@@ -2564,16 +2564,21 @@ NSString *const kData=@"data";
     
     //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
     _accountState = kStateBound;
+    
     //don't queue this notification because it should be handled INLINE inside the receive queue
     [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:self];
     [self accountStatusChanged];
     
     //now fetch roster, request disco and send initial presence
     [self fetchRoster];
+    
     //query disco *before* sending out our first presence because this presence will trigger pubsub "headline" updates and we want to know
-    //if and what pubsub features the server supports, before handling that
+    //if and what pubsub/pep features the server supports, before handling that
+    //we can pipeline the disco requests and outgoing presence broadcast, though
     [self queryDisco];
     [self sendPresence];
+    
+    //send own csi state (this must be done *after* presences to not delay/filter incoming presence flood needed to prime our database
     [self sendCurrentCSIState];
     
     //only do this if smacks is not supported because handling of the old queue will be already done on smacks enable/failed enable
@@ -2746,7 +2751,10 @@ NSString *const kData=@"data";
     [self dispatchOnReceiveQueue: ^{
         //don't send anything before a resource is bound
         if(self.accountState<kStateBound || !self.connectionProperties.supportsClientState)
+        {
+            DDLogVerbose(@"NOT sending csi state, because we are not bound yet");
             return;
+        }
         
         //really send csi nonza
         MLXMLNode* csiNode;

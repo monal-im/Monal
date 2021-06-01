@@ -716,9 +716,7 @@ $$
 
 +(void) updateBookmarksForAccount:(xmpp*) account
 {
-#ifdef IS_ALPHA
     [account.pubsub fetchNode:@"storage:bookmarks" from:account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
-#endif
 }
 
 +(BOOL) checkIfStillBookmarked:(NSString*) room onAccount:(xmpp*) account

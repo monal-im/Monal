@@ -2218,7 +2218,7 @@ NSString *const kData=@"data";
 #ifndef IS_ALPHA
                     [self initSM3];
 #else
-                    NSAssert(false, @"corrupt smacks state");
+                    @throw [NSException exceptionWithName:@"RuntimeError" reason:@"corrupt smacks state" userInfo:dic];
 #endif
                 }
             }
@@ -2276,7 +2276,7 @@ NSString *const kData=@"data";
 #ifndef IS_ALPHA
                     [self initSM3];
 #else
-                    NSAssert(false, @"corrupt smacks state");
+                    @throw [NSException exceptionWithName:@"RuntimeError" reason:@"corrupt smacks state" userInfo:dic];
 #endif
                 }
             }

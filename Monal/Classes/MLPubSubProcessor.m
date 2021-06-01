@@ -148,6 +148,7 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
         for(NSString* itemId in data)
         {
             //iterate through all conference elements provided
+            BOOL bookmarksUpdateNeeded = NO;
             NSMutableSet* bookmarkedMucs = [[NSMutableSet alloc] init];
             for(MLXMLNode* conference in [data[itemId] find:@"{storage:bookmarks}storage/conference"])
             {
@@ -174,9 +175,10 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
                     if(nick)
                         [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];
                     //try to join muc, this will add it to / update our favorites table once we joined successfully
-                    [MLMucProcessor sendDiscoQueryFor:room onAccount:account withJoin:YES];
+                    bookmarksUpdateNeeded = YES;
+                    [MLMucProcessor sendDiscoQueryFor:room onAccount:account withJoin:YES andBookmarksUpdate:NO];       //andBookmarksUpdate:NO beause we are doing a batch update
                 }
-                //check if it is a known entry that canged autojoin to false
+                //check if it is a known entry that changed autojoin to false
                 else if(ownFavorites[room] != nil && ![autojoin boolValue])
                 {
                     DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
@@ -214,6 +216,12 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
                 [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
                 [MLMucProcessor leave:room onAccount:account withBookmarksUpdate:NO];
             }
+            
+            //batch update done --> update remote bookmarks if needed
+            //this will feth the remote bookmarks once again (in addition to the headline push handled herein)
+            //this is due to implementation simplicity and to make sure we make the time window for race conditions with other clients as small as possible
+            if(bookmarksUpdateNeeded)
+                [MLMucProcessor updateBookmarksForAccount:account];
             
             return;      //we only need the first pep item (there should be only one item in the first place)
         }

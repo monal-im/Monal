@@ -2594,8 +2594,9 @@ NSString *const kData=@"data";
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
     
     //join MUCs from muc_favorites db
+    //andBookmarksUpdate: could be yes or no, should not matter here--> use yes because this was hardcorded before this parameter was added
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
-        [MLMucProcessor sendDiscoQueryFor:entry[@"room"] onAccount:self withJoin:YES];
+        [MLMucProcessor sendDiscoQueryFor:entry[@"room"] onAccount:self withJoin:YES andBookmarksUpdate:YES];
 }
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
@@ -2928,7 +2929,7 @@ NSString *const kData=@"data";
 
 -(void) joinMuc:(NSString* _Nonnull) room
 {
-    [MLMucProcessor sendDiscoQueryFor:room onAccount:self withJoin:YES];
+    [MLMucProcessor sendDiscoQueryFor:room onAccount:self withJoin:YES andBookmarksUpdate:YES];
 }
 
 -(void) leaveMuc:(NSString* _Nonnull) room

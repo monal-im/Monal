@@ -25,11 +25,12 @@ NS_ASSUME_NONNULL_BEGIN
 +(void) processPresence:(XMPPPresence*) presenceNode forAccount:(xmpp*) account;
 +(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account;
 
-+(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join;
-+(void) pingAllMucsOnAccount:(xmpp*) account;
-+(void) ping:(NSString*) roomJid onAccount:(xmpp*) account;
++(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks;
 +(void) sendJoinPresenceFor:(NSString*) room onAccount:(xmpp*) account;
 +(void) leave:(NSString*) room onAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks;
++(void) pingAllMucsOnAccount:(xmpp*) account;
++(void) ping:(NSString*) roomJid onAccount:(xmpp*) account;
++(void) updateBookmarksForAccount:(xmpp*) account;
 
 @end
 

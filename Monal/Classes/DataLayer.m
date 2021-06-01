@@ -1043,7 +1043,7 @@ static NSDateFormatter* dbFormatter;
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
         NSAssert(nick, @"Could not determine muc nick when adding muc");
         
-        [self.db executeNonQuery:@"INSERT INTO muc_favorites (room, nick, account_id, autojoin) VALUES(?, ?, ?, 1) ON CONFLICT(room, account_id) DO UPDATE SET nick=?;" andArguments:@[room, nick, accountNo, nick]];
+        [self.db executeNonQuery:@"INSERT INTO muc_favorites (room, nick, account_id) VALUES(?, ?, ?) ON CONFLICT(room, account_id) DO UPDATE SET nick=?;" andArguments:@[room, nick, accountNo, nick]];
     }];
 }
 
@@ -2757,6 +2757,20 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DELETE FROM _subscriptionRequestsTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
             [self.db executeNonQuery:@"INSERT INTO subscriptionRequests (account_id, buddy_name) SELECT account_id, buddy_name FROM _subscriptionRequestsTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _subscriptionRequestsTMP;"];
+        }];
+        
+        dbUpdated |= [self updateDBTo:5.023 withBlock:^{
+            [self.db executeNonQuery:@"ALTER TABLE muc_favorites RENAME TO _muc_favoritesTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'muc_favorites' ( \
+                'account_id' INTEGER NOT NULL, \
+                'room' VARCHAR(255) NOT NULL, \
+                'nick' varchar(255), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                UNIQUE('room', 'account_id'), \
+                PRIMARY KEY('account_id', 'room') \
+            );"];
+            [self.db executeNonQuery:@"INSERT INTO muc_favorites (account_id, room, nick) SELECT account_id, room, nick FROM _muc_favoritesTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _muc_favoritesTMP;"];
         }];
     }];
     // Vacuum after db updates

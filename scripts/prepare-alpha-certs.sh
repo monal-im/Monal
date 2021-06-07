@@ -33,5 +33,5 @@ security list-keychains -s ios-build.keychain
 
 # Put the provisioning profile in place 
 mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-cp ./scripts/*.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-cp ./scripts/*.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/
+cp *.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+cp *.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/

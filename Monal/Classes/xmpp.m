@@ -3200,7 +3200,7 @@ NSString *const kData=@"data";
         //dispatch completion handler outside of the receiveQueue
         if(completion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                completion(NO, error ? [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Could not change password", @"")] : NSLocalizedString(@"Could not change password: your account is currently not conneced", @""));
+                completion(NO, error ? [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Could not change password", @"")] : NSLocalizedString(@"Could not change password: your account is currently not connected", @""));
             });
     }];
 }

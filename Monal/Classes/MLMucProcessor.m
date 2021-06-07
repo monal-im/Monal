@@ -227,7 +227,16 @@ static NSMutableDictionary* _uiHandler;
                     //check if we have joined already (we handle only non-joining self-presences here)
                     //joining self-presences are handled below
                     if(![self isJoining:node.fromUser])
-                        ;           //ignore non-joining self-presences for now
+                    {
+                        if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
+                        {
+                            //delete muc from favorites table and update bookmarks
+                            [[DataLayer sharedInstance] deleteMuc:node.fromUser forAccountId:account.accountNo];
+                            [self updateBookmarksForAccount:account];
+                        }
+                        else
+                            ;           //ignore other non-joining self-presences for now
+                    }
                     break;
                 }
                 //banned from room

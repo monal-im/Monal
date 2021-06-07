@@ -233,6 +233,8 @@ static NSMutableDictionary* _uiHandler;
                             //delete muc from favorites table and update bookmarks
                             [[DataLayer sharedInstance] deleteMuc:node.fromUser forAccountId:account.accountNo];
                             [self updateBookmarksForAccount:account];
+                            
+                            //TODO: mark buddy as destroyed
                         }
                         else
                             ;           //ignore other non-joining self-presences for now
@@ -520,6 +522,25 @@ static NSMutableDictionary* _uiHandler;
 }
 
 $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $_BOOL(join), $_BOOL(updateBookmarks))
+    NSAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!");
+    
+    if([iqNode check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}gone"])
+    {
+        DDLogError(@"Querying muc info returned this muc isn't available anymore: %@", [iqNode findFirst:@"error"]);
+        @synchronized(_stateLockObject) {
+            [_joining removeObject:iqNode.fromUser];
+        }
+        
+        //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
+        [[DataLayer sharedInstance] deleteMuc:iqNode.fromUser forAccountId:account.accountNo];
+        //make sure to update remote bookmarks, even if updateBookmarks == NO
+        [self updateBookmarksForAccount:account];
+        
+        //TODO: mark buddy as destroyed
+        
+        return;
+    }
+    
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Querying muc info returned an error: %@", [iqNode findFirst:@"error"]);
@@ -529,7 +550,6 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@", @""), roomJid] forMuc:roomJid withNode:iqNode andAccount:account andIsSevere:YES];
         return;
     }
-    NSAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!");
     
     //extract features
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];

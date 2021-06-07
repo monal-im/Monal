@@ -351,7 +351,7 @@ enum DummySettingsRows {
                     [self performSegueWithIdentifier:@"showOpenSource" sender:self];
                     break;
                 case PrivacyRow:
-                    [self openLink:@"https://monal.im/privacy-policy/"];
+                    [self openLink:@"https://monal.im/monal-privacy-policy/"];
                     break;
                 case AboutRow:
                     [self openLink:@"https://monal.im/about/"];

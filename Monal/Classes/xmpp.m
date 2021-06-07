@@ -1349,15 +1349,11 @@ NSString *const kData=@"data";
 
                 if([presenceNode check:@"{http://jabber.org/protocol/muc#user}x"] || [presenceNode check:@"{http://jabber.org/protocol/muc}x"])
                 {
-#ifdef IS_ALPHA
-                    [MLMucProcessor processPresence:presenceNode forAccount:self];
-#else
                     //only handle presences for mucs we know
                     if([[DataLayer sharedInstance] isBuddyMuc:presenceNode.fromUser forAccount:self.accountNo])
                         [MLMucProcessor processPresence:presenceNode forAccount:self];
                     else
                         DDLogError(@"Got presence of unknown muc %@, ignoring...", presenceNode.fromUser);
-#endif
                     
                     //mark this stanza as handled
                     [self incrementLastHandledStanza];

@@ -11,3 +11,12 @@ contents.xcworkspacedata
 
 # Pods
 Monal/Pods
+
+# certs and other encrypted stuff
+*.pem
+*.key
+*.csr
+*.cer
+*.mobileprovision
+*.provisionprofile
+*.p12

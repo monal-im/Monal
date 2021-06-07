@@ -29,6 +29,9 @@ jobs:
         run: git submodule update --remote
       - name: Make our build scripts executable
         run: chmod +x ./scripts/build.sh
+      - run: chmod +x ./scripts/prepare-alpha-certs.sh
+      - name: Prepare alpha certs
+        run: ./scripts/prepare-alpha-certs.sh
       - name: Run build
         run: ./scripts/build.sh
       - run: chmod +x ./scripts/upload.sh

@@ -108,7 +108,10 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     
     //ignore muc PMs (after discussion with holger we don't want to support that)
-    if(![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"])
+    if(
+        ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
+        ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"]
+    )
     {
         XMPPMessage* errorReply = [[XMPPMessage alloc] init];
         [errorReply.attributes setObject:@"error" forKey:@"type"];

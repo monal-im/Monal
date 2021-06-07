@@ -8,6 +8,8 @@ for file in ./scripts/*.enc; do
 	openssl aes-256-cbc -k "$KEY_PASSWORD" -md sha256 -in "$file" -d -a -out "${file%%.enc}"
 done
 
+cd scripts
+
 # Create a custom keychain
 security create-keychain -p travis ios-build.keychain
 # Make the custom keychain default, so xcodebuild will use it for signing

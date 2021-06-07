@@ -432,6 +432,7 @@ NSString *const kData=@"data";
         ) || (
             //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
             _catchupDone &&
+            _cancelPingTimer == nil &&
             !unackedCount &&
             ![_parseQueue operationCount] &&
             [_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
@@ -440,11 +441,12 @@ NSString *const kData=@"data";
     )
         retval = YES;
     _lastIdleState = retval;
-    DDLogVerbose(@"%@ --> Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_parseQueue operationCount] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
+    DDLogVerbose(@"%@ --> Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t_cancelPingTimer = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_parseQueue operationCount] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
         self.accountNo,
         _accountState < kStateReconnecting ? @"YES" : @"NO",
         _reconnectInProgress ? @"YES" : @"NO",
         _catchupDone ? @"YES" : @"NO",
+        _cancelPingTimer,
         unackedCount,
         (unsigned long)[_parseQueue operationCount],
         (unsigned long)[_receiveQueue operationCount],

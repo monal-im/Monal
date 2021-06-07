@@ -2953,6 +2953,8 @@ NSString *const kData=@"data";
         //this means the jid is an account which can not be queried if not subscribed
         if([error check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}service-unavailable"])
             return completion(@"account", nil);
+        else if([error check:@"/<type=error>/error<type=auth>/{urn:ietf:params:xml:ns:xmpp-stanzas}subscription-required"])
+            return completion(@"account", nil);
         //any other error probably means the remote server is not reachable or (even more likely) the jid is incorrect
         NSString* errorDescription = [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Unexpected error while checking type of jid:", @"")];
         DDLogError(@"checkJidType got an error, informing user: %@", errorDescription);

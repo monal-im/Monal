@@ -798,7 +798,7 @@
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
                                         <rect key="frame" x="0.0" y="537.5" width="1024" height="242"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xhf-eh-Dkx" id="BdL-U7-BOc">
@@ -2613,6 +2613,7 @@
                                     </collectionViewCellContentView>
                                     <connections>
                                         <outlet property="ImagePreview" destination="xUd-1b-tVK" id="Jd1-Dh-u6w"/>
+                                        <outlet property="closeButton" destination="FUb-45-FS7" id="hLE-US-KEz"/>
                                     </connections>
                                 </collectionViewCell>
                                 <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="UploadQueueDocumentCell" id="VCP-J6-XZX" customClass="MLUploadQueueDocumentCell">
@@ -2644,11 +2645,12 @@
                                         </subviews>
                                     </collectionViewCellContentView>
                                     <connections>
+                                        <outlet property="closeButton" destination="OVd-9f-POM" id="YAz-0V-IYo"/>
                                         <outlet property="fileName" destination="KQi-dq-Tef" id="NBN-eH-8M2"/>
                                         <outlet property="previewImage" destination="Mj0-lg-IoI" id="PNK-kQ-VWd"/>
                                     </connections>
                                 </collectionViewCell>
-                                <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="addToUploadQueueCell" id="Tuu-Xg-0z6">
+                                <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="addToUploadQueueCell" id="Tuu-Xg-0z6" customClass="MLUploadQueueAddCell">
                                     <rect key="frame" x="278" y="8.5" width="129" height="128"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="aBm-lK-aAO">
@@ -2665,6 +2667,9 @@
                                             </button>
                                         </subviews>
                                     </collectionViewCellContentView>
+                                    <connections>
+                                        <outlet property="addButton" destination="pMG-HJ-VKP" id="fey-nQ-w84"/>
+                                    </connections>
                                 </collectionViewCell>
                             </cells>
                             <connections>

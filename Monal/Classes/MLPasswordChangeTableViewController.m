@@ -53,7 +53,7 @@
             self.progress.mode = MBProgressHUDModeIndeterminate;
             self.progress.removeFromSuperViewOnHide = YES;
             self.progress.hidden = NO;
-            
+
             [self.xmppAccount changePassword:[self.passwordNew getText] withCompletion:^(BOOL success, NSString* message) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     self.progress.hidden = YES;

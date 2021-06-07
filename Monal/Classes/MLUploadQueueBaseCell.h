@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MLUploadQueueBaseCell : UICollectionViewCell
 @property (nonatomic) NSUInteger index;
 @property (weak, nonatomic) id <MLUploadQueueCellDelegate> uploadQueueDelegate;
+@property (weak, nonatomic) IBOutlet UIButton* closeButton;
 
 -(IBAction) closeButtonAction;
 @end

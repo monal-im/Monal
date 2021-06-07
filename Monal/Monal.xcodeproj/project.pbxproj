@@ -215,6 +215,7 @@
 		389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
 		3D2B1870262A12A10092E181 /* MLUploadQueueItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D2B186F262A12A10092E181 /* MLUploadQueueItem.m */; };
 		3D4BC2C92626294200292F14 /* MLUploadQueueDocumentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */; };
+		3D99CE5A266ED38D002BF4A3 /* MLUploadQueueAddCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D99CE59266ED38D002BF4A3 /* MLUploadQueueAddCell.m */; };
 		3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */; };
 		3DBAD1E62627A2BC0078BD27 /* MLUploadQueueBaseCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DBAD1E52627A2BC0078BD27 /* MLUploadQueueBaseCell.m */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
@@ -791,6 +792,8 @@
 		3D2B186F262A12A10092E181 /* MLUploadQueueItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueItem.m; sourceTree = "<group>"; };
 		3D4BC2C72626294200292F14 /* MLUploadQueueDocumentCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueDocumentCell.h; sourceTree = "<group>"; };
 		3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueDocumentCell.m; sourceTree = "<group>"; };
+		3D99CE58266ED38D002BF4A3 /* MLUploadQueueAddCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueAddCell.h; sourceTree = "<group>"; };
+		3D99CE59266ED38D002BF4A3 /* MLUploadQueueAddCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueAddCell.m; sourceTree = "<group>"; };
 		3D9EE5322617677700135D46 /* MLUploadQueueImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueImageCell.h; sourceTree = "<group>"; };
 		3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueImageCell.m; sourceTree = "<group>"; };
 		3DBAD1E42627A2BC0078BD27 /* MLUploadQueueBaseCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueBaseCell.h; sourceTree = "<group>"; };
@@ -1268,6 +1271,8 @@
 				3DBAD1E42627A2BC0078BD27 /* MLUploadQueueBaseCell.h */,
 				3DBAD1E52627A2BC0078BD27 /* MLUploadQueueBaseCell.m */,
 				3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */,
+				3D99CE58266ED38D002BF4A3 /* MLUploadQueueAddCell.h */,
+				3D99CE59266ED38D002BF4A3 /* MLUploadQueueAddCell.m */,
 			);
 			name = ChatViews;
 			sourceTree = "<group>";
@@ -2621,6 +2626,7 @@
 				C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */,
 				26BDECDC1867B7790018670D /* CallViewController.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
+				3D99CE5A266ED38D002BF4A3 /* MLUploadQueueAddCell.m in Sources */,
 				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,

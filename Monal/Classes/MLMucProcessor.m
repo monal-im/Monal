@@ -554,8 +554,8 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         return;
     }
     
-    //the join was aborted by a call to leave
-    if(![self isJoining:iqNode.fromUser])
+    //the join (join=YES) was aborted by a call to leave (isJoining: returns NO)
+    if(join && ![self isJoining:iqNode.fromUser])
     {
         DDLogWarn(@"Ignoring muc disco result for '%@' on account %@: not joining anymore...", iqNode.fromUser, account.accountNo);
         return;

@@ -229,13 +229,7 @@ static NSMutableDictionary* _uiHandler;
                     if(![self isJoining:node.fromUser])
                     {
                         if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
-                        {
-                            //delete muc from favorites table and update bookmarks
-                            [[DataLayer sharedInstance] deleteMuc:node.fromUser forAccountId:account.accountNo];
-                            [self updateBookmarksForAccount:account];
-                            
-                            //TODO: mark buddy as destroyed
-                        }
+                            [self deleteMuc:node.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:YES];
                         else
                             ;           //ignore other non-joining self-presences for now
                     }
@@ -399,12 +393,8 @@ static NSMutableDictionary* _uiHandler;
     [presence leaveRoom:room withNick:nick];
     [account send:presence];
     
-    //delete muc from favorites table
-    [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-    
-    //update bookmarks if requested
-    if(updateBookmarks)
-        [self updateBookmarksForAccount:account];
+    //delete muc from favorites table and update bookmarks if requested
+    [self deleteMuc:room forAccount:account withBookmarksUpdate:updateBookmarks keepBuddylistEntry:NO];
 }
 
 +(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks
@@ -532,11 +522,8 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         }
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
-        [[DataLayer sharedInstance] deleteMuc:iqNode.fromUser forAccountId:account.accountNo];
         //make sure to update remote bookmarks, even if updateBookmarks == NO
-        [self updateBookmarksForAccount:account];
-        
-        //TODO: mark buddy as destroyed
+        [self deleteMuc:iqNode.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
         return;
     }
@@ -560,9 +547,8 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         DDLogError(@"muc disco returned that this jid is not a muc!");
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
-        [[DataLayer sharedInstance] deleteMuc:iqNode.fromUser forAccountId:account.accountNo];
         //make sure to update remote bookmarks, even if updateBookmarks == NO
-        [self updateBookmarksForAccount:account];
+        [self deleteMuc:iqNode.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:NO];
     
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@: This is not a groupchat!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andAccount:account andIsSevere:YES];
         return;
@@ -765,6 +751,20 @@ $$
         if([room isEqualToString:[entry[@"room"] lowercaseString]])
             return YES;
     return NO;
+}
+
++(void) deleteMuc:(NSString*) room forAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry
+{
+    //delete muc from favorites table and update bookmarks if requested
+    [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+    if(updateBookmarks)
+        [self updateBookmarksForAccount:account];
+    
+    //update buddylist (e.g. contact list) if requested
+    if(keepBuddylistEntry)
+        ;       //TODO: mark entry as destroyed
+    else
+        [[DataLayer sharedInstance] removeBuddy:room forAccount:account.accountNo];
 }
 
 @end

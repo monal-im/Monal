@@ -65,8 +65,8 @@ NSString *const kData=@"data";
 @end
 
 @interface MLMucProcessor ()
--(NSDictionary*) state;
--(void) setState:(NSDictionary*) state;
++(NSDictionary*) getInternalState;
++(void) setInternalState:(NSDictionary*) state;
 @end
 
 @interface xmpp()
@@ -2149,7 +2149,7 @@ NSString *const kData=@"data";
             [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
         
         [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
-        [values setObject:[MLMucProcessor state] forKey:@"mucState"];
+        [values setObject:[MLMucProcessor getInternalState] forKey:@"mucState"];
         [values setObject:_runningMamQueries forKey:@"runningMamQueries"];
         [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
@@ -2370,7 +2370,7 @@ NSString *const kData=@"data";
                 [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
             
             if([dic objectForKey:@"mucState"])
-                [MLMucProcessor setState:[dic objectForKey:@"mucState"]];
+                [MLMucProcessor setInternalState:[dic objectForKey:@"mucState"]];
             
             if([dic objectForKey:@"runningMamQueries"])
                 _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
@@ -2594,7 +2594,7 @@ NSString *const kData=@"data";
     //join MUCs from muc_favorites db
     //andBookmarksUpdate: could be yes or no, should not matter here--> use yes because this was hardcorded before this parameter was added
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
-        [MLMucProcessor sendDiscoQueryFor:entry[@"room"] onAccount:self withJoin:YES andBookmarksUpdate:YES];
+        [MLMucProcessor join:entry[@"room"] onAccount:self];
 }
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
@@ -2927,7 +2927,7 @@ NSString *const kData=@"data";
 
 -(void) joinMuc:(NSString* _Nonnull) room
 {
-    [MLMucProcessor sendDiscoQueryFor:room onAccount:self withJoin:YES andBookmarksUpdate:YES];
+    [MLMucProcessor join:room onAccount:self];
 }
 
 -(void) leaveMuc:(NSString* _Nonnull) room

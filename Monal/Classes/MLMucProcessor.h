@@ -16,21 +16,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLMucProcessor : NSObject
 
-+(void) setState:(NSDictionary*) state;
-+(NSDictionary*) state;
-
 +(void) addUIHandler:(monal_id_block_t) handler forMuc:(NSString*) room;
 +(void) removeUIHandlerForMuc:(NSString*) room;
 
 +(void) processPresence:(XMPPPresence*) presenceNode forAccount:(xmpp*) account;
 +(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account;
 
-+(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks;
-+(void) sendJoinPresenceFor:(NSString*) room onAccount:(xmpp*) account;
++(void) join:(NSString*) room onAccount:(xmpp*) account;
 +(void) leave:(NSString*) room onAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks;
 +(void) pingAllMucsOnAccount:(xmpp*) account;
 +(void) ping:(NSString*) roomJid onAccount:(xmpp*) account;
-+(void) updateBookmarksForAccount:(xmpp*) account;
 
 @end
 

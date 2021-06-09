@@ -52,7 +52,7 @@ static NSMutableDictionary* _uiHandler;
     _noUpdateBookmarks = [[NSMutableSet alloc] init];
 }
 
-+(void) setState:(NSDictionary*) state
++(void) setInternalState:(NSDictionary*) state
 {
     //ignore state having wrong version code
     if(!state[@"version"] || ![state[@"version"] isEqual:CURRENT_MUC_STATE_VERSION])
@@ -68,7 +68,7 @@ static NSMutableDictionary* _uiHandler;
     }
 }
 
-+(NSDictionary*) state
++(NSDictionary*) getInternalState
 {
     @synchronized(_stateLockObject) {
         return @{
@@ -137,6 +137,11 @@ static NSMutableDictionary* _uiHandler;
         @synchronized(_stateLockObject) {
             [_joining removeObject:presenceNode.fromUser];
         }
+        
+        //delete muc from favorites table and update bookmarks
+        if([self checkIfStillBookmarked:presenceNode.fromUser onAccount:account])
+            [self deleteMuc:presenceNode.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:YES];
+        
         [self handleError:NSLocalizedString(@"Groupchat error", @"") forMuc:presenceNode.fromUser withNode:presenceNode andAccount:account andIsSevere:YES];
         return;
     }
@@ -228,6 +233,7 @@ static NSMutableDictionary* _uiHandler;
                     //joining self-presences are handled below
                     if(![self isJoining:node.fromUser])
                     {
+                        //muc got destroyed
                         if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
                             [self deleteMuc:node.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:YES];
                         else
@@ -266,7 +272,7 @@ static NSMutableDictionary* _uiHandler;
                         [_joining removeObject:node.fromUser];
                     }
                     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
-                    [self leave:node.fromUser onAccount:account withBookmarksUpdate:YES];
+                    [self deleteMuc:node.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:YES];
                 }
                 //removed because of system shutdown
                 case 332:
@@ -291,7 +297,7 @@ static NSMutableDictionary* _uiHandler;
             }
             
             //we joined successfully --> add muc to our favorites (this will use the already up to date nick from buddylist db table)
-            //and update bookmarks if this was the first timewe joined this muc
+            //and update bookmarks if this was the first time we joined this muc
             [[DataLayer sharedInstance] addMucFavorite:node.fromUser forAccountId:account.accountNo andMucNick:nil];
             @synchronized(_stateLockObject) {
                 //only update bookmarks on first join AND if not requested otherwise (batch join etc.)
@@ -371,6 +377,11 @@ static NSMutableDictionary* _uiHandler;
     }
 }
 
++(void) join:(NSString*) room onAccount:(xmpp*) account
+{
+    [self sendDiscoQueryFor:room onAccount:account withJoin:YES andBookmarksUpdate:YES];
+}
+
 +(void) leave:(NSString*) room onAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks
 {
     room = [room lowercaseString];
@@ -403,7 +414,7 @@ static NSMutableDictionary* _uiHandler;
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Room jid or account must not be nil!" userInfo:nil];
     roomJid = [roomJid lowercaseString];
     DDLogInfo(@"Querying disco for muc %@...", roomJid);
-    //mark room as "joining" as soon as possible to make sure we can handle join "aborts" (e.g. when processing bookmark pdates while a joining disco queryis alead in flight)
+    //mark room as "joining" as soon as possible to make sure we can handle join "aborts" (e.g. when processing bookmark pdates while a joining disco query is already in flight)
     //this will fix race condition that makes us join a muc directly after it got removed from our favorites table and leaved through a bookmark update
     if(join)
     {
@@ -572,13 +583,7 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     //update db with new infos
     if(![[DataLayer sharedInstance] isBuddyMuc:iqNode.fromUser forAccount:account.accountNo])
     {
-        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:iqNode.fromUser forAccount:account.accountNo];
-        //use the account display name as nick, if nothing can be found in buddylist and muc_favorites db tables
-        if(!nick)
-        {
-            nick = [MLContact ownDisplayNameForAccount:account];
-            DDLogInfo(@"Using default nick '%@' for room %@", nick, iqNode.fromUser);
-        }
+        NSString* nick = [self calculateNickForMuc:iqNode.fromUser onAccount:account];
         //add new muc buddy (potentially deleting a non-muc buddy having the same jid)
         DDLogInfo(@"Adding new muc %@ using nick '%@' to buddylist...", iqNode.fromUser, nick);
         [[DataLayer sharedInstance] initMuc:iqNode.fromUser forAccountId:account.accountNo andMucNick:nick];
@@ -755,6 +760,7 @@ $$
 
 +(void) deleteMuc:(NSString*) room forAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry
 {
+    DDLogInfo(@"Deleting muc %@ on account %@...", room, account.accountNo);
     //delete muc from favorites table and update bookmarks if requested
     [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
     if(updateBookmarks)
@@ -765,6 +771,18 @@ $$
         ;       //TODO: mark entry as destroyed
     else
         [[DataLayer sharedInstance] removeBuddy:room forAccount:account.accountNo];
+}
+
++(NSString*) calculateNickForMuc:(NSString*) room onAccount:(xmpp*) account
+{
+    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+    //use the account display name as nick, if nothing can be found in buddylist and muc_favorites db tables
+    if(!nick)
+    {
+        nick = [MLContact ownDisplayNameForAccount:account];
+        DDLogInfo(@"Using default nick '%@' for room %@", nick, room);
+    }
+    return nick;
 }
 
 @end

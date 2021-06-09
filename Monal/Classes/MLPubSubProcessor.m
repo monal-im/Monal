@@ -241,9 +241,15 @@ $$
 $$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
     if(!success)
     {
-        DDLogWarn(@"Could not fetch bookmarks from pep prior to publishing!");
-        [self handleErrorWithDescription:NSLocalizedString(@"Failed to save groupchat bookmarks", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
-        return;
+        //item-not-found means: no bookmarks in storage --> use an empty data dict
+        if([errorIq check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+            data = @{};
+        else
+        {
+            DDLogWarn(@"Could not fetch bookmarks from pep prior to publishing!");
+            [self handleErrorWithDescription:NSLocalizedString(@"Failed to save groupchat bookmarks", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
+            return;
+        }
     }
     
     BOOL changed = NO;

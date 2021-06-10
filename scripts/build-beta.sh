@@ -4,7 +4,7 @@
 APP_NAME="Monal"
 IOS_DEVELOPER_NAME="iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)"
 APP_DEVELOPER_NAME="Apple Distribution: Anurodh Pokharel (33XS7DE5NZ)"
-GCC_PREPROCESSOR_DEFINITIONS="IS_ALPHA=0"
+GCC_PREPROCESSOR_DEFINITIONS=""
 BUILD_TYPE="Debug"
 
 # go to Monal-IM root folder
@@ -16,3 +16,4 @@ git submodule update --remote
 
 # build beta
 ./scripts/build.sh
+

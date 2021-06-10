@@ -2968,6 +2968,7 @@ enum msgSentState {
     }
     else
     {
+        [self hideUploadQueue];
         [self hideUploadHUD];
     }
 }
@@ -2976,12 +2977,12 @@ enum msgSentState {
 {
     if(self.uploadQueue.count == 0)
     {
+        [self hideUploadQueue];
         [self hideUploadHUD];
         return;
     }
     assert(self.uploadQueue.count >= 1);
     [self showUploadHUD];
-    [self.uploadMenuView removeConstraint:self.uploadMenuConstraint];
 
     DDLogVerbose(@"start dispatch");
     MLUploadQueueItem* uploadItem = self.uploadQueue.firstObject;
@@ -3056,25 +3057,24 @@ enum msgSentState {
             [UIView setAnimationsEnabled:YES];
             [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
         }];
-
-        return;
     }
-    [self.uploadMenuView performBatchUpdates:^{
-        // Move '+' to the end of the queue
-        [self.uploadMenuView moveItemAtIndexPath:[NSIndexPath indexPathForItem:(self.uploadQueue.count) inSection:0] toIndexPath:[NSIndexPath indexPathForItem:(self.uploadQueue.count + newItems.count) inSection:0]];
-        // Add all new elements
-        // for(NSUInteger i = self.uploadQueue.count - newItems; i < self.uploadQueue.count; i++)
-        NSUInteger start = self.uploadQueue.count;
-        for(NSUInteger i = 0; i < newItems.count; i++)
-        {
-            [self.uploadQueue addObject:newItems[i]];
-            [self.uploadMenuView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:(start + i) inSection:0]]];
-        }
-    } completion:^(BOOL finished)
+    else
     {
-        [self.uploadMenuView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.uploadQueue.count inSection:0] atScrollPosition:UICollectionViewScrollPositionRight animated:YES];
-    }];
-    [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
+        [self.uploadMenuView performBatchUpdates:^{
+            // Add all new elements
+            NSUInteger start = self.uploadQueue.count;
+            [self.uploadMenuView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:start inSection:0]]];
+            for(NSUInteger i = 0; i < newItems.count; i++)
+            {
+                [self.uploadQueue addObject:newItems[i]];
+                [self.uploadMenuView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:(start + i + 1) inSection:0]]];
+            }
+        } completion:^(BOOL finished)
+        {
+            [self.uploadMenuView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.uploadQueue.count inSection:0] atScrollPosition:UICollectionViewScrollPositionRight animated:YES];
+            [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
+        }];
+    }
 }
 
 - (nonnull __kindof UICollectionViewCell*) collectionView:(nonnull UICollectionView*) collectionView cellForItemAtIndexPath:(nonnull NSIndexPath*) indexPath

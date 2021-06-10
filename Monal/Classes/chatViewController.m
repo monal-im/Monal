@@ -206,11 +206,10 @@ enum msgSentState {
                                 toItem:nil
                                 attribute:NSLayoutAttributeNotAnAttribute
                                 multiplier:1.0
-                                constant:200];
+                                constant:0]; // Constant will be set through showUploadQueue
     [self.inputContainerView addConstraint:self.chatInputConstraintHWKeyboard];
     [self.inputContainerView addConstraint:self.chatInputConstraintSWKeyboard];
     [self.uploadMenuView addConstraint:self.uploadMenuConstraint];
-    [NSLayoutConstraint deactivateConstraints:@[self.uploadMenuConstraint]]; // Queue is empty by default -> upload menu will not be visible after loading view
     
     [self setChatInputHeightConstraints:YES];
     
@@ -2962,11 +2961,15 @@ enum msgSentState {
     if(self.uploadQueue.count > 0)
     {
         [self.uploadMenuView performBatchUpdates:^{
-            [self.uploadQueue removeObjectAtIndex:0];
-            [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
-        } completion:nil];
+            [self deleteQueueItemAtIndex:0];
+        } completion:^(BOOL finished){
+            [self emptyUploadQueue];
+        }];
     }
-    [self emptyUploadQueue];
+    else
+    {
+        [self hideUploadHUD];
+    }
 }
 
 -(void) emptyUploadQueue
@@ -3010,18 +3013,50 @@ enum msgSentState {
 }
 
 # pragma mark - Upload Queue (UI)
+-(void) showUploadQueue
+{
+    self.uploadMenuConstraint.constant = 180;
+    self.uploadMenuView.hidden = NO;
+}
+
+-(void) hideUploadQueue
+{
+    self.uploadMenuConstraint.constant = 1; // Can't set this to 0, because this will disable the view. If this were to happen, we would not use an accurate queue count if a user empties the queue and fills it afterwards. This is a hack to prevent this behaviour
+    self.uploadMenuView.hidden = YES;
+}
+
+-(void) deleteQueueItemAtIndex:(NSUInteger) index
+{
+    if(self.uploadQueue.count == 1) // Delete last object in queue
+    {
+        [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:index + 1 inSection:0]]]; // Delete '+' icon if queue is empty
+    }
+    [self.uploadQueue removeObjectAtIndex:index];
+    [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:index inSection:0]]];
+}
+
 -(void) addToUIQueue:(NSArray<MLUploadQueueItem*>*) newItems;
 {
     if(self.uploadQueue.count == 0 && newItems.count > 0) // Queue was previously empty but will be filled now
     {
-        [NSLayoutConstraint activateConstraints:@[self.uploadMenuConstraint]];
         // Force reload of view because this fails after the queue was emptied once otherwise. The '+' cell may also not be in the collection view yet when this function is called.
-        [self.uploadQueue addObjectsFromArray:newItems];
-        [self.uploadMenuView reloadSections:[NSIndexSet indexSetWithIndex:0]];
-        [self.uploadMenuView setNeedsDisplay];
-        [self.uploadMenuView layoutIfNeeded];
-        [CATransaction flush];
-        [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
+        [CATransaction begin];
+        [UIView setAnimationsEnabled:NO];
+        [self showUploadQueue];
+        [self.uploadMenuView performBatchUpdates:^{
+            [self.uploadQueue addObjectsFromArray:newItems];
+            NSMutableArray<NSIndexPath*>* newInd = [[NSMutableArray<NSIndexPath*> alloc] initWithCapacity:newItems.count + 1];
+            for(NSUInteger i = 0; i <= newItems.count; i++)
+            {
+                newInd[i] = [NSIndexPath indexPathForItem:i inSection:0];
+            }
+            [self.uploadMenuView insertItemsAtIndexPaths:newInd];
+        } completion:^(BOOL finished){
+            [CATransaction commit];
+            [UIView setAnimationsEnabled:YES];
+            [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
+        }];
+
         return;
     }
     [self.uploadMenuView performBatchUpdates:^{
@@ -3042,7 +3077,7 @@ enum msgSentState {
     [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
 }
 
-- (nonnull __kindof UICollectionViewCell *)collectionView:(nonnull UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath
+- (nonnull __kindof UICollectionViewCell*) collectionView:(nonnull UICollectionView*) collectionView cellForItemAtIndexPath:(nonnull NSIndexPath*) indexPath
 {
     if(indexPath.item == self.uploadQueue.count)
     { // the '+' tile
@@ -3080,32 +3115,32 @@ enum msgSentState {
     return 1;
 }
 
-- (NSInteger)collectionView:(nonnull UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+- (NSInteger)collectionView:(nonnull UICollectionView*) collectionView numberOfItemsInSection:(NSInteger)section
 {
     assert(section == 0);
-    return self.uploadQueue.count + 1;
+    return self.uploadQueue.count == 0 ? 0 : self.uploadQueue.count + 1;
 }
 
 - (void) notifyUploadQueueRemoval:(NSUInteger) index
 {
     assert(index < self.uploadQueue.count);
-    [self.uploadQueue removeObjectAtIndex:index];
-    [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:index inSection:0]]];
+    [self.uploadMenuView performBatchUpdates:^{
+        [self deleteQueueItemAtIndex:index];
+    } completion:^(BOOL finished) {
+        // Fix all indices accordingly
+        for(NSUInteger i = 0; i < self.uploadQueue.count; i++)
+        {
+            MLUploadQueueBaseCell* tmp = (MLUploadQueueImageCell*)[self.uploadMenuView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection: 0]];
+            tmp.index = i;
+        }
 
-    // Fix all indices accordingly
-    // [self.uploadMenuView reloadSections:[NSIndexSet indexSetWithIndex:0]]; // <- simpler as the for loop, but does not look good
-    for(NSUInteger i = 0; i < self.uploadQueue.count; i++)
-    {
-        MLUploadQueueBaseCell* tmp = (MLUploadQueueImageCell*)[self.uploadMenuView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection: 0]];
-        tmp.index = i;
-    }
-
-    // Don't show uploadMenuView if queue is empty again
-    if(self.uploadQueue.count == 0)
-    {
-         [NSLayoutConstraint deactivateConstraints:@[self.uploadMenuConstraint]];
-         [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
-    }
+        // Don't show uploadMenuView if queue is empty again
+        if(self.uploadQueue.count == 0)
+        {
+            [self hideUploadQueue];
+            [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
+        }
+    }];
 }
 
 - (IBAction)addImageToUploadQueue

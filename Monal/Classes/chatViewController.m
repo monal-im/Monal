@@ -3064,11 +3064,14 @@ enum msgSentState {
             // Add all new elements
             NSUInteger start = self.uploadQueue.count;
             [self.uploadMenuView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:start inSection:0]]];
-            for(NSUInteger i = 0; i < newItems.count; i++)
+            [self.uploadQueue addObjectsFromArray:newItems];
+            NSUInteger newElementsInSet = self.uploadQueue.count - start;
+            NSMutableArray<NSIndexPath*>* newInd = [[NSMutableArray<NSIndexPath*> alloc] initWithCapacity:newElementsInSet];
+            for(NSUInteger i = 0; i < newElementsInSet; i++)
             {
-                [self.uploadQueue addObject:newItems[i]];
-                [self.uploadMenuView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:(start + i + 1) inSection:0]]];
+                newInd[i] = [NSIndexPath indexPathForItem:start + i + 1 inSection:0];
             }
+            [self.uploadMenuView insertItemsAtIndexPaths:newInd];
         } completion:^(BOOL finished)
         {
             [self.uploadMenuView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.uploadQueue.count inSection:0] atScrollPosition:UICollectionViewScrollPositionRight animated:YES];

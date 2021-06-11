@@ -42,7 +42,6 @@
 @property (nonatomic) BOOL avatarChanged;
 @property (nonatomic) BOOL rosterNameChanged;
 @property (nonatomic) BOOL statusMessageChanged;
-@property (nonatomic) BOOL usedCamera;
 @end
 
 @implementation XMPPEdit
@@ -866,20 +865,16 @@
         
         TOCropViewController *cropViewController = [[TOCropViewController alloc] initWithImage:selectedImage];
         cropViewController.delegate = self;
+        cropViewController.transitioningDelegate = nil;
         //set square aspect ratio and don't let the user change that (this is a avatar which should be square for maximum compatibility with other clients)
         cropViewController.aspectRatioPreset = TOCropViewControllerAspectRatioPresetSquare;
         cropViewController.aspectRatioLockEnabled = YES;
         cropViewController.aspectRatioPickerButtonHidden = YES;
         
-        if (picker.sourceType == UIImagePickerControllerSourceTypeCamera) {
-            [picker dismissViewControllerAnimated:YES completion:^{
-                self.usedCamera = YES;
-                [self presentViewController:cropViewController animated:YES completion:nil];
-            }];
-        } else {
-            self.usedCamera = NO;
-            [picker pushViewController:cropViewController animated:YES];
-        }
+        UINavigationController* cropRootController = [[UINavigationController alloc] initWithRootViewController:cropViewController];
+        [picker dismissViewControllerAnimated:YES completion:^{
+            [self presentViewController:cropRootController animated:YES completion:nil];
+        }];
     }
     else
         [picker dismissViewControllerAnimated:YES completion:nil];
@@ -929,10 +924,7 @@
                      angle:(NSInteger)angle
 {
     [self useAvatarImage:image];
-    if(self.usedCamera)
-        [self dismissViewControllerAnimated:YES completion:nil];
-    else
-        [cropViewController dismissViewControllerAnimated:YES completion:nil];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end

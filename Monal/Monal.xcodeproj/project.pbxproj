@@ -1935,7 +1935,6 @@
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
 				2665C11C1C4ABF7100CC9A04 /* Remove Build number */,
-				2665C11D1C4ABFB500CC9A04 /* Tag Git */,
 				26AA70212146BBB900598605 /* Embed App Extensions */,
 				261E542723A0A1D300394F59 /* Embed Frameworks */,
 				B76834F7D41432AA1A41545E /* [CP] Embed Pods Frameworks */,
@@ -2082,9 +2081,7 @@
 				ORGANIZATIONNAME = Monal.im;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
-						DevelopmentTeam = 33XS7DE5NZ;
 						LastSwiftMigration = 1220;
-						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -2105,13 +2102,9 @@
 					};
 					260773BF232FC4E800BFD50F = {
 						CreatedOnToolsVersion = 11.0;
-						DevelopmentTeam = 33XS7DE5NZ;
-						ProvisioningStyle = Manual;
 					};
 					26AA70102146BBB800598605 = {
 						CreatedOnToolsVersion = 9.4.1;
-						DevelopmentTeam = 33XS7DE5NZ;
-						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -2282,7 +2275,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"${CONFIGURATION}\" == \"AppStore\" ]; then\noldBuildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_iOS\" | tail -n1 | sed 's/Build_iOS_//g')\nbuildNumber=$(expr $oldBuildNumber + 1)\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/Monal-Info.plist\"\nfi";
+			shellScript = "if [ \"${CONFIGURATION}\" == \"AppStore\" ]; then\nbuildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_iOS\" | tail -n1 | sed 's/Build_iOS_//g')\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/Monal-Info.plist\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/shareSheet-iOS/Info.plist\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/monalxmpp/Info.plist\"\nfi\n";
 		};
 		2665C11C1C4ABF7100CC9A04 /* Remove Build number */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2297,20 +2290,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ \"${CONFIGURATION}\" == \"AppStore\" ]; then\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion 0\" \"${PROJECT_DIR}/Monal-Info.plist\"\nfi\n\n";
-		};
-		2665C11D1C4ABFB500CC9A04 /* Tag Git */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Tag Git";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"${CONFIGURATION}\" == \"AppStore\" ]; then\noldBuildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_iOS\" | tail -n1 | sed 's/Build_iOS_//g')\nbuildNumber=$(expr $oldBuildNumber + 1)\ngit tag Build_iOS_$buildNumber\ngit push origin Build_iOS_$buildNumber\nfi\n";
 		};
 		8FC0217E357D67979CAFB523 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3086,14 +3065,13 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = NO;
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -3128,7 +3106,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal App Store";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SUPPORTS_MACCATALYST = YES;
@@ -3156,7 +3134,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
@@ -3191,7 +3169,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering dev";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SKIP_INSTALL = YES;
@@ -3359,7 +3337,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering dev";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -3427,10 +3405,10 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = NO;
@@ -3464,7 +3442,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal App Store";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SUPPORTS_MACCATALYST = YES;
@@ -3483,7 +3461,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_BITCODE = YES;
+				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -3513,7 +3491,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
-				ENABLE_BITCODE = YES;
+				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -3556,9 +3534,9 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = shareSheet.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -3588,7 +3566,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Share Sheet";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
@@ -3630,9 +3608,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = shareSheet.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3663,7 +3641,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Share Sheet";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -3707,9 +3685,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = shareSheet.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3740,7 +3718,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Share Sheet";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -4059,10 +4037,10 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = NO;
@@ -4096,7 +4074,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal App Store";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SUPPORTS_MACCATALYST = YES;
@@ -4115,7 +4093,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_BITCODE = YES;
+				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;

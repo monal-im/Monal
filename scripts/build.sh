@@ -42,7 +42,7 @@ echo "****************************"
 # see: https://gist.github.com/cocoaNib/502900f24846eb17bb29
 # and: https://forums.developer.apple.com/thread/100065
 # and: for developer-id distribution (distribution *outside* of appstore) an developer-id certificate must be used for building
-xcodebuild -exportArchive -archivePath "build/macos_$APP_NAME.xcarchive" -exportPath "build/app" -exportOptionsPlist ../scripts/catalyst_exportOptions.plist
+xcodebuild -exportArchive -archivePath "build/macos_$APP_NAME.xcarchive" -exportPath "build/app" -exportOptionsPlist $EXPORT_OPTIONS_CATALYST
 echo "build dir:"
 ls -l "build"
 
@@ -68,6 +68,6 @@ echo "*     Exporting iOS     *"
 echo "*************************"
 # see: https://gist.github.com/cocoaNib/502900f24846eb17bb29
 # and: https://forums.developer.apple.com/thread/100065
-xcodebuild -exportArchive -archivePath "build/ios_$APP_NAME.xcarchive" -exportPath "build/ipa" -exportOptionsPlist ../scripts/exportOptions.plist
+xcodebuild -exportArchive -archivePath "build/ios_$APP_NAME.xcarchive" -exportPath "build/ipa" -exportOptionsPlist $EXPORT_OPTIONS_IOS
 echo "build dir:"
 ls -l "build"

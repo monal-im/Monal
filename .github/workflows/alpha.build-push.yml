@@ -20,6 +20,8 @@ jobs:
       GCC_PREPROCESSOR_DEFINITIONS: "IS_ALPHA=1"
       BUILD_TYPE: "Debug"
       ALPHA_UPLOAD_SECRET: ${{ secrets.ALPHA_UPLOAD_SECRET }}
+      EXPORT_OPTIONS_CATALYST: "../scripts/exportOptions/Alpha_Catalyst_ExportOptions.plist"
+      EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Alpha_iOS_ExportOptions.plist"
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v2

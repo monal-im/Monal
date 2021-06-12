@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store</string>
+	<key>compileBitcode</key>
+	<false/>
+	<key>teamID</key>
+	<string>S8D843U34Y</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>G7YU7X7KRJ.SworIM</key>
+		<string>Monal App Store</string>
+		<key>G7YU7X7KRJ.SworIM.shareSheet</key>
+		<string>Monal Share Sheet</string>
+		<key>G7YU7X7KRJ.SworIM.NotificaionService</key>
+		<string>Monal iOS Notification filtering</string>
+	</dict>
+</dict>
+</plist>

@@ -6,16 +6,14 @@
 	<string>app-store</string>
 	<key>compileBitcode</key>
 	<false/>
-	<key>teamID</key>
-	<string>S8D843U34Y</string>
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>G7YU7X7KRJ.SworIM</key>
-		<string>Monal App Store</string>
+		<string>Mac Catalyst App Store</string>
 		<key>G7YU7X7KRJ.SworIM.shareSheet</key>
-		<string>Monal Share Sheet</string>
+		<string>catalyst share sheet developer id</string>
 		<key>G7YU7X7KRJ.SworIM.NotificaionService</key>
-		<string>Monal iOS Notification filtering</string>
+		<string>Monal Catalyst  Notification Filtering App Store</string>
 	</dict>
 </dict>
 </plist>

@@ -5,7 +5,7 @@ name: beta.build-push
 on:
   # Triggers the workflow on push
   push:
-    branches: [ beta ]
+    branches: [ develop ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -24,6 +24,8 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Checkout submodules
         run: git submodule update --init --recursive
       - name: Checkout submodules

@@ -24,6 +24,8 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Checkout submodules
         run: git submodule update --init --recursive
       - name: Checkout submodules
@@ -48,8 +50,8 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: monal-catalyst
-          path: ./Monal/build/app/$APP_NAME.tar
+          path: Monal/build/app/Monal.tar
       - name: push tag to beta repo
         run: |
           buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
-          push origin Build_iOS_$buildNumber
+          git push origin Build_iOS_$buildNumber

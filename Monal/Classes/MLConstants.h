@@ -153,11 +153,6 @@ static inline NSString* LocalizationNotNeeded(NSString* s)
 #define kBlockingMatchedHostResource 3
 #define kBlockingMatchedHost 4
 
-//temp not for release
-#ifndef DEBUG
-#define DEBUG 1
-#endif
-
 //use this to completely disable omemo in build
 //#ifndef DISABLE_OMEMO
 //#define DISABLE_OMEMO 1

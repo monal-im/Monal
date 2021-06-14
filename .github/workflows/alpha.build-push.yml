@@ -18,7 +18,7 @@ jobs:
       APP_DIR: "Monal.alpha.app"
       IOS_DEVELOPER_NAME: "Apple Distribution: Thilo Molitor (S8D843U34Y)"
       APP_DEVELOPER_NAME: "Developer ID Application: Thilo Molitor (S8D843U34Y)"
-      GCC_PREPROCESSOR_DEFINITIONS: "IS_ALPHA=1"
+      GCC_PREPROCESSOR_DEFINITIONS: "DEBUG=1 IS_ALPHA=1"
       BUILD_TYPE: "Debug"
       ALPHA_UPLOAD_SECRET: ${{ secrets.ALPHA_UPLOAD_SECRET }}
       EXPORT_OPTIONS_CATALYST: "../scripts/exportOptions/Alpha_Catalyst_ExportOptions.plist"

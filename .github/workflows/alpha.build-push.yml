@@ -15,6 +15,7 @@ jobs:
     runs-on: self-hosted
     env:
       APP_NAME: "Monal"
+      APP_DIR: "Monal.alpha.app"
       IOS_DEVELOPER_NAME: "Apple Distribution: Thilo Molitor (S8D843U34Y)"
       APP_DEVELOPER_NAME: "Developer ID Application: Thilo Molitor (S8D843U34Y)"
       GCC_PREPROCESSOR_DEFINITIONS: "IS_ALPHA=1"

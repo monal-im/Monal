@@ -15,6 +15,7 @@ jobs:
     runs-on: self-hosted
     env:
       APP_NAME: "Monal"
+      APP_DIR: "Monal.app"
       IOS_DEVELOPER_NAME: "Apple Distribution: Anurodh Pokharel (33XS7DE5NZ)"
       APP_DEVELOPER_NAME: "Developer ID Application: Anurodh Pokharel (33XS7DE5NZ)"
       GCC_PREPROCESSOR_DEFINITIONS: "DEBUG=1"

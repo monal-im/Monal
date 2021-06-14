@@ -42,6 +42,10 @@ jobs:
         run: ./scripts/build.sh
       - name: validate ios app
         run: xcrun altool --validate-app -f ./Monal/build/ipa/Monal.ipa -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+      - name: push tag to stable repo
+        run: |
+          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          git push origin Build_iOS_$buildNumber
       - name: Publish ios to testflight
         run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       #- name: catalyst notarization
@@ -52,7 +56,3 @@ jobs:
         with:
           name: monal-catalyst
           path: Monal/build/app/Monal.tar
-      - name: push tag to stable repo
-        run: |
-          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
-          git push origin Build_iOS_$buildNumber

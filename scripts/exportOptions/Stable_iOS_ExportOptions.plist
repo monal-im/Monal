@@ -6,8 +6,6 @@
 	<string>app-store</string>
 	<key>compileBitcode</key>
 	<false/>
-	<key>teamID</key>
-	<string>S8D843U34Y</string>
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>G7YU7X7KRJ.SworIM</key>

@@ -5,12 +5,12 @@ name: beta.build-push
 on:
   # Triggers the workflow on push
   push:
-    branches: [ alpha.build ]
+    branches: [ beta ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  buildAndPublishAlpha:
+  buildAndPublishBeta:
     # The type of runner that the job will run on
     runs-on: self-hosted
     env:

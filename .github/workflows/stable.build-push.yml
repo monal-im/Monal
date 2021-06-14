@@ -1,0 +1,58 @@
+# build a new stable release and push it to apple
+name: stable.build-push
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push
+  push:
+    branches: [ stable ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  buildAndPublishStable:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    env:
+      APP_NAME: "Monal"
+      APP_DIR: "Monal.app"
+      IOS_DEVELOPER_NAME: "Apple Distribution: Anurodh Pokharel (33XS7DE5NZ)"
+      APP_DEVELOPER_NAME: "Developer ID Application: Anurodh Pokharel (33XS7DE5NZ)"
+      GCC_PREPROCESSOR_DEFINITIONS: ""
+      BUILD_TYPE: "AppStore"
+      EXPORT_OPTIONS_CATALYST: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
+      EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Stable_iOS_ExportOptions.plist"
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Checkout submodules
+        run: git submodule update --remote
+      - name: Get last build tag and increment it
+        run: |
+          oldBuildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          buildNumber=$(expr $oldBuildNumber + 1)
+          git tag Build_iOS_$buildNumber
+      - name: Make our build scripts executable
+        run: chmod +x ./scripts/build.sh
+      - name: Run build
+        run: ./scripts/build.sh
+      - name: validate ios app
+        run: xcrun altool --validate-app -f ./Monal/build/ipa/Monal.ipa -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+      - name: Publish ios to testflight
+        run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+      #- name: catalyst notarization
+      #  run: xcrun altool --notarize-app -f ./Monal/build/app/$APP_NAME.tar --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+      #- name: Upload catalyst release
+      #  run: echo TODO
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monal-catalyst
+          path: Monal/build/app/Monal.tar
+      - name: push tag to stable repo
+        run: |
+          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          git push origin Build_iOS_$buildNumber

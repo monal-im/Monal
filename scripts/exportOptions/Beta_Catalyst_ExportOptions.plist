@@ -3,16 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>method</key>
-	<string>app-store</string>
+	<string>developer-id</string>
 	<key>compileBitcode</key>
 	<false/>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>G7YU7X7KRJ.SworIM</key>
+		<key>maccatalyst.G7YU7X7KRJ.SworIM</key>
 		<string>Monal Catalyst Developer id</string>
-		<key>G7YU7X7KRJ.SworIM.shareSheet</key>
+		<key>maccatalyst.G7YU7X7KRJ.SworIM.shareSheet</key>
 		<string>catalyst share sheet developer id</string>
-		<key>G7YU7X7KRJ.SworIM.NotificaionService</key>
+		<key>maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService</key>
 		<string>Monal Catalyst Notification NSE</string>
 	</dict>
 </dict>

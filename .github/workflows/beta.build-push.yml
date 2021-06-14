@@ -30,7 +30,7 @@ jobs:
         run: git submodule update --remote
       - name: Get last build tag and increment it
         run: |
-          oldBuildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_iOS\" | tail -n1 | sed 's/Build_iOS_//g'
+          oldBuildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           buildNumber=$(expr $oldBuildNumber + 1)
           git tag Build_iOS_$buildNumber
       - name: Make our build scripts executable
@@ -51,5 +51,5 @@ jobs:
           path: ./Monal/build/app/$APP_NAME.tar
       - name: push tag to beta repo
         run: |
-          buildNumber=$(git tag --sort=\"v:refname\" |grep \"Build_iOS\" | tail -n1 | sed 's/Build_iOS_//g'
+          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           push origin Build_iOS_$buildNumber

@@ -51,9 +51,11 @@ echo "**************************"
 echo "*     Packing macOS      *"
 echo "**************************"
 cd build/app
-mv "$APP_NAME.app" "$APP_DIR"
+mkdir tar_release
+mv "$APP_NAME.app" "tar_release/$APP_DIR"
+cd tar_release
 tar -cf "$APP_NAME.tar" "$APP_DIR"
-cd ../..
+cd ../../..
 ls -l build/app
 
 echo ""

@@ -17,7 +17,7 @@ def monal
   inhibit_all_warnings!
   pod 'MBProgressHUD', '~> 1.2.0'
   pod 'IDMPhotoBrowser'
-  pod 'SDWebImage', '~> 5.10.0'
+  pod 'SDWebImage', '~> 5.11.1'
   pod 'DZNEmptyDataSet'
   pod 'EAIntroView'
   pod 'TOCropViewController'
@@ -34,7 +34,7 @@ def monalxmpp
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
   signalDeps
   #this is only for ios12. Remove for mac builds.
-  pod 'OpenSSL-Universal', '1.1.180'
+  pod 'OpenSSL-Universal', '1.1.1100'
 end
 
 

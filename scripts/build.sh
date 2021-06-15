@@ -55,6 +55,7 @@ mkdir tar_release
 mv "$APP_NAME.app" "tar_release/$APP_DIR"
 cd tar_release
 tar -cf "../$APP_NAME.tar" "$APP_DIR"
+zip -r "../$APP_NAME.zip" "$APP_DIR"
 cd ../../..
 ls -l build/app
 

@@ -48,8 +48,8 @@ jobs:
           git push origin Build_iOS_$buildNumber
       - name: Publish ios to appstore connect
         run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --team-id 33XS7DE5NZ -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
-      - name: Publish catalyst to appstore connect
-        run: xcrun altool --upload-app -f ./Monal/build/app/$APP_NAME.zip --team-id 33XS7DE5NZ --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+      #- name: Publish catalyst to appstore connect
+      #  run: xcrun altool --upload-app -f ./Monal/build/app/$APP_NAME.zip --team-id 33XS7DE5NZ --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       #- name: catalyst notarization
       #  run: xcrun altool --notarize-app -f ./Monal/build/app/$APP_NAME.tar --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       #- name: Upload catalyst release

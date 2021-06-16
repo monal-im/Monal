@@ -38,10 +38,10 @@ jobs:
       - name: Run build
         run: ./scripts/build.sh
       - run: |
-        chmod +x ./scripts/upload.sh
-        cd Monal/build/app/tar_release
-        tar -cf "../$APP_NAME.tar" "$APP_DIR"
-        cd ../../../..
+          chmod +x ./scripts/upload.sh
+          cd Monal/build/app/tar_release
+          tar -cf "../$APP_NAME.tar" "$APP_DIR"
+          cd ../../../..
       - name: Uploading to alpha site
         run: ./scripts/upload.sh
 #  checkReleaseBuild:

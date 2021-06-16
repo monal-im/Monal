@@ -61,7 +61,7 @@ jobs:
             xcrun stapler staple "$APP_DIR"
             stapleTries=$((stapleTries +1))
             if [ $? -eq 0 ]; then break; fi
-            If [ stapleTries -gt 15]; then exit 1;
+            If [ $stapleTries -gt 15]; then exit 1;
             sleep 120
           done
           stapler validate "$APP_DIR"

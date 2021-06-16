@@ -72,4 +72,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: monal-catalyst
-          path: Monal/build/app/$APP_NAME.zip
+          path: Monal/build/app/tar_release/Monal.app

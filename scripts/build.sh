@@ -54,7 +54,6 @@ cd build/app
 mkdir tar_release
 mv "$APP_NAME.app" "tar_release/$APP_DIR"
 cd tar_release
-tar -cf "../$APP_NAME.tar" "$APP_DIR"
 /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME".zip
 cd ../../..
 ls -l build/app

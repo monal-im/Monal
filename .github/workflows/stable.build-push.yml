@@ -64,8 +64,6 @@ jobs:
             sleep 120
           done
           stapler validate ./Monal/build/app/Monal.app
-          rm Monal/build/app/Monal.tar
-          tar -cf "Monal.app" "Monal/build/app/Monal.tar"
       #- name: Publish catalyst to appstore connect
       #  run:  xcrun altool --upload-app -f ./Monal/build/app/Monal.zip --team-id 33XS7DE5NZ --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       - uses: actions/upload-artifact@v2

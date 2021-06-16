@@ -64,8 +64,6 @@ jobs:
             sleep 120
           done
           stapler validate ./Monal/build/app/Monal.app
-          rm Monal/build/app/Monal.tar
-          tar -cf "Monal.app" "Monal/build/app/Monal.tar"
       - name: upload new catalyst beta to monal.im
         run: curl -X POST -F "macbeta=@Monal/build/app/Monal.zip" -H "X-Secret: "$(cat /Users/build/beta_upload_secret.txt)" https://monal.im/upload-macos-beta.php
       #- name: Publish catalyst to appstore connect

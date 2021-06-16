@@ -66,7 +66,7 @@ jobs:
           stapler validate ./Monal/build/app/tar_release/Monal.app
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "Monal/build/app/tar_release/$APP_DIR" "Monal/build/app/$APP_NAME.zip"
       - name: upload new catalyst beta to monal.im
-        run: curl -X POST -F "macbeta=@Monal/build/app/Monal.zip" -H "X-Secret: "$(cat /Users/build/beta_upload_secret.txt)" https://monal.im/upload-macos-beta.php
+        run: curl -X POST -F "macbeta=@Monal/build/app/Monal.zip" -H "X-Secret: $(cat /Users/build/beta_upload_secret.txt)" https://monal.im/upload-macos-beta.php
       #- name: Publish catalyst to appstore connect
       #  run:  xcrun altool --upload-app -f ./Monal/build/app/Monal.zip --team-id 33XS7DE5NZ --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       - uses: actions/upload-artifact@v2

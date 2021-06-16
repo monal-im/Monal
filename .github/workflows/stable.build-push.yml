@@ -57,13 +57,13 @@ jobs:
           stapleTries=0
           while :
           do
-            xcrun stapler staple ./Monal/build/app/Monal.app
+            xcrun stapler staple ./Monal/build/app/tar_release/Monal.app
             stapleTries=$((stapleTries +1))
             if [ $? -eq 0 ]; then break; fi
             If [ stapleTries -gt 15]; then exit 1;
             sleep 120
           done
-          stapler validate ./Monal/build/app/Monal.app
+          stapler validate ./Monal/build/app/tar_release/Monal.app
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "Monal/build/app/tar_release/$APP_DIR" "Monal/build/app/$APP_NAME.zip"
       #- name: Publish catalyst to appstore connect
       #  run:  xcrun altool --upload-app -f ./Monal/build/app/Monal.zip --team-id 33XS7DE5NZ --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"

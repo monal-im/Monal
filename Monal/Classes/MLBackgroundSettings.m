@@ -202,6 +202,7 @@
         NSData *data =[NSData dataWithContentsOfURL:newURL];
         if([[MLImageManager sharedInstance] saveBackgroundImageData:data]) {
             [[HelperTools defaultsDB] setObject:@"CUSTOM" forKey:@"BackgroundImage"];
+            [self sendBackgroundChangeNotification];
         }
     }];
 }

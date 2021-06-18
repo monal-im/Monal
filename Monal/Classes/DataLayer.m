@@ -2774,6 +2774,24 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"INSERT INTO muc_favorites (account_id, room, nick) SELECT account_id, room, nick FROM _muc_favoritesTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _muc_favoritesTMP;"];
         }];
+        
+        [self updateDBTo:5.024 withBlock:^{
+            //nicknames should be compared case sensitive --> change collation
+            //we don't need to migrate our table data because the db upgrade triggers a xmpp reconnect and this in turn triggers
+            //a new muc join which does clear this table anyways
+            [self.db executeNonQuery:@"DROP TABLE muc_participants;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'muc_participants' ( \
+                     'account_id' INTEGER NOT NULL, \
+                     'room' VARCHAR(255) NOT NULL, \
+                     'room_nick' VARCHAR(255) NOT NULL COLLATE binary, \
+                     'participant_jid' VARCHAR(255), \
+                     'affiliation' VARCHAR(255), \
+                     'role' VARCHAR(255), \
+                     PRIMARY KEY('account_id','room','room_nick'), \
+                     FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                     FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+            );"];
+        }];
     }];
     
     // Vacuum after db updates

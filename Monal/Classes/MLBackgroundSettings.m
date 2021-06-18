@@ -14,12 +14,12 @@
 @import AVFoundation;
 
 @interface MLBackgroundSettings ()
-@property (nonatomic, strong) NSMutableArray *photos;
-@property (nonatomic, strong) NSArray *imageList;
+@property (nonatomic, strong) NSMutableArray* photos;
+@property (nonatomic, strong) NSArray* imageList;
 @property (nonatomic, assign) NSUInteger selectedIndex;
 @property (nonatomic, assign) NSUInteger displayedPhotoIndex;
-@property (nonatomic, strong) UIImage *leftImage;
-@property (nonatomic, strong) UIImage *rightImage;
+@property (nonatomic, strong) UIImage* leftImage;
+@property (nonatomic, strong) UIImage* rightImage;
 
 @end
 
@@ -129,7 +129,7 @@
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate = self;
     imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted){
         if(granted)
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self presentViewController:imagePicker animated:YES completion:nil];
@@ -146,7 +146,7 @@
     NSString *currentBackground = [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
     self.selectedIndex = -1;
     // Add photos
-    [self.imageList enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [self.imageList enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL* _Nonnull stop) {
         NSString* name = (NSString*) obj;
         IDMPhoto* photo = [IDMPhoto photoWithImage:[UIImage imageNamed:name]];
         photo.caption = [name stringByReplacingOccurrencesOfString:@"_" withString:@" "];
@@ -172,12 +172,12 @@
     browser.displayActionButton = NO;
     browser.displayToolbar = YES;
     
-    self.leftImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowLeft"];
-    self.rightImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowRight"];
+    self.leftImage = [UIImage imageNamed:@"IDMPhotoBrowser_arrowLeft"];
+    self.rightImage = [UIImage imageNamed:@"IDMPhotoBrowser_arrowRight"];
     browser.leftArrowImage = self.leftImage;
     browser.rightArrowImage = self.rightImage;
 
-    UINavigationController* nav =[[UINavigationController alloc] initWithRootViewController:browser];
+    UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:browser];
 
     // Present
     [self presentViewController:nav animated:YES completion:nil];
@@ -199,8 +199,9 @@
 {
     NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] init];
     [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
-        NSData *data =[NSData dataWithContentsOfURL:newURL];
-        if([[MLImageManager sharedInstance] saveBackgroundImageData:data]) {
+        NSData* data = [NSData dataWithContentsOfURL:newURL];
+        if([[MLImageManager sharedInstance] saveBackgroundImageData:data])
+        {
             [[HelperTools defaultsDB] setObject:@"CUSTOM" forKey:@"BackgroundImage"];
             [self sendBackgroundChangeNotification];
         }
@@ -223,25 +224,20 @@
 {
     [self dismissViewControllerAnimated:YES completion:nil];
     
-    NSString *mediaType = info[UIImagePickerControllerMediaType];
+    NSString* mediaType = info[UIImagePickerControllerMediaType];
     if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
-        UIImage *selectedImage= info[UIImagePickerControllerEditedImage];
-        if(!selectedImage) selectedImage= info[UIImagePickerControllerOriginalImage];
-        NSData *jpgData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
+        UIImage* selectedImage = info[UIImagePickerControllerEditedImage];
+        if(!selectedImage)
+            selectedImage = info[UIImagePickerControllerOriginalImage];
+        NSData* jpgData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
         if(jpgData)
         {
-            
             if([[MLImageManager sharedInstance] saveBackgroundImageData:jpgData]) {
                 [[HelperTools defaultsDB] setObject:@"CUSTOM" forKey:@"BackgroundImage"];
             }
-            
         }
-        
     }
-    
 }
-
-
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {

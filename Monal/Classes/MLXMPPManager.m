@@ -478,7 +478,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     {
         DDLogVerbose(@"Forcefully disconnecting account %@ (%@@%@)", [account objectForKey:kAccountID], [account objectForKey:@"username"], [account objectForKey:@"domain"]);
         xmpp* xmppAccount = [self getConnectedAccountForID:[account objectForKey:kAccountID]];
-        [xmppAccount disconnect:YES];
+        if(xmppAccount != nil)
+            [xmppAccount disconnect:YES];
     }
     createTimer(2.0, (^{
         [self connectIfNecessary];

@@ -22,7 +22,7 @@
     // Do any additional setup after loading the view.
     
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self selector:@selector(updateBackground) name:kMonalBackgroundChanged object:nil];
+    [nc addObserver:self selector:@selector(handleBackgroundChanged) name:kMonalBackgroundChanged object:nil];
 }
 
 
@@ -31,7 +31,7 @@
     [super viewWillAppear:animated];
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
-    [self updateBackground];
+    [self updateBackground:NO];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -41,7 +41,12 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
--(void) updateBackground
+-(void) handleBackgroundChanged
+{
+    [self updateBackground:YES];
+}
+
+-(void) updateBackground:(BOOL) forceReload
 {
     BOOL backgrounds = [[HelperTools defaultsDB] boolForKey:@"ChatBackgrounds"];
     
@@ -52,7 +57,7 @@
         {
             if([imageName isEqualToString:@"CUSTOM"])
             {
-                self.backgroundImageView.image = [[MLImageManager sharedInstance] getBackground];
+                self.backgroundImageView.image = [[MLImageManager sharedInstance] getBackground:forceReload];
             }
             else
             {

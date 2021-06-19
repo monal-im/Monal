@@ -225,15 +225,17 @@
     return [data writeToFile:writablePath atomically:YES];
 }
 
--(UIImage *) getBackground
+-(UIImage*) getBackground:(BOOL) forceReload
 {
-    if(self.chatBackground) return self.chatBackground;
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
-    
-    self.chatBackground= [UIImage imageWithContentsOfFile:writablePath];
-    
+    // use cached image
+    if(self.chatBackground && forceReload == NO)
+        return self.chatBackground;
+    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString* documentsDirectory = [paths objectAtIndex:0];
+    NSString* writablePath = [documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
+
+    self.chatBackground = [UIImage imageWithContentsOfFile:writablePath];
+
     return self.chatBackground;
 }
 /*

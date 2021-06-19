@@ -40,7 +40,7 @@
 -(void) getIconForContact:(NSString*_Nonnull) contact andAccount:(NSString *_Nonnull) accountNo withCompletion:(void (^_Nullable)(UIImage *_Nullable))completion;
 +(UIImage* _Nonnull) circularImage:(UIImage* _Nonnull) image;
 
--(UIImage *_Nullable) getBackground;
+-(UIImage* _Nullable) getBackground:(BOOL) forceReload;
 
 /**
  Purge cache in the event of  a memory warning

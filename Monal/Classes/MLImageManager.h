@@ -42,6 +42,8 @@
 
 -(UIImage* _Nullable) getBackground:(BOOL) forceReload;
 
+-(void) resetBackgroundImage;
+
 /**
  Purge cache in the event of  a memory warning
  */

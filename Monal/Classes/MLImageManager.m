@@ -238,6 +238,12 @@
 
     return self.chatBackground;
 }
+
+-(void) resetBackgroundImage
+{
+    self.chatBackground = nil;
+}
+
 /*
 - (void)URLSession:(NSURLSession *)session
       downloadTask:(NSURLSessionDownloadTask *)downloadTask

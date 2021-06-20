@@ -47,12 +47,12 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: monal-catalyst
-          path: build/app/Monal.tar
+          path: Monal/build/app/Monal.tar
           if-no-files-found: error
       - uses: actions/upload-artifact@v2
         with:
           name: monal-ios
-          path: build/ipa/Monal.ipa
+          path: Monal/build/ipa/Monal.ipa
           if-no-files-found: error
       - uses: actions/upload-artifact@v2
         with:

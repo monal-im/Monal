@@ -38,8 +38,8 @@
 }
 
 -(id) initWithImage:(UIImage*) image {
+    self = [super init];
     assert(image != nil);
-    assert(self = [super init]);
     _type = UPLOAD_QUEUE_TYPE_RAW_IMAGE;
     self.image = image;
     self.url = nil;
@@ -48,9 +48,9 @@
 
 -(id) initWithImage:(UIImage*) image imageUrl:(NSURL *)url
 {
+    self = [super init];
     assert(image != nil);
     assert(url != nil);
-    assert(self = [super init]);
     _type = UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL;
     self.image = image;
     self.url = url;
@@ -59,9 +59,8 @@
 
 -(id) initWithURL:(NSURL*) url
 {
+    self = [super init];
     assert(url != nil);
-    assert(self = [super init]);
-    // MLUploadQueueItem* item = [MLUploadQueueItem alloc];
     _type = UPLOAD_QUEUE_TYPE_URL;
     self.url = url;
     self.image = nil;

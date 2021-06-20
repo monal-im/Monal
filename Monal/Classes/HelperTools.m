@@ -33,6 +33,12 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
++(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id) userInfo
+{
+    if(!check)
+        @throw [NSException exceptionWithName:@"MLAssert" reason:text userInfo:userInfo];
+}
+
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
 {
     NSString* message;

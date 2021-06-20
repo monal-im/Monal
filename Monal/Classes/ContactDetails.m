@@ -199,7 +199,7 @@ enum ContactDetailsAboutRows {
             MLTextInputCell* cell = (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
             if(self.contact.isGroup)
             {
-                [cell initTextCell:self.contact.accountNickInGroup andPlaceholder:nil andDelegate:nil];
+                [cell initTextCell:self.contact.accountNickInGroup andPlaceholder:nil andDelegate:self];
                 [cell disableEditMode];
             }
             else

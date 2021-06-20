@@ -72,4 +72,20 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: monal-catalyst
-          path: Monal/build/app/$APP_NAME.zip
+          path: Monal/build/app/tar_release/Monal.app
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monal-ios
+          path: Monal/build/ipa/Monal.ipa
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monal-catalyst-dsym
+          path: Monal/build/macos_Monal.xcarchive/dSYMs
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monal-ios-dsym
+          path: Monal/build/ios_Monal.xcarchive/dSYMs
+          if-no-files-found: error

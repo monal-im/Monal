@@ -26,7 +26,7 @@
     // Configure the view for the selected state
 }
 
--(void) setupCellWithText:(NSString*) text andPlaceholder:(NSString*) placeholder
+-(void) setupCellWithText:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate
 {
     self.textInput.text = text;
     self.textInput.secureTextEntry = NO;
@@ -34,17 +34,21 @@
     self.textInput.enabled = YES;
     // enable autocorrection
     self.textInput.autocorrectionType = UITextAutocorrectionTypeYes;
+    if(delegate != nil)
+    {
+        self.textInput.delegate = delegate;
+    }
 }
 
 -(void) initTextCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
 {
-    [self setupCellWithText:text andPlaceholder:placeholder];
+    [self setupCellWithText:text andPlaceholder:placeholder andDelegate:delegate];
     [self.textInput setKeyboardType:UIKeyboardTypeDefault];
 }
 
 -(void) initMailCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
 {
-    [self setupCellWithText:text andPlaceholder:placeholder];
+    [self setupCellWithText:text andPlaceholder:placeholder andDelegate:delegate];
     [self.textInput setKeyboardType:UIKeyboardTypeEmailAddress];
     // disable autocorrection
     self.textInput.autocorrectionType = UITextAutocorrectionTypeNo;
@@ -52,7 +56,7 @@
 
 -(void) initPasswordCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
 {
-    [self setupCellWithText:text andPlaceholder:placeholder];
+    [self setupCellWithText:text andPlaceholder:placeholder andDelegate:delegate];
     self.textInput.secureTextEntry = YES;
     [self.textInput setKeyboardType:UIKeyboardTypeDefault];
 }

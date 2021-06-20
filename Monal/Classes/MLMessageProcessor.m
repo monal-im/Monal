@@ -207,8 +207,13 @@ static NSMutableDictionary* _typingNotifications;
     //inbound value for groupchat messages
     if(ownNick != nil)
     {
-        inbound = ![ownNick isEqualToString:actualFrom];
-        DDLogDebug(@"This is muc, inbound is now: %@ (ownNick: %@, actualFrom: %@)", inbound ? @"YES": @"NO", ownNick, actualFrom);
+        //we know the real jid of a participant? --> use this for inbound calculation
+        //(use the nickname otherwise)
+        if(participantJid != nil)
+            inbound = ![participantJid isEqualToString:account.connectionProperties.identity.jid];
+        else
+            inbound = ![ownNick isEqualToString:actualFrom];
+        DDLogDebug(@"This is muc, inbound is now: %@ (ownNick: %@, actualFrom: %@, participantJid: %@)", inbound ? @"YES": @"NO", ownNick, actualFrom, participantJid);
     }
     
     if([messageNode check:@"/<type=groupchat>/subject#"])

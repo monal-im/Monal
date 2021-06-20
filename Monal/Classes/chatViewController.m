@@ -626,7 +626,7 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
     [nc addObserver:self selector:@selector(updateNavBarLastInteractionLabel:) name:kMonalLastInteractionUpdatedNotice object:nil];
     
-    [nc addObserver:self selector:@selector(updateBackground) name:kMonalBackgroundChanged object:nil];
+    [nc addObserver:self selector:@selector(handleBackgroundChanged) name:kMonalBackgroundChanged object:nil];
     
     self.viewDidAppear = NO;
     self.viewIsScrolling = YES;
@@ -643,7 +643,7 @@ enum msgSentState {
     [self updateNavBarLastInteractionLabel:nil];
     [self displayEncryptionStateInUI];
     
-    [self updateBackground];
+    [self updateBackground:NO];
     
     self.placeHolderText.text = [NSString stringWithFormat:NSLocalizedString(@"Message from %@", @""), self.jid];
     // Load message draft from db
@@ -741,7 +741,13 @@ enum msgSentState {
     [self stopLastInteractionTimer];
 }
 
--(void) updateBackground {
+-(void) handleBackgroundChanged
+{
+    [self updateBackground:YES];
+}
+
+-(void) updateBackground:(BOOL) forceReload
+{
     BOOL backgrounds = [[HelperTools defaultsDB] boolForKey:@"ChatBackgrounds"];
     
     if(backgrounds){
@@ -751,7 +757,7 @@ enum msgSentState {
         {
             if([imageName isEqualToString:@"CUSTOM"])
             {
-                self.backgroundImage.image = [[MLImageManager sharedInstance] getBackground];
+                self.backgroundImage.image = [[MLImageManager sharedInstance] getBackground:forceReload];
             } else  {
                 self.backgroundImage.image = [UIImage imageNamed:imageName];
             }

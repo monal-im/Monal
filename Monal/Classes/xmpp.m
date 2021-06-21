@@ -728,8 +728,10 @@ NSString *const kData=@"data";
             self->_cancelReconnectTimer();
         self->_cancelReconnectTimer = nil;
         
+        //invalidate all ephemeral iq handlers (those not surviving an app restart or switch to/from appex)
         @synchronized(self->_iqHandlers) {
             for(NSString* iqid in [self->_iqHandlers allKeys])
+            {
                 if(![self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
                 {
                     NSDictionary* data = (NSDictionary*)self->_iqHandlers[iqid];
@@ -739,7 +741,9 @@ NSString *const kData=@"data";
                         if(data[@"errorHandler"])
                             ((monal_iq_handler_t)data[@"errorHandler"])(nil);
                     }
+                    [self->_iqHandlers removeObjectForKey:iqid];
                 }
+            }
         }
         
         if(explicitLogout && self->_accountState>=kStateHasStream)

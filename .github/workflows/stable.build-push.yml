@@ -51,18 +51,17 @@ jobs:
       - name: Notarize catalyst
         run: xcrun altool --notarize-app -f ./Monal/build/app/Monal.zip --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       - name: wait a bit for noarize
-        run: sleep 120
+        run: sleep 60
       - name: staple
         run: |
           cd Monal/build/app/tar_release/
           stapleTries=0
           while :
           do
-            xcrun stapler staple "$APP_DIR"
+            xcrun stapler staple "$APP_DIR" || sleep 60
             stapleTries=$((stapleTries +1))
             if [ $? -eq 0 ]; then break; fi
             if [ $stapleTries -gt 15]; then exit 1; fi
-            sleep 120
           done
           stapler validate "$APP_DIR"
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"

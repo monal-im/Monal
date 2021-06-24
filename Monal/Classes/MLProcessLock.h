@@ -6,13 +6,17 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
+#import "MLConstants.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLProcessLock : NSObject
 
 +(BOOL) checkRemoteRunning:(NSString*) processName;
 +(void) waitForRemoteStartup:(NSString*) processName;
++(void) waitForRemoteStartup:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler;
 +(void) waitForRemoteTermination:(NSString*) processName;
++(void) waitForRemoteTermination:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler;
 +(void) lock;
 +(void) unlock;
 

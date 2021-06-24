@@ -371,11 +371,14 @@
 -(void) close
 {
     nw_connection_send(self.shared_state.connection, NULL, NW_CONNECTION_FINAL_MESSAGE_CONTEXT, YES, ^(nw_error_t  _Nullable error) {
-        NSError* st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(error));
-        @synchronized(self.shared_state) {
-            self.shared_state.error = st_error;
+        if(error)
+        {
+            NSError* st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(error));
+            @synchronized(self.shared_state) {
+                self.shared_state.error = st_error;
+            }
+            [self generateEvent:NSStreamEventErrorOccurred];
         }
-        [self generateEvent:NSStreamEventErrorOccurred];
     });
     @synchronized(self.shared_state) {
         self.closed = YES;

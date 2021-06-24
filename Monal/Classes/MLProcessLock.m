@@ -83,14 +83,32 @@
 
 +(void) waitForRemoteStartup:(NSString*) processName
 {
+    [self waitForRemoteStartup:processName withLoopHandler:nil];
+}
+
++(void) waitForRemoteStartup:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler
+{
     while(![[NSThread currentThread] isCancelled] && ![self checkRemoteRunning:processName])
-        [self sleep:0.050];     //checkRemoteRunning did already wait for its timeout, don't wait too long here
+    {
+        if(handler)
+            handler();
+        [self sleep:0.050];     //checkRemoteRunning did already wait for its timeout, because its ping was not answered --> don't wait too long here
+    }
 }
 
 +(void) waitForRemoteTermination:(NSString*) processName
 {
+    [self waitForRemoteTermination:processName withLoopHandler:nil];
+}
+
++(void) waitForRemoteTermination:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler
+{
     while(![[NSThread currentThread] isCancelled] && [self checkRemoteRunning:processName])
-        [self sleep:0.25];    //checkRemoteRunning did not wait for its timeout, wait here
+    {
+        if(handler)
+            handler();
+        [self sleep:0.250];    //checkRemoteRunning did not wait for its timeout, because its ping got answered --> wait here
+    }
 }
 
 +(void) lock

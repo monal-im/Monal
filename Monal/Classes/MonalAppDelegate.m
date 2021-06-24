@@ -181,7 +181,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
         DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
-        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
+            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        }];
     }
     
     return YES;
@@ -547,15 +549,17 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) applicationWillEnterForeground:(UIApplication *)application
 {
     DDLogInfo(@"Entering FG");
-    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     
     //TODO: show "loading..." animation/modal
     
     //only proceed with foregrounding if the NotificationServiceExtension is not running
+    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
         DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
-        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
+            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        }];
     }
     
     //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)

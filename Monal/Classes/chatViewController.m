@@ -1315,6 +1315,19 @@ enum msgSentState {
                 });
             }];
         }
+        else if([provider hasItemConformingToTypeIdentifier:@"public.mpeg-4"] == YES)
+        {
+            [provider loadItemForTypeIdentifier:@"public.mpeg-4" options:nil completionHandler:^(NSURL* path, NSError* error)
+             {
+                if(error != nil)
+                    DDLogInfo(@"Error while parsing video provider: %@", error);
+                if(path == nil)
+                    DDLogInfo(@"Video provider passed empty path");
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self addImagesToQueue:@[path]];
+                });
+            }];
+        }
         else
         {
             [provider loadObjectOfClass:[UIImage class] completionHandler:^(__kindof id<NSItemProviderReading>  _Nullable object, NSError * _Nullable error) {

@@ -343,7 +343,7 @@ static NSMutableDictionary* _uiHandler;
                 {
                     DDLogInfo(@"Querying muc mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
                     [mamQuery setMAMQueryAfter:lastStanzaId];
-                    [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup)];
+                    [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
                 }
                 else
                 {
@@ -711,7 +711,7 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
         XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
         [pageQuery setiqTo:iqNode.fromUser];
-        [account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup)];
+        [account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
     }
     else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
         DDLogVerbose(@"Muc mam catchup finished");

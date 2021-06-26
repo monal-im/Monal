@@ -446,7 +446,7 @@ NSString *const kData=@"data";
         _accountState < kStateReconnecting ? @"YES" : @"NO",
         _reconnectInProgress ? @"YES" : @"NO",
         _catchupDone ? @"YES" : @"NO",
-        _cancelPingTimer,
+        _cancelPingTimer == nil ? @"none" : @"running timer",
         unackedCount,
         (unsigned long)[_parseQueue operationCount],
         (unsigned long)[_receiveQueue operationCount],

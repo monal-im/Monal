@@ -257,6 +257,9 @@ $$
     
     for(NSDictionary* contact in [iqNode find:@"{jabber:iq:roster}query/item@@"])
     {
+        if(!contact[@"jid"])
+            continue;
+        contact[@"jid"] = [[NSString stringWithFormat:"%@", contact[@"jid"]] lowercaseString];
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
             [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:account.accountNo];

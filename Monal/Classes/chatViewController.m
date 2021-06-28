@@ -1170,6 +1170,21 @@ enum msgSentState {
 
 #pragma mark - attachment picker
 
+-(void) showCameraPermissionWarning
+{
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Camera permissions missing", @"Camera permissions missing warning") message:NSLocalizedString(@"Monal is not allowed to access the camera", @"Camera permissions missing warning") preferredStyle:UIAlertControllerStyleAlert];
+
+    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action) {}];
+
+    UIAlertAction* monalIosSettings = [UIAlertAction actionWithTitle:NSLocalizedString(@"Settings", @"Camera permissions missing warning") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:@{} completionHandler:nil];
+    }];
+
+    [alert addAction:defaultAction];
+    [alert addAction:monalIosSettings];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 -(IBAction)attach:(id)sender
 {
     [self stopEditing];
@@ -1180,10 +1195,10 @@ enum msgSentState {
                                                                             message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
     // Check for http upload support
-    if(!account.connectionProperties.supportsHTTPUpload )
+    if(!account.connectionProperties.supportsHTTPUpload)
     {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
-                                                                       message:NSLocalizedString(@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+                                                                       message:NSLocalizedString(@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it.", @"") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
@@ -1202,18 +1217,42 @@ enum msgSentState {
         UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
         mediaPicker.delegate = self;
 
-        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
             mediaPicker.mediaTypes = @[(NSString*)kUTTypeImage, (NSString*)kUTTypeMovie];
 
-            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
-                if(granted)
+            switch ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo])
+            {
+                case AVAuthorizationStatusAuthorized:
                 {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self presentViewController:mediaPicker animated:YES completion:nil];
                     });
+                    break;
                 }
-            }];
+                case AVAuthorizationStatusNotDetermined:
+                {
+                    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted)
+                    {
+                        if(granted == YES)
+                        {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                [self presentViewController:mediaPicker animated:YES completion:nil];
+                            });
+                        }
+                        else
+                            DDLogWarn(@"Camera access not granted. AV Permissions now set to denied");
+                    }];
+                    break;
+                }
+                case AVAuthorizationStatusDenied:
+                case AVAuthorizationStatusRestricted:
+                {
+                    DDLogWarn(@"Camera access denied");
+                    [self showCameraPermissionWarning];
+                    break;
+                }
+            }
         }];
 
         UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {

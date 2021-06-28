@@ -217,9 +217,9 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) messageSent:(NSNotification *) notification
 {
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self insertOrMoveContact:contact completion:nil];
-    });
+    if(!contact)
+        unreachable();
+    [self insertOrMoveContact:contact completion:nil];
 }
 
 -(void) handleNewMessage:(NSNotification*) notification
@@ -227,8 +227,11 @@ static NSMutableSet* _smacksWarningDisplayed;
     MLMessage* newMessage = notification.userInfo[@"message"];
     MLContact* contact = notification.userInfo[@"contact"];
     xmpp* msgAccount = (xmpp*)notification.object;
-    if(!msgAccount)
+    if(!newMessage || !contact || !msgAccount)
+    {
+        unreachable();
         return;
+    }
     if([newMessage.messageType isEqualToString:kMessageTypeStatus])
         return;
 
@@ -244,58 +247,54 @@ static NSMutableSet* _smacksWarningDisplayed;
 }
 
 -(void) insertOrMoveContact:(MLContact *) contact completion:(void (^ _Nullable)(BOOL finished))completion {
-    __block NSIndexPath* indexPath = nil;
-    for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++) {
-        NSMutableArray* curContactArray = [self getChatArrayForSection:section];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.chatListTable performBatchUpdates:^{
+            __block NSIndexPath* indexPath = nil;
+            for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++) {
+                NSMutableArray* curContactArray = [self getChatArrayForSection:section];
 
-        // check if contact is already displayed -> get coresponding indexPath
-        [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            MLContact* rowContact = (MLContact *) obj;
-            if([rowContact.contactJid isEqualToString:contact.contactJid] &&
-               [rowContact.accountId isEqualToString:contact.accountId]) {
-                indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
-                *stop = YES;
+                // check if contact is already displayed -> get coresponding indexPath
+                [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    MLContact* rowContact = (MLContact *) obj;
+                    if([rowContact.contactJid isEqualToString:contact.contactJid] &&
+                       [rowContact.accountId isEqualToString:contact.accountId]) {
+                        indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
+                        *stop = YES;
+                    }
+                }];
             }
-        }];
-    }
 
-    size_t insertInSection = unpinnedChats;
-    if(contact.isPinned) {
-        insertInSection = pinnedChats;
-    }
-    NSMutableArray* insertContactToArray = [self getChatArrayForSection:insertInSection];
-    NSIndexPath* insertAtPath = [NSIndexPath indexPathForRow:0 inSection:insertInSection];
+            size_t insertInSection = unpinnedChats;
+            if(contact.isPinned) {
+                insertInSection = pinnedChats;
+            }
+            NSMutableArray* insertContactToArray = [self getChatArrayForSection:insertInSection];
+            NSIndexPath* insertAtPath = [NSIndexPath indexPathForRow:0 inSection:insertInSection];
 
-    if(indexPath && insertAtPath.section == indexPath.section && insertAtPath.row == indexPath.row) {
-        [insertContactToArray replaceObjectAtIndex:insertAtPath.row  withObject:contact];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.chatListTable reloadRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationNone];
-        });
-        return;
-    } else if(indexPath) {
-        // Contact is already in out active chats list
-        NSMutableArray* removeContactFromArray = [self getChatArrayForSection:indexPath.section];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.chatListTable performBatchUpdates:^{
+            if(indexPath && insertAtPath.section == indexPath.section && insertAtPath.row == indexPath.row)
+            {
+                [insertContactToArray replaceObjectAtIndex:insertAtPath.row  withObject:contact];
+                [self.chatListTable reloadRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationNone];
+                return;
+            }
+            else if(indexPath)
+            {
+                // Contact is already in out active chats list
+                NSMutableArray* removeContactFromArray = [self getChatArrayForSection:indexPath.section];
                 [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 [removeContactFromArray removeObjectAtIndex:indexPath.row];
                 [insertContactToArray insertObject:contact atIndex:0];
                 [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationNone];
-            } completion:^(BOOL finished) {
-                if(completion) completion(finished);
-            }];
-        });
-    }
-    else {
-        // Chats does not exists in active Chats yet
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.chatListTable beginUpdates];
-            [insertContactToArray insertObject:contact atIndex:0];
-            [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationRight];
-            [self.chatListTable endUpdates];
-            if(completion) completion(YES);
-        });
-    }
+            }
+            else {
+                // Chats does not exists in active Chats yet
+                [insertContactToArray insertObject:contact atIndex:0];
+                [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationRight];
+            }
+        } completion:^(BOOL finished) {
+            if(completion) completion(finished);
+        }];
+    });
 }
 
 -(void) viewWillAppear:(BOOL) animated
@@ -480,20 +479,19 @@ static NSMutableSet* _smacksWarningDisplayed;
 
         UINavigationController* nav = segue.destinationViewController;
         ContactsViewController* contacts = (ContactsViewController *)nav.topViewController;
-        contacts.selectContact = ^(MLContact* selectedContact) {
+        contacts.selectContact = ^(MLContact* selectedContact)
+        {
             [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId];
             //no success may mean its already there
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
-                    size_t sectionToUse = unpinnedChats; // Default is not pinned
-                    if(selectedContact.isPinned) {
-                        sectionToUse = pinnedChats; // Insert in pinned section
-                    }
-                    NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:sectionToUse];
-                    [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
-                    [self presentChatWithContact:selectedContact];
-                }];
-            });
+            [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
+                size_t sectionToUse = unpinnedChats; // Default is not pinned
+                if(selectedContact.isPinned) {
+                    sectionToUse = pinnedChats; // Insert in pinned section
+                }
+                NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:sectionToUse];
+                [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
+                [self presentChatWithContact:selectedContact];
+            }];
         };
     }
 }

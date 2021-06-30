@@ -3,17 +3,27 @@
 <plist version="1.0">
 <dict>
 	<key>method</key>
-	<string>developer-id</string>
+	<string>app-store</string>
+	<key>destination</key>
+	<string>export</string>
 	<key>compileBitcode</key>
 	<false/>
+	<key>signingStyle</key>
+	<string>manual</string>
+	<key>installerSigningCertificate</key>
+	<string>3rd Party Mac Developer Installer: Anurodh Pokharel (33XS7DE5NZ)</string>
+	<key>signingCertificate</key>
+	<string>Apple Distribution</string>
+	<key>teamID</key>
+	<string>33XS7DE5NZ</string>
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>maccatalyst.G7YU7X7KRJ.SworIM</key>
-		<string>Monal Catalyst Developer id</string>
+		<string>Monal Catalyst App Store</string>
 		<key>maccatalyst.G7YU7X7KRJ.SworIM.shareSheet</key>
-		<string>catalyst share sheet developer id</string>
+		<string>Monal Catalyst App Store Share sheet</string>
 		<key>maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService</key>
-		<string>Monal Catalyst Notification NSE</string>
+		<string>Monal Catalyst  Notification Filtering App Store</string>
 	</dict>
 </dict>
 </plist>

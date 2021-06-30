@@ -17,7 +17,7 @@ jobs:
       APP_NAME: "Monal"
       APP_DIR: "Monal.app"
       IOS_DEVELOPER_NAME: "Apple Distribution: Anurodh Pokharel (33XS7DE5NZ)"
-      APP_DEVELOPER_NAME: "Developer ID Application: Anurodh Pokharel (33XS7DE5NZ)"
+      APP_DEVELOPER_NAME: "Apple Distribution: Anurodh Pokharel (33XS7DE5NZ)"
       GCC_PREPROCESSOR_DEFINITIONS: ""
       BUILD_TYPE: "AppStore"
       EXPORT_OPTIONS_CATALYST: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
@@ -50,6 +50,8 @@ jobs:
         run: xcrun altool --notarize-app -f ./Monal/build/app/Monal.zip --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       - name: Publish ios to appstore connect
         run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --team-id 33XS7DE5NZ -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+      - name: Publish catalyst to appstore connect
+        run: xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)" --type macos --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
       - name: wait a bit for noarize
         run: sleep 60
       - name: staple
@@ -66,12 +68,15 @@ jobs:
           stapler validate "$APP_DIR"
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"
           cd ../../../..
-      #- name: Publish catalyst to appstore connect
-      #  run:  xcrun altool --upload-app -f ./Monal/build/app/Monal.zip --team-id 33XS7DE5NZ --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       - uses: actions/upload-artifact@v2
         with:
           name: monal-catalyst
-          path: Monal/build/app/tar_release/Monal.app
+          path: Monal/build/app/Monal.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monal-catalyst-pkg
+          path: Monal/build/app/Monal.pkg
           if-no-files-found: error
       - uses: actions/upload-artifact@v2
         with:

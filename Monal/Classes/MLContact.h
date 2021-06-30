@@ -34,25 +34,25 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  account number in the database should be an integer
  */
 
-@property (nonatomic, copy) NSString *accountId;
-@property (nonatomic, copy) NSString *contactJid;
+@property (nonatomic, copy) NSString* accountId;
+@property (nonatomic, copy) NSString* contactJid;
 
-@property (nonatomic, copy) NSString *fullName;
+@property (nonatomic, copy) NSString* fullName;
 /**
  usually user assigned nick name
  */
-@property (nonatomic, copy) NSString *nickName;
+@property (nonatomic, copy) NSString* nickName;
 
 /**
  xmpp state text
  */
-@property (nonatomic, copy) NSString *state;
+@property (nonatomic, copy) NSString* state;
 
 /**
  xmpp status message
  */
-@property (nonatomic, copy) NSString *statusMessage;
-@property (nonatomic, copy) NSDate *lastMessageTime;
+@property (nonatomic, copy) NSString* statusMessage;
+@property (nonatomic, copy) NSDate* lastMessageTime;
 
 /**
  used to display the badge on a row
@@ -66,12 +66,12 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, assign) BOOL isEncrypted;
 
 @property (nonatomic, assign) BOOL isGroup;
-@property (nonatomic, copy) NSString *groupSubject;
-@property (nonatomic, copy) NSString *mucType;
-@property (nonatomic, copy) NSString *accountNickInGroup;
+@property (nonatomic, copy) NSString* groupSubject;
+@property (nonatomic, copy) NSString* mucType;
+@property (nonatomic, copy) NSString* accountNickInGroup;
 
-@property (nonatomic, copy) NSString *subscription; //roster subbscription state
-@property (nonatomic, copy) NSString *ask; //whether we have tried to subscribe 
+@property (nonatomic, copy) NSString* subscription; //roster subbscription state
+@property (nonatomic, copy) NSString* ask; //whether we have tried to subscribe
 
 /**
  picks nick, full or note part of jid to display

@@ -10,8 +10,6 @@
 	<false/>
 	<key>signingStyle</key>
 	<string>manual</string>
-	<key>installerSigningCertificate</key>
-	<string>3rd Party Mac Developer Installer: Anurodh Pokharel (33XS7DE5NZ)</string>
 	<key>signingCertificate</key>
 	<string>Apple Distribution</string>
 	<key>teamID</key>

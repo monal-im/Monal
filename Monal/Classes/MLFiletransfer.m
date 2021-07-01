@@ -152,6 +152,14 @@ static NSMutableSet* _currentlyTransfering;
         
         NSURLSession* session = [NSURLSession sharedSession];
         NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+            if(error)
+            {
+                DDLogError(@"File download failed: %@", error);
+                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to download file", @"") forMessageId:msg.messageId];
+                [self markAsComplete:historyId];
+                return;
+            }
+            
             NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
             if(!mimeType)

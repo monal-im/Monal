@@ -2037,6 +2037,8 @@ NSString *const kData=@"data";
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
                 if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
                     DDLogDebug(@"SEND: redacted sasl element: %@", [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
+                else if([stanza check:@"{jabber:iq:register}query"])
+                    DDLogDebug(@"SEND: redacted register/change password iq");
                 else
                     DDLogDebug(@"SEND: %@", stanza);
                 [self->_outputQueue addObject:stanza];

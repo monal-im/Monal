@@ -2035,7 +2035,10 @@ NSString *const kData=@"data";
         )
         {
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-                DDLogDebug(@"SEND: %@", stanza);
+                if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
+                    DDLogDebug(@"SEND: redacted sasl element: %@", [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
+                else
+                    DDLogDebug(@"SEND: %@", stanza);
                 [self->_outputQueue addObject:stanza];
                 [self writeFromQueue];      // try to send if there is space
             }]];

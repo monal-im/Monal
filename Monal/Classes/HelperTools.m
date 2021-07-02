@@ -280,6 +280,7 @@ void logException(NSException* exception)
     [DDLog addLogger:[DDOSLogger sharedInstance]];
 #endif
     
+    /*
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
@@ -292,6 +293,7 @@ void logException(NSException* exception)
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger.maximumFileSize = 1024 * 1024 * 64;
     [DDLog addLogger:self.fileLogger];
+    */
     
     //network logger
     MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
@@ -306,10 +308,12 @@ void logException(NSException* exception)
     DDLogInfo(@"Starting: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
     [DDLog flushLog];
     
+    /*
     //for debugging when upgrading the app
     NSArray* directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
     for(NSString* file in directoryContents)
         DDLogVerbose(@"File %@/%@", [containerUrl path], file);
+    */
 }
 
 +(BOOL) isAppExtension

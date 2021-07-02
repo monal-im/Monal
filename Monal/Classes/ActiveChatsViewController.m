@@ -541,7 +541,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     // Display msg draft or last msg
     MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:chatContact.contactJid forAccount:chatContact.accountId];
 
-    [cell initCell:chatContact withLastMessage:messageRow];
+    [cell initCell:chatContact withLastMessage:[messageRow stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
 
     return cell;
 }

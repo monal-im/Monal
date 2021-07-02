@@ -259,7 +259,9 @@ enum DummySettingsRows {
                     [cell initCell:NSLocalizedString(@"Version", @"") withLabel:[HelperTools appBuildVersionInfo]];
                     break;
                 }
+#ifdef DEBUG
                 case LogRow:
+#endif
                 case SettingsAboutRowsCntORLogRow: {
                     [cell initTapCell:NSLocalizedString(@"Log", @"")];
                     break;
@@ -363,7 +365,9 @@ enum DummySettingsRows {
                 case AboutRow:
                     [self openLink:@"https://monal.im/about/"];
                     break;
+#ifdef DEBUG
                 case LogRow:
+#endif
                 case SettingsAboutRowsCntORLogRow:
                     [self performSegueWithIdentifier:@"showLogs" sender:self];
                     break;

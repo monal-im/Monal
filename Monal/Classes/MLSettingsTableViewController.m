@@ -108,6 +108,7 @@ enum DummySettingsRows {
     [self refreshAccountList];
 
     _tappedVersionInfo = 0;
+    [[HelperTools defaultsDB] setBool:NO forKey:@"showLogInSettings"];
     self.selected = nil;
 }
 

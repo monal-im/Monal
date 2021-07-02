@@ -46,17 +46,19 @@ xcodebuild -exportArchive -archivePath "build/macos_$APP_NAME.xcarchive" -export
 echo "build dir:"
 ls -l "build"
 
-echo ""
-echo "**************************"
-echo "*     Packing macOS      *"
-echo "**************************"
-cd build/app
-mkdir tar_release
-mv "$APP_NAME.app" "tar_release/$APP_DIR"
-cd tar_release
-/usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME".zip
-cd ../../..
-ls -l build/app
+if [ -z ${SKIP_CATALYST_ZIP_CREATION+x} ]; then
+    echo ""
+    echo "**************************"
+    echo "*     Packing macOS zip  *"
+    echo "**************************"
+    cd build/app
+    mkdir tar_release
+    mv "$APP_NAME.app" "tar_release/$APP_DIR"
+    cd tar_release
+    /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME".zip
+    cd ../../..
+    ls -l build/app
+fi
 
 echo ""
 echo "*************************"

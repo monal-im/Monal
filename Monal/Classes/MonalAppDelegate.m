@@ -762,6 +762,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                     if(!stopped)
                         DDLogDebug(@"no background tasks running, nothing to stop");
                     [DDLog flushLog];
+                    
+                    //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                 } onQueue:dispatch_get_main_queue()];
             }
         }
@@ -794,6 +797,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 [DDLog flushLog];
                 [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
                 _bgTask = UIBackgroundTaskInvalid;
+                
+                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
             }];
         }
     } onQueue:dispatch_get_main_queue()];
@@ -819,6 +825,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [task setTaskCompletedWithSuccess:NO];
         [self scheduleBackgroundFetchingTask];      //schedule new one
         [DDLog flushLog];
+        
+        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
     };
     
     if([[MLXMPPManager sharedInstance] hasConnectivity])

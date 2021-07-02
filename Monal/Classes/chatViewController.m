@@ -3080,6 +3080,7 @@ enum msgSentState {
 
 -(void) hideUploadQueue
 {
+    [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
     self.uploadMenuConstraint.constant = 1; // Can't set this to 0, because this will disable the view. If this were to happen, we would not use an accurate queue count if a user empties the queue and fills it afterwards. This is a hack to prevent this behaviour
     self.uploadMenuView.hidden = YES;
 }
@@ -3199,7 +3200,6 @@ enum msgSentState {
         if(self.uploadQueue.count == 0)
         {
             [self hideUploadQueue];
-            [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
         }
     }];
 }

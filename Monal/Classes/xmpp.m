@@ -2164,6 +2164,7 @@ NSString *const kData=@"data";
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.registeredOnPushAppserver] forKey:@"registeredOnPushAppserver"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
@@ -2322,6 +2323,12 @@ NSString *const kData=@"data";
             {
                 NSNumber* pushEnabled = [dic objectForKey:@"pushEnabled"];
                 self.connectionProperties.pushEnabled = pushEnabled.boolValue;
+            }
+            
+            if([dic objectForKey:@"registeredOnPushAppserver"])
+            {
+                NSNumber* registeredOnPushAppserver = [dic objectForKey:@"registeredOnPushAppserver"];
+                self.connectionProperties.registeredOnPushAppserver = registeredOnPushAppserver.boolValue;
             }
             
             if([dic objectForKey:@"supportsClientState"])
@@ -2557,6 +2564,7 @@ NSString *const kData=@"data";
     self.connectionProperties.usingCarbons2 = NO;
     self.connectionProperties.supportsPush = NO;
     self.connectionProperties.pushEnabled = NO;
+    self.connectionProperties.registeredOnPushAppserver = NO;
     self.connectionProperties.supportsClientState = NO;
     self.connectionProperties.supportsMam2 = NO;
     self.connectionProperties.supportsPubSub = NO;

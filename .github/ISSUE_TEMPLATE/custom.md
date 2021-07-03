@@ -12,8 +12,8 @@ assignees: ''
 
 ### System information (if you can provide):
 
-iOS version:
-macOS version:
+iOS Monal & system version:
+macOS Monal & system version:
 Used XMPP server (domain):
 Used XMPP server software & version:
 How many accounts are registered in your Monal app:
@@ -21,7 +21,7 @@ How many accounts are registered in your Monal app:
 ### Additional information like screenshots:
 
 
-If you can please activate the logs via `Settings/Log` - then reproduce your issue and then send the file to info (at) monal (dot) im.
+If you can reproduce your issue: send us your log file (`Settings/Log`) to info (at) monal (dot) im.
 PLEASE BE AWARE THAT THIS CAN PROVIDE SENSITIVE INFORMATION TO THE DEVELOPERS (which of course will not abuse this, but you are informed now!)
 
 ---

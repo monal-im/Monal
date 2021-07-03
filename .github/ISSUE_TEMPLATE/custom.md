@@ -17,6 +17,7 @@ macOS Monal & system version:
 Used XMPP server (domain):
 Used XMPP server software & version:
 How many accounts are registered in your Monal app:
+What XEPs are showed as green under Settings-->Account-->(i) in server column (under advanced settings):
 
 ### Additional information like screenshots:
 
@@ -26,3 +27,5 @@ PLEASE BE AWARE THAT THIS CAN PROVIDE SENSITIVE INFORMATION TO THE DEVELOPERS (w
 
 ---
 [ ] I have cross-check this overview https://github.com/anurodhp/Monal/issues/322 as well es filtered for related labels https://github.com/anurodhp/Monal/labels
+[ ] I have checked that at least XEP-198, XEP-0280, XEP-0352, XEP-0357 and XEP-0163 are activated on your server and showed as 'green' under Settings-->Account-->(i) in server column (under advanced settings)
+[ ] I have checked that all checkboxes are ticked under Settings --> Notifications

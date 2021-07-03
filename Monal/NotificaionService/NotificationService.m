@@ -72,6 +72,10 @@
                 //now call this new handler we did not add to our handlerList
                 [self generateNotificationForHandler:contentHandler];
             }];
+            
+            //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+            
             return;
         }
         else
@@ -146,6 +150,9 @@
                         //use feedAllWaitingHandlersWithCompletion:nil instead of feedAllWaitingHandlers, because feedAllWaitingHandlers
                         //would sync-dispatch to a new thread and use @synchronized there --> that would create a deadlock with this thread
                         [self feedAllWaitingHandlersWithCompletion:nil];
+                        
+                        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                     }
                 }
             });
@@ -220,6 +227,9 @@
     //is waiting for the @synchronized(self) block in this method
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [self feedAllWaitingHandlersWithCompletion:nil];
+        
+        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
     });
 }
 

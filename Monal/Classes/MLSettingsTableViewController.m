@@ -373,7 +373,7 @@ enum DummySettingsRows {
                     break;
                 case VersionRow: {
 #ifndef DEBUG
-                    if(_tappedVersionInfo > 7)
+                    if(_tappedVersionInfo >= 16)
                     {
                         [[HelperTools defaultsDB] setBool:YES forKey:@"showLogInSettings"];
                         [tableView reloadData];

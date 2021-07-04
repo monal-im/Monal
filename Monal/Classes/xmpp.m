@@ -816,7 +816,6 @@ NSString *const kData=@"data";
 {
     [self dispatchOnReceiveQueue: ^{
         DDLogInfo(@"removing streams from runLoop and aborting parser");
-        [self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we should have closed sockets then!)
 
         //prevent any new read or write
         if(self->_xmlParser != nil)
@@ -850,6 +849,9 @@ NSString *const kData=@"data";
         self->_accountState = kStateDisconnected;
         
         [self->_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we should have closed sockets then!)
+        //we don't throw away operations in the receive queue because they could be more than just stanzas
+        //(for example outgoing messages that should be written to the smacks queue instead of just vanishing in a void)
+        //all incoming stanzas in the receive queue will honor the _accountState being lower than kStateReconnecting and be dropped
     }];
 }
 
@@ -956,6 +958,11 @@ NSString *const kData=@"data";
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
                 DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount]);
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                    if(self.accountState<kStateReconnecting)
+                    {
+                        DDLogWarn(@"Throwing away queued incoming stanza, accountState < kStateReconnecting");
+                        return;
+                    }
                     [MLNotificationQueue queueNotificationsInBlock:^{
                         //add whole processing of incoming stanzas to one big transaction
                         //this will make it impossible to leave inconsistent database entries on app crashes or iphone crashes/reboots

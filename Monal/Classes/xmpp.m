@@ -3389,6 +3389,8 @@ NSString *const kData=@"data";
     }
     if(![_outputQueue count])
     {
+        DDLogVerbose(@"no entries in _outputQueue. trying to send half-sent data.");
+        [self writeToStream:nil];
         DDLogVerbose(@"no entries in _outputQueue. early return from writeFromQueue().");
         return;
     }
@@ -3436,10 +3438,6 @@ NSString *const kData=@"data";
 
 -(BOOL) writeToStream:(NSString*) messageOut
 {
-    if(!messageOut) {
-        DDLogInfo(@"tried to send empty message. returning without doing anything.");
-        return YES;     //pretend we sent the empty "data"
-    }
     if(!_streamHasSpace)
     {
         DDLogVerbose(@"no space to write. returning.");
@@ -3488,8 +3486,15 @@ NSString *const kData=@"data";
     }
 
     //then try to send the stanza in question and buffer half sent data
-    const uint8_t *rawstring = (const uint8_t *)[messageOut UTF8String];
-    NSInteger rawstringLen=strlen((char*)rawstring);
+    if(!messageOut)
+    {
+        DDLogInfo(@"tried to send empty message. returning without doing anything.");
+        return YES;     //pretend we sent the empty "data"
+    }
+    const uint8_t* rawstring = (const uint8_t *)[messageOut UTF8String];
+    NSInteger rawstringLen = strlen((char*)rawstring);
+    if(rawstringLen <= 0)
+        return YES;     //pretend we sent the empty "data"
     NSInteger sentLen = [_oStream write:rawstring maxLength:rawstringLen];
     if(sentLen!=-1)
     {

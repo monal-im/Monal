@@ -263,7 +263,7 @@ enum DummySettingsRows {
                 case LogRow:
 #endif
                 case SettingsAboutRowsCntORLogRow: {
-                    [cell initTapCell:NSLocalizedString(@"Log", @"")];
+                    [cell initTapCell:NSLocalizedString(@"Debug", @"")];
                     break;
                 }
                 default: {

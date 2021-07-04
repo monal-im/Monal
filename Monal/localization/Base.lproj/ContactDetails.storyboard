@@ -215,7 +215,7 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" id="qoa-Nu-bBB">
-                        <barButtonItem key="rightBarButtonItem" title="Close" id="urj-qd-yc7">
+                        <barButtonItem key="leftBarButtonItem" title="Close" id="urj-qd-yc7">
                             <connections>
                                 <action selector="close:" destination="S9G-MN-HIG" id="gt9-j6-W3Y"/>
                             </connections>

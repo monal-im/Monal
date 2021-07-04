@@ -93,8 +93,10 @@
 -(void) prepareForFreeze:(NSNotification*) notification
 {
     //invalidate socket when getting freezed
-    CFSocketInvalidate(_cfsocketout);
-    CFRelease(_cfsocketout);
+    if(_cfsocketout != NULL && !CFSocketIsValid(_cfsocketout))
+        CFSocketInvalidate(_cfsocketout);
+    if(_cfsocketout != NULL)
+        CFRelease(_cfsocketout);
     _cfsocketout = NULL;
 }
 

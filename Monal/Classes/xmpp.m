@@ -2479,6 +2479,12 @@ NSString *const kData=@"data";
 
 -(void) bindResource:(NSString*) resource
 {
+    //check if our resource is a modern one and change it to a modern one if not
+    //this should fix rare bugs when monal was first installed a long time ago when the resource didn't yet had a random part
+    NSArray* parts = [resource componentsSeparatedByString:@"."];
+    if([[HelperTools dataWithHexString:parts[1]] length] < 1)
+        return [self bindResource:[HelperTools encodeRandomResource]];
+    
     _accountState = kStateBinding;
     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:resource];

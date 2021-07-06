@@ -3,25 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>method</key>
-	<string>app-store</string>
+	<string>developer-id</string>
 	<key>destination</key>
 	<string>export</string>
 	<key>compileBitcode</key>
 	<false/>
-	<key>signingStyle</key>
-	<string>manual</string>
 	<key>signingCertificate</key>
-	<string>Apple Distribution</string>
-	<key>teamID</key>
-	<string>33XS7DE5NZ</string>
+	<string>Apple Developer</string>
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>maccatalyst.G7YU7X7KRJ.SworIM</key>
-		<string>Monal Catalyst App Store</string>
+		<string>Monal Catalyst Developer id</string>
 		<key>maccatalyst.G7YU7X7KRJ.SworIM.shareSheet</key>
-		<string>Monal Catalyst App Store Share sheet</string>
+		<string>catalyst share sheet developer id</string>
 		<key>maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService</key>
-		<string>Monal Catalyst  Notification Filtering App Store</string>
+		<string>Monal Catalyst Notification NSE</string>
 	</dict>
 </dict>
 </plist>

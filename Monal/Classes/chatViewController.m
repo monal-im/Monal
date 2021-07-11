@@ -2226,7 +2226,7 @@ enum msgSentState {
     
     //configure swipe actions
     
-    UIContextualAction* LMCEditAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* LMCEditAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Edit", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [self.chatInput setText:message.messageText];       //we want to begin editing using the old message
         self.placeHolderText.hidden = YES;
         weakify(self);
@@ -2262,7 +2262,7 @@ enum msgSentState {
         LMCEditAction.image = [[[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
 
-    UIContextualAction* quoteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* quoteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Quote", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         // Preserve user input
         NSMutableString* quoteString = [[NSMutableString alloc] init];
         if(self.chatInput.text.length > 0) {
@@ -2283,7 +2283,7 @@ enum msgSentState {
         quoteAction.image = [[[UIImage systemImageNamed:@"quote.bubble.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
-    UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [self.xmppAccount sendMessage:kMessageDeletedBody toContact:self.contact isEncrypted:(self.contact.isEncrypted || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
@@ -2303,7 +2303,7 @@ enum msgSentState {
         LMCDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
-    UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
         [self->_messageTable beginUpdates];
@@ -2322,7 +2322,7 @@ enum msgSentState {
         localDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
-    UIContextualAction* copyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* copyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Copy", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
         MLBaseCell* selectedCell = [self.messageTable cellForRowAtIndexPath:indexPath];
         if([selectedCell isKindOfClass:[MLChatImageCell class]])

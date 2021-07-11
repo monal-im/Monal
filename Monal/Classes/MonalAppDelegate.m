@@ -260,23 +260,23 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", granted ? @"YES" : @"NO", error);
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
-    
-    UIColor *monalGreen = [UIColor monalGreen];
-    UIColor *monaldarkGreen =[UIColor monaldarkGreen];
-    [[UINavigationBar appearance] setTintColor:monalGreen];
-    if (@available(iOS 13.0, *)) {
-        UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+
+    if (@available(iOS 13.0, *))
+    {
+        UINavigationBarAppearance* appearance = [[UINavigationBarAppearance alloc] init];
         [appearance configureWithTransparentBackground];
-        appearance.backgroundColor=[UIColor systemBackgroundColor];
+        appearance.backgroundColor = [UIColor systemBackgroundColor];
         
         [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
         [[UINavigationBar appearance] setStandardAppearance:appearance];
 #if TARGET_OS_MACCATALYST
         self.window.windowScene.titlebar.titleVisibility = UITitlebarTitleVisibilityHidden;
+#else
+        [[UITabBar appearance] setTintColor:[UIColor monaldarkGreen]];
+        [[UINavigationBar appearance] setTintColor:[UIColor monalGreen]];
 #endif
     }
     [[UINavigationBar appearance] setPrefersLargeTitles:YES];
-    [[UITabBar appearance] setTintColor:monaldarkGreen];
 
     //handle message notifications by initializing the MLNotificationManager
     [MLNotificationManager sharedInstance];
@@ -299,7 +299,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @""), version, buildDate, buildTime]);
     
     //init background/foreground status
     //this has to be done here to make sure we have the correct state when he app got started through notification quick actions

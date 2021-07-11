@@ -54,10 +54,12 @@
 
 -(void) killAppex
 {
-    DDLogInfo(@"Now killing appex process, goodbye...");
-    [DDLog flushLog];
-    usleep(10000);
-    exit(0);
+    @synchronized(self) {
+        DDLogInfo(@"Now killing appex process, goodbye...");
+        [DDLog flushLog];
+        usleep(10000);
+        exit(0);
+    }
 }
 
 -(void) incomingPush:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
@@ -236,11 +238,13 @@
     //without this dispatch a deadlock could also occur when this method tries to enter the receiveQueue (disconnectAll) while the receive queue
     //is waiting for the @synchronized(self) block in this method
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [self feedAllWaitingHandlersWithCompletion:nil];
-        
-        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-        [self killAppex];
+        @synchronized(self) {
+            [self feedAllWaitingHandlersWithCompletion:nil];
+            
+            //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+            [self killAppex];
+        }
     });
 }
 

@@ -1,0 +1,5 @@
+commit 621ab3c0ed75aca8ddc503890bd06e2d73560601
+Author: Thilo Molitor <thilo@eightysoft.de>
+Date:   Sun Jul 11 23:31:38 2021 +0200
+
+    Make sure to synchronize appex suicide

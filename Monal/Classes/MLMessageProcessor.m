@@ -221,6 +221,7 @@ static NSMutableDictionary* _typingNotifications;
         if(!isMLhistory)
         {
             NSString* subject = [messageNode findFirst:@"/<type=groupchat>/subject#"];
+            subject = [subject stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:account.accountNo andRoom:messageNode.fromUser];
             DDLogInfo(@"Got MUC subject for %@: %@", messageNode.fromUser, subject);
             
@@ -262,12 +263,12 @@ static NSMutableDictionary* _typingNotifications;
         NSString* messageType = kMessageTypeText;
         BOOL encrypted = NO;
         NSString* body = [messageNode findFirst:@"body#"];
-        
         if(decrypted)
         {
             body = decrypted;
             encrypted = YES;
         }
+        body = [body stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
         //messages with oob tag are filetransfers (but only if they are https urls)
         NSString* lowercaseBody = [body lowercaseString];

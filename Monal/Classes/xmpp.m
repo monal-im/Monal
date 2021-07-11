@@ -816,7 +816,6 @@ NSString *const kData=@"data";
 {
     [self dispatchOnReceiveQueue: ^{
         DDLogInfo(@"removing streams from runLoop and aborting parser");
-        [self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we should have closed sockets then!)
 
         //prevent any new read or write
         if(self->_xmlParser != nil)
@@ -850,6 +849,9 @@ NSString *const kData=@"data";
         self->_accountState = kStateDisconnected;
         
         [self->_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we should have closed sockets then!)
+        //we don't throw away operations in the receive queue because they could be more than just stanzas
+        //(for example outgoing messages that should be written to the smacks queue instead of just vanishing in a void)
+        //all incoming stanzas in the receive queue will honor the _accountState being lower than kStateReconnecting and be dropped
     }];
 }
 
@@ -956,6 +958,11 @@ NSString *const kData=@"data";
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
                 DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount]);
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                    if(self.accountState<kStateReconnecting)
+                    {
+                        DDLogWarn(@"Throwing away queued incoming stanza, accountState < kStateReconnecting");
+                        return;
+                    }
                     [MLNotificationQueue queueNotificationsInBlock:^{
                         //add whole processing of incoming stanzas to one big transaction
                         //this will make it impossible to leave inconsistent database entries on app crashes or iphone crashes/reboots
@@ -969,6 +976,7 @@ NSString *const kData=@"data";
                     } onQueue:@"receiveQueue"];
                     DDLogVerbose(@"Flushed all queued notifications...");
                 }]] waitUntilFinished:YES];
+                [parsedStanza clear];
             }]] waitUntilFinished:NO];
         }];
 
@@ -2035,7 +2043,12 @@ NSString *const kData=@"data";
         )
         {
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-                DDLogDebug(@"SEND: %@", stanza);
+                if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
+                    DDLogDebug(@"SEND: redacted sasl element: %@", [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
+                else if([stanza check:@"{jabber:iq:register}query"])
+                    DDLogDebug(@"SEND: redacted register/change password iq");
+                else
+                    DDLogDebug(@"SEND: %@", stanza);
                 [self->_outputQueue addObject:stanza];
                 [self writeFromQueue];      // try to send if there is space
             }]];
@@ -2159,6 +2172,7 @@ NSString *const kData=@"data";
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.registeredOnPushAppserver] forKey:@"registeredOnPushAppserver"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
@@ -2319,6 +2333,12 @@ NSString *const kData=@"data";
                 self.connectionProperties.pushEnabled = pushEnabled.boolValue;
             }
             
+            if([dic objectForKey:@"registeredOnPushAppserver"])
+            {
+                NSNumber* registeredOnPushAppserver = [dic objectForKey:@"registeredOnPushAppserver"];
+                self.connectionProperties.registeredOnPushAppserver = registeredOnPushAppserver.boolValue;
+            }
+            
             if([dic objectForKey:@"supportsClientState"])
             {
                 NSNumber* csiNumber = [dic objectForKey:@"supportsClientState"];
@@ -2460,6 +2480,12 @@ NSString *const kData=@"data";
 
 -(void) bindResource:(NSString*) resource
 {
+    //check if our resource is a modern one and change it to a modern one if not
+    //this should fix rare bugs when monal was first installed a long time ago when the resource didn't yet had a random part
+    NSArray* parts = [resource componentsSeparatedByString:@"."];
+    if([[HelperTools dataWithHexString:parts[1]] length] < 1)
+        return [self bindResource:[HelperTools encodeRandomResource]];
+    
     _accountState = kStateBinding;
     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:resource];
@@ -2552,6 +2578,7 @@ NSString *const kData=@"data";
     self.connectionProperties.usingCarbons2 = NO;
     self.connectionProperties.supportsPush = NO;
     self.connectionProperties.pushEnabled = NO;
+    self.connectionProperties.registeredOnPushAppserver = NO;
     self.connectionProperties.supportsClientState = NO;
     self.connectionProperties.supportsMam2 = NO;
     self.connectionProperties.supportsPubSub = NO;
@@ -3376,6 +3403,8 @@ NSString *const kData=@"data";
     }
     if(![_outputQueue count])
     {
+        DDLogVerbose(@"no entries in _outputQueue. trying to send half-sent data.");
+        [self writeToStream:nil];
         DDLogVerbose(@"no entries in _outputQueue. early return from writeFromQueue().");
         return;
     }
@@ -3423,10 +3452,6 @@ NSString *const kData=@"data";
 
 -(BOOL) writeToStream:(NSString*) messageOut
 {
-    if(!messageOut) {
-        DDLogInfo(@"tried to send empty message. returning without doing anything.");
-        return YES;     //pretend we sent the empty "data"
-    }
     if(!_streamHasSpace)
     {
         DDLogVerbose(@"no space to write. returning.");
@@ -3475,8 +3500,15 @@ NSString *const kData=@"data";
     }
 
     //then try to send the stanza in question and buffer half sent data
-    const uint8_t *rawstring = (const uint8_t *)[messageOut UTF8String];
-    NSInteger rawstringLen=strlen((char*)rawstring);
+    if(!messageOut)
+    {
+        DDLogInfo(@"tried to send empty message. returning without doing anything.");
+        return YES;     //pretend we sent the empty "data"
+    }
+    const uint8_t* rawstring = (const uint8_t *)[messageOut UTF8String];
+    NSInteger rawstringLen = strlen((char*)rawstring);
+    if(rawstringLen <= 0)
+        return YES;     //pretend we sent the empty "data"
     NSInteger sentLen = [_oStream write:rawstring maxLength:rawstringLen];
     if(sentLen!=-1)
     {

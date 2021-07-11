@@ -82,7 +82,9 @@ static NSRegularExpression* attributeFilterRegex;
 {
     _attributes = [[NSMutableDictionary alloc] init];
     _children = [[NSMutableArray alloc] init];
+    _parent = nil;
     _data = nil;
+    _element = @"";
     self.cache = [[NSMutableDictionary alloc] init];
 }
 
@@ -170,6 +172,14 @@ static NSRegularExpression* attributeFilterRegex;
 -(void) setXMLNS:(NSString*) xmlns
 {
     [_attributes setObject:[xmlns copy] forKey:kXMLNS];
+}
+
+-(void) clear
+{
+    //clear all children breaking the parent (and child) object references
+    for(MLXMLNode* node in _children)
+        [node clear];
+    [self internalInit];
 }
 
 -(void) addChild:(MLXMLNode*) child

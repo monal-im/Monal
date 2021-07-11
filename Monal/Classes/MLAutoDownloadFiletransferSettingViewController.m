@@ -31,7 +31,6 @@ enum MLAutoDownloadFiletransferSettingViewController {
     [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"AccountCell"];
     
     self.navigationItem.title = NSLocalizedString(@"Auto-Download Media", @"");
-    self.view.backgroundColor = [UIColor whiteColor];
 }
 
 -(nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section

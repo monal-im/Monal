@@ -58,8 +58,12 @@ NSString *const kAskSubscribe=@"subscribe";
     {
         //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
         NSDictionary* jidParts = [HelperTools splitJid:self.contactJid];
-        displayName = jidParts[@"node"];
-        DDLogVerbose(@"Using default: %@", jidParts[@"node"]);
+        if(jidParts[@"node"] != nil)
+            displayName = jidParts[@"node"];
+        else
+            displayName = jidParts[@"host"];
+
+        DDLogVerbose(@"Using default: %@", displayName);
     }
     DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, displayName);
     return displayName;

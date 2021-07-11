@@ -52,6 +52,14 @@
     [DDLog flushLog];
 }
 
+-(void) killAppex
+{
+    DDLogInfo(@"Now killing appex process, goodbye...");
+    [DDLog flushLog];
+    usleep(10000);
+    exit(0);
+}
+
 -(void) incomingPush:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
     DDLogInfo(@"Got incoming push...pinging main app");
@@ -75,6 +83,7 @@
             
             //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+            [self killAppex];
             
             return;
         }
@@ -153,6 +162,7 @@
                         
                         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                        [self killAppex];
                     }
                 }
             });
@@ -230,6 +240,7 @@
         
         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+        [self killAppex];
     });
 }
 

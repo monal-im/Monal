@@ -976,6 +976,7 @@ NSString *const kData=@"data";
                     } onQueue:@"receiveQueue"];
                     DDLogVerbose(@"Flushed all queued notifications...");
                 }]] waitUntilFinished:YES];
+                [parsedStanza clear];
             }]] waitUntilFinished:NO];
         }];
 

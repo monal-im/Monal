@@ -2938,8 +2938,8 @@ NSString *const kData=@"data";
             if(retrievedBodies == 0)
             {
                 //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any body-messages
-                //but only for non-item-not-found errors
-                if(error == nil || ([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}internal-server-error"] && [@"item-not-found" isEqualToString:[error findFirst:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]]))
+                //but only for non-item-not-found errors (and internal-server-error errors sent by one of ejabberd or prosody instead [don't know which one it was])
+                if(error == nil || ([error check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}internal-server-error"] && [@"item-not-found" isEqualToString:[error findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]]))
                     completion(nil, nil);
                 else
                     completion(nil, [HelperTools extractXMPPError:error withDescription:nil]);

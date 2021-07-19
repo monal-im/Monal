@@ -238,8 +238,13 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
     }
     else
     {
-        if(!rid)
+        if(!rid || !jid)
             return;
+        // check that a corresponding buddy exists -> prevent foreign key errors
+        if([[DataLayer sharedInstance] isContactInList:jid forAccount:account.accountNo] == NO) {
+            DDLogWarn(@"Skipping processOMEMOKeys: jid %@ not a known buddy. AccountNo: %@", jid, account.accountNo);
+            return;
+        }
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
         if(!receivedKeys && data.count == 1)
         {

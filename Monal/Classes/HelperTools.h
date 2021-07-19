@@ -32,6 +32,7 @@ void logException(NSException* exception);
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 +(void) configureFileProtectionFor:(NSString*) file;
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
++(void) clearSyncErrorsOnAppForeground;
 +(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly;
 
 +(BOOL) isInBackground;

@@ -133,6 +133,15 @@ void logException(NSException* exception)
     return retval;
 }
 
++(void) clearSyncErrorsOnAppForeground
+{
+    NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
+    DDLogInfo(@"Clearing syncError notifications: %@", syncErrorsDisplayed);
+    for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
+        syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
+    [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+}
+
 +(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly
 {
     @synchronized(self) {

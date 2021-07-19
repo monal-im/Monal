@@ -332,6 +332,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         [xmppAccount setClientActive];
     }
+    
+    //we are in foreground now (or at least we have been for a few seconds)
+    //--> clear sync error notifications so that they can appear again
+    //wait some time to make sure all xmpp class instances have been created
+    createTimer(1, (^{
+        [HelperTools clearSyncErrorsOnAppForeground];
+    }));
 }
 
 #pragma mark - Connection related

@@ -108,7 +108,7 @@
         {
             accessory.image = [UIImage imageNamed:NSLocalizedString(@"Disconnected", @"")];
             cell.accessoryView = accessory;
-            NSLocalizedString(@"Could not connect", @"")
+            NSLocalizedString(@"Could not connect", @"");
         }
     }
     else

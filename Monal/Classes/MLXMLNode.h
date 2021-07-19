@@ -59,8 +59,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 -(void) removeChild:(MLXMLNode*) child;
 
--(void) clear;
-
 /**
  The name of the element itself. 
  */

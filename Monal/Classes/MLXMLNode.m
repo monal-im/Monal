@@ -174,14 +174,6 @@ static NSRegularExpression* attributeFilterRegex;
     [_attributes setObject:[xmlns copy] forKey:kXMLNS];
 }
 
--(void) clear
-{
-    //clear all children breaking the parent (and child) object references
-    for(MLXMLNode* node in _children)
-        [node clear];
-    [self internalInit];
-}
-
 -(void) addChild:(MLXMLNode*) child
 {
     if(!child)

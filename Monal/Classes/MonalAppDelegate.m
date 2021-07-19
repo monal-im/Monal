@@ -249,7 +249,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         if(@available(iOS 13.0, *))
         {
             DDLogInfo(@"Registering for APNS...");
-            [[UIApplication sharedApplication] registerForRemoteNotifications];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[UIApplication sharedApplication] registerForRemoteNotifications];
+            });
         }
         else
         {

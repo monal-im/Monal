@@ -242,23 +242,25 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         ];
     }
     //request auth to show notifications and register our notification categories created above
-    [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError *error) {
+    [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError* error) {
         DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", granted ? @"YES" : @"NO", error);
-        
-        //activate push
-        if(@available(iOS 13.0, *))
+        if(granted == YES)
         {
-            DDLogInfo(@"Registering for APNS...");
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[UIApplication sharedApplication] registerForRemoteNotifications];
-            });
-        }
-        else
-        {
+            //activate push
+            if(@available(iOS 13.0, *))
+            {
+                DDLogInfo(@"Registering for APNS...");
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[UIApplication sharedApplication] registerForRemoteNotifications];
+                });
+            }
+            else
+            {
 #if !TARGET_OS_MACCATALYST
-            DDLogInfo(@"Registering for VoIP APNS...");
-            [self voipRegistration];
+                DDLogInfo(@"Registering for VoIP APNS...");
+                [self voipRegistration];
 #endif
+            }
         }
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];

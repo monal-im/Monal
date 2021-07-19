@@ -194,20 +194,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //this will use the cached values in defaultsDB, if possible
     [[MLXMPPManager sharedInstance] setPushToken:nil];
     
-    //activate push
-    if(@available(iOS 13.0, *))
-    {
-        DDLogInfo(@"Registering for APNS...");
-        [[UIApplication sharedApplication] registerForRemoteNotifications];
-    }
-    else
-    {
-#if !TARGET_OS_MACCATALYST
-        DDLogInfo(@"Registering for VoIP APNS...");
-        [self voipRegistration];
-#endif
-    }
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scheduleBackgroundFetchingTask) name:kScheduleBackgroundFetchingTask object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
@@ -258,6 +244,20 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //request auth to show notifications and register our notification categories created above
     [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError *error) {
         DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", granted ? @"YES" : @"NO", error);
+        
+        //activate push
+        if(@available(iOS 13.0, *))
+        {
+            DDLogInfo(@"Registering for APNS...");
+            [[UIApplication sharedApplication] registerForRemoteNotifications];
+        }
+        else
+        {
+#if !TARGET_OS_MACCATALYST
+            DDLogInfo(@"Registering for VoIP APNS...");
+            [self voipRegistration];
+#endif
+        }
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
 

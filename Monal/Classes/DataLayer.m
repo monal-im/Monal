@@ -2798,7 +2798,7 @@ static NSDateFormatter* dbFormatter;
     NSNumber* newdbversion = [self.db idReadTransaction:^{
         return [self.db executeScalar:@"SELECT dbversion FROM dbversion;"];
     }];
-    if([newdbversion isEqual:dbversion])
+    if(![newdbversion isEqual:dbversion])
         [self.db vacuum];
     
     //turn foreign keys on again

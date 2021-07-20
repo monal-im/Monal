@@ -157,8 +157,10 @@ static NSMutableDictionary* _typingNotifications;
             stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
     }
     
-    NSString* messageId = [messageNode findFirst:@"/@id"];
-    if(!messageId.length)
+    NSString* messageId = [messageNode findFirst:@"{urn:xmpp:sid:0}origin-id@id"];
+    if(messageId == nil || !messageId.length)
+        messageId = [messageNode findFirst:@"/@id"];
+    if(messageId == nil || !messageId.length)
     {
         DDLogWarn(@"Empty ID using random UUID");
         messageId = [[NSUUID UUID] UUIDString];
@@ -330,6 +332,7 @@ static NSMutableDictionary* _typingNotifications;
                                          encrypted:encrypted
                                displayMarkerWanted:[messageNode check:@"{urn:xmpp:chat-markers:0}markable"]
                                     usingHistoryId:historyIdToUse
+                                checkForDuplicates:[messageNode check:@"{urn:xmpp:sid:0}origin-id"]
                 ];
             }
             

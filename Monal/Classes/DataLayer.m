@@ -1200,13 +1200,13 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId
+-(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates
 {
     if(!buddyName || !message)
         return nil;
     
     return [self.db idWriteTransaction:^{
-        if(![self hasMessageForStanzaId:stanzaid orMessageID:messageid onChatBuddy:buddyName withInboundDir:inbound onAccount:accountNo])
+        if(!checkForDuplicates || ![self hasMessageForStanzaId:stanzaid orMessageID:messageid onChatBuddy:buddyName withInboundDir:inbound onAccount:accountNo])
         {
             //this is always from a contact
             NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
@@ -1290,7 +1290,7 @@ static NSDateFormatter* dbFormatter;
         NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND inbound=? AND messageid=?;" andArguments:@[accountNo, buddyName, [NSNumber numberWithBool:inbound], messageId]];
         if(historyId != nil)
         {
-            DDLogVerbose(@"found by messageid");
+            DDLogVerbose(@"found by origin-id or messageid");
             if(stanzaId)
             {
                 DDLogDebug(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, contact=%@, inbound=%d)...", historyId, stanzaId, accountNo, messageId, buddyName, inbound);

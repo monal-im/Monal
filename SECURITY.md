@@ -1,15 +1,5 @@
 # Security Policy
 
-## Supported Versions
-
-Versions of Monal IM which are currently being supported with security updates:
-
-| MonalIM Version | System Version |Supported          |
-| ------- | ------- |------------------ |
-| 5.0   | macOS > 10.5, iOS > 11 | :heavy_check_mark: |
-| 4.9.0   | macOS > 10.5, iOS > 11 |:heavy_check_mark:               |
-| < 4.9.0   | macOS > 10.5, iOS > 11 | :x:  Please upgrade! |
-
 ## Reporting a Vulnerability
 
 It is highly appreciated to report a vulnerability to the Monal developers. We ask you for

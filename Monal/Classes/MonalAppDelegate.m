@@ -262,6 +262,13 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 #endif
             }
         }
+        else
+        {
+            //delete apns push token --> push will not be registered anymore
+            //TODO: delete token on appserver
+            [[HelperTools defaultsDB] removeObjectForKey:@"pushToken"];
+            [[MLXMPPManager sharedInstance] setPushToken:nil];
+        }
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
 

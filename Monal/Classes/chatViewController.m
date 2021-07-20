@@ -984,12 +984,12 @@ enum msgSentState {
         }
     }
     [self sendChatState:NO];
+    [self emptyUploadQueue];
 }
 
 -(IBAction) sendMessageText:(id)sender
 {
     [self resignTextView];
-    [self emptyUploadQueue];
 }
 
 -(void) recordMessageAudio:(UILongPressGestureRecognizer*)gestureRecognizer{
@@ -2604,7 +2604,7 @@ enum msgSentState {
 // Send message with 'enter' if chatInput is first repsonder
 -(void) enterKeyPressed:(UIKeyCommand*)keyCommand
 {
-    if([self.chatInput isFirstResponder]) {
+    if([self.chatInput isFirstResponder] && self.chatInput.text.length > 0) {
         [self resignTextView];
     }
 }

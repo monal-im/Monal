@@ -3551,6 +3551,7 @@ NSString *const kData=@"data";
         pushToken != nil && [pushToken length] > 0
     )
     {
+        DDLogInfo(@"registering (and enabling) push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         XMPPIQ* registerNode = [[XMPPIQ alloc] initWithType:kiqSetType];
         [registerNode setRegisterOnAppserverWithToken:pushToken];
         [registerNode setiqTo:[HelperTools pushServer][@"jid"]];

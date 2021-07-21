@@ -403,13 +403,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) unregisterPush
 {
     NSString* node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
+    NSString* api_url = [NSString stringWithFormat:@"%@/v1/unregister", [HelperTools pushServer][@"url"]];
     
     NSString* post = [NSString stringWithFormat:@"type=apns&node=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
     NSData* postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     NSString* postLength = [NSString stringWithFormat:@"%luld",[postData length]];
     
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] init];
-    [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/v1/unregister", [HelperTools pushServer][@"url"]]]];
+    [request setURL:[NSURL URLWithString:api_url]];
     [request setHTTPMethod:@"POST"];
     [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
@@ -420,22 +421,22 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             NSHTTPURLResponse* httpresponse = (NSHTTPURLResponse*)response;
             if(!error && httpresponse.statusCode < 400)
             {
-                DDLogInfo(@"connection to push api successful");
+                DDLogInfo(@"connection to push api %@ successful(%ld)", api_url, httpresponse.statusCode);
                 NSString* responseBody = [[NSString alloc] initWithData:data  encoding:NSUTF8StringEncoding];
                 DDLogInfo(@"push api returned: %@", responseBody);
                 NSArray* responseParts=[responseBody componentsSeparatedByString:@"\n"];
                 if(responseParts.count>0)
                 {
                     if([responseParts[0] isEqualToString:@"OK"] )
-                        DDLogInfo(@"push api: unregistered");
+                        DDLogInfo(@"push api: unregistered ok");
                     else
                         DDLogError(@"push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
                 }
                 else
-                    DDLogError(@"push api could  not be broken into parts");
+                    DDLogError(@"push api response could not be broken into parts");
             }
             else
-                DDLogError(@"connection to push api NOT successful");
+                DDLogError(@"connection to push api %@ NOT successful(%ld): %@", api_url, httpresponse.statusCode, error);
         }] resume];
     });
 }

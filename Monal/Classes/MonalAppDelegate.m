@@ -243,42 +243,57 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }
     //request auth to show notifications and register our notification categories created above
     [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError* error) {
-        DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", granted ? @"YES" : @"NO", error);
-        if(granted == YES)
-        {
-            //activate push
-            if(@available(iOS 13.0, *))
+        dispatch_async(dispatch_get_main_queue(), ^{
+            DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", granted ? @"YES" : @"NO", error);
+            BOOL oldGranted = [[HelperTools defaultsDB] boolForKey:@"notificationsGranted"];
+            [[HelperTools defaultsDB] setBool:granted forKey:@"notificationsGranted"];
+            if(granted == YES)
             {
-                DDLogInfo(@"Registering for APNS...");
-                dispatch_async(dispatch_get_main_queue(), ^{
+                if(!oldGranted)
+                {
+                    //this is only needed for better UI (settings --> noifications should reflect the proper state)
+                    //both invalidations are needed because we don't know the timing of this notification granting handler
+                    DDLogInfo(@"Invalidating all account states...");
+                    [[DataLayer sharedInstance] invalidateAllAccountStates];        //invalidate states for account objects not yet created
+                    [[MLXMPPManager sharedInstance] reconnectAll];                  //invalidate for account objects already created
+                }
+                
+                //activate push
+                if(@available(iOS 13.0, *))
+                {
+                    DDLogInfo(@"Registering for APNS...");
                     [[UIApplication sharedApplication] registerForRemoteNotifications];
-                });
+                }
+                else
+                {
+#if !TARGET_OS_MACCATALYST
+                    DDLogInfo(@"Registering for VoIP APNS...");
+                    [self voipRegistration];
+#endif
+                }
             }
             else
             {
-#if !TARGET_OS_MACCATALYST
-                DDLogInfo(@"Registering for VoIP APNS...");
-                [self voipRegistration];
-#endif
+                //delete apns push token --> push will not be registered on our xmpp server anymore
+                DDLogWarn(@"Notifications disabled --> deleting APNS push token from user defaults!");
+                NSString* oldToken = [[HelperTools defaultsDB] objectForKey:@"pushToken"];
+                [[HelperTools defaultsDB] removeObjectForKey:@"pushToken"];
+                [[MLXMPPManager sharedInstance] setPushToken:nil];
+                
+                //unregister from push appserver
+                if((oldToken != nil && oldToken.length != 0) || oldGranted)
+                {
+                    DDLogWarn(@"Unregistering node from appserver!");
+                    [self unregisterPush];
+                    
+                    //this is only needed for better UI (settings --> noifications should reflect the proper state)
+                    //both invalidations are needed because we don't know the timing of this notification granting handler
+                    DDLogInfo(@"Invalidating all account states...");
+                    [[DataLayer sharedInstance] invalidateAllAccountStates];        //invalidate states for account objects not yet created
+                    [[MLXMPPManager sharedInstance] reconnectAll];                  //invalidate for account objects already created
+                }
             }
-        }
-        else
-        {
-            //delete apns push token --> push will not be registered on our xmpp server anymore
-            DDLogWarn(@"Notifications disabled --> deleting APNS push token from user defaults!");
-            NSString* oldToken = [[HelperTools defaultsDB] objectForKey:@"pushToken"];
-            [[HelperTools defaultsDB] removeObjectForKey:@"pushToken"];
-            [[MLXMPPManager sharedInstance] setPushToken:nil];
-            //unregister from push appserver
-            if(oldToken != nil && oldToken.length != 0)
-            {
-                DDLogWarn(@"Unregistering node from appserver!");
-                [self unregisterPush];
-            }
-            //this is only needed for better UI (settings --> noifications should reflect the proper state)
-            DDLogInfo(@"Invalidating all account states...");
-            [[DataLayer sharedInstance] invalidateAllAccountStates];
-        }
+        });
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
 

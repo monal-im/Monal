@@ -265,10 +265,16 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         else
         {
             //delete apns push token --> push will not be registered on our xmpp server anymore
+            DDLogWarn(@"Notifications disabled --> deleting APNS push token from user defaults!");
+            NSString* oldToken = [[HelperTools defaultsDB] objectForKey:@"pushToken"];
             [[HelperTools defaultsDB] removeObjectForKey:@"pushToken"];
             [[MLXMPPManager sharedInstance] setPushToken:nil];
-            //unregister from puh appserver
-            [self unregisterPush];
+            //unregister from push appserver
+            if(oldToken != nil && oldToken.length != 0)
+            {
+                DDLogWarn(@"Unregistering node from appserver!");
+                [self unregisterPush];
+            }
         }
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];

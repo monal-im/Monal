@@ -264,10 +264,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         }
         else
         {
-            //delete apns push token --> push will not be registered anymore
-            //TODO: delete token on appserver
+            //delete apns push token --> push will not be registered on our xmpp server anymore
             [[HelperTools defaultsDB] removeObjectForKey:@"pushToken"];
             [[MLXMPPManager sharedInstance] setPushToken:nil];
+            //unregister from puh appserver
+            [self unregisterPush];
         }
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
@@ -391,6 +392,46 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) setActiveChatsController: (UIViewController*) activeChats
 {
     self.activeChats = (ActiveChatsViewController*)activeChats;
+}
+
+-(void) unregisterPush
+{
+    NSString* node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
+    
+    NSString* post = [NSString stringWithFormat:@"type=apns&node=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
+    NSData* postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+    NSString* postLength = [NSString stringWithFormat:@"%luld",[postData length]];
+    
+    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] init];
+    [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/v1/unregister", [HelperTools pushServer][@"url"]]]];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [request setHTTPBody:postData];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            NSHTTPURLResponse* httpresponse = (NSHTTPURLResponse*)response;
+            if(!error && httpresponse.statusCode < 400)
+            {
+                DDLogInfo(@"connection to push api successful");
+                NSString* responseBody = [[NSString alloc] initWithData:data  encoding:NSUTF8StringEncoding];
+                DDLogInfo(@"push api returned: %@", responseBody);
+                NSArray* responseParts=[responseBody componentsSeparatedByString:@"\n"];
+                if(responseParts.count>0)
+                {
+                    if([responseParts[0] isEqualToString:@"OK"] )
+                        DDLogInfo(@"push api: unregistered");
+                    else
+                        DDLogError(@"push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
+                }
+                else
+                    DDLogError(@"push api could  not be broken into parts");
+            }
+            else
+                DDLogError(@"connection to push api NOT successful");
+        }] resume];
+    });
 }
 
 #pragma mark - handling urls

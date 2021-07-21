@@ -3556,6 +3556,17 @@ NSString *const kData=@"data";
         [registerNode setiqTo:[HelperTools pushServer][@"jid"]];
         [self sendIq:registerNode withHandler:$newHandler(MLIQProcessor, handleAppserverNodeRegistered)];
     }
+    else if(![MLXMPPManager sharedInstance].hasAPNSToken && self.accountState >= kStateBound)
+    {
+        //disable push for this node
+        DDLogInfo(@"DISABLING push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        if(self.connectionProperties.supportsPush)
+        {
+            XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
+            [disable setPushDisable];
+            [self send:disable];
+        }
+    }
     else
     {
         DDLogInfo(@"NOT registering and enabling push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");

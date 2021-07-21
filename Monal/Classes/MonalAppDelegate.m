@@ -275,6 +275,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 DDLogWarn(@"Unregistering node from appserver!");
                 [self unregisterPush];
             }
+            //this is only needed for better UI (settings --> noifications should reflect the proper state)
+            DDLogInfo(@"Invalidating all account states...");
+            [[DataLayer sharedInstance] invalidateAllAccountStates];
         }
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];

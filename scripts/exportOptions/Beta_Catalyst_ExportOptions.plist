@@ -9,7 +9,7 @@
 	<key>compileBitcode</key>
 	<false/>
 	<key>signingCertificate</key>
-	<string>Apple Developer</string>
+	<string>Developer ID Application</string>
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>maccatalyst.G7YU7X7KRJ.SworIM</key>

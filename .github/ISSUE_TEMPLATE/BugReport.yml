@@ -15,6 +15,8 @@ body:
         - AppStore
         - Beta
         - Alpha
+    validations:
+      required: true
   - type: input
     id: ios_version
     attributes:
@@ -87,9 +89,7 @@ body:
         - 3
         - 4
         - 5
-        - 6
-        - 7
-        - 8
+        - ">= 6"
     validations:
       required: true
   - type: textarea

@@ -20,7 +20,7 @@ body:
     attributes:
       label: iOS system version
       description: What iOS version are you using?
-      placeholder: 14.7
+      placeholder: "14.7"
     validations:
       required: false
   - type: input
@@ -28,7 +28,7 @@ body:
     attributes:
       label: iOS Monal version
       description: What Monal version are you using?
-      placeholder: 5.0.1
+      placeholder: "5.0.1"
     validations:
       required: false
   - type: input
@@ -36,7 +36,7 @@ body:
     attributes:
       label: macOS system version
       description: What macOS version are you using?
-      placeholder: 14.7
+      placeholder: "14.7"
     validations:
       required: false
   - type: input
@@ -44,7 +44,7 @@ body:
     attributes:
       label: macOS Monal version
       description: What Monal version are you using
-      placeholder: 5.0.1
+      placeholder: "5.0.1"
     validations:
       required: false
   - type: input
@@ -73,7 +73,7 @@ body:
     attributes:
       label: XMPP Server Software
       description: Which software version is the XMPP-Server running?
-      placeholder: 1.0.1
+      placeholder: "1.0.1"
     validations:
       required: false
   - type: dropdown
@@ -118,8 +118,7 @@ body:
   - type: checkboxes
     id: cross-check-checkbox
     attributes:
-      label: 
-      description: 
+      label: Related Issues
       options:
         - label: I have cross-checked this overview https://github.com/monal-im/Monal/issues/322 as well as filtered for related labels https://github.com/monal-im/Monal/labels
           required: true
@@ -127,7 +126,6 @@ body:
     id: xep-checkbox
     attributes:
       label: XEP-Check
-      description: 
       options:
         - label: I have checked that at least XEP-198, XEP-0280, XEP-0352, XEP-0357 and XEP-0163 are activated on my server and shown as 'green' under Settings-->Account-->(i) in server column (under advanced settings)
           required: true
@@ -135,7 +133,6 @@ body:
     id: notifications-checkbox
     attributes:
       label: Notifications-Menu
-      description: 
       options:
         - label: I have checked that all checkboxes are ticked under Settings --> Notifications
           required: true

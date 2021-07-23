@@ -262,7 +262,10 @@ $$
         contact[@"jid"] = [[NSString stringWithFormat:@"%@", contact[@"jid"]] lowercaseString];
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
-            [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:account.accountNo];
+            // we should never delete our own buddy -> prevent foreign key errors for omemo
+            if([[contact objectForKey:@"jid"] isEqualToString:account.connectionProperties.identity.jid] == NO) {
+                [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:account.accountNo];
+            }
         }
         else
         {

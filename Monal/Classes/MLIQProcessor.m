@@ -262,7 +262,10 @@ $$
         contact[@"jid"] = [[NSString stringWithFormat:@"%@", contact[@"jid"]] lowercaseString];
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
-            [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:account.accountNo];
+            // we should never delete our own buddy -> prevent foreign key errors for omemo
+            if([[contact objectForKey:@"jid"] isEqualToString:account.connectionProperties.identity.jid] == NO) {
+                [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:account.accountNo];
+            }
         }
         else
         {
@@ -337,14 +340,15 @@ $$handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     
     if([features containsObject:@"urn:xmpp:push:0"])
     {
+        DDLogInfo(@"supports push");
         account.connectionProperties.supportsPush = YES;
         [account enablePush];
     }
     
     if([features containsObject:@"urn:xmpp:mam:2"])
     {
-        account.connectionProperties.supportsMam2 = YES;
         DDLogInfo(@"supports mam:2");
+        account.connectionProperties.supportsMam2 = YES;
         
         //query mam since last received stanza ID because we could not resume the smacks session
         //(we would not have landed here if we were able to resume the smacks session)
@@ -508,6 +512,7 @@ $$handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         account.connectionProperties.pushEnabled = NO;
         return;
     }
+    DDLogInfo(@"Push is enabled now");
     account.connectionProperties.pushEnabled = YES;
 $$
 

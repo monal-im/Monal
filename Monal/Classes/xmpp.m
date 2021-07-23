@@ -709,7 +709,40 @@ NSString *const kData=@"data";
     [self dispatchOnReceiveQueue: ^{
         if(self->_accountState<kStateReconnecting)
         {
-            DDLogVerbose(@"not doing logout because already logged out");
+            DDLogVerbose(@"not doing logout because already logged out, but clearing state if explicitLogout was yes");
+            if(explicitLogout)
+            {
+                @synchronized(self->_stateLockObject) {
+                    DDLogVerbose(@"explicitLogout == YES --> clearing state");
+                    
+                    //preserve unAckedStanzas even on explicitLogout and resend them on next connect
+                    //if we don't do this, messages could get lost when logging out directly after sending them
+                    //and: sending messages twice is less intrusive than silently loosing them
+                    NSMutableArray* stanzas = self.unAckedStanzas;
+
+                    //reset smacks state to sane values (this can be done even if smacks is not supported)
+                    [self initSM3];
+                    self.unAckedStanzas = stanzas;
+                    
+                    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
+                    @synchronized(self->_iqHandlers) {
+                        for(NSString* iqid in [self->_iqHandlers allKeys])
+                        {
+                            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+                            if([self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+                                $invalidate(self->_iqHandlers[iqid], $ID(account, self));
+                            else if(self->_iqHandlers[iqid][@"errorHandler"])
+                                ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
+                        }
+                        self->_iqHandlers = [[NSMutableDictionary alloc] init];
+                    }
+
+                    //persist these changes
+                    [self persistState];
+                }
+                
+                [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
+            }
             return;
         }
         DDLogInfo(@"disconnecting");
@@ -3551,10 +3584,22 @@ NSString *const kData=@"data";
         pushToken != nil && [pushToken length] > 0
     )
     {
+        DDLogInfo(@"registering (and enabling) push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         XMPPIQ* registerNode = [[XMPPIQ alloc] initWithType:kiqSetType];
         [registerNode setRegisterOnAppserverWithToken:pushToken];
         [registerNode setiqTo:[HelperTools pushServer][@"jid"]];
         [self sendIq:registerNode withHandler:$newHandler(MLIQProcessor, handleAppserverNodeRegistered)];
+    }
+    else if(![MLXMPPManager sharedInstance].hasAPNSToken && self.accountState >= kStateBound)
+    {
+        //disable push for this node
+        DDLogInfo(@"DISABLING push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        if(self.connectionProperties.supportsPush)
+        {
+            XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
+            [disable setPushDisable];
+            [self send:disable];
+        }
     }
     else
     {

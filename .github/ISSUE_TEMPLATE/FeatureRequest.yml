@@ -1,0 +1,31 @@
+name: Feature Request
+description: File a feature request report
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+
+        This is the wrong template, if you want to fill a bug report!
+  - type: checkboxes
+    id: bug-checkbox
+    attributes:
+      options:
+        - label: I understood that this template is only for feature requests and not for bug reports
+          required: true
+  - type: checkboxes
+    id: cross-check-checkbox
+    attributes:
+      options:
+        - label: I have cross-checked this overview https://github.com/monal-im/Monal/issues/322 as well as filtered for related labels https://github.com/monal-im/Monal/labels
+          required: true
+  - type: textarea
+    id: feature
+    attributes:
+      label: Describe your feature
+      description: What feature are you missing?
+      placeholder: Tell us what feature is missing!
+      value: "A feature request was born"
+    validations:
+      required: true

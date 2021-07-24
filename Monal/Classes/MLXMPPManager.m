@@ -778,6 +778,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             // remove element
             [outboxClean removeObject:row];
             [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
+            [[HelperTools defaultsDB] synchronize];
             continue;
         }
         if([outAccountNo isEqualToString:account.accountNo])
@@ -802,6 +803,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             // remove msg even after error
             [outboxClean removeObject:row];
             [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
+            [[HelperTools defaultsDB] synchronize];
         }
     }
 }

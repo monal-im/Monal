@@ -2792,6 +2792,13 @@ static NSDateFormatter* dbFormatter;
                      FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
             );"];
         }];
+
+        [self updateDBTo:5.025 withBlock:^{
+            // delete all old shareSheet outbox messages
+            NSArray<NSDictionary*>* newOutbox = [[NSArray alloc] init];
+            [[HelperTools defaultsDB] setObject:newOutbox forKey:@"outbox"];
+            [[HelperTools defaultsDB] synchronize];
+        }];
     }];
     
     // Vacuum after db updates
@@ -2837,6 +2844,7 @@ static NSDateFormatter* dbFormatter;
         }
     }
     [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
+    [[HelperTools defaultsDB] synchronize];
 }
 
 #pragma mark mute and block

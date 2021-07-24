@@ -651,18 +651,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) applicationWillResignActive:(UIApplication *)application
 {
-    NSArray<MLContact*>* activeContacts = [[DataLayer sharedInstance] activeContactDict];
-    if(!activeContacts)
-        return;
-
-    NSError* err;
-    NSData* archive = [NSKeyedArchiver archivedDataWithRootObject:activeContacts requiringSecureCoding:YES error:&err];
-    NSAssert(err == nil, @"%@", err);
-    [[HelperTools defaultsDB] setObject:archive forKey:@"recipients"];
-    [[HelperTools defaultsDB] synchronize];
-    
-    [[HelperTools defaultsDB] setObject:[[DataLayer sharedInstance] enabledAccountList] forKey:@"accounts"];
-    [[HelperTools defaultsDB] synchronize];
 }
 
 -(void) applicationDidEnterBackground:(UIApplication*) application

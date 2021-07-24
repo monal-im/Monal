@@ -13,16 +13,16 @@
 #import "MLContact.h"
 #import "MLConstants.h"
 #import "HelperTools.h"
+#import "DataLayer.h"
 
 #import <MapKit/MapKit.h>
 
 @interface ShareViewController ()
 
-@property (nonatomic, strong) NSDictionary* account;
-@property (nonatomic, strong) NSString* recipient;
-
-@property (nonatomic, strong) NSArray* accounts;
+@property (nonatomic, strong) NSArray<NSDictionary*>* accounts;
 @property (nonatomic, strong) NSArray<MLContact*>* recipients;
+@property (nonatomic, strong) MLContact* recipient;
+@property (nonatomic, strong) NSDictionary* account;
 
 @end
 
@@ -41,38 +41,61 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     NSSetUncaughtExceptionHandler(&logException);
 }
 
--(void)viewDidLoad {
+-(void) viewDidLoad
+{
     [super viewDidLoad];
     [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
     [self.navigationController.navigationBar setBackgroundColor:[UIColor monaldarkGreen]];
     self.navigationController.navigationItem.title = NSLocalizedString(@"Monal", @"");
 }
 
-- (void)presentationAnimationDidFinish {
+- (void) presentationAnimationDidFinish
+{
     DDLogInfo(@"Monal ShareViewController presentationAnimationDidFinish");
     
-    self.accounts = [[HelperTools defaultsDB] objectForKey:@"accounts"];
-    NSData* recipientsData = [[HelperTools defaultsDB] objectForKey:@"recipients"];
+    // list pinned chats above normal chats
+    NSMutableArray<MLContact*>* recipients = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
+    [recipients addObjectsFromArray:[[DataLayer sharedInstance] activeContactsWithPinned:NO]];
     
-    NSError* error;
-    NSSet* objClasses = [NSSet setWithArray:@[[NSMutableArray class], [NSArray class], [NSMutableDictionary class], [NSDictionary class], [NSNumber class], [NSString class], [NSDate class], [NSObject class], [MLContact class]]];
-    self.recipients = (NSArray<MLContact*>*)[NSKeyedUnarchiver unarchivedObjectOfClasses:objClasses fromData:recipientsData error:&error];
-    if(error) {
-        DDLogError(@"Monal ShareViewController: %@", error);
-    }
+    self.recipients = recipients;
+    self.accounts = [[DataLayer sharedInstance] enabledAccountList];
 
-    self.recipient = [[HelperTools defaultsDB] objectForKey:@"lastRecipient"];
-    self.account = [[HelperTools defaultsDB] objectForKey:@"lastAccount"];
+    BOOL recipientFound = NO;
+    for(MLContact* recipient in self.recipients) {
+        for(NSDictionary* accountToCheck in self.accounts) {
+            if([[NSString stringWithFormat:@"%@", [accountToCheck objectForKey:@"account_id"]] isEqualToString:recipient.accountId] == YES) {
+                self.recipient = recipient;
+                self.account = accountToCheck;
+                recipientFound = YES;
+                break;
+            }
+        }
+        if(recipientFound == YES) {
+            break;
+        }
+    }
     [self reloadConfigurationItems];
 }
 
-- (BOOL)isContentValid {
-    if(self.recipient.length > 0 && self.account != nil)
-    return YES;
-    else return NO;
+-(MLContact* _Nullable) getLastContactForAccount:(NSString*) accountNo {
+    for(MLContact* recipient in self.recipients) {
+        if([recipient.accountId isEqualToString:accountNo] == YES) {
+            return recipient;
+        }
+    }
+    return nil;
 }
 
-- (void)didSelectPost {
+- (BOOL) isContentValid
+{
+    if(self.recipient != nil && self.account != nil)
+        return YES;
+    else
+        return NO;
+}
+
+- (void) didSelectPost
+{
     NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
     DDLogVerbose(@"Attachments = %@", item.attachments);
 
@@ -99,8 +122,8 @@ const u_int32_t MagicMapKitItem = 1 << 2;
         }
     }
     NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-    [payload setObject:self.account forKey:@"account"];
-    [payload setObject:self.recipient forKey:@"recipient"];
+    [payload setObject:self.recipient.accountId forKey:@"accountNo"];
+    [payload setObject:self.recipient.contactJid forKey:@"recipient"];
 
     // use best matching providers
     if((magicIdentifyer & MagicMapKitItem) > 0) {
@@ -143,41 +166,41 @@ const u_int32_t MagicMapKitItem = 1 << 2;
 -(void) savePayloadMsgAndComplete:(NSDictionary*) payload
 {
     // append to old outbox
-    NSMutableArray* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
+    NSMutableArray<NSDictionary*>* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
     if(!outbox) outbox = [[NSMutableArray alloc] init];
 
     [outbox addObject:payload];
     [[HelperTools defaultsDB] setObject:outbox forKey:@"outbox"];
 
-    // Save last used account / recipient
-    [[HelperTools defaultsDB] setObject:self.account forKey:@"lastAccount"];
-    [[HelperTools defaultsDB] setObject:self.recipient forKey:@"lastRecipient"];
-
     [[HelperTools defaultsDB] synchronize];
 
-    [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+    [self.extensionContext completeRequestReturningItems:@[] completionHandler:^(BOOL expired) {
+        [self openMainApp];
+    }];
 }
 
-- (NSArray *)configurationItems {
-    NSMutableArray *toreturn = [[NSMutableArray alloc] init];
-    if(self.accounts.count > 1) {
+- (NSArray*)configurationItems
+{
+    NSMutableArray* toreturn = [[NSMutableArray alloc] init];
+    if(self.accounts.count > 1)
+    {
         SLComposeSheetConfigurationItem* accountSelector = [[SLComposeSheetConfigurationItem alloc] init];
         accountSelector.title = NSLocalizedString(@"Account", @"ShareViewController: Account");
 
-        accountSelector.value = [NSString stringWithFormat:@"%@@%@",[self.account objectForKey:@"username"],[self.account objectForKey:@"domain"]];
+        accountSelector.value = [NSString stringWithFormat:@"%@@%@", [self.account objectForKey:@"username"], [self.account objectForKey:@"domain"]];
         accountSelector.tapHandler = ^{
             UIStoryboard* iosShareStoryboard = [UIStoryboard storyboardWithName:@"iosShare" bundle:nil];
             MLSelectionController* controller = (MLSelectionController*)[iosShareStoryboard instantiateViewControllerWithIdentifier:@"accounts"];
-            controller.options= self.accounts;
-            controller.completion = ^(NSDictionary *selectedAccount)
+            controller.options = self.accounts;
+            controller.completion = ^(NSDictionary* selectedAccount)
             {
-                if(selectedAccount) {
+                if(selectedAccount != nil) {
                     self.account = selectedAccount;
                 }
                 else {
-                    self.account = nil;
+                    self.account = self.accounts[0]; // at least one account is present (count > 0)
                 }
-                self.recipient = @"";
+                self.recipient = [self getLastContactForAccount:[self.account objectForKey:@"account_id"]];
                 [self reloadConfigurationItems];
             };
             
@@ -186,33 +209,35 @@ const u_int32_t MagicMapKitItem = 1 << 2;
         [toreturn addObject:accountSelector];
     }
     
-    if(!self.account && self.accounts.count>0) {
+    if(!self.account && self.accounts.count > 0)
+    {
         self.account = [self.accounts objectAtIndex:0];
-        
     }
-    
-    SLComposeSheetConfigurationItem *recipient = [[SLComposeSheetConfigurationItem alloc] init];
+    SLComposeSheetConfigurationItem* recipient = [[SLComposeSheetConfigurationItem alloc] init];
     recipient.title = NSLocalizedString(@"Recipient", @"shareViewController: recipient");
-    recipient.value = self.recipient;
+    recipient.value = self.recipient.contactJid;
     recipient.tapHandler = ^{
         UIStoryboard* iosShareStoryboard = [UIStoryboard storyboardWithName:@"iosShare" bundle:nil];
         MLSelectionController* controller = (MLSelectionController *)[iosShareStoryboard instantiateViewControllerWithIdentifier:@"contacts"];
 
         // Create list of recipients for the selected account
         NSMutableArray<NSDictionary*>* recipientsToShow = [[NSMutableArray alloc] init];
-        for (MLContact* contact in self.recipients) {
-            [recipientsToShow addObject:@{@"contact": contact}];
+        for (MLContact* contact in self.recipients)
+        {
+            // only show contacts from the selected account
+            if([contact.accountId isEqualToString:[NSString stringWithFormat:@"%@", [self.account objectForKey:@"account_id"]]])
+                [recipientsToShow addObject:@{@"contact": contact}];
         }
 
         controller.options = recipientsToShow;
-        controller.completion = ^(NSDictionary *selectedRecipient)
+        controller.completion = ^(NSDictionary* selectedRecipient)
         {
             MLContact* contact = [selectedRecipient objectForKey:@"contact"];
             if(contact) {
-                self.recipient = contact.contactJid;
+                self.recipient = contact;
             }
             else {
-                self.recipient = @"";
+                self.recipient = nil;
             }
             [self reloadConfigurationItems];
         };
@@ -222,6 +247,36 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     [toreturn addObject:recipient];
     [self validateContent];
     return toreturn;
+}
+
+-(void) openURL:(NSURL*) url
+{
+    UInt16 iterations = 0;
+    SEL openURLSelector = NSSelectorFromString(@"openURL:");
+    UIResponder* responder = self;
+    responder = [responder nextResponder];
+    while(responder != nil)
+    {
+        UIApplication* app = (UIApplication*)responder;
+        if([responder respondsToSelector:openURLSelector] == YES) {
+            if(app != nil) {
+                [app performSelector:@selector(openURL:) withObject:url];
+                break;
+            }
+        }
+        responder = responder.nextResponder;
+        iterations++;
+        if(iterations > 20) {
+            // break to prevent infinite loop
+            break;
+        }
+    }
+}
+
+-(void) openMainApp
+{
+    NSURL* mainAppUrl = [NSURL URLWithString:@"monalOpen://"];
+    [self openURL:mainAppUrl];
 }
 
 @end

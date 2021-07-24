@@ -109,7 +109,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #else
     [self upgradeIntegerUserSettingsIfUnset:@"AutodownloadFiletransfersMaxSize" toDefault:5*1024*1024];     // 5 MiB
 #endif
-    
+
     //upgrade syncErrorsDisplayed list
     [self upgradeObjectUserSettingsIfUnset:@"syncErrorsDisplayed" toDefault:@{}];
 
@@ -118,6 +118,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     // upgrade default image quality
     [self upgradeFloatUserSettingsIfUnset:@"ImageUploadQuality" toDefault:0.75];
+
+    // remove old settings from shareSheet outbox
+    [self removeObjectUserSettingsIfSet:@"lastRecipient"];
+    [self removeObjectUserSettingsIfSet:@"lastAccount"];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -156,6 +160,17 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(currentSettingVal == nil)
     {
         [[HelperTools defaultsDB] setObject:defaultVal forKey:settingsName];
+        [[HelperTools defaultsDB] synchronize];
+    }
+}
+
+-(void) removeObjectUserSettingsIfSet:(NSString*) settingsName
+{
+    NSObject* currentSettingsVal = [[HelperTools defaultsDB] objectForKey:settingsName];
+    if(currentSettingsVal != nil)
+    {
+        DDLogInfo(@"Removing defaultsDB Entry %@", settingsName);
+        [[HelperTools defaultsDB] removeObjectForKey:settingsName];
         [[HelperTools defaultsDB] synchronize];
     }
 }
@@ -751,29 +766,39 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) sendOutboxForAccount:(xmpp*) account
 {
-    NSMutableArray* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
-    NSMutableArray* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
+    NSArray<NSDictionary*>* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
+    NSMutableArray<NSDictionary*>* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
 
     DDLogInfo(@"Got message outbox: %@", outbox);
     for(NSDictionary* row in outbox)
     {
-        NSDictionary* accountDic = [row objectForKey:@"account"] ;
-        if([[accountDic objectForKey:kAccountID] integerValue] == [account.accountNo integerValue])
+        NSString* outAccountNo = [row objectForKey:@"accountNo"];
+        NSString* recipient = [row objectForKey:@"recipient"];
+        if(outAccountNo == nil || recipient == nil) {
+            // remove element
+            [outboxClean removeObject:row];
+            [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
+            continue;
+        }
+        if([outAccountNo isEqualToString:account.accountNo])
         {
-            NSString* accountID = [NSString stringWithFormat:@"%@", [accountDic objectForKey:kAccountID]];
-            NSString* recipient = [row objectForKey:@"recipient"];
-            NSAssert(recipient != nil, @"Recipient missing");
-            NSAssert(recipient != nil, @"Recipient missing");
-            BOOL encryptMessages = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:accountID];
-            MLContact* contact = [MLContact createContactFromJid:recipient andAccountNo:accountID];
-            
+            MLAssert(recipient != nil, @"Recipient missing", row);
+
+            BOOL encryptMessages = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:account.accountNo];
+            MLContact* recipientContact = [MLContact createContactFromJid:recipient andAccountNo:account.accountNo];
+
+            // make sure that a buddy entry exists
+            if([[DataLayer sharedInstance] isContactInList:recipientContact.contactJid forAccount:account.accountNo] == NO) {
+                DDLogWarn(@"jid is missing in buddylist: jid: %@ accountNo: %@", recipientContact.contactJid, account.accountNo);
+                [[DataLayer sharedInstance] addContact:recipientContact.contactJid forAccount:account.accountNo nickname:nil andMucNick:nil];
+            }
+            // message handling
             if([row objectForKey:@"comment"]) {
-                [self sendMessageAndAddToHistory:[row objectForKey:@"comment"] toContact:contact isEncrypted:encryptMessages isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) { }];
+                [self sendMessageAndAddToHistory:[row objectForKey:@"comment"] toContact:recipientContact isEncrypted:encryptMessages isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) { }];
             }
             if([row objectForKey:@"url"]) {
-                [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:contact isEncrypted:encryptMessages isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) { }];
+                [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipientContact isEncrypted:encryptMessages isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) { }];
             }
-            
             // remove msg even after error
             [outboxClean removeObject:row];
             [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];

@@ -2799,7 +2799,10 @@ static NSDateFormatter* dbFormatter;
         return [self.db executeScalar:@"SELECT dbversion FROM dbversion;"];
     }];
     if(![newdbversion isEqual:dbversion])
+    {
         [self.db vacuum];
+        [self cleanUpShareSheetOutbox];
+    }
     
     //turn foreign keys on again
     //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
@@ -2808,6 +2811,32 @@ static NSDateFormatter* dbFormatter;
     
     DDLogInfo(@"Database version check complete, old version %@ was updated to version %@", dbversion, newdbversion);
     return;
+}
+
+-(void) cleanUpShareSheetOutbox
+{
+    NSArray<NSDictionary*>* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
+    NSMutableArray<NSDictionary*>* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
+    NSMutableSet<NSString*>* accountList = [[NSMutableSet alloc] init];
+    for(NSDictionary* account in [self accountList]) {
+        [accountList addObject:[account objectForKey:@"account_id"]];
+    }
+
+    for(NSDictionary* row in outbox)
+    {
+        NSString* outAccountNo = [row objectForKey:@"accountNo"];
+        NSString* recipient = [row objectForKey:@"recipient"];
+        if(outAccountNo == nil || recipient == nil) {
+            // remove element
+            [outboxClean removeObject:row];
+            continue;
+        }
+        if([accountList containsObject:outAccountNo] == NO) {
+            [outboxClean removeObject:row];
+            continue;
+        }
+    }
+    [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
 }
 
 #pragma mark mute and block

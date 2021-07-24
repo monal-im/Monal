@@ -10,8 +10,6 @@
 	<dict>
 		<key>monal.alpha</key>
 		<string>Catalyst Monal Alpha</string>
-		<key>monal.alpha.shareSheet</key>
-		<string>Catalyst Monal Alpha shareSheet</string>
 		<key>monal.alpha.NotificaionService</key>
 		<string>Catalyst Monal Alpha NotificationService</string>
 	</dict>

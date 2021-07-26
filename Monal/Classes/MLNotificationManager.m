@@ -146,6 +146,7 @@
     DDLogVerbose(@"notification manager got displayed message notice: %@", message.messageId);
     NSString* idval = [self identifierWithMessage:message];
     
+    DDLogVerbose(@"Removing pending/deliverd notification with identifier '%@'...", idval);
     [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
     [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
     

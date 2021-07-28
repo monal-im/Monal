@@ -9,7 +9,6 @@
 #import <BackgroundTasks/BackgroundTasks.h>
 
 #import "MonalAppDelegate.h"
-#import "CallViewController.h"
 #import "MLConstants.h"
 #import "HelperTools.h"
 #import "MLNotificationManager.h"
@@ -71,19 +70,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 }
 
 #pragma mark - notification actions
-
--(void) showCallScreen:(NSNotification*) userInfo
-{
-//    dispatch_async(dispatch_get_main_queue(),
-//                   ^{
-//                       NSDictionary* contact=userInfo.object;
-//                       CallViewController *callScreen= [[CallViewController alloc] initWithContact:contact];
-//
-//
-//
-//                       [self.tabBarController presentModalViewController:callNav animated:YES];
-//                   });
-}
 
 -(void) updateUnread
 {

@@ -13,7 +13,6 @@
 #import "ContactDetails.h"
 #import "addContact.h"
 #import "MLNewViewController.h"
-#import "CallViewController.h"
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
 #import "xmpp.h"
@@ -108,33 +107,6 @@
     return @[
         [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:)]
     ];
-}
-
-#pragma mark - jingle
-
--(void) showCallRequest:(NSNotification*) notification
-{
-    NSDictionary* dic = notification.object;
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString* contactName = [dic objectForKey:@"user"];
-        NSString* userName = [dic objectForKey:kUsername];
-
-        UIAlertController* messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Incoming Call", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Incoming audio call to %@ from %@ ", @""),userName,  contactName] preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Accept", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            
-            [self performSegueWithIdentifier:@"showCall" sender:dic];
-            
-            [[MLXMPPManager sharedInstance] handleCall:dic withResponse:YES];
-        }];
-        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Decline" , @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-            [[MLXMPPManager sharedInstance] handleCall:dic withResponse:NO];
-        }];
-        [messageAlert addAction:closeAction];
-        [messageAlert addAction:acceptAction];
-
-        [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
-    });
 }
 
 #pragma mark - message signals

@@ -41,91 +41,6 @@
 		263DFAC02183D7160038E716 /* MLSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFABE2183A59B0038E716 /* MLSelectionController.m */; };
 		263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFAC22187D0E00038E716 /* MLLinkCell.m */; };
 		263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 263F568C121B5E970027D85D /* MediaPlayer.framework */; };
-		26400712140B43BB00CF1107 /* rtcpapppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BB140B43BB00CF1107 /* rtcpapppacket.cpp */; };
-		26400713140B43BB00CF1107 /* rtcpapppacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006BC140B43BB00CF1107 /* rtcpapppacket.hh */; };
-		26400714140B43BB00CF1107 /* rtcpbyepacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BD140B43BB00CF1107 /* rtcpbyepacket.cpp */; };
-		26400715140B43BB00CF1107 /* rtcpbyepacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006BE140B43BB00CF1107 /* rtcpbyepacket.hh */; };
-		26400716140B43BB00CF1107 /* rtcpcompoundpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BF140B43BB00CF1107 /* rtcpcompoundpacket.cpp */; };
-		26400717140B43BB00CF1107 /* rtcpcompoundpacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006C0140B43BB00CF1107 /* rtcpcompoundpacket.hh */; };
-		26400718140B43BB00CF1107 /* rtcpcompoundpacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006C1140B43BB00CF1107 /* rtcpcompoundpacketbuilder.cpp */; };
-		26400719140B43BB00CF1107 /* rtcpcompoundpacketbuilder.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006C2140B43BB00CF1107 /* rtcpcompoundpacketbuilder.hh */; };
-		2640071A140B43BB00CF1107 /* rtcppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006C3140B43BB00CF1107 /* rtcppacket.cpp */; };
-		2640071B140B43BB00CF1107 /* rtcppacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006C4140B43BB00CF1107 /* rtcppacket.hh */; };
-		2640071C140B43BB00CF1107 /* rtcppacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006C5140B43BB00CF1107 /* rtcppacketbuilder.cpp */; };
-		2640071D140B43BB00CF1107 /* rtcppacketbuilder.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006C6140B43BB00CF1107 /* rtcppacketbuilder.hh */; };
-		2640071E140B43BB00CF1107 /* rtcprrpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006C7140B43BB00CF1107 /* rtcprrpacket.cpp */; };
-		2640071F140B43BB00CF1107 /* rtcprrpacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006C8140B43BB00CF1107 /* rtcprrpacket.hh */; };
-		26400720140B43BB00CF1107 /* rtcpscheduler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006C9140B43BB00CF1107 /* rtcpscheduler.cpp */; };
-		26400721140B43BB00CF1107 /* rtcpscheduler.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006CA140B43BB00CF1107 /* rtcpscheduler.hh */; };
-		26400722140B43BB00CF1107 /* rtcpsdesinfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006CB140B43BB00CF1107 /* rtcpsdesinfo.cpp */; };
-		26400723140B43BB00CF1107 /* rtcpsdesinfo.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006CC140B43BB00CF1107 /* rtcpsdesinfo.hh */; };
-		26400724140B43BB00CF1107 /* rtcpsdespacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006CD140B43BB00CF1107 /* rtcpsdespacket.cpp */; };
-		26400725140B43BB00CF1107 /* rtcpsdespacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006CE140B43BB00CF1107 /* rtcpsdespacket.hh */; };
-		26400726140B43BB00CF1107 /* rtcpsrpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006CF140B43BB00CF1107 /* rtcpsrpacket.cpp */; };
-		26400727140B43BB00CF1107 /* rtcpsrpacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D0140B43BB00CF1107 /* rtcpsrpacket.hh */; };
-		26400728140B43BB00CF1107 /* rtcpunknownpacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D1140B43BB00CF1107 /* rtcpunknownpacket.hh */; };
-		2640072B140B43BB00CF1107 /* rtpaddress.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D4140B43BB00CF1107 /* rtpaddress.hh */; };
-		2640072C140B43BB00CF1107 /* rtpbyteaddress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006D5140B43BB00CF1107 /* rtpbyteaddress.cpp */; };
-		2640072D140B43BB00CF1107 /* rtpbyteaddress.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D6140B43BB00CF1107 /* rtpbyteaddress.hh */; };
-		2640072E140B43BB00CF1107 /* rtpcollisionlist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006D7140B43BB00CF1107 /* rtpcollisionlist.cpp */; };
-		2640072F140B43BB00CF1107 /* rtpcollisionlist.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D8140B43BB00CF1107 /* rtpcollisionlist.hh */; };
-		26400730140B43BB00CF1107 /* rtpconfig.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006D9140B43BB00CF1107 /* rtpconfig.hh */; };
-		26400731140B43BB00CF1107 /* rtpdebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006DA140B43BB00CF1107 /* rtpdebug.cpp */; };
-		26400732140B43BB00CF1107 /* rtpdebug.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006DB140B43BB00CF1107 /* rtpdebug.hh */; };
-		26400733140B43BB00CF1107 /* rtpdefines.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006DC140B43BB00CF1107 /* rtpdefines.hh */; };
-		26400734140B43BB00CF1107 /* rtperrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006DD140B43BB00CF1107 /* rtperrors.cpp */; };
-		26400735140B43BB00CF1107 /* rtperrors.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006DE140B43BB00CF1107 /* rtperrors.hh */; };
-		26400736140B43BB00CF1107 /* rtpexternaltransmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006DF140B43BB00CF1107 /* rtpexternaltransmitter.cpp */; };
-		26400737140B43BB00CF1107 /* rtpexternaltransmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E0140B43BB00CF1107 /* rtpexternaltransmitter.hh */; };
-		26400738140B43BB00CF1107 /* rtphashtable.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E1140B43BB00CF1107 /* rtphashtable.hh */; };
-		26400739140B43BB00CF1107 /* rtpinternalsourcedata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006E2140B43BB00CF1107 /* rtpinternalsourcedata.cpp */; };
-		2640073A140B43BB00CF1107 /* rtpinternalsourcedata.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E3140B43BB00CF1107 /* rtpinternalsourcedata.hh */; };
-		2640073B140B43BB00CF1107 /* rtpipv4address.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006E4140B43BB00CF1107 /* rtpipv4address.cpp */; };
-		2640073C140B43BB00CF1107 /* rtpipv4address.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E5140B43BB00CF1107 /* rtpipv4address.hh */; };
-		2640073D140B43BB00CF1107 /* rtpipv4destination.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E6140B43BB00CF1107 /* rtpipv4destination.hh */; };
-		2640073E140B43BB00CF1107 /* rtpipv6address.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006E7140B43BB00CF1107 /* rtpipv6address.cpp */; };
-		2640073F140B43BB00CF1107 /* rtpipv6address.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E8140B43BB00CF1107 /* rtpipv6address.hh */; };
-		26400740140B43BB00CF1107 /* rtpipv6destination.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006E9140B43BB00CF1107 /* rtpipv6destination.hh */; };
-		26400741140B43BB00CF1107 /* rtpkeyhashtable.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006EA140B43BB00CF1107 /* rtpkeyhashtable.hh */; };
-		26400742140B43BB00CF1107 /* rtplibraryversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006EB140B43BB00CF1107 /* rtplibraryversion.cpp */; };
-		26400743140B43BB00CF1107 /* rtplibraryversion.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006EC140B43BB00CF1107 /* rtplibraryversion.hh */; };
-		26400744140B43BB00CF1107 /* rtpmemorymanager.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006ED140B43BB00CF1107 /* rtpmemorymanager.hh */; };
-		26400745140B43BB00CF1107 /* rtpmemoryobject.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006EE140B43BB00CF1107 /* rtpmemoryobject.hh */; };
-		26400746140B43BB00CF1107 /* rtppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006EF140B43BB00CF1107 /* rtppacket.cpp */; };
-		26400747140B43BB00CF1107 /* rtppacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006F0140B43BB00CF1107 /* rtppacket.hh */; };
-		26400748140B43BB00CF1107 /* rtppacketbuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006F1140B43BB00CF1107 /* rtppacketbuilder.cpp */; };
-		26400749140B43BB00CF1107 /* rtppacketbuilder.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006F2140B43BB00CF1107 /* rtppacketbuilder.hh */; };
-		2640074A140B43BB00CF1107 /* rtppollthread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006F3140B43BB00CF1107 /* rtppollthread.cpp */; };
-		2640074B140B43BB00CF1107 /* rtppollthread.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006F4140B43BB00CF1107 /* rtppollthread.hh */; };
-		2640074C140B43BB00CF1107 /* rtprandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006F5140B43BB00CF1107 /* rtprandom.cpp */; };
-		2640074D140B43BB00CF1107 /* rtprandom.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006F6140B43BB00CF1107 /* rtprandom.hh */; };
-		2640074E140B43BB00CF1107 /* rtprandomrand48.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006F7140B43BB00CF1107 /* rtprandomrand48.cpp */; };
-		2640074F140B43BB00CF1107 /* rtprandomrand48.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006F8140B43BB00CF1107 /* rtprandomrand48.hh */; };
-		26400750140B43BB00CF1107 /* rtprandomrands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006F9140B43BB00CF1107 /* rtprandomrands.cpp */; };
-		26400751140B43BB00CF1107 /* rtprandomrands.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006FA140B43BB00CF1107 /* rtprandomrands.hh */; };
-		26400752140B43BB00CF1107 /* rtprandomurandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006FB140B43BB00CF1107 /* rtprandomurandom.cpp */; };
-		26400753140B43BB00CF1107 /* rtprandomurandom.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006FC140B43BB00CF1107 /* rtprandomurandom.hh */; };
-		26400754140B43BB00CF1107 /* rtprawpacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006FD140B43BB00CF1107 /* rtprawpacket.hh */; };
-		26400755140B43BB00CF1107 /* rtpsession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006FE140B43BB00CF1107 /* rtpsession.cpp */; };
-		26400756140B43BB00CF1107 /* rtpsession.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006FF140B43BB00CF1107 /* rtpsession.hh */; };
-		26400757140B43BB00CF1107 /* rtpsessionparams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400700140B43BB00CF1107 /* rtpsessionparams.cpp */; };
-		26400758140B43BB00CF1107 /* rtpsessionparams.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400701140B43BB00CF1107 /* rtpsessionparams.hh */; };
-		26400759140B43BB00CF1107 /* rtpsessionsources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400702140B43BB00CF1107 /* rtpsessionsources.cpp */; };
-		2640075A140B43BB00CF1107 /* rtpsessionsources.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400703140B43BB00CF1107 /* rtpsessionsources.hh */; };
-		2640075B140B43BB00CF1107 /* rtpsourcedata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400704140B43BB00CF1107 /* rtpsourcedata.cpp */; };
-		2640075C140B43BB00CF1107 /* rtpsourcedata.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400705140B43BB00CF1107 /* rtpsourcedata.hh */; };
-		2640075D140B43BB00CF1107 /* rtpsources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400706140B43BB00CF1107 /* rtpsources.cpp */; };
-		2640075E140B43BB00CF1107 /* rtpsources.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400707140B43BB00CF1107 /* rtpsources.hh */; };
-		2640075F140B43BB00CF1107 /* rtpstructs.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400708140B43BB00CF1107 /* rtpstructs.hh */; };
-		26400760140B43BB00CF1107 /* rtptimeutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400709140B43BB00CF1107 /* rtptimeutilities.cpp */; };
-		26400761140B43BB00CF1107 /* rtptimeutilities.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070A140B43BB00CF1107 /* rtptimeutilities.hh */; };
-		26400762140B43BB00CF1107 /* rtptransmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070B140B43BB00CF1107 /* rtptransmitter.hh */; };
-		26400763140B43BB00CF1107 /* rtptypes_win.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070C140B43BB00CF1107 /* rtptypes_win.hh */; };
-		26400764140B43BB00CF1107 /* rtptypes.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070D140B43BB00CF1107 /* rtptypes.hh */; };
-		26400765140B43BB00CF1107 /* rtpudpv4transmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2640070E140B43BB00CF1107 /* rtpudpv4transmitter.cpp */; };
-		26400766140B43BB00CF1107 /* rtpudpv4transmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070F140B43BB00CF1107 /* rtpudpv4transmitter.hh */; };
-		26400767140B43BB00CF1107 /* rtpudpv6transmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400710140B43BB00CF1107 /* rtpudpv6transmitter.cpp */; };
-		26400768140B43BB00CF1107 /* rtpudpv6transmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400711140B43BB00CF1107 /* rtpudpv6transmitter.hh */; };
 		2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2642EBCF1869425D006A6C12 /* CoreAudio.framework */; };
 		2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */; };
 		2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4941FF046E800F46AB5 /* MLBaseCell.m */; };
@@ -158,7 +73,6 @@
 		26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
-		26BDECDC1867B7790018670D /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BDECDA1867B7790018670D /* CallViewController.m */; };
 		26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */; };
 		26CC579623A0867400ABB92A /* monalxmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CC579423A0867400ABB92A /* monalxmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		26CC57A223A086AA00ABB92A /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
@@ -178,15 +92,11 @@
 		26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
 		26CC57CA23A0892800ABB92A /* MLIQProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661101B238F10360030A4EE /* MLIQProcessor.m */; };
 		26CC57CB23A0892800ABB92A /* MLPresenceProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611020238F104B0030A4EE /* MLPresenceProcessor.m */; };
-		26CC57CF23A08D5B00ABB92A /* jingleCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* jingleCall.m */; };
-		26CC57D023A08D5B00ABB92A /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
-		26CC57D123A08D5B00ABB92A /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
 		26CC57D323A08D7100ABB92A /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
 		26CC57D423A08D7100ABB92A /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
 		26CC57D623A08D7100ABB92A /* MLMetaInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 26020B3621B957A0009A9735 /* MLMetaInfo.m */; };
 		26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
-		26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */; };
 		26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 262D9EAB17924532009292B4 /* MLConstants.h */; };
@@ -246,7 +156,6 @@
 		54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15D504A24C727CC002F75BB /* MLLogFileManager.m */; };
 		54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */ = {isa = PBXBuildFile; fileRef = 54E594BA2523C34900E4172B /* MLPubSub.h */; };
 		54E594BE2523C34B00E4172B /* MLPubSub.m in Sources */ = {isa = PBXBuildFile; fileRef = 54E594BC2523C34A00E4172B /* MLPubSub.m */; };
-		6C0881EAB68D8D4760C8F4B8 /* Pods_jrtplib_static.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9FD41A731431B8DC2D41B808 /* Pods_jrtplib_static.framework */; };
 		92417E5783566741C7D44309 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A393BB8609C73BEFF20F241 /* Pods_MonalUITests.framework */; };
 		AA739B555DD9138B6DC252B4 /* Pods_MonalXMPPUnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5892D3335DDF763ED899C05 /* Pods_MonalXMPPUnitTests.framework */; };
 		B2F4C53CD9A8A4046C237072 /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E865A50FFD3C29AD8F3DFD0 /* Pods_NotificaionService.framework */; };
@@ -310,13 +219,6 @@
 			remoteGlobalIDString = 26CC579123A0867400ABB92A;
 			remoteInfo = monalxmpp;
 		};
-		26CC57D823A08DA300ABB92A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 268BCD55140B25CC0025E4D1;
-			remoteInfo = "jrtplib-static";
-		};
 		26CC57E723A08F3A00ABB92A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -377,7 +279,6 @@
 		061EF1BEDEE7A71FDF9AB402 /* Pods-shareSheet.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore.xcconfig"; sourceTree = "<group>"; };
 		0D0362F6B26B9407BE313F36 /* Pods-NotificaionService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.debug.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.debug.xcconfig"; sourceTree = "<group>"; };
 		0EC0A5305E72C0F7F9E1CDEF /* Pods-shareSheet.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.adhoc.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.adhoc.xcconfig"; sourceTree = "<group>"; };
-		127D3489728DDC3A97F4293A /* Pods-jrtplib-static.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.adhoc.xcconfig"; path = "Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.adhoc.xcconfig"; sourceTree = "<group>"; };
 		12CB538E8FC0AAFD96856CDD /* Pods_shareSheet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shareSheet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		190BE683A0C65E5A839F52BD /* Pods_Monal_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -546,10 +447,6 @@
 		2640070F140B43BB00CF1107 /* rtpudpv4transmitter.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rtpudpv4transmitter.hh; path = jrtplib/rtpudpv4transmitter.hh; sourceTree = "<group>"; };
 		26400710140B43BB00CF1107 /* rtpudpv6transmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rtpudpv6transmitter.cpp; path = jrtplib/rtpudpv6transmitter.cpp; sourceTree = "<group>"; };
 		26400711140B43BB00CF1107 /* rtpudpv6transmitter.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rtpudpv6transmitter.hh; path = jrtplib/rtpudpv6transmitter.hh; sourceTree = "<group>"; };
-		2642EBC518693626006A6C12 /* RTP.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RTP.hh; sourceTree = "<group>"; };
-		2642EBC618693626006A6C12 /* RTP.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RTP.mm; sourceTree = "<group>"; };
-		2642EBC818693634006A6C12 /* jingleCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jingleCall.h; sourceTree = "<group>"; };
-		2642EBC918693634006A6C12 /* jingleCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = jingleCall.m; sourceTree = "<group>"; };
 		2642EBCF1869425D006A6C12 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		2644D4901FF0064C00F46AB5 /* MLChatImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatImageCell.h; sourceTree = "<group>"; };
@@ -604,7 +501,6 @@
 		267C9920206DE23100AB876C /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		267ECD6A1B746C340025337F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
-		268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libjrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDetailsTableViewCell.h; sourceTree = "<group>"; };
 		268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDetailsTableViewCell.m; sourceTree = "<group>"; };
 		268DD58417C4541000C673A9 /* MLChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatCell.h; sourceTree = "<group>"; };
@@ -635,8 +531,6 @@
 		26B51C4618654D98002134C3 /* LogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogViewController.h; sourceTree = "<group>"; };
 		26B51C4718654D98002134C3 /* LogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
-		26BDECD91867B7790018670D /* CallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallViewController.h; sourceTree = "<group>"; };
-		26BDECDA1867B7790018670D /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
 		26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLNotificationSettingsViewController.h; sourceTree = "<group>"; };
 		26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNotificationSettingsViewController.m; sourceTree = "<group>"; };
 		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
@@ -758,8 +652,6 @@
 		26F396DB2197507100EF5720 /* GLTintButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTintButton.h; sourceTree = "<group>"; };
 		26F7BB441115F95000712672 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		26F9794C1ACAC73A0008E005 /* MLContactCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLContactCell.xib; sourceTree = "<group>"; };
-		26FB468D18B2755A0043094F /* IPAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPAddress.h; sourceTree = "<group>"; };
-		26FB468E18B2755A0043094F /* IPAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPAddress.m; sourceTree = "<group>"; };
 		26FC618B24EB2BEE0094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "localization/external/zh-Hant.lproj/Main.strings"; sourceTree = SOURCE_ROOT; };
 		26FC618D24EB2BEF0094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "localization/external/zh-Hant.lproj/Login.strings"; sourceTree = SOURCE_ROOT; };
 		26FC618E24EB2BF10094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "localization/external/zh-Hant.lproj/Settings.strings"; sourceTree = SOURCE_ROOT; };
@@ -831,14 +723,11 @@
 		86CF04FDE084C646CA14B774 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Monal-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Monal-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		9705AFFB59AF72A9B79C1D7B /* Pods-MonalXMPPUnitTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.adhoc.xcconfig"; sourceTree = "<group>"; };
-		9FD41A731431B8DC2D41B808 /* Pods_jrtplib_static.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_jrtplib_static.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4C686567AC126CDDFB1BE44 /* Pods-NotificaionService.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.beta.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.beta.xcconfig"; sourceTree = "<group>"; };
 		AAFC73E987D41BA8D91E9F95 /* Pods-monalxmpp.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.appstore.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.appstore.xcconfig"; sourceTree = "<group>"; };
 		AD0E234056402EE91A36D628 /* Pods-Monal.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.adhoc.xcconfig"; sourceTree = "<group>"; };
-		B4C8C4A8BA0B48E5DA219993 /* Pods-jrtplib-static.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.appstore.xcconfig"; path = "Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.appstore.xcconfig"; sourceTree = "<group>"; };
 		B55DCA2ABBDB6E635D46D69A /* Pods-monalxmpp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.debug.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.debug.xcconfig"; sourceTree = "<group>"; };
 		B5892D3335DDF763ED899C05 /* Pods_MonalXMPPUnitTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalXMPPUnitTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B9E9919E9BAF5290CC803EAD /* Pods-jrtplib-static.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.beta.xcconfig"; path = "Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.beta.xcconfig"; sourceTree = "<group>"; };
 		C10490482612ED2F0054AC9E /* MLEmoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLEmoji.swift; sourceTree = "<group>"; };
 		C10490E22612F3D00054AC9E /* MLCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCrypto.swift; sourceTree = "<group>"; };
 		C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptedPayload.swift; sourceTree = "<group>"; };
@@ -987,7 +876,6 @@
 		E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingsAboutViewController.m; sourceTree = "<group>"; };
 		E8DED05F25388BE8003167FF /* MLSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSearchViewController.h; sourceTree = "<group>"; };
 		E8DED06125388BE8003167FF /* MLSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSearchViewController.m; sourceTree = "<group>"; };
-		EF5FE59D4A5076BE0A48DDE4 /* Pods-jrtplib-static.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.debug.xcconfig"; path = "Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.debug.xcconfig"; sourceTree = "<group>"; };
 		F7506FDE7A78EB0CAB14FF60 /* Pods-MonalUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.debug.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		FCADB10208409DD462AC921F /* Pods-Monal.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.beta.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.beta.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1026,14 +914,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		268BCD53140B25CC0025E4D1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				6C0881EAB68D8D4760C8F4B8 /* Pods_jrtplib_static.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		26AA700E2146BBB800598605 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1047,7 +927,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */,
 				B6C2B2781C2EDD10E9341233 /* Pods_monalxmpp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1099,7 +978,6 @@
 			isa = PBXGroup;
 			children = (
 				26080210110ABA4E005E194D /* Monal.app */,
-				268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */,
 				26AA70112146BBB800598605 /* shareSheet.appex */,
 				260773C0232FC4E800BFD50F /* NotificaionService.appex */,
 				26CC579223A0867400ABB92A /* monalxmpp.framework */,
@@ -1127,7 +1005,6 @@
 				54E594BC2523C34A00E4172B /* MLPubSub.m */,
 				2661102E238F17D00030A4EE /* Models */,
 				2633CB40231CB7F5006D0277 /* Processors */,
-				2642EBC418693615006A6C12 /* Jingle */,
 				26CF3EAF1780DF8B002B7085 /* Parsers */,
 				26CF3EAE1780DF86002B7085 /* Nodes */,
 				260C51CF177F08F50039634B /* xmpp.h */,
@@ -1214,19 +1091,6 @@
 				389E298925E901CA009A5268 /* MLAudioRecoderManager.m */,
 			);
 			name = Managers;
-			sourceTree = "<group>";
-		};
-		2642EBC418693615006A6C12 /* Jingle */ = {
-			isa = PBXGroup;
-			children = (
-				2642EBC818693634006A6C12 /* jingleCall.h */,
-				2642EBC918693634006A6C12 /* jingleCall.m */,
-				2642EBC518693626006A6C12 /* RTP.hh */,
-				2642EBC618693626006A6C12 /* RTP.mm */,
-				26FB468D18B2755A0043094F /* IPAddress.h */,
-				26FB468E18B2755A0043094F /* IPAddress.m */,
-			);
-			name = Jingle;
 			sourceTree = "<group>";
 		};
 		2644D48F1FF004B800F46AB5 /* ChatViews */ = {
@@ -1622,8 +1486,6 @@
 			children = (
 				26EC40FD17BDD85F0031304D /* addContact.h */,
 				26EC40FE17BDD85F0031304D /* addContact.m */,
-				26BDECD91867B7790018670D /* CallViewController.h */,
-				26BDECDA1867B7790018670D /* CallViewController.m */,
 			);
 			name = "Modal views";
 			sourceTree = "<group>";
@@ -1762,7 +1624,6 @@
 				6D6C5046292E68BB30C97B38 /* Pods_Monal.framework */,
 				190BE683A0C65E5A839F52BD /* Pods_Monal_Tests.framework */,
 				7E865A50FFD3C29AD8F3DFD0 /* Pods_NotificaionService.framework */,
-				9FD41A731431B8DC2D41B808 /* Pods_jrtplib_static.framework */,
 				1F17B168B23E046B18971F63 /* Pods_monalxmpp.framework */,
 				12CB538E8FC0AAFD96856CDD /* Pods_shareSheet.framework */,
 				2A393BB8609C73BEFF20F241 /* Pods_MonalUITests.framework */,
@@ -1783,9 +1644,6 @@
 				0D0362F6B26B9407BE313F36 /* Pods-NotificaionService.debug.xcconfig */,
 				4A614910EEF29D66DD4B37E3 /* Pods-NotificaionService.adhoc.xcconfig */,
 				D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */,
-				EF5FE59D4A5076BE0A48DDE4 /* Pods-jrtplib-static.debug.xcconfig */,
-				127D3489728DDC3A97F4293A /* Pods-jrtplib-static.adhoc.xcconfig */,
-				B4C8C4A8BA0B48E5DA219993 /* Pods-jrtplib-static.appstore.xcconfig */,
 				B55DCA2ABBDB6E635D46D69A /* Pods-monalxmpp.debug.xcconfig */,
 				E06DB4446BAE2F9C0192D055 /* Pods-monalxmpp.adhoc.xcconfig */,
 				AAFC73E987D41BA8D91E9F95 /* Pods-monalxmpp.appstore.xcconfig */,
@@ -1802,7 +1660,6 @@
 				7D6715099247A9CCC180EE30 /* Pods-MonalUITests.beta.xcconfig */,
 				4862C3A0242FB4F709B8F3FF /* Pods-MonalXMPPUnitTests.beta.xcconfig */,
 				A4C686567AC126CDDFB1BE44 /* Pods-NotificaionService.beta.xcconfig */,
-				B9E9919E9BAF5290CC803EAD /* Pods-jrtplib-static.beta.xcconfig */,
 				DC5DA2C9782510B3433FD50D /* Pods-monalxmpp.beta.xcconfig */,
 				6BCB9FB4EBEA3735D24A44DF /* Pods-shareSheet.beta.xcconfig */,
 			);
@@ -1842,63 +1699,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		268BCD54140B25CC0025E4D1 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				26400713140B43BB00CF1107 /* rtcpapppacket.hh in Headers */,
-				26400715140B43BB00CF1107 /* rtcpbyepacket.hh in Headers */,
-				26400717140B43BB00CF1107 /* rtcpcompoundpacket.hh in Headers */,
-				26400719140B43BB00CF1107 /* rtcpcompoundpacketbuilder.hh in Headers */,
-				2640071B140B43BB00CF1107 /* rtcppacket.hh in Headers */,
-				2640071D140B43BB00CF1107 /* rtcppacketbuilder.hh in Headers */,
-				2640071F140B43BB00CF1107 /* rtcprrpacket.hh in Headers */,
-				26400721140B43BB00CF1107 /* rtcpscheduler.hh in Headers */,
-				26400723140B43BB00CF1107 /* rtcpsdesinfo.hh in Headers */,
-				26400725140B43BB00CF1107 /* rtcpsdespacket.hh in Headers */,
-				26400727140B43BB00CF1107 /* rtcpsrpacket.hh in Headers */,
-				26400728140B43BB00CF1107 /* rtcpunknownpacket.hh in Headers */,
-				2640072B140B43BB00CF1107 /* rtpaddress.hh in Headers */,
-				2640072D140B43BB00CF1107 /* rtpbyteaddress.hh in Headers */,
-				2640072F140B43BB00CF1107 /* rtpcollisionlist.hh in Headers */,
-				26400730140B43BB00CF1107 /* rtpconfig.hh in Headers */,
-				26400732140B43BB00CF1107 /* rtpdebug.hh in Headers */,
-				26400733140B43BB00CF1107 /* rtpdefines.hh in Headers */,
-				26400735140B43BB00CF1107 /* rtperrors.hh in Headers */,
-				26400737140B43BB00CF1107 /* rtpexternaltransmitter.hh in Headers */,
-				26400738140B43BB00CF1107 /* rtphashtable.hh in Headers */,
-				2640073A140B43BB00CF1107 /* rtpinternalsourcedata.hh in Headers */,
-				2640073C140B43BB00CF1107 /* rtpipv4address.hh in Headers */,
-				2640073D140B43BB00CF1107 /* rtpipv4destination.hh in Headers */,
-				2640073F140B43BB00CF1107 /* rtpipv6address.hh in Headers */,
-				26400740140B43BB00CF1107 /* rtpipv6destination.hh in Headers */,
-				26400741140B43BB00CF1107 /* rtpkeyhashtable.hh in Headers */,
-				26400743140B43BB00CF1107 /* rtplibraryversion.hh in Headers */,
-				26400744140B43BB00CF1107 /* rtpmemorymanager.hh in Headers */,
-				26400745140B43BB00CF1107 /* rtpmemoryobject.hh in Headers */,
-				26400747140B43BB00CF1107 /* rtppacket.hh in Headers */,
-				26400749140B43BB00CF1107 /* rtppacketbuilder.hh in Headers */,
-				2640074B140B43BB00CF1107 /* rtppollthread.hh in Headers */,
-				2640074D140B43BB00CF1107 /* rtprandom.hh in Headers */,
-				2640074F140B43BB00CF1107 /* rtprandomrand48.hh in Headers */,
-				26400751140B43BB00CF1107 /* rtprandomrands.hh in Headers */,
-				26400753140B43BB00CF1107 /* rtprandomurandom.hh in Headers */,
-				26400754140B43BB00CF1107 /* rtprawpacket.hh in Headers */,
-				26400756140B43BB00CF1107 /* rtpsession.hh in Headers */,
-				26400758140B43BB00CF1107 /* rtpsessionparams.hh in Headers */,
-				2640075A140B43BB00CF1107 /* rtpsessionsources.hh in Headers */,
-				2640075C140B43BB00CF1107 /* rtpsourcedata.hh in Headers */,
-				2640075E140B43BB00CF1107 /* rtpsources.hh in Headers */,
-				2640075F140B43BB00CF1107 /* rtpstructs.hh in Headers */,
-				26400761140B43BB00CF1107 /* rtptimeutilities.hh in Headers */,
-				26400762140B43BB00CF1107 /* rtptransmitter.hh in Headers */,
-				26400763140B43BB00CF1107 /* rtptypes_win.hh in Headers */,
-				26400764140B43BB00CF1107 /* rtptypes.hh in Headers */,
-				26400766140B43BB00CF1107 /* rtpudpv4transmitter.hh in Headers */,
-				26400768140B43BB00CF1107 /* rtpudpv6transmitter.hh in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		26CC578D23A0867400ABB92A /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -1974,24 +1774,6 @@
 			productReference = 260773C0232FC4E800BFD50F /* NotificaionService.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		268BCD55140B25CC0025E4D1 /* jrtplib-static */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 268BCD57140B25CC0025E4D1 /* Build configuration list for PBXNativeTarget "jrtplib-static" */;
-			buildPhases = (
-				A2FEE42268434719904C5019 /* [CP] Check Pods Manifest.lock */,
-				268BCD52140B25CC0025E4D1 /* Sources */,
-				268BCD53140B25CC0025E4D1 /* Frameworks */,
-				268BCD54140B25CC0025E4D1 /* Headers */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "jrtplib-static";
-			productName = "jrtplib-static";
-			productReference = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */;
-			productType = "com.apple.product-type.library.static";
-		};
 		26AA70102146BBB800598605 /* shareSheet */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 26AA70202146BBB900598605 /* Build configuration list for PBXNativeTarget "shareSheet" */;
@@ -2025,7 +1807,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				26CC57D923A08DA300ABB92A /* PBXTargetDependency */,
 			);
 			name = monalxmpp;
 			productName = monalxmpp;
@@ -2173,7 +1954,6 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				268BCD55140B25CC0025E4D1 /* jrtplib-static */,
 				1D6058900D05DD3D006BFB54 /* Monal */,
 				26AA70102146BBB800598605 /* shareSheet */,
 				260773BF232FC4E800BFD50F /* NotificaionService */,
@@ -2336,28 +2116,6 @@
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-MonalUITests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		A2FEE42268434719904C5019 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-jrtplib-static-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2628,7 +2386,6 @@
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */,
 				C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */,
-				26BDECDC1867B7790018670D /* CallViewController.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
@@ -2673,48 +2430,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		268BCD52140B25CC0025E4D1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				26400712140B43BB00CF1107 /* rtcpapppacket.cpp in Sources */,
-				26400714140B43BB00CF1107 /* rtcpbyepacket.cpp in Sources */,
-				26400716140B43BB00CF1107 /* rtcpcompoundpacket.cpp in Sources */,
-				26400718140B43BB00CF1107 /* rtcpcompoundpacketbuilder.cpp in Sources */,
-				2640071A140B43BB00CF1107 /* rtcppacket.cpp in Sources */,
-				2640071C140B43BB00CF1107 /* rtcppacketbuilder.cpp in Sources */,
-				2640071E140B43BB00CF1107 /* rtcprrpacket.cpp in Sources */,
-				26400720140B43BB00CF1107 /* rtcpscheduler.cpp in Sources */,
-				26400722140B43BB00CF1107 /* rtcpsdesinfo.cpp in Sources */,
-				26400724140B43BB00CF1107 /* rtcpsdespacket.cpp in Sources */,
-				26400726140B43BB00CF1107 /* rtcpsrpacket.cpp in Sources */,
-				2640072C140B43BB00CF1107 /* rtpbyteaddress.cpp in Sources */,
-				2640072E140B43BB00CF1107 /* rtpcollisionlist.cpp in Sources */,
-				26400731140B43BB00CF1107 /* rtpdebug.cpp in Sources */,
-				26400734140B43BB00CF1107 /* rtperrors.cpp in Sources */,
-				26400736140B43BB00CF1107 /* rtpexternaltransmitter.cpp in Sources */,
-				26400739140B43BB00CF1107 /* rtpinternalsourcedata.cpp in Sources */,
-				2640073B140B43BB00CF1107 /* rtpipv4address.cpp in Sources */,
-				2640073E140B43BB00CF1107 /* rtpipv6address.cpp in Sources */,
-				26400742140B43BB00CF1107 /* rtplibraryversion.cpp in Sources */,
-				26400746140B43BB00CF1107 /* rtppacket.cpp in Sources */,
-				26400748140B43BB00CF1107 /* rtppacketbuilder.cpp in Sources */,
-				2640074A140B43BB00CF1107 /* rtppollthread.cpp in Sources */,
-				2640074C140B43BB00CF1107 /* rtprandom.cpp in Sources */,
-				2640074E140B43BB00CF1107 /* rtprandomrand48.cpp in Sources */,
-				26400750140B43BB00CF1107 /* rtprandomrands.cpp in Sources */,
-				26400752140B43BB00CF1107 /* rtprandomurandom.cpp in Sources */,
-				26400755140B43BB00CF1107 /* rtpsession.cpp in Sources */,
-				26400757140B43BB00CF1107 /* rtpsessionparams.cpp in Sources */,
-				26400759140B43BB00CF1107 /* rtpsessionsources.cpp in Sources */,
-				2640075B140B43BB00CF1107 /* rtpsourcedata.cpp in Sources */,
-				2640075D140B43BB00CF1107 /* rtpsources.cpp in Sources */,
-				26400760140B43BB00CF1107 /* rtptimeutilities.cpp in Sources */,
-				26400765140B43BB00CF1107 /* rtpudpv4transmitter.cpp in Sources */,
-				26400767140B43BB00CF1107 /* rtpudpv6transmitter.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		26AA700D2146BBB800598605 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2749,10 +2464,7 @@
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
 				540BD0D424D8D2000087A743 /* IPC.m in Sources */,
 				541B6AB4262BC9040038B936 /* MLStream.m in Sources */,
-				26CC57CF23A08D5B00ABB92A /* jingleCall.m in Sources */,
 				26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */,
-				26CC57D123A08D5B00ABB92A /* IPAddress.m in Sources */,
-				26CC57D023A08D5B00ABB92A /* RTP.mm in Sources */,
 				26CC57B823A0876300ABB92A /* MLHTTPRequest.m in Sources */,
 				26CC57A223A086AA00ABB92A /* xmpp.m in Sources */,
 				26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */,
@@ -2819,11 +2531,6 @@
 			isa = PBXTargetDependency;
 			target = 26CC579123A0867400ABB92A /* monalxmpp */;
 			targetProxy = 26CC579723A0867400ABB92A /* PBXContainerItemProxy */;
-		};
-		26CC57D923A08DA300ABB92A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 268BCD55140B25CC0025E4D1 /* jrtplib-static */;
-			targetProxy = 26CC57D823A08DA300ABB92A /* PBXContainerItemProxy */;
 		};
 		26CC57E823A08F3A00ABB92A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3477,72 +3184,6 @@
 			};
 			name = AppStore;
 		};
-		2675EF5B18B98C2D0059C5C3 /* AppStore */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = B4C8C4A8BA0B48E5DA219993 /* Pods-jrtplib-static.appstore.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_BITCODE = NO;
-				EXECUTABLE_PREFIX = lib;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Debug\"",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "DCC3D5D0-2C13-42D0-B613-CD8A14A86A0E";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				STRIP_INSTALLED_PRODUCT = NO;
-			};
-			name = AppStore;
-		};
-		268BCD58140B25CC0025E4D1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = EF5FE59D4A5076BE0A48DDE4 /* Pods-jrtplib-static.debug.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				COPY_PHASE_STRIP = NO;
-				ENABLE_BITCODE = NO;
-				EXECUTABLE_PREFIX = lib;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Debug\"",
-				);
-				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				STRIP_INSTALLED_PRODUCT = NO;
-			};
-			name = Debug;
-		};
 		26AA701D2146BBB900598605 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 21E99538324C14220843F325 /* Pods-shareSheet.debug.xcconfig */;
@@ -4112,38 +3753,6 @@
 			};
 			name = Adhoc;
 		};
-		26E74FBF17B06D2200FD91AE /* Adhoc */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 127D3489728DDC3A97F4293A /* Pods-jrtplib-static.adhoc.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_BITCODE = NO;
-				EXECUTABLE_PREFIX = lib;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Debug\"",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "DCC3D5D0-2C13-42D0-B613-CD8A14A86A0E";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				STRIP_INSTALLED_PRODUCT = NO;
-			};
-			name = Adhoc;
-		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4416,38 +4025,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Beta;
-		};
-		C11C870C26A83C1D00B8DEA5 /* Beta */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = B9E9919E9BAF5290CC803EAD /* Pods-jrtplib-static.beta.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_BITCODE = NO;
-				EXECUTABLE_PREFIX = lib;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Debug\"",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "DCC3D5D0-2C13-42D0-B613-CD8A14A86A0E";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Beta;
 		};
@@ -5117,17 +4694,6 @@
 				260773CA232FC4E800BFD50F /* Adhoc */,
 				260773CB232FC4E800BFD50F /* AppStore */,
 				C11C870F26A83C1D00B8DEA5 /* Beta */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		268BCD57140B25CC0025E4D1 /* Build configuration list for PBXNativeTarget "jrtplib-static" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				268BCD58140B25CC0025E4D1 /* Debug */,
-				26E74FBF17B06D2200FD91AE /* Adhoc */,
-				2675EF5B18B98C2D0059C5C3 /* AppStore */,
-				C11C870C26A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

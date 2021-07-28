@@ -688,34 +688,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [account setBlocked:isBlocked forJid:contact];
 }
 
-#pragma mark - Jingle VOIP
-
--(void) callContact:(MLContact*) contact
-{
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
-    [account call:contact];
-}
-
--(void) hangupContact:(MLContact*) contact
-{
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
-    [account hangup:contact];
-}
-
--(void) handleCall:(NSDictionary *) userDic withResponse:(BOOL) accept
-{
-    //find account
-     xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[userDic objectForKey:kAccountID]]];
-
-    if(accept) {
-        [account acceptCall:userDic];
-    }
-    else  {
-         [account declineCall:userDic];
-    }
-
-}
-
 #pragma mark message signals
 
 -(void) handleSentMessage:(NSNotification*) notification

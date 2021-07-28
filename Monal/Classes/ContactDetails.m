@@ -10,7 +10,6 @@
 #import "MBProgressHUD.h"
 #import "MLImageManager.h"
 #import "MLConstants.h"
-#import "CallViewController.h"
 #import "MLXMPPManager.h"
 #import "MLDetailsTableViewCell.h"
 #import "MLContactDetailHeader.h"
@@ -122,21 +121,9 @@ enum ContactDetailsAboutRows {
 }
 
 
--(IBAction) callContact:(id)sender
-{
-    [self performSegueWithIdentifier:@"showCall" sender:self];
-    [[MLXMPPManager sharedInstance] callContact:self.contact];
-}
-
-
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if([segue.identifier isEqualToString:@"showCall"])
-    {
-        CallViewController* callScreen = segue.destinationViewController;
-        callScreen.contact = self.contact;
-    }
-    else if([segue.identifier isEqualToString:@"showResources"])
+    if([segue.identifier isEqualToString:@"showResources"])
     {
         MLResourcesTableViewController* resourcesVC = segue.destinationViewController;
         resourcesVC.contact = self.contact;

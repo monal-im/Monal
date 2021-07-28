@@ -11,7 +11,6 @@
 #import <Security/SecureTransport.h>
 
 #import "xmpp.h"
-#import "jingleCall.h"
 #import "MLDNSLookup.h"
 #import "MLSignalStore.h"
 #import "MLPubSub.h"
@@ -45,6 +44,7 @@
 #import "MLHTTPRequest.h"
 #import "AESGcm.h"
 
+@import AVFoundation;
 
 #define STATE_VERSION 3
 
@@ -1674,9 +1674,6 @@ NSString *const kData=@"data";
             else            //only process iqs that have not already been handled by a registered iq handler
             {
                 [MLIQProcessor processIq:iqNode forAccount:self];
-
-                if([[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
-                    [self jingleResult:iqNode];
             }
             
             //only mark stanza as handled *after* processing it
@@ -3066,184 +3063,6 @@ NSString *const kData=@"data";
     [self sendIq:roster withHandler:$newHandler(MLIQProcessor, handleRoster)];
 }
 
-#pragma mark - Jingle calls
--(void)call:(MLContact*) contact
-{
-    if(self.jingle) return;
-    self.jingle=[[jingleCall alloc] init];
-    self.jingle.me=[NSString stringWithFormat:@"%@/%@", self.connectionProperties.identity.jid, self.connectionProperties.identity.resource];
-
-    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:contact.contactJid];
-    if([resources count]>0)
-    {
-        //TODO selct resource action sheet?
-        XMPPIQ* jingleiq =[self.jingle initiateJingleTo:contact.contactJid withId:[[NSUUID UUID] UUIDString] andResource:[[resources objectAtIndex:0] objectForKey:@"resource"]];
-        [self send:jingleiq];
-    }
-}
-
--(void)hangup:(MLContact*) contact
-{
-    XMPPIQ* jingleiq = [self.jingle terminateJinglewithId:[[NSUUID UUID] UUIDString]];
-    [self send:jingleiq];
-    [self.jingle rtpDisconnect];
-    self.jingle=nil;
-}
-
--(void)acceptCall:(NSDictionary*) userInfo
-{
-    XMPPIQ* node =[self.jingle acceptJingleTo:[userInfo objectForKey:@"user"] withId:[[NSUUID UUID] UUIDString]  andResource:[userInfo objectForKey:@"resource"]];
-    [self send:node];
-}
-
-
--(void)declineCall:(NSDictionary*) userInfo
-{
-    XMPPIQ* jingleiq =[self.jingle rejectJingleTo:[userInfo objectForKey:@"user"] withId:[[NSUUID UUID] UUIDString] andResource:[userInfo objectForKey:@"resource"]];
-    [self send:jingleiq];
-    [self.jingle rtpDisconnect];
-    self.jingle=nil;
-}
-
--(void) jingleResult:(XMPPIQ*) iqNode
-{
-    //confirmation of set call after we accepted
-    NSString* from = iqNode.fromUser;
-    if(from && [[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
-    {
-        NSString* fullName = from;
-        NSDictionary* userDic=@{@"buddy_name":from,
-                                @"full_name":fullName,
-                                kAccountID:self.accountNo
-        };
-        [[NSNotificationCenter defaultCenter]
-         postNotificationName: kMonalCallStartedNotice object: userDic];
-
-        [self.jingle rtpConnect];
-        return;
-    }
-
-}
-
-
--(void) processJingleSetIq:(XMPPIQ*) iqNode
-{
-/*
- * TODO fix for new parser
-    if ([iqNode.type isEqualToString:kiqSetType]) {
-        if(iqNode.jingleSession) {
-
-            //accpetance of our call
-            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-accept"] &&
-               [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid])
-            {
-
-                NSDictionary* transport1;
-                NSDictionary* transport2;
-                for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
-                    if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
-                        transport1=candidate;
-                    }
-                    if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
-                        transport2=candidate;
-                    }
-                }
-
-                NSDictionary* pcmaPayload;
-                for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
-                    if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
-                        pcmaPayload=payload;
-                        break;
-                    }
-                }
-
-                if (pcmaPayload && transport1) {
-                    self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
-                    self.jingle.destinationPort= [transport1 objectForKey:@"port"];
-
-                    XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                    [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
-                    [self send:node];
-
-                    [self.jingle rtpConnect];
-                }
-                return;
-            }
-
-            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-terminate"] &&  [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid]) {
-                XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-                [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
-                [self send:node];
-                [self.jingle rtpDisconnect];
-            }
-
-            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-initiate"]) {
-                NSDictionary* pcmaPayload;
-                for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
-                    if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
-                        pcmaPayload=payload;
-                        break;
-                    }
-                }
-
-                NSDictionary* transport1;
-                NSDictionary* transport2;
-                for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
-                    if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
-                        transport1=candidate;
-                    }
-                    if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
-                        transport2=candidate;
-                    }
-                }
-
-                if (pcmaPayload && transport1) {
-                    self.jingle = [[jingleCall alloc] init];
-                    self.jingle.initiator= [iqNode.jingleSession objectForKey:@"initiator"];
-                    self.jingle.responder= [iqNode.jingleSession objectForKey:@"responder"];
-                    if(!self.jingle.responder)
-                    {
-                        self.jingle.responder = [NSString stringWithFormat:@"%@/%@", iqNode.to, self.connectionProperties.boundJid];
-                    }
-
-                    self.jingle.thesid= [iqNode.jingleSession objectForKey:@"sid"];
-                    self.jingle.destinationPort= [transport1 objectForKey:@"port"];
-                    self.jingle.idval=iqNode.idval;
-                    if(transport2) {
-                        self.jingle.destinationPort2= [transport2 objectForKey:@"port"];
-                    }
-                    else {
-                        self.jingle.destinationPort2=[transport1 objectForKey:@"port"]; // if nothing is provided just reuse..
-                    }
-                    self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
-
-
-                    if(iqNode.user && iqNode.resource && self.connectionProperties.identity.jid) {
-
-                        NSDictionary *dic= @{@"from":iqNode.from,
-                                             @"user":iqNode.user,
-                                             @"resource":iqNode.resource,
-                                             @"id": iqNode.idval,
-                                             kAccountID:self.accountNo,
-                                             @"account_name": self.connectionProperties.identity.jid
-                        };
-
-                        [[NSNotificationCenter defaultCenter]
-                         postNotificationName: kMonalCallRequestNotice object: dic];
-
-                    }
-                }
-                else {
-                    //does not support the same formats
-                }
-
-            }
-        }
-    }
-*/
-}
-
-
 #pragma mark - account management
 
 -(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion
@@ -3675,7 +3494,7 @@ NSString *const kData=@"data";
 
 -(NSData*) resizeAvatarImage:(UIImage*) image
 {
-    //resize image to a maximum of 600x600 pixel
+    // resize image to a maximum of 600x600 pixel
     CGRect dimensions = AVMakeRectWithAspectRatioInsideRect(image.size, CGRectMake(0, 0, 600, 600));
     DDLogInfo(@"Downsizing avatar image to %lux%lu pixel", (unsigned long)dimensions.size.width, (unsigned long)dimensions.size.height);
     UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:dimensions.size];

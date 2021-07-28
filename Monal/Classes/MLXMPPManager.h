@@ -89,27 +89,8 @@
 -(BOOL) isValidPassword:(NSString*) password forAccount:(NSString*) accountNo;
 -(void) updatePassword:(NSString*) password forAccount:(NSString*) accountNo;
 
-#pragma mark Jingle VOIP
-
-/**
- Call a contact from an account
- */
--(void) callContact:(MLContact*) contact;
-
-/**
- hangup on a contact from an account
- */
--(void) hangupContact:(MLContact*) contact;
-
-
 -(void) approveContact:(MLContact*) contact;
-
 -(void) rejectContact:(MLContact*) contact;
-
-/**
- respond to call with either accept or not. Passes back the notifiaction dictionary
- */
--(void) handleCall:(NSDictionary*) userDic withResponse:(BOOL) accept; 
 
 /**
 Sends a message to a specified contact in account. Calls completion handler on success or failure.

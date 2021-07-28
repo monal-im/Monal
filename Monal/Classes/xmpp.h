@@ -162,28 +162,6 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
  */
 -(void) leaveMuc:(NSString* _Nonnull) room;
 
-#pragma mark Jingle
-/**
- Calls a contact
- */
--(void)call:(MLContact*) contact;
-
-/**
-Hangs up current call with contact
- */
--(void)hangup:(MLContact*) contact;
-
-/**
-Decline a call request
- */
--(void)declineCall:(NSDictionary*) contact;
-
-/**
- accept call request
- */
--(void)acceptCall:(NSDictionary*) contact;
-
-
 /*
  notifies the server client is in foreground
  */

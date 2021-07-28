@@ -14,18 +14,13 @@
 
 @import UserNotifications;
 
-
-#if !TARGET_OS_MACCATALYST
-@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate >
-#else
-@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate >
-#endif
+@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate>
 
 @property (nonatomic, strong) UIWindow* window;
 
 -(void) updateUnread;
--(void) handleURL:(NSURL *) url;
--(void) setActiveChatsController: (UIViewController *) activeChats;
+-(void) handleURL:(NSURL*) url;
+-(void) setActiveChatsController: (UIViewController*) activeChats;
 
 @end
 

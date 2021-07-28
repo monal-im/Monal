@@ -29,7 +29,7 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeOneBesideSecondary;
     
     [self updateBackground:NO];
 }

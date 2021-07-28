@@ -23,10 +23,8 @@
     NSString* versionTxt = [HelperTools appBuildVersionInfo];
     [self.aboutVersion setText:versionTxt];
 
-    if (@available(iOS 13.0, *)) {
-        UIBarButtonItem* leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(close:)];
-        self.navigationItem.leftBarButtonItem = leftBarButtonItem;
-    }
+    UIBarButtonItem* leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(close:)];
+    self.navigationItem.leftBarButtonItem = leftBarButtonItem;
 }
 
 - (NSArray<UIKeyCommand*>*) keyCommands

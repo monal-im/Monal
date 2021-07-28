@@ -69,46 +69,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     DDLogError(@"push reg error %@", error);
 }
 
-#pragma mark - VOIP notification
-
-#if !TARGET_OS_MACCATALYST
-
--(void) voipRegistration
-{
-    PKPushRegistry* voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
-    voipRegistry.delegate = self;
-    voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
-}
-
-// Handle updated APNS tokens
--(void) pushRegistry:(PKPushRegistry*) registry didUpdatePushCredentials:(PKPushCredentials*) credentials forType:(NSString*) type
-{
-    NSString* token = [HelperTools stringFromToken:credentials.token];
-    DDLogInfo(@"APNS voip token string: %@", token);
-    [[MLXMPPManager sharedInstance] setPushToken:token];
-}
-
--(void) pushRegistry:(PKPushRegistry*) registry didInvalidatePushTokenForType:(NSString*) type
-{
-    DDLogInfo(@"didInvalidatePushTokenForType called (and ignored, TODO: disable push on server?)");
-}
-
-// Handle incoming pushes
--(void) pushRegistry:(PKPushRegistry*) registry didReceiveIncomingPushWithPayload:(PKPushPayload*) payload forType:(PKPushType) type withCompletionHandler:(void (^)(void)) completion
-{
-    DDLogInfo(@"incoming voip push notfication: %@", [payload dictionaryPayload]);
-    if([UIApplication sharedApplication].applicationState == UIApplicationStateActive)
-        return;
-    if(@available(iOS 13.0, *))
-        DDLogError(@"Voip push shouldnt arrive on ios13.");
-    else
-        [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result) {
-            completion();
-        }];
-}
-
-#endif
-
 #pragma mark - notification actions
 
 -(void) showCallScreen:(NSNotification*) userInfo
@@ -219,28 +179,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         options:UNNotificationActionOptionNone
     ];
     UNNotificationCategory* messageCategory;
-    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert;
-    if(@available(iOS 13.0, *))
-    {
-        messageCategory = [UNNotificationCategory
-            categoryWithIdentifier:@"message"
-            actions:@[replyAction, markAsReadAction]
-            intentIdentifiers:@[]
-            options:UNNotificationCategoryOptionAllowAnnouncement
-        ];
-        
-        //ios 13 has support for UNAuthorizationOptionAnnouncement
-        authOptions = authOptions | UNAuthorizationOptionAnnouncement;
-    }
-    else
-    {
-        messageCategory = [UNNotificationCategory
-            categoryWithIdentifier:@"message"
-            actions:@[replyAction, markAsReadAction]
-            intentIdentifiers:@[]
-            options:UNNotificationCategoryOptionNone
-        ];
-    }
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement;
+    messageCategory = [UNNotificationCategory
+        categoryWithIdentifier:@"message"
+        actions:@[replyAction, markAsReadAction]
+        intentIdentifiers:@[]
+        options:UNNotificationCategoryOptionAllowAnnouncement
+    ];
+
     //request auth to show notifications and register our notification categories created above
     [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError* error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -259,18 +205,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 }
                 
                 //activate push
-                if(@available(iOS 13.0, *))
-                {
-                    DDLogInfo(@"Registering for APNS...");
-                    [[UIApplication sharedApplication] registerForRemoteNotifications];
-                }
-                else
-                {
-#if !TARGET_OS_MACCATALYST
-                    DDLogInfo(@"Registering for VoIP APNS...");
-                    [self voipRegistration];
-#endif
-                }
+                DDLogInfo(@"Registering for APNS...");
+                [[UIApplication sharedApplication] registerForRemoteNotifications];
             }
             else
             {
@@ -297,32 +233,26 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
 
-    if (@available(iOS 13.0, *))
-    {
-        UINavigationBarAppearance* appearance = [[UINavigationBarAppearance alloc] init];
-        [appearance configureWithTransparentBackground];
-        appearance.backgroundColor = [UIColor systemBackgroundColor];
-        
-        [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
-        [[UINavigationBar appearance] setStandardAppearance:appearance];
+    UINavigationBarAppearance* appearance = [[UINavigationBarAppearance alloc] init];
+    [appearance configureWithTransparentBackground];
+    appearance.backgroundColor = [UIColor systemBackgroundColor];
+    
+    [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
+    [[UINavigationBar appearance] setStandardAppearance:appearance];
 #if TARGET_OS_MACCATALYST
-        self.window.windowScene.titlebar.titleVisibility = UITitlebarTitleVisibilityHidden;
+    self.window.windowScene.titlebar.titleVisibility = UITitlebarTitleVisibilityHidden;
 #else
-        [[UITabBar appearance] setTintColor:[UIColor monaldarkGreen]];
-        [[UINavigationBar appearance] setTintColor:[UIColor monalGreen]];
+    [[UITabBar appearance] setTintColor:[UIColor monaldarkGreen]];
+    [[UINavigationBar appearance] setTintColor:[UIColor monalGreen]];
 #endif
-    }
     [[UINavigationBar appearance] setPrefersLargeTitles:YES];
 
     //handle message notifications by initializing the MLNotificationManager
     [MLNotificationManager sharedInstance];
     
     //register BGTask
-    if(@available(iOS 13.0, *))
-    {
-        DDLogInfo(@"calling MonalAppDelegate configureBackgroundFetchingTask");
-        [self configureBackgroundFetchingTask];
-    }
+    DDLogInfo(@"calling MonalAppDelegate configureBackgroundFetchingTask");
+    [self configureBackgroundFetchingTask];
     // Play audio even if phone is in silent mode
     NSError* audioSessionError;
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&audioSessionError];
@@ -523,7 +453,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if([notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
         completionHandler(UNNotificationPresentationOptionNone);
     } else {
-        completionHandler(UNNotificationPresentationOptionAlert);
+        completionHandler(UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner);
     }
 }
 
@@ -708,38 +638,36 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 - (void)buildMenuWithBuilder:(id<UIMenuBuilder>)builder
 {
     [super buildMenuWithBuilder:builder];
-    if (@available(iOS 13.0, *)) {
-        //monal
-        UIKeyCommand* preferencesCommand = [UIKeyCommand commandWithTitle:@"Preferences..." image:nil action:@selector(showSettings) input:@"," modifierFlags:UIKeyModifierCommand propertyList:nil];
+    //monal
+    UIKeyCommand* preferencesCommand = [UIKeyCommand commandWithTitle:@"Preferences..." image:nil action:@selector(showSettings) input:@"," modifierFlags:UIKeyModifierCommand propertyList:nil];
 
-        UIMenu* preferencesMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.preferences" options:UIMenuOptionsDisplayInline children:@[preferencesCommand]];
-        [builder insertSiblingMenu:preferencesMenu afterMenuForIdentifier:UIMenuAbout];
+    UIMenu* preferencesMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.preferences" options:UIMenuOptionsDisplayInline children:@[preferencesCommand]];
+    [builder insertSiblingMenu:preferencesMenu afterMenuForIdentifier:UIMenuAbout];
 
-        //file
-        UIKeyCommand* newCommand = [UIKeyCommand commandWithTitle:@"New Message" image:nil action:@selector(showNew) input:@"N" modifierFlags:UIKeyModifierCommand propertyList:nil];
+    //file
+    UIKeyCommand* newCommand = [UIKeyCommand commandWithTitle:@"New Message" image:nil action:@selector(showNew) input:@"N" modifierFlags:UIKeyModifierCommand propertyList:nil];
 
-        UIMenu* newMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.new" options:UIMenuOptionsDisplayInline children:@[newCommand]];
-        [builder insertChildMenu:newMenu atStartOfMenuForIdentifier:UIMenuFile];
+    UIMenu* newMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.new" options:UIMenuOptionsDisplayInline children:@[newCommand]];
+    [builder insertChildMenu:newMenu atStartOfMenuForIdentifier:UIMenuFile];
 
-        UIKeyCommand* detailsCommand = [UIKeyCommand commandWithTitle:@"Details..." image:nil action:@selector(showDetails) input:@"I" modifierFlags:UIKeyModifierCommand propertyList:nil];
+    UIKeyCommand* detailsCommand = [UIKeyCommand commandWithTitle:@"Details..." image:nil action:@selector(showDetails) input:@"I" modifierFlags:UIKeyModifierCommand propertyList:nil];
 
-        UIMenu* detailsMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.detail" options:UIMenuOptionsDisplayInline children:@[detailsCommand]];
-        [builder insertSiblingMenu:detailsMenu afterMenuForIdentifier:@"im.monal.new"];
+    UIMenu* detailsMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.detail" options:UIMenuOptionsDisplayInline children:@[detailsCommand]];
+    [builder insertSiblingMenu:detailsMenu afterMenuForIdentifier:@"im.monal.new"];
 
-        UIKeyCommand* deleteCommand = [UIKeyCommand commandWithTitle:@"Delete Conversation" image:nil action:@selector(deleteConversation) input:@"\b" modifierFlags:UIKeyModifierCommand propertyList:nil];
+    UIKeyCommand* deleteCommand = [UIKeyCommand commandWithTitle:@"Delete Conversation" image:nil action:@selector(deleteConversation) input:@"\b" modifierFlags:UIKeyModifierCommand propertyList:nil];
 
-        UIMenu* deleteMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.delete" options:UIMenuOptionsDisplayInline children:@[deleteCommand]];
-        [builder insertSiblingMenu:deleteMenu afterMenuForIdentifier:@"im.monal.detail"];
+    UIMenu* deleteMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.delete" options:UIMenuOptionsDisplayInline children:@[deleteCommand]];
+    [builder insertSiblingMenu:deleteMenu afterMenuForIdentifier:@"im.monal.detail"];
 
-        [builder removeMenuForIdentifier:UIMenuHelp];
+    [builder removeMenuForIdentifier:UIMenuHelp];
 
-        [builder replaceChildrenOfMenuForIdentifier:UIMenuAbout fromChildrenBlock:^NSArray<UIMenuElement *> * _Nonnull(NSArray<UIMenuElement *> * _Nonnull items) {
-            UICommand* itemCommand = (UICommand*)items.firstObject;
-            UICommand* aboutCommand = [UICommand commandWithTitle:itemCommand.title image:nil action:@selector(aboutWindow) propertyList:nil];
-            NSArray* menuItems = @[aboutCommand];
-            return menuItems;
-        }];
-    }
+    [builder replaceChildrenOfMenuForIdentifier:UIMenuAbout fromChildrenBlock:^NSArray<UIMenuElement *> * _Nonnull(NSArray<UIMenuElement *> * _Nonnull items) {
+        UICommand* itemCommand = (UICommand*)items.firstObject;
+        UICommand* aboutCommand = [UICommand commandWithTitle:itemCommand.title image:nil action:@selector(aboutWindow) propertyList:nil];
+        NSArray* menuItems = @[aboutCommand];
+        return menuItems;
+    }];
 }
 
 -(void) aboutWindow
@@ -853,11 +781,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 [[MLXMPPManager sharedInstance] disconnectAll];
                 
                 //schedule a BGProcessingTaskRequest to process this further as soon as possible
-                if(@available(iOS 13.0, *))
-                {
-                    DDLogInfo(@"calling scheduleBackgroundFetchingTask");
-                    [self scheduleBackgroundFetchingTask];
-                }
+                DDLogInfo(@"calling scheduleBackgroundFetchingTask");
+                [self scheduleBackgroundFetchingTask];
                 
                 [DDLog flushLog];
                 [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
@@ -919,53 +844,40 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) configureBackgroundFetchingTask
 {
-    if(@available(iOS 13.0, *))
-    {
-        [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) launchHandler:^(BGTask *task) {
-            DDLogDebug(@"RUNNING BGTASK LAUNCH HANDLER");
-            if(![HelperTools isInBackground])
-            {
-                DDLogDebug(@"Already in foreground, stopping bgtask");
-                [_bgFetch setTaskCompletedWithSuccess:YES];
-            }
-            else
-                [self handleBackgroundFetchingTask:task];
-        }];
-    } else {
-        // No fallback unfortunately
-    }
+    [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) launchHandler:^(BGTask *task) {
+        DDLogDebug(@"RUNNING BGTASK LAUNCH HANDLER");
+        if(![HelperTools isInBackground])
+        {
+            DDLogDebug(@"Already in foreground, stopping bgtask");
+            [_bgFetch setTaskCompletedWithSuccess:YES];
+        }
+        else
+            [self handleBackgroundFetchingTask:task];
+    }];
 }
 
 -(void) scheduleBackgroundFetchingTask
 {
-    if(@available(iOS 13.0, *))
-    {
-        [HelperTools dispatchSyncReentrant:^{
-            NSError *error = NULL;
-            // cancel existing task (if any)
-            [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
-            // new task
-            //BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-            BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-            request.requiresNetworkConnectivity = YES;
-            request.requiresExternalPower = NO;
-            request.earliestBeginDate = nil;
-            //request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
-            BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
-            if(!success) {
-                // Errorcodes https://stackoverflow.com/a/58224050/872051
-                DDLogError(@"Failed to submit BGTask request: %@", error);
-            } else {
-                DDLogVerbose(@"Success submitting BGTask request %@", request);
-            }
-        } onQueue:dispatch_get_main_queue()];
-    }
-    else
-    {
-        // No fallback unfortunately
-        DDLogError(@"BGTask needed but NOT supported!");
-    }
+    [HelperTools dispatchSyncReentrant:^{
+        NSError *error = NULL;
+        // cancel existing task (if any)
+        [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
+        // new task
+        //BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+        BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+        //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+        request.requiresNetworkConnectivity = YES;
+        request.requiresExternalPower = NO;
+        request.earliestBeginDate = nil;
+        //request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+        BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
+        if(!success) {
+            // Errorcodes https://stackoverflow.com/a/58224050/872051
+            DDLogError(@"Failed to submit BGTask request: %@", error);
+        } else {
+            DDLogVerbose(@"Success submitting BGTask request %@", request);
+        }
+    } onQueue:dispatch_get_main_queue()];
 }
 
 -(void) connectIfNecessary

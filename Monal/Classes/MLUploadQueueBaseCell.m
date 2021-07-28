@@ -10,18 +10,6 @@
 
 @implementation MLUploadQueueBaseCell
 
--(void) awakeFromNib
-{
-    [super awakeFromNib];
-    if(@available(iOS 13.0, *)) {} else
-    {
-        UIImage* closeButtonImage = [UIImage imageNamed:@"away"];
-        assert(self.closeButton != nil);
-        assert(closeButtonImage != nil);
-        [self.closeButton setImage:closeButtonImage forState:UIControlStateNormal];
-    }
-}
-
 -(IBAction) closeButtonAction
 {
     [self.uploadQueueDelegate notifyUploadQueueRemoval:self.index];

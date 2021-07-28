@@ -92,13 +92,9 @@ enum DummySettingsRows {
 
     [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"AccountCell"];
 
-    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeOneBesideSecondary;
 #if !TARGET_OS_MACCATALYST
-    if (@available(iOS 13.0, *)) {
-        self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
-    } else {
-        // Fallback on earlier versions
-    }
+    self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
 #endif
 }
 

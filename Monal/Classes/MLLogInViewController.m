@@ -45,14 +45,6 @@
     [nc addObserver:self selector:@selector(omemoBundleFetchFinished:) name:kMonalFinishedOmemoBundleFetch object:nil];
     [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
 
-    if(@available(iOS 13.0, *))
-    {
-        // nothing to do here
-    }
-    else
-    {
-        [self.qrScanButton setTitle:NSLocalizedString(@"QR", "MLLoginView: QR-Code Button iOS12 only") forState:UIControlStateNormal];
-    }
     [self registerForKeyboardNotifications];
 }
 
@@ -311,15 +303,8 @@
 {
     if([segue.identifier isEqualToString:@"scanQRCode"])
     {
-        if(@available(iOS 12.0, macCatalyst 14.0, *))
-        {
-            MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
-            qrCodeScanner.loginDelegate = self;
-        }
-        else
-        {
-            [MLQRCodeScannerCatalina showCatalinaWarningWithView:self];
-        }
+        MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
+        qrCodeScanner.loginDelegate = self;
     }
     else if([segue.identifier isEqualToString:@"showPrivacySettings"])
     {

@@ -36,11 +36,7 @@
     page1.title = NSLocalizedString(@"Welcome to Monal", @"");
     page1.titleColor = [UIColor darkGrayColor];
     page1.desc = NSLocalizedString(@"Chat for free with your friends, colleagues and family!", @"");
-    if (@available(iOS 13.0, *)) {
-        page1.descColor = [UIColor labelColor];
-    } else {
-       page1.descColor = [UIColor blackColor];
-    }
+    page1.descColor = [UIColor labelColor];
     page1.titleIconPositionY = 100.f;
     page1.titlePositionY = self.view.bounds.size.height/2 - 30;
     page1.descPositionY = self.view.bounds.size.height/2 - 70;
@@ -49,11 +45,7 @@
     page2.title = NSLocalizedString(@"Choices Galore", @"");
     page2.titleColor = [UIColor darkGrayColor];
     page2.desc = NSLocalizedString(@"Use your existing account or make a new one on the many servers around the world", @"");
-    if (@available(iOS 13.0, *)) {
-        page2.descColor = [UIColor labelColor];
-    } else {
-       page2.descColor = [UIColor blackColor];
-    }
+    page2.descColor = [UIColor labelColor];
     page2.titleIconPositionY = 100.f;
     page2.titlePositionY = self.view.bounds.size.height/2 - 30;
     page2.descPositionY = self.view.bounds.size.height/2 - 70;
@@ -62,11 +54,7 @@
     page3.title = NSLocalizedString(@"Escape The Garden", @"");
     page3.titleColor = [UIColor darkGrayColor];
     page3.desc = NSLocalizedString(@"You are not trapped in a garden. Talk to anyone else without anyone tracking you.", @"");
-    if (@available(iOS 13.0, *)) {
-        page3.descColor = [UIColor labelColor];
-    } else {
-        page3.descColor = [UIColor blackColor];
-    }
+    page3.descColor = [UIColor labelColor];
     page3.titleIconPositionY = 100.f;
     page3.titlePositionY = self.view.bounds.size.height/2 - 30;
     page3.descPositionY = self.view.bounds.size.height/2 - 70;
@@ -75,12 +63,8 @@
     page4.title = NSLocalizedString(@"Spread The Word", @"");
     page4.titleColor=[UIColor darkGrayColor];
     page4.desc = NSLocalizedString(@"If you like Monal, please let others know and leave a review", @"");
-    if (@available(iOS 13.0, *)) {
-        page4.descColor=[UIColor labelColor];
-    } else {
-        page4.descColor=[UIColor blackColor];
-    }
-    page4.titleIconPositionY=100.f;
+    page4.descColor = [UIColor labelColor];
+    page4.titleIconPositionY = 100.f;
     page4.titlePositionY = self.view.bounds.size.height/2 - 30;
     page4.descPositionY = self.view.bounds.size.height/2 - 70;
     
@@ -89,11 +73,7 @@
     intro.skipButtonAlignment = EAViewAlignmentCenter;
     intro.skipButtonY = 100.f;
     intro.pageControlY = 120.0f;
-    if (@available(iOS 13.0, *)) {
-        intro.backgroundColor = [UIColor systemGroupedBackgroundColor];
-    } else {
-        intro.backgroundColor = [UIColor systemGroupedBackgroundColor];
-    }
+    intro.backgroundColor = [UIColor systemGroupedBackgroundColor];
     [intro.skipButton setTitleColor:[UIColor monaldarkGreen] forState:UIControlStateNormal];
     [intro setDelegate:self];
     intro.pageControl.currentPageIndicatorTintColor = [UIColor monaldarkGreen];

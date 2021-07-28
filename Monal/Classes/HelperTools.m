@@ -52,16 +52,10 @@ void logException(NSException* exception)
 
 +(NSDictionary*) pushServer
 {
-    if (@available(iOS 13.0, *))        // for ios 13 onwards
-        return @{
-            @"jid": @"ios13push.monal.im",
-            @"url": @"https://ios13push.monal.im:5281/push_appserver",
-        };
-    else                                // for ios 12
-        return @{
-            @"jid": @"push.monal.im",
-            @"url": @"https://push.monal.im:5281/push_appserver",
-        };
+    return @{
+        @"jid": @"ios13push.monal.im",
+        @"url": @"https://ios13push.monal.im:5281/push_appserver",
+    };
 }
 
 +(NSString*) stringFromToken:(NSData*) tokenIn

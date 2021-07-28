@@ -469,8 +469,8 @@ enum ContactDetailsAboutRows {
             browser.displayActionButton = YES;
             browser.displayToolbar = YES;
 
-            self.leftImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowLeft"];
-            self.rightImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowRight"];
+            self.leftImage = [UIImage systemImageNamed:@"arrowtriangle.left.fill"];
+            self.rightImage = [UIImage systemImageNamed:@"arrowtriangle.right.fill"];
             browser.leftArrowImage = self.leftImage;
             browser.rightArrowImage = self.rightImage;
             UIBarButtonItem* close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"") style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];

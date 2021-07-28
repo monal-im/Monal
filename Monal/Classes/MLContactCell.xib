@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -13,29 +12,29 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="60"/>
             <autoresizingMask key="autoresizingMask"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="vJJ-6x-WMR" id="Qx8-80-HZA">
-                <rect key="frame" x="0.0" y="0.0" width="293" height="60"/>
+                <rect key="frame" x="0.0" y="0.0" width="294.5" height="60"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OhQ-Fk-Czf" userLabel="name">
-                        <rect key="frame" x="70" y="6" width="130" height="20"/>
+                        <rect key="frame" x="71" y="6" width="129.5" height="20"/>
                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WBM-UR-4hu" userLabel="status" customClass="MLAttributedLabel">
-                        <rect key="frame" x="70" y="28" width="224" height="19"/>
+                        <rect key="frame" x="71" y="28" width="223.5" height="19"/>
                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="pGK-Ar-iBm" userLabel="usericon">
-                        <rect key="frame" x="7" y="6.5" width="48" height="48"/>
+                        <rect key="frame" x="8" y="6.5" width="48" height="48"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="48" id="0m8-YI-N9A"/>
                             <constraint firstAttribute="width" constant="48" id="788-Js-K50"/>
                         </constraints>
                     </imageView>
-                    <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" adjustsImageWhenDisabled="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="orC-ej-MKC">
-                        <rect key="frame" x="40" y="0.0" width="22" height="22"/>
+                    <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" adjustsImageWhenDisabled="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="orC-ej-MKC">
+                        <rect key="frame" x="41" y="0.0" width="22" height="22"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <state key="normal" title="99" backgroundImage="NotificationBubble">
@@ -44,26 +43,26 @@
                         </state>
                     </button>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IrL-yc-gYp" userLabel="name">
-                        <rect key="frame" x="70" y="20.5" width="224" height="20"/>
+                        <rect key="frame" x="71" y="20.5" width="223.5" height="20"/>
                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Awx-9U-LWt" userLabel="statusOrb">
-                        <rect key="frame" x="44" y="39.5" width="15" height="15"/>
+                        <rect key="frame" x="45" y="39.5" width="15" height="15"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="15" id="W9O-5a-SsY"/>
                             <constraint firstAttribute="width" constant="15" id="c2D-y5-Xhd"/>
                         </constraints>
                     </imageView>
-                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="847-moon-selected" translatesAutoresizingMaskIntoConstraints="NO" id="IAx-7T-RJd">
-                        <rect key="frame" x="282" y="23" width="12" height="14"/>
+                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="moon.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="IAx-7T-RJd">
+                        <rect key="frame" x="282.5" y="24" width="12" height="12.5"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="12" id="AjH-c6-9Xp"/>
                             <constraint firstAttribute="height" constant="14" id="Xbr-kc-Y3g"/>
                         </constraints>
                     </imageView>
                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mar 24, 2019" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7IF-Xp-ziQ">
-                        <rect key="frame" x="208" y="1" width="86" height="16"/>
+                        <rect key="frame" x="208.5" y="1" width="86" height="16"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="86" id="7Sj-WB-6yb"/>
                         </constraints>
@@ -108,7 +107,7 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="847-moon-selected" width="24" height="28"/>
         <image name="NotificationBubble" width="22" height="22"/>
+        <image name="moon.fill" catalog="system" width="128" height="121"/>
     </resources>
 </document>

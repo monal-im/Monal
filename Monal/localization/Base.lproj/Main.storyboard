@@ -499,7 +499,7 @@
         <scene sceneID="vAl-ec-NFW">
             <objects>
                 <splitViewController presentsWithGesture="NO" id="dqD-Rt-bEF" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Chats" image="906-chat-3" id="jh7-be-VPo"/>
+                    <tabBarItem key="tabBarItem" title="Chats" image="text.bubble" catalog="system" id="jh7-be-VPo"/>
                     <connections>
                         <outlet property="delegate" destination="ncC-uM-uuw" id="L3K-5f-uMh"/>
                         <segue destination="rFS-eK-Dxd" kind="relationship" relationship="masterViewController" id="O9T-Gg-eaS"/>
@@ -1333,7 +1333,7 @@
                                                         <constraint firstAttribute="height" constant="28" id="glu-sL-G5U"/>
                                                     </constraints>
                                                     <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    <state key="normal" image="724-info"/>
+                                                    <state key="normal" image="info.circle" catalog="system"/>
                                                 </button>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XUY-AO-Shv">
                                                     <rect key="frame" x="753" y="28" width="256" height="200"/>
@@ -1502,7 +1502,7 @@
                                                         <constraint firstAttribute="width" constant="28" id="ake-Sq-Thc"/>
                                                     </constraints>
                                                     <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    <state key="normal" image="724-info"/>
+                                                    <state key="normal" image="info.circle" catalog="system"/>
                                                 </button>
                                                 <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Delivered" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0C4-4V-7mE">
                                                     <rect key="frame" x="680.5" y="218" width="45.5" height="12"/>
@@ -1600,7 +1600,7 @@
                                                         <constraint firstAttribute="height" constant="28" id="f0V-lJ-KMs"/>
                                                     </constraints>
                                                     <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    <state key="normal" image="724-info"/>
+                                                    <state key="normal" image="info.circle" catalog="system"/>
                                                 </button>
                                                 <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Delivered" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BY7-In-qxm">
                                                     <rect key="frame" x="680.5" y="218" width="45.5" height="12"/>
@@ -2766,18 +2766,18 @@
         <segue reference="U4S-rm-QvZ"/>
     </inferredMetricsTieBreakers>
     <resources>
-        <image name="724-info" width="28" height="28"/>
         <image name="744-locked-received" width="21" height="28"/>
         <image name="744-locked-selected" width="21" height="28"/>
         <image name="745-unlocked" width="21" height="28"/>
-        <image name="906-chat-3" width="28" height="26"/>
         <image name="Tie_My_Boat_by_Ray_Garcia" width="563" height="1218"/>
         <image name="down" width="28" height="28"/>
         <image name="file" width="28" height="28"/>
+        <image name="info.circle" catalog="system" width="128" height="121"/>
         <image name="mic" catalog="system" width="108" height="128"/>
         <image name="paperclip" catalog="system" width="121" height="128"/>
         <image name="paperplane.fill" catalog="system" width="128" height="118"/>
         <image name="plus.square" catalog="system" width="128" height="114"/>
+        <image name="text.bubble" catalog="system" width="128" height="110"/>
         <image name="xmark.circle.fill" catalog="system" width="128" height="121"/>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

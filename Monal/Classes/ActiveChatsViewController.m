@@ -81,20 +81,12 @@ static NSMutableSet* _smacksWarningDisplayed;
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"ContactCell"];
     
-    self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
-    if(@available(iOS 13.0, *))
-    {
+    self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeOneBesideSecondary;
 #if !TARGET_OS_MACCATALYST
-        self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
+    self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
 #endif
-        self.settingsButton.image = [UIImage systemImageNamed:@"gearshape.fill"];
-        self.composeButton.image = [UIImage systemImageNamed:@"person.2.fill"];
-    }
-    else
-    {
-        self.settingsButton.image = [UIImage imageNamed:@"973-user"];
-        self.composeButton.image = [UIImage imageNamed:@"704-compose"];
-    }
+    self.settingsButton.image = [UIImage systemImageNamed:@"gearshape.fill"];
+    self.composeButton.image = [UIImage systemImageNamed:@"person.2.fill"];
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
@@ -458,19 +450,15 @@ static NSMutableSet* _smacksWarningDisplayed;
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
     if([segue.identifier isEqualToString:@"showIntro"])
     {
-        // needed for >= ios13
-        if(@available(iOS 13.0, *))
-        {
-            MLWelcomeViewController* welcome = (MLWelcomeViewController*) segue.destinationViewController;
-            welcome.completion = ^(){
-                if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
-                {
-                    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
-                        [self performSegueWithIdentifier:@"showLogin" sender:self];
-                    }
+        MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
+        welcome.completion = ^(){
+            if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
+            {
+                if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
+                    [self performSegueWithIdentifier:@"showLogin" sender:self];
                 }
-            };
-        }
+            }
+        };
     }
     else if([segue.identifier isEqualToString:@"showConversation"])
     {

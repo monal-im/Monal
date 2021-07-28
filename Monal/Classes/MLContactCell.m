@@ -39,19 +39,12 @@
     [self setCount:(long)contact.unreadCount];
     [self displayLastMessage:lastMessage forContact:contact];
 
-    if(@available(iOS 13.0, *))
+    if(contact.isGroup)
     {
-        if(contact.isGroup)
-        {
-            if([@"channel" isEqualToString:contact.mucType])
-                self.userImage.image = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_channel"]];
-            else
-                self.userImage.image = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_muc"]];
-        }
+        if([@"channel" isEqualToString:contact.mucType])
+            self.userImage.image = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_channel"]];
         else
-            [[MLImageManager sharedInstance] getIconForContact:contact.contactJid andAccount:contact.accountId withCompletion:^(UIImage *image) {
-                self.userImage.image = image;
-            }];
+            self.userImage.image = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_muc"]];
     }
     else
         [[MLImageManager sharedInstance] getIconForContact:contact.contactJid andAccount:contact.accountId withCompletion:^(UIImage *image) {

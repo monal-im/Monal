@@ -119,17 +119,6 @@ class MonalUITests: XCTestCase {
         closeButton.tap()
     }
 
-    /*func test_0004_ResetTime() throws {
-        let app = XCUIApplication()
-        app.launchArguments = createStartArgs(extraArgs: ["--reset"])
-        if #available(iOS 13.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                app.launch()
-            }
-        }
-    }*/
-
     func test_0005_Register() throws
     {
         let app = XCUIApplication()
@@ -161,15 +150,6 @@ class MonalUITests: XCTestCase {
         app.navigationBars["Privacy Settings"].buttons["Close"].tap()
         startChattingStaticText.tap()
     }
-
-    /*func test_0006_LaunchPerformance() throws {
-        if #available(iOS 13.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
-        }
-    }*/
 
     func test_0007_PlusAndContactsButtons() throws {
         let app = XCUIApplication()

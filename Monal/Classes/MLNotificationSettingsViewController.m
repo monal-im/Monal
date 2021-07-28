@@ -61,7 +61,7 @@ enum {
     self.monal = NSLocalizedString(@"Monal Push Server", @"");
     self.advanced = NSLocalizedString(@"Mark all messages as read", @"");
 
-    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeOneBesideSecondary;
 }
 
 -(void) viewWillAppear:(BOOL) animated

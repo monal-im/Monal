@@ -2,7 +2,7 @@ project 'Monal.xcodeproj'
 source 'https://cdn.cocoapods.org/'
  
 # Uncomment the next line to define a global platform for your project
-platform :ios, '13.0'
+platform :ios, '14.0'
 
 # ignore all warnings from all pods
 inhibit_all_warnings!
@@ -33,8 +33,6 @@ def monalxmpp
   pod 'CocoaLumberjack'
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
   signalDeps
-  #this is only for ios12. Remove for mac builds.
-  pod 'OpenSSL-Universal', '1.1.1100'
 end
 
 

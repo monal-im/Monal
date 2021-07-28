@@ -33,7 +33,7 @@ struct XMPPLoginQRCode : Codable
 }
 
 @available(macCatalyst 14.0, *)
-@available(iOS 12.0, *)
+@available(iOS 14.0, *)
 @objc class MLQRCodeScanner: UIViewController, AVCaptureMetadataOutputObjectsDelegate
 {
     @objc weak var loginDelegate : MLLQRCodeScannerAccountLoginDeleagte?
@@ -296,20 +296,5 @@ struct XMPPLoginQRCode : Codable
     func handleQRCodeError()
     {
         errorMsg(title: NSLocalizedString("Invalid format", comment: "QR-Code-Scanner: invalid format"), msg: NSLocalizedString("We could not find a xmpp related QR-Code", comment: "QR-Code-Scanner: invalid format"), startCaptureOnClose: true)
-    }
-}
-
-@objcMembers
-public class MLQRCodeScannerCatalina : NSObject
-{
-    public static func showCatalinaWarning(view: UIViewController)
-    {
-        let ac = UIAlertController(title: NSLocalizedString("QR-Code scanning unsupported", comment: "catalina warning"), message: NSLocalizedString("QR-Code scanning is not supported on catalina", comment: "catalina warning"), preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: ""), style: .default)
-            {
-                action -> Void in
-            }
-        )
-        view.present(ac, animated: true)
     }
 }

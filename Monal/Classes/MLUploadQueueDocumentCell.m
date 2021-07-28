@@ -32,18 +32,14 @@
             return result;
         }
         DDLogVerbose(@"Thumbnail generation not successful - reverting to generic image for file");
-        UIDocumentInteractionController* imgCtrl = [UIDocumentInteractionController interactionControllerWithURL:url]; // Memory leak? I want C++ back :/
+        UIDocumentInteractionController* imgCtrl = [UIDocumentInteractionController interactionControllerWithURL:url];
         if(imgCtrl != nil && imgCtrl.icons.count > 0)
         {
             return imgCtrl.icons.firstObject;
         }
         else
         {
-            if (@available(iOS 13.0, *)) {
-                return [UIImage systemImageNamed:@"doc"];
-            } else {
-                return nil;
-            }
+            return [UIImage systemImageNamed:@"doc"];
         }
     }
 }

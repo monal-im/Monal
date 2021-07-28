@@ -8,7 +8,6 @@
 
 #import "ContactsViewController.h"
 #import "MLContactCell.h"
-#import "MLInfoCell.h"
 #import "DataLayer.h"
 #import "chatViewController.h"
 #import "ContactDetails.h"
@@ -50,7 +49,7 @@
                                     bundle:[NSBundle mainBundle]]
                                     forCellReuseIdentifier:@"ContactCell"];
     
-    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeOneBesideSecondary;
     
     self.searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
     
@@ -63,11 +62,8 @@
     
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
-    
-    if(@available(iOS 13.0, *))
-        self.navigationItem.rightBarButtonItem.image = [UIImage systemImageNamed:@"plus"];
-    else
-        self.navigationItem.rightBarButtonItem.image = [UIImage imageNamed:@"907-plus-rounded-square"];
+
+    self.navigationItem.rightBarButtonItem.image = [UIImage systemImageNamed:@"plus"];
 }
 
 -(void) dealloc

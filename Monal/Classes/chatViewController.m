@@ -48,6 +48,7 @@
 @import MobileCoreServices;
 @import AVFoundation;
 @import QuartzCore.CATransaction;
+@import UniformTypeIdentifiers.UTCoreTypes;
 
 @class MLEmoji;
 
@@ -166,7 +167,7 @@ enum msgSentState {
     self.chatInput.scrollsToTop = NO;
     self.editingCallback = nil;
     
-    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeOneBesideSecondary;
     
     _isTyping = NO;
     self.hidesBottomBarWhenPushed=YES;
@@ -183,16 +184,12 @@ enum msgSentState {
     //does not become first responder like in iOS
     [self.view addSubview:self.inputContainerView];
 
-    [self.inputContainerView.leadingAnchor constraintEqualToAnchor:self.inputContainerView.superview.leadingAnchor].active=YES;
-    [self.inputContainerView.bottomAnchor constraintEqualToAnchor:self.inputContainerView.superview.bottomAnchor].active=YES;
-    [self.inputContainerView.trailingAnchor constraintEqualToAnchor:self.inputContainerView.superview.trailingAnchor].active=YES;
+    [self.inputContainerView.leadingAnchor constraintEqualToAnchor:self.inputContainerView.superview.leadingAnchor].active = YES;
+    [self.inputContainerView.bottomAnchor constraintEqualToAnchor:self.inputContainerView.superview.bottomAnchor].active = YES;
+    [self.inputContainerView.trailingAnchor constraintEqualToAnchor:self.inputContainerView.superview.trailingAnchor].active = YES;
     self.tableviewBottom.constant += 20;
 #endif
-
-    self.filePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[mimeType_images, mimeType_gifFiles, mimeType_txtFiles, mimeType_videoFiles, mimeType_pdfFiles, mimeType_xmlFiles, mimeType_sourceCodeFiles,
-                        mimeType_audioFiles, mimeType_mp4Files, mimeType_movFiles, mimeType_zipFiles, mimeType_gzipFiles,
-                        mimeType_tarFiles, mimeType_rtfFiles, mimeType_xlsFiles, mimeType_pptFiles, mimeType_docFiles,
-                        mimeType_keyNoteFiles, mimeType_presentationFiles, mimeType_rmFiles, mimeType_mp3Files, mimeType_aviFiles, mimeType_mp4aFiles, mimeType_wavFiles] inMode:UIDocumentPickerModeImport];
+    self.filePicker = [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[UTTypeItem]];
     self.filePicker.allowsMultipleSelection = NO;
     self.filePicker.delegate = self;
 
@@ -212,14 +209,9 @@ enum msgSentState {
     [self.uploadMenuView addConstraint:self.uploadMenuConstraint];
     
     [self setChatInputHeightConstraints:YES];
-    
-    if (@available(iOS 13.0, *)) {
-        [self.sendButton setImage:[UIImage systemImageNamed:@"paperplane.fill"] forState:UIControlStateNormal];
-        [self.plusButton setImage:[UIImage systemImageNamed:@"paperclip"] forState:UIControlStateNormal];
-    } else {
-        [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
-        [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
-    }
+
+    [self.sendButton setImage:[UIImage systemImageNamed:@"paperplane.fill"] forState:UIControlStateNormal];
+    [self.plusButton setImage:[UIImage systemImageNamed:@"paperclip"] forState:UIControlStateNormal];
     
     [self initAudioRecordButton];
     
@@ -292,12 +284,8 @@ enum msgSentState {
     self.longGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(recordMessageAudio:)];
     self.longGestureRecognizer.minimumPressDuration = 0.8;
     [self.audioRecordButton addGestureRecognizer:self.longGestureRecognizer];
-    
-    if (@available(iOS 13.0, *)) {
-        [self.audioRecordButton setImage:[UIImage systemImageNamed:@"mic"] forState:UIControlStateNormal];
-    } else {
-        [self.audioRecordButton setImage:[UIImage imageNamed:@"microphone"] forState:UIControlStateNormal];
-    }
+
+    [self.audioRecordButton setImage:[UIImage systemImageNamed:@"mic"] forState:UIControlStateNormal];
     
     [self.sendButton setHidden:YES];
     self.isAudioMessage = YES;
@@ -1082,13 +1070,26 @@ enum msgSentState {
 }
 
 #pragma mark  - location delegate
--(void) locationManager:(CLLocationManager*) manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
-    CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
+-(void) locationManagerDidChangeAuthorization:(CLLocationManager*) manager {
+    CLAuthorizationStatus gpsStatus = [manager authorizationStatus];
     if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
         if(self.sendLocation) {
-            self.sendLocation=NO;
+            self.sendLocation = NO;
             [self.locationManager requestLocation];
         }
+    }
+    else
+    {
+        // Display warning
+        UIAlertController* gpsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing permission", @"")
+                                                                            message:NSLocalizedString(@"You did not grant Monal to access your location.", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [gpsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action) {
+            [gpsWarning dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [gpsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Settings", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action) {
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:@{} completionHandler:nil];
+        }]];
+        [self presentViewController:gpsWarning animated:YES completion:nil];
     }
 }
 
@@ -1146,9 +1147,9 @@ enum msgSentState {
             self.gpsHUD.hidden = YES;
         
             // Display warning
-            UIAlertController *gpsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No GPS location received", @"")
+            UIAlertController* gpsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No GPS location received", @"")
                                                                                 message:NSLocalizedString(@"Monal did not received a gps location. Please try again later.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [gpsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [gpsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action) {
                 [gpsWarning dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:gpsWarning animated:YES completion:nil];
@@ -1183,7 +1184,7 @@ enum msgSentState {
     [self presentViewController:alert animated:YES completion:nil];
 }
 
--(IBAction)attach:(id)sender
+-(IBAction) attach:(id) sender
 {
     [self stopEditing];
     [self.chatInput resignFirstResponder];
@@ -1267,12 +1268,8 @@ enum msgSentState {
         }];
 
         // Set image
-        if (@available(iOS 13.0, *)) {
-            [cameraAction setValue:[[UIImage systemImageNamed:@"camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
-            [photosAction setValue:[[UIImage systemImageNamed:@"photo"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
-        } else {
-            [cameraAction setValue:[[UIImage imageNamed:@"714-camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
-        }
+        [cameraAction setValue:[[UIImage systemImageNamed:@"camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        [photosAction setValue:[[UIImage systemImageNamed:@"photo"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         [fileAction setValue:[[UIImage imageNamed:@"file-attatchment"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         [actionControll addAction:cameraAction];
         [actionControll addAction:photosAction];
@@ -1280,22 +1277,23 @@ enum msgSentState {
 #endif
     }
     
-    UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
         // GPS
-        CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
+        CLLocationManager* gpsManager = [CLLocationManager init];
+        CLAuthorizationStatus gpsStatus = [gpsManager authorizationStatus];
         if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
             [self displayGPSHUD];
             [self makeLocationManager];
             [self.locationManager startUpdatingLocation];
         } else if(gpsStatus == kCLAuthorizationStatusNotDetermined) {
 #if TARGET_OS_MACCATALYST
-            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed", @"") message:NSLocalizedString(@"Monal  uses your location when you send a location message in a conversation.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed", @"") message:NSLocalizedString(@"Monal uses your location when you send a location message in a conversation.", @"") preferredStyle:UIAlertControllerStyleAlert];
             
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
             
-            UIAlertAction* allow = [UIAlertAction actionWithTitle:NSLocalizedString(@"Allow", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertAction* allow = [UIAlertAction actionWithTitle:NSLocalizedString(@"Allow", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
                 [self makeLocationManager];
                 self.sendLocation=YES;
                 [self.locationManager requestWhenInUseAuthorization];
@@ -1306,7 +1304,7 @@ enum msgSentState {
 
 #else
             [self makeLocationManager];
-            self.sendLocation=YES;
+            self.sendLocation = YES;
             [self.locationManager requestWhenInUseAuthorization];
 #endif
 
@@ -1321,9 +1319,7 @@ enum msgSentState {
     }];
 
     // Set image
-    if (@available(iOS 13.0, *)) {
-        [gpsAlert setValue:[[UIImage systemImageNamed:@"location"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
-    }
+    [gpsAlert setValue:[[UIImage systemImageNamed:@"location"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
     [actionControll addAction:gpsAlert];
     [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         [actionControll dismissViewControllerAnimated:YES completion:nil];
@@ -2253,10 +2249,7 @@ enum msgSentState {
         };
     }];
     LMCEditAction.backgroundColor = UIColor.systemYellowColor;
-    if(@available(iOS 13.0, *))
-    {
-        LMCEditAction.image = [[[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
-    }
+    LMCEditAction.image = [[[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     UIContextualAction* quoteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Quote", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         // Preserve user input
@@ -2274,10 +2267,7 @@ enum msgSentState {
         return completionHandler(YES);
     }];
     quoteAction.backgroundColor = UIColor.systemGreenColor;
-    if(@available(iOS 13.0, *))
-    {
-        quoteAction.image = [[[UIImage systemImageNamed:@"quote.bubble.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
-    }
+    quoteAction.image = [[[UIImage systemImageNamed:@"quote.bubble.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     
     UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [self.xmppAccount sendMessage:kMessageDeletedBody toContact:self.contact isEncrypted:(self.contact.isEncrypted || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
@@ -2294,10 +2284,7 @@ enum msgSentState {
         return completionHandler(YES);
     }];
     LMCDeleteAction.backgroundColor = UIColor.systemRedColor;
-    if(@available(iOS 13.0, *))
-    {
-        LMCDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
-    }
+    LMCDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     
     UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
@@ -2313,10 +2300,7 @@ enum msgSentState {
         return completionHandler(YES);
     }];
     localDeleteAction.backgroundColor = UIColor.systemRedColor;
-    if(@available(iOS 13.0, *))
-    {
-        localDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
-    }
+    localDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     
     UIContextualAction* copyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Copy", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
@@ -2330,10 +2314,7 @@ enum msgSentState {
         return completionHandler(YES);
     }];
     copyAction.backgroundColor = UIColor.systemGreenColor;
-    if(@available(iOS 13.0, *))
-    {
-        copyAction.image = [[[UIImage systemImageNamed:@"doc.on.doc.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
-    }
+    copyAction.image = [[[UIImage systemImageNamed:@"doc.on.doc.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     
     //only allow editing for the 3 newest message && only on outgoing messages
     if(!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted | self.contact.isEncrypted) historyBaseID:nil])

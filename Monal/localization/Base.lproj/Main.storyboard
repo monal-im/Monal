@@ -2531,12 +2531,13 @@
                             </connections>
                         </textView>
                         <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kYa-y4-X5Z" userLabel="SendButton">
-                            <rect key="frame" x="370" y="137" width="36" height="30"/>
+                            <rect key="frame" x="378" y="141" width="21" height="22"/>
                             <accessibility key="accessibilityConfiguration" identifier="send" label="Send"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="36" id="NRJ-Qj-1DA"/>
                                 <constraint firstAttribute="height" constant="30" id="ZPw-Mb-D1d"/>
                             </constraints>
+                            <state key="normal" image="paperplane.fill" catalog="system"/>
                             <attributedString key="userComments">
                                 <fragment content="#bc-ignore!"/>
                             </attributedString>
@@ -2545,12 +2546,13 @@
                             </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c6B-5o-sqL" userLabel="PlusButton">
-                            <rect key="frame" x="8" y="140" width="28" height="27"/>
+                            <rect key="frame" x="12" y="143" width="20" height="22"/>
                             <accessibility key="accessibilityConfiguration" label="Attach"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="28" id="r5D-N5-kFE"/>
                                 <constraint firstAttribute="height" constant="27" id="yNE-7P-Ml5"/>
                             </constraints>
+                            <state key="normal" image="paperclip" catalog="system"/>
                             <attributedString key="userComments">
                                 <fragment content="#bc-ignore!"/>
                             </attributedString>
@@ -2568,13 +2570,14 @@
                             <nil key="highlightedColor"/>
                         </label>
                         <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p5g-C7-nvT" userLabel="AudioButton">
-                            <rect key="frame" x="370" y="137" width="36" height="30"/>
+                            <rect key="frame" x="380" y="141" width="17" height="22"/>
                             <accessibility key="accessibilityConfiguration" identifier="microphone"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="30" id="dpb-If-XvF"/>
                                 <constraint firstAttribute="width" constant="36" id="uM4-4m-Jhb"/>
                             </constraints>
                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                            <state key="normal" image="mic" catalog="system"/>
                         </button>
                         <collectionView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="DZg-BI-mVA" userLabel="UploadMenuView">
                             <rect key="frame" x="8" y="0.0" width="398" height="145"/>
@@ -2771,6 +2774,9 @@
         <image name="Tie_My_Boat_by_Ray_Garcia" width="563" height="1218"/>
         <image name="down" width="28" height="28"/>
         <image name="file" width="28" height="28"/>
+        <image name="mic" catalog="system" width="108" height="128"/>
+        <image name="paperclip" catalog="system" width="121" height="128"/>
+        <image name="paperplane.fill" catalog="system" width="128" height="118"/>
         <image name="plus.square" catalog="system" width="128" height="114"/>
         <image name="xmark.circle.fill" catalog="system" width="128" height="121"/>
         <systemColor name="darkTextColor">

@@ -210,9 +210,6 @@ enum msgSentState {
     
     [self setChatInputHeightConstraints:YES];
 
-    [self.sendButton setImage:[UIImage systemImageNamed:@"paperplane.fill"] forState:UIControlStateNormal];
-    [self.plusButton setImage:[UIImage systemImageNamed:@"paperclip"] forState:UIControlStateNormal];
-    
     [self initAudioRecordButton];
     
     // setup refreshControl for infinite scrolling
@@ -285,8 +282,6 @@ enum msgSentState {
     self.longGestureRecognizer.minimumPressDuration = 0.8;
     [self.audioRecordButton addGestureRecognizer:self.longGestureRecognizer];
 
-    [self.audioRecordButton setImage:[UIImage systemImageNamed:@"mic"] forState:UIControlStateNormal];
-    
     [self.sendButton setHidden:YES];
     self.isAudioMessage = YES;
 }

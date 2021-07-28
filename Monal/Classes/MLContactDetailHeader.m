@@ -61,9 +61,9 @@
     self.background.image = [UIImage imageNamed:@"Tie_My_Boat_by_Ray_Garcia"];
 
     if(contact.isMuted)
-        [self.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];
+        [self.muteButton setImage:[UIImage systemImageNamed:@"moon.fill"] forState:UIControlStateNormal];
     else
-        [self.muteButton setImage:[UIImage imageNamed:@"847-moon"] forState:UIControlStateNormal];
+        [self.muteButton setImage:[UIImage systemImageNamed:@"moon"] forState:UIControlStateNormal];
 
     if(contact.isEncrypted)
         [self.lockButton setImage:[UIImage imageNamed:@"744-locked-selected"] forState:UIControlStateNormal];

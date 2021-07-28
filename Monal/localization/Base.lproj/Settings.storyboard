@@ -2,7 +2,6 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="dgM-uB-Aap">
     <device id="ipad12_9rounded" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -483,7 +482,7 @@
         <scene sceneID="tk9-fl-21l">
             <objects>
                 <splitViewController title="Settings" presentsWithGesture="NO" id="dgM-uB-Aap" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Settings" image="740-gear" id="YtW-zK-Qze"/>
+                    <tabBarItem key="tabBarItem" title="Settings" image="gearshape" catalog="system" id="YtW-zK-Qze"/>
                     <connections>
                         <outlet property="delegate" destination="GaS-pa-U5f" id="jHb-hI-E1M"/>
                         <segue destination="J7g-Ys-82i" kind="relationship" relationship="masterViewController" id="bBL-Ih-zel"/>
@@ -921,8 +920,8 @@
         <segue reference="bth-aJ-RQL"/>
     </inferredMetricsTieBreakers>
     <resources>
-        <image name="740-gear" width="28" height="28"/>
         <image name="AppLogo" width="341.33334350585938" height="341.33334350585938"/>
+        <image name="gearshape" catalog="system" width="128" height="121"/>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

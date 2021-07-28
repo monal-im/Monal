@@ -124,17 +124,17 @@ enum {
             cell.imageView.hidden = NO;
             cell.textLabel.text = self.notifications;
             if(self.canShowNotifications)
-                cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
+                cell.imageView.image = [UIImage systemImageNamed:@"checkmark.seal"];
             else
-               cell.imageView.image = [UIImage imageNamed:@"disabled"];
+                cell.imageView.image = [UIImage systemImageNamed:@"xmark.seal"];
             return cell;
         }
         case kNotificationSettingSectionApplePush: {
             UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
             if([MLXMPPManager sharedInstance].hasAPNSToken)
-                cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
+                cell.imageView.image = [UIImage systemImageNamed:@"checkmark.seal"];
             else
-                cell.imageView.image = [UIImage imageNamed:@"disabled"];
+                cell.imageView.image = [UIImage systemImageNamed:@"xmark.seal"];
             cell.imageView.hidden = NO;
             cell.textLabel.text = self.apple;
             return cell;
@@ -146,9 +146,9 @@ enum {
                 if(!xmppAccount.connectionProperties.registeredOnPushAppserver)
                     ticked = NO;
             if(ticked)
-                cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
+                cell.imageView.image = [UIImage systemImageNamed:@"checkmark.seal"];
             else
-               cell.imageView.image = [UIImage imageNamed:@"disabled"];
+                cell.imageView.image = [UIImage systemImageNamed:@"xmark.seal"];
             cell.textLabel.text = self.monal;
             cell.imageView.hidden = NO;
             return cell;
@@ -158,9 +158,9 @@ enum {
             xmpp* xmppAccount = [MLXMPPManager sharedInstance].connectedXMPP[indexPath.row];
             cell.textLabel.text = xmppAccount.connectionProperties.identity.jid;
             if(xmppAccount.connectionProperties.pushEnabled)
-                cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
+                cell.imageView.image = [UIImage systemImageNamed:@"checkmark.seal"];
             else
-                cell.imageView.image = [UIImage imageNamed:@"disabled"];
+                cell.imageView.image = [UIImage systemImageNamed:@"xmark.seal"];
             cell.imageView.hidden = NO;
             return cell;
         }

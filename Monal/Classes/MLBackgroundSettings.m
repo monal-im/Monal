@@ -10,8 +10,10 @@
 #import "MLBackgroundSettings.h"
 #import "MLSwitchCell.h"
 #import "MLImageManager.h"
+
 @import CoreServices;
 @import AVFoundation;
+@import UniformTypeIdentifiers.UTCoreTypes;
 
 @interface MLBackgroundSettings ()
 @property (nonatomic, strong) NSMutableArray* photos;
@@ -119,11 +121,9 @@
 -(void) showPhotos
 {
 #if TARGET_OS_MACCATALYST
-    //UTI @"public.data" for everything
-    NSString *images = (NSString *)kUTTypeImage;
-    UIDocumentPickerViewController *imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
-    imagePicker.allowsMultipleSelection=NO;
-    imagePicker.delegate=self;
+    UIDocumentPickerViewController* imagePicker = [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[UTTypeImage]];
+    imagePicker.allowsMultipleSelection = NO;
+    imagePicker.delegate = self;
     [self presentViewController:imagePicker animated:YES completion:nil];
 #else
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];

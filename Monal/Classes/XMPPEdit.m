@@ -21,6 +21,7 @@
 
 @import MobileCoreServices;
 @import AVFoundation;
+@import UniformTypeIdentifiers.UTCoreTypes;
 
 @interface XMPPEdit()
 
@@ -138,11 +139,8 @@
             @""
         ];
     }
-    
 #if TARGET_OS_MACCATALYST
-    //UTI @"public.data" for everything
-    NSString *images = (NSString *)kUTTypeImage;
-    self.imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
+    self.imagePicker = [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[UTTypeImage]];
     self.imagePicker.allowsMultipleSelection = NO;
     self.imagePicker.delegate = self;
 #endif

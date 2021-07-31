@@ -28,17 +28,19 @@
 
 @implementation MLLogInViewController
 
-- (void)viewDidLoad {
+-(void) viewDidLoad
+{
     [super viewDidLoad];
-    self.topImage.layer.cornerRadius=5.0;
-    self.topImage.clipsToBounds=YES;
+    self.topImage.layer.cornerRadius = 5.0;
+    self.topImage.clipsToBounds = YES;
 }
 
-- (void) viewWillAppear:(BOOL)animated
+-(void) viewWillAppear:(BOOL) animated
 {
     [super viewWillAppear:animated];
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self selector:@selector(connected:) name:kMonalFinishedCatchup object:nil];
+    [nc addObserver:self selector:@selector(connected:) name:kMLHasConnectedNotice object:nil];
+    [nc addObserver:self selector:@selector(catchedup:) name:kMonalFinishedCatchup object:nil];
 #ifndef DISABLE_OMEMO
     [nc addObserver:self selector:@selector(omemoBundleFetchFinished:) name:kMonalFinishedOmemoBundleFetch object:nil];
 #endif
@@ -50,7 +52,8 @@
 {
     NSURL* url = [NSURL URLWithString:link];
     
-    if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"] ) {
+    if([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"])
+    {
         SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
         [self presentViewController:safariView animated:YES completion:nil];
     }
@@ -148,10 +151,22 @@
 
 -(void) connected:(NSNotification*) notification
 {
-    if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
+    xmpp* xmppAccount = notification.object;
+    if(xmppAccount != nil && [xmppAccount.accountNo isEqualToString:self.accountNo])
     {
         [[NSNotificationCenter defaultCenter] removeObserver:self name:kXMPPError object:nil];
         [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.loginHUD.label.text = NSLocalizedString(@"Loading contact list", @"");
+        });
+    }
+}
+
+-(void) catchedup:(NSNotification*) notification
+{
+    xmpp* xmppAccount = notification.object;
+    if(xmppAccount != nil && [xmppAccount.accountNo isEqualToString:self.accountNo])
+    {
 #ifndef DISABLE_OMEMO
         dispatch_async(dispatch_get_main_queue(), ^{
             self.loginHUD.label.text = NSLocalizedString(@"Loading omemo bundles", @"");

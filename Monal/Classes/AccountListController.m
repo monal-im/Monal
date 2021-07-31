@@ -94,7 +94,7 @@
     if([[account objectForKey:@"enabled"] boolValue] == YES)
     {
         cell.imageView.image = [UIImage systemImageNamed:@"checkmark.circle"];
-        if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@", [[self.accountList objectAtIndex:accNo] objectForKey:@"account_id"]]])
+        if([[MLXMPPManager sharedInstance] isAccountForIdConnected:[NSString stringWithFormat:@"%@", [[self.accountList objectAtIndex:accNo] objectForKey:@"account_id"]]])
         {
             accessory.image = [UIImage imageNamed:@"Connected"];
             cell.accessoryView = accessory;
@@ -108,7 +108,7 @@
         {
             accessory.image = [UIImage imageNamed:@"Disconnected"];
             cell.accessoryView = accessory;
-            NSLocalizedString(@"Could not connect", @"");
+            cell.detailTextLabel.text = NSLocalizedString(@"Connecting...", @"");
         }
     }
     else

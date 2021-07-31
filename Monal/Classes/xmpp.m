@@ -1713,7 +1713,6 @@ NSString *const kData=@"data";
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
             if(h==nil)
                 return [self invalidXMLError];
-            
             self.resuming = NO;
 
             //now we are bound again
@@ -1721,6 +1720,7 @@ NSString *const kData=@"data";
             _connectedTime = [NSDate date];
             _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
             _exponentialBackoff = 0;
+            [self accountStatusChanged];
 
             @synchronized(_stateLockObject) {
                 //remove already delivered stanzas and resend the (still) unacked ones

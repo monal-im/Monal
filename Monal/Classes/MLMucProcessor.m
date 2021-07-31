@@ -302,7 +302,7 @@ static NSMutableDictionary* _uiHandler;
             @synchronized(_stateLockObject) {
                 DDLogVerbose(@"_firstJoin set: %@\n_noUpdateBookmarks set: %@", _firstJoin, _noUpdateBookmarks);
                 //only update bookmarks on first join AND if not requested otherwise (batch join etc.)
-                if([_firstJoin containsObject:node.fromUser] && [_noUpdateBookmarks containsObject:node.fromUser])
+                if([_firstJoin containsObject:node.fromUser] && ![_noUpdateBookmarks containsObject:node.fromUser])
                     [self updateBookmarksForAccount:account];
                 [_firstJoin removeObject:node.fromUser];
                 [_noUpdateBookmarks removeObject:node.fromUser];

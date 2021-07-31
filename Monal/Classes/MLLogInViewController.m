@@ -44,7 +44,6 @@
 #ifndef DISABLE_OMEMO
     [nc addObserver:self selector:@selector(omemoBundleFetchFinished:) name:kMonalFinishedOmemoBundleFetch object:nil];
 #endif
-
     [self registerForKeyboardNotifications];
 }
 

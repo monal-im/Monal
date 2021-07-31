@@ -37,21 +37,18 @@
 - (void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(connected:) name:kMonalFinishedCatchup object:nil];
 #ifndef DISABLE_OMEMO
-    [nc addObserver:self selector:@selector(updateBundleFetchStatus:) name:kMonalUpdateBundleFetchStatus object:nil];
-#endif
     [nc addObserver:self selector:@selector(omemoBundleFetchFinished:) name:kMonalFinishedOmemoBundleFetch object:nil];
-    [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
-
+#endif
     [self registerForKeyboardNotifications];
 }
 
 
 -(void) openLink:(NSString *) link
 {
-    NSURL *url= [NSURL URLWithString:link];
+    NSURL* url = [NSURL URLWithString:link];
     
     if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"] ) {
         SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
@@ -129,8 +126,13 @@
     [dic setObject:@YES forKey:kEnabled];
     [dic setObject:@NO forKey:kDirectTLS];
     
+    
     NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
-    if(accountID) {
+    if(accountID)
+    {
+        //make sure we observer new connection errors (the observer will be removed in connected: to make sure we don't catch
+        //non-fatal errors like muc join failures etc. (or any other errors after we successfully connected and logged in for that matter)
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(error:) name:kXMPPError object:nil];
         self.accountNo = [NSString stringWithFormat:@"%@", accountID];
         [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
         [SAMKeychain setPassword:password forService:kMonalKeychainName account:self.accountNo];
@@ -148,11 +150,13 @@
 {
     if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
     {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:kXMPPError object:nil];
         [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
 #ifndef DISABLE_OMEMO
         dispatch_async(dispatch_get_main_queue(), ^{
             self.loginHUD.label.text = NSLocalizedString(@"Loading omemo bundles", @"");
         });
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateBundleFetchStatus:) name:kMonalUpdateBundleFetchStatus object:nil];
 #else
         [self omemoBundleFetchFinished:nil];
 #endif
@@ -175,6 +179,7 @@
 {
     if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
     {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:kMonalUpdateBundleFetchStatus object:nil];
         dispatch_async(dispatch_get_main_queue(), ^{
             self.loginHUD.hidden = YES;
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Success!", @"") message:NSLocalizedString(@"You are set up and connected.", @"") preferredStyle:UIAlertControllerStyleAlert];
@@ -186,19 +191,26 @@
     }
 }
 
--(void) error
+-(void) error:(NSNotification*) notification
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.loginHUD.hidden=YES;
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [alert dismissViewControllerAnimated:YES completion:nil];
-        }]];
-        [self presentViewController:alert animated:YES completion:nil];
-        
-        if(self.accountNo)
-            [[DataLayer sharedInstance] removeAccount:self.accountNo];
-    });
+    xmpp* xmppAccount = notification.object;
+    if(xmppAccount != nil && [xmppAccount.accountNo isEqualToString:self.accountNo])
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.loginHUD.hidden=YES;
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:alert animated:YES completion:nil];
+            
+            if(self.accountNo)
+            {
+                [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+                [[DataLayer sharedInstance] removeAccount:self.accountNo];
+            }
+        });
+    }
 }
 
 -(IBAction) useWithoutAccount:(id)sender

@@ -300,6 +300,7 @@ static NSMutableDictionary* _uiHandler;
             //and update bookmarks if this was the first time we joined this muc
             [[DataLayer sharedInstance] addMucFavorite:node.fromUser forAccountId:account.accountNo andMucNick:nil];
             @synchronized(_stateLockObject) {
+                DDLogVerbose(@"_firstJoin set: %@\n_noUpdateBookmarks set: %@", _firstJoin, _noUpdateBookmarks);
                 //only update bookmarks on first join AND if not requested otherwise (batch join etc.)
                 if([_firstJoin containsObject:node.fromUser] && [_noUpdateBookmarks containsObject:node.fromUser])
                     [self updateBookmarksForAccount:account];
@@ -746,6 +747,7 @@ $$
 
 +(void) updateBookmarksForAccount:(xmpp*) account
 {
+    DDLogVerbose(@"Updating bookmarks on account %@", account.connectionProperties.identity.jid);
     [account.pubsub fetchNode:@"storage:bookmarks" from:account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
 }
 

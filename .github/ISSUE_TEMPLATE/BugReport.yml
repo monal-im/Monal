@@ -9,7 +9,8 @@ body:
   - type: dropdown
     id: build_type
     attributes:
-      label: What Monal Release channel are you using? If you did install Monal via the Apple AppStore, please select AppStore.
+      label: What Monal Release channel are you using?
+      description: If you did install Monal via the Apple AppStore, please select AppStore.
       multiple: false
       options:
         - AppStore
@@ -60,7 +61,8 @@ body:
   - type: dropdown
     id: xmpp_server_software
     attributes:
-      label: Which XMPP-Server software are you using? Try to reach out to your provider if possible.
+      label: Which XMPP-Server software are you using?
+      description:  Try to reach out to your provider if possible.
       multiple: false
       options:
         - Prosody

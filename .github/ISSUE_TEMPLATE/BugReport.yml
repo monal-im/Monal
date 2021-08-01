@@ -10,6 +10,7 @@ body:
     id: build_type
     attributes:
       label: What Monal Release channel are you using?
+      description: If you did install Monal via the Apple AppStore, please select AppStore.
       multiple: false
       options:
         - AppStore
@@ -21,7 +22,7 @@ body:
     id: ios_version
     attributes:
       label: iOS system version
-      description: What iOS version are you using?
+      description: What iOS version are you using? Open Settings, scroll down until "General", select "Info" and report "Software version".
       placeholder: "14.7"
     validations:
       required: false
@@ -29,7 +30,7 @@ body:
     id: ios_monal__version
     attributes:
       label: iOS Monal version
-      description: What Monal version are you using?
+      description: What Monal version are you using? Open Monal, select top left icon, scoll down until "Version".
       placeholder: "5.0.1"
     validations:
       required: false
@@ -45,7 +46,7 @@ body:
     id: mac_monal__version
     attributes:
       label: macOS Monal version
-      description: What Monal version are you using
+      description: What Monal version are you using?
       placeholder: "5.0.1"
     validations:
       required: false
@@ -53,7 +54,7 @@ body:
     id: xmpp_server
     attributes:
       label: Used XMPP server (domain)
-      description: Which XMPP server are you using?
+      description: Which XMPP server are you using? Open Monal, select top left icon, see the very top information an report the domain after the @ symbol.
       placeholder: chat.example.org
     validations:
       required: true
@@ -61,6 +62,7 @@ body:
     id: xmpp_server_software
     attributes:
       label: Which XMPP-Server software are you using?
+      description:  Try to reach out to your provider if possible.
       multiple: false
       options:
         - Prosody
@@ -74,7 +76,7 @@ body:
     id: xmpp_server_software_version
     attributes:
       label: XMPP Server Software
-      description: Which software version is the XMPP-Server running?
+      description: Which software version is the XMPP-Server running? Try to reach out to your provider if possible.
       placeholder: "1.0.1"
     validations:
       required: false
@@ -98,7 +100,7 @@ body:
       label: What happened?
       description: Also tell us, what did you expect to happen?
       placeholder: Tell us what you see!
-      value: "A bug happened!"
+      value: "A problem happened!"
     validations:
       required: true
   - type: markdown
@@ -127,7 +129,7 @@ body:
     attributes:
       label: XEP-Check
       options:
-        - label: I have checked that at least XEP-198, XEP-0280, XEP-0352, XEP-0357 and XEP-0163 are activated on my server and shown as 'green' under Settings-->Account-->(i) in server column (under advanced settings)
+        - label: I have checked that at least XEP-198, XEP-0280, XEP-0352, XEP-0357 and XEP-0163 are activated on my server and shown as 'green' under Settings --> Account--> (i) in advanced settings
           required: true
   - type: checkboxes
     id: notifications-checkbox

@@ -24,8 +24,8 @@
 @property (nonatomic, strong) UIWindow* window;
 
 -(void) updateUnread;
--(void) handleURL:(NSURL *) url;
--(void) setActiveChatsController: (UIViewController *) activeChats;
+-(void) handleXMPPURL:(NSURL*) url;
+-(void) setActiveChatsController: (UIViewController*) activeChats;
 
 @end
 

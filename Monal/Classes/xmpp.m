@@ -2099,6 +2099,8 @@ NSString *const kData=@"data";
 
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId withLMCId:(NSString* _Nullable) LMCId
 {
+    DDLogVerbose(@"sending new outgoing message %@ to %@", messageId, contact.contactJid);
+    
     XMPPMessage* messageNode = [[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact.contactJid forKey:@"to"];
     messageNode.id = messageId;

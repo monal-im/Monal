@@ -41,6 +41,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     UIBackgroundTaskIdentifier _bgTask;
     API_AVAILABLE(ios(13.0)) BGTask* _bgFetch;
     monal_void_block_t _backgroundTimer;
+    MLContact* _contactToOpen;
 }
 @property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @end
@@ -416,6 +417,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) setActiveChatsController: (UIViewController*) activeChats
 {
     self.activeChats = (ActiveChatsViewController*)activeChats;
+    [self openChatOfContact:_contactToOpen];
 }
 
 -(void) unregisterPush
@@ -468,12 +470,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
          
  @link https://xmpp.org/extensions/xep-0147.html
  */
--(void) handleURL:(NSURL *) url {
+-(void) handleXMPPURL:(NSURL*) url
+{
     //TODO just uses fist account. maybe change in the future
     xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
-    if(account) {
+    if(account)
+    {
         NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-        NSString* mucJid = components.path;
+        NSString* jid = components.path;
         BOOL isGroup = NO;
         
         for(NSURLQueryItem* item in components.queryItems)
@@ -483,23 +487,29 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         }
         
         if(isGroup)
-            [account joinMuc:mucJid];
+            [account joinMuc:jid];
         
-        [[DataLayer sharedInstance] addActiveBuddies:mucJid forAccount:account.accountNo];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            MLContact* contact = [MLContact createContactFromJid:mucJid andAccountNo:account.accountNo];
-            [(ActiveChatsViewController*)self.activeChats presentChatWithContact:contact];
-            [(ActiveChatsViewController*)self.activeChats refreshDisplay];
-        });
+        [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
+        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+        [self openChatOfContact:contact];
     }
 }
 
-- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
+-(BOOL) application:(UIApplication*) app openURL:(NSURL*) url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*) options
 {
-    if([url.scheme isEqualToString:@"xmpp"])        //for xmpp uris
+    if([url.scheme isEqualToString:@"xmpp"])                //for xmpp uris
     {
-        [self handleURL:url];
+        [self handleXMPPURL:url];
+        return YES;
+    }
+    else if([url.scheme isEqualToString:@"monalOpen"])      //app opened via sharesheet
+    {
+        //make sure our outbox content is sent (if the mainapp is still connected and also was in foreground while the sharesheet was used)
+        //and open the chat the newest outbox entry was sent to
+        MLContact* lastRecipientContact = [[MLXMPPManager sharedInstance] sendAllOutboxes];
+        [[DataLayer sharedInstance] addActiveBuddies:lastRecipientContact.contactJid forAccount:lastRecipientContact.accountId];
+        DDLogVerbose(@"Trying to open chat for %@", lastRecipientContact.contactJid);
+        [self openChatOfContact:lastRecipientContact];
         return YES;
     }
     return NO;
@@ -531,7 +541,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
     {
-        DDLogVerbose(@"notification action triggered for %@", response.notification.request.content.userInfo);
+        DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
         [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
         //add our completion handler to handler queue
         [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result) {
@@ -544,6 +554,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         NSAssert(fromContact, @"fromContact should not be nil");
         NSAssert(messageId, @"messageId should not be nil");
         NSAssert(account, @"account should not be nil");
+        
+        //make sure we have an active buddy for this chat
+        [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountId];
+        
+        //handle message actions
         if([response.actionIdentifier isEqualToString:@"REPLY_ACTION"])
         {
             DDLogInfo(@"REPLY_ACTION triggered...");
@@ -583,16 +598,44 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             
             [self updateUnread];
         }
+        else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
+            [self openChatOfContact:fromContact];
     }
     else
     {
-        //all completion handler directly (we did not handle anything and no connectIfNecessary was called)
+        //call completion handler directly (we did not handle anything and no connectIfNecessary was called)
         if(completionHandler)
             completionHandler();
     }
 }
 
-
+-(void) openChatOfContact:(MLContact* _Nullable) contact
+{
+    if(contact != nil)
+        _contactToOpen = contact;
+    
+    if(self.activeChats != nil && _contactToOpen != nil)
+    {
+        // the timer makes sure the view is properly initialized when opning the chat
+        createTimer(0.5, (^{
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(_contactToOpen != nil)
+                {
+                    DDLogDebug(@"Opening chat for contact %@", [contact contactJid]);
+                    // clear old open chat and set new one
+                    [((ActiveChatsViewController*)self.activeChats).navigationController popViewControllerAnimated:YES];
+                    [(ActiveChatsViewController*)self.activeChats presentChatWithContact:_contactToOpen];
+                    [(ActiveChatsViewController*)self.activeChats refreshDisplay];
+                }
+                else
+                    DDLogDebug(@"_contactToOpen changed to nil, not opening chat for contact %@", [contact contactJid]);
+                _contactToOpen = nil;
+            });
+        }));
+    }
+    else
+        DDLogDebug(@"Not opening chat for contact %@", [contact contactJid]);
+}
 
 #pragma mark - memory
 -(void) applicationDidReceiveMemoryWarning:(UIApplication *)application
@@ -705,7 +748,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 }
 
 #pragma mark - mac menu
-- (void)buildMenuWithBuilder:(id<UIMenuBuilder>)builder
+-(void) buildMenuWithBuilder:(id<UIMenuBuilder>) builder
 {
     [super buildMenuWithBuilder:builder];
     if (@available(iOS 13.0, *)) {

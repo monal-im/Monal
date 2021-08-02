@@ -280,6 +280,11 @@ extern NSString* const kMessageTypeFiletransfer;
 
 
 -(void) invalidateAllAccountStates;
+
+-(void) addShareSheetPayload:(NSDictionary*) payload;
+-(NSArray*) getShareSheetPayloadForAccountNo:(NSString*) accountNo;
+-(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId;
+
 @end
 
 NS_ASSUME_NONNULL_END

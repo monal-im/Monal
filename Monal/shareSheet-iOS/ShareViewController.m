@@ -61,23 +61,24 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     self.accounts = [[DataLayer sharedInstance] enabledAccountList];
 
     BOOL recipientFound = NO;
-    for(MLContact* recipient in self.recipients) {
-        for(NSDictionary* accountToCheck in self.accounts) {
-            if([[NSString stringWithFormat:@"%@", [accountToCheck objectForKey:@"account_id"]] isEqualToString:recipient.accountId] == YES) {
+    for(MLContact* recipient in self.recipients)
+    {
+        for(NSDictionary* accountToCheck in self.accounts)
+            if([[NSString stringWithFormat:@"%@", [accountToCheck objectForKey:@"account_id"]] isEqualToString:recipient.accountId] == YES)
+            {
                 self.recipient = recipient;
                 self.account = accountToCheck;
                 recipientFound = YES;
                 break;
             }
-        }
-        if(recipientFound == YES) {
+        if(recipientFound == YES)
             break;
-        }
     }
     [self reloadConfigurationItems];
 }
 
--(MLContact* _Nullable) getLastContactForAccount:(NSString*) accountNo {
+-(MLContact* _Nullable) getLastContactForAccount:(NSString*) accountNo
+{
     for(MLContact* recipient in self.recipients) {
         if([recipient.accountId isEqualToString:accountNo] == YES) {
             return recipient;
@@ -86,7 +87,7 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     return nil;
 }
 
-- (BOOL) isContentValid
+-(BOOL) isContentValid
 {
     if(self.recipient != nil && self.account != nil)
         return YES;
@@ -94,7 +95,7 @@ const u_int32_t MagicMapKitItem = 1 << 2;
         return NO;
 }
 
-- (void) didSelectPost
+-(void) didSelectPost
 {
     NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
     DDLogVerbose(@"Attachments = %@", item.attachments);
@@ -102,7 +103,7 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     u_int32_t magicIdentifyer = 0;
     NSMutableDictionary<NSNumber*, NSItemProvider*>* magicIdentifyerDic = [[NSMutableDictionary alloc] init];
 
-    for (NSItemProvider* provider in item.attachments)
+    for(NSItemProvider* provider in item.attachments)
     {
         DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
         if([provider hasItemConformingToTypeIdentifier:@"public.url"])
@@ -122,8 +123,9 @@ const u_int32_t MagicMapKitItem = 1 << 2;
         }
     }
     NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-    [payload setObject:self.recipient.accountId forKey:@"accountNo"];
-    [payload setObject:self.recipient.contactJid forKey:@"recipient"];
+    payload[@"account_id"] = self.recipient.accountId;
+    payload[@"recipient"] = self.recipient.contactJid;
+    payload[@"comment"] = self.contentText;
 
     // use best matching providers
     if((magicIdentifyer & MagicMapKitItem) > 0) {
@@ -133,11 +135,8 @@ const u_int32_t MagicMapKitItem = 1 << 2;
             NSError* err;
             MKMapItem* mapItem = [NSKeyedUnarchiver unarchivedObjectOfClass:[MKMapItem class] fromData:item error:&err];
             DDLogWarn(@"%@", err);
-            [payload setObject:[NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude] forKey:@"url"];
-            if(self.contentText.length > 0)
-            {
-                [payload setObject:self.contentText forKey:@"comment"];
-            }
+            payload[@"type"] = @"geo";
+            payload[@"data"] = [NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude];
             [self savePayloadMsgAndComplete:payload];
         }];
     }
@@ -145,41 +144,29 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     {
         NSItemProvider* provider = [magicIdentifyerDic objectForKey:[NSNumber numberWithUnsignedInt:MagicPublicUrl]];
         [provider loadItemForTypeIdentifier:@"public.url" options:NULL completionHandler:^(NSURL<NSSecureCoding>*  _Nullable item, NSError * _Null_unspecified error) {
-            [payload setObject:item.absoluteString forKey:@"url"];
-            if(self.contentText.length > 0)
-            {
-                [payload setObject:self.contentText forKey:@"comment"];
-            }
+            payload[@"type"] = @"url";
+            payload[@"data"] = item.absoluteString;
             [self savePayloadMsgAndComplete:payload];
         }];
     }
     else if((magicIdentifyer & MagicPlainTxt) > 0)
     {
-        if(self.contentText.length > 0)
-        {
-            [payload setObject:self.contentText forKey:@"comment"];
-        }
+        payload[@"type"] = @"text";
+        payload[@"data"] = self.contentText;
+        payload[@"comment"] = @"";
         [self savePayloadMsgAndComplete:payload];
     }
 }
 
 -(void) savePayloadMsgAndComplete:(NSDictionary*) payload
 {
-    // append to old outbox
-    NSMutableArray<NSDictionary*>* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
-    if(!outbox) outbox = [[NSMutableArray alloc] init];
-
-    [outbox addObject:payload];
-    [[HelperTools defaultsDB] setObject:outbox forKey:@"outbox"];
-
-    [[HelperTools defaultsDB] synchronize];
-
+    [[DataLayer sharedInstance] addShareSheetPayload:payload];
     [self.extensionContext completeRequestReturningItems:@[] completionHandler:^(BOOL expired) {
-        [self openMainApp];
+        [self openMainApp:payload[@"recipient"]];
     }];
 }
 
-- (NSArray*)configurationItems
+-(NSArray*) configurationItems
 {
     NSMutableArray* toreturn = [[NSMutableArray alloc] init];
     if(self.accounts.count > 1)
@@ -254,26 +241,19 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     UInt16 iterations = 0;
     SEL openURLSelector = NSSelectorFromString(@"openURL:");
     UIResponder* responder = self;
-    responder = [responder nextResponder];
-    while(responder != nil)
-    {
-        UIApplication* app = (UIApplication*)responder;
-        if([responder respondsToSelector:openURLSelector] == YES) {
-            if(app != nil) {
+    while((responder = [responder nextResponder]) != nil && iterations++ < 16)
+        if([responder respondsToSelector:openURLSelector] == YES)
+        {
+            UIApplication* app = (UIApplication*)responder;
+            if(app != nil)
+            {
                 [app performSelector:@selector(openURL:) withObject:url];
                 break;
             }
         }
-        responder = responder.nextResponder;
-        iterations++;
-        if(iterations > 20) {
-            // break to prevent infinite loop
-            break;
-        }
-    }
 }
 
--(void) openMainApp
+-(void) openMainApp:(NSString*) recipient
 {
     NSURL* mainAppUrl = [NSURL URLWithString:@"monalOpen://"];
     [self openURL:mainAppUrl];

@@ -18,6 +18,7 @@
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
 #import "MLXEPSlashMeHandler.h"
+#import "MLNotificationQueue.h"
 
 @import QuartzCore.CATransaction;
 
@@ -49,7 +50,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 }
 
 #pragma mark view lifecycle
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+-(id) initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
@@ -58,18 +59,18 @@ static NSMutableSet* _smacksWarningDisplayed;
     return self;
 }
 
-- (void)viewDidLoad
+-(void) viewDidLoad
 {
     [super viewDidLoad];
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
-    MonalAppDelegate *appDelegte = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegte setActiveChatsController:self];
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDelegate setActiveChatsController:self];
     
-     self.chatListTable=[[UITableView alloc] init];
-     self.chatListTable.delegate=self;
-     self.chatListTable.dataSource=self;
+     self.chatListTable = [[UITableView alloc] init];
+     self.chatListTable.delegate = self;
+     self.chatListTable.dataSource = self;
     
     self.view = self.chatListTable;
     
@@ -83,9 +84,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     [nc addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
     [nc addObserver:self selector:@selector(handleBackgroundChanged) name:kMonalBackgroundChanged object:nil];
     
-    [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
-                                               bundle:[NSBundle mainBundle]]
-         forCellReuseIdentifier:@"ContactCell"];
+    [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"ContactCell"];
     
     self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeOneBesideSecondary;
 #if !TARGET_OS_MACCATALYST
@@ -206,7 +205,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 }
 
 
--(void) messageSent:(NSNotification *) notification
+-(void) messageSent:(NSNotification*) notification
 {
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
     if(!contact)
@@ -238,7 +237,8 @@ static NSMutableSet* _smacksWarningDisplayed;
     [[MLImageManager sharedInstance] resetBackgroundImage];
 }
 
--(void) insertOrMoveContact:(MLContact *) contact completion:(void (^ _Nullable)(BOOL finished))completion {
+-(void) insertOrMoveContact:(MLContact*) contact completion:(void (^ _Nullable)(BOOL finished)) completion
+{
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.chatListTable performBatchUpdates:^{
             __block NSIndexPath* indexPath = nil;
@@ -271,7 +271,7 @@ static NSMutableSet* _smacksWarningDisplayed;
             }
             else if(indexPath)
             {
-                // Contact is already in out active chats list
+                // Contact is already in our active chats list
                 NSMutableArray* removeContactFromArray = [self getChatArrayForSection:indexPath.section];
                 [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 [removeContactFromArray removeObjectAtIndex:indexPath.row];
@@ -374,6 +374,14 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
     else
     {
+        // Only open contact chat when it is not opened yet -> macOS
+        if([contact.contactJid isEqualToString:self.lastSelectedUser.contactJid])
+        {
+            //make sure the already open chat is reloaded
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
+            return;
+        }
+        
         // open chat
         [self performSegueWithIdentifier:@"showConversation" sender:contact];
     }
@@ -429,12 +437,12 @@ static NSMutableSet* _smacksWarningDisplayed;
     [super performSegueWithIdentifier:identifier sender:sender];
 }
 
--(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+-(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
     if([segue.identifier isEqualToString:@"showIntro"])
     {
-        MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
+        MLWelcomeViewController* welcome = (MLWelcomeViewController*) segue.destinationViewController;
         welcome.completion = ^(){
             if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
             {
@@ -446,17 +454,17 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
     else if([segue.identifier isEqualToString:@"showConversation"])
     {
-        UINavigationController *nav = segue.destinationViewController;
-        chatViewController *chatVC = (chatViewController *)nav.topViewController;
-        UIBarButtonItem *barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+        UINavigationController* nav = segue.destinationViewController;
+        chatViewController* chatVC = (chatViewController*)nav.topViewController;
+        UIBarButtonItem* barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
         self.navigationItem.backBarButtonItem = barButtonItem;
         [chatVC setupWithContact:sender];
     }
     else if([segue.identifier isEqualToString:@"showDetails"])
     {
         UINavigationController* nav = segue.destinationViewController;
-        ContactDetails* details = (ContactDetails *)nav.topViewController;
-        details.contact= sender;
+        ContactDetails* details = (ContactDetails*)nav.topViewController;
+        details.contact = sender;
     }
     else if([segue.identifier isEqualToString:@"showContacts"])
     {
@@ -466,9 +474,8 @@ static NSMutableSet* _smacksWarningDisplayed;
         }
 
         UINavigationController* nav = segue.destinationViewController;
-        ContactsViewController* contacts = (ContactsViewController *)nav.topViewController;
-        contacts.selectContact = ^(MLContact* selectedContact)
-        {
+        ContactsViewController* contacts = (ContactsViewController*)nav.topViewController;
+        contacts.selectContact = ^(MLContact* selectedContact) {
             [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId];
             //no success may mean its already there
             [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
@@ -577,7 +584,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
 }
 
--(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+-(void) tableView:(UITableView*) tableView didSelectRowAtIndexPath:(NSIndexPath*) indexPath
 {
     self.lastSelectedIndexPath = indexPath;
     MLContact* selected = nil;
@@ -586,8 +593,6 @@ static NSMutableSet* _smacksWarningDisplayed;
     } else {
         selected = self.unpinnedContacts[indexPath.row];
     }
-    // Only open contact chat when it is not opened yet -> macOS
-    if(selected.contactJid == self.lastSelectedUser.contactJid) return;
     
     [self presentChatWithContact:selected];
 }
@@ -669,16 +674,6 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) showSettings {
    [self performSegueWithIdentifier:@"showSettings" sender:self];
-}
-
-
--(IBAction) unwindToActiveChatsViewController:(UIStoryboardSegue*) segue
-{
-    // Show normal navigation bar again
-    [[self navigationController] setNavigationBarHidden:NO animated:NO];
-    
-    // unselected the current user
-    self.lastSelectedUser = nil;
 }
 
 @end

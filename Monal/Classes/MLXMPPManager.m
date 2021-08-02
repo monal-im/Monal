@@ -300,9 +300,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 {
     xmpp* account = notification.object;
     DDLogInfo(@"### MAM/SMACKS CATCHUP FINISHED FOR ACCOUNT NO %@ ###", account.accountNo);
-    
-    //send sharesheet outbox
-    [self sendOutboxForAccount:account];
 }
 
 -(BOOL) allAccountsIdle
@@ -429,31 +426,28 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         DDLogError(@"Keychain error: %@", [NSString stringWithFormat:@"%@", error]);
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
     }
-    MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
+    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
-    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
+    MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
     xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     xmppAccount.statusMessage = [account objectForKey:@"statusMessage"];
 
-    if(xmppAccount)
-    {
-        @synchronized(_connectedXMPP) {
-            [_connectedXMPP addObject:xmppAccount];
-        }
-
-        if(_hasConnectivity)
-        {
-            if(![account[@"enabled"] boolValue])
-            {
-                DDLogInfo(@"existing but disabled account, not connecting");
-                return;
-            }
-            DDLogInfo(@"starting connect");
-            [xmppAccount connect];
-        }
-        else
-            DDLogWarn(@"NOT connecting because no connectivity.");
+    @synchronized(_connectedXMPP) {
+        [_connectedXMPP addObject:xmppAccount];
     }
+
+    if(_hasConnectivity)
+    {
+        if(![account[@"enabled"] boolValue])
+        {
+            DDLogInfo(@"existing but disabled account, not connecting");
+            return;
+        }
+        DDLogInfo(@"starting connect");
+        [xmppAccount connect];
+    }
+    else
+        DDLogWarn(@"NOT connecting because no connectivity.");
 }
 
 
@@ -569,9 +563,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(messageDBId != nil)
     {
         DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
-        [self sendMessage:message toContact:contact isEncrypted:encrypted isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
-            if(successSend)
-                completion(successSend, messageIdSend);
+        [self sendMessage:message toContact:contact isEncrypted:encrypted isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString* messageIdSend) {
+            completion(successSend, messageIdSend);
         }];
         DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
         [[MLNotificationQueue currentQueue] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
@@ -580,16 +573,15 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         DDLogError(@"Could not add message to history!");
 }
 
--(void)sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
+-(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^)(BOOL success, NSString* messageId)) completion
 {
-    BOOL success=NO;
+    BOOL success = NO;
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
     {
-        success=YES;
+        success = YES;
         [account sendMessage:message toContact:contact isEncrypted:encrypted isUpload:isUpload andMessageId:messageId];
     }
-
     if(completion)
         completion(success, messageId);
 }
@@ -733,48 +725,42 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - share sheet added
 
--(void) sendOutboxForAccount:(xmpp*) account
+-(MLContact*) sendAllOutboxes
 {
-    NSArray<NSDictionary*>* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
-    NSMutableArray<NSDictionary*>* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
-
-    DDLogInfo(@"Got message outbox: %@", outbox);
-    for(NSDictionary* row in outbox)
+    //send all sharesheet outboxes (this method will be called by AppDelegate if opened via monalOpen:// url)
+    MLContact* lastRecipientContact = nil;
+    for(xmpp* xmppAccount in [self connectedXMPP])
     {
-        NSString* outAccountNo = [row objectForKey:@"accountNo"];
-        NSString* recipient = [row objectForKey:@"recipient"];
-        if(outAccountNo == nil || recipient == nil) {
-            // remove element
-            [outboxClean removeObject:row];
-            [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
-            [[HelperTools defaultsDB] synchronize];
-            continue;
-        }
-        if([outAccountNo isEqualToString:account.accountNo])
-        {
-            MLAssert(recipient != nil, @"Recipient missing", row);
-
-            BOOL encryptMessages = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:account.accountNo];
-            MLContact* recipientContact = [MLContact createContactFromJid:recipient andAccountNo:account.accountNo];
-
-            // make sure that a buddy entry exists
-            if([[DataLayer sharedInstance] isContactInList:recipientContact.contactJid forAccount:account.accountNo] == NO) {
-                DDLogWarn(@"jid is missing in buddylist: jid: %@ accountNo: %@", recipientContact.contactJid, account.accountNo);
-                [[DataLayer sharedInstance] addContact:recipientContact.contactJid forAccount:account.accountNo nickname:nil andMucNick:nil];
-            }
-            // message handling
-            if([row objectForKey:@"comment"]) {
-                [self sendMessageAndAddToHistory:[row objectForKey:@"comment"] toContact:recipientContact isEncrypted:encryptMessages isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) { }];
-            }
-            if([row objectForKey:@"url"]) {
-                [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipientContact isEncrypted:encryptMessages isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) { }];
-            }
-            // remove msg even after error
-            [outboxClean removeObject:row];
-            [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
-            [[HelperTools defaultsDB] synchronize];
-        }
+        MLContact* recipientContact = [self sendOutboxForAccount:xmppAccount];
+        if(recipientContact != nil)
+            lastRecipientContact = recipientContact;
     }
+    return lastRecipientContact;
+}
+
+-(MLContact*) sendOutboxForAccount:(xmpp*) account
+{
+    MLContact* recipientContact = nil;
+    for(NSDictionary* payload in [[DataLayer sharedInstance] getShareSheetPayloadForAccountNo:account.accountNo])
+    {
+        DDLogInfo(@"Sending outbox entry: %@", payload);
+        recipientContact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
+        BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:recipientContact.contactJid andAccountNo:recipientContact.accountId];
+        if([payload[@"comment"] length] > 0)
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"comment"] toContact:recipientContact isEncrypted:encrypted isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                DDLogInfo(@"SHARESHEET_SEND_COMMENT success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+            }];
+        if([payload[@"type"] isEqualToString:@"geo"] || [payload[@"type"] isEqualToString:@"url"] || [payload[@"type"] isEqualToString:@"text"])
+        {
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] toContact:recipientContact isEncrypted:encrypted isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+            }];
+        }
+        else
+            MLAssert(NO, @"Outbox payload type unknown", payload);
+    }
+    return recipientContact;
 }
 
 @end

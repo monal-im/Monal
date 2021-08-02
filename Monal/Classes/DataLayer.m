@@ -2740,10 +2740,19 @@ static NSDateFormatter* dbFormatter;
             );"];
         }];
 
-        [self updateDBTo:5.025 withBlock:^{
-            // delete all old shareSheet outbox messages
-            NSArray<NSDictionary*>* newOutbox = [[NSArray alloc] init];
-            [[HelperTools defaultsDB] setObject:newOutbox forKey:@"outbox"];
+        [self updateDBTo:5.026 withBlock:^{
+            //new outbox table for sharesheet
+            [self.db executeNonQuery:@"CREATE TABLE 'sharesheet_outbox' ( \
+                    'id' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
+                    'account_id' INTEGER NOT NULL, \
+                    'recipient' VARCHAR(255) NOT NULL, \
+                    'type' VARCHAR(32), \
+                    'data' VARCHAR(1023), \
+                    'comment' VARCHAR(255), \
+                    FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                    FOREIGN KEY('account_id', 'recipient') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+            );"];
+            [[HelperTools defaultsDB] removeObjectForKey:@"outbox"];
             [[HelperTools defaultsDB] synchronize];
         }];
     }];
@@ -2753,10 +2762,7 @@ static NSDateFormatter* dbFormatter;
         return [self.db executeScalar:@"SELECT dbversion FROM dbversion;"];
     }];
     if(![newdbversion isEqual:dbversion])
-    {
         [self.db vacuum];
-        [self cleanUpShareSheetOutbox];
-    }
     
     //turn foreign keys on again
     //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
@@ -2767,32 +2773,36 @@ static NSDateFormatter* dbFormatter;
     return;
 }
 
--(void) cleanUpShareSheetOutbox
+-(void) addShareSheetPayload:(NSDictionary*) payload
 {
-    NSArray<NSDictionary*>* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
-    NSMutableArray<NSDictionary*>* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
-    NSMutableSet<NSString*>* accountList = [[NSMutableSet alloc] init];
-    for(NSDictionary* account in [self accountList]) {
-        [accountList addObject:[account objectForKey:@"account_id"]];
-    }
-
-    for(NSDictionary* row in outbox)
-    {
-        NSString* outAccountNo = [row objectForKey:@"accountNo"];
-        NSString* recipient = [row objectForKey:@"recipient"];
-        if(outAccountNo == nil || recipient == nil) {
-            // remove element
-            [outboxClean removeObject:row];
-            continue;
-        }
-        if([accountList containsObject:outAccountNo] == NO) {
-            [outboxClean removeObject:row];
-            continue;
-        }
-    }
-    [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
-    [[HelperTools defaultsDB] synchronize];
+    //make sure we don't insert empty data
+    if(payload[@"type"] == nil || payload[@"data"] == nil)
+        return;
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"INSERT INTO sharesheet_outbox (account_id, recipient, type, data, comment) VALUES(?, ?, ?, ?, ?);" andArguments:@[
+            payload[@"account_id"],
+            payload[@"recipient"],
+            payload[@"type"],
+            payload[@"data"],
+            payload[@"comment"],
+        ]];
+    }];
 }
+
+-(NSArray*) getShareSheetPayloadForAccountNo:(NSString*) accountNo
+{
+    return [self.db idWriteTransaction:^{
+        return [self.db executeReader:@"SELECT * FROM sharesheet_outbox WHERE account_id=? ORDER BY id ASC;" andArguments:@[accountNo]];
+    }];
+}
+
+-(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId
+{
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"DELETE FROM sharesheet_outbox WHERE id=?;" andArguments:@[payloadId]];
+    }];
+}
+
 
 #pragma mark mute and block
 -(void) muteJid:(NSString*) jid onAccount:(NSString*) accountNo

@@ -450,7 +450,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
     if([segue.identifier isEqualToString:@"showIntro"])
     {
-        MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
+        MLWelcomeViewController* welcome = (MLWelcomeViewController*) segue.destinationViewController;
         welcome.completion = ^(){
             if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
             {

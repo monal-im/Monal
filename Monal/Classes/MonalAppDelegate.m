@@ -38,7 +38,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     NSMutableDictionary* _wakeupCompletions;
     UIBackgroundTaskIdentifier _bgTask;
-    API_AVAILABLE(ios(13.0)) BGTask* _bgFetch;
+    BGTask* _bgFetch;
     monal_void_block_t _backgroundTimer;
 }
 @property (nonatomic, weak) ActiveChatsViewController* activeChats;
@@ -781,7 +781,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     } onQueue:dispatch_get_main_queue()];
 }
 
--(void) handleBackgroundFetchingTask:(BGTask*) task API_AVAILABLE(ios(13.0))
+-(void) handleBackgroundFetchingTask:(BGTask*) task
 {
     DDLogInfo(@"RUNNING BGTASK");
     

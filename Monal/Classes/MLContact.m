@@ -175,11 +175,20 @@ NSString *const kAskSubscribe=@"subscribe";
         || [self.subscription isEqualToString:kSubFrom];
 }
 
--(BOOL) isEqual:(MLContact*) contact
+-(BOOL) isEqualToContact:(MLContact*) contact
 {
     return contact != nil &&
            [self.contactJid isEqualToString:contact.contactJid] &&
            [self.accountId isEqualToString:contact.accountId];
+}
+
+-(BOOL) isEqual:(id) object
+{
+    if(self == object)
+        return YES;
+    if([object isKindOfClass:[MLContact class]])
+        return [self isEqualToContact:(MLContact*)object];
+    return NO;
 }
 
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo

@@ -500,7 +500,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
             DDLogDebug(@"Marked as read: %@", unread);
             
-            //remove notifications of all remotely read messages (indicated by sending a response message)
+            //remove notifications of all read messages
             for(MLMessage* msg in unread)
             {
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];

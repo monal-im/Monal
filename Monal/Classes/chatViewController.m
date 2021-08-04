@@ -618,7 +618,6 @@ enum msgSentState {
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     if(!self.xmppAccount) DDLogDebug(@"Disabled account detected");
     
-    [MLNotificationManager sharedInstance].currentAccountNo = self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact = self.contact;
     
     [self handleForeGround];
@@ -697,7 +696,6 @@ enum msgSentState {
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
     }
     [super viewWillDisappear:animated];
-    [MLNotificationManager sharedInstance].currentAccountNo = nil;
     [MLNotificationManager sharedInstance].currentContact = nil;
     
     [self sendChatState:NO];
@@ -781,7 +779,7 @@ enum msgSentState {
 {
     if(self.navigationController.topViewController==self)
     {
-        if([MLNotificationManager sharedInstance].currentContact!=self.contact)
+        if(![[MLNotificationManager sharedInstance].currentContact isEqual:self.contact])
             return;
         
         if(![HelperTools isNotInFocus])
@@ -793,13 +791,16 @@ enum msgSentState {
             MLMessage* lastUnreadMessage = [unread lastObject];
             if(lastUnreadMessage)
             {
-                DDLogDebug(@"Marking as displayed: %@", lastUnreadMessage.messageId);
-                [[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] sendDisplayMarkerForMessage:lastUnreadMessage];
+                DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
+                [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];
             }
             
-            //update app badge
-            MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-            [appDelegate updateUnread];
+            //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
+            for(MLMessage* msg in unread)
+            {
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:self.xmppAccount userInfo:@{@"message":msg}];
+                [self.xmppAccount sendDisplayMarkerForMessage:msg];
+            }
             
             // update unread counter
             self.contact.unreadCount -= unread.count;
@@ -1185,13 +1186,12 @@ enum msgSentState {
 {
     [self stopEditing];
     [self.chatInput resignFirstResponder];
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
 
-    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
+    UIAlertController* actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
                                                                             message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
     // Check for http upload support
-    if(!account.connectionProperties.supportsHTTPUpload)
+    if(!self.xmppAccount.connectionProperties.supportsHTTPUpload)
     {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
                                                                        message:NSLocalizedString(@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it.", @"") preferredStyle:UIAlertControllerStyleAlert];

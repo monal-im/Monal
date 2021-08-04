@@ -291,10 +291,8 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) viewWillAppear:(BOOL) animated
 {
+    DDLogDebug(@"active chats view will appear");
     [super viewWillAppear:animated];
-    // reset account selection on non split view systems
-    if([HelperTools deviceUsesSplitView] == NO)
-       self.lastSelectedUser = nil;
     // load contacts
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
     {
@@ -304,8 +302,16 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
 }
 
+-(void) viewWillDisappear:(BOOL) animated
+{
+    DDLogDebug(@"active chats view will disappear");
+    [super viewWillDisappear:animated];
+    self.lastSelectedUser = nil;
+}
+
 -(void) viewDidAppear:(BOOL) animated
 {
+    DDLogDebug(@"active chats view did appear");
     [super viewDidAppear:animated];
     
     for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])

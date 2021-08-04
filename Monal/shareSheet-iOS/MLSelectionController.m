@@ -14,55 +14,57 @@
 
 @implementation MLSelectionController
 
-- (void)viewDidLoad {
+-(void) viewDidLoad
+{
     [super viewDidLoad];
 }
 
 #pragma mark - Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+-(NSInteger) numberOfSectionsInTableView:(UITableView*) tableView
+{
     return 1;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+-(NSInteger) tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
+{
     return self.options.count;
 }
 
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"option" forIndexPath:indexPath];
-   NSDictionary* row = self.options[indexPath.row];
-    MLContact *item =[row objectForKey:@"contact"];
+-(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
+{
+    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"option" forIndexPath:indexPath];
+    NSDictionary* row = self.options[indexPath.row];
+    MLContact* contact = (MLContact*)[row objectForKey:@"contact"];
     
-    if(item) {
-        MLContact *contact =(MLContact *)item;
+    if(contact)
+    {
         cell.textLabel.text = contact.contactDisplayName;
-        
-        MLContact *selectedContact = (MLContact *) [self.selection objectForKey:@"contact"];
-        
-        if([selectedContact.contactJid isEqualToString: contact.contactJid]) {
-            cell.accessoryType=UITableViewCellAccessoryCheckmark;
-        } else {
-            cell.accessoryType= UITableViewCellAccessoryNone;
-        }
-    } else {
+        MLContact* selectedContact = (MLContact*)[self.selection objectForKey:@"contact"];
+        if([selectedContact isEqual:contact])
+            cell.accessoryType = UITableViewCellAccessoryCheckmark;
+        else
+            cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+    else
+    {
         cell.textLabel.text = [NSString stringWithFormat:@"%@@%@",[row objectForKey:@"username"],[row objectForKey:@"domain"]];
-        if([[self.selection objectForKey:@"account_id"] integerValue]==[[row objectForKey:@"account_id"] integerValue]) {
-            cell.accessoryType=UITableViewCellAccessoryCheckmark;
-        } else {
-            cell.accessoryType= UITableViewCellAccessoryNone;
-        }
+        if([[self.selection objectForKey:@"account_id"] integerValue]==[[row objectForKey:@"account_id"] integerValue])
+            cell.accessoryType = UITableViewCellAccessoryCheckmark;
+        else
+            cell.accessoryType = UITableViewCellAccessoryNone;
     }
     return cell;
 }
 
--(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+-(void) tableView:(UITableView*) tableView didSelectRowAtIndexPath:(NSIndexPath*) indexPath
+{
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    self.selection= self.options[indexPath.row];
+    self.selection = self.options[indexPath.row];
     [tableView reloadData];
-    if(self.completion) {
+    if(self.completion)
         self.completion(self.selection);
-    }
 }
 
 

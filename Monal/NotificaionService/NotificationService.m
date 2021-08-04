@@ -250,6 +250,7 @@
 
 -(void) listNotifications
 {
+    DDLogVerbose(@"listing notifications:");
     [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
         for(UNNotificationRequest* request in requests)
         {
@@ -262,6 +263,7 @@
             DDLogInfo(@"listNotifications: delivered notification %@ --> %@: %@", notification.request.identifier, notification.request.content.title, notification.request.content.body);
         }
     }];
+    DDLogVerbose(@"done listing notifications...");
 }
 
 -(void) nowIdle:(NSNotification*) notification

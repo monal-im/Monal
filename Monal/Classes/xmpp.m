@@ -1716,7 +1716,6 @@ NSString *const kData=@"data";
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
             if(h==nil)
                 return [self invalidXMLError];
-            
             self.resuming = NO;
 
             //now we are bound again
@@ -1724,6 +1723,7 @@ NSString *const kData=@"data";
             _connectedTime = [NSDate date];
             _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
             _exponentialBackoff = 0;
+            [self accountStatusChanged];
 
             @synchronized(_stateLockObject) {
                 //remove already delivered stanzas and resend the (still) unacked ones
@@ -1759,7 +1759,7 @@ NSString *const kData=@"data";
                         self->_catchupDone = YES;
                         DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
                         //don't queue this notification because it should be handled INLINE inside the receive queue
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:@{@"accountNo": self.accountNo}];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
                     }
                 }];
             }
@@ -2099,6 +2099,8 @@ NSString *const kData=@"data";
 
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId withLMCId:(NSString* _Nullable) LMCId
 {
+    DDLogVerbose(@"sending new outgoing message %@ to %@", messageId, contact.contactJid);
+    
     XMPPMessage* messageNode = [[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact.contactJid forKey:@"to"];
     messageNode.id = messageId;
@@ -3613,7 +3615,7 @@ NSString *const kData=@"data";
     {
         _catchupDone = YES;
         //don't queue this notification because it should be handled INLINE inside the receive queue
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self  userInfo:@{@"accountNo": self.accountNo}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
 
     }
 }

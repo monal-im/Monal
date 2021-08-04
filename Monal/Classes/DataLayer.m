@@ -1471,44 +1471,6 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo
-{
-    return [self.db idReadTransaction:^{
-        NSString* accountJid = [self jidOfAccount:accountNo];
-        if(accountJid != nil)
-        {
-            NSString* query = @"SELECT distinct date(timestamp) AS the_date FROM message_history WHERE account_id=? AND buddy_name=? ORDER BY timestamp, message_history_id DESC";
-            NSArray* params = @[accountNo, buddy];
-            //DDLogVerbose(query);
-            NSArray* toReturn = [self.db executeReader:query andArguments:params];
-
-            if(toReturn != nil)
-            {
-                DDLogVerbose(@"count: %lu", (unsigned long)[toReturn count]);
-                return toReturn;
-            }
-            else
-            {
-                DDLogError(@"message history buddy date list is empty or failed to read");
-                return [[NSArray alloc] init];
-            }
-        }
-        else
-            return [[NSArray alloc] init];
-    }];
-}
-
--(NSArray*) messageHistoryDateForContact:(NSString*) contact forAccount:(NSString*) accountNo forDate:(NSString*) date
-{
-    return [self.db idReadTransaction:^{
-        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND DATE(timestamp)=? ORDER BY message_history_id ASC;";
-        NSArray* params = @[accountNo, contact, date];
-        DDLogVerbose(@"%@", query);
-        NSArray* results = [self.db executeScalarReader:query andArguments:params];
-        return [self messagesForHistoryIDs:results];
-    }];
-}
-
 -(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     return [self.db boolWriteTransaction:^{
@@ -1516,28 +1478,6 @@ static NSDateFormatter* dbFormatter;
         for(NSNumber* historyId in messageHistoryIDs)
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
         return [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
-    }];
-}
-
--(NSMutableArray<MLContact*>*) messageHistoryContacts:(NSString*) accountNo
-{
-    return [self.db idReadTransaction:^{
-        NSMutableArray<MLContact*>* toReturn = [[NSMutableArray<MLContact*> alloc] init];
-        //returns a list of  buddy's with message history
-        NSString* accountJid = [self jidOfAccount:accountNo];
-        if(accountJid)
-        {
-            for(NSDictionary* contact in [self.db executeReader:@"SELECT DISTINCT \
-                account_id, buddy_name \
-                FROM message_history \
-                WHERE account_id=? \
-                ORDER BY buddy_name ASC; \
-                " andArguments:@[accountNo]])
-            {
-                [toReturn addObject:[MLContact createContactFromJid:contact[@"buddy_name"] andAccountNo:contact[@"account_id"]]];
-            }
-        }
-        return toReturn;
     }];
 }
 
@@ -1776,6 +1716,13 @@ static NSDateFormatter* dbFormatter;
         NSString* accountJid = [self jidOfAccount:accountNo];
         if(!accountJid)
             return;
+#ifdef DEBUG
+        MLAssert(![accountJid isEqualToString:buddyname], @"We should never try to create a chat with our own jid", (@{
+            @"buddyname": buddyname,
+            @"accountNo": accountNo,
+            @"accountJid": accountJid
+        }));
+#endif
         if([accountJid isEqualToString:buddyname])
         {
             // Something is broken
@@ -2792,6 +2739,22 @@ static NSDateFormatter* dbFormatter;
                      FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
             );"];
         }];
+
+        [self updateDBTo:5.026 withBlock:^{
+            //new outbox table for sharesheet
+            [self.db executeNonQuery:@"CREATE TABLE 'sharesheet_outbox' ( \
+                    'id' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
+                    'account_id' INTEGER NOT NULL, \
+                    'recipient' VARCHAR(255) NOT NULL, \
+                    'type' VARCHAR(32), \
+                    'data' VARCHAR(1023), \
+                    'comment' VARCHAR(255), \
+                    FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                    FOREIGN KEY('account_id', 'recipient') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+            );"];
+            [[HelperTools defaultsDB] removeObjectForKey:@"outbox"];
+            [[HelperTools defaultsDB] synchronize];
+        }];
     }];
     
     // Vacuum after db updates
@@ -2809,6 +2772,37 @@ static NSDateFormatter* dbFormatter;
     DDLogInfo(@"Database version check complete, old version %@ was updated to version %@", dbversion, newdbversion);
     return;
 }
+
+-(void) addShareSheetPayload:(NSDictionary*) payload
+{
+    //make sure we don't insert empty data
+    if(payload[@"type"] == nil || payload[@"data"] == nil)
+        return;
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"INSERT INTO sharesheet_outbox (account_id, recipient, type, data, comment) VALUES(?, ?, ?, ?, ?);" andArguments:@[
+            payload[@"account_id"],
+            payload[@"recipient"],
+            payload[@"type"],
+            payload[@"data"],
+            payload[@"comment"],
+        ]];
+    }];
+}
+
+-(NSArray*) getShareSheetPayloadForAccountNo:(NSString*) accountNo
+{
+    return [self.db idWriteTransaction:^{
+        return [self.db executeReader:@"SELECT * FROM sharesheet_outbox WHERE account_id=? ORDER BY id ASC;" andArguments:@[accountNo]];
+    }];
+}
+
+-(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId
+{
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"DELETE FROM sharesheet_outbox WHERE id=?;" andArguments:@[payloadId]];
+    }];
+}
+
 
 #pragma mark mute and block
 -(void) muteJid:(NSString*) jid onAccount:(NSString*) accountNo

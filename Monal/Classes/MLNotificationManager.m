@@ -123,9 +123,7 @@
         else
         {
             //don't show notifications for open chats
-            if(
-                ![message.buddyName isEqualToString:self.currentContact.contactJid]
-            )
+            if(![message isEqualToContact:self.currentContact])
                 [self showModernNotificaionForMessage:message withSound:sound];
             else
                 DDLogDebug(@"not showing notification: chat is open");
@@ -146,6 +144,7 @@
     DDLogVerbose(@"notification manager got displayed message notice: %@", message.messageId);
     NSString* idval = [self identifierWithMessage:message];
     
+    DDLogVerbose(@"Removing pending/deliverd notification with identifier '%@'...", idval);
     [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
     [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
     

@@ -151,7 +151,7 @@
 		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
 		26AA70152146BBB900598605 /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA70142146BBB900598605 /* ShareViewController.m */; };
 		26AA70182146BBB900598605 /* iosShare.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70162146BBB900598605 /* iosShare.storyboard */; };
-		26AA701C2146BBB900598605 /* shareSheet.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70112146BBB800598605 /* shareSheet.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		26AA701C2146BBB900598605 /* shareSheet.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70112146BBB800598605 /* shareSheet.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
 		26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */; };
@@ -2829,6 +2829,7 @@
 		};
 		26AA701B2146BBB900598605 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = 26AA70102146BBB800598605 /* shareSheet */;
 			targetProxy = 26AA701A2146BBB900598605 /* PBXContainerItemProxy */;
 		};

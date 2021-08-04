@@ -487,7 +487,7 @@ enum msgSentState {
         [_localMLContactCache removeAllObjects];
     }
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
-    if(self.contact && [self.contact.contactJid isEqualToString:contact.contactJid] && [self.contact.accountId isEqual:contact.accountId])
+    if(self.contact && [self.contact isEqual:contact])
         [self updateUIElements];
 }
 
@@ -635,7 +635,6 @@ enum msgSentState {
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     if(!self.xmppAccount) DDLogDebug(@"Disabled account detected");
     
-    [MLNotificationManager sharedInstance].currentAccountNo = self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact = self.contact;
     
     [self handleForeGround];
@@ -714,7 +713,6 @@ enum msgSentState {
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
     }
     [super viewWillDisappear:animated];
-    [MLNotificationManager sharedInstance].currentAccountNo = nil;
     [MLNotificationManager sharedInstance].currentContact = nil;
     
     [self sendChatState:NO];
@@ -798,7 +796,7 @@ enum msgSentState {
 {
     if(self.navigationController.topViewController==self)
     {
-        if([MLNotificationManager sharedInstance].currentContact!=self.contact)
+        if(![self.contact isEqual:[MLNotificationManager sharedInstance].currentContact])
             return;
         
         if(![HelperTools isNotInFocus])
@@ -810,13 +808,16 @@ enum msgSentState {
             MLMessage* lastUnreadMessage = [unread lastObject];
             if(lastUnreadMessage)
             {
-                DDLogDebug(@"Marking as displayed: %@", lastUnreadMessage.messageId);
-                [[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] sendDisplayMarkerForMessage:lastUnreadMessage];
+                DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
+                [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];
             }
             
-            //update app badge
-            MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-            [appDelegate updateUnread];
+            //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
+            for(MLMessage* msg in unread)
+            {
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:self.xmppAccount userInfo:@{@"message":msg}];
+                [self.xmppAccount sendDisplayMarkerForMessage:msg];
+            }
             
             // update unread counter
             self.contact.unreadCount -= unread.count;
@@ -1189,13 +1190,12 @@ enum msgSentState {
 {
     [self stopEditing];
     [self.chatInput resignFirstResponder];
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
 
-    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
+    UIAlertController* actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
                                                                             message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
     // Check for http upload support
-    if(!account.connectionProperties.supportsHTTPUpload)
+    if(!self.xmppAccount.connectionProperties.supportsHTTPUpload)
     {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
                                                                        message:NSLocalizedString(@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it.", @"") preferredStyle:UIAlertControllerStyleAlert];
@@ -1487,8 +1487,7 @@ enum msgSentState {
     if(!message)
         DDLogError(@"Notification without message");
     
-    if([message.accountId isEqualToString:self.contact.accountId]
-       && [message.buddyName isEqualToString:self.contact.contactJid])
+    if([message isEqualToContact:self.contact])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(!self.messageList)
@@ -2506,13 +2505,23 @@ enum msgSentState {
         [self.xmppAccount setMAMQueryMostRecentForContact:self.contact before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages, NSString* _Nullable error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 strongify(self);
-                if(!messages)
+                if(!messages && !error)
+                {
+                    //xmpp account got reconnected
+                    DDLogError(@"Got backscrolling mam error: nil (possible reconnect while querying)");
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not fetch messages", @"") message:NSLocalizedString(@"The connection to the server was interrupted and no old messages could be fetched for this chat. Please try again later. %@", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                }
+                else if(!messages)
                 {
                     NSString* errorText = error;
                     if(!error)
                         errorText = NSLocalizedString(@"All messages already present in local history!", @"");
                     DDLogError(@"Got backscrolling mam error: %@", errorText);
-                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not load (all) old messages", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Could not load (all) old messages from your server archive. Please try again later. %@", @""), errorText] preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not fetch messages", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Could not fetch (all) old messages for this chat from your server archive. Please try again later. %@", @""), errorText] preferredStyle:UIAlertControllerStyleAlert];
                     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                         [alert dismissViewControllerAnimated:YES completion:nil];
                     }]];

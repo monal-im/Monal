@@ -14,8 +14,6 @@
 	<dict>
 		<key>maccatalyst.G7YU7X7KRJ.SworIM</key>
 		<string>Monal Catalyst Developer id</string>
-		<key>maccatalyst.G7YU7X7KRJ.SworIM.shareSheet</key>
-		<string>catalyst share sheet developer id</string>
 		<key>maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService</key>
 		<string>Monal Catalyst Notification NSE</string>
 	</dict>

@@ -212,12 +212,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSString*) lastStanzaIdForAccount:(NSString*) accountNo;
 -(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSString*) accountNo;
 
--(NSArray *) messageHistoryListDates:(NSString *) buddy forAccount: (NSString *) accountNo;
--(NSArray *) messageHistoryDateForContact:(NSString *) buddy forAccount:(NSString *) accountNo forDate:(NSString*) date;
-
 -(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo;
 
--(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo;
 -(NSArray<MLMessage*>*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
 -(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;
@@ -284,6 +280,11 @@ extern NSString* const kMessageTypeFiletransfer;
 
 
 -(void) invalidateAllAccountStates;
+
+-(void) addShareSheetPayload:(NSDictionary*) payload;
+-(NSArray*) getShareSheetPayloadForAccountNo:(NSString*) accountNo;
+-(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId;
+
 @end
 
 NS_ASSUME_NONNULL_END

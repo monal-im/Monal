@@ -1,7 +1,6 @@
 # Monal
 ## A cross platform, modern XMPP client for iOS and MacOS
-![Build](https://travis-ci.org/monal-im/Monal.svg?branch=develop)
-[![alpha.build-push](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml/badge.svg?branch=alpha.build)](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml)
+[![Alpha build status](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml/badge.svg?branch=alpha.build)](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml)
 [![Translation status](https://hosted.weblate.org/widgets/monal/-/svg-badge.svg)](https://hosted.weblate.org/engage/monal/?utm_source=widget)
 
 This is the Monal XMPP client as found in the app store.  If you want to  use the latest stable versions, search for Monal in the iOS or OSX app store. [Visit the blog to read about the development](https://monal.im)!
@@ -43,6 +42,8 @@ Find general information in the [Monal Wiki](https://github.com/monal-im/Monal/w
 ### Translations
 
 We host and manage translations via [Weblate](https://hosted.weblate.org/engage/monal/).
+
+[![Detailed translation status](https://hosted.weblate.org/widgets/monal/-/multi-auto.svg)](https://hosted.weblate.org/engage/monal/?utm_source=widget)
 
 ### Platform information
 

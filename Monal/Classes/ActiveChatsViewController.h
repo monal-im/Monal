@@ -24,6 +24,4 @@
 -(void) showSettings;
 -(void) showDetails;
 
--(IBAction) unwindToActiveChatsViewController:(UIStoryboardSegue*) segue;
-
 @end

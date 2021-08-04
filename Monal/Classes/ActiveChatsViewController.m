@@ -23,13 +23,8 @@
 @import QuartzCore.CATransaction;
 
 @interface ActiveChatsViewController ()
-
 @property (atomic, strong) NSMutableArray* unpinnedContacts;
 @property (atomic, strong) NSMutableArray* pinnedContacts;
-
-@property (nonatomic, strong) MLContact* lastSelectedUser;
-@property (nonatomic, strong) NSIndexPath *lastSelectedIndexPath;
-
 @end
 
 @implementation ActiveChatsViewController
@@ -204,7 +199,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         unreachable();
     }
     // ignore all removals that aren't in foreground
-    if([self.lastSelectedUser isEqual:removedContact] == NO)
+    if([removedContact isEqual:[MLNotificationManager sharedInstance].currentContact] == NO)
         return;
     // remove contact from activechats table
     [self refreshDisplay];
@@ -256,8 +251,8 @@ static NSMutableSet* _smacksWarningDisplayed;
                 // check if contact is already displayed -> get coresponding indexPath
                 [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                     MLContact* rowContact = (MLContact *) obj;
-                    if([rowContact.contactJid isEqualToString:contact.contactJid] &&
-                       [rowContact.accountId isEqualToString:contact.accountId]) {
+                    if([rowContact isEqual:contact])
+                    {
                         indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
                         *stop = YES;
                     }
@@ -314,7 +309,6 @@ static NSMutableSet* _smacksWarningDisplayed;
 {
     DDLogDebug(@"active chats view will disappear");
     [super viewWillDisappear:animated];
-    self.lastSelectedUser = nil;
 }
 
 -(void) viewDidAppear:(BOOL) animated
@@ -382,7 +376,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) presentChatWithContact:(MLContact*) contact
 {
     // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
-    if([contact isEqual:self.lastSelectedUser])
+    if([contact isEqual:[MLNotificationManager sharedInstance].currentContact])
     {
         // make sure the already open chat is reloaded and return
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
@@ -397,9 +391,6 @@ static NSMutableSet* _smacksWarningDisplayed;
         [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
     else
         [self performSegueWithIdentifier:@"showConversation" sender:contact];
-    
-    // save last opened contact
-    self.lastSelectedUser = contact;
 }
 
 /*
@@ -604,7 +595,6 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) tableView:(UITableView*) tableView didSelectRowAtIndexPath:(NSIndexPath*) indexPath
 {
-    self.lastSelectedIndexPath = indexPath;
     MLContact* selected = nil;
     if(indexPath.section == pinnedChats) {
         selected = self.pinnedContacts[indexPath.row];
@@ -671,26 +661,40 @@ static NSMutableSet* _smacksWarningDisplayed;
     return toreturn;
 }
 
-#pragma mark -mac menu
--(void) showContacts {
+#pragma mark - mac menu
+-(void) showContacts
+{
     // Only segue if at least one account is enabled
-    if([self showAccountNumberWarningIfNeeded]) {
+    if([self showAccountNumberWarningIfNeeded])
         return;
-    }
     [self performSegueWithIdentifier:@"showContacts" sender:self];
 }
 
--(void) showDetails {
-    if(self.lastSelectedUser)
-        [self performSegueWithIdentifier:@"showDetails" sender:self.lastSelectedUser];
+-(void) showDetails
+{
+    if([MLNotificationManager sharedInstance].currentContact != nil)
+        [self performSegueWithIdentifier:@"showDetails" sender:[MLNotificationManager sharedInstance].currentContact];
 }
 
--(void) deleteConversation {
-    if(self.lastSelectedIndexPath)
-        [self tableView:self.chatListTable commitEditingStyle:UITableViewCellEditingStyleDelete forRowAtIndexPath:self.lastSelectedIndexPath];
+-(void) deleteConversation
+{
+    for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt; section++)
+    {
+        NSMutableArray* curContactArray = [self getChatArrayForSection:section];
+        // check if contact is already displayed -> get coresponding indexPath
+        [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            MLContact* rowContact = (MLContact*)obj;
+            if([rowContact isEqual:[MLNotificationManager sharedInstance].currentContact])
+            {
+                [self tableView:self.chatListTable commitEditingStyle:UITableViewCellEditingStyleDelete forRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:section]];
+                return;
+            }
+        }];
+    }
 }
 
--(void) showSettings {
+-(void) showSettings
+{
    [self performSegueWithIdentifier:@"showSettings" sender:self];
 }
 

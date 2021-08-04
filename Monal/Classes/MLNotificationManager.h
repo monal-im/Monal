@@ -24,15 +24,10 @@
 @property (nonatomic, strong) MLContact* currentContact;
 
 /**
- if in chat with this account's user then dont push messages for this user when not locked
- */
-@property (nonatomic, strong) NSString* currentAccountNo;
-
-/**
  handles the notification. 
  1. background will show alert
  2. foreground will show slider
  */
--(void) handleNewMessage:(NSNotification *)notification;
+-(void) handleNewMessage:(NSNotification*) notification;
 
 @end

@@ -382,8 +382,9 @@ static NSMutableSet* _smacksWarningDisplayed;
         return;
     }
     
-    // clear old chat before opening a new one
-    [self.navigationController popViewControllerAnimated:NO];
+    // clear old chat before opening a new one (but not for splitView == YES)
+    if([HelperTools deviceUsesSplitView] == NO)
+        [self.navigationController popViewControllerAnimated:NO];
     
     // show placeholder if contact is nil, open chat otherwise
     if(contact == nil)

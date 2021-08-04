@@ -123,9 +123,7 @@
         else
         {
             //don't show notifications for open chats
-            if(
-                ![message.buddyName isEqualToString:self.currentContact.contactJid]
-            )
+            if(!([message.accountId isEqualToString:self.currentContact.accountId] && [message.buddyName isEqualToString:self.currentContact.contactJid]))
                 [self showModernNotificaionForMessage:message withSound:sound];
             else
                 DDLogDebug(@"not showing notification: chat is open");

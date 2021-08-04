@@ -550,7 +550,7 @@ enum ContactDetailsAboutRows {
 -(void) refreshContact:(NSNotification*) notification
 {
     MLContact* contactUpdate = notification.userInfo[@"contact"];
-    if(contactUpdate && [self.contact.accountId isEqualToString:contactUpdate.accountId] && [self.contact.contactJid isEqualToString:contactUpdate.contactJid])
+    if(contactUpdate && [contactUpdate isEqual:self.contact])
     {
         weakify(self);
         dispatch_async(dispatch_get_main_queue(), ^{

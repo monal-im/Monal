@@ -201,6 +201,11 @@ NSString *const kAskSubscribe=@"subscribe";
     return NO;
 }
 
+-(NSUInteger) hash
+{
+    return [self.contactJid hash] ^ [self.accountId hash];
+}
+
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo
 {
     assert(jid != nil);

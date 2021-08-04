@@ -1487,7 +1487,7 @@ enum msgSentState {
     if(!message)
         DDLogError(@"Notification without message");
     
-    if([message.accountId isEqualToString:self.contact.accountId] && [message.buddyName isEqualToString:self.contact.contactJid])
+    if([message isEqualToContact:self.contact])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(!self.messageList)

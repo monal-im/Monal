@@ -28,6 +28,8 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 -(BOOL) isSubscribed;
 
+-(BOOL) isEqual:(MLContact*) contact;
+
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
 
 /**

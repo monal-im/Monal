@@ -7,6 +7,7 @@
 //
 
 #import "MLContact.h"
+#import "MLMessage.h"
 #import "HelperTools.h"
 #import "DataLayer.h"
 #import "xmpp.h"
@@ -175,6 +176,13 @@ NSString *const kAskSubscribe=@"subscribe";
         || [self.subscription isEqualToString:kSubFrom];
 }
 
+-(BOOL) isEqualToMessage:(MLMessage*) message
+{
+    return message != nil &&
+           [self.contactJid isEqualToString:message.buddyName] &&
+           [self.accountId isEqualToString:message.accountId];
+}
+
 -(BOOL) isEqualToContact:(MLContact*) contact
 {
     return contact != nil &&
@@ -188,6 +196,8 @@ NSString *const kAskSubscribe=@"subscribe";
         return YES;
     if([object isKindOfClass:[MLContact class]])
         return [self isEqualToContact:(MLContact*)object];
+    if([object isKindOfClass:[MLMessage class]])
+        return [self isEqualToMessage:(MLMessage*)object];
     return NO;
 }
 

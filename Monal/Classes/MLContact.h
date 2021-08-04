@@ -19,6 +19,7 @@ FOUNDATION_EXPORT NSString* const kSubRemove;
 FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @class xmpp;
+@class MLMessage;
 
 @interface MLContact : NSObject <NSSecureCoding>
 
@@ -29,6 +30,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(BOOL) isSubscribed;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
+-(BOOL) isEqualToMessage:(MLMessage*) message;
 -(BOOL) isEqual:(id) object;
 
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo;

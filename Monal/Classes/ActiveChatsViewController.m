@@ -160,21 +160,20 @@ static NSMutableSet* _smacksWarningDisplayed;
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
     DDLogInfo(@"Refreshing contact %@ at %@: unread=%lu", contact.contactJid, contact.accountId, (unsigned long)contact.unreadCount);
     
-    if([notification.userInfo objectForKey:@"pinningChanged"]) {
-        // if pinning changed we have to move the user to a other section
+    // if pinning changed we have to move the user to a other section
+    if([notification.userInfo objectForKey:@"pinningChanged"])
         [self insertOrMoveContact:contact completion:nil];
-    } else {
+    else
+    {
         __block NSIndexPath* indexPath = nil;
-        for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++) {
+        for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++)
+        {
             NSMutableArray* curContactArray = [self getChatArrayForSection:section];
-
             // check if contact is already displayed -> get coresponding indexPath
             [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 MLContact* rowContact = (MLContact*)obj;
-                if(
-                    [rowContact.contactJid isEqualToString:contact.contactJid] &&
-                    [rowContact.accountId isEqualToString:contact.accountId]
-                ) {
+                if([rowContact isEqual:[MLNotificationManager sharedInstance].currentContact])
+                {
                     //this MLContact instance is used in various ui parts, not just this file --> update all properties but keep the instance intact
                     [rowContact updateWithContact:contact];
                     indexPath = [NSIndexPath indexPathForRow:idx inSection:section];

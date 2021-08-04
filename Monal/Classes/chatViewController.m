@@ -487,7 +487,7 @@ enum msgSentState {
         [_localMLContactCache removeAllObjects];
     }
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
-    if(self.contact && [self.contact.contactJid isEqualToString:contact.contactJid] && [self.contact.accountId isEqual:contact.accountId])
+    if(self.contact && [self.contact isEqual:contact])
         [self updateUIElements];
 }
 
@@ -796,7 +796,7 @@ enum msgSentState {
 {
     if(self.navigationController.topViewController==self)
     {
-        if(![[MLNotificationManager sharedInstance].currentContact isEqual:self.contact])
+        if(![self.contact isEqual:[MLNotificationManager sharedInstance].currentContact])
             return;
         
         if(![HelperTools isNotInFocus])
@@ -1487,8 +1487,7 @@ enum msgSentState {
     if(!message)
         DDLogError(@"Notification without message");
     
-    if([message.accountId isEqualToString:self.contact.accountId]
-       && [message.buddyName isEqualToString:self.contact.contactJid])
+    if([message.accountId isEqualToString:self.contact.accountId] && [message.buddyName isEqualToString:self.contact.contactJid])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(!self.messageList)

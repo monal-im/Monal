@@ -204,7 +204,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         unreachable();
     }
     // ignore all removals that aren't in foreground
-    if([self.lastSelectedUser.accountId isEqualToString:removedContact.accountId] == NO || [self.lastSelectedUser.contactJid isEqualToString:removedContact.contactJid] == NO)
+    if([self.lastSelectedUser isEqual:removedContact] == NO)
         return;
     // remove contact from activechats table
     [self refreshDisplay];
@@ -375,24 +375,24 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact
 {
+    // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
+    if([contact isEqual:self.lastSelectedUser])
+    {
+        // make sure the already open chat is reloaded and return
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
+        return;
+    }
+    
+    // clear old chat before opening a new one
+    [self.navigationController popViewControllerAnimated:NO];
+    
+    // show placeholder if contact is nil, open chat otherwise
     if(contact == nil)
-    {
-        // show placeholder
         [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
-    }
     else
-    {
-        // Only open contact chat when it is not opened yet -> macOS
-        if([contact.contactJid isEqualToString:self.lastSelectedUser.contactJid])
-        {
-            //make sure the already open chat is reloaded
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
-            return;
-        }
-        
-        // open chat
         [self performSegueWithIdentifier:@"showConversation" sender:contact];
-    }
+    
+    // save last opened contact
     self.lastSelectedUser = contact;
 }
 

@@ -162,16 +162,18 @@ static NSMutableSet* _smacksWarningDisplayed;
         {
             NSMutableArray* curContactArray = [self getChatArrayForSection:section];
             // check if contact is already displayed -> get coresponding indexPath
-            [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                MLContact* rowContact = (MLContact*)obj;
-                if([rowContact isEqual:[MLNotificationManager sharedInstance].currentContact])
+            NSUInteger rowIdx = 0;
+            for(MLContact* rowContact in curContactArray)
+            {
+                if([rowContact isEqual:contact])
                 {
                     //this MLContact instance is used in various ui parts, not just this file --> update all properties but keep the instance intact
                     [rowContact updateWithContact:contact];
-                    indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
-                    *stop = YES;
+                    indexPath = [NSIndexPath indexPathForRow:rowIdx inSection:section];
+                    break;
                 }
-            }];
+                rowIdx++;
+            }
         }
         // reload contact entry if we found it
         if(indexPath) {

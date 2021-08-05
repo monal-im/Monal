@@ -70,9 +70,9 @@ static NSMutableSet* _smacksWarningDisplayed;
     self.view = self.chatListTable;
     
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self selector:@selector(refreshDisplay) name:kMonalRefresh object:nil];
+    [nc addObserver:self selector:@selector(handleRefreshDisplayNotification:) name:kMonalRefresh object:nil];
     [nc addObserver:self selector:@selector(handleContactRemoved:) name:kMonalContactRemoved object:nil];
-    [nc addObserver:self selector:@selector(refreshDisplay) name:kMonalMessageFiletransferUpdateNotice object:nil];
+    [nc addObserver:self selector:@selector(handleRefreshDisplayNotification:) name:kMonalMessageFiletransferUpdateNotice object:nil];
     [nc addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
@@ -91,7 +91,6 @@ static NSMutableSet* _smacksWarningDisplayed;
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
 }
-
 
 -(void) refreshDisplay
 {
@@ -182,6 +181,16 @@ static NSMutableSet* _smacksWarningDisplayed;
             });
         }
     }
+}
+
+-(void) handleRefreshDisplayNotification:(NSNotification*) notification
+{
+    // filter notifcations from within this class
+    if([notification.object isKindOfClass:[ActiveChatsViewController class]])
+    {
+        return;
+    }
+    [self refreshDisplay];
 }
 
 -(void) handleContactRemoved:(NSNotification*) notification

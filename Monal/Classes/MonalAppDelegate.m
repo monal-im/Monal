@@ -543,7 +543,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                     DDLogDebug(@"Opening chat for contact %@", [contact contactJid]);
                     // open new chat
                     [(ActiveChatsViewController*)self.activeChats presentChatWithContact:_contactToOpen];
-                    [(ActiveChatsViewController*)self.activeChats refreshDisplay];
                 }
                 else
                     DDLogDebug(@"_contactToOpen changed to nil, not opening chat for contact %@", [contact contactJid]);

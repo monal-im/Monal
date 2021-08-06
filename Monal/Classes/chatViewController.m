@@ -788,8 +788,9 @@ enum msgSentState {
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
             
             //send displayed marker for last unread message (XEP-0333)
+            //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
             MLMessage* lastUnreadMessage = [unread lastObject];
-            if(lastUnreadMessage)
+            if(lastUnreadMessage && (!self.contact.isGroup || [@"group" isEqualToString:self.contact.mucType]))
             {
                 DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
                 [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];

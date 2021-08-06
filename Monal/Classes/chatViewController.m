@@ -487,7 +487,7 @@ enum msgSentState {
         [_localMLContactCache removeAllObjects];
     }
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
-    if(self.contact && [self.contact isEqual:contact])
+    if(self.contact && [self.contact isEqualToContact:contact])
         [self updateUIElements];
 }
 
@@ -794,9 +794,9 @@ enum msgSentState {
 
 -(void) refreshCounter
 {
-    if(self.navigationController.topViewController==self)
+    if(self.navigationController.topViewController == self)
     {
-        if(![self.contact isEqual:[MLNotificationManager sharedInstance].currentContact])
+        if(![self.contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
             return;
         
         if(![HelperTools isNotInFocus])

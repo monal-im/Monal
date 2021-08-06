@@ -584,19 +584,21 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
             DDLogDebug(@"Marked as read: %@", unread);
             
-            //remove notifications of all read messages
-            for(MLMessage* msg in unread)
+            //send displayed marker for last unread message (XEP-0333)
+            MLMessage* lastUnreadMessage = [unread lastObject];
+            if(lastUnreadMessage)
             {
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
-                [account sendDisplayMarkerForMessage:msg];
+                DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
+                [account sendDisplayMarkerForMessage:lastUnreadMessage];
             }
+            
+            //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
             
             //update unread count in active chats list
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": fromContact
             }];
-            
-            [self updateUnread];
         }
         else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
             [self openChatOfContact:fromContact];

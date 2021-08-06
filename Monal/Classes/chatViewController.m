@@ -813,11 +813,7 @@ enum msgSentState {
             }
             
             //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
-            for(MLMessage* msg in unread)
-            {
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:self.xmppAccount userInfo:@{@"message":msg}];
-                [self.xmppAccount sendDisplayMarkerForMessage:msg];
-            }
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:self.xmppAccount userInfo:@{@"messagesArray":unread}];
             
             // update unread counter
             self.contact.unreadCount -= unread.count;

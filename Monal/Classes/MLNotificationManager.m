@@ -41,7 +41,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFiletransferUpdate:) name:kMonalMessageFiletransferUpdateNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeletedMessage:) name:kMonalDeletedMessageNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalDisplayedMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDisplayedMessages:) name:kMonalDisplayedMessagesNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
 
     self.notificationPrivacySetting = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
@@ -133,23 +133,29 @@
         DDLogDebug(@"not showing notification: showAlert is NO (or this contact got muted)");
 }
 
--(void) handleDisplayedMessage:(NSNotification*) notification
+-(void) handleDisplayedMessages:(NSNotification*) notification
 {
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    NSArray<MLMessage*>* messages = [notification.userInfo objectForKey:@"messagesArray"];
+    DDLogVerbose(@"notification manager got displayed messages notice with %lu entries", [messages count]);
     
-    if([message.messageType isEqualToString:kMessageTypeStatus])
-        return;
+    //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        for(MLMessage* msg in messages)
+        {
+            if([msg.messageType isEqualToString:kMessageTypeStatus])
+                return;
+            
+            NSString* idval = [self identifierWithMessage:msg];
+            
+            DDLogVerbose(@"Removing pending/deliverd notification for message '%@' with identifier '%@'...", msg.messageId, idval);
+            [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
+            [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
+        }
+        //update app badge
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
+    });
     
-    DDLogVerbose(@"notification manager got displayed message notice: %@", message.messageId);
-    NSString* idval = [self identifierWithMessage:message];
-    
-    DDLogVerbose(@"Removing pending/deliverd notification with identifier '%@'...", idval);
-    [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
-    [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
-    
-    //update app badge
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
 }
 
 -(void) handleDeletedMessage:(NSNotification*) notification

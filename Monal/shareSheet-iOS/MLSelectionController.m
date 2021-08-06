@@ -42,7 +42,7 @@
     {
         cell.textLabel.text = contact.contactDisplayName;
         MLContact* selectedContact = (MLContact*)[self.selection objectForKey:@"contact"];
-        if([selectedContact isEqual:contact])
+        if([selectedContact isEqualToContact:contact])
             cell.accessoryType = UITableViewCellAccessoryCheckmark;
         else
             cell.accessoryType = UITableViewCellAccessoryNone;

@@ -487,7 +487,7 @@ enum msgSentState {
         [_localMLContactCache removeAllObjects];
     }
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
-    if(self.contact && [self.contact isEqual:contact])
+    if(self.contact && [self.contact isEqualToContact:contact])
         [self updateUIElements];
 }
 
@@ -794,9 +794,9 @@ enum msgSentState {
 
 -(void) refreshCounter
 {
-    if(self.navigationController.topViewController==self)
+    if(self.navigationController.topViewController == self)
     {
-        if(![self.contact isEqual:[MLNotificationManager sharedInstance].currentContact])
+        if(![self.contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
             return;
         
         if(![HelperTools isNotInFocus])
@@ -805,19 +805,16 @@ enum msgSentState {
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
             
             //send displayed marker for last unread message (XEP-0333)
+            //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
             MLMessage* lastUnreadMessage = [unread lastObject];
-            if(lastUnreadMessage)
+            if(lastUnreadMessage && (!self.contact.isGroup || [@"group" isEqualToString:self.contact.mucType]))
             {
                 DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
                 [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];
             }
             
             //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
-            for(MLMessage* msg in unread)
-            {
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:self.xmppAccount userInfo:@{@"message":msg}];
-                [self.xmppAccount sendDisplayMarkerForMessage:msg];
-            }
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:self.xmppAccount userInfo:@{@"messagesArray":unread}];
             
             // update unread counter
             self.contact.unreadCount -= unread.count;

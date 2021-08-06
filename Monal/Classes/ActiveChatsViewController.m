@@ -70,9 +70,9 @@ static NSMutableSet* _smacksWarningDisplayed;
     self.view = self.chatListTable;
     
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self selector:@selector(refreshDisplay) name:kMonalRefresh object:nil];
+    [nc addObserver:self selector:@selector(handleRefreshDisplayNotification:) name:kMonalRefresh object:nil];
     [nc addObserver:self selector:@selector(handleContactRemoved:) name:kMonalContactRemoved object:nil];
-    [nc addObserver:self selector:@selector(refreshDisplay) name:kMonalMessageFiletransferUpdateNotice object:nil];
+    [nc addObserver:self selector:@selector(handleRefreshDisplayNotification:) name:kMonalMessageFiletransferUpdateNotice object:nil];
     [nc addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
@@ -99,7 +99,6 @@ static NSMutableSet* _smacksWarningDisplayed;
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
 }
-
 
 -(void) refreshDisplay
 {
@@ -170,16 +169,18 @@ static NSMutableSet* _smacksWarningDisplayed;
         {
             NSMutableArray* curContactArray = [self getChatArrayForSection:section];
             // check if contact is already displayed -> get coresponding indexPath
-            [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                MLContact* rowContact = (MLContact*)obj;
-                if([rowContact isEqual:[MLNotificationManager sharedInstance].currentContact])
+            NSUInteger rowIdx = 0;
+            for(MLContact* rowContact in curContactArray)
+            {
+                if([rowContact isEqualToContact:contact])
                 {
                     //this MLContact instance is used in various ui parts, not just this file --> update all properties but keep the instance intact
                     [rowContact updateWithContact:contact];
-                    indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
-                    *stop = YES;
+                    indexPath = [NSIndexPath indexPathForRow:rowIdx inSection:section];
+                    break;
                 }
-            }];
+                rowIdx++;
+            }
         }
         // reload contact entry if we found it
         if(indexPath) {
@@ -190,6 +191,16 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
 }
 
+-(void) handleRefreshDisplayNotification:(NSNotification*) notification
+{
+    // filter notifcations from within this class
+    if([notification.object isKindOfClass:[ActiveChatsViewController class]])
+    {
+        return;
+    }
+    [self refreshDisplay];
+}
+
 -(void) handleContactRemoved:(NSNotification*) notification
 {
     MLContact* removedContact = [notification.userInfo objectForKey:@"contact"];
@@ -198,7 +209,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         unreachable();
     }
     // ignore all removals that aren't in foreground
-    if([removedContact isEqual:[MLNotificationManager sharedInstance].currentContact] == NO)
+    if([removedContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact] == NO)
         return;
     // remove contact from activechats table
     [self refreshDisplay];
@@ -250,7 +261,7 @@ static NSMutableSet* _smacksWarningDisplayed;
                 // check if contact is already displayed -> get coresponding indexPath
                 [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                     MLContact* rowContact = (MLContact *) obj;
-                    if([rowContact isEqual:contact])
+                    if([rowContact isEqualToContact:contact])
                     {
                         indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
                         *stop = YES;
@@ -375,7 +386,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) presentChatWithContact:(MLContact*) contact
 {
     // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
-    if([contact isEqual:[MLNotificationManager sharedInstance].currentContact])
+    if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
     {
         // make sure the already open chat is reloaded and return
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
@@ -684,7 +695,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         // check if contact is already displayed -> get coresponding indexPath
         [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             MLContact* rowContact = (MLContact*)obj;
-            if([rowContact isEqual:[MLNotificationManager sharedInstance].currentContact])
+            if([rowContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
             {
                 [self tableView:self.chatListTable commitEditingStyle:UITableViewCellEditingStyleDelete forRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:section]];
                 return;

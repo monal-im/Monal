@@ -18,7 +18,7 @@ NSString* const kiqErrorType = @"error";
 
 @implementation XMPPIQ
 
--(id) initWithId:(NSString*) iqid andType:(NSString*) iqType
+-(id) initInternalWithId:(NSString*) iqid andType:(NSString*) iqType
 {
     self = [super initWithElement:@"iq"];
     [self setXMLNS:@"jabber:client"];
@@ -31,7 +31,7 @@ NSString* const kiqErrorType = @"error";
 
 -(id) initWithType:(NSString*) iqType
 {
-    return [self initWithId:[[NSUUID UUID] UUIDString] andType:iqType];
+    return [self initInternalWithId:[[NSUUID UUID] UUIDString] andType:iqType];
 }
 
 -(id) initWithType:(NSString*) iqType to:(NSString*) to
@@ -42,9 +42,9 @@ NSString* const kiqErrorType = @"error";
     return self;
 }
 
--(id) initAsResponseTo:(XMPPIQ*) iq withType:(NSString*) iqType
+-(id) initAsResponseTo:(XMPPIQ*) iq
 {
-    self = [self initWithId:[iq findFirst:@"/@id"] andType:iqType];
+    self = [self initInternalWithId:[iq findFirst:@"/@id"] andType:kiqResultType];
     if(iq.from)
         [self setiqTo:iq.from];
     return self;

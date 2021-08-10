@@ -22,8 +22,7 @@ NSString* const kiqErrorType = @"error";
 {
     self = [super initWithElement:@"iq"];
     [self setXMLNS:@"jabber:client"];
-    if(iqid)
-        self.id = iqid;
+    self.id = iqid;
     if(iqType)
         self.attributes[@"type"] = iqType;
     return self;
@@ -168,11 +167,13 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setMAMQueryLatestMessagesForJid:(NSString* _Nullable) jid before:(NSString* _Nullable) uid
 {
+    //set iq id to mam query id
+    self.id = [NSString stringWithFormat:@"MLhistory:%@", [[NSUUID UUID] UUIDString]];
     XMPPDataForm* form = [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"urn:xmpp:mam:2"];
     if(jid)
         form[@"with"] = jid;
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
-        @"queryid": [NSString stringWithFormat:@"MLhistory:%@", [[NSUUID UUID] UUIDString]]
+        @"queryid": self.id
     } andChildren:@[
         form,
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
@@ -185,8 +186,10 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setMAMQueryForLatestId
 {
+    //set iq id to mam query id
+    self.id = [NSString stringWithFormat:@"MLignore:%@", [[NSUUID UUID] UUIDString]];
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
-        @"queryid": [NSString stringWithFormat:@"MLignore:%@", [[NSUUID UUID] UUIDString]]
+        @"queryid": self.id
     } andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" formType:@"urn:xmpp:mam:2" andDictionary:@{
             @"end": [HelperTools generateDateTimeString:[NSDate date]]
@@ -201,8 +204,10 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setMAMQueryAfter:(NSString*) uid
 {
+    //set iq id to mam query id
+    self.id = [NSString stringWithFormat:@"MLcatchup:%@", [[NSUUID UUID] UUIDString]];
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
-        @"queryid": [NSString stringWithFormat:@"MLcatchup:%@", [[NSUUID UUID] UUIDString]]
+        @"queryid": self.id
     } andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"urn:xmpp:mam:2"],
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
@@ -215,8 +220,10 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setCompleteMAMQuery
 {
+    //set iq id to mam query id
+    self.id = [NSString stringWithFormat:@"MLcatchup:%@", [[NSUUID UUID] UUIDString]];
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
-        @"queryid": [NSString stringWithFormat:@"MLcatchup:%@", [[NSUUID UUID] UUIDString]]
+        @"queryid": self.id
     } andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"urn:xmpp:mam:2"],
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[

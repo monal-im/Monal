@@ -1188,12 +1188,12 @@ NSString *const kData=@"data";
                 NSDictionary* dic = (NSDictionary *) obj;
                 XMPPStanza* stanza = [dic objectForKey:kStanza];
                 //only resend message stanzas because of the smacks error condition
-                //but don't add them to our outgoing smacks queue again, if smacks isn't supported (do we really need this special handling?)
+                //but don't add them to our outgoing smacks queue again, if smacks isn't supported
                 if([stanza.element isEqualToString:@"message"])
                     [self send:stanza withSmacks:self.connectionProperties.supportsSM3];
             }];
-            //persist these changes (the queue can now be empty because smacks enable failed
-            //or contain all the resent stanzas (e.g. only resume failed))
+            //persist these changes, the queue can now be empty (because smacks enable failed)
+            //or contain all the resent stanzas (e.g. only resume failed)
             [self persistState];
         }
     }

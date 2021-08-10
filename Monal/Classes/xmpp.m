@@ -2832,14 +2832,14 @@ NSString *const kData=@"data";
 {
     if(!self.connectionProperties.supportsMam2)
         return;
-    XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query updateMamArchivePrefDefault:preference];
     [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleSetMamPrefs)];
 }
 
 -(void) getMAMPrefs
 {
-    XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query mamArchivePref];
     [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleMamPrefs)];
 }
@@ -2947,7 +2947,7 @@ NSString *const kData=@"data";
         }
     };
     query = ^(NSString* _Nullable before) {
-        XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
         if(contact.isGroup)
         {
             if(!before)

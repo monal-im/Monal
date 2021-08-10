@@ -45,6 +45,7 @@ static NSMutableDictionary* _uiHandler;
 {
     _stateLockObject = [[NSObject alloc] init];
     _roomFeatures = [[NSMutableDictionary alloc] init];
+    //TODO: remove joining state on reconnect (e.g. add invalidation handler for disco iq)
     _joining = [[NSMutableSet alloc] init];
     _firstJoin = [[NSMutableSet alloc] init];
     _uiHandler = [[NSMutableDictionary alloc] init];
@@ -338,7 +339,7 @@ static NSMutableDictionary* _uiHandler;
                 //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
                 //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
                 NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:node.fromUser andAccount:account.accountNo];
-                XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
                 [mamQuery setiqTo:node.fromUser];
                 if(lastStanzaId)
                 {
@@ -695,7 +696,7 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
         //handle weird XEP-0313 monkey-patching XEP-0059 behaviour (WHY THE HELL??)
         if(!secondTry && [iqNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
         {
-            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
             [mamQuery setiqTo:iqNode.fromUser];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
             [mamQuery setCompleteMAMQuery];
@@ -709,7 +710,7 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
     {
         DDLogVerbose(@"Paging through muc mam catchup results with after: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
         //do RSM forward paging
-        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
         [pageQuery setiqTo:iqNode.fromUser];
         [account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];

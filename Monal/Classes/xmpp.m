@@ -1645,12 +1645,10 @@ NSString *const kData=@"data";
             }
             
             //remove handled mam queries from _runningMamQueries
-            if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"] && _runningMamQueries[[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]] != nil)
-                [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]];
-            else if([iqNode check:@"/<type=error>"])
-                for(NSString* mamQueryId in [_runningMamQueries allKeys])
-                    if([iqNode.id isEqual:((XMPPIQ*)_runningMamQueries[mamQueryId]).id])
-                        [_runningMamQueries removeObjectForKey:mamQueryId];
+            if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin"] && _runningMamQueries[[iqNode findFirst:@"/@id"]] != nil)
+                [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/@id"]];
+            else if([iqNode check:@"/<type=error>"] && _runningMamQueries[[iqNode findFirst:@"/@id"]] != nil)
+                [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/@id"]];
             
             //process registered iq handlers
             id iqHandler = nil;
@@ -2909,7 +2907,7 @@ NSString *const kData=@"data";
         }
     };
     responseHandler = ^(XMPPIQ* response) {
-        NSMutableArray* mamPage = [self getOrderedMamPageFor:[response findFirst:@"{urn:xmpp:mam:2}fin@queryid"]];
+        NSMutableArray* mamPage = [self getOrderedMamPageFor:[response findFirst:@"/@id"]];
         
         //count new bodies
         for(NSDictionary* data in mamPage)

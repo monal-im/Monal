@@ -486,8 +486,17 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             }
             
             //mark messages as read because we are replying
-            [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
-            [self updateUnread];
+            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
+            DDLogDebug(@"Marked as read: %@", unread);
+            
+            //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
+            
+            //update unread count in active chats list
+            [fromContact refresh];      //this will make sure the unread count is correct
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                @"contact": fromContact
+            }];
             
             BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:fromContact.contactJid andAccountNo:fromContact.accountId];
             [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText toContact:fromContact isEncrypted:encrypted isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
@@ -513,6 +522,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
             
             //update unread count in active chats list
+            [fromContact refresh];      //this will make sure the unread count is correct
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": fromContact
             }];

@@ -78,7 +78,7 @@
     self.otherParty=self.initiator;
     _activeresource=resource;
     
-    XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
+    XMPPIQ* node =[[XMPPIQ alloc] initWithType:kiqSetType];
     [node setJingleAcceptTo:to andResource:resource withValues:info];
     self.idval= iqid; 
     
@@ -112,7 +112,7 @@
     
      NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP, @"localport1":self.localPort,@"localport2":self.localPort2};
     
-    XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
+    XMPPIQ* node =[[XMPPIQ alloc] initWithType:kiqSetType];
     [node setJingleInitiateTo:to andResource:resource withValues:info];
     
     return node;
@@ -122,7 +122,7 @@
 {
     NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid};
     
-    XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
+    XMPPIQ* node =[[XMPPIQ alloc] initWithType:kiqSetType];
     [node setJingleDeclineTo:to andResource:resource withValues:info];
     
     return node;
@@ -136,7 +136,7 @@
     if(self.initiator && self.responder && self.thesid && _ownIP) {
         NSDictionary* info =@{@"initiator":self.initiator, @"responder":self.responder, @"sid":self.thesid, @"ownip":_ownIP};
         
-        XMPPIQ* node =[[XMPPIQ alloc] initWithId:iqid andType:kiqSetType];
+        XMPPIQ* node =[[XMPPIQ alloc] initWithType:kiqSetType];
         [node setJingleTerminateTo:self.otherParty andResource:_activeresource withValues:info];
         return node;
     }

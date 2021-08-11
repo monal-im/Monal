@@ -170,6 +170,11 @@ NSString *const kAskSubscribe=@"subscribe";
     self.lastMessageTime = contact.lastMessageTime;
 }
 
+-(void) refresh
+{
+    [self updateWithContact:[MLContact createContactFromJid:self.contactJid andAccountNo:self.accountId]];
+}
+
 -(BOOL) isSubscribed
 {
     return [self.subscription isEqualToString:kSubBoth]

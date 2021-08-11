@@ -17,10 +17,9 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 
 @interface XMPPIQ : XMPPStanza
 
--(id) initWithId:(NSString*) iqid andType:(NSString*) iqType;
 -(id) initWithType:(NSString*) iqType;
 -(id) initWithType:(NSString*) iqType to:(NSString*) to;
--(id) initAsResponseTo:(XMPPIQ*) iq withType:(NSString*) iqType;
+-(id) initAsResponseTo:(XMPPIQ*) iq;
 
 -(void) setRegisterOnAppserverWithToken:(NSString*) token;
 -(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid;

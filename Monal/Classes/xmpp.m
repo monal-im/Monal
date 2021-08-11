@@ -1188,12 +1188,12 @@ NSString *const kData=@"data";
                 NSDictionary* dic = (NSDictionary *) obj;
                 XMPPStanza* stanza = [dic objectForKey:kStanza];
                 //only resend message stanzas because of the smacks error condition
-                //but don't add them to our outgoing smacks queue again, if smacks isn't supported (do we really need this special handling?)
+                //but don't add them to our outgoing smacks queue again, if smacks isn't supported
                 if([stanza.element isEqualToString:@"message"])
                     [self send:stanza withSmacks:self.connectionProperties.supportsSM3];
             }];
-            //persist these changes (the queue can now be empty because smacks enable failed
-            //or contain all the resent stanzas (e.g. only resume failed))
+            //persist these changes, the queue can now be empty (because smacks enable failed)
+            //or contain all the resent stanzas (e.g. only resume failed)
             [self persistState];
         }
     }
@@ -1645,12 +1645,10 @@ NSString *const kData=@"data";
             }
             
             //remove handled mam queries from _runningMamQueries
-            if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"] && _runningMamQueries[[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]] != nil)
-                [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]];
-            else if([iqNode check:@"/<type=error>"])
-                for(NSString* mamQueryId in [_runningMamQueries allKeys])
-                    if([iqNode.id isEqual:((XMPPIQ*)_runningMamQueries[mamQueryId]).id])
-                        [_runningMamQueries removeObjectForKey:mamQueryId];
+            if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin"] && _runningMamQueries[[iqNode findFirst:@"/@id"]] != nil)
+                [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/@id"]];
+            else if([iqNode check:@"/<type=error>"] && _runningMamQueries[[iqNode findFirst:@"/@id"]] != nil)
+                [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/@id"]];
             
             //process registered iq handlers
             id iqHandler = nil;
@@ -2835,14 +2833,14 @@ NSString *const kData=@"data";
 {
     if(!self.connectionProperties.supportsMam2)
         return;
-    XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query updateMamArchivePrefDefault:preference];
     [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleSetMamPrefs)];
 }
 
 -(void) getMAMPrefs
 {
-    XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query mamArchivePref];
     [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleMamPrefs)];
 }
@@ -2912,7 +2910,7 @@ NSString *const kData=@"data";
         }
     };
     responseHandler = ^(XMPPIQ* response) {
-        NSMutableArray* mamPage = [self getOrderedMamPageFor:[response findFirst:@"{urn:xmpp:mam:2}fin@queryid"]];
+        NSMutableArray* mamPage = [self getOrderedMamPageFor:[response findFirst:@"/@id"]];
         
         //count new bodies
         for(NSDictionary* data in mamPage)
@@ -2950,7 +2948,7 @@ NSString *const kData=@"data";
         }
     };
     query = ^(NSString* _Nullable before) {
-        XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
         if(contact.isGroup)
         {
             if(!before)

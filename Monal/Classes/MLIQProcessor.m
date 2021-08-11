@@ -42,14 +42,14 @@
 {
     if([iqNode check:@"{urn:xmpp:ping}ping"])
     {
-        XMPPIQ* pong = [[XMPPIQ alloc] initWithId:[iqNode findFirst:@"/@id"] andType:kiqResultType];
+        XMPPIQ* pong = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [pong setiqTo:iqNode.from];
         [account send:pong];
     }
     
     if([iqNode check:@"{jabber:iq:version}query"])
     {
-        XMPPIQ* versioniq = [[XMPPIQ alloc] initWithId:[iqNode findFirst:@"/@id"] andType:kiqResultType];
+        XMPPIQ* versioniq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [versioniq setiqTo:iqNode.from];
         [versioniq setVersion];
         [account send:versioniq];
@@ -57,7 +57,7 @@
     
     if([iqNode check:@"{http://jabber.org/protocol/disco#info}query"])
     {
-        XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initAsResponseTo:iqNode withType:kiqResultType];
+        XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [discoInfoResponse setDiscoInfoWithFeatures:account.capsFeatures identity:account.capsIdentity andNode:[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query@node"]];
         [account send:discoInfoResponse];
     }
@@ -71,7 +71,7 @@
         [self processRosterWithAccount:account andIqNode:iqNode];
         
         //send empty result iq as per RFC 6121 requirements
-        XMPPIQ* reply = [[XMPPIQ alloc] initWithId:[iqNode findFirst:@"/@id"] andType:kiqResultType];
+        XMPPIQ* reply = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [reply setiqTo:iqNode.from];
         [account send:reply];
     }
@@ -128,7 +128,7 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
         //handle weird XEP-0313 monkey-patching XEP-0059 behaviour (WHY THE HELL??)
         if(!secondTry && [iqNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
         {
-            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
             [mamQuery setCompleteMAMQuery];
             [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, YES))];
@@ -144,7 +144,7 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
     {
         DDLogVerbose(@"Paging through mam catchup results with after: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
         //do RSM forward paging
-        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
         [account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup)];
     }
@@ -356,7 +356,7 @@ $$handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
         //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
         NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForAccount:account.accountNo];
-        XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         if(lastStanzaId)
         {
             DDLogInfo(@"Querying mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);

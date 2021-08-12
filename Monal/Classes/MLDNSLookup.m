@@ -6,15 +6,24 @@
 //  Copyright © 2018 Monal.im. All rights reserved.
 //
 
+#import <stdint.h>
+#import "MLConstants.h"
 #import "MLDNSLookup.h"
 @import Darwin.POSIX.sys.time; 
 
 @interface MLDNSLookup()
 @end
 
+static NSMutableDictionary* _RRCache;
+
 @implementation MLDNSLookup
 
--(void) doDiscoveryWithSecure:(BOOL) secure andDomain:(NSString*) domain
++(void) initialize
+{
+    _RRCache = [[NSMutableDictionary alloc] init];
+}
+
+-(void) doDiscoveryWithSecure:(BOOL) secure andDomain:(NSString*) domain withTimeout:(unsigned long) query_timeout
 {
 	DNSServiceRef sdRef;
     DNSServiceErrorType res;
@@ -46,7 +55,7 @@
         FD_SET(sock, &set);
         
         /* Initialize the timeout data structure. */
-        timeout.tv_sec = 2ul;
+        timeout.tv_sec = query_timeout;
         timeout.tv_usec = 0;
         
         /* select returns 0 if timeout, 1 if input available, -1 if error. */
@@ -59,30 +68,59 @@
         }
         else
         {
-            //DDLogVerbose(@"dns call timed out");
+            DDLogWarn(@"dns call timed out: %@", serviceDiscoveryString);
         }
     }
 }
 
--(NSArray *) dnsDiscoverOnDomain:(NSString *) domain
+-(NSArray*) doRealDnsDiscoverOnDomain:(NSString*) domain withTimeout:(unsigned long) timeout
 {
     self.discoveredServers = [[NSMutableArray alloc] init];
-    
-    //request xmpps and xmpp records, xmpps will be preferred
-    [self doDiscoveryWithSecure:YES andDomain:domain];
-    [self doDiscoveryWithSecure:NO andDomain:domain];
-    
-    //we ignore weights here for simplicity
-    NSSortDescriptor* descriptor = [[NSSortDescriptor alloc] initWithKey:@"priority" ascending:YES];
-    NSArray* sortArray = [NSArray arrayWithObjects:descriptor, nil];
-    [self.discoveredServers sortUsingDescriptors:sortArray];
-    
-    return [self.discoveredServers copy];
+    @synchronized(self.discoveredServers) {
+        //request xmpps and xmpp records, xmpps will be preferred
+        [self doDiscoveryWithSecure:YES andDomain:domain withTimeout:timeout];
+        [self doDiscoveryWithSecure:NO andDomain:domain withTimeout:timeout];
+        
+        //we ignore weights here for simplicity
+        NSSortDescriptor* descriptor = [[NSSortDescriptor alloc] initWithKey:@"priority" ascending:YES];
+        NSArray* sortArray = [NSArray arrayWithObjects:descriptor, nil];
+        [self.discoveredServers sortUsingDescriptors:sortArray];
+        
+        //calculate lowest timeout
+        u_int32_t lowest_ttl = UINT32_MAX;
+        for(NSDictionary* entry in self.discoveredServers)
+            lowest_ttl = MIN(lowest_ttl, [entry[@"ttl"] unsignedIntValue]);
+        
+        //update resource record cache with discovered servers list
+        @synchronized(_RRCache) {
+            _RRCache[domain] = @{
+                @"timeout": [NSDate dateWithTimeIntervalSinceNow:lowest_ttl],
+                @"records": [self.discoveredServers copy],
+            };
+        }
+        
+        //return discovered servers list
+        return [self.discoveredServers copy];
+    }
+}
+
+-(NSArray*) dnsDiscoverOnDomain:(NSString*) domain
+{
+    @synchronized(_RRCache) {
+        if(_RRCache[domain] != nil && [_RRCache[domain][@"timeout"] timeIntervalSinceNow] > 0)
+        {
+            //update our cache in background
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+                [self doRealDnsDiscoverOnDomain:domain withTimeout:16ul];     //long query timeout (this is a background query)
+            });
+            return [_RRCache[domain][@"records"] copy];
+        }
+    }
+    return [self doRealDnsDiscoverOnDomain:domain withTimeout:4ul];     //short query timeout (we are waiting for this query)
 }
 
 
-
-
+// ********************************************** C code below **********************************************
 
 
 char *ConvertDomainLabelToCString_withescape(const domainLabel* label, char *ptr, char esc)
@@ -112,14 +150,14 @@ char *ConvertDomainLabelToCString_withescape(const domainLabel* label, char *ptr
     return(ptr);                                                // and return
 }
 
-char *ConvertDomainNameToCString_withescape(const domainName* name, int len, char *ptr, char esc)
+char* ConvertDomainNameToCString_withescape(const domainName* name, int len, char* ptr, char esc)
 {
     const u_char *src         = name->c;                        // Domain name we're reading
     const u_char *const max   = name->c + MIN(MAX_DOMAIN_NAME, len);      // Maximum that's valid
     
     if (*src == 0) *ptr++ = '.';                                // Special case: For root, just write a dot
     
-    while (*src)                                                                                                        // While more characters in the domain name
+    while (*src)                                                // While more characters in the domain name
     {
         if (src + 1 + *src >= max) return(NULL);
         ptr = ConvertDomainLabelToCString_withescape((const domainLabel *)src, ptr, esc);
@@ -133,13 +171,8 @@ char *ConvertDomainNameToCString_withescape(const domainName* name, int len, cha
 }
 
 // print arbitrary rdata in a readable manned
-void print_rdata(int type, int len, const u_char *rdata, void* _context)
+void print_rdata(int type, int len, const u_char* rdata, u_int32_t ttl, void* _context)
 {
-    int srvDomainLen = len - 6; // len - sizeof(priority) - sizeof(weight) - sizeof(port)
-    if(srvDomainLen > MAX_DOMAIN_NAME) {
-        return;
-    }
-
     NSDictionary* context = (__bridge NSDictionary*)_context;
     BOOL isSecure = [context[@"isSecure"] boolValue];
     MLDNSLookup* caller = (MLDNSLookup*)context[@"caller"];
@@ -148,42 +181,40 @@ void print_rdata(int type, int len, const u_char *rdata, void* _context)
     {
         srv_rdata* srv = (srv_rdata*)rdata;
         char targetStr[MAX_CSTRING];
+        int srvDomainLen = len - sizeof(srv->priority) - sizeof(srv->weight) - sizeof(srv->port);
+        if(srvDomainLen > MAX_DOMAIN_NAME)
+            return;
         ConvertDomainNameToCString_withescape(&srv->target, srvDomainLen, targetStr, 0);
         //  DDLogVerbose(@"pri=%d, w=%d, port=%d, target=%s\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetstr);
         
         NSString* theServer = [NSString stringWithUTF8String:targetStr];
-        NSNumber* prio = [NSNumber numberWithUnsignedInt:(ntohs(srv->priority) + (isSecure == YES ? 0 : 65535))]; // prefer TLS over STARTTLS
+        NSNumber* prio = [NSNumber numberWithUnsignedInt:(ntohs(srv->priority) + (isSecure == YES ? 0 : UINT16_MAX))]; // prefer TLS over STARTTLS
         NSNumber* weight = [NSNumber numberWithInt:ntohs(srv->weight)];
         NSNumber* thePort = [NSNumber numberWithInt:ntohs(srv->port)];
         if(theServer && prio && weight && thePort) {
-            // Check if service is not provided
+            // Check if service is not provided (ignored for xmpps records, NOT ignored for xmpp records)
             bool serviceEnabled = ![theServer isEqualToString:@"."];
             if(serviceEnabled == false && isSecure == YES)
-            {
                 return;
-            }
-            // Validate that the domain ends with at dot
+            // Validate that the domain ends with at dot (and ignore this entry, if not)
             if([theServer hasSuffix:@"."] == NO)
-            {
                 return;
-            }
-            // TODO: Validate that the server fqdn format is correct
-
+            //add result to discovered severs list
             NSDictionary* row = @{
                 @"priority": prio,
                 @"server": theServer,
                 @"port": thePort,
                 @"isSecure": [NSNumber numberWithBool:isSecure],
                 @"weight": weight,
-                @"isEnabled": [NSNumber numberWithBool:serviceEnabled]
+                @"isEnabled": [NSNumber numberWithBool:serviceEnabled],
+                @"ttl": [NSNumber numberWithUnsignedInt:ttl],
             };
             [caller.discoveredServers addObject:row];
         }
     }
-    
 }
 
-void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, const u_int32_t interfaceIndex, const DNSServiceErrorType errorCode, const char *name, const u_int16_t rrtype, const u_int16_t rrclass, const u_int16_t rdlen, const void *rdata, const u_int32_t ttl, void *context)
+void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, const u_int32_t interfaceIndex, const DNSServiceErrorType errorCode, const char* name, const u_int16_t rrtype, const u_int16_t rrclass, const u_int16_t rdlen, const void* rdata, const u_int32_t ttl, void* context)
 {
     (void)DNSServiceRef;
     (void)flags;
@@ -198,7 +229,7 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
         return;
     }
     // DDLogVerbose(@"query callback - name = %s, rdata=\n", name);
-    print_rdata(rrtype, rdlen, rdata, context);
+    print_rdata(rrtype, rdlen, rdata, ttl, context);
 }
 
 

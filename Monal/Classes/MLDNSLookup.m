@@ -66,15 +66,15 @@
 
 -(NSArray *) dnsDiscoverOnDomain:(NSString *) domain
 {
-    self.discoveredServers =[[NSMutableArray alloc] init];
+    self.discoveredServers = [[NSMutableArray alloc] init];
     
-    //mix xmpps and xmpp records as per XEP-0368
+    //request xmpps and xmpp records, xmpps will be preferred
     [self doDiscoveryWithSecure:YES andDomain:domain];
     [self doDiscoveryWithSecure:NO andDomain:domain];
     
     //we ignore weights here for simplicity
-    NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"priority"  ascending:YES];
-    NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
+    NSSortDescriptor* descriptor = [[NSSortDescriptor alloc] initWithKey:@"priority" ascending:YES];
+    NSArray* sortArray = [NSArray arrayWithObjects:descriptor, nil];
     [self.discoveredServers sortUsingDescriptors:sortArray];
     
     return [self.discoveredServers copy];
@@ -158,16 +158,25 @@ void print_rdata(int type, int len, const u_char *rdata, void* _context)
         if(theServer && prio && weight && thePort) {
             // Check if service is not provided
             bool serviceEnabled = ![theServer isEqualToString:@"."];
-            if(serviceEnabled == false && isSecure) {
+            if(serviceEnabled == false && isSecure == YES)
+            {
                 return;
             }
             // Validate that the domain ends with at dot
-            if(![theServer hasSuffix:@"."]) {
+            if([theServer hasSuffix:@"."] == NO)
+            {
                 return;
             }
             // TODO: Validate that the server fqdn format is correct
 
-            NSDictionary* row=[NSDictionary dictionaryWithObjectsAndKeys:prio,@"priority", theServer,@"server", thePort,@"port", [NSNumber numberWithBool:isSecure],@"isSecure", weight,@"weight", [NSNumber numberWithBool:serviceEnabled],@"isEnabled", nil];
+            NSDictionary* row = @{
+                @"priority": prio,
+                @"server": theServer,
+                @"port": thePort,
+                @"isSecure": [NSNumber numberWithBool:isSecure],
+                @"weight": weight,
+                @"isEnabled": [NSNumber numberWithBool:serviceEnabled]
+            };
             [caller.discoveredServers addObject:row];
         }
     }

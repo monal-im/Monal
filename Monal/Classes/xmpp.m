@@ -574,7 +574,13 @@ NSString *const kData=@"data";
         if(!_firstLoginForThisInstance)
             DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
         for(NSDictionary* row in _discoveredServersList)
-            DDLogInfo(@"SRV entry in _discoveredServersList: %@", row);
+            DDLogInfo(@"SRV entry in _discoveredServersList: server=%@, port=%@, isSecure=%s, priority=%@, ttl=%@",
+                [row objectForKey:@"server"],
+                [row objectForKey:@"port"],
+                [[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+                [row objectForKey:@"priority"],
+                [row objectForKey:@"ttl"]
+            );
         _usableServersList = [_discoveredServersList mutableCopy];
     }
 
@@ -594,7 +600,13 @@ NSString *const kData=@"data";
         [_usableServersList removeObjectAtIndex:0];
         DDLogInfo(@"%lu SRV entries left:", (unsigned long)[_usableServersList count]);
         for(NSDictionary* row in _usableServersList)
-            DDLogInfo(@"SRV entry in _usableServersList: %@", row);
+            DDLogInfo(@"SRV entry in _usableServersList: server=%@, port=%@, isSecure=%s, priority=%@, ttl=%@",
+                [row objectForKey:@"server"],
+                [row objectForKey:@"port"],
+                [[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+                [row objectForKey:@"priority"],
+                [row objectForKey:@"ttl"]
+            );
     }
     
     [self createStreams];

@@ -39,6 +39,9 @@
         NULL,
         NULL
     );
+    
+    //register freeze handler
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(prepareForFreeze:) name:kMonalWillBeFreezed object:nil];
 }
 
 -(void) willRemoveLogger
@@ -85,6 +88,16 @@
 
     [compressed setLength: strm.total_out];
     return [NSData dataWithData:compressed];
+}
+
+-(void) prepareForFreeze:(NSNotification*) notification
+{
+    //invalidate socket when getting freezed
+    if(_cfsocketout != NULL && !CFSocketIsValid(_cfsocketout))
+        CFSocketInvalidate(_cfsocketout);
+    if(_cfsocketout != NULL)
+        CFRelease(_cfsocketout);
+    _cfsocketout = NULL;
 }
 
 -(void) logMessage:(DDLogMessage*) logMessage
@@ -150,11 +163,16 @@
     addr.sin_port           = htons([[[HelperTools defaultsDB] stringForKey:@"udpLoggerPort"] integerValue]);
     addr.sin_addr.s_addr    = inet_addr([[[HelperTools defaultsDB] stringForKey:@"udpLoggerHostname"] UTF8String]);
     
-    if(!CFSocketIsValid(_cfsocketout))
+    if(_cfsocketout != NULL && !CFSocketIsValid(_cfsocketout))
     {
         CFSocketInvalidate(_cfsocketout);       //just to make sure
         //release old socket object and create new one
         CFRelease(_cfsocketout);
+        _cfsocketout = NULL;
+    }
+    
+    if(_cfsocketout == NULL)
+    {
         _cfsocketout = CFSocketCreate(
             kCFAllocatorDefault,
             PF_INET,
@@ -165,6 +183,7 @@
             NULL
         );
     }
+    
     //send log via udp
     CFSocketError error = CFSocketSendData(_cfsocketout, (__bridge CFDataRef)[NSData dataWithBytes:(const UInt8*)&addr length:sizeof(addr)], (__bridge CFDataRef)data, 0);
     if(error)

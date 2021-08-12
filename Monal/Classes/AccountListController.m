@@ -108,6 +108,7 @@
         {
             accessory.image = [UIImage imageNamed:NSLocalizedString(@"Disconnected", @"")];
             cell.accessoryView = accessory;
+            cell.detailTextLabel.text = NSLocalizedString(@"Connecting...", @"");
         }
     }
     else
@@ -115,6 +116,7 @@
         cell.imageView.image = [UIImage imageNamed:@"disabled"];
         accessory.image = nil;
         cell.accessoryView = accessory;
+        cell.detailTextLabel.text = NSLocalizedString(@"Account disabled", @"");
     }
 }
 

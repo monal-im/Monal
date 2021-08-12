@@ -81,10 +81,11 @@ static inline NSString* LocalizationNotNeeded(NSString* s)
 #define kDataNameSpace @"jabber:x:data"
 
 //all other constants needed
+#define kMonalWillBeFreezed @"kMonalWillBeFreezed"
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMonalMucSubjectChanged @"kMonalMucSubjectChanged"
 #define kMonalDeletedMessageNotice @"kMonalDeletedMessageNotice"
-#define kMonalDisplayedMessageNotice @"kMonalDisplayedMessageNotice"
+#define kMonalDisplayedMessagesNotice @"kMonalDisplayedMessagesNotice"
 #define kMonalHistoryMessagesNotice @"kMonalHistoryMessagesNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"

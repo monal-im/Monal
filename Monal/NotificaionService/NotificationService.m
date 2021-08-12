@@ -52,6 +52,16 @@
     [DDLog flushLog];
 }
 
+-(void) killAppex
+{
+    @synchronized(self) {
+        DDLogInfo(@"Now killing appex process, goodbye...");
+        [DDLog flushLog];
+        usleep(10000);
+        exit(0);
+    }
+}
+
 -(void) incomingPush:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
     DDLogInfo(@"Got incoming push...pinging main app");
@@ -72,6 +82,11 @@
                 //now call this new handler we did not add to our handlerList
                 [self generateNotificationForHandler:contentHandler];
             }];
+            
+            //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+            [self killAppex];
+            
             return;
         }
         else
@@ -146,6 +161,10 @@
                         //use feedAllWaitingHandlersWithCompletion:nil instead of feedAllWaitingHandlers, because feedAllWaitingHandlers
                         //would sync-dispatch to a new thread and use @synchronized there --> that would create a deadlock with this thread
                         [self feedAllWaitingHandlersWithCompletion:nil];
+                        
+                        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                        [self killAppex];
                     }
                 }
             });
@@ -219,12 +238,19 @@
     //without this dispatch a deadlock could also occur when this method tries to enter the receiveQueue (disconnectAll) while the receive queue
     //is waiting for the @synchronized(self) block in this method
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [self feedAllWaitingHandlersWithCompletion:nil];
+        @synchronized(self) {
+            [self feedAllWaitingHandlersWithCompletion:nil];
+            
+            //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+            [self killAppex];
+        }
     });
 }
 
 -(void) listNotifications
 {
+    DDLogVerbose(@"listing notifications:");
     [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
         for(UNNotificationRequest* request in requests)
         {
@@ -237,6 +263,7 @@
             DDLogInfo(@"listNotifications: delivered notification %@ --> %@: %@", notification.request.identifier, notification.request.content.title, notification.request.content.body);
         }
     }];
+    DDLogVerbose(@"done listing notifications...");
 }
 
 -(void) nowIdle:(NSNotification*) notification

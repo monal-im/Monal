@@ -169,7 +169,7 @@ extern NSString* const kMessageTypeFiletransfer;
 /*
  adds a specified message to the database
  */
--(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*_Nullable) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId;
+-(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*_Nullable) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates;
 
 /*
  Marks a message as sent. When the server acked it
@@ -212,12 +212,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSString*) lastStanzaIdForAccount:(NSString*) accountNo;
 -(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSString*) accountNo;
 
--(NSArray *) messageHistoryListDates:(NSString *) buddy forAccount: (NSString *) accountNo;
--(NSArray *) messageHistoryDateForContact:(NSString *) buddy forAccount:(NSString *) accountNo forDate:(NSString*) date;
-
 -(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo;
 
--(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo;
 -(NSArray<MLMessage*>*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
 -(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;
@@ -284,6 +280,11 @@ extern NSString* const kMessageTypeFiletransfer;
 
 
 -(void) invalidateAllAccountStates;
+
+-(void) addShareSheetPayload:(NSDictionary*) payload;
+-(NSArray*) getShareSheetPayloadForAccountNo:(NSString*) accountNo;
+-(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId;
+
 @end
 
 NS_ASSUME_NONNULL_END

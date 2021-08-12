@@ -241,7 +241,7 @@ $$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID
     if(!success)
     {
         //item-not-found means: no bookmarks in storage --> use an empty data dict
-        if([errorIq check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+        if([errorIq check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
             data = @{};
         else
         {

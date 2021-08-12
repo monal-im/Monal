@@ -53,18 +53,18 @@ enum SettingsAboutRows {
     LogRow,
 #endif
     VersionRow,
-    SettingsAboutRowsCnt
+    SettingsAboutRowsCntORLogRow,
+    SettingsAboutRowsWithLogCnt
 };
 
 //this will hold all disabled rows of all enums (this is needed because the code below still references these rows)
 enum DummySettingsRows {
     DummySettingsRowsBegin = 100,
-#ifndef DEBUG
-    LogRow,
-#endif
 };
 
-@interface MLSettingsTableViewController ()
+@interface MLSettingsTableViewController () {
+    int _tappedVersionInfo;
+}
 
 @property (nonatomic, strong) NSArray* sections;
 @property (nonatomic, strong) NSArray* accountRows;
@@ -81,6 +81,7 @@ enum DummySettingsRows {
 
 -(IBAction) close:(id) sender
 {
+    _tappedVersionInfo = 0;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -106,6 +107,7 @@ enum DummySettingsRows {
     [super viewWillAppear:animated];
     [self refreshAccountList];
 
+    _tappedVersionInfo = 0;
     self.selected = nil;
 }
 
@@ -135,7 +137,11 @@ enum DummySettingsRows {
         case kSettingSectionAccounts: return [self getAccountNum] + SettingsAccountRowsCnt;
         case kSettingSectionApp: return SettingsAppRowsCnt;
         case kSettingSectionSupport: return SettingsSupportRowCnt;
-        case kSettingSectionAbout: return SettingsAboutRowsCnt;
+#ifndef DEBUG
+        case kSettingSectionAbout: return [[HelperTools defaultsDB] boolForKey:@"showLogInSettings"] ? SettingsAboutRowsWithLogCnt : SettingsAboutRowsCntORLogRow;
+#else
+        case kSettingSectionAbout: return SettingsAboutRowsCntORLogRow;
+#endif
         default:
             unreachable();
     }
@@ -249,12 +255,15 @@ enum DummySettingsRows {
                     [cell initTapCell:NSLocalizedString(@"About", @"")];
                     break;
                 }
-                case LogRow: {
-                    [cell initTapCell:NSLocalizedString(@"Log", @"")];
-                    break;
-                }
                 case VersionRow: {
                     [cell initCell:NSLocalizedString(@"Version", @"") withLabel:[HelperTools appBuildVersionInfo]];
+                    break;
+                }
+#ifdef DEBUG
+                case LogRow:
+#endif
+                case SettingsAboutRowsCntORLogRow: {
+                    [cell initTapCell:NSLocalizedString(@"Debug", @"")];
                     break;
                 }
                 default: {
@@ -356,10 +365,22 @@ enum DummySettingsRows {
                 case AboutRow:
                     [self openLink:@"https://monal.im/about/"];
                     break;
+#ifdef DEBUG
                 case LogRow:
+#endif
+                case SettingsAboutRowsCntORLogRow:
                     [self performSegueWithIdentifier:@"showLogs" sender:self];
                     break;
                 case VersionRow: {
+#ifndef DEBUG
+                    if(_tappedVersionInfo >= 16)
+                    {
+                        [[HelperTools defaultsDB] setBool:YES forKey:@"showLogInSettings"];
+                        [tableView reloadData];
+                    }
+                    else
+                        _tappedVersionInfo++;
+#endif
                     UIPasteboard* pastboard = UIPasteboard.generalPasteboard;
                     pastboard.string = [HelperTools appBuildVersionInfo];
                     break;

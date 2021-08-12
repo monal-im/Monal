@@ -7,6 +7,7 @@
 //
 
 #import "MLContact.h"
+#import "MLMessage.h"
 #import "HelperTools.h"
 #import "DataLayer.h"
 #import "xmpp.h"
@@ -58,8 +59,12 @@ NSString *const kAskSubscribe=@"subscribe";
     {
         //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
         NSDictionary* jidParts = [HelperTools splitJid:self.contactJid];
-        displayName = jidParts[@"node"];
-        DDLogVerbose(@"Using default: %@", jidParts[@"node"]);
+        if(jidParts[@"node"] != nil)
+            displayName = jidParts[@"node"];
+        else
+            displayName = jidParts[@"host"];
+
+        DDLogVerbose(@"Using default: %@", displayName);
     }
     DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, displayName);
     return displayName;
@@ -165,10 +170,45 @@ NSString *const kAskSubscribe=@"subscribe";
     self.lastMessageTime = contact.lastMessageTime;
 }
 
+-(void) refresh
+{
+    [self updateWithContact:[MLContact createContactFromJid:self.contactJid andAccountNo:self.accountId]];
+}
+
 -(BOOL) isSubscribed
 {
     return [self.subscription isEqualToString:kSubBoth]
         || [self.subscription isEqualToString:kSubFrom];
+}
+
+-(BOOL) isEqualToMessage:(MLMessage*) message
+{
+    return message != nil &&
+           [self.contactJid isEqualToString:message.buddyName] &&
+           [self.accountId isEqualToString:message.accountId];
+}
+
+-(BOOL) isEqualToContact:(MLContact*) contact
+{
+    return contact != nil &&
+           [self.contactJid isEqualToString:contact.contactJid] &&
+           [self.accountId isEqualToString:contact.accountId];
+}
+
+-(BOOL) isEqual:(id) object
+{
+    if(self == object)
+        return YES;
+    if([object isKindOfClass:[MLContact class]])
+        return [self isEqualToContact:(MLContact*)object];
+    if([object isKindOfClass:[MLMessage class]])
+        return [self isEqualToMessage:(MLMessage*)object];
+    return NO;
+}
+
+-(NSUInteger) hash
+{
+    return [self.contactJid hash] ^ [self.accountId hash];
 }
 
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo

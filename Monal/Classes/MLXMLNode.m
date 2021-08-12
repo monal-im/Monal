@@ -82,7 +82,9 @@ static NSRegularExpression* attributeFilterRegex;
 {
     _attributes = [[NSMutableDictionary alloc] init];
     _children = [[NSMutableArray alloc] init];
+    _parent = nil;
     _data = nil;
+    _element = @"";
     self.cache = [[NSMutableDictionary alloc] init];
 }
 

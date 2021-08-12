@@ -60,6 +60,15 @@ const int KEY_SIZE = 16;
 
     [self setupSignal];
 
+    // Make sure that our own jid is included in the buddylist
+    if([[DataLayer sharedInstance] isContactInList:self.accountJid forAccount:account.accountNo] == NO) {
+#ifdef DEBUG
+        MLAssert(NO, @"Own jid is missing in buddylist", (@{@"account": account.accountNo, @"jid": self.accountJid}));
+#endif
+        DDLogWarn(@"Own jid is missing in buddylist: jid: %@ accountNo: %@", self.accountJid, account.accountNo);
+        [[DataLayer sharedInstance] addContact:self.accountJid forAccount:account.accountNo nickname:nil andMucNick:nil];
+    }
+
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loggedIn:) name:kMLHasConnectedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupDone:) name:kMonalFinishedCatchup object:nil];
 
@@ -238,8 +247,13 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
     }
     else
     {
-        if(!rid)
+        if(!rid || !jid)
             return;
+        // check that a corresponding buddy exists -> prevent foreign key errors
+        if([[DataLayer sharedInstance] isContactInList:jid forAccount:account.accountNo] == NO) {
+            DDLogWarn(@"Skipping processOMEMOKeys: jid %@ not a known buddy. AccountNo: %@", jid, account.accountNo);
+            return;
+        }
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
         if(!receivedKeys && data.count == 1)
         {

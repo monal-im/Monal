@@ -450,7 +450,7 @@
 -(void) markSessionAsBroken:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=false WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=true WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 

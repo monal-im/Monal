@@ -446,7 +446,7 @@ NSString *const kData=@"data";
         _accountState < kStateReconnecting ? @"YES" : @"NO",
         _reconnectInProgress ? @"YES" : @"NO",
         _catchupDone ? @"YES" : @"NO",
-        _cancelPingTimer,
+        _cancelPingTimer == nil ? @"none" : @"running timer",
         unackedCount,
         (unsigned long)[_parseQueue operationCount],
         (unsigned long)[_receiveQueue operationCount],
@@ -709,7 +709,40 @@ NSString *const kData=@"data";
     [self dispatchOnReceiveQueue: ^{
         if(self->_accountState<kStateReconnecting)
         {
-            DDLogVerbose(@"not doing logout because already logged out");
+            DDLogVerbose(@"not doing logout because already logged out, but clearing state if explicitLogout was yes");
+            if(explicitLogout)
+            {
+                @synchronized(self->_stateLockObject) {
+                    DDLogVerbose(@"explicitLogout == YES --> clearing state");
+                    
+                    //preserve unAckedStanzas even on explicitLogout and resend them on next connect
+                    //if we don't do this, messages could get lost when logging out directly after sending them
+                    //and: sending messages twice is less intrusive than silently loosing them
+                    NSMutableArray* stanzas = self.unAckedStanzas;
+
+                    //reset smacks state to sane values (this can be done even if smacks is not supported)
+                    [self initSM3];
+                    self.unAckedStanzas = stanzas;
+                    
+                    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
+                    @synchronized(self->_iqHandlers) {
+                        for(NSString* iqid in [self->_iqHandlers allKeys])
+                        {
+                            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+                            if([self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+                                $invalidate(self->_iqHandlers[iqid], $ID(account, self));
+                            else if(self->_iqHandlers[iqid][@"errorHandler"])
+                                ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
+                        }
+                        self->_iqHandlers = [[NSMutableDictionary alloc] init];
+                    }
+
+                    //persist these changes
+                    [self persistState];
+                }
+                
+                [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
+            }
             return;
         }
         DDLogInfo(@"disconnecting");
@@ -816,7 +849,6 @@ NSString *const kData=@"data";
 {
     [self dispatchOnReceiveQueue: ^{
         DDLogInfo(@"removing streams from runLoop and aborting parser");
-        [self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we should have closed sockets then!)
 
         //prevent any new read or write
         if(self->_xmlParser != nil)
@@ -850,6 +882,9 @@ NSString *const kData=@"data";
         self->_accountState = kStateDisconnected;
         
         [self->_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we should have closed sockets then!)
+        //we don't throw away operations in the receive queue because they could be more than just stanzas
+        //(for example outgoing messages that should be written to the smacks queue instead of just vanishing in a void)
+        //all incoming stanzas in the receive queue will honor the _accountState being lower than kStateReconnecting and be dropped
     }];
 }
 
@@ -956,6 +991,11 @@ NSString *const kData=@"data";
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
                 DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount]);
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                    if(self.accountState<kStateReconnecting)
+                    {
+                        DDLogWarn(@"Throwing away queued incoming stanza, accountState < kStateReconnecting");
+                        return;
+                    }
                     [MLNotificationQueue queueNotificationsInBlock:^{
                         //add whole processing of incoming stanzas to one big transaction
                         //this will make it impossible to leave inconsistent database entries on app crashes or iphone crashes/reboots
@@ -1148,12 +1188,12 @@ NSString *const kData=@"data";
                 NSDictionary* dic = (NSDictionary *) obj;
                 XMPPStanza* stanza = [dic objectForKey:kStanza];
                 //only resend message stanzas because of the smacks error condition
-                //but don't add them to our outgoing smacks queue again, if smacks isn't supported (do we really need this special handling?)
+                //but don't add them to our outgoing smacks queue again, if smacks isn't supported
                 if([stanza.element isEqualToString:@"message"])
                     [self send:stanza withSmacks:self.connectionProperties.supportsSM3];
             }];
-            //persist these changes (the queue can now be empty because smacks enable failed
-            //or contain all the resent stanzas (e.g. only resume failed))
+            //persist these changes, the queue can now be empty (because smacks enable failed)
+            //or contain all the resent stanzas (e.g. only resume failed)
             [self persistState];
         }
     }
@@ -1605,12 +1645,10 @@ NSString *const kData=@"data";
             }
             
             //remove handled mam queries from _runningMamQueries
-            if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"] && _runningMamQueries[[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]] != nil)
-                [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]];
-            else if([iqNode check:@"/<type=error>"])
-                for(NSString* mamQueryId in [_runningMamQueries allKeys])
-                    if([iqNode.id isEqual:((XMPPIQ*)_runningMamQueries[mamQueryId]).id])
-                        [_runningMamQueries removeObjectForKey:mamQueryId];
+            if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin"] && _runningMamQueries[[iqNode findFirst:@"/@id"]] != nil)
+                [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/@id"]];
+            else if([iqNode check:@"/<type=error>"] && _runningMamQueries[[iqNode findFirst:@"/@id"]] != nil)
+                [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/@id"]];
             
             //process registered iq handlers
             id iqHandler = nil;
@@ -1676,7 +1714,6 @@ NSString *const kData=@"data";
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
             if(h==nil)
                 return [self invalidXMLError];
-            
             self.resuming = NO;
 
             //now we are bound again
@@ -1684,6 +1721,7 @@ NSString *const kData=@"data";
             _connectedTime = [NSDate date];
             _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
             _exponentialBackoff = 0;
+            [self accountStatusChanged];
 
             @synchronized(_stateLockObject) {
                 //remove already delivered stanzas and resend the (still) unacked ones
@@ -1719,7 +1757,7 @@ NSString *const kData=@"data";
                         self->_catchupDone = YES;
                         DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
                         //don't queue this notification because it should be handled INLINE inside the receive queue
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:@{@"accountNo": self.accountNo}];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
                     }
                 }];
             }
@@ -2035,7 +2073,12 @@ NSString *const kData=@"data";
         )
         {
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-                DDLogDebug(@"SEND: %@", stanza);
+                if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
+                    DDLogDebug(@"SEND: redacted sasl element: %@", [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
+                else if([stanza check:@"{jabber:iq:register}query"])
+                    DDLogDebug(@"SEND: redacted register/change password iq");
+                else
+                    DDLogDebug(@"SEND: %@", stanza);
                 [self->_outputQueue addObject:stanza];
                 [self writeFromQueue];      // try to send if there is space
             }]];
@@ -2054,6 +2097,8 @@ NSString *const kData=@"data";
 
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId withLMCId:(NSString* _Nullable) LMCId
 {
+    DDLogVerbose(@"sending new outgoing message %@ to %@", messageId, contact.contactJid);
+    
     XMPPMessage* messageNode = [[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact.contactJid forKey:@"to"];
     messageNode.id = messageId;
@@ -2159,6 +2204,7 @@ NSString *const kData=@"data";
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.registeredOnPushAppserver] forKey:@"registeredOnPushAppserver"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
@@ -2319,6 +2365,12 @@ NSString *const kData=@"data";
                 self.connectionProperties.pushEnabled = pushEnabled.boolValue;
             }
             
+            if([dic objectForKey:@"registeredOnPushAppserver"])
+            {
+                NSNumber* registeredOnPushAppserver = [dic objectForKey:@"registeredOnPushAppserver"];
+                self.connectionProperties.registeredOnPushAppserver = registeredOnPushAppserver.boolValue;
+            }
+            
             if([dic objectForKey:@"supportsClientState"])
             {
                 NSNumber* csiNumber = [dic objectForKey:@"supportsClientState"];
@@ -2460,6 +2512,12 @@ NSString *const kData=@"data";
 
 -(void) bindResource:(NSString*) resource
 {
+    //check if our resource is a modern one and change it to a modern one if not
+    //this should fix rare bugs when monal was first installed a long time ago when the resource didn't yet had a random part
+    NSArray* parts = [resource componentsSeparatedByString:@"."];
+    if([[HelperTools dataWithHexString:parts[1]] length] < 1)
+        return [self bindResource:[HelperTools encodeRandomResource]];
+    
     _accountState = kStateBinding;
     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:resource];
@@ -2552,6 +2610,7 @@ NSString *const kData=@"data";
     self.connectionProperties.usingCarbons2 = NO;
     self.connectionProperties.supportsPush = NO;
     self.connectionProperties.pushEnabled = NO;
+    self.connectionProperties.registeredOnPushAppserver = NO;
     self.connectionProperties.supportsClientState = NO;
     self.connectionProperties.supportsMam2 = NO;
     self.connectionProperties.supportsPubSub = NO;
@@ -2774,14 +2833,14 @@ NSString *const kData=@"data";
 {
     if(!self.connectionProperties.supportsMam2)
         return;
-    XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query updateMamArchivePrefDefault:preference];
     [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleSetMamPrefs)];
 }
 
 -(void) getMAMPrefs
 {
-    XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query mamArchivePref];
     [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleMamPrefs)];
 }
@@ -2851,7 +2910,7 @@ NSString *const kData=@"data";
         }
     };
     responseHandler = ^(XMPPIQ* response) {
-        NSMutableArray* mamPage = [self getOrderedMamPageFor:[response findFirst:@"{urn:xmpp:mam:2}fin@queryid"]];
+        NSMutableArray* mamPage = [self getOrderedMamPageFor:[response findFirst:@"/@id"]];
         
         //count new bodies
         for(NSDictionary* data in mamPage)
@@ -2889,7 +2948,7 @@ NSString *const kData=@"data";
         }
     };
     query = ^(NSString* _Nullable before) {
-        XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
         if(contact.isGroup)
         {
             if(!before)
@@ -2911,8 +2970,8 @@ NSString *const kData=@"data";
             if(retrievedBodies == 0)
             {
                 //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any body-messages
-                //but only for non-item-not-found errors
-                if(error == nil || ([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}internal-server-error"] && [@"item-not-found" isEqualToString:[error findFirst:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]]))
+                //but only for non-item-not-found errors (and internal-server-error errors sent by one of ejabberd or prosody instead [don't know which one it was])
+                if(error == nil || ([error check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}internal-server-error"] && [@"item-not-found" isEqualToString:[error findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]]))
                     completion(nil, nil);
                 else
                     completion(nil, [HelperTools extractXMPPError:error withDescription:nil]);
@@ -3376,6 +3435,8 @@ NSString *const kData=@"data";
     }
     if(![_outputQueue count])
     {
+        DDLogVerbose(@"no entries in _outputQueue. trying to send half-sent data.");
+        [self writeToStream:nil];
         DDLogVerbose(@"no entries in _outputQueue. early return from writeFromQueue().");
         return;
     }
@@ -3423,10 +3484,6 @@ NSString *const kData=@"data";
 
 -(BOOL) writeToStream:(NSString*) messageOut
 {
-    if(!messageOut) {
-        DDLogInfo(@"tried to send empty message. returning without doing anything.");
-        return YES;     //pretend we sent the empty "data"
-    }
     if(!_streamHasSpace)
     {
         DDLogVerbose(@"no space to write. returning.");
@@ -3475,8 +3532,15 @@ NSString *const kData=@"data";
     }
 
     //then try to send the stanza in question and buffer half sent data
-    const uint8_t *rawstring = (const uint8_t *)[messageOut UTF8String];
-    NSInteger rawstringLen=strlen((char*)rawstring);
+    if(!messageOut)
+    {
+        DDLogInfo(@"tried to send empty message. returning without doing anything.");
+        return YES;     //pretend we sent the empty "data"
+    }
+    const uint8_t* rawstring = (const uint8_t *)[messageOut UTF8String];
+    NSInteger rawstringLen = strlen((char*)rawstring);
+    if(rawstringLen <= 0)
+        return YES;     //pretend we sent the empty "data"
     NSInteger sentLen = [_oStream write:rawstring maxLength:rawstringLen];
     if(sentLen!=-1)
     {
@@ -3520,10 +3584,22 @@ NSString *const kData=@"data";
         pushToken != nil && [pushToken length] > 0
     )
     {
+        DDLogInfo(@"registering (and enabling) push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         XMPPIQ* registerNode = [[XMPPIQ alloc] initWithType:kiqSetType];
         [registerNode setRegisterOnAppserverWithToken:pushToken];
         [registerNode setiqTo:[HelperTools pushServer][@"jid"]];
         [self sendIq:registerNode withHandler:$newHandler(MLIQProcessor, handleAppserverNodeRegistered)];
+    }
+    else if(![MLXMPPManager sharedInstance].hasAPNSToken && self.accountState >= kStateBound)
+    {
+        //disable push for this node
+        DDLogInfo(@"DISABLING push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        if(self.connectionProperties.supportsPush)
+        {
+            XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
+            [disable setPushDisable];
+            [self send:disable];
+        }
     }
     else
     {
@@ -3537,7 +3613,7 @@ NSString *const kData=@"data";
     {
         _catchupDone = YES;
         //don't queue this notification because it should be handled INLINE inside the receive queue
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self  userInfo:@{@"accountNo": self.accountNo}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
 
     }
 }

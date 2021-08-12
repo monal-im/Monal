@@ -487,7 +487,7 @@ enum msgSentState {
         [_localMLContactCache removeAllObjects];
     }
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
-    if(self.contact && [self.contact.contactJid isEqualToString:contact.contactJid] && [self.contact.accountId isEqual:contact.accountId])
+    if(self.contact && [self.contact isEqualToContact:contact])
         [self updateUIElements];
 }
 
@@ -635,7 +635,6 @@ enum msgSentState {
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     if(!self.xmppAccount) DDLogDebug(@"Disabled account detected");
     
-    [MLNotificationManager sharedInstance].currentAccountNo = self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact = self.contact;
     
     [self handleForeGround];
@@ -714,7 +713,6 @@ enum msgSentState {
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
     }
     [super viewWillDisappear:animated];
-    [MLNotificationManager sharedInstance].currentAccountNo = nil;
     [MLNotificationManager sharedInstance].currentContact = nil;
     
     [self sendChatState:NO];
@@ -796,9 +794,9 @@ enum msgSentState {
 
 -(void) refreshCounter
 {
-    if(self.navigationController.topViewController==self)
+    if(self.navigationController.topViewController == self)
     {
-        if([MLNotificationManager sharedInstance].currentContact!=self.contact)
+        if(![self.contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
             return;
         
         if(![HelperTools isNotInFocus])
@@ -807,16 +805,16 @@ enum msgSentState {
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
             
             //send displayed marker for last unread message (XEP-0333)
+            //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
             MLMessage* lastUnreadMessage = [unread lastObject];
-            if(lastUnreadMessage)
+            if(lastUnreadMessage && (!self.contact.isGroup || [@"group" isEqualToString:self.contact.mucType]))
             {
-                DDLogDebug(@"Marking as displayed: %@", lastUnreadMessage.messageId);
-                [[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] sendDisplayMarkerForMessage:lastUnreadMessage];
+                DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
+                [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];
             }
             
-            //update app badge
-            MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-            [appDelegate updateUnread];
+            //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:self.xmppAccount userInfo:@{@"messagesArray":unread}];
             
             // update unread counter
             self.contact.unreadCount -= unread.count;
@@ -984,12 +982,12 @@ enum msgSentState {
         }
     }
     [self sendChatState:NO];
+    [self emptyUploadQueue];
 }
 
 -(IBAction) sendMessageText:(id)sender
 {
     [self resignTextView];
-    [self emptyUploadQueue];
 }
 
 -(void) recordMessageAudio:(UILongPressGestureRecognizer*)gestureRecognizer{
@@ -1170,20 +1168,34 @@ enum msgSentState {
 
 #pragma mark - attachment picker
 
+-(void) showCameraPermissionWarning
+{
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Camera permissions missing", @"Camera permissions missing warning") message:NSLocalizedString(@"Monal is not allowed to access the camera", @"Camera permissions missing warning") preferredStyle:UIAlertControllerStyleAlert];
+
+    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action) {}];
+
+    UIAlertAction* monalIosSettings = [UIAlertAction actionWithTitle:NSLocalizedString(@"Settings", @"Camera permissions missing warning") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:@{} completionHandler:nil];
+    }];
+
+    [alert addAction:defaultAction];
+    [alert addAction:monalIosSettings];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 -(IBAction)attach:(id)sender
 {
     [self stopEditing];
     [self.chatInput resignFirstResponder];
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
 
-    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
+    UIAlertController* actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
                                                                             message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
     // Check for http upload support
-    if(!account.connectionProperties.supportsHTTPUpload )
+    if(!self.xmppAccount.connectionProperties.supportsHTTPUpload)
     {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
-                                                                       message:NSLocalizedString(@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+                                                                       message:NSLocalizedString(@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it.", @"") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
@@ -1202,18 +1214,42 @@ enum msgSentState {
         UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
         mediaPicker.delegate = self;
 
-        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
             mediaPicker.mediaTypes = @[(NSString*)kUTTypeImage, (NSString*)kUTTypeMovie];
 
-            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
-                if(granted)
+            switch ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo])
+            {
+                case AVAuthorizationStatusAuthorized:
                 {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self presentViewController:mediaPicker animated:YES completion:nil];
                     });
+                    break;
                 }
-            }];
+                case AVAuthorizationStatusNotDetermined:
+                {
+                    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted)
+                    {
+                        if(granted == YES)
+                        {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                [self presentViewController:mediaPicker animated:YES completion:nil];
+                            });
+                        }
+                        else
+                            DDLogWarn(@"Camera access not granted. AV Permissions now set to denied");
+                    }];
+                    break;
+                }
+                case AVAuthorizationStatusDenied:
+                case AVAuthorizationStatusRestricted:
+                {
+                    DDLogWarn(@"Camera access denied");
+                    [self showCameraPermissionWarning];
+                    break;
+                }
+            }
         }];
 
         UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -1448,8 +1484,7 @@ enum msgSentState {
     if(!message)
         DDLogError(@"Notification without message");
     
-    if([message.accountId isEqualToString:self.contact.accountId]
-       && [message.buddyName isEqualToString:self.contact.contactJid])
+    if([message isEqualToContact:self.contact])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(!self.messageList)
@@ -2187,7 +2222,7 @@ enum msgSentState {
     
     //configure swipe actions
     
-    UIContextualAction* LMCEditAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* LMCEditAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Edit", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [self.chatInput setText:message.messageText];       //we want to begin editing using the old message
         self.placeHolderText.hidden = YES;
         weakify(self);
@@ -2223,7 +2258,7 @@ enum msgSentState {
         LMCEditAction.image = [[[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
 
-    UIContextualAction* quoteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* quoteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Quote", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         // Preserve user input
         NSMutableString* quoteString = [[NSMutableString alloc] init];
         if(self.chatInput.text.length > 0) {
@@ -2244,7 +2279,7 @@ enum msgSentState {
         quoteAction.image = [[[UIImage systemImageNamed:@"quote.bubble.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
-    UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [self.xmppAccount sendMessage:kMessageDeletedBody toContact:self.contact isEncrypted:(self.contact.isEncrypted || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
@@ -2264,7 +2299,7 @@ enum msgSentState {
         LMCDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
-    UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
         [self->_messageTable beginUpdates];
@@ -2283,7 +2318,7 @@ enum msgSentState {
         localDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
-    UIContextualAction* copyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* copyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Copy", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
         MLBaseCell* selectedCell = [self.messageTable cellForRowAtIndexPath:indexPath];
         if([selectedCell isKindOfClass:[MLChatImageCell class]])
@@ -2467,13 +2502,23 @@ enum msgSentState {
         [self.xmppAccount setMAMQueryMostRecentForContact:self.contact before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages, NSString* _Nullable error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 strongify(self);
-                if(!messages)
+                if(!messages && !error)
+                {
+                    //xmpp account got reconnected
+                    DDLogError(@"Got backscrolling mam error: nil (possible reconnect while querying)");
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not fetch messages", @"") message:NSLocalizedString(@"The connection to the server was interrupted and no old messages could be fetched for this chat. Please try again later. %@", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                }
+                else if(!messages)
                 {
                     NSString* errorText = error;
                     if(!error)
                         errorText = NSLocalizedString(@"All messages already present in local history!", @"");
                     DDLogError(@"Got backscrolling mam error: %@", errorText);
-                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not load (all) old messages", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Could not load (all) old messages from your server archive. Please try again later. %@", @""), errorText] preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not fetch messages", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Could not fetch (all) old messages for this chat from your server archive. Please try again later. %@", @""), errorText] preferredStyle:UIAlertControllerStyleAlert];
                     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                         [alert dismissViewControllerAnimated:YES completion:nil];
                     }]];
@@ -2565,7 +2610,7 @@ enum msgSentState {
 // Send message with 'enter' if chatInput is first repsonder
 -(void) enterKeyPressed:(UIKeyCommand*)keyCommand
 {
-    if([self.chatInput isFirstResponder]) {
+    if([self.chatInput isFirstResponder] && self.chatInput.text.length > 0) {
         [self resignTextView];
     }
 }
@@ -3041,6 +3086,7 @@ enum msgSentState {
 
 -(void) hideUploadQueue
 {
+    [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
     self.uploadMenuConstraint.constant = 1; // Can't set this to 0, because this will disable the view. If this were to happen, we would not use an accurate queue count if a user empties the queue and fills it afterwards. This is a hack to prevent this behaviour
     self.uploadMenuView.hidden = YES;
 }
@@ -3160,7 +3206,6 @@ enum msgSentState {
         if(self.uploadQueue.count == 0)
         {
             [self hideUploadQueue];
-            [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
         }
     }];
 }

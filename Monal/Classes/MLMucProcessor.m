@@ -45,6 +45,7 @@ static NSMutableDictionary* _uiHandler;
 {
     _stateLockObject = [[NSObject alloc] init];
     _roomFeatures = [[NSMutableDictionary alloc] init];
+    //TODO: remove joining state on reconnect (e.g. add invalidation handler for disco iq)
     _joining = [[NSMutableSet alloc] init];
     _firstJoin = [[NSMutableSet alloc] init];
     _uiHandler = [[NSMutableDictionary alloc] init];
@@ -300,8 +301,9 @@ static NSMutableDictionary* _uiHandler;
             //and update bookmarks if this was the first time we joined this muc
             [[DataLayer sharedInstance] addMucFavorite:node.fromUser forAccountId:account.accountNo andMucNick:nil];
             @synchronized(_stateLockObject) {
+                DDLogVerbose(@"_firstJoin set: %@\n_noUpdateBookmarks set: %@", _firstJoin, _noUpdateBookmarks);
                 //only update bookmarks on first join AND if not requested otherwise (batch join etc.)
-                if([_firstJoin containsObject:node.fromUser] && [_noUpdateBookmarks containsObject:node.fromUser])
+                if([_firstJoin containsObject:node.fromUser] && ![_noUpdateBookmarks containsObject:node.fromUser])
                     [self updateBookmarksForAccount:account];
                 [_firstJoin removeObject:node.fromUser];
                 [_noUpdateBookmarks removeObject:node.fromUser];
@@ -337,13 +339,13 @@ static NSMutableDictionary* _uiHandler;
                 //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
                 //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
                 NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:node.fromUser andAccount:account.accountNo];
-                XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
                 [mamQuery setiqTo:node.fromUser];
                 if(lastStanzaId)
                 {
                     DDLogInfo(@"Querying muc mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
                     [mamQuery setMAMQueryAfter:lastStanzaId];
-                    [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup)];
+                    [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
                 }
                 else
                 {
@@ -692,9 +694,9 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
         DDLogWarn(@"Muc mam catchup query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
         
         //handle weird XEP-0313 monkey-patching XEP-0059 behaviour (WHY THE HELL??)
-        if(!secondTry && [iqNode check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+        if(!secondTry && [iqNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
         {
-            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
             [mamQuery setiqTo:iqNode.fromUser];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
             [mamQuery setCompleteMAMQuery];
@@ -708,10 +710,10 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
     {
         DDLogVerbose(@"Paging through muc mam catchup results with after: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
         //do RSM forward paging
-        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
         [pageQuery setiqTo:iqNode.fromUser];
-        [account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup)];
+        [account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
     }
     else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
         DDLogVerbose(@"Muc mam catchup finished");
@@ -746,6 +748,7 @@ $$
 
 +(void) updateBookmarksForAccount:(xmpp*) account
 {
+    DDLogVerbose(@"Updating bookmarks on account %@", account.connectionProperties.identity.jid);
     [account.pubsub fetchNode:@"storage:bookmarks" from:account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
 }
 

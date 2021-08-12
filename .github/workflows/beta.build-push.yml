@@ -19,7 +19,7 @@ jobs:
       IOS_DEVELOPER_NAME: "Apple Distribution: Anurodh Pokharel (33XS7DE5NZ)"
       APP_DEVELOPER_NAME: "Developer ID Application: Anurodh Pokharel (33XS7DE5NZ)"
       GCC_PREPROCESSOR_DEFINITIONS: "DEBUG=1"
-      BUILD_TYPE: "AppStore"
+      BUILD_TYPE: "Beta"
       EXPORT_OPTIONS_CATALYST: "../scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
       EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Beta_iOS_ExportOptions.plist"
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: monal-catalyst
-          path: Monal/build/app/tar_release/Monal.app
+          path: Monal/build/app/Monal.zip
           if-no-files-found: error
       - uses: actions/upload-artifact@v2
         with:

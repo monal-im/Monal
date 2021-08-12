@@ -42,14 +42,14 @@
 {
     if([iqNode check:@"{urn:xmpp:ping}ping"])
     {
-        XMPPIQ* pong = [[XMPPIQ alloc] initWithId:[iqNode findFirst:@"/@id"] andType:kiqResultType];
+        XMPPIQ* pong = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [pong setiqTo:iqNode.from];
         [account send:pong];
     }
     
     if([iqNode check:@"{jabber:iq:version}query"])
     {
-        XMPPIQ* versioniq = [[XMPPIQ alloc] initWithId:[iqNode findFirst:@"/@id"] andType:kiqResultType];
+        XMPPIQ* versioniq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [versioniq setiqTo:iqNode.from];
         [versioniq setVersion];
         [account send:versioniq];
@@ -57,7 +57,7 @@
     
     if([iqNode check:@"{http://jabber.org/protocol/disco#info}query"])
     {
-        XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initAsResponseTo:iqNode withType:kiqResultType];
+        XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [discoInfoResponse setDiscoInfoWithFeatures:account.capsFeatures identity:account.capsIdentity andNode:[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query@node"]];
         [account send:discoInfoResponse];
     }
@@ -71,7 +71,7 @@
         [self processRosterWithAccount:account andIqNode:iqNode];
         
         //send empty result iq as per RFC 6121 requirements
-        XMPPIQ* reply = [[XMPPIQ alloc] initWithId:[iqNode findFirst:@"/@id"] andType:kiqResultType];
+        XMPPIQ* reply = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [reply setiqTo:iqNode.from];
         [account send:reply];
     }
@@ -126,9 +126,9 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
         DDLogWarn(@"Mam catchup query returned error: %@", [iqNode findFirst:@"error"]);
         
         //handle weird XEP-0313 monkey-patching XEP-0059 behaviour (WHY THE HELL??)
-        if(!secondTry && [iqNode check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+        if(!secondTry && [iqNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
         {
-            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
             [mamQuery setCompleteMAMQuery];
             [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, YES))];
@@ -144,7 +144,7 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
     {
         DDLogVerbose(@"Paging through mam catchup results with after: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
         //do RSM forward paging
-        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
         [account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup)];
     }
@@ -255,11 +255,17 @@ $$
         return;
     }
     
-    for(NSDictionary* contact in [iqNode find:@"{jabber:iq:roster}query/item@@"])
+    for(NSMutableDictionary* contact in [iqNode find:@"{jabber:iq:roster}query/item@@"])
     {
+        if(!contact[@"jid"])
+            continue;
+        contact[@"jid"] = [[NSString stringWithFormat:@"%@", contact[@"jid"]] lowercaseString];
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
-            [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:account.accountNo];
+            // we should never delete our own buddy -> prevent foreign key errors for omemo
+            if([[contact objectForKey:@"jid"] isEqualToString:account.connectionProperties.identity.jid] == NO) {
+                [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:account.accountNo];
+            }
         }
         else
         {
@@ -334,14 +340,15 @@ $$handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     
     if([features containsObject:@"urn:xmpp:push:0"])
     {
+        DDLogInfo(@"supports push");
         account.connectionProperties.supportsPush = YES;
         [account enablePush];
     }
     
     if([features containsObject:@"urn:xmpp:mam:2"])
     {
-        account.connectionProperties.supportsMam2 = YES;
         DDLogInfo(@"supports mam:2");
+        account.connectionProperties.supportsMam2 = YES;
         
         //query mam since last received stanza ID because we could not resume the smacks session
         //(we would not have landed here if we were able to resume the smacks session)
@@ -349,7 +356,7 @@ $$handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
         //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
         NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForAccount:account.accountNo];
-        XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         if(lastStanzaId)
         {
             DDLogInfo(@"Querying mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
@@ -477,6 +484,7 @@ $$handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
     {
         DDLogError(@"Registering on appserver returned an error: %@", [iqNode findFirst:@"error"]);
         [HelperTools postError:NSLocalizedString(@"Appserver error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
+        account.connectionProperties.registeredOnPushAppserver = NO;
         return;
     }
     
@@ -485,10 +493,12 @@ $$handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
     {
         DDLogError(@"Appserver returned invalid data: %@", iqNode);
         [HelperTools postError:NSLocalizedString(@"Appserver returned invalid data", @"") withNode:nil andAccount:account andIsSevere:NO];
+        account.connectionProperties.registeredOnPushAppserver = NO;
         return;
     }
     
     DDLogInfo(@"ENABLING PUSH: %@ < %@", dataForm[@"node"], dataForm[@"secret"]);
+    account.connectionProperties.registeredOnPushAppserver = YES;
     XMPPIQ* enable = [[XMPPIQ alloc] initWithType:kiqSetType];
     [enable setPushEnableWithNode:dataForm[@"node"] andSecret:dataForm[@"secret"] onAppserver:dataForm[@"jid"]];
     [account sendIq:enable withHandler:$newHandler(MLIQProcessor, handlePushEnabled)];
@@ -502,6 +512,7 @@ $$handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         account.connectionProperties.pushEnabled = NO;
         return;
     }
+    DDLogInfo(@"Push is enabled now");
     account.connectionProperties.pushEnabled = YES;
 $$
 

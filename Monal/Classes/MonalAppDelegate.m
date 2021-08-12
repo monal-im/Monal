@@ -41,6 +41,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     UIBackgroundTaskIdentifier _bgTask;
     API_AVAILABLE(ios(13.0)) BGTask* _bgFetch;
     monal_void_block_t _backgroundTimer;
+    MLContact* _contactToOpen;
 }
 @property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @end
@@ -194,20 +195,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //this will use the cached values in defaultsDB, if possible
     [[MLXMPPManager sharedInstance] setPushToken:nil];
     
-    //activate push
-    if(@available(iOS 13.0, *))
-    {
-        DDLogInfo(@"Registering for APNS...");
-        [[UIApplication sharedApplication] registerForRemoteNotifications];
-    }
-    else
-    {
-#if !TARGET_OS_MACCATALYST
-        DDLogInfo(@"Registering for VoIP APNS...");
-        [self voipRegistration];
-#endif
-    }
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scheduleBackgroundFetchingTask) name:kScheduleBackgroundFetchingTask object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
@@ -256,27 +243,77 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         ];
     }
     //request auth to show notifications and register our notification categories created above
-    [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError *error) {
-        DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", granted ? @"YES" : @"NO", error);
+    [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError* error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", granted ? @"YES" : @"NO", error);
+            BOOL oldGranted = [[HelperTools defaultsDB] boolForKey:@"notificationsGranted"];
+            [[HelperTools defaultsDB] setBool:granted forKey:@"notificationsGranted"];
+            if(granted == YES)
+            {
+                if(!oldGranted)
+                {
+                    //this is only needed for better UI (settings --> noifications should reflect the proper state)
+                    //both invalidations are needed because we don't know the timing of this notification granting handler
+                    DDLogInfo(@"Invalidating all account states...");
+                    [[DataLayer sharedInstance] invalidateAllAccountStates];        //invalidate states for account objects not yet created
+                    [[MLXMPPManager sharedInstance] reconnectAll];                  //invalidate for account objects already created
+                }
+                
+                //activate push
+                if(@available(iOS 13.0, *))
+                {
+                    DDLogInfo(@"Registering for APNS...");
+                    [[UIApplication sharedApplication] registerForRemoteNotifications];
+                }
+                else
+                {
+#if !TARGET_OS_MACCATALYST
+                    DDLogInfo(@"Registering for VoIP APNS...");
+                    [self voipRegistration];
+#endif
+                }
+            }
+            else
+            {
+                //delete apns push token --> push will not be registered on our xmpp server anymore
+                DDLogWarn(@"Notifications disabled --> deleting APNS push token from user defaults!");
+                NSString* oldToken = [[HelperTools defaultsDB] objectForKey:@"pushToken"];
+                [[HelperTools defaultsDB] removeObjectForKey:@"pushToken"];
+                [[MLXMPPManager sharedInstance] setPushToken:nil];
+                
+                //unregister from push appserver
+                if((oldToken != nil && oldToken.length != 0) || oldGranted)
+                {
+                    DDLogWarn(@"Unregistering node from appserver!");
+                    [self unregisterPush];
+                    
+                    //this is only needed for better UI (settings --> noifications should reflect the proper state)
+                    //both invalidations are needed because we don't know the timing of this notification granting handler
+                    DDLogInfo(@"Invalidating all account states...");
+                    [[DataLayer sharedInstance] invalidateAllAccountStates];        //invalidate states for account objects not yet created
+                    [[MLXMPPManager sharedInstance] reconnectAll];                  //invalidate for account objects already created
+                }
+            }
+        });
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
-    
-    UIColor *monalGreen = [UIColor monalGreen];
-    UIColor *monaldarkGreen =[UIColor monaldarkGreen];
-    [[UINavigationBar appearance] setTintColor:monalGreen];
-    if (@available(iOS 13.0, *)) {
-        UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+
+    if (@available(iOS 13.0, *))
+    {
+        UINavigationBarAppearance* appearance = [[UINavigationBarAppearance alloc] init];
         [appearance configureWithTransparentBackground];
-        appearance.backgroundColor=[UIColor systemBackgroundColor];
+        appearance.backgroundColor = [UIColor systemBackgroundColor];
         
         [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
         [[UINavigationBar appearance] setStandardAppearance:appearance];
 #if TARGET_OS_MACCATALYST
         self.window.windowScene.titlebar.titleVisibility = UITitlebarTitleVisibilityHidden;
+#else
+        [[UITabBar appearance] setTintColor:[UIColor monaldarkGreen]];
+        [[UINavigationBar appearance] setTintColor:[UIColor monalGreen]];
 #endif
     }
     [[UINavigationBar appearance] setPrefersLargeTitles:YES];
-    [[UITabBar appearance] setTintColor:monaldarkGreen];
 
     //handle message notifications by initializing the MLNotificationManager
     [MLNotificationManager sharedInstance];
@@ -299,7 +336,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @""), version, buildDate, buildTime]);
     
     //init background/foreground status
     //this has to be done here to make sure we have the correct state when he app got started through notification quick actions
@@ -380,6 +417,48 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) setActiveChatsController: (UIViewController*) activeChats
 {
     self.activeChats = (ActiveChatsViewController*)activeChats;
+    [self openChatOfContact:_contactToOpen];
+}
+
+-(void) unregisterPush
+{
+    NSString* node = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
+    NSString* api_url = [NSString stringWithFormat:@"%@/v1/unregister", [HelperTools pushServer][@"url"]];
+    
+    NSString* post = [NSString stringWithFormat:@"type=apns&node=%@", [node stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
+    NSData* postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+    NSString* postLength = [NSString stringWithFormat:@"%luld",[postData length]];
+    
+    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] init];
+    [request setURL:[NSURL URLWithString:api_url]];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [request setHTTPBody:postData];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            NSHTTPURLResponse* httpresponse = (NSHTTPURLResponse*)response;
+            if(!error && httpresponse.statusCode < 400)
+            {
+                DDLogInfo(@"connection to push api %@ successful(%ld)", api_url, httpresponse.statusCode);
+                NSString* responseBody = [[NSString alloc] initWithData:data  encoding:NSUTF8StringEncoding];
+                DDLogInfo(@"push api returned: %@", responseBody);
+                NSArray* responseParts=[responseBody componentsSeparatedByString:@"\n"];
+                if(responseParts.count>0)
+                {
+                    if([responseParts[0] isEqualToString:@"OK"] )
+                        DDLogInfo(@"push api: unregistered ok");
+                    else
+                        DDLogError(@"push api returned invalid data: %@", [responseParts componentsJoinedByString: @" | "]);
+                }
+                else
+                    DDLogError(@"push api response could not be broken into parts");
+            }
+            else
+                DDLogError(@"connection to push api %@ NOT successful(%ld): %@", api_url, httpresponse.statusCode, error);
+        }] resume];
+    });
 }
 
 #pragma mark - handling urls
@@ -391,12 +470,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
          
  @link https://xmpp.org/extensions/xep-0147.html
  */
--(void) handleURL:(NSURL *) url {
+-(void) handleXMPPURL:(NSURL*) url
+{
     //TODO just uses fist account. maybe change in the future
     xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
-    if(account) {
+    if(account)
+    {
         NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-        NSString* mucJid = components.path;
+        NSString* jid = components.path;
         BOOL isGroup = NO;
         
         for(NSURLQueryItem* item in components.queryItems)
@@ -406,23 +487,29 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         }
         
         if(isGroup)
-            [account joinMuc:mucJid];
+            [account joinMuc:jid];
         
-        [[DataLayer sharedInstance] addActiveBuddies:mucJid forAccount:account.accountNo];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            MLContact* contact = [MLContact createContactFromJid:mucJid andAccountNo:account.accountNo];
-            [(ActiveChatsViewController*)self.activeChats presentChatWithContact:contact];
-            [(ActiveChatsViewController*)self.activeChats refreshDisplay];
-        });
+        [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
+        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+        [self openChatOfContact:contact];
     }
 }
 
-- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
+-(BOOL) application:(UIApplication*) app openURL:(NSURL*) url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*) options
 {
-    if([url.scheme isEqualToString:@"xmpp"])        //for xmpp uris
+    if([url.scheme isEqualToString:@"xmpp"])                //for xmpp uris
     {
-        [self handleURL:url];
+        [self handleXMPPURL:url];
+        return YES;
+    }
+    else if([url.scheme isEqualToString:@"monalOpen"])      //app opened via sharesheet
+    {
+        //make sure our outbox content is sent (if the mainapp is still connected and also was in foreground while the sharesheet was used)
+        //and open the chat the newest outbox entry was sent to
+        MLContact* lastRecipientContact = [[MLXMPPManager sharedInstance] sendAllOutboxes];
+        [[DataLayer sharedInstance] addActiveBuddies:lastRecipientContact.contactJid forAccount:lastRecipientContact.accountId];
+        DDLogVerbose(@"Trying to open chat for %@", lastRecipientContact.contactJid);
+        [self openChatOfContact:lastRecipientContact];
         return YES;
     }
     return NO;
@@ -454,7 +541,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
     {
-        DDLogVerbose(@"notification action triggered for %@", response.notification.request.content.userInfo);
+        DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
         [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
         //add our completion handler to handler queue
         [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result) {
@@ -467,6 +554,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         NSAssert(fromContact, @"fromContact should not be nil");
         NSAssert(messageId, @"messageId should not be nil");
         NSAssert(account, @"account should not be nil");
+        
+        //make sure we have an active buddy for this chat
+        [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountId];
+        
+        //handle message actions
         if([response.actionIdentifier isEqualToString:@"REPLY_ACTION"])
         {
             DDLogInfo(@"REPLY_ACTION triggered...");
@@ -478,8 +570,17 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             }
             
             //mark messages as read because we are replying
-            [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
-            [self updateUnread];
+            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
+            DDLogDebug(@"Marked as read: %@", unread);
+            
+            //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
+            
+            //update unread count in active chats list
+            [fromContact refresh];      //this will make sure the unread count is correct
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                @"contact": fromContact
+            }];
             
             BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:fromContact.contactJid andAccountNo:fromContact.accountId];
             [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText toContact:fromContact isEncrypted:encrypted isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
@@ -492,30 +593,60 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
             DDLogDebug(@"Marked as read: %@", unread);
             
-            //remove notifications of all remotely read messages (indicated by sending a response message)
-            for(MLMessage* msg in unread)
+            //send displayed marker for last unread message (XEP-0333)
+            //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
+            MLMessage* lastUnreadMessage = [unread lastObject];
+            if(lastUnreadMessage && (!fromContact.isGroup || [@"group" isEqualToString:fromContact.mucType]))
             {
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
-                [account sendDisplayMarkerForMessage:msg];
+                DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
+                [account sendDisplayMarkerForMessage:lastUnreadMessage];
             }
             
+            //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
+            
             //update unread count in active chats list
+            [fromContact refresh];      //this will make sure the unread count is correct
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": fromContact
             }];
-            
-            [self updateUnread];
         }
+        else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
+            [self openChatOfContact:fromContact];
     }
     else
     {
-        //all completion handler directly (we did not handle anything and no connectIfNecessary was called)
+        //call completion handler directly (we did not handle anything and no connectIfNecessary was called)
         if(completionHandler)
             completionHandler();
     }
 }
 
-
+-(void) openChatOfContact:(MLContact* _Nullable) contact
+{
+    if(contact != nil)
+        _contactToOpen = contact;
+    
+    if(self.activeChats != nil && _contactToOpen != nil)
+    {
+        // the timer makes sure the view is properly initialized when opning the chat
+        createTimer(0.5, (^{
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(_contactToOpen != nil)
+                {
+                    DDLogDebug(@"Opening chat for contact %@", [contact contactJid]);
+                    // open new chat
+                    [(ActiveChatsViewController*)self.activeChats presentChatWithContact:_contactToOpen];
+                }
+                else
+                    DDLogDebug(@"_contactToOpen changed to nil, not opening chat for contact %@", [contact contactJid]);
+                _contactToOpen = nil;
+            });
+        }));
+    }
+    else
+        DDLogDebug(@"Not opening chat for contact %@", [contact contactJid]);
+}
 
 #pragma mark - memory
 -(void) applicationDidReceiveMemoryWarning:(UIApplication *)application
@@ -574,18 +705,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) applicationWillResignActive:(UIApplication *)application
 {
-    NSArray<MLContact*>* activeContacts = [[DataLayer sharedInstance] activeContactDict];
-    if(!activeContacts)
-        return;
-
-    NSError* err;
-    NSData* archive = [NSKeyedArchiver archivedDataWithRootObject:activeContacts requiringSecureCoding:YES error:&err];
-    NSAssert(err == nil, @"%@", err);
-    [[HelperTools defaultsDB] setObject:archive forKey:@"recipients"];
-    [[HelperTools defaultsDB] synchronize];
-    
-    [[HelperTools defaultsDB] setObject:[[DataLayer sharedInstance] enabledAccountList] forKey:@"accounts"];
-    [[HelperTools defaultsDB] synchronize];
 }
 
 -(void) applicationDidEnterBackground:(UIApplication*) application
@@ -640,7 +759,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 }
 
 #pragma mark - mac menu
-- (void)buildMenuWithBuilder:(id<UIMenuBuilder>)builder
+-(void) buildMenuWithBuilder:(id<UIMenuBuilder>) builder
 {
     [super buildMenuWithBuilder:builder];
     if (@available(iOS 13.0, *)) {
@@ -762,6 +881,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                     if(!stopped)
                         DDLogDebug(@"no background tasks running, nothing to stop");
                     [DDLog flushLog];
+                    
+                    //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                 } onQueue:dispatch_get_main_queue()];
             }
         }
@@ -794,6 +916,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 [DDLog flushLog];
                 [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
                 _bgTask = UIBackgroundTaskInvalid;
+                
+                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
             }];
         }
     } onQueue:dispatch_get_main_queue()];
@@ -819,6 +944,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [task setTaskCompletedWithSuccess:NO];
         [self scheduleBackgroundFetchingTask];      //schedule new one
         [DDLog flushLog];
+        
+        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
     };
     
     if([[MLXMPPManager sharedInstance] hasConnectivity])

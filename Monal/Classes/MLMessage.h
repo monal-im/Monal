@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class MLContact;
+
 /**
  message object intended to be passed around and eventually used to render
  */
@@ -19,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  account number in the database should be an integer
  */
-@property (nonatomic, copy) NSString *accountId;
+@property (nonatomic, copy) NSString* accountId;
 
 /**
   jid of the contact that this msg corresponds to
@@ -34,22 +36,22 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The message's local  unique identifier
  */
-@property (nonatomic, copy) NSString *messageId;
+@property (nonatomic, copy) NSString* messageId;
 
 /**
  The id for the message as provided by the xmpp server
  */
-@property (nonatomic, copy) NSString *stanzaId;
+@property (nonatomic, copy) NSString* stanzaId;
 
 /**
 The of the message in the DB , should be int
  */
-@property (nonatomic, copy) NSNumber *messageDBId;
+@property (nonatomic, copy) NSNumber* messageDBId;
 
 /**
  Actual sender will differ from the "from" when in a group chat
  */
-@property (nonatomic, copy) NSString *actualFrom;
+@property (nonatomic, copy) NSString* actualFrom;
 @property (nonatomic, assign) BOOL isMuc;
 
 @property (nonatomic, copy) NSString* messageType;
@@ -59,28 +61,26 @@ The of the message in the DB , should be int
 @property (nonatomic, copy) NSString* filetransferMimeType;
 @property (nonatomic, copy) NSNumber* filetransferSize;
 
-@property (nonatomic, copy) NSString *messageText;
+@property (nonatomic, copy) NSString* messageText;
 
 /**
  If the text was parsed into a URL. For message type url
  */
-@property (nonatomic, copy) NSURL *url;
+@property (nonatomic, copy) NSURL* url;
 
 /**
  path to preview image for image type
  */
-@property (nonatomic, copy) NSURL *previewImage;
-@property (nonatomic, copy) NSString *previewText;
+@property (nonatomic, copy) NSURL* previewImage;
+@property (nonatomic, copy) NSString* previewText;
 
 /**
  for message type status. The MUC subeject
  */
-@property (nonatomic, copy) NSString *groupSubject;
+@property (nonatomic, copy) NSString* groupSubject;
 
-
-
-@property (nonatomic, copy) NSDate *delayTimeStamp;
-@property (nonatomic, copy) NSDate *timestamp;
+@property (nonatomic, copy) NSDate* delayTimeStamp;
+@property (nonatomic, copy) NSDate* timestamp;
 
 /*
  usually used to indicate if the message was  encrypted on the wire, not in this payload
@@ -103,8 +103,8 @@ The of the message in the DB , should be int
  values only set if in a response the message was marked as error.
  if hasBeenReceived is true, these should be ignored
  */
-@property (nonatomic, copy) NSString *errorType;
-@property (nonatomic, copy) NSString *errorReason;
+@property (nonatomic, copy) NSString* errorType;
+@property (nonatomic, copy) NSString* errorReason;
 
 /*
  the message has not been marked as read in the db
@@ -116,9 +116,13 @@ The of the message in the DB , should be int
 /**
  Converts a dictonary to a message object Provide a formatter for the format the dates will be in
  */
-+(MLMessage *) messageFromDictionary:(NSDictionary *) dic;
++(MLMessage*) messageFromDictionary:(NSDictionary*) dic;
 
 -(void) updateWithMessage:(MLMessage*) msg;
+
+-(BOOL) isEqualToContact:(MLContact*) contact;
+-(BOOL) isEqualToMessage:(MLMessage*) message;
+-(BOOL) isEqual:(id) object;
 
 @end
 

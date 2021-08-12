@@ -42,6 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL supportsSM3;
 @property (nonatomic, assign) BOOL supportsPush;
 @property (nonatomic, assign) BOOL pushEnabled;
+@property (nonatomic, assign) BOOL registeredOnPushAppserver;
 @property (nonatomic, assign) BOOL usingCarbons2;
 @property (nonatomic, assign) BOOL supportsRosterVersion;
 @property (nonatomic, assign) BOOL supportsRosterPreApproval;

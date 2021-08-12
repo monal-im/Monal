@@ -7,6 +7,7 @@
 //
 
 #import "MLMessage.h"
+#import "MLContact.h"
 
 @implementation MLMessage
 
@@ -76,6 +77,46 @@
     self.errorReason = msg.errorReason;
     self.filetransferMimeType = msg.filetransferMimeType;
     self.filetransferSize = msg.filetransferSize;
+}
+
+-(BOOL) isEqualToContact:(MLContact*) contact
+{
+    return contact != nil &&
+           [self.buddyName isEqualToString:contact.contactJid] &&
+           [self.accountId isEqualToString:contact.accountId];
+}
+
+-(BOOL) isEqualToMessage:(MLMessage*) message
+{
+    return message != nil &&
+           [self.accountId isEqualToString:message.accountId] &&
+           [self.buddyName isEqualToString:message.buddyName] &&
+           self.inbound == message.inbound &&
+           [self.actualFrom isEqualToString:message.actualFrom] &&
+           (
+               // either the stanzaid is equal --> strong same message
+               // or the message id is equal --> weak same message (but together with the message text it should be sufficient)
+               [self.stanzaId isEqualToString:message.stanzaId] ||
+               ([self.messageId isEqualToString:message.messageId] && [self.messageText isEqualToString:message.messageText])
+           );
+}
+
+-(BOOL) isEqual:(id) object
+{
+    if(self == object)
+        return YES;
+    if([object isKindOfClass:[MLContact class]])
+        return [self isEqualToContact:(MLContact*)object];
+    if([object isKindOfClass:[MLMessage class]])
+        return [self isEqualToMessage:(MLMessage*)object];
+    return NO;
+}
+
+-(NSUInteger) hash
+{
+    return [self.accountId hash] ^ [self.buddyName hash] ^ (self.inbound ? 1 : 0) ^
+           [self.actualFrom hash] ^ [self.messageText hash] ^ [self.messageId hash] ^
+           [self.stanzaId hash];
 }
 
 @end

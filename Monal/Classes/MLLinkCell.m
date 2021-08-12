@@ -38,7 +38,7 @@
         if([url.scheme isEqualToString:@"xmpp"] )
         {
             MonalAppDelegate* delegate =(MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-            [delegate handleURL:url];
+            [delegate handleXMPPURL:url];
         }
         
         else if ([url.scheme isEqualToString:@"http"] ||

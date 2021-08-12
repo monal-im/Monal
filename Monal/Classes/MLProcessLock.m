@@ -137,10 +137,12 @@
 {
     BOOL was_called_in_mainthread = [NSThread isMainThread];
     NSRunLoop* main_runloop = [NSRunLoop mainRunLoop];
+    NSDate* timeout = [NSDate dateWithTimeIntervalSinceNow:time];
     //we have to spin the runloop instead of simply sleeping to not miss incoming IPC messages
     //(pings coming from the appex for example)
     if(was_called_in_mainthread)
-        [main_runloop runMode:[main_runloop currentMode] beforeDate:[NSDate dateWithTimeIntervalSinceNow:time]];
+        while([timeout timeIntervalSinceNow] > 0)
+            [main_runloop runMode:[main_runloop currentMode] beforeDate:timeout];
     else
         [NSThread sleepForTimeInterval:time];
 }

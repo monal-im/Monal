@@ -494,7 +494,7 @@ NSString *const kData=@"data";
     if(localOStream)
         _oStream = localOStream;
     
-    if((localIStream==nil) || (localOStream==nil))
+    if((localIStream == nil) || (localOStream == nil))
     {
         DDLogError(@"failed to create streams");
         [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Unable to connect to server!", @""), @"isSevere": @NO}];
@@ -544,7 +544,7 @@ NSString *const kData=@"data";
         _discoveredServersList = [[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
         _SRVDiscoveryDone = YES;
         // no SRV records found, update server to directly connect to specified domain
-        if([_discoveredServersList count]==0)
+        if([_discoveredServersList count] == 0)
         {
             [self.connectionProperties.server updateConnectServer:self.connectionProperties.identity.domain];
             [self.connectionProperties.server updateConnectPort:@5222];
@@ -569,7 +569,7 @@ NSString *const kData=@"data";
     }
     
     // if all servers have been tried start over with the first one again
-    if([_discoveredServersList count]>0 && [_usableServersList count]==0)
+    if([_discoveredServersList count] > 0 && [_usableServersList count] == 0)
     {
         if(!_firstLoginForThisInstance)
             DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
@@ -585,7 +585,7 @@ NSString *const kData=@"data";
         }
     }
 
-    if([_usableServersList count]>0)
+    if([_usableServersList count] > 0)
     {
         DDLogInfo(@"Using connection parameters discovered via SRV dns record: server=%@, port=%@, isSecure=%s, priority=%@",
             [[_usableServersList objectAtIndex:0] objectForKey:@"server"],

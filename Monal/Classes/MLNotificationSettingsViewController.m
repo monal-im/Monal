@@ -20,7 +20,6 @@ enum {
     kNotificationSettingSectionNotifications,
     kNotificationSettingSectionMonalPush,
     kNotificationSettingSectionAccounts,
-    kNotificationSettingSectionAdvanced,
     kNotificationSettingSectionCount
 };
 
@@ -30,7 +29,6 @@ enum {
 @property (nonatomic, strong) NSString* apple;
 @property (nonatomic, strong) NSString* notifications;
 @property (nonatomic, strong) NSString* monal;
-@property (nonatomic, strong) NSString* advanced;
 @property (nonatomic, assign) BOOL canShowNotifications;
 
 @end
@@ -53,13 +51,11 @@ enum {
         @"",
         @"",
         NSLocalizedString(@"Accounts", @""),
-        NSLocalizedString(@"Advanced", @"")
     ];
     
     self.apple = NSLocalizedString(@"Apple Push Service", @"");
     self.notifications = NSLocalizedString(@"Can Show Notifications", @"");
     self.monal = NSLocalizedString(@"Monal Push Server", @"");
-    self.advanced = NSLocalizedString(@"Mark all messages as read", @"");
 
     self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeOneBesideSecondary;
 }
@@ -100,7 +96,6 @@ enum {
         case kNotificationSettingSectionApplePush: return 1;
         case kNotificationSettingSectionMonalPush: return 1;
         case kNotificationSettingSectionAccounts: return [MLXMPPManager sharedInstance].connectedXMPP.count;
-        case kNotificationSettingSectionAdvanced: return 1;
         default: unreachable(); return 0;
     }
 }
@@ -164,12 +159,6 @@ enum {
             cell.imageView.hidden = NO;
             return cell;
         }
-        case kNotificationSettingSectionAdvanced: {
-            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
-            cell.imageView.hidden = YES;
-            cell.textLabel.text = self.advanced;
-            return cell;
-        }
         default:
             unreachable();
             return [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
@@ -180,21 +169,6 @@ enum {
 -(void) tableView:(UITableView*) tableView didSelectRowAtIndexPath:(NSIndexPath*) indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
-    switch(indexPath.section)
-    {
-        case kNotificationSettingSectionAdvanced: {
-            switch(indexPath.row) {
-                // Mark all messages as read
-                case 0: {
-                    [[DataLayer sharedInstance] setAllMessagesAsRead];
-                    break;
-                }
-                default:
-                    break;
-            }
-            break;
-        }
-    }
 }
 
 

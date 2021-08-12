@@ -573,25 +573,19 @@ NSString *const kData=@"data";
     {
         if(!_firstLoginForThisInstance)
             DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
+        for(NSDictionary* row in _discoveredServersList)
+            DDLogInfo(@"SRV entry in _discoveredServersList: %@", row);
         _usableServersList = [_discoveredServersList mutableCopy];
-        for(NSDictionary *row in _usableServersList)
-        {
-            DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
-                [row objectForKey:@"server"],
-                [row objectForKey:@"port"],
-                [[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
-                [row objectForKey:@"priority"]
-            );
-        }
     }
 
     if([_usableServersList count] > 0)
     {
-        DDLogInfo(@"Using connection parameters discovered via SRV dns record: server=%@, port=%@, isSecure=%s, priority=%@",
+        DDLogInfo(@"Using connection parameters discovered via SRV dns record: server=%@, port=%@, isSecure=%s, priority=%@, ttl=%@",
             [[_usableServersList objectAtIndex:0] objectForKey:@"server"],
             [[_usableServersList objectAtIndex:0] objectForKey:@"port"],
             [[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
-            [[_usableServersList objectAtIndex:0] objectForKey:@"priority"]
+            [[_usableServersList objectAtIndex:0] objectForKey:@"priority"],
+            [[_usableServersList objectAtIndex:0] objectForKey:@"ttl"]
         );
         [self.connectionProperties.server updateConnectServer: [[_usableServersList objectAtIndex:0] objectForKey:@"server"]];
         [self.connectionProperties.server updateConnectPort: [[_usableServersList objectAtIndex:0] objectForKey:@"port"]];
@@ -599,15 +593,8 @@ NSString *const kData=@"data";
         // remove this server so that the next connection attempt will try the next server in the list
         [_usableServersList removeObjectAtIndex:0];
         DDLogInfo(@"%lu SRV entries left:", (unsigned long)[_usableServersList count]);
-        for(NSDictionary *row in _usableServersList)
-        {
-            DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
-                [row objectForKey:@"server"],
-                [row objectForKey:@"port"],
-                [[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
-                [row objectForKey:@"priority"]
-            );
-        }
+        for(NSDictionary* row in _usableServersList)
+            DDLogInfo(@"SRV entry in _usableServersList: %@", row);
     }
     
     [self createStreams];

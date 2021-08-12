@@ -54,9 +54,8 @@ typedef struct __attribute__((packed))
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLDNSLookup : NSObject
-@property (nonatomic, strong) NSMutableArray *discoveredServers;
--(NSArray *) dnsDiscoverOnDomain:(NSString *) domain;
-
+@property (nonatomic, strong) NSMutableArray* discoveredServers;
+-(NSArray*) dnsDiscoverOnDomain:(NSString*) domain;
 @end
 
 NS_ASSUME_NONNULL_END

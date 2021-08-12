@@ -6,7 +6,7 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
-#include <CommonCrypto/CommonDigest.h>
+#import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import "HelperTools.h"
 #import "MLXMPPManager.h"

@@ -152,7 +152,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* _context)
         //  DDLogVerbose(@"pri=%d, w=%d, port=%d, target=%s\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetstr);
         
         NSString* theServer = [NSString stringWithUTF8String:targetStr];
-        NSNumber* prio = [NSNumber numberWithInt:ntohs(srv->priority)];
+        NSNumber* prio = [NSNumber numberWithUnsignedInt:(ntohs(srv->priority) + (isSecure == YES ? 0 : 65535))]; // prefer TLS over STARTTLS
         NSNumber* weight = [NSNumber numberWithInt:ntohs(srv->weight)];
         NSNumber* thePort = [NSNumber numberWithInt:ntohs(srv->port)];
         if(theServer && prio && weight && thePort) {

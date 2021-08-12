@@ -952,11 +952,19 @@ NSString *const kData=@"data";
     {
         DDLogInfo(@"creating parser delegate");
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
+            //don't parse any more if we reached > 100 stanzas already parsed and waiting in parse queue
+            //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
+            //should create a backpressure ino the tcp stream, too
+            while([self->_parseQueue operationCount] > 100)
+            {
+                DDLogInfo(@"Sleeping 1 second because parse queue has > 100 entries...");
+                [NSThread sleepForTimeInterval:1];
+            }
 #ifndef QueryStatistics
             //prime query cache by doing the most used queries in this thread ahead of the receiveQueue processing
             //only preprocess MLXMLNode queries to prime the cache if enough xml nodes are already queued
             //(we don't want to slow down processing by this)
-            if([self->_parseQueue operationCount] > 1)
+            if([self->_parseQueue operationCount] > 2)
             {
                 //this list contains the upper part of the 0.75 percentile of the statistically most used queries
                 [parsedStanza find:@"/@id"];

@@ -111,6 +111,7 @@ static NSMutableDictionary* _RRCache;
         [self.discoveredServers removeAllObjects];
         
         //request xmpps and xmpp records, xmpps will be preferred (use a dispatch queue to fetch xmpp and xmpps concurrently)
+        DDLogVerbose(@"Querying DNS for xmpps AND xmpp records...");
         dispatch_queue_t queue = dispatch_queue_create("im.monal.dnsqueue", DISPATCH_QUEUE_CONCURRENT);
         dispatch_async(queue, ^{
             [self doDiscoveryWithSecure:YES andDomain:domain withTimeout:timeout];
@@ -118,19 +119,25 @@ static NSMutableDictionary* _RRCache;
         dispatch_async(queue, ^{
             [self doDiscoveryWithSecure:NO andDomain:domain withTimeout:timeout];
         });
-        dispatch_barrier_sync(queue, ^{});      //wait for both dns queries to complete
+        //wait for both dns queries to complete
+        dispatch_barrier_sync(queue, ^{
+            DDLogVerbose(@"SRV DNS queries completed (xmpps AND xmpp)...");
+        });
         
         //we ignore weights here for simplicity
+        DDLogVerbose(@"Sorting: %@", self.discoveredServers);
         NSSortDescriptor* descriptor = [[NSSortDescriptor alloc] initWithKey:@"priority" ascending:YES];
         NSArray* sortArray = [NSArray arrayWithObjects:descriptor, nil];
         [self.discoveredServers sortUsingDescriptors:sortArray];
         
         //calculate lowest timeout
-        int32_t lowest_ttl = INT32_MAX;
+        DDLogVerbose(@"Calculating lowest timeout...");
+        u_int32_t lowest_ttl = UINT32_MAX;
         for(NSDictionary* entry in self.discoveredServers)
-            lowest_ttl = MIN(lowest_ttl, [entry[@"ttl"] intValue]);
+            lowest_ttl = MIN(lowest_ttl, [entry[@"ttl"] unsignedIntValue]);
         
         //update resource record cache with discovered servers list
+        DDLogVerbose(@"Updating RRCache with: %@", self.discoveredServers);
         @synchronized(_RRCache) {
             _RRCache[domain] = @{
                 @"timeout": [NSDate dateWithTimeIntervalSinceNow:lowest_ttl],
@@ -145,16 +152,18 @@ static NSMutableDictionary* _RRCache;
 
 -(NSArray*) dnsDiscoverOnDomain:(NSString*) domain
 {
+    /*
     @synchronized(_RRCache) {
-        /*if(_RRCache[domain] != nil && [_RRCache[domain][@"timeout"] timeIntervalSinceNow] > 0)
+        if(_RRCache[domain] != nil && [_RRCache[domain][@"timeout"] timeIntervalSinceNow] > 0)
         {
             //update our cache in background
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
                 [self doRealDnsDiscoverOnDomain:domain withTimeout:16ul];     //long query timeout (this is a background query)
             });
             return [_RRCache[domain][@"records"] copy];
-        }*/
+        }
     }
+    */
     return [self doRealDnsDiscoverOnDomain:domain withTimeout:4ul];     //short query timeout (we are waiting for this query)
 }
 

@@ -949,8 +949,8 @@ NSString* const kStanza = @"stanza";
             //should create a backpressure ino the tcp stream, too
             while([self->_parseQueue operationCount] > 100)
             {
-                DDLogInfo(@"Sleeping 1 second because parse queue has > 100 entries...");
-                [NSThread sleepForTimeInterval:1];
+                DDLogInfo(@"Sleeping 0.5 seconds because parse queue has > 100 entries...");
+                [NSThread sleepForTimeInterval:0.5];
             }
 #ifndef QueryStatistics
             //prime query cache by doing the most used queries in this thread ahead of the receiveQueue processing

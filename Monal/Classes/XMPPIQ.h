@@ -105,41 +105,21 @@ removes a contact from the roster
  */
 -(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType;
 
-
 #pragma mark MUC
+
 /**
  create instant room
  */
 -(void) setInstantRoom;
 
-#pragma mark Jingle
-
-
-/**
- Dictionary info has initiator, responder, sid, ownip, localport1, localport2
- */
--(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
-/**
- Dictionary info has initiator, responder, sid, ownip, localport1, localport2
- */
--(void) setJingleAcceptTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
-/**
- Dictionary info has initiator, responder, sid
- */
--(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
-/**
- Dictionary info has initiator, responder, sid, ownip
- */
--(void) setJingleTerminateTo:(NSString* _Nullable) jid andResource:(NSString* _Nullable) resource withValues:(NSDictionary* _Nullable) info;
-
-
--(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;
--(void) requestBlockList;
-
 #pragma mark - account
+
 -(void) changePasswordForUser:(NSString* _Nonnull) user newPassword:(NSString* _Nonnull) newPsss;
 -(void) getRegistrationFields;
 -(void) registerUser:(NSString* _Nonnull) user withPassword:(NSString* _Nonnull) newPass captcha:(NSString* _Nonnull) captcha andHiddenFields:(NSDictionary* _Nonnull) hiddenFields;
+
+-(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;
+-(void) requestBlockList;
 
 @end
 

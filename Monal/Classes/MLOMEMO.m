@@ -569,15 +569,10 @@ $$
                 [self needNewSessionForContact:encryptForJid andDevice:device];
                 continue;
             }
-            MLXMLNode* keyNode = [[MLXMLNode alloc] initWithElement:@"key"];
-            [keyNode.attributes setObject:[NSString stringWithFormat:@"%@", device] forKey:@"rid"];
-            if(deviceEncryptedKey.type == SignalCiphertextTypePreKeyMessage)
-            {
-                [keyNode.attributes setObject:@"1" forKey:@"prekey"];
-            }
-
-            [keyNode setData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]];
-            [xmlHeader.children addObject:keyNode];
+            [xmlHeader addChild:[[MLXMLNode alloc] initWithElement:@"key" withAttributes:@{
+                @"rid": [NSString stringWithFormat:@"%@", device],
+                @"prekey": (deviceEncryptedKey.type == SignalCiphertextTypePreKeyMessage ? @"1" : @"0"),
+            } andChildren:@[] andData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]]];
         }
     }
 }
@@ -605,27 +600,23 @@ $$
     // Check if we found omemo keys from the recipient
     if(devices.count > 0 || overrideDevices.count > 0)
     {
-        MLXMLNode* encrypted = [[MLXMLNode alloc] initWithElement:@"encrypted"];
-        [encrypted.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
-        [messageNode.children addObject:encrypted];
+        MLXMLNode* encrypted = [[MLXMLNode alloc] initWithElement:@"encrypted" andNamespace:@"eu.siacs.conversations.axolotl"];
 
         MLEncryptedPayload* encryptedPayload;
         if(message)
         {
-            NSData* messageBytes = [message dataUsingEncoding:NSUTF8StringEncoding];
-
             // Encrypt message
+            NSData* messageBytes = [message dataUsingEncoding:NSUTF8StringEncoding];
             encryptedPayload = [AESGcm encrypt:messageBytes keySize:KEY_SIZE];
             if(encryptedPayload == nil)
             {
                 DDLogWarn(@"Could not encrypt message: AESGcm error");
                 return;
             }
-
-            MLXMLNode* payload = [[MLXMLNode alloc] initWithElement:@"payload"];
-            [payload setData:[HelperTools encodeBase64WithData:encryptedPayload.body]];
-            [encrypted.children addObject:payload];
-        } else {
+            [encrypted addChild:[[MLXMLNode alloc] initWithElement:@"payload" andData:[HelperTools encodeBase64WithData:encryptedPayload.body]]];
+        }
+        else
+        {
             // There is no message that can be encrypted -> create new session keys
             NSData* newKey = [AESGcm genKey:KEY_SIZE];
             NSData* newIv = [AESGcm genIV];
@@ -643,15 +634,11 @@ $$
         }
 
         // Get own device id
-        NSString* deviceid = [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
-        MLXMLNode* header = [[MLXMLNode alloc] initWithElement:@"header"];
-        [header.attributes setObject:deviceid forKey:@"sid"];
-        [encrypted.children addObject:header];
-
-        MLXMLNode* ivNode = [[MLXMLNode alloc] initWithElement:@"iv"];
-        [ivNode setData:[HelperTools encodeBase64WithData:encryptedPayload.iv]];
-        [header.children addObject:ivNode];
-
+        MLXMLNode* header = [[MLXMLNode alloc] initWithElement:@"header" withAttributes:@{
+            @"sid": [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid],
+        } andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"iv" andData:[HelperTools encodeBase64WithData:encryptedPayload.iv]],
+        ] andData:nil];
         if(!overrideDevices)
         {
             // normal encryption -> add encryption for all of our own devices as well as to all of our contact's devices
@@ -665,6 +652,9 @@ $$
             // all devices in overrideDevices must belong to a single jid.
             [self addEncryptionKeyForAllDevices:overrideDevices encryptForJid:toContact withEncryptedPayload:encryptedPayload withXMLHeader:header];
         }
+        
+        [encrypted addChild:header];
+        [messageNode addChild:encrypted];
     }
 }
 
@@ -879,25 +869,14 @@ $$
  */
 -(void) publishDevicesViaPubSub:(NSSet<NSNumber*>*) devices
 {
-    MLXMLNode* itemNode = [[MLXMLNode alloc] initWithElement:@"item"];
-    [itemNode.attributes setObject:@"current" forKey:kId];
-
-    MLXMLNode* listNode = [[MLXMLNode alloc] init];
-    listNode.element=@"list";
-    [listNode.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
-
+    MLXMLNode* listNode = [[MLXMLNode alloc] initWithElement:@"list" andNamespace:@"eu.siacs.conversations.axolotl"];
     for(NSNumber* deviceNum in devices)
-    {
-        NSString* deviceid = [deviceNum stringValue];
-        MLXMLNode* device = [[MLXMLNode alloc] init];
-        device.element = @"device";
-        [device.attributes setObject:deviceid forKey:kId];
-        [listNode addChild:device];
-    }
-    [itemNode addChild:listNode];
-
+        [listNode addChild:[[MLXMLNode alloc] initWithElement:@"device" withAttributes:@{kId: [deviceNum stringValue]} andChildren:@[] andData:nil]];
+    
     // publish devices via pubsub
-    [self.account.pubsub publishItem:itemNode onNode:@"eu.siacs.conversations.axolotl.devicelist" withConfigOptions:@{
+    [self.account.pubsub publishItem:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{kId: @"current"} andChildren:@[
+        listNode,
+    ] andData:nil] onNode:@"eu.siacs.conversations.axolotl.devicelist" withConfigOptions:@{
         @"pubsub#persist_items": @"true",
         @"pubsub#access_model": @"open"
     }];
@@ -908,47 +887,26 @@ $$
  */
 -(void) publishKeysViaPubSub:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(u_int32_t) deviceid
 {
-    MLXMLNode* itemNode = [[MLXMLNode alloc] init];
-    itemNode.element = @"item";
-    [itemNode.attributes setObject:@"current" forKey:kId];
-
-    MLXMLNode* bundle = [[MLXMLNode alloc] init];
-    bundle.element = @"bundle";
-    [bundle.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
-
-    MLXMLNode* signedPreKeyPublic = [[MLXMLNode alloc] init];
-    signedPreKeyPublic.element = @"signedPreKeyPublic";
-    [signedPreKeyPublic.attributes setObject:[keys objectForKey:@"signedPreKeyId"] forKey:@"signedPreKeyId"];
-    signedPreKeyPublic.data = [HelperTools encodeBase64WithData: [keys objectForKey:@"signedPreKeyPublic"]];
-    [bundle addChild:signedPreKeyPublic];
-
-    MLXMLNode* signedPreKeySignature = [[MLXMLNode alloc] init];
-    signedPreKeySignature.element = @"signedPreKeySignature";
-    signedPreKeySignature.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"signedPreKeySignature"]];
-    [bundle addChild:signedPreKeySignature];
-
-    MLXMLNode* identityKey = [[MLXMLNode alloc] init];
-    identityKey.element = @"identityKey";
-    identityKey.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"identityKey"]];
-    [bundle addChild:identityKey];
-
-    MLXMLNode* prekeyNode = [[MLXMLNode alloc] init];
-    prekeyNode.element = @"prekeys";
-
+    MLXMLNode* prekeyNode = [[MLXMLNode alloc] initWithElement:@"prekeys"];
     for(SignalPreKey* prekey in prekeys)
     {
-        MLXMLNode* preKeyPublic = [[MLXMLNode alloc] init];
-        preKeyPublic.element = @"preKeyPublic";
-        [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%d", prekey.preKeyId] forKey:@"preKeyId"];
-        preKeyPublic.data = [HelperTools encodeBase64WithData:prekey.keyPair.publicKey];
+        MLXMLNode* preKeyPublic = [[MLXMLNode alloc] initWithElement:@"preKeyPublic" withAttributes:@{
+            @"preKeyId": [NSString stringWithFormat:@"%d", prekey.preKeyId],
+        } andChildren:@[] andData:[HelperTools encodeBase64WithData:prekey.keyPair.publicKey]];
         [prekeyNode addChild:preKeyPublic];
     };
-
-    [bundle addChild:prekeyNode];
-    [itemNode addChild:bundle];
-
+    
     // send bundle via pubsub interface
-    [self.account.pubsub publishItem:itemNode onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid] withConfigOptions:@{
+    [self.account.pubsub publishItem:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{kId: @"current"} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"bundle" andNamespace:@"eu.siacs.conversations.axolotl" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"signedPreKeyPublic" withAttributes:@{
+                @"signedPreKeyId": keys[@"signedPreKeyId"]
+            } andChildren:@[] andData:[HelperTools encodeBase64WithData: keys[@"signedPreKeyPublic"]]],
+            [[MLXMLNode alloc] initWithElement:@"signedPreKeySignature" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithData:[keys objectForKey:@"signedPreKeySignature"]]],
+            [[MLXMLNode alloc] initWithElement:@"identityKey" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithData:[keys objectForKey:@"identityKey"]]],
+            prekeyNode,
+        ] andData:nil]
+    ] andData:nil] onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid] withConfigOptions:@{
         @"pubsub#persist_items": @"true",
         @"pubsub#access_model": @"open"
     }];

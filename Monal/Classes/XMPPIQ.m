@@ -87,11 +87,9 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setBindWithResource:(NSString*) resource
 {
-    MLXMLNode* bindNode =[[MLXMLNode alloc] initWithElement:@"bind" andNamespace:@"urn:ietf:params:xml:ns:xmpp-bind"];
-    MLXMLNode* resourceNode = [[MLXMLNode alloc] initWithElement:@"resource"];
-    resourceNode.data = resource;
-    [bindNode addChild:resourceNode];
-    [self addChild:bindNode];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"bind" andNamespace:@"urn:ietf:params:xml:ns:xmpp-bind" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"resource" andData:resource]
+    ] andData:nil]];
 }
 
 -(void) setMucListQueryFor:(NSString*) listType
@@ -147,10 +145,7 @@ NSString* const kiqErrorType = @"error";
 
 -(void) mamArchivePref
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"prefs";
-    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
-    [self addChild:queryNode];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"prefs" andNamespace:@"urn:xmpp:mam:2"]];
 }
 
 -(void) updateMamArchivePrefDefault:(NSString *) pref
@@ -158,11 +153,7 @@ NSString* const kiqErrorType = @"error";
     /**
      pref is aways, never or roster
      */
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"prefs";
-    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
-    [queryNode.attributes setObject:pref forKey:@"default"];
-    [self addChild:queryNode];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"prefs" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{@"default": pref} andChildren:@[] andData:nil]];
 }
 
 -(void) setMAMQueryLatestMessagesForJid:(NSString* _Nullable) jid before:(NSString* _Nullable) uid
@@ -177,8 +168,8 @@ NSString* const kiqErrorType = @"error";
     } andChildren:@[
         form,
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"50"],
-            [[MLXMLNode alloc] initWithElement:@"before" withAttributes:@{} andChildren:@[] andData:uid]
+            [[MLXMLNode alloc] initWithElement:@"max" andData:@"50"],
+            [[MLXMLNode alloc] initWithElement:@"before" andData:uid]
         ] andData:nil]
     ] andData:nil];
     [self addChild:queryNode];
@@ -195,7 +186,7 @@ NSString* const kiqErrorType = @"error";
             @"end": [HelperTools generateDateTimeString:[NSDate date]]
         }],
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"1"],
+            [[MLXMLNode alloc] initWithElement:@"max" andData:@"1"],
             [[MLXMLNode alloc] initWithElement:@"before"]
         ] andData:nil]
     ] andData:nil];
@@ -211,8 +202,8 @@ NSString* const kiqErrorType = @"error";
     } andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"urn:xmpp:mam:2"],
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"50"],
-            [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:uid]
+            [[MLXMLNode alloc] initWithElement:@"max" andData:@"50"],
+            [[MLXMLNode alloc] initWithElement:@"after" andData:uid]
         ] andData:nil]
     ] andData:nil];
     [self addChild:queryNode];
@@ -227,7 +218,7 @@ NSString* const kiqErrorType = @"error";
     } andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"urn:xmpp:mam:2"],
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"50"]
+            [[MLXMLNode alloc] initWithElement:@"max" andData:@"50"]
         ] andData:nil]
     ] andData:nil];
     [self addChild:queryNode];
@@ -255,41 +246,23 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setRosterRequest:(NSString*) version
 {
-    MLXMLNode* queryNode = [[MLXMLNode alloc] init];
-    queryNode.element = @"query";
-    [queryNode.attributes setObject:@"jabber:iq:roster" forKey:kXMLNS];
+    NSDictionary* attrs = @{};
     if(version)
-        [queryNode.attributes setObject:version forKey:@"ver"];
-    [self addChild:queryNode];
+        attrs = @{@"ver": version};
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:attrs andChildren:@[] andData:nil]];
 }
 
 -(void) setVersion
 {
-    MLXMLNode* queryNode = [[MLXMLNode alloc] init];
-    queryNode.element = @"query";
-    [queryNode.attributes setObject:@"jabber:iq:version" forKey:kXMLNS];
-    
-    MLXMLNode* name = [[MLXMLNode alloc] init];
-    name.element = @"name";
-    name.data = @"Monal";
-    
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"name" andData:@"Monal"],
 #if TARGET_OS_MACCATALYST
-    MLXMLNode* os = [[MLXMLNode alloc] init];
-    os.element = @"os";
-    os.data = @"macOS";
+        [[MLXMLNode alloc] initWithElement:@"os" andData:@"macOS"],
 #else
-    MLXMLNode* os = [[MLXMLNode alloc] init];
-    os.element = @"os";
-    os.data = @"iOS";
+        [[MLXMLNode alloc] initWithElement:@"os" andData:@"iOS"],
 #endif
-    
-    MLXMLNode* appVersion = [[MLXMLNode alloc] initWithElement:@"version"];
-    appVersion.data = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-    
-    [queryNode addChild:name];
-    [queryNode addChild:os];
-    [queryNode addChild:appVersion];
-    [self addChild:queryNode];
+        [[MLXMLNode alloc] initWithElement:@"version" andData:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]],
+    ] andData:nil]];
 }
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
@@ -334,304 +307,40 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setInstantRoom
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode.attributes setObject:@"http://jabber.org/protocol/muc#owner" forKey:kXMLNS];
-    
-    MLXMLNode* xNode =[[MLXMLNode alloc] init];
-    xNode.element=@"x";
-    [xNode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
-    [xNode.attributes setObject:@"submit" forKey:@"type"];
-    
-    [queryNode addChild:xNode];
-    [self addChild:queryNode];
-}
-
-#pragma mark Jingle
-
--(void) setJingleInitiateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
-{
-    [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
-    
-    MLXMLNode* jingleNode =[[MLXMLNode alloc] init];
-    jingleNode.element=@"jingle";
-    [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
-    [jingleNode.attributes setObject:@"session-initiate" forKey:@"action"];
-    [jingleNode.attributes setObject:[info objectForKey:@"initiator"] forKey:@"initiator"];
-   [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
- 
-   MLXMLNode* contentNode =[[MLXMLNode alloc] init];
-    contentNode.element=@"content";
-    [contentNode.attributes setObject:@"initiator" forKey:@"creator"];
-    [contentNode.attributes setObject:@"audio-session" forKey:@"name"];
-    
-    MLXMLNode* description =[[MLXMLNode alloc] init];
-    description.element=@"description";
-    [description.attributes setObject:@"urn:xmpp:jingle:apps:rtp:1" forKey:kXMLNS];
-    [description.attributes setObject:@"audio" forKey:@"media"];
-
-    
-    MLXMLNode* payload =[[MLXMLNode alloc] init];
-    payload.element=@"payload-type";
-    [payload.attributes setObject:@"8" forKey:@"id"];
-    [payload.attributes setObject:@"PCMA" forKey:@"name"];
-    [payload.attributes setObject:@"8000" forKey:@"clockrate"];
-    [payload.attributes setObject:@"1" forKey:@"channels"];
-    
-    [description addChild:payload];
-    
-    MLXMLNode* transport =[[MLXMLNode alloc] init];
-    transport.element=@"transport";
-    [transport.attributes setObject:@"urn:xmpp:jingle:transports:raw-udp:1" forKey:kXMLNS];
-
-    
-    MLXMLNode* candidate1 =[[MLXMLNode alloc] init];
-    candidate1.element=@"candidate";
-    [candidate1.attributes setObject:@"1" forKey:@"component"];
-    [candidate1.attributes setObject:[info objectForKey:@"ownip"] forKey:@"ip"];
-    [candidate1.attributes setObject:[info objectForKey:@"localport1"] forKey:@"port"];
-    [candidate1.attributes setObject:@"monal001" forKey:@"id"];
-    [candidate1.attributes setObject:@"0" forKey:@"generation"];
-    
-    MLXMLNode* candidate2 =[[MLXMLNode alloc] init];
-    candidate2.element=@"candidate";
-    [candidate2.attributes setObject:@"2" forKey:@"component"];
-    [candidate2.attributes setObject:[info objectForKey:@"ownip"] forKey:@"ip"];
-    [candidate2.attributes setObject:[info objectForKey:@"localport2"] forKey:@"port"];
-    [candidate2.attributes setObject:@"monal002" forKey:@"id"];
-    [candidate2.attributes setObject:@"0" forKey:@"generation"];
-    
-    [transport addChild:candidate1];
-    [transport addChild:candidate2];
-    
-    [contentNode addChild:description];
-    [contentNode addChild:transport];
-    
-    [jingleNode addChild:contentNode];
-    [self addChild:jingleNode];
-    
-    
-//        [query appendFormat:@" <iq to='%@/%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'>
-//         <content creator='initiator'  name=\"audio-session\" senders=\"both\" responder='%@'>
-//         <description xmlns=\"urn:xmpp:jingle:apps:rtp:1\" media=\"audio\">
-//         <payload-type id=\"8\" name=\"PCMA\" clockrate=\"8000\" channels='0'/></description>
-//         
-//         <transport xmlns='urn:xmpp:jingle:transports:raw-udp:1'>
-//         <candidate component=\"1\" ip=\"%@\" port=\"%@\"   id=\"monal001\" generation=\"0\"   />
-//         <candidate component=\"2\" ip=\"%@\" port=\"%@\"   id=\"monal002\" generation=\"0\"  /> </transport> </content>
-//         
-//         </jingle> </iq>", self.otherParty, _resource, _iqid, self.me, _to,  self.thesid, _to, _ownIP, self.localPort, _ownIP,self.localPort2];
-}
-
-
--(void) setJingleAcceptTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
-{
-    [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
-    
-    MLXMLNode* jingleNode =[[MLXMLNode alloc] init];
-    jingleNode.element=@"jingle";
-    [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
-    [jingleNode.attributes setObject:@"session-accept" forKey:@"action"];
-    [jingleNode.attributes setObject:[info objectForKey:@"initiator"] forKey:@"initiator"];
-    [jingleNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
-    [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
-    
-    MLXMLNode* contentNode =[[MLXMLNode alloc] init];
-    contentNode.element=@"content";
-    [contentNode.attributes setObject:@"creator" forKey:@"initiator"];
-    [contentNode.attributes setObject:@"audio-session" forKey:@"name"];
-    [contentNode.attributes setObject:@"both" forKey:@"senders"];
-    [contentNode.attributes setObject:[info objectForKey:@"responder"] forKey:@"responder"];
-    
-    
-    MLXMLNode* description =[[MLXMLNode alloc] init];
-    description.element=@"description";
-    [description.attributes setObject:@"urn:xmpp:jingle:apps:rtp:1" forKey:kXMLNS];
-    [description.attributes setObject:@"audio" forKey:@"media"];
-    
-    
-    MLXMLNode* payload =[[MLXMLNode alloc] init];
-    payload.element=@"payload-type";
-    [payload.attributes setObject:@"8" forKey:@"id"];
-    [payload.attributes setObject:@"PCMA" forKey:@"name"];
-    [payload.attributes setObject:@"8000" forKey:@"clockrate"];
-    [payload.attributes setObject:@"1" forKey:@"channels"];
-    
-    [description addChild:payload];
-    
-    MLXMLNode* transport =[[MLXMLNode alloc] init];
-    transport.element=@"transport";
-    [transport.attributes setObject:@"urn:xmpp:jingle:transports:raw-udp:1" forKey:kXMLNS];
-    
-    
-    MLXMLNode* candidate1 =[[MLXMLNode alloc] init];
-    candidate1.element=@"candidate";
-    [candidate1.attributes setObject:@"1" forKey:@"component"];
-    [candidate1.attributes setObject:[info objectForKey:@"ownip"] forKey:@"ip"];
-    [candidate1.attributes setObject:[info objectForKey:@"localport1"] forKey:@"port"];
-    [candidate1.attributes setObject:@"monal001" forKey:@"id"];
-    [candidate1.attributes setObject:@"0" forKey:@"generation"];
-    
-    MLXMLNode* candidate2 =[[MLXMLNode alloc] init];
-    candidate2.element=@"candidate";
-    [candidate2.attributes setObject:@"2" forKey:@"component"];
-    [candidate2.attributes setObject:[info objectForKey:@"ownip"] forKey:@"ip"];
-    [candidate2.attributes setObject:[info objectForKey:@"localport2"] forKey:@"port"];
-    [candidate2.attributes setObject:@"monal002" forKey:@"id"];
-    [candidate2.attributes setObject:@"0" forKey:@"generation"];
-    
-    [transport addChild:candidate1];
-    [transport addChild:candidate2];
-    
-    [contentNode addChild:description];
-    [contentNode addChild:transport];
-    
-    [jingleNode addChild:contentNode];
-    [self addChild:jingleNode];
-    
-}
--(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
-{
-    [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
-
-    MLXMLNode* jingleNode =[[MLXMLNode alloc] init];
-    jingleNode.element=@"jingle";
-    [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
-    [jingleNode.attributes setObject:@"session-terminate" forKey:@"action"];
-    [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
-    
-    MLXMLNode* reason =[[MLXMLNode alloc] init];
-    reason.element=@"reason";
-    
-    MLXMLNode* decline =[[MLXMLNode alloc] init];
-    decline.element=@"decline";
-    
-    [reason addChild:decline] ;
-    [jingleNode addChild:reason];
-    [self addChild:jingleNode];
-    
-}
-
--(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
-{
-    if([jid rangeOfString:@"/"].location==NSNotFound) {
-        [self setiqTo:[NSString stringWithFormat:@"%@/%@",jid,resource]];
-    }
-    else {
-        [self setiqTo:jid];
-    }
-    
-    MLXMLNode* jingleNode =[[MLXMLNode alloc] init];
-    jingleNode.element=@"jingle";
-    [jingleNode setXMLNS:@"urn:xmpp:jingle:1"];
-    [jingleNode.attributes setObject:@"session-terminate" forKey:@"action"];
-  
-    [jingleNode.attributes setObject:[info objectForKey:@"sid"] forKey:@"sid"];
-    
-    MLXMLNode* reason =[[MLXMLNode alloc] init];
-    reason.element=@"reason";
-
-    MLXMLNode* success =[[MLXMLNode alloc] init];
-    success.element=@"success";
-
-    [reason addChild:success] ;
-    [jingleNode addChild:reason];
-    [self addChild:jingleNode];
-
-  
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#owner" withAttributes:@{} andChildren:@[
+        [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"http://jabber.org/protocol/muc#roomconfig"]
+    ] andData:nil]];
 }
 
 #pragma mark - Account Management
+
 -(void) getRegistrationFields
 {
-    MLXMLNode* query = [[MLXMLNode alloc] init];
-    query.element = @"query";
-    [query setXMLNS:kRegisterNameSpace];
-    [self addChild:query];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace]];
 }
 
 /*
  This is really hardcoded for yax.im might work for others
  */
--(void) registerUser:(NSString *) user withPassword:(NSString *) newPass captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields
+-(void) registerUser:(NSString*) user withPassword:(NSString*) newPass captcha:(NSString*) captcha andHiddenFields:(NSDictionary*) hiddenFields
 {
-    MLXMLNode* query =[[MLXMLNode alloc] init];
-    query.element=@"query";
-    [query setXMLNS:kRegisterNameSpace];
-    
-    MLXMLNode* x =[[MLXMLNode alloc] init];
-    x.element=@"x";
-    [x setXMLNS:kDataNameSpace];
-    [x.attributes setValue:@"submit" forKey:@"type"];
-    
-    
-    MLXMLNode* username =[[MLXMLNode alloc] init];
-    username.element=@"field";
-    [username.attributes setValue:@"username" forKey:@"var"];
-    MLXMLNode* usernameValue =[[MLXMLNode alloc] init];
-    usernameValue.element=@"value";
-    usernameValue.data=user;
-    [username addChild:usernameValue];
-    
-    MLXMLNode* password =[[MLXMLNode alloc] init];
-    password.element=@"field";
-    [password.attributes setValue:@"password" forKey:@"var"];
-    MLXMLNode* passwordValue =[[MLXMLNode alloc] init];
-    passwordValue.element=@"value";
-    passwordValue.data=newPass;
-     [password addChild:passwordValue];
-    
-    MLXMLNode* ocr =[[MLXMLNode alloc] init];
-    ocr.element=@"field";
-     [ocr.attributes setValue:@"ocr" forKey:@"var"];
-    MLXMLNode* ocrValue =[[MLXMLNode alloc] init];
-    ocrValue.element=@"value";
-    ocrValue.data=captcha;
-    [ocr addChild:ocrValue];
-    
-    [hiddenFields enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-       
-        MLXMLNode* field =[[MLXMLNode alloc] init];
-        field.element=@"field";
-        [field.attributes setValue:key forKey:@"var"];
-        MLXMLNode* fieldValue =[[MLXMLNode alloc] init];
-        fieldValue.element=@"value";
-        fieldValue.data=obj;
-        [field addChild:fieldValue];
-        
-        [x addChild:field];
-        
+    NSMutableDictionary* fields = [NSMutableDictionary dictionaryWithDictionary:@{
+        @"username": user,
+        @"password": newPass,
+        @"ocr": captcha,
     }];
-    
-    [x addChild:username];
-    [x addChild:password];
-    [x addChild:ocr];
-    
-    [query addChild:x];
-    
-    [self addChild:query];
+    [fields addEntriesFromDictionary:hiddenFields];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
+        [[XMPPDataForm alloc] initWithType:@"submit" formType:kRegisterNameSpace andDictionary:fields]
+    ] andData:nil]];
 }
 
--(void) changePasswordForUser:(NSString *) user newPassword:(NSString *)newPass
+-(void) changePasswordForUser:(NSString*) user newPassword:(NSString*) newPass
 {
-    MLXMLNode* query =[[MLXMLNode alloc] init];
-    query.element=@"query";
-    [query setXMLNS:kRegisterNameSpace];
-    
-    MLXMLNode* username =[[MLXMLNode alloc] init];
-    username.element=@"username";
-    username.data=user;
-    
-    MLXMLNode* password =[[MLXMLNode alloc] init];
-    password.element=@"password";
-    password.data=newPass;
-   
-    [query addChild:username];
-    [query addChild:password];
-    
-    [self addChild:query];
-    
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"username" andData:user],
+        [[MLXMLNode alloc] initWithElement:@"password" andData:newPass],
+    ] andData:nil]];
 }
-
 
 @end

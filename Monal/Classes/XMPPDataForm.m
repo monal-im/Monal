@@ -9,6 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "XMPPDataForm.h"
 
+@interface MLXMLNode()
+@property (atomic, strong, readwrite) NSString* element;
+@end
+
 @implementation XMPPDataForm
 
 //this simple init is not public api because type and form type are mandatory in xep-0004

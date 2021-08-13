@@ -8,6 +8,10 @@
 
 #import "XMPPMessage.h"
 
+@interface MLXMLNode()
+@property (atomic, strong, readwrite) NSString* element;
+@end
+
 @implementation XMPPMessage
 
 NSString* const kMessageChatType = @"chat";

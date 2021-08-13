@@ -14,9 +14,14 @@
 #import "XMPPPresence.h"
 
 @interface MLXMLNode()
+{
+    NSMutableArray* _children;
+}
 @property (atomic, strong) NSMutableDictionary* cache;
+
+@property (atomic, strong, readwrite) NSString* element;
 @property (atomic, readwrite) NSMutableDictionary* attributes;
-@property (atomic, readwrite) MLXMLNode* parent;
+@property (atomic, weak, readwrite) MLXMLNode* parent;
 @end
 
 @implementation MLXMLNode
@@ -129,6 +134,17 @@ static NSRegularExpression* attributeFilterRegex;
     return self;
 }
 
+-(id) initWithElement:(NSString*) element andData:(NSString* _Nullable) data
+{
+    self = [self initWithElement:element withAttributes:@{} andChildren:@[] andData:data];
+    return self;
+}
+
+-(void) deinit
+{
+    DDLogVerbose(@"Deinit of MLXMLNode: %@", self);
+}
+
 -(id) initWithCoder:(NSCoder*) decoder
 {
     self = [super init];
@@ -202,6 +218,11 @@ static NSRegularExpression* attributeFilterRegex;
     //invalidate caches of all nodes upstream in our tree
     for(MLXMLNode* node = self; node; node = node.parent)
         node.cache = [[NSMutableDictionary alloc] init];
+}
+
+-(NSArray*) children
+{
+    return [NSArray arrayWithArray:_children];
 }
 
 -(void) invalidateCache

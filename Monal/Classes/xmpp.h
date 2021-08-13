@@ -39,7 +39,6 @@ FOUNDATION_EXPORT NSString* const kFileName;
 FOUNDATION_EXPORT NSString* const kContentType;
 FOUNDATION_EXPORT NSString* const kData;
 
-@class jingleCall;
 @class MLPubSub;
 @class MLXMLNode;
 @class XMPPDataForm;
@@ -66,12 +65,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, strong) NSString *regCode;
 @property (nonatomic, strong) NSDictionary *regHidden;
 
-@property (nonatomic, strong) jingleCall* call;
-
 // state attributes
 @property (nonatomic, strong) NSString* statusMessage;
-
-@property (nonatomic, strong) jingleCall* _Nullable jingle;
 
 // DB info
 @property (nonatomic, strong) NSString* accountNo;

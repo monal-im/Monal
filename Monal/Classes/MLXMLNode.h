@@ -25,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns;
 -(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString* _Nullable) data;
 -(id) initWithElement:(NSString*) element withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString* _Nullable) data;
+-(id) initWithElement:(NSString*) element andData:(NSString* _Nullable) data;
 
 /**
  Query for text contents, elementNames, attributes or child elements
@@ -46,8 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
  Generates an XML String suitable for writing based on the node
  */
 @property (strong, readonly) NSString* XMLString;
--(NSString*) XMLString;
--(NSString*) description;
+@property (strong, readonly) NSString* description;
 
 /**
  Adds a new child node (this creates a copy of the node and changes the copy's parent property to its new parent
@@ -62,7 +62,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The name of the element itself. 
  */
-@property (atomic, strong) NSString* element;
+@property (atomic, strong, readonly) NSString* element;
 
 /**
  Attributes are given keys as they will be printed in the XML
@@ -72,7 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Children are XMLnodes
  */
-@property (atomic, readonly) NSMutableArray* children;
+@property (atomic, readonly) NSArray* children;
 
 /**
  String to be inserted into the data field between elements. AKA inner text.
@@ -82,7 +82,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Parent node of this one (if any)
  */
-@property (atomic, readonly) MLXMLNode* _Nullable parent;
+@property (atomic, weak, readonly) MLXMLNode* _Nullable parent;
 
 @end
 

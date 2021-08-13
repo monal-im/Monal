@@ -555,9 +555,9 @@ static NSMutableSet* _currentlyTransfering;
     
     DDLogDebug(@"Requesting file upload slot for mimeType %@", sendMimeType);
     [account requestHTTPSlotWithParams:@{
-        kData:fileData,
-        kFileName:userFacingFilename,
-        kContentType:sendMimeType
+        @"data":fileData,
+        @"fileName":userFacingFilename,
+        @"contentType":sendMimeType
     } andCompletion:^(NSString *url, NSError *error) {
         if(error)
         {

@@ -9,6 +9,10 @@
 #import "XMPPPresence.h"
 #import "HelperTools.h"
 
+@interface MLXMLNode()
+@property (atomic, strong, readwrite) NSString* element;
+@end
+
 @implementation XMPPPresence
 
 -(id) init
@@ -34,10 +38,7 @@
 #pragma mark own state
 -(void) setShow:(NSString*) showVal
 {
-    MLXMLNode* show = [[MLXMLNode alloc] init];
-    show.element = @"show";
-    show.data=showVal;
-    [self addChild:show];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"show" withAttributes:@{} andChildren:@[] andData:showVal]];
 }
 
 -(void) setAway
@@ -52,10 +53,7 @@
 
 -(void) setStatus:(NSString*) status
 {
-    MLXMLNode* statusNode = [[MLXMLNode alloc] init];
-    statusNode.element = @"status";
-    statusNode.data = status;
-    [self addChild:statusNode];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"status" withAttributes:@{} andChildren:@[] andData:status]];
 }
 
 -(void) setLastInteraction:(NSDate*) date

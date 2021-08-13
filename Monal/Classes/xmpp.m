@@ -796,9 +796,8 @@ NSString *const kData=@"data";
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the xmpp stream directly afterwards
             [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                 //close stream
-                MLXMLNode* stream = [[MLXMLNode alloc] init];
-                stream.element = @"/stream:stream"; //hack to close stream
-                [self writeToStream:[stream XMLString]]; // dont even bother queueing
+                MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"/stream:stream"];  //hack to close stream
+                [self writeToStream:[stream XMLString]];    // dont even bother queueing
             }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
 
             @synchronized(self->_stateLockObject) {

@@ -502,12 +502,18 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) disconnectAll
 {
     DDLogVerbose(@"manager disconnecAll");
+    dispatch_queue_t queue = dispatch_queue_create("im.monal.disconnect", DISPATCH_QUEUE_CONCURRENT);
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
         //disconnect to prevent endless loops trying to connect
-        DDLogVerbose(@"manager disconnecting");
-        [xmppAccount disconnect];
+        dispatch_async(queue, ^{
+            DDLogVerbose(@"manager disconnecting");
+            [xmppAccount disconnect];
+        });
     }
+    dispatch_barrier_sync(queue, ^{
+        DDLogVerbose(@"manager disconnecAll done (inside barrier)");
+    });
     DDLogVerbose(@"manager disconnecAll done");
 }
 

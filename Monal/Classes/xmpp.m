@@ -47,14 +47,9 @@
 @import AVFoundation;
 
 #define STATE_VERSION 3
-
-
-NSString *const kQueueID=@"queueID";
-NSString *const kStanza=@"stanza";
-
-NSString *const kFileName=@"fileName";
-NSString *const kContentType=@"contentType";
-NSString *const kData=@"data";
+#define CONNECT_TIMEOUT 8.0
+NSString* const kQueueID = @"queueID";
+NSString* const kStanza = @"stanza";
 
 
 @interface MLPubSub ()
@@ -686,8 +681,7 @@ NSString *const kData=@"data";
         if(self->_registration || self->_registrationSubmission)
             return;
         
-        double connectTimeout = 8.0;
-        self->_cancelLoginTimer = createTimer(connectTimeout, (^{
+        self->_cancelLoginTimer = createTimer(CONNECT_TIMEOUT, (^{
             [self dispatchAsyncOnReceiveQueue: ^{
                 self->_cancelLoginTimer = nil;
                 DDLogInfo(@"login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
@@ -706,6 +700,17 @@ NSString *const kData=@"data";
 {
     //this has to be synchronous because we want to wait for the disconnect to complete before continuingand unlocking the process in the NSE
     [self dispatchOnReceiveQueue: ^{
+        DDLogInfo(@"stopping running timers");
+        if(self->_cancelLoginTimer)
+            self->_cancelLoginTimer();        //cancel running login timer
+        self->_cancelLoginTimer = nil;
+        if(self->_cancelPingTimer)
+            self->_cancelPingTimer();         //cancel running ping timer
+        self->_cancelPingTimer = nil;
+        if(self->_cancelReconnectTimer)
+            self->_cancelReconnectTimer();
+        self->_cancelReconnectTimer = nil;
+        
         if(self->_accountState<kStateReconnecting)
         {
             DDLogVerbose(@"not doing logout because already logged out, but clearing state if explicitLogout was yes");
@@ -748,17 +753,6 @@ NSString *const kData=@"data";
         self->_disconnectInProgres = YES;
         [self->_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas (we should be logged out then!)
         [self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we should be logged out then!)
-        
-        DDLogInfo(@"stopping running timers");
-        if(self->_cancelLoginTimer)
-            self->_cancelLoginTimer();        //cancel running login timer
-        self->_cancelLoginTimer = nil;
-        if(self->_cancelPingTimer)
-            self->_cancelPingTimer();         //cancel running ping timer
-        self->_cancelPingTimer = nil;
-        if(!self->_reconnectInProgress && self->_cancelReconnectTimer)
-            self->_cancelReconnectTimer();
-        self->_cancelReconnectTimer = nil;
         
         //invalidate all ephemeral iq handlers (those not surviving an app restart or switch to/from appex)
         @synchronized(self->_iqHandlers) {
@@ -2713,15 +2707,15 @@ NSString *const kData=@"data";
     XMPPIQ* httpSlotRequest = [[XMPPIQ alloc] initWithType:kiqGetType];
     [httpSlotRequest setiqTo:self.connectionProperties.uploadServer];
     [httpSlotRequest
-        httpUploadforFile:[params objectForKey:kFileName]
-        ofSize:[NSNumber numberWithInteger:((NSData*)[params objectForKey:kData]).length]
-        andContentType:[params objectForKey:kContentType]
+        httpUploadforFile:params[@"fileName"]
+        ofSize:[NSNumber numberWithInteger:((NSData*)params[@"data"]).length]
+        andContentType:params[@"contentType"]
     ];
     [self sendIq:httpSlotRequest withResponseHandler:^(XMPPIQ* response) {
         DDLogInfo(@"Got slot for upload: %@", [response findFirst:@"{urn:xmpp:http:upload:0}slot/put@url"]);
         //upload to server using HTTP PUT
         NSMutableDictionary* headers = [[NSMutableDictionary alloc] init];
-        headers[@"Content-Type"] = [params objectForKey:kContentType];
+        headers[@"Content-Type"] = params[@"contentType"];
         for(MLXMLNode* header in [response find:@"{urn:xmpp:http:upload:0}slot/put/header"])
             headers[[header findFirst:@"/@name"]] = [header findFirst:@"/#"];
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -2729,7 +2723,7 @@ NSString *const kData=@"data";
                 sendWithVerb:kPut path:[response findFirst:@"{urn:xmpp:http:upload:0}slot/put@url"]
                 headers:headers
                 withArguments:nil
-                data:[params objectForKey:kData]
+                data:params[@"data"]
                 andCompletionHandler:^(NSError* error, id result) {
                     if(!error)
                     {

@@ -52,12 +52,12 @@ typedef enum NotificationPrivacySettingOption {
 
 #if defined(IS_ALPHA) || defined(DEBUG)
     #define unreachable() { \
-        DDLogWarn(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
+        DDLogError(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
         NSAssert(NO, @"unreachable"); \
     }
 #else
     #define unreachable() { \
-        DDLogWarn(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
+        DDLogError(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
     }
 #endif
 

@@ -751,8 +751,6 @@ NSString* const kStanza = @"stanza";
         }
         DDLogInfo(@"disconnecting");
         self->_disconnectInProgres = YES;
-        [self->_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas (we should be logged out then!)
-        [self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we should be logged out then!)
         
         //invalidate all ephemeral iq handlers (those not surviving an app restart or switch to/from appex)
         @synchronized(self->_iqHandlers) {
@@ -944,6 +942,12 @@ NSString* const kStanza = @"stanza";
     {
         DDLogInfo(@"creating parser delegate");
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
+            if(self.accountState<kStateReconnecting)
+            {
+                DDLogWarn(@"Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateReconnecting");
+                return;
+            }
+            
             //don't parse any more if we reached > 100 stanzas already parsed and waiting in parse queue
             //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
             //should create a backpressure ino the tcp stream, too
@@ -993,7 +997,7 @@ NSString* const kStanza = @"stanza";
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     if(self.accountState<kStateReconnecting)
                     {
-                        DDLogWarn(@"Throwing away queued incoming stanza, accountState < kStateReconnecting");
+                        DDLogWarn(@"Throwing away incoming stanza queued in parse queue, accountState < kStateReconnecting");
                         return;
                     }
                     [MLNotificationQueue queueNotificationsInBlock:^{
@@ -3191,9 +3195,13 @@ NSString* const kStanza = @"stanza";
         {
             NSError* st_error = [stream streamError];
             DDLogError(@"Stream %@ error code=%ld domain=%@ local desc:%@", stream, (long)st_error.code,st_error.domain, st_error.localizedDescription);
-
-            NSString *message = st_error.localizedDescription;
-
+            if(stream != _oStream)      //check for _oStream here, because we don't have any _iStream (the mlpipe input stream was directly handed over to the xml parser)
+            {
+                DDLogInfo(@"Ignoring error in iStream (will already be handled in oStream error handler");
+                break;
+            }
+            
+            NSString* message = st_error.localizedDescription;
             switch(st_error.code)
             {
                 case errSSLXCertChainInvalid: {

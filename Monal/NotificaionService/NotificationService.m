@@ -66,15 +66,19 @@
 {
     DDLogInfo(@"Got incoming push...pinging main app");
     
-    //terminate appex if the main app is already running
-    if([MLProcessLock checkRemoteRunning:@"MainApp"])
+    //terminate appex if the main app is already running (use a high timeout to make sure the mainapp isn't running, even if the mainthread is heavily busy)
+    //EXPLANATION: the mainapp uses the main thread for UI stuff, which sometimes can block the main thread for more than 250ms
+    //             --> that would make the ping *NOT* succeed and in turn erroneously tell the appex that the mainapp was not running
+    //             the appex on the other side does not use its main thread --> a ping coming from the mainapp will almost always
+    //             be answered in only a few milliseconds
+    if([MLProcessLock checkRemoteRunning:@"MainApp" withTimeout:2.0])
     {
         //this will make sure we still run if we get triggered immediately after the mainapp disconnected but before its process got freezed
         DDLogDebug(@"Main app already in foreground, sleeping for 5 seconds and trying again");
         usleep(5000000);
         
         DDLogDebug(@"Pinging main app again");
-        if([MLProcessLock checkRemoteRunning:@"MainApp"])
+        if([MLProcessLock checkRemoteRunning:@"MainApp" withTimeout:2.0])       //use a high timeout to make sure the mainapp isn't running, even if the mainthread is heavily busy
         {
             DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
             [DDLog flushLog];
@@ -145,7 +149,7 @@
                 //--> waiting 500ms before checking if this was the last push that expired (e.g. no new push came in) does not do any harm here
                 //WARNING: we have to closely watch apple...if they remove this 5 second gap between this call to the expiration handler and the actual
                 //appex freeze, this sleep will no longer be harmless and could even cause smacks state corruption (by not diconnecting cleanly and having stanzas
-                //still in the TCP queue delivered on next appex unfreeze een if the have been already handled by the mainapp)
+                //still in the TCP queue delivered on next appex unfreeze even if they have been handled by the mainapp already)
                 usleep(500000);
                 
                 @synchronized(self) {

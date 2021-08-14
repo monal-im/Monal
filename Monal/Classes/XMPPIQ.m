@@ -327,7 +327,7 @@ NSString* const kiqErrorType = @"error";
     NSMutableDictionary* fields = [NSMutableDictionary dictionaryWithDictionary:@{
         @"username": user,
         @"password": newPass,
-        @"ocr": captcha,
+        @"ocr": captcha?captcha:@"",
     }];
     [fields addEntriesFromDictionary:hiddenFields];
     [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[

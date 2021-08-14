@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MLProcessLock : NSObject
 
 +(BOOL) checkRemoteRunning:(NSString*) processName;
++(BOOL) checkRemoteRunning:(NSString*) processName withTimeout:(double) pingTimeout;
 +(void) waitForRemoteStartup:(NSString*) processName;
 +(void) waitForRemoteStartup:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler;
 +(void) waitForRemoteTermination:(NSString*) processName;

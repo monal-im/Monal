@@ -22,6 +22,16 @@
 
 +(BOOL) checkRemoteRunning:(NSString*) processName
 {
+    //default timeout used by mainapp (appex uses a higher timeout)
+    //EXPLANATION: the mainapp uses the main thread for UI stuff, which sometimes can block the main thread for more than 250ms
+    //             --> that would make the ping *NOT* succeed and in turn erroneously tell the appex that the mainapp was not running
+    //             the appex on the other side does not use its main thread --> a ping coming from the mainapp will almost always
+    //             be answered in only a few milliseconds
+    return [self checkRemoteRunning:processName withTimeout:0.250];
+}
+
++(BOOL) checkRemoteRunning:(NSString*) processName withTimeout:(double) pingTimeout
+{
     __block BOOL was_called_in_mainthread = [NSThread isMainThread];
     __block NSCondition* condition = [[NSCondition alloc] init];
     __block NSRunLoop* main_runloop = [NSRunLoop mainRunLoop];
@@ -47,8 +57,8 @@
         [condition unlock];
     }];
     
-    //wait for response blocking this thread for 250ms
-    NSDate* timeout = [NSDate dateWithTimeIntervalSinceNow:0.250];
+    //wait for response blocking this thread for pingTimeout seconds
+    NSDate* timeout = [NSDate dateWithTimeIntervalSinceNow:pingTimeout];
     DDLogVerbose(@"Waiting for %f seconds...", (double)[timeout timeIntervalSinceNow]);
     //we have to repeate the condition wait/runloop polling until we time out if the wakeup was not due to a received ping response
     while(!response_received && [timeout timeIntervalSinceNow] > 0)
@@ -88,7 +98,8 @@
 
 +(void) waitForRemoteStartup:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler
 {
-    while(![[NSThread currentThread] isCancelled] && ![self checkRemoteRunning:processName])
+    //we will wait almost 2 seconds (the IPC message timeout)
+    while(![[NSThread currentThread] isCancelled] && ![self checkRemoteRunning:processName withTimeout:1.5])
     {
         if(handler)
             handler();
@@ -103,7 +114,11 @@
 
 +(void) waitForRemoteTermination:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler
 {
-    while(![[NSThread currentThread] isCancelled] && [self checkRemoteRunning:processName])
+    //wait 500ms (in case this method will be used by the appex to wait for the mainapp in the future)
+    //--> we want to make sure the mainapp *really* isn't running anymore while still not waiting too long
+    //(this 500ms is a tradeoff, a longer timeout would be safer but could result in long mainapp startup delays or startup kills by iOS)
+    //see the explanation of checkRemoteRunning: for further details
+    while(![[NSThread currentThread] isCancelled] && [self checkRemoteRunning:processName withTimeout:0.5])
     {
         if(handler)
             handler();

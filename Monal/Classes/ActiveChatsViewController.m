@@ -616,7 +616,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 - (UIImage *)imageForEmptyDataSet:(UIScrollView *)scrollView
 {
-    return [UIImage imageNamed:@"pooh"];
+    return [UIImage imageNamed:@"river"];
 }
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView

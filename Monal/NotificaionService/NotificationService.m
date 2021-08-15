@@ -19,6 +19,7 @@
 @interface Push : NSObject
 @property (atomic, strong) NSMutableArray* handlerList;
 @property (atomic, strong) NSMutableSet* idleAccounts;
+@property (atomic) BOOL incomingPushWaiting;
 @end
 
 @implementation Push
@@ -66,6 +67,11 @@
 {
     DDLogInfo(@"Got incoming push...pinging main app");
     
+    //make sure the rest of this class knows that we got onemore push to be handled, even if it isn't added to self.handlerList yet because we want to ping the mainapp first
+    @synchronized(self) {
+        self.incomingPushWaiting = YES;
+    }
+    
     //terminate appex if the main app is already running (use a high timeout to make sure the mainapp isn't running, even if the mainthread is heavily busy)
     //EXPLANATION: the mainapp uses the main thread for UI stuff, which sometimes can block the main thread for more than 250ms
     //             --> that would make the ping *NOT* succeed and in turn erroneously tell the appex that the mainapp was not running
@@ -110,6 +116,7 @@
         //add contentHandler to our list
         DDLogDebug(@"Adding content handler to list: %lu", [self.handlerList count]);
         [self.handlerList addObject:contentHandler];
+        self.incomingPushWaiting = NO;     //the incoming push was added to self.handlerList now
         
         if(first)       //first incoming push --> connect to servers
         {
@@ -141,7 +148,7 @@
         }
         
         //disconnect if this was the last handler and no new push comes in in the next 500ms
-        if([self.handlerList count] == 0)
+        if([self.handlerList count] == 0 && !self.incomingPushWaiting)
         {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 //wait 500ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
@@ -155,7 +162,7 @@
                 @synchronized(self) {
                     //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
                     //(e.g. [MLFiletransfer isIdle] is not YES)
-                    if([self.handlerList count] == 0)
+                    if([self.handlerList count] == 0 && !self.incomingPushWaiting)
                     {
                         //post sync errors for all non-idle accounts
                         [HelperTools updateSyncErrorsWithDeleteOnly:NO];

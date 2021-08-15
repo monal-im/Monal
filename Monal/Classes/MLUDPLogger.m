@@ -22,6 +22,7 @@
 @interface MLUDPLogger ()
 {
     CFSocketRef _cfsocketout;
+    u_int64_t _counter;
 }
 @end
 
@@ -111,6 +112,7 @@
     if(self->_logFormatter)
         logMsg = [NSString stringWithFormat:@"%@\n", [self->_logFormatter formatLogMessage:logMessage]];
     
+    _counter++;
     NSDictionary* msgDict = @{
         @"formattedMessage": logMsg,
         @"message": logMessage.message,
@@ -127,7 +129,8 @@
         @"threadID": logMessage.threadID,
         @"threadName": logMessage.threadName,
         @"queueLabel": logMessage.queueLabel,
-        @"qos": [NSNumber numberWithInteger:logMessage.qos]
+        @"qos": [NSNumber numberWithInteger:logMessage.qos],
+        @"_counter": [NSNumber numberWithUnsignedLongLong:_counter],
     };
     NSError* writeError = nil; 
     NSData* rawData = [NSJSONSerialization dataWithJSONObject:msgDict options:NSJSONWritingPrettyPrinted error:&writeError];

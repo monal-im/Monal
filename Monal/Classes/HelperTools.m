@@ -23,6 +23,10 @@
 
 static DDFileLogger* _fileLogger;
 
+@interface xmpp()
+-(void) dispatchOnReceiveQueue: (void (^)(void)) operation;
+@end
+
 @implementation HelperTools
 
 void logException(NSException* exception)
@@ -149,7 +153,12 @@ void logException(NSException* exception)
             if(account.accountState < kStateReconnecting && !account.reconnectInProgress)
                 continue;
             NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
-            if(account.idle)
+            //dispatch this to the receive queue to make sure this account *really* is idle when testing (and not in the midde of handling one single stanza)
+            __block BOOL idle = NO;
+            [account dispatchOnReceiveQueue:^{
+                idle = account.idle;
+            }];
+            if(idle)
             {
                 DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
                 [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];

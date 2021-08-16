@@ -332,7 +332,7 @@ static NSMutableDictionary* _typingNotifications;
                                          encrypted:encrypted
                                displayMarkerWanted:[messageNode check:@"{urn:xmpp:chat-markers:0}markable"]
                                     usingHistoryId:historyIdToUse
-                                checkForDuplicates:[messageNode check:@"{urn:xmpp:sid:0}origin-id"]
+                                checkForDuplicates:[messageNode check:@"{urn:xmpp:sid:0}origin-id"] || (stanzaid != nil)
                 ];
             }
             

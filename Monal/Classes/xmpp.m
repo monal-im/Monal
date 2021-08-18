@@ -2546,6 +2546,17 @@ NSString* const kStanza = @"stanza";
     [self sendIq:discoItems withHandler:$newHandler(MLIQProcessor, handleServerDiscoItems)];
 }
 
+-(void) purgeOfflineStorage
+{
+    XMPPIQ* purgeIq = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [purgeIq setPurgeOfflineStorage];
+    [self sendIq:purgeIq withResponseHandler:^(XMPPIQ* response) {
+        DDLogInfo(@"Successfully purged offline storage...");
+    } andErrorHandler:^(XMPPIQ* error) {
+        DDLogWarn(@"Could not purge offline storage (using XEP-0013): %@", error);
+    }];
+}
+
 -(void) sendPresence
 {
     //don't send presences if we are not bound
@@ -2642,7 +2653,8 @@ NSString* const kStanza = @"stanza";
     //if and what pubsub/pep features the server supports, before handling that
     //we can pipeline the disco requests and outgoing presence broadcast, though
     [self queryDisco];
-    [self sendPresence];
+    [self purgeOfflineStorage];
+    [self sendPresence];            //this will trigger a replay of offline stanzas on prosody (no XEP-0013 support anymore 😡)
     
     //send own csi state (this must be done *after* presences to not delay/filter incoming presence flood needed to prime our database
     [self sendCurrentCSIState];

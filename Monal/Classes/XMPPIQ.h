@@ -40,6 +40,8 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
  */
 -(void) setPing;
 
+-(void) setPurgeOfflineStorage;
+
 /**
  gets MAM prefernces
  */

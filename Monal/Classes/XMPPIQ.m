@@ -137,8 +137,14 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setPing
 {
-    MLXMLNode* pingNode = [[MLXMLNode alloc] initWithElement:@"ping" andNamespace:@"urn:xmpp:ping"];
-    [self addChild:pingNode];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"ping" andNamespace:@"urn:xmpp:ping"]];
+}
+
+-(void) setPurgeOfflineStorage
+{
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"offline" andNamespace:@"http://jabber.org/protocol/offline" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"purge"]
+    ] andData:nil]];
 }
 
 #pragma mark - MAM

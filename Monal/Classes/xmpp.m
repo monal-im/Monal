@@ -62,6 +62,7 @@ NSString* const kStanza = @"stanza";
 @interface MLMucProcessor ()
 +(NSDictionary*) getInternalState;
 +(void) setInternalState:(NSDictionary*) state;
++(void) resetForNewSession;
 @end
 
 @interface xmpp()
@@ -2600,6 +2601,9 @@ NSString* const kStanza = @"stanza";
                 ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
         }
     }
+    
+    //clear muc state
+    [MLMucProcessor resetForNewSession];
     
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)

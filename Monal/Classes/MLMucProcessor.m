@@ -83,6 +83,14 @@ static NSMutableDictionary* _uiHandler;
     }
 }
 
++(void) resetForNewSession
+{
+    _roomFeatures = [[NSMutableDictionary alloc] init];
+    _joining = [[NSMutableSet alloc] init];
+    //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
+
+}
+
 +(BOOL) isJoining:(NSString*) room
 {
     @synchronized(_stateLockObject) {
@@ -434,7 +442,7 @@ static NSMutableDictionary* _uiHandler;
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:roomJid];
     [discoInfo setDiscoInfoNode];
-    [account sendIq:discoInfo withHandler:$newHandler(self, handleDiscoResponse, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
+    [account sendIq:discoInfo withHandler:$newHandlerWithInvalidation(self, handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
 }
 
 +(void) pingAllMucsOnAccount:(xmpp*) account
@@ -523,6 +531,13 @@ static NSMutableDictionary* _uiHandler;
         }
     }];
 }
+
+$$handler(handleDiscoResponseInvalidation, $_ID(NSString*, roomJid))
+    DDLogInfo(@"Removing muc '%@' from _joining...", roomJid);
+    @synchronized(_stateLockObject) {
+        [_joining removeObject:roomJid];
+    }
+$$
 
 $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $_BOOL(join), $_BOOL(updateBookmarks))
     NSAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!");

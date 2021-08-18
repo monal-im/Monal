@@ -2530,11 +2530,6 @@ NSString* const kStanza = @"stanza";
 
 -(void) queryDisco
 {
-    XMPPIQ* accountInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [accountInfo setiqTo:self.connectionProperties.identity.jid];
-    [accountInfo setDiscoInfoNode];
-    [self sendIq:accountInfo withHandler:$newHandler(MLIQProcessor, handleAccountDiscoInfo)];
-    
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:self.connectionProperties.identity.domain];
     [discoInfo setDiscoInfoNode];
@@ -2544,6 +2539,11 @@ NSString* const kStanza = @"stanza";
     [discoItems setiqTo:self.connectionProperties.identity.domain];
     [discoItems setDiscoItemNode];
     [self sendIq:discoItems withHandler:$newHandler(MLIQProcessor, handleServerDiscoItems)];
+    
+    XMPPIQ* accountInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [accountInfo setiqTo:self.connectionProperties.identity.jid];
+    [accountInfo setDiscoInfoNode];
+    [self sendIq:accountInfo withHandler:$newHandler(MLIQProcessor, handleAccountDiscoInfo)];
 }
 
 -(void) purgeOfflineStorage

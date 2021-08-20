@@ -2674,7 +2674,6 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.supportsPush = NO;
     self.connectionProperties.pushEnabled = NO;
     self.connectionProperties.registeredOnPushAppserver = NO;
-    self.connectionProperties.supportsClientState = NO;
     self.connectionProperties.supportsMam2 = NO;
     self.connectionProperties.supportsPubSub = NO;
     self.connectionProperties.supportsHTTPUpload = NO;

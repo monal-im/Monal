@@ -347,6 +347,7 @@ static NSMutableDictionary* _uiHandler;
                 //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
                 //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
                 NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:node.fromUser andAccount:account.accountNo];
+                [account delayIncomingMessageStanzasForArchiveJid:node.fromUser];
                 XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
                 [mamQuery setiqTo:node.fromUser];
                 if(lastStanzaId)
@@ -701,6 +702,7 @@ $$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
     //we ignore this single message loss here, because it should be super rare and solving it would be really complicated
     if([iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
         [[DataLayer sharedInstance] setLastStanzaId:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"] forMuc:iqNode.fromUser andAccount:account.accountNo];
+    [account mamFinishedFor:iqNode.fromUser];
 $$
 
 $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
@@ -718,7 +720,10 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
             [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, YES))];
         }
         else
+        {
             [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for groupchat %@", @""), iqNode.fromUser] withNode:iqNode andAccount:account andIsSevere:YES];
+            [account mamFinishedFor:iqNode.fromUser];
+        }
         return;
     }
     if(![[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] && [iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
@@ -731,7 +736,10 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
         [account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
     }
     else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
+    {
         DDLogVerbose(@"Muc mam catchup finished");
+        [account mamFinishedFor:iqNode.fromUser];
+    }
 $$
 
 +(void) handleError:(NSString*) description forMuc:(NSString*) room withNode:(XMPPStanza*) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere

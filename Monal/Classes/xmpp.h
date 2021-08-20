@@ -182,7 +182,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
  */
 -(void) enablePush;
 
--(void) mamFinished;
+-(void) mamFinishedFor:(NSString*) archiveJid;
 
 /**
  query a user's software version
@@ -215,8 +215,10 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) sendDisplayMarkerForMessage:(MLMessage*) msg;
 -(void) publishAvatar:(UIImage*) image;
 -(void) publishStatusMessage:(NSString*) message;
+-(void) delayIncomingMessageStanzasForArchiveJid:(NSString*) archiveJid;
 
 +(NSDictionary*) invalidateState:(NSDictionary*) dic;
+
 
 @end
 

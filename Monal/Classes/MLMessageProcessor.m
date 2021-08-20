@@ -146,7 +146,7 @@ static NSMutableDictionary* _typingNotifications;
             possibleUnkownContact = messageNode.toUser;
         else
             possibleUnkownContact = messageNode.fromUser;
-        DDLogWarn(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
+        DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
         [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil andMucNick:nil];
     }
     
@@ -160,6 +160,7 @@ static NSMutableDictionary* _typingNotifications;
             stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
     }
     
+    //all modern clients using origin-id should use the same id for origin-id AND message id 
     NSString* messageId = [messageNode findFirst:@"{urn:xmpp:sid:0}origin-id@id"];
     if(messageId == nil || !messageId.length)
         messageId = [messageNode findFirst:@"/@id"];

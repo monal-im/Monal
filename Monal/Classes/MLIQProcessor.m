@@ -136,7 +136,7 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
         else
         {
             [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query for new messages on account %@", @""), account.connectionProperties.identity.jid] withNode:iqNode andAccount:account andIsSevere:YES];
-            [account mamFinished];
+            [account mamFinishedFor:account.connectionProperties.identity.jid];
         }
         return;
     }
@@ -151,7 +151,7 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
     else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
     {
         DDLogVerbose(@"Mam catchup finished");
-        [account mamFinished];
+        [account mamFinishedFor:account.connectionProperties.identity.jid];
     }
 $$
 
@@ -172,7 +172,7 @@ $$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
     //we ignore this single message loss here, because it should be super rare and solving it would be really complicated
     if([iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
         [[DataLayer sharedInstance] setLastStanzaId:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"] forAccount:account.accountNo];
-    [account mamFinished];
+    [account mamFinishedFor:account.connectionProperties.identity.jid];
 $$
 
 $$handler(handleCarbonsEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
@@ -356,6 +356,7 @@ $$handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
         //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
         NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForAccount:account.accountNo];
+        [account delayIncomingMessageStanzasForArchiveJid:account.connectionProperties.identity.jid];
         XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         if(lastStanzaId)
         {

@@ -40,9 +40,9 @@ static NSMutableDictionary* _typingNotifications;
 
 +(MLMessage* _Nullable) processMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode forAccount:(xmpp*) account withHistoryId:(NSNumber* _Nullable) historyIdToUse
 {
-    NSAssert(messageNode != nil, @"messageNode should not be nil!");
-    NSAssert(outerMessageNode != nil, @"outerMessageNode should not be nil!");
-    NSAssert(account != nil, @"account should not be nil!");
+    MLAssert(messageNode != nil, @"messageNode should not be nil!");
+    MLAssert(outerMessageNode != nil, @"outerMessageNode should not be nil!");
+    MLAssert(account != nil, @"account should not be nil!");
     
     //this will be the return value f tis method
     //(a valid MLMessage, if this was a new message added to the db or nil, if it was another stanza not added
@@ -54,7 +54,10 @@ static NSMutableDictionary* _typingNotifications;
     BOOL isMLhistory = NO;
     if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"])
         isMLhistory = YES;
-    NSAssert(!isMLhistory || historyIdToUse != nil, @"processing of MLhistory: mam messages is only possible if a history id was given");
+    MLAssert(!isMLhistory || historyIdToUse != nil, @"processing of MLhistory: mam messages is only possible if a history id was given", (@{
+        @"isMLhistory": @(isMLhistory),
+        @"historyIdToUse": historyIdToUse != nil ? historyIdToUse : @"(nil)",
+    }));
     
     if([messageNode check:@"/<type=error>"])
     {

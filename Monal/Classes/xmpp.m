@@ -1587,10 +1587,10 @@ NSString* const kStanza = @"stanza";
             }
             
             //assert on wrong from and to values
-            NSAssert(![messageNode.fromUser containsString:@"/"], @"messageNode.fromUser contains resource!");
-            NSAssert(![messageNode.toUser containsString:@"/"], @"messageNode.toUser contains resource!");
-            NSAssert(![outerMessageNode.fromUser containsString:@"/"], @"outerMessageNode.fromUser contains resource!");
-            NSAssert(![outerMessageNode.toUser containsString:@"/"], @"outerMessageNode.toUser contains resource!");
+            MLAssert(![messageNode.fromUser containsString:@"/"], @"messageNode.fromUser contains resource!", messageNode);
+            MLAssert(![messageNode.toUser containsString:@"/"], @"messageNode.toUser contains resource!", messageNode);
+            MLAssert(![outerMessageNode.fromUser containsString:@"/"], @"outerMessageNode.fromUser contains resource!", outerMessageNode);
+            MLAssert(![outerMessageNode.toUser containsString:@"/"], @"outerMessageNode.toUser contains resource!", outerMessageNode);
             
             //only process mam results when they are *not* for priming the database with the initial stanzaid (the id will be taken from the iq result)
             //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
@@ -2033,7 +2033,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) send:(MLXMLNode*) stanza withSmacks:(BOOL) withSmacks
 {
-    NSAssert(stanza, @"stanza to send should not be nil");
+    MLAssert(stanza != nil, @"stanza to send should not be nil!", @{@"withSmacks": @(withSmacks)});
     
     [self dispatchAsyncOnReceiveQueue:^{
         //add outgoing mam queryids to our state (but don't persist state because this will be done by smacks code below)
@@ -2914,7 +2914,10 @@ NSString* const kStanza = @"stanza";
         }];
         
         DDLogDebug(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[historyIdList count]);
-        NSAssert([historyIdList count] <= retrievedBodies, @"did add more messages to historydb table than bodies collected!");
+        MLAssert([historyIdList count] <= retrievedBodies, @"did add more messages to historydb table than bodies collected!", (@{
+            @"historyIdList": historyIdList,
+            @"retrievedBodies": @(retrievedBodies),
+        }));
         if([historyIdList count] < retrievedBodies)
             DDLogWarn(@"Got %lu mam history messages already contained in history db, possibly ougoing messages that did not have a stanzaid yet!", (unsigned long)(retrievedBodies - [historyIdList count]));
         if(![historyIdList count])

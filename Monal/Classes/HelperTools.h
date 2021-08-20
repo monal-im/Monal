@@ -25,7 +25,7 @@ void logException(NSException* exception);
 
 @interface HelperTools : NSObject
 
-+(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id) additionalData;
++(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id _Nullable) additionalData;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSDictionary*) pushServer;
 +(NSString*) stringFromToken:(NSData*) tokenIn;

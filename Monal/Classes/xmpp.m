@@ -3514,7 +3514,7 @@ NSString* const kStanza = @"stanza";
 {
     //only handle iq timeouts while the parseQueue is almost empty
     //(a long backlog in the parse queue could trigger spurious iq timeouts for iqs we already received an answer to, but didn't process it yet)
-    if([_parseQueue operationCount] > 4)
+    if([_parseQueue operationCount] > 4 || _accountState < kStateBound)
         return;
     
     @synchronized(_iqHandlers) {

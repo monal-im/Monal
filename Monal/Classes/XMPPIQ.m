@@ -49,6 +49,14 @@ NSString* const kiqErrorType = @"error";
     return self;
 }
 
+-(id) initAsErrorTo:(XMPPIQ*) iq
+{
+    self = [self initInternalWithId:[iq findFirst:@"/@id"] andType:kiqErrorType];
+    if(iq.from)
+        [self setiqTo:iq.from];
+    return self;
+}
+
 #pragma mark iq set
 
 -(void) setRegisterOnAppserverWithToken:(NSString*) token

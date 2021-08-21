@@ -20,6 +20,7 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 -(id) initWithType:(NSString*) iqType;
 -(id) initWithType:(NSString*) iqType to:(NSString*) to;
 -(id) initAsResponseTo:(XMPPIQ*) iq;
+-(id) initAsErrorTo:(XMPPIQ*) iq;
 
 -(void) setRegisterOnAppserverWithToken:(NSString*) token;
 -(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid;

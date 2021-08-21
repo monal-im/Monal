@@ -61,6 +61,9 @@
         [discoInfoResponse setDiscoInfoWithFeatures:account.capsFeatures identity:account.capsIdentity andNode:[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query@node"]];
         [account send:discoInfoResponse];
     }
+    
+    DDLogWarn(@"Got unhandled get IQ: %@", iqNode);
+    [self respondWithErrorTo:iqNode onAccount:account];
 }
 
 +(void) processSetIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
@@ -105,6 +108,9 @@
         // notify the views
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
     }
+    
+    DDLogWarn(@"Got unhandled set IQ: %@", iqNode);
+    [self respondWithErrorTo:iqNode onAccount:account];
 }
 
 +(void) processResultIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
@@ -113,6 +119,11 @@
     //WARNING: be careful adding other stateless result handlers (those can impose security risks!)
     if([iqNode check:@"{jabber:iq:version}query"])
         [self iqVersionResult:iqNode forAccount:account];
+        return;
+    }
+    
+    DDLogWarn(@"Got unhandled result IQ: %@", iqNode);
+    [self respondWithErrorTo:iqNode onAccount:account];
 }
 
 +(void) processErrorIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
@@ -572,6 +583,15 @@ $$
                                                                          @"fromResource":iqNode.fromResource}];
         }
     }
+}
+
++(void) respondWithErrorTo:(XMPPIQ*) iqNode onAccount:(xmpp*) account
+{
+    XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+    [errorIq addChild:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"service-unavailable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+    ] andData:nil]];
+    [account send:errorIq];
 }
 
 @end

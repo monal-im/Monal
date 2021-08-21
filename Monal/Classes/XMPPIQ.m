@@ -132,7 +132,7 @@ NSString* const kiqErrorType = @"error";
 -(void) setiqTo:(NSString*) to
 {
     if(to)
-        [self.attributes setObject:to forKey:@"to"];
+        self.to = to;
 }
 
 -(void) setPing

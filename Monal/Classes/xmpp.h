@@ -217,8 +217,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) publishStatusMessage:(NSString*) message;
 -(void) delayIncomingMessageStanzasForArchiveJid:(NSString*) archiveJid;
 
-+(NSDictionary*) invalidateState:(NSDictionary*) dic;
-
++(NSMutableDictionary*) invalidateState:(NSDictionary*) dic;
+-(void) updateIqHandlerTimeouts;
 
 @end
 

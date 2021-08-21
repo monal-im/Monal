@@ -265,6 +265,10 @@ void logException(NSException* exception)
         while(counter++)
         {
             DDLogInfo(@"activity(%@): %lu", appex ? @"APPEX" : @"MAINAPP", counter);
+            //trigger iq invalidations from this background thread because timeouts aren't time critical
+            //we use this to decrement the timeout value of an iq handler every second until it reaches zero
+            for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
+                [account updateIqHandlerTimeouts];
             [NSThread sleepForTimeInterval:1];
         }
     });

@@ -45,6 +45,7 @@
         XMPPIQ* pong = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [pong setiqTo:iqNode.from];
         [account send:pong];
+        return;
     }
     
     if([iqNode check:@"{jabber:iq:version}query"])
@@ -53,6 +54,7 @@
         [versioniq setiqTo:iqNode.from];
         [versioniq setVersion];
         [account send:versioniq];
+        return;
     }
     
     if([iqNode check:@"{http://jabber.org/protocol/disco#info}query"])
@@ -60,6 +62,7 @@
         XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [discoInfoResponse setDiscoInfoWithFeatures:account.capsFeatures identity:account.capsIdentity andNode:[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query@node"]];
         [account send:discoInfoResponse];
+        return;
     }
     
     DDLogWarn(@"Got unhandled get IQ: %@", iqNode);
@@ -77,10 +80,12 @@
         XMPPIQ* reply = [[XMPPIQ alloc] initAsResponseTo:iqNode];
         [reply setiqTo:iqNode.from];
         [account send:reply];
+        return;
     }
 
     if(account.connectionProperties.supportsBlocking)
     {
+        BOOL blockingUpdated = NO;
         // mark jid as unblocked
         if([iqNode check:@"{urn:xmpp:blocking}unblock"])
         {
@@ -95,6 +100,7 @@
                 // remove all blocks
                 [account updateLocalBlocklistCache:[[NSSet<NSString*> alloc] init]];
             }
+            blockingUpdated = YES;
         }
         // mark jid as blocked
         if([iqNode check:@"{urn:xmpp:blocking}block"])
@@ -104,9 +110,14 @@
                 if(item && item[@"jid"])
                     [[DataLayer sharedInstance] blockJid:item[@"jid"] withAccountNo:account.accountNo];
             }
+            blockingUpdated = YES;
         }
-        // notify the views
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
+        if(blockingUpdated)
+        {
+            // notify the views
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
+            return;
+        }
     }
     
     DDLogWarn(@"Got unhandled set IQ: %@", iqNode);
@@ -118,6 +129,7 @@
     //this is the only iq result that does not need any state
     //WARNING: be careful adding other stateless result handlers (those can impose security risks!)
     if([iqNode check:@"{jabber:iq:version}query"])
+    {
         [self iqVersionResult:iqNode forAccount:account];
         return;
     }
@@ -128,7 +140,7 @@
 
 +(void) processErrorIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    DDLogWarn(@"Got unhandled IQ error: %@", iqNode);
+    DDLogWarn(@"Got unhandled error IQ: %@", iqNode);
 }
 
 $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))

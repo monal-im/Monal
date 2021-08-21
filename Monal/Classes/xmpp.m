@@ -46,8 +46,9 @@
 
 @import AVFoundation;
 
-#define STATE_VERSION 3
+#define STATE_VERSION 4
 #define CONNECT_TIMEOUT 8.0
+#define IQ_TIMEOUT 20.0
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";
 
@@ -341,7 +342,7 @@ NSString* const kStanza = @"stanza";
 {
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
-        DDLogVerbose(@"DISPATCHING %@ OPERATION ON RECEIVE QUEUE: %lu", async ? @"ASYNC" : @"*sync*", [_receiveQueue operationCount]);
+        DDLogVerbose(@"DISPATCHING %@ OPERATION ON RECEIVE QUEUE %@: %lu", async ? @"ASYNC" : @"*sync*", [_receiveQueue name], [_receiveQueue operationCount]);
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:!async];
     }
     else
@@ -738,8 +739,8 @@ NSString* const kStanza = @"stanza";
                         for(NSString* iqid in [self->_iqHandlers allKeys])
                         {
                             DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-                            if([self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
-                                $invalidate(self->_iqHandlers[iqid], $ID(account, self));
+                            if(self->_iqHandlers[iqid][@"handler"] != nil)
+                                $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self));
                             else if(self->_iqHandlers[iqid][@"errorHandler"])
                                 ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                         }
@@ -761,7 +762,7 @@ NSString* const kStanza = @"stanza";
         @synchronized(self->_iqHandlers) {
             for(NSString* iqid in [self->_iqHandlers allKeys])
             {
-                if(![self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+                if(self->_iqHandlers[iqid][@"handler"] == nil)
                 {
                     NSDictionary* data = (NSDictionary*)self->_iqHandlers[iqid];
                     if(data[@"errorHandler"])
@@ -812,8 +813,8 @@ NSString* const kStanza = @"stanza";
                     for(NSString* iqid in [self->_iqHandlers allKeys])
                     {
                         DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-                        if([self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
-                            $invalidate(self->_iqHandlers[iqid], $ID(account, self));
+                        if(self->_iqHandlers[iqid][@"handler"] != nil)
+                            $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self));
                         else if(self->_iqHandlers[iqid][@"errorHandler"])
                             ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                     }
@@ -1011,7 +1012,7 @@ NSString* const kStanza = @"stanza";
                         DDLogVerbose(@"Starting transaction for: %@", parsedStanza);
                         [[DataLayer sharedInstance] createTransaction:^{
                             DDLogVerbose(@"Started transaction for: %@", parsedStanza);
-                            [self processInput:parsedStanza];
+                            [self processInput:parsedStanza withDelayedReplay:NO];
                             DDLogVerbose(@"Ending transaction for: %@", parsedStanza);
                         }];
                         DDLogVerbose(@"Ended transaction for: %@", parsedStanza);
@@ -1327,11 +1328,6 @@ NSString* const kStanza = @"stanza";
 }
 
 #pragma mark - stanza handling
-
--(void) processInput:(MLXMLNode*) parsedStanza
-{
-    [self processInput:parsedStanza withDelayedReplay:NO];
-}
 
 -(void) processInput:(MLXMLNode*) parsedStanza withDelayedReplay:(BOOL) delayedReplay
 {
@@ -1690,14 +1686,14 @@ NSString* const kStanza = @"stanza";
                 [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/@id"]];
             
             //process registered iq handlers
-            id iqHandler = nil;
+            NSMutableDictionary* iqHandler = nil;
             @synchronized(_iqHandlers) {
                 iqHandler = _iqHandlers[[iqNode findFirst:@"/@id"]];
             }
             if(iqHandler)
             {
-                if([iqHandler isKindOfClass:[MLHandler class]])
-                    $call(iqHandler, $ID(account, self), $ID(iqNode));
+                if(iqHandler[@"handler"] != nil)
+                    $call(iqHandler[@"handler"], $ID(account, self), $ID(iqNode));
                 else if([iqNode check:@"/<type=result>"] && iqHandler[@"resultHandler"])
                     ((monal_iq_handler_t) iqHandler[@"resultHandler"])(iqNode);
                 else if([iqNode check:@"/<type=error>"] && iqHandler[@"errorHandler"])
@@ -2042,7 +2038,7 @@ NSString* const kStanza = @"stanza";
 {
     if(resultHandler || errorHandler)
         @synchronized(_iqHandlers) {
-            _iqHandlers[iq.id] = @{@"id":iq.id, @"resultHandler":resultHandler, @"errorHandler":errorHandler};
+            _iqHandlers[iq.id] = [@{@"iq":iq, @"timeout":@(IQ_TIMEOUT), @"resultHandler":resultHandler, @"errorHandler":errorHandler} mutableCopy];
         }
     [self send:iq];
 }
@@ -2053,7 +2049,7 @@ NSString* const kStanza = @"stanza";
     {
         DDLogVerbose(@"Adding %@ to iqHandlers...", handler);
         @synchronized(_iqHandlers) {
-            _iqHandlers[iq.id] = handler;
+            _iqHandlers[iq.id] = [@{@"iq":iq, @"timeout":@(IQ_TIMEOUT), @"handler":handler} mutableCopy];
         }
     }
     [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
@@ -2220,10 +2216,14 @@ NSString* const kStanza = @"stanza";
         [values setValue:self.streamID forKey:@"streamID"];
 
         NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
+        NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
         @synchronized(_iqHandlers) {
             for(NSString* iqid in _iqHandlers)
-                if([_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+                if(_iqHandlers[iqid][@"handler"] != nil)
+                {
                     persistentIqHandlers[iqid] = _iqHandlers[iqid];
+                    persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", _iqHandlers[iqid][@"timeout"], _iqHandlers[iqid][@"handler"]];
+                }
         }
         [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
 
@@ -2272,7 +2272,7 @@ NSString* const kStanza = @"stanza";
             self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
             self.streamID,
             _lastInteractionDate,
-            persistentIqHandlers,
+            persistentIqHandlerDescriptions,
             self.connectionProperties.supportsPush,
             self.connectionProperties.supportsHTTPUpload,
             self.connectionProperties.pushEnabled,
@@ -2291,6 +2291,13 @@ NSString* const kStanza = @"stanza";
         NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
         if(dic)
         {
+            //check state version
+            if([dic[@"VERSION"] intValue] != STATE_VERSION)
+            {
+                DDLogWarn(@"Account state upgraded from %@ to %d, invalidating state...", dic[@"VERSION"], STATE_VERSION);
+                dic = [[self class] invalidateState:dic];
+            }
+            
             //collect smacks state
             self.lastHandledInboundStanza = [dic objectForKey:@"lastHandledInboundStanza"];
             self.lastHandledOutboundStanza = [dic objectForKey:@"lastHandledOutboundStanza"];
@@ -2311,6 +2318,11 @@ NSString* const kStanza = @"stanza";
                 }
             }
             
+            //the list of mam queryids is closely coupled with smacks state (it records mam queryids of outgoing stanzas)
+            //--> load them even when loading smacks state only
+            if([dic objectForKey:@"runningMamQueries"])
+                _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
+            
             //debug output
             DDLogVerbose(@"%@ --> readSmacksStateOnly(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
                 self.accountNo,
@@ -2325,21 +2337,10 @@ NSString* const kStanza = @"stanza";
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
                     DDLogDebug(@"readSmacksStateOnly unAckedStanza %@: %@", [dic objectForKey:kQueueID], [dic objectForKey:kStanza]);
-            
-            if([dic[@"VERSION"] intValue] != STATE_VERSION)
-            {
-                DDLogWarn(@"Account state upgraded from %@ to %d, invalidating smacks streamID...", dic[@"VERSION"], STATE_VERSION);
-                self.streamID = nil;
-            }
         }
         //always reset handler and smacksRequestInFlight when loading smacks state
         _smacksAckHandler = [[NSMutableArray alloc] init];
         self.smacksRequestInFlight = NO;
-        
-        //the list of mam queryids is closely coupled with smacks state (it records mam queryids of outgoing stanzas)
-        //--> load them even when loading smacks state only
-        if([dic objectForKey:@"runningMamQueries"])
-            _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
     }
 }
 
@@ -2349,6 +2350,13 @@ NSString* const kStanza = @"stanza";
         NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
         if(dic)
         {
+            //check state version
+            if([dic[@"VERSION"] intValue] != STATE_VERSION)
+            {
+                DDLogWarn(@"Account state upgraded from %@ to %d, invalidating state...", dic[@"VERSION"], STATE_VERSION);
+                dic = [[self class] invalidateState:dic];
+            }
+            
             //collect smacks state
             self.lastHandledInboundStanza = [dic objectForKey:@"lastHandledInboundStanza"];
             self.lastHandledOutboundStanza = [dic objectForKey:@"lastHandledOutboundStanza"];
@@ -2370,9 +2378,13 @@ NSString* const kStanza = @"stanza";
             }
             
             NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
+            NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
             @synchronized(_iqHandlers) {
                 for(NSString* iqid in persistentIqHandlers)
-                    _iqHandlers[iqid] = persistentIqHandlers[iqid];
+                {
+                    _iqHandlers[iqid] = [persistentIqHandlers[iqid] mutableCopy];
+                    persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", persistentIqHandlers[iqid][@"timeout"], persistentIqHandlers[iqid][@"handler"]];
+                }
             }
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
@@ -2486,7 +2498,7 @@ NSString* const kStanza = @"stanza";
                 self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
                 self.streamID,
                 _lastInteractionDate,
-                persistentIqHandlers,
+                persistentIqHandlerDescriptions,
                 self.connectionProperties.supportsPush,
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
@@ -2499,12 +2511,6 @@ NSString* const kStanza = @"stanza";
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
                     DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kQueueID], [dic objectForKey:kStanza]);
-            
-            if([dic[@"VERSION"] intValue] != STATE_VERSION)
-            {
-                DDLogWarn(@"Account state upgraded from %@ to %d, invalidating smacks streamID...", dic[@"VERSION"], STATE_VERSION);
-                self.streamID = nil;
-            }
         }
         
         //always reset handler and smacksRequestInFlight when loading smacks state
@@ -2513,7 +2519,7 @@ NSString* const kStanza = @"stanza";
     }
 }
 
-+(NSDictionary*) invalidateState:(NSDictionary*) dic
++(NSMutableDictionary*) invalidateState:(NSDictionary*) dic
 {
     NSArray* toKeep = @[@"lastHandledInboundStanza", @"lastHandledOutboundStanza", @"lastOutboundStanza", @"unAckedStanzas", @"loggedInOnce", @"lastInteractionDate", @"inCatchup", @"delayedMessageStanzas"];
     
@@ -2651,8 +2657,8 @@ NSString* const kStanza = @"stanza";
         for(NSString* iqid in handlersCopy)
         {
             DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-            if([handlersCopy[iqid] isKindOfClass:[MLHandler class]])
-                $invalidate(handlersCopy[iqid], $ID(account, self));
+            if(handlersCopy[iqid][@"handler"] != nil)
+                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self));
             else if(handlersCopy[iqid][@"errorHandler"])
                 ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
         }
@@ -3501,6 +3507,63 @@ NSString* const kStanza = @"stanza";
     else
     {
         DDLogInfo(@"NOT registering and enabling push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+    }
+}
+
+-(void) updateIqHandlerTimeouts
+{
+    //only handle iq timeouts while the parseQueue is almost empty
+    //(a long backlog in the parse queue could trigger spurious iq timeouts for iqs we already received an answer to, but didn't process it yet)
+    if([_parseQueue operationCount] > 4)
+        return;
+    
+    @synchronized(_iqHandlers) {
+        //we are NOT mutating on iteration here, because we use dispatchAsyncOnReceiveQueue to handle timeouts
+        for(NSString* iqid in _iqHandlers)
+        {
+            //decrement handler timeout every second and check if it landed below zero --> trigger a fake iq error to handle timeout
+            //this makes sure a freeze/killed app doesn't immediately trigger timeouts once the app is restarted, as it would be with timestamp based timeouts
+            //doing it this way makes sure the incoming iq result has a chance to be processed even in a freeze/kill scenario
+            _iqHandlers[iqid][@"timeout"] = @([_iqHandlers[iqid][@"timeout"] doubleValue] - 1.0);
+            if([_iqHandlers[iqid][@"timeout"] doubleValue] < 0)
+            {
+                DDLogWarn(@"Timeout of handler triggered: %@", _iqHandlers[iqid]);
+                
+                //fake xmpp stanza error to make timeout handling transparent without the need for invalidation handler
+                //we need to fake the from, too (no from means own bare jid)
+                XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:_iqHandlers[iqid][@"iq"]];
+                errorIq.to = self.connectionProperties.identity.fullJid;
+                if([_iqHandlers[iqid][@"iq"] to] != nil)
+                    errorIq.from = [_iqHandlers[iqid][@"iq"] to];
+                else
+                    errorIq.from = self.connectionProperties.identity.jid;
+                [errorIq addChild:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"remote-server-timeout" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+                    [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"No response in %d seconds", (int)IQ_TIMEOUT]],
+                ] andData:nil]];
+                
+                //make sure our fake error iq is handled inside the receiveQueue
+                [self dispatchAsyncOnReceiveQueue:^{
+                    //extract this from _iqHandlers to make sure we only handle iqs didn't get handled in the meantime
+                    NSMutableDictionary* iqHandler = nil;
+                    @synchronized(_iqHandlers) {
+                        iqHandler = _iqHandlers[iqid];
+                    }
+                    if(iqHandler)
+                    {
+                        if(iqHandler[@"handler"] != nil)
+                            $call(iqHandler[@"handler"], $ID(account, self), $ID(errorIq));
+                        else if(iqHandler[@"errorHandler"] != nil)
+                            ((monal_iq_handler_t) iqHandler[@"errorHandler"])(errorIq);
+                        
+                        //remove handler after calling it
+                        @synchronized(_iqHandlers) {
+                            [_iqHandlers removeObjectForKey:iqid];
+                        }
+                    }
+                }];
+            }
+        }
     }
 }
 

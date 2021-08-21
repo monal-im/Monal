@@ -1361,6 +1361,15 @@ NSString* const kStanza = @"stanza";
         {
             XMPPPresence* presenceNode = (XMPPPresence*)parsedStanza;
             
+            //sanity: check if presence from and to attributes are valid and throw it away if not
+            if((presenceNode.attributes[@"from"] && [@"" isEqualToString:presenceNode.attributes[@"from"]]) || (presenceNode.attributes[@"to"] && [@"" isEqualToString:presenceNode.attributes[@"to"]]))
+            {
+                DDLogError(@"sanity check failed for presence node, ignoring presence: %@", presenceNode);
+                //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
+                [self incrementLastHandledStanza];
+                return;
+            }
+            
             //sanitize: no from or to always means own bare/full jid
             if(!presenceNode.from)
                 presenceNode.from = self.connectionProperties.identity.jid;
@@ -1520,6 +1529,15 @@ NSString* const kStanza = @"stanza";
             XMPPMessage* outerMessageNode = (XMPPMessage*)parsedStanza;
             XMPPMessage* messageNode = outerMessageNode;
             
+            //sanity: check if outer message from and to attributes are valid and throw it away if not
+            if((outerMessageNode.attributes[@"from"] && [@"" isEqualToString:outerMessageNode.attributes[@"from"]]) || (outerMessageNode.attributes[@"to"] && [@"" isEqualToString:outerMessageNode.attributes[@"to"]]))
+            {
+                DDLogError(@"sanity check failed for outer message node, ignoring message: %@", outerMessageNode);
+                //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
+                [self incrementLastHandledStanza];
+                return;
+            }
+            
             //sanitize outer node: no from or to always means own bare/full jid
             if(!outerMessageNode.from)
                 outerMessageNode.from = self.connectionProperties.identity.jid;
@@ -1534,6 +1552,7 @@ NSString* const kStanza = @"stanza";
                 [self incrementLastHandledStanza];
                 return;
             }
+            
             //extract inner message if mam result or carbon copy
             //the original "outer" message will be kept in outerMessageNode while the forwarded stanza will be stored in messageNode
             if([outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
@@ -1550,6 +1569,7 @@ NSString* const kStanza = @"stanza";
                         return;
                     }
                 }
+                
                 //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
                 messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
                 
@@ -1569,6 +1589,7 @@ NSString* const kStanza = @"stanza";
                     [self incrementLastHandledStanza];
                     return;
                 }
+                
                 //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
                 messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:carbons:2}*/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
                 
@@ -1578,6 +1599,15 @@ NSString* const kStanza = @"stanza";
                     [messageNode addChild:[outerMessageNode findFirst:@"{urn:xmpp:delay}delay"]];
                 
                 DDLogDebug(@"carbon extracted, messageNode is now: %@", messageNode);
+            }
+            
+            //sanity: check if inner message from and to attributes are valid and throw it away if not
+            if((messageNode.attributes[@"from"] && [@"" isEqualToString:messageNode.attributes[@"from"]]) || (messageNode.attributes[@"to"] && [@"" isEqualToString:messageNode.attributes[@"to"]]))
+            {
+                DDLogError(@"sanity check failed for outer message node, ignoring message: %@", outerMessageNode);
+                //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
+                [self incrementLastHandledStanza];
+                return;
             }
             
             //sanitize inner node: no from or to always means own bare jid
@@ -1662,6 +1692,15 @@ NSString* const kStanza = @"stanza";
         else if([parsedStanza check:@"/{jabber:client}iq"])
         {
             XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
+            
+            //sanity: check if iq from and to attributes are valid and throw it away if not
+            if((iqNode.attributes[@"from"] && [@"" isEqualToString:iqNode.attributes[@"from"]]) || (iqNode.attributes[@"to"] && [@"" isEqualToString:iqNode.attributes[@"to"]]))
+            {
+                DDLogError(@"sanity check failed for iq node, ignoring iq: %@", iqNode);
+                //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
+                [self incrementLastHandledStanza];
+                return;
+            }
             
             //sanitize: no from or to always means own bare jid
             if(!iqNode.from)

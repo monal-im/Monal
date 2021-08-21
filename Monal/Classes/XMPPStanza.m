@@ -38,11 +38,14 @@
     }
 }
 
--(void) setFrom:(NSString*) from
+-(void) setFrom:(NSString* _Nullable) from
 {
     NSDictionary* jid = [HelperTools splitJid:from];
     @synchronized(self.attributes) {
-        self.attributes[@"from"] = [NSString stringWithFormat:@"%@%@", jid[@"user"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
+        if(from != nil)
+            self.attributes[@"from"] = [NSString stringWithFormat:@"%@%@", jid[@"user"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
+        else
+            [self.attributes removeObjectForKey:@"from"];
     }
 }
 -(NSString*) from
@@ -56,11 +59,14 @@
     return [NSString stringWithFormat:@"%@%@", jid[@"user"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
 }
 
--(void) setFromUser:(NSString*) user
+-(void) setFromUser:(NSString* _Nullable) user
 {
     @synchronized(self.attributes) {
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"from"]];
-        self.attributes[@"from"] = [NSString stringWithFormat:@"%@%@", [user lowercaseString], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
+        if(user == nil)
+            [self.attributes removeObjectForKey:@"from"];
+        else
+            self.attributes[@"from"] = [NSString stringWithFormat:@"%@%@", [user lowercaseString], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
     }
 }
 -(NSString*) fromUser
@@ -73,11 +79,16 @@
     }
 }
 
--(void) setFromNode:(NSString*) node
+-(void) setFromNode:(NSString* _Nullable) node
 {
+    if(!self.attributes[@"from"])
+        return;
     @synchronized(self.attributes) {
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"from"]];
-        self.attributes[@"from"] = [NSString stringWithFormat:@"%@@%@%@", node, jid[@"host"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
+        if(node == nil)
+            self.attributes[@"from"] = [NSString stringWithFormat:@"%@%@", jid[@"host"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
+        else
+            self.attributes[@"from"] = [NSString stringWithFormat:@"%@@%@%@", node, jid[@"host"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
     }
 }
 -(NSString*) fromNode
@@ -90,11 +101,13 @@
     }
 }
 
--(void) setFromHost:(NSString*) host
+-(void) setFromHost:(NSString* _Nullable) host
 {
     @synchronized(self.attributes) {
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"from"]];
-        if(jid[@"node"])
+        if(host == nil)
+            [self.attributes removeObjectForKey:@"from"];
+        else if(jid[@"node"])
             self.attributes[@"from"] = [NSString stringWithFormat:@"%@@%@%@", jid[@"node"], [host lowercaseString], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
         else
             self.attributes[@"from"] = [NSString stringWithFormat:@"%@%@", [host lowercaseString], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
@@ -114,7 +127,8 @@
 {
     @synchronized(self.attributes) {
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"from"]];
-        self.attributes[@"from"] = [NSString stringWithFormat:@"%@%@", jid[@"user"], resource && ![resource isEqualToString:@""] ? [NSString stringWithFormat:@"/%@", resource] : @""];
+        if(jid[@"user"])
+            self.attributes[@"from"] = [NSString stringWithFormat:@"%@%@", jid[@"user"], resource && ![resource isEqualToString:@""] ? [NSString stringWithFormat:@"/%@", resource] : @""];
     }
 }
 -(NSString*) fromResource
@@ -127,11 +141,14 @@
     }
 }
 
--(void) setTo:(NSString*) to
+-(void) setTo:(NSString* _Nullable) to
 {
     NSDictionary* jid = [HelperTools splitJid:to];
     @synchronized(self.attributes) {
-        self.attributes[@"to"] = [NSString stringWithFormat:@"%@%@", jid[@"user"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
+        if(to != nil)
+            self.attributes[@"to"] = [NSString stringWithFormat:@"%@%@", jid[@"user"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
+        else
+            [self.attributes removeObjectForKey:@"to"];
     }
 }
 -(NSString*) to
@@ -145,11 +162,14 @@
     return [NSString stringWithFormat:@"%@%@", jid[@"user"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
 }
 
--(void) setToUser:(NSString*) user
+-(void) setToUser:(NSString* _Nullable) user
 {
     @synchronized(self.attributes) {
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"to"]];
-        self.attributes[@"to"] = [NSString stringWithFormat:@"%@%@", [user lowercaseString], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
+        if(user == nil)
+            [self.attributes removeObjectForKey:@"to"];
+        else
+            self.attributes[@"to"] = [NSString stringWithFormat:@"%@%@", [user lowercaseString], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
     }
 }
 -(NSString*) toUser
@@ -162,11 +182,14 @@
     }
 }
 
--(void) setToNode:(NSString*) node
+-(void) setToNode:(NSString* _Nullable) node
 {
     @synchronized(self.attributes) {
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"to"]];
-        self.attributes[@"to"] = [NSString stringWithFormat:@"%@@%@%@", [node lowercaseString], jid[@"host"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
+        if(node == nil)
+            self.attributes[@"to"] = [NSString stringWithFormat:@"%@%@", jid[@"host"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
+        else
+            self.attributes[@"to"] = [NSString stringWithFormat:@"%@@%@%@", [node lowercaseString], jid[@"host"], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
     }
 }
 -(NSString*) toNode
@@ -179,11 +202,13 @@
     }
 }
 
--(void) setToHost:(NSString*) host
+-(void) setToHost:(NSString* _Nullable) host
 {
     @synchronized(self.attributes) {
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"to"]];
-        if(jid[@"node"])
+        if(host == nil)
+            [self.attributes removeObjectForKey:@"from"];
+        else if(jid[@"node"])
             self.attributes[@"to"] = [NSString stringWithFormat:@"%@@%@%@", jid[@"node"], [host lowercaseString], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
         else
             self.attributes[@"to"] = [NSString stringWithFormat:@"%@%@", [host lowercaseString], jid[@"resource"] ? [NSString stringWithFormat:@"/%@", jid[@"resource"]] : @""];
@@ -203,7 +228,8 @@
 {
     @synchronized(self.attributes) {
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"to"]];
-        self.attributes[@"to"] = [NSString stringWithFormat:@"%@%@", jid[@"user"], resource && ![resource isEqualToString:@""] ? [NSString stringWithFormat:@"/%@", resource] : @""];
+        if(jid[@"user"])
+            self.attributes[@"to"] = [NSString stringWithFormat:@"%@%@", jid[@"user"], resource && ![resource isEqualToString:@""] ? [NSString stringWithFormat:@"/%@", resource] : @""];
     }
 }
 -(NSString*) toResource

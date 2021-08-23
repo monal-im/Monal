@@ -2763,6 +2763,15 @@ static NSDateFormatter* dbFormatter;
             //we use -1because all queries using this test for message_history_id > this field, not >=
             [self.db executeNonQuery:@"ALTER TABLE 'buddylist' ADD COLUMN 'latest_read_message_history_id' INTEGER NOT NULL DEFAULT -1;"];
         }];
+        
+        [self updateDBTo:5.102 withBlock:^{
+            //make sure the latest_read_message_history_id is filled with correct initial values
+            [self.db executeNonQuery:@"UPDATE buddylist AS b SET latest_read_message_history_id=IFNULL((\
+                SELECT message_history_id FROM message_history AS h\
+                    WHERE h.account_id=b.account_id AND h.buddy_name=b.buddy_name AND unread=1 AND inbound=1\
+                    ORDER BY message_history_id ASC LIMIT 1\
+            )-1, -1);"];
+        }];
     }];
     
     // Vacuum after db updates

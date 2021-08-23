@@ -1605,7 +1605,11 @@ static NSDateFormatter* dbFormatter;
             if(outgoing)
                 [self.db executeNonQuery:@"UPDATE message_history SET displayed=1 WHERE message_history_id=? AND received=1;" andArguments:@[historyIDEntry]];
             else
+            {
                 [self.db executeNonQuery:@"UPDATE message_history SET unread=0 WHERE message_history_id=?;" andArguments:@[historyIDEntry]];
+                //make sure the latest_read_message_history_id field in our buddylist is updated
+                [self.db executeNonQuery:@"UPDATE buddylist SET latest_read_message_history_id=? WHERE account_id=? AND buddy_name=?;" andArguments:@[historyIDEntry, accountNo, buddy]];
+            }
         }
         
         //return NSArray of all updated MLMessages
@@ -1649,15 +1653,8 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         // count # of msgs in message table
-        return [self.db executeScalar:@"SELECT COUNT(M.message_history_id) FROM message_history AS M INNER JOIN buddylist AS B ON M.account_id=B.account_id AND M.buddy_name=B.buddy_name WHERE M.unread=1 AND M.inbound=1 AND B.muted=0;"];
-    }];
-}
-
-//set all unread messages to read
--(void) setAllMessagesAsRead
-{
-    [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"UPDATE message_history SET unread=0 WHERE unread=1;"];
+        NSNumber* lowest_unread = [self.db executeScalar:@"SELECT MIN(latest_read_message_history_id) FROM buddylist;"];
+        return [self.db executeScalar:@"SELECT COUNT(M.message_history_id) FROM message_history AS M INNER JOIN buddylist AS B ON M.account_id=B.account_id AND M.buddy_name=B.buddy_name WHERE M.unread=1 AND M.inbound=1 AND B.muted=0 AND M.message_history_id>?;" andArguments:@[lowest_unread]];
     }];
 }
 
@@ -1702,8 +1699,13 @@ static NSDateFormatter* dbFormatter;
     [self.db voidWriteTransaction:^{
         //mark all messages as read
         [self.db executeNonQuery:@"UPDATE message_history SET unread=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname]];
+        //make sure the latest_read_message_history_id field in our buddylist is updated
+        //(we use the newest history entry for this buddyname here)
+        [self.db executeNonQuery:@"UPDATE buddylist SET latest_read_message_history_id=(\
+            SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND inbound=1 ORDER BY message_history_id DESC LIMIT 1\
+        ) WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname, accountNo, buddyname]];
         //remove contact from active chats list
-        [self.db executeNonQuery:@"DELETE FROM activechats WHERE buddy_name=? AND account_id=?;" andArguments:@[buddyname, accountNo]];
+        [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname]];
     }];
 }
 
@@ -1788,7 +1790,7 @@ static NSDateFormatter* dbFormatter;
         return @0;
     return [self.db idReadTransaction:^{
         // count # messages from a specific user in messages table
-        return [self.db executeScalar:@"SELECT COUNT(message_history_id) FROM message_history WHERE unread=1 AND account_id=? AND buddy_name=? AND inbound=1;" andArguments:@[accountNo, buddy]];
+        return [self.db executeScalar:@"SELECT COUNT(message_history_id) FROM message_history AS h LEFT JOIN buddylist AS b ON h.account_id=b.account_id AND h.buddy_name=b.buddy_name WHERE h.message_history_id > b.latest_read_message_history_id AND h.unread=1 AND h.account_id=? AND h.buddy_name=? AND h.inbound=1;" andArguments:@[accountNo, buddy]];
     }];
 }
 
@@ -2754,6 +2756,12 @@ static NSDateFormatter* dbFormatter;
             );"];
             [[HelperTools defaultsDB] removeObjectForKey:@"outbox"];
             [[HelperTools defaultsDB] synchronize];
+        }];
+        
+        [self updateDBTo:5.101 withBlock:^{
+            //save the smallest unread id for faster retrieval of unread message count per contact
+            //we use -1because all queries using this test for message_history_id > this field, not >=
+            [self.db executeNonQuery:@"ALTER TABLE 'buddylist' ADD COLUMN 'latest_read_message_history_id' INTEGER NOT NULL DEFAULT -1;"];
         }];
     }];
     

@@ -231,8 +231,6 @@ extern NSString* const kMessageTypeFiletransfer;
 #pragma mark count unread
 -(NSNumber*) countUserUnreadMessages:(NSString* _Nullable) buddy forAccount:(NSString* _Nullable) accountNo;
 -(NSNumber*) countUnreadMessages;
-//set all unread messages to read
--(void) setAllMessagesAsRead;
 
 -(void) muteJid:(NSString*) jid onAccount:(NSString*) accountNo;
 -(void) unMuteJid:(NSString*) jid onAccount:(NSString*) accountNo;

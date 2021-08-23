@@ -89,7 +89,7 @@
             DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
             [DDLog flushLog];
             [self feedAllWaitingHandlersWithCompletion:^{
-                //now call this new handler we did not add to our handlerList
+                //now call this new handler we did not add to our handlerList (don't update unread badge, because this needs the database potentially locked by mainapp)
                 [self generateNotificationForHandler:contentHandler];
             }];
             
@@ -206,9 +206,6 @@
     //this is used with special extension filtering entitlement which does not show notifications with empty body, title and subtitle
     //but: app badge updates are still performed: use this to make sure the badge is up to date, even if a message got marked as read (by XEP-0333 etc.)
     UNMutableNotificationContent* emptyContent = [[UNMutableNotificationContent alloc] init];
-    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
-    DDLogInfo(@"Updating unread badge to: %@", unreadMsgCnt);
-    emptyContent.badge = unreadMsgCnt;
     if(handler)
         handler(emptyContent);
     return emptyContent;

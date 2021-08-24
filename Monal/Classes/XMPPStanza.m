@@ -97,7 +97,7 @@
         if(!self.attributes[@"from"])
             return nil;
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"from"]];
-        return [jid[@"node"] lowercaseString];
+        return jid[@"node"];
     }
 }
 
@@ -119,7 +119,7 @@
         if(!self.attributes[@"from"])
             return nil;
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"from"]];
-        return [jid[@"host"] lowercaseString];
+        return jid[@"host"];
     }
 }
 
@@ -178,7 +178,7 @@
         if(!self.attributes[@"to"])
             return nil;
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"to"]];
-        return [jid[@"user"] lowercaseString];
+        return jid[@"user"];
     }
 }
 
@@ -198,7 +198,7 @@
         if(!self.attributes[@"to"])
             return nil;
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"to"]];
-        return [jid[@"node"] lowercaseString];
+        return jid[@"node"];
     }
 }
 
@@ -220,7 +220,7 @@
         if(!self.attributes[@"to"])
             return nil;
         NSDictionary* jid = [HelperTools splitJid:self.attributes[@"to"]];
-        return [jid[@"host"] lowercaseString];
+        return jid[@"host"];
     }
 }
 

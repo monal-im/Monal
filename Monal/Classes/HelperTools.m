@@ -126,19 +126,18 @@ void logException(NSException* exception)
     else
         retval[@"host"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
     
-    //cleanup empty strings
-    if([retval[@"user"] isEqualToString:@""])
-        [retval removeObjectForKey:@"user"];
-    if([retval[@"node"] isEqualToString:@""])
-        [retval removeObjectForKey:@"node"];
+    //log sanity check errors (this checks 'host' and 'user'at once because without node host==user)
     if([retval[@"host"] isEqualToString:@""])
-        [retval removeObjectForKey:@"host"];
+        DDLogError(@"jid '%@' has no host part!", jid);
+    
+    //sanitize retval
+    if([retval[@"node"] isEqualToString:@""])
+    {
+        [retval removeObjectForKey:@"node"];
+        retval[@"user"] = retval[@"host"];      //empty node means user==host
+    }
     if([retval[@"resource"] isEqualToString:@""])
         [retval removeObjectForKey:@"resource"];
-    
-    //log sanity check errors
-    if(retval[@"host"] == nil)
-        DDLogError(@"jid '%@' has no host part!", jid);
     
     return retval;
 }

@@ -1362,7 +1362,7 @@ NSString* const kStanza = @"stanza";
             XMPPPresence* presenceNode = (XMPPPresence*)parsedStanza;
             
             //sanity: check if presence from and to attributes are valid and throw it away if not
-            if((presenceNode.attributes[@"from"] && [@"" isEqualToString:presenceNode.attributes[@"from"]]) || (presenceNode.attributes[@"to"] && [@"" isEqualToString:presenceNode.attributes[@"to"]]))
+            if([@"" isEqualToString:presenceNode.from] || [@"" isEqualToString:presenceNode.to])
             {
                 DDLogError(@"sanity check failed for presence node, ignoring presence: %@", presenceNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
@@ -1530,7 +1530,7 @@ NSString* const kStanza = @"stanza";
             XMPPMessage* messageNode = outerMessageNode;
             
             //sanity: check if outer message from and to attributes are valid and throw it away if not
-            if((outerMessageNode.attributes[@"from"] && [@"" isEqualToString:outerMessageNode.attributes[@"from"]]) || (outerMessageNode.attributes[@"to"] && [@"" isEqualToString:outerMessageNode.attributes[@"to"]]))
+            if([@"" isEqualToString:outerMessageNode.from] || [@"" isEqualToString:outerMessageNode.to])
             {
                 DDLogError(@"sanity check failed for outer message node, ignoring message: %@", outerMessageNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
@@ -1602,9 +1602,9 @@ NSString* const kStanza = @"stanza";
             }
             
             //sanity: check if inner message from and to attributes are valid and throw it away if not
-            if((messageNode.attributes[@"from"] && [@"" isEqualToString:messageNode.attributes[@"from"]]) || (messageNode.attributes[@"to"] && [@"" isEqualToString:messageNode.attributes[@"to"]]))
+            if([@"" isEqualToString:messageNode.from] || [@"" isEqualToString:messageNode.to])
             {
-                DDLogError(@"sanity check failed for outer message node, ignoring message: %@", outerMessageNode);
+                DDLogError(@"sanity check failed for inner message node, ignoring message: %@", messageNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
                 [self incrementLastHandledStanza];
                 return;
@@ -1694,7 +1694,7 @@ NSString* const kStanza = @"stanza";
             XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
             
             //sanity: check if iq from and to attributes are valid and throw it away if not
-            if((iqNode.attributes[@"from"] && [@"" isEqualToString:iqNode.attributes[@"from"]]) || (iqNode.attributes[@"to"] && [@"" isEqualToString:iqNode.attributes[@"to"]]))
+            if([@"" isEqualToString:iqNode.from] || [@"" isEqualToString:iqNode.to])
             {
                 DDLogError(@"sanity check failed for iq node, ignoring iq: %@", iqNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)

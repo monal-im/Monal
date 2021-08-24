@@ -629,6 +629,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         }
         //remove from DB
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contact}];
     }
 }
 

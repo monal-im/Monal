@@ -283,17 +283,17 @@ $$
         if(!contact[@"jid"])
             continue;
         contact[@"jid"] = [[NSString stringWithFormat:@"%@", contact[@"jid"]] lowercaseString];
+        MLContact* contactObj = [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo];
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
             // we should never delete our own buddy -> prevent foreign key errors for omemo
-            if([[contact objectForKey:@"jid"] isEqualToString:account.connectionProperties.identity.jid] == NO) {
-                [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:account.accountNo];
+            if([contact[@"jid"] isEqualToString:account.connectionProperties.identity.jid] == NO) {
+                [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
             }
         }
         else
         {
-            MLContact* contactObj = [MLContact createContactFromJid:[contact objectForKey:@"jid"] andAccountNo:account.accountNo];
-
             if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
             {
                 [[DataLayer sharedInstance] deleteContactRequest:contactObj];
@@ -304,8 +304,8 @@ $$
                 [[DataLayer sharedInstance] deleteContactRequest:contactObj];
             }
             
-            DDLogVerbose(@"Adding contact %@ (%@) to database", [contact objectForKey:@"jid"], [contact objectForKey:@"name"]);
-            [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
+            DDLogVerbose(@"Adding contact %@ (%@) to database", contact[@"jid"], [contact objectForKey:@"name"]);
+            [[DataLayer sharedInstance] addContact:contact[@"jid"]
                                         forAccount:account.accountNo
                                           nickname:[contact objectForKey:@"name"] ? [contact objectForKey:@"name"] : @""
                                         andMucNick:nil];
@@ -313,11 +313,11 @@ $$
             DDLogVerbose(@"Setting subscription status '%@' (ask=%@) for contact %@", contact[@"subscription"], contact[@"ask"], contact[@"jid"]);
             [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
                                                  andAsk:[contact objectForKey:@"ask"]
-                                             forContact:[contact objectForKey:@"jid"]
+                                             forContact:contact[@"jid"]
                                              andAccount:account.accountNo];
             
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                @"contact": [MLContact createContactFromJid:[contact objectForKey:@"jid"] andAccountNo:account.accountNo]
+                @"contact": [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo]
             }];
         }
     }

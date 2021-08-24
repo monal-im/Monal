@@ -45,7 +45,6 @@ static NSMutableDictionary* _uiHandler;
 {
     _stateLockObject = [[NSObject alloc] init];
     _roomFeatures = [[NSMutableDictionary alloc] init];
-    //TODO: remove joining state on reconnect (e.g. add invalidation handler for disco iq)
     _joining = [[NSMutableSet alloc] init];
     _firstJoin = [[NSMutableSet alloc] init];
     _uiHandler = [[NSMutableDictionary alloc] init];
@@ -796,7 +795,12 @@ $$
     if(keepBuddylistEntry)
         ;       //TODO: mark entry as destroyed
     else
+    {
         [[DataLayer sharedInstance] removeBuddy:room forAccount:account.accountNo];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{
+            @"contact": [MLContact createContactFromJid:room andAccountNo:account.accountNo]
+        }];
+    }
 }
 
 +(NSString*) calculateNickForMuc:(NSString*) room onAccount:(xmpp*) account

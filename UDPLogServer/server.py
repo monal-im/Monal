@@ -12,10 +12,10 @@ def eprint(*args, **kwargs):
 
 # import optional/alternative modules
 try:
-    from termcolor import cprint
+    from xtermcolor import colorize
 except ImportError as e:
     eprint(e)
-    def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
+    def colorize(text, rgb=None, ansi=None, bg=None, ansi_bg=None, fd=1, **kwargs):
         print(text, **kwargs)
 try:
     from Cryptodome.Cipher import AES  # pycryptodomex
@@ -26,15 +26,15 @@ def flag_to_kwargs(flag):
     kwargs = {}
     if flag != None:
         if flag & 1:     # error
-            kwargs = {"color": "red", "on_color": "on_grey", "attrs": ["bold"]}
+            kwargs = {"ansi": 9, "ansi_bg": 0}
         elif flag & 2:   # warning
-            kwargs = {"color": "yellow", "on_color": "on_grey", "attrs": []}
+            kwargs = {"ansi": 208, "ansi_bg": 0}
         elif flag & 4:   # info
-            kwargs = {"color": "grey", "attrs": ["bold", "dark"]}
+            kwargs = {"ansi": 40, "ansi_bg": None}
         elif flag & 8:   # debug
-            kwargs = {"color": "grey", "attrs": ["bold"]}
+            kwargs = {"ansi": 39, "ansi_bg": None}
         elif flag & 16:  # verbose
-            kwargs = {"color": "white", "attrs": []}
+            kwargs = {"ansi": 7, "ansi_bg": None}
     return kwargs
 
 def decrypt(ciphertext, key):
@@ -78,14 +78,8 @@ last_counter = None
 
 logfd = None
 if args.file:
-    eprint("Opening logfile '%s' for writing..." % args.file)
+    print(colorize("Opening logfile '%s' for writing..." % args.file, ansi=15, ansi_bg=0), flush=True)
     logfd = open(args.file, "w")
-
-#for level in (1, 2, 4, 8, 16):
-    #kwargs = flag_to_kwargs(level)
-    #logline = ("Test flag %d" % level).rstrip()
-    #cprint(logline, flush=True, **kwargs)
-#cprint("Test counter jump", color="yellow", on_color="on_grey", attrs=["bold"]);
 
 while True:
     # receive raw udp packet
@@ -106,9 +100,9 @@ while True:
     
     # check if _counter jumped over some lines
     if last_counter != None and decoded["_counter"] != last_counter + 1:
-        logline = "counter jumped from %d to %d leaving out %d lines" % (last_counter, decoded["_counter"], decoded["_counter"] - last_counter)
+        logline = "counter jumped from %d to %d leaving out %d lines" % (last_counter, decoded["_counter"], decoded["_counter"] - last_counter - 1)
         print(logline, file=logfd)
-        cprint(logline, color="white", on_color="on_grey", attrs=["dark", "bold"]);
+        print(colorize(logline, ansi=15, ansi_bg=0), flush=True)
     
     # deduce log color from loglevel
     kwargs = flag_to_kwargs(decoded["flag"] if "flag" in decoded else None)
@@ -116,5 +110,5 @@ while True:
     # print original formatted log message
     logline = ("%s" % str(decoded["formattedMessage"])).rstrip()
     print(logline, file=logfd)
-    cprint(logline, flush=True, **kwargs)
+    print(colorize(logline, **kwargs), flush=True)
     last_counter = decoded["_counter"]

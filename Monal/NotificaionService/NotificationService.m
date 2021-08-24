@@ -139,32 +139,27 @@
     @synchronized(self) {
         DDLogInfo(@"Handling expired push: %lu", (unsigned long)[self.handlerList count]);
         
-        //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
-        //BUT: don't post the last one, because after this we won't be allowed to publish any notification
-        if([self.handlerList count] > 1)
-        {
-            void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
-            [self.handlerList removeObject:handler];
-            [self generateNotificationForHandler:handler];
-        }
-        
-        //disconnect if this was the last handler and no new push comes in in the next 500ms
+        //disconnect if this was the last handler and no new push comes in in the next 250ms
         if([self.handlerList count] <= 1 && !self.incomingPushWaiting)
         {
+            DDLogInfo(@"Last push expired and currently no new push pending, shutting down in 250ms");
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                //wait 500ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
+                //wait 250ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
                 //after a push expired we have ~5 seconds run time left to do the clean disconnect
                 //--> waiting 500ms before checking if this was the last push that expired (e.g. no new push came in) does not do any harm here
                 //WARNING: we have to closely watch apple...if they remove this 5 second gap between this call to the expiration handler and the actual
                 //appex freeze, this sleep will no longer be harmless and could even cause smacks state corruption (by not diconnecting cleanly and having stanzas
                 //still in the TCP queue delivered on next appex unfreeze even if they have been handled by the mainapp already)
-                usleep(500000);
+                DDLogInfo(@"Waiting 250ms for next push before shutting down");
+                usleep(250000);
                 
                 @synchronized(self) {
                     //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
                     //(e.g. [MLFiletransfer isIdle] is not YES)
-                    if([self.handlerList count] <= 0 && !self.incomingPushWaiting)
+                    if([self.handlerList count] <= 1 && !self.incomingPushWaiting)
                     {
+                        DDLogInfo(@"Disconnecting and killing appex now");
+                        
                         //post sync errors for all non-idle accounts
                         [HelperTools updateSyncErrorsWithDeleteOnly:NO];
                         
@@ -172,15 +167,31 @@
                         //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
                         //use feedAllWaitingHandlersWithCompletion:nil instead of feedAllWaitingHandlers, because feedAllWaitingHandlers
                         //would sync-dispatch to a new thread and use @synchronized there --> that would create a deadlock with this thread
-                        //NOTICE: this call will disconnect and feed the handler afterwards, which makes itpossible to post any syncErrors
+                        //NOTICE: this call will disconnect and feed the handler afterwards, which makes it possible to post any syncErrors
                         [self feedAllWaitingHandlersWithCompletion:nil];
                         
                         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                         [self killAppex];
                     }
+                    else
+                    {
+                        DDLogInfo(@"NOT shutting down, got new pipelined incomng push, feeding old handler");
+                        void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
+                        [self.handlerList removeObject:handler];
+                        [self generateNotificationForHandler:handler];
+                    }
                 }
             });
+        }
+        else
+        {
+            //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
+            //BUT: don't post the last one, because after this we won't be allowed to publish any notification
+            DDLogInfo(@"Not last push, just feeding next handler");
+            void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
+            [self.handlerList removeObject:handler];
+            [self generateNotificationForHandler:handler];
         }
     }
 }

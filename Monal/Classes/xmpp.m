@@ -46,7 +46,7 @@
 
 @import AVFoundation;
 
-#define STATE_VERSION 4
+#define STATE_VERSION 5
 #define CONNECT_TIMEOUT 8.0
 #define IQ_TIMEOUT 20.0
 NSString* const kQueueID = @"queueID";
@@ -108,7 +108,6 @@ NSString* const kStanza = @"stanza";
     BOOL _firstLoginForThisInstance;
     NSString* _internalID;
     NSMutableDictionary* _inCatchup;
-    NSMutableDictionary* _delayedMessageStanzas;
     
     //registration related stuff
     BOOL _registration;
@@ -227,7 +226,6 @@ NSString* const kStanza = @"stanza";
     _mamPageArrays = [[NSMutableDictionary alloc] init];
     _runningMamQueries = [[NSMutableDictionary alloc] init];
     _inCatchup = [[NSMutableDictionary alloc] init];
-    _delayedMessageStanzas = [[NSMutableDictionary alloc] init];
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
@@ -1645,22 +1643,20 @@ NSString* const kStanza = @"stanza";
             MLAssert(![outerMessageNode.toUser containsString:@"/"], @"outerMessageNode.toUser contains resource!", outerMessageNode);
             
             //capture normal (non-mam-result) messages for later processing while we are doing a mam catchup (even headline messages)
-            //do so only while this archiveJid is listed in _inCatchup OR _delayedMessageStanzas for this archiveJid is not yet empty
+            //do so only while this archiveJid is listed in _inCatchup
             //(of course we DON'T handle already delayed message stanzas here)
             if(!delayedReplay && (
                 (
-                    ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && (
-                        _inCatchup[self.connectionProperties.identity.jid] != nil ||
-                        _delayedMessageStanzas[self.connectionProperties.identity.jid] != nil       //this isn't strictly needed, but added for safety reasons
-                    ) && ![outerMessageNode check:@"{urn:xmpp:mam:2}result"]
+                    ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] &&
+                    _inCatchup[self.connectionProperties.identity.jid] != nil &&
+                    ![outerMessageNode check:@"{urn:xmpp:mam:2}result"]
                 ) || (
-                    [[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && (
-                        _inCatchup[messageNode.fromUser] != nil ||
-                        _delayedMessageStanzas[messageNode.fromUser] != nil                         //this isn't strictly needed, but added for safety reasons
-                    ) && ![outerMessageNode check:@"{urn:xmpp:mam:2}result"]
+                    [[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] &&
+                    _inCatchup[messageNode.fromUser] != nil &&
+                    ![outerMessageNode check:@"{urn:xmpp:mam:2}result"]
                 )
             )) {
-                DDLogInfo(@"Saving incoming message node to _delayedMessageStanzas...");
+                DDLogInfo(@"Saving incoming message node to delayedMessageStanzas...");
                 [self delayIncomingMessageStanzaUntilCatchupDone:originalParsedStanza];
             }
             //only process mam results when they are *not* for priming the database with the initial stanzaid (the id will be taken from the iq result)
@@ -2302,7 +2298,6 @@ NSString* const kStanza = @"stanza";
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
         [values setObject:[_inCatchup copy] forKey:@"inCatchup"];
-        [values setObject:[_delayedMessageStanzas copy] forKey:@"delayedMessageStanzas"];
         
         if(self.connectionProperties.discoveredServices)
             [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
@@ -2315,7 +2310,7 @@ NSString* const kStanza = @"stanza";
         [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
         //debug output
-        DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@\n\t_delayedMessageStanzas=%@",
+        DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@",
             self.accountNo,
             values[@"stateSavedAt"],
             self.lastHandledInboundStanza,
@@ -2331,8 +2326,7 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.supportsPubSub,
             self.connectionProperties.supportsBlocking,
             self.connectionProperties.supportsClientState,
-            _inCatchup,
-            _delayedMessageStanzas
+            _inCatchup
         );
     }
 }
@@ -2537,11 +2531,9 @@ NSString* const kStanza = @"stanza";
             
             if([dic objectForKey:@"inCatchup"])
                 _inCatchup = [[dic objectForKey:@"inCatchup"] mutableCopy];
-            if([dic objectForKey:@"delayedMessageStanzas"])
-                _delayedMessageStanzas = [[dic objectForKey:@"delayedMessageStanzas"] mutableCopy];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\t_inCatchup=%@\n\t_delayedMessageStanzas=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\t_inCatchup=%@",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -2557,8 +2549,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsPubSub,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
-                _inCatchup,
-                _delayedMessageStanzas
+                _inCatchup
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -2573,7 +2564,7 @@ NSString* const kStanza = @"stanza";
 
 +(NSMutableDictionary*) invalidateState:(NSDictionary*) dic
 {
-    NSArray* toKeep = @[@"lastHandledInboundStanza", @"lastHandledOutboundStanza", @"lastOutboundStanza", @"unAckedStanzas", @"loggedInOnce", @"lastInteractionDate", @"inCatchup", @"delayedMessageStanzas"];
+    NSArray* toKeep = @[@"lastHandledInboundStanza", @"lastHandledOutboundStanza", @"lastOutboundStanza", @"unAckedStanzas", @"loggedInOnce", @"lastInteractionDate", @"inCatchup"];
     
     NSMutableDictionary* newState = [[NSMutableDictionary alloc] init];
     if(dic)
@@ -2741,10 +2732,10 @@ NSString* const kStanza = @"stanza";
     //clear list of running mam queries
     _runningMamQueries = [[NSMutableDictionary alloc] init];
     
-    //clear old catchup state (technically all stanzas still in _delayedMessageStanzas could have also been in the parseQueue in the last run and deleted there
+    //clear old catchup state (technically all stanzas still in delayedMessageStanzas could have also been in the parseQueue in the last run and deleted there
     //--> no harm in deleting them when starting a new session (but DON'T DELETE them when resuming the old smacks session)
     _inCatchup = [[NSMutableDictionary alloc] init];
-    _delayedMessageStanzas = [[NSMutableDictionary alloc] init];
+    [[DataLayer sharedInstance] deleteDelayedMessageStanzasForAccount:self.accountNo];
     
     //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
     _accountState = kStateBound;
@@ -3629,20 +3620,18 @@ NSString* const kStanza = @"stanza";
     NSString* archiveJid = self.connectionProperties.identity.jid;
     if([[originalParsedStanza findFirst:@"/@type"] isEqualToString:@"groupchat"])
         archiveJid = originalParsedStanza.fromUser;
-        
-    if(_delayedMessageStanzas[archiveJid] == nil)
-        _delayedMessageStanzas[archiveJid] = [[NSMutableArray alloc] init];
     
-    [_delayedMessageStanzas[archiveJid] addObject:originalParsedStanza];
+    [[DataLayer sharedInstance] addDelayedMessageStanza:originalParsedStanza forArchiveJid:archiveJid andAccountNo:self.accountNo];
 }
 
-//this method is needed to not have a retain cycle (happens when using a block instead of this method)
+//this method is needed to not have a retain cycle (happens when using a block instead of this method in mamFinishedFor:)
 -(void) _handleInternalMamFinishedFor:(NSString*) archiveJid
 {
-    if(_delayedMessageStanzas[archiveJid] == nil || [_delayedMessageStanzas[archiveJid] count] == 0)
+    //pick the next delayed message stanza (will return nil if there isn't any left)
+    MLXMLNode* delayedStanza = [[DataLayer sharedInstance] getNextDelayedMessageStanzaForArchiveJid:archiveJid andAccountNo:self.accountNo];
+    if(delayedStanza == nil)
     {
         [_inCatchup removeObjectForKey:archiveJid];
-        [_delayedMessageStanzas removeObjectForKey:archiveJid];
         
         //handle old mamFinished code as soon as all delayed messages have been processed
         //we need to wait for all delayed messages because at least omemo needs the pep headline messages coming in during mam catchup
@@ -3658,10 +3647,6 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
-        //pick the next delayed message stanza
-        XMPPMessage* delayedStanza = [_delayedMessageStanzas[archiveJid] objectAtIndex:0];
-        [_delayedMessageStanzas[archiveJid] removeObjectAtIndex:0];
-        
         //now *really* process delayed message stanza
         [self processInput:delayedStanza withDelayedReplay:YES];
         
@@ -3673,9 +3658,12 @@ NSString* const kStanza = @"stanza";
 }
 -(void) mamFinishedFor:(NSString*) archiveJid
 {
-    //handle delayed message stanzas delivered while the mam catchup was in progress
-    //the first call is handled inline, while all subsequent self-invocations are handled by dispatching it async to the receiveQueue
-    [self _handleInternalMamFinishedFor:archiveJid];
+    //we should be already in the receive queue, but just to make sure (sync dispatch will do nothing if we already are in the right queue)
+    [self dispatchOnReceiveQueue:^{
+        //handle delayed message stanzas delivered while the mam catchup was in progress
+        //the first call is handled directly, while all subsequent self-invocations are handled by dispatching it async to the receiveQueue
+        [self _handleInternalMamFinishedFor:archiveJid];
+    }];
 }
 
 -(void) addMessageToMamPageArray:(NSDictionary*) messageDictionary

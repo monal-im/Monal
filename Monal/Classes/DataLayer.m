@@ -2774,6 +2774,18 @@ static NSDateFormatter* dbFormatter;
                 SELECT message_history_id FROM message_history ORDER BY message_history_id DESC LIMIT 1\
             ));"];
         }];
+        
+        [self updateDBTo:5.104 withBlock:^{
+            //database table for storage of delayed message stanzas during catchup phase (we store this into a database to make sure we don't consume too much memory)
+            [self.db executeNonQuery:@"CREATE TABLE 'delayed_message_stanzas' ( \
+                    'id' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
+                    'account_id' INTEGER NOT NULL, \
+                    'archive_jid' BLOB NOT NULL, \
+                    'stanza' VARCHAR(32), \
+                    FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                    FOREIGN KEY('account_id', 'archive_jid') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+            );"];
+        }];
     }];
     
     // Vacuum after db updates
@@ -2790,6 +2802,66 @@ static NSDateFormatter* dbFormatter;
     
     DDLogInfo(@"Database version check complete, old version %@ was updated to version %@", dbversion, newdbversion);
     return;
+}
+
+-(void) deleteDelayedMessageStanzasForAccount:(NSString*) accountNo
+{
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"DELETE FROM delayed_message_stanzas WHERE account_id=?;" andArguments:@[accountNo]];
+    }];
+}
+
+-(void) addDelayedMessageStanza:(MLXMLNode*) stanza forArchiveJid:(NSString*) archiveJid andAccountNo:(NSString*) accountNo
+{
+    if(!accountNo || !archiveJid || !stanza)
+        return;
+    NSError* error;
+    NSData* data = [NSKeyedArchiver archivedDataWithRootObject:stanza requiringSecureCoding:YES error:&error];
+    if(error)
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"INSERT INTO delayed_message_stanzas (account_id, archive_jid, stanza) VALUES(?, ?, ?);" andArguments:@[accountNo, archiveJid, data]];
+    }];
+}
+
+-(MLXMLNode* _Nullable) getNextDelayedMessageStanzaForArchiveJid:(NSString*) archiveJid andAccountNo:(NSString*) accountNo
+{
+    if(!accountNo || !archiveJid)
+        return nil;
+    NSData* data = (NSData*)[self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT stanza FROM delayed_message_stanzas WHERE account_id=? AND archive_jid=? ORDER BY id ASC LIMIT 1;" andArguments:@[]];
+    }];
+    if(data)
+    {
+        NSError* error;
+        MLXMLNode* stanza = (MLXMLNode*)[NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
+            [NSMutableDictionary class],
+            [NSDictionary class],
+            [NSMutableSet class],
+            [NSSet class],
+            [NSMutableArray class],
+            [NSArray class],
+            [NSNumber class],
+            [NSString class],
+            [NSDate class],
+            [MLXMLNode class],
+            [XMPPIQ class],
+            [XMPPPresence class],
+            [XMPPMessage class],
+            [XMPPDataForm class],
+        ]] fromData:data error:&error];
+        if(error)
+        {
+#ifdef IS_ALPHA
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+#else
+            DDLogError(@"Error: %@", error);
+            return nil;
+#endif
+        }
+        return stanza;
+    }
+    return nil;
 }
 
 -(void) addShareSheetPayload:(NSDictionary*) payload
@@ -2822,8 +2894,8 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
-
 #pragma mark mute and block
+
 -(void) muteJid:(NSString*) jid onAccount:(NSString*) accountNo
 {
     if(!jid || !accountNo)

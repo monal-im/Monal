@@ -616,12 +616,17 @@ NSString* const kStanza = @"stanza";
 
 -(void) unfreezed
 {
-    if(self.accountState < kStateReconnecting)
-    {
-        DDLogInfo(@"UNFREEZING account %@", self.accountNo);
-        //(re)read persisted state (could be changed by appex)
-        [self readState];
-    }
+    //make sure we don't have any race conditions by dispatching this to our receive queue
+    [self dispatchAsyncOnReceiveQueue:^{
+        if(self.accountState < kStateReconnecting)
+        {
+            DDLogInfo(@"UNFREEZING account %@", self.accountNo);
+            //(re)read persisted state (could be changed by appex)
+            [self readState];
+        }
+        else
+            DDLogInfo(@"Not UNFREEZING account %@, already connected", self.accountNo);
+    }];
 }
 
 -(void) connect
@@ -1091,6 +1096,14 @@ NSString* const kStanza = @"stanza";
         {
             DDLogInfo(@"ping already sent, ignoring second ping request.");
             return;
+        }
+        else if([_parseQueue operationCount] > 4)
+        {
+            DDLogWarn(@"parseQueue overflow, delaying ping by 10 seconds.");
+            createTimer(10.0, (^{
+                DDLogDebug(@"ping delay expired, retrying ping.");
+                [self sendPing:timeout];
+            }));
         }
         else
         {

@@ -139,19 +139,19 @@
     @synchronized(self) {
         DDLogInfo(@"Handling expired push: %lu", (unsigned long)[self.handlerList count]);
         
-        //disconnect if this was the last handler and no new push comes in in the next 250ms
+        //disconnect if this was the last handler and no new push comes in in the next 1500ms
         if([self.handlerList count] <= 1 && !self.incomingPushWaiting)
         {
-            DDLogInfo(@"Last push expired and currently no new push pending, shutting down in 250ms");
+            DDLogInfo(@"Last push expired and currently no new push pending, shutting down in 1500ms");
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                //wait 250ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
+                //wait 1500ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
                 //after a push expired we have ~5 seconds run time left to do the clean disconnect
                 //--> waiting 500ms before checking if this was the last push that expired (e.g. no new push came in) does not do any harm here
                 //WARNING: we have to closely watch apple...if they remove this 5 second gap between this call to the expiration handler and the actual
                 //appex freeze, this sleep will no longer be harmless and could even cause smacks state corruption (by not diconnecting cleanly and having stanzas
                 //still in the TCP queue delivered on next appex unfreeze even if they have been handled by the mainapp already)
-                DDLogInfo(@"Waiting 250ms for next push before shutting down");
-                usleep(250000);
+                DDLogInfo(@"Waiting 1500ms for next push before shutting down");
+                usleep(1500000);
                 
                 @synchronized(self) {
                     //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
@@ -271,20 +271,22 @@
 
 -(void) listNotifications
 {
-    DDLogVerbose(@"listing notifications:");
+    DDLogDebug(@"Listing pending notifications");
     [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
         for(UNNotificationRequest* request in requests)
         {
-            DDLogInfo(@"listNotifications: pending notification %@ --> %@: %@", request.identifier, request.content.title, request.content.body);
+            DDLogDebug(@"Pending notification %@ --> %@: %@", request.identifier, request.content.title, request.content.body);
         }
     }];
+    /*
     [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
         for(UNNotification* notification in notifications)
         {
-            DDLogInfo(@"listNotifications: delivered notification %@ --> %@: %@", notification.request.identifier, notification.request.content.title, notification.request.content.body);
+            DDLogDebug(@"listNotifications: delivered notification %@ --> %@: %@", notification.request.identifier, notification.request.content.title, notification.request.content.body);
         }
     }];
     DDLogVerbose(@"done listing notifications...");
+    */
 }
 
 -(void) nowIdle:(NSNotification*) notification

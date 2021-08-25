@@ -141,12 +141,6 @@
         [SAMKeychain setPassword:password forService:kMonalKeychainName account:self.accountNo];
         [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
     }
-
-    // open privacy settings
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
-        [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
-        return;
-    }
 }
 
 -(void) connected:(NSNotification*) notification
@@ -243,19 +237,20 @@
 
 #pragma mark -textfield delegate
 
-- (void)textFieldDidBeginEditing:(UITextField *)textField
+-(void) textFieldDidBeginEditing:(UITextField*) textField
 {
     self.activeField = textField;
 }
 
-- (void)textFieldDidEndEditing:(UITextField *)textField
+- (void) textFieldDidEndEditing:(UITextField*) textField
 {
     self.activeField = nil;
 }
 
 #pragma mark - key commands
 
--(BOOL)canBecomeFirstResponder {
+-(BOOL) canBecomeFirstResponder
+{
     return YES;
 }
 
@@ -267,7 +262,8 @@
 }
 
 // List of custom hardware key commands
-- (NSArray<UIKeyCommand *> *)keyCommands {
+-(NSArray<UIKeyCommand *> *) keyCommands
+{
     return @[
         // enter
         [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterPressed:)],
@@ -277,7 +273,7 @@
 
 #pragma mark - keyboard management
 
-- (void)registerForKeyboardNotifications
+-(void) registerForKeyboardNotifications
 {
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWasShown:)
@@ -289,7 +285,7 @@
 }
 
 // Called when the UIKeyboardDidShowNotification is sent.
-- (void)keyboardWasShown:(NSNotification*)aNotification
+-(void) keyboardWasShown:(NSNotification*) aNotification
 {
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
@@ -308,7 +304,7 @@
 }
 
 // Called when the UIKeyboardWillHideNotification is sent
-- (void)keyboardWillBeHidden:(NSNotification*)aNotification
+-(void) keyboardWillBeHidden:(NSNotification*) aNotification
 {
     UIEdgeInsets contentInsets = UIEdgeInsetsZero;
     self.scrollView.contentInset = contentInsets;
@@ -321,26 +317,22 @@
 }
 
 
--(void) removeObservers {
+-(void) removeObservers
+{
+    DDLogVerbose(@"removing all observers");
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc removeObserver:self];
 }
 
--(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+-(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     if([segue.identifier isEqualToString:@"scanQRCode"])
     {
         MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
         qrCodeScanner.loginDelegate = self;
     }
-    else if([segue.identifier isEqualToString:@"showPrivacySettings"])
-    {
-        // nothing todo
-    }
     else
-    {
         [self removeObservers];
-    }
 }
 
 -(void) MLQRCodeAccountLoginScannedWithJid:(NSString*) jid password:(NSString*) password

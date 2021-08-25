@@ -298,13 +298,10 @@ static NSMutableSet* _smacksWarningDisplayed;
 {
     DDLogDebug(@"active chats view will appear");
     [super viewWillAppear:animated];
-    // load contacts
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
-    {
-        [self refreshDisplay];
-        // only check if the login screen has to be shown if there are no active chats
-        [self segueToIntroScreensIfNeeded];
-    }
+        [self refreshDisplay];      // load contacts
+    // only check if the login screen has to be shown if there are no active chats
+    [self segueToIntroScreensIfNeeded];
 }
 
 -(void) viewWillDisappear:(BOOL) animated
@@ -362,6 +359,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     // display quick start if the user never seen it or if there are 0 enabled accounts
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"] || [[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
         [self performSegueWithIdentifier:@"showLogin" sender:self];
+        return;
     }
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
         [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];

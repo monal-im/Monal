@@ -2990,14 +2990,15 @@ enum msgSentState {
 
 -(void) handleMediaUploadCompletion:(NSString*) url withMime:(NSString*) mimeType withSize:(NSNumber*) size withError:(NSError*) error
 {
+    DDLogVerbose(@"Now in upload completion");
     [self showPotentialError:error];
     if(!error)
     {
         NSString* newMessageID = [[NSUUID UUID] UUIDString];
         [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
         [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:nil];
+        DDLogInfo(@"File sent");
     }
-    DDLogVerbose(@"upload done");
     if(self.uploadQueue.count > 0)
     {
         [self.uploadMenuView performBatchUpdates:^{
@@ -3029,6 +3030,7 @@ enum msgSentState {
     if([uploadItem getType] == UPLOAD_QUEUE_TYPE_RAW_IMAGE || [uploadItem getType] == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL)
     {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            DDLogVerbose(@"Uploading image");
             [MLFiletransfer uploadUIImage:[uploadItem getImage] onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self handleMediaUploadCompletion:url withMime:mimeType withSize:size withError:error];
@@ -3040,13 +3042,18 @@ enum msgSentState {
     {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
-            [coordinator coordinateReadingItemAtURL:[uploadItem getURL] options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
+            DDLogVerbose(@"Uploading file at URL '%@'", [uploadItem getURL]);
+            NSError* error;
+            [coordinator coordinateReadingItemAtURL:[uploadItem getURL] options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL * _Nonnull newURL) {
+                DDLogDebug(@"NSFileCoordinator called accessor");
                 [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self handleMediaUploadCompletion:url withMime:mimeType withSize:size withError:error];
                     });
                 }];
             }];
+            if(error)
+                DDLogError(@"NSFileCoordinator error: %@", error);
         });
     } else {
         unreachable();

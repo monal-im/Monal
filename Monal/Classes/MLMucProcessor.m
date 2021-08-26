@@ -540,7 +540,10 @@ $$handler(handleDiscoResponseInvalidation, $_ID(NSString*, roomJid))
 $$
 
 $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $_BOOL(join), $_BOOL(updateBookmarks))
-    NSAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!");
+    MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!", (@{
+        @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
+        @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
+    }));
     
     if([iqNode check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}gone"])
     {

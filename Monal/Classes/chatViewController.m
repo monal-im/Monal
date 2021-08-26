@@ -784,28 +784,35 @@ enum msgSentState {
         
         if(![HelperTools isNotInFocus])
         {
-            //get list of unread messages
-            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
-            
-            //send displayed marker for last unread message (XEP-0333)
-            //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
-            MLMessage* lastUnreadMessage = [unread lastObject];
-            if(lastUnreadMessage && (!self.contact.isGroup || [@"group" isEqualToString:self.contact.mucType]))
-            {
-                DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
-                [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];
-            }
-            
-            //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:self.xmppAccount userInfo:@{@"messagesArray":unread}];
-            
-            // update unread counter
-            self.contact.unreadCount -= unread.count;
-            if(self.contact.unreadCount < 0)
-                self.contact.unreadCount = 0;
+            //don't block the main thread while writing to the db (anoter thread could hold a write transaction already, slowing down the main thread)
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                //get list of unread messages
+                NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
+                
+                //send displayed marker for last unread message (XEP-0333)
+                //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
+                MLMessage* lastUnreadMessage = [unread lastObject];
+                if(lastUnreadMessage && (!self.contact.isGroup || [@"group" isEqualToString:self.contact.mucType]))
+                {
+                    DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
+                    [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];
+                }
+                
+                //now switch back to the main thread, we are reading only (and self.contact should only be accessed from the main thread)
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:self.xmppAccount userInfo:@{@"messagesArray":unread}];
+                    
+                    // update unread counter
+                    self.contact.unreadCount -= unread.count;
+                    if(self.contact.unreadCount < 0)
+                        self.contact.unreadCount = 0;
 
-            //refresh contact in active contacts view
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+                    //refresh contact in active contacts view
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+                });
+            });
+            
         }
         else
             DDLogDebug(@"Not marking messages as read because we are still in background: %@ notInFokus: %@", [HelperTools isInBackground] ? @"YES" : @"NO", [HelperTools isNotInFocus] ? @"YES" : @"NO");

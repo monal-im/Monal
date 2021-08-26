@@ -3604,6 +3604,8 @@ NSString* const kStanza = @"stanza";
                             [_iqHandlers removeObjectForKey:iqid];
                         }
                     }
+                    else
+                        DDLogWarn(@"iq handler for '%@' vanished while switching to receive queue", iqid);
                 }];
             }
         }

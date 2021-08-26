@@ -313,7 +313,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
     {
         DDLogInfo(@"Got disconnectAll IPC message");
-        NSAssert([HelperTools isInBackground]==YES, @"Got 'Monal.disconnectAll' while in foreground. This should NEVER happen!");
+        MLAssert([HelperTools isInBackground]==YES, @"Got 'Monal.disconnectAll' while in foreground. This should NEVER happen!", message);
         //disconnect all (currently connecting or already connected) accounts
         [[MLXMPPManager sharedInstance] disconnectAll];
     }
@@ -743,15 +743,22 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) nowIdle:(NSNotification*) notification
 {
     DDLogInfo(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
-    [self checkIfBackgroundTaskIsStillNeeded];
+    //dispatch *async* to main queue to avoid deadlock between receiveQueue ---sync--> im.monal.disconnect ---sync--> receiveQueue
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self checkIfBackgroundTaskIsStillNeeded];
+    });
 }
 
 -(void) filetransfersNowIdle:(NSNotification*) notification
 {
     DDLogInfo(@"### FILETRANSFERS CHANGED TO IDLE STATE ###");
-    [self checkIfBackgroundTaskIsStillNeeded];
+    //dispatch *async* to main queue to avoid deadlock between receiveQueue ---sync--> im.monal.disconnect ---sync--> receiveQueue
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self checkIfBackgroundTaskIsStillNeeded];
+    });
 }
 
+//this method will either be called from an anonymous timer thread or from the main thread
 -(void) checkIfBackgroundTaskIsStillNeeded
 {
     if([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle])
@@ -846,18 +853,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         strongify(task);
         _bgFetch = nil;
         
-        //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-        [HelperTools updateSyncErrorsWithDeleteOnly:NO];
-        
-        //disconnect all accounts to prevent TCP buffer leaking
-        [[MLXMPPManager sharedInstance] disconnectAll];
+        //NOTE: don't disconnect etc. because addBackgroundTask above will already do this
+        //(ui background tasks expire at the same time as background fetching tasks)
         
         [task setTaskCompletedWithSuccess:NO];
         [self scheduleBackgroundFetchingTask];      //schedule new one
         [DDLog flushLog];
-        
-        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
     };
     
     if([[MLXMPPManager sharedInstance] hasConnectivity])

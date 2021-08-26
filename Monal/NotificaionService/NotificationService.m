@@ -241,7 +241,7 @@
         //this will terminate/freeze the app extension afterwards
         while([self.handlerList count])
         {
-            DDLogDebug(@"Feeding handler");
+            DDLogDebug(@"Feeding handler next");
             void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
             [self generateNotificationForHandler:handler];

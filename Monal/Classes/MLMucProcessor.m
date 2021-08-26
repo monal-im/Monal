@@ -141,7 +141,7 @@ static NSMutableDictionary* _uiHandler;
     //check for all other errors
     if([presenceNode findFirst:@"/<type=error>"])
     {
-        DDLogError(@"got muc error presence!");
+        DDLogError(@"got muc error presence of %@!", presenceNode.fromUser);
         @synchronized(_stateLockObject) {
             [_joining removeObject:presenceNode.fromUser];
         }
@@ -252,6 +252,7 @@ static NSMutableDictionary* _uiHandler;
                 //banned from room
                 case 301:
                 {
+                    DDLogDebug(@"got banned from room %@", node.fromUser);
                     @synchronized(_stateLockObject) {
                         [_joining removeObject:node.fromUser];
                     }
@@ -260,6 +261,7 @@ static NSMutableDictionary* _uiHandler;
                 //kicked from room
                 case 307:
                 {
+                    DDLogDebug(@"got kicked from room %@", node.fromUser);
                     @synchronized(_stateLockObject) {
                         [_joining removeObject:node.fromUser];
                     }
@@ -268,6 +270,7 @@ static NSMutableDictionary* _uiHandler;
                 //removed because of affiliation change --> reenter room
                 case 321:
                 {
+                    DDLogDebug(@"got affiliation change for room %@", node.fromUser);
                     @synchronized(_stateLockObject) {
                         [_joining removeObject:node.fromUser];
                     }
@@ -276,6 +279,7 @@ static NSMutableDictionary* _uiHandler;
                 //removed because room is now members only (an we are not a member)
                 case 322:
                 {
+                    DDLogDebug(@"got removed from members-only room %@", node.fromUser);
                     @synchronized(_stateLockObject) {
                         [_joining removeObject:node.fromUser];
                     }
@@ -285,6 +289,7 @@ static NSMutableDictionary* _uiHandler;
                 //removed because of system shutdown
                 case 332:
                 {
+                    DDLogDebug(@"got removed from room %@ because of system shutdown", node.fromUser);
                     @synchronized(_stateLockObject) {
                         [_joining removeObject:node.fromUser];
                     }
@@ -477,7 +482,7 @@ static NSMutableDictionary* _uiHandler;
     //we don't need to handle this across smacks resumes or reconnects, because a new ping will be issued on the next smacks resume
     //(and full reconnets will rejoin all mucs anyways)
     [account sendIq:ping withResponseHandler:^(XMPPIQ* result) {
-        DDLogInfo(@"Muc ping returned: we are still connected, everything is fine");
+        DDLogInfo(@"Muc ping returned: we are still connected to %@, everything is fine", roomJid);
     } andErrorHandler:^(XMPPIQ* error) {
         if(error == nil)
         {
@@ -487,7 +492,7 @@ static NSMutableDictionary* _uiHandler;
         DDLogWarn([HelperTools extractXMPPError:error withDescription:@"Muc ping returned error"]);
         if([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}not-acceptable"])
         {
-            DDLogWarn(@"Ping failed with 'not-acceptable' --> we have to re-join");
+            DDLogWarn(@"Ping failed with 'not-acceptable' --> we have to re-join %@", roomJid);
             @synchronized(_stateLockObject) {
                 [_joining removeObject:roomJid];
             }
@@ -496,29 +501,29 @@ static NSMutableDictionary* _uiHandler;
             if([self checkIfStillBookmarked:roomJid onAccount:account])
                 [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES andBookmarksUpdate:YES];
             else
-                DDLogWarn(@"Not re-joining because this muc got removed from favorites table in the meantime");
+                DDLogWarn(@"Not re-joining because muc %@ got removed from favorites table in the meantime", roomJid);
         }
         else if(
             [error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}service-unavailable"] ||
             [error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}feature-not-implemented"]
         )
         {
-            DDLogInfo(@"The client is joined, but the pinged client does not implement XMPP Ping (XEP-0199) --> do nothing");
+            DDLogInfo(@"The client is joined to %@, but the pinged client does not implement XMPP Ping (XEP-0199) --> do nothing", roomJid);
         }
         else if([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
         {
-            DDLogInfo(@"The client is joined, but the occupant just changed their name (e.g. initiated by a different client) --> do nothing");
+            DDLogInfo(@"The client is joined to %@, but the occupant just changed their name (e.g. initiated by a different client) --> do nothing", roomJid);
         }
         else if(
             [error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}remote-server-not-found"] ||
             [error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}remote-server-timeout"]
         )
         {
-            DDLogError(@"The remote server is unreachable for unspecified reasons; this can be a temporary network failure or a server outage. No decision can be made based on this; Treat like a timeout --> do nothing");
+            DDLogError(@"The remote server for room %@ is unreachable for unspecified reasons; this can be a temporary network failure or a server outage. No decision can be made based on this; Treat like a timeout --> do nothing", roomJid);
         }
         else
         {
-            DDLogWarn(@"Any other error happened: The client is probably not joined any more. It should perform a re-join. --> we have to re-join");
+            DDLogWarn(@"Any other error happened: The client is probably not joined to %@ any more. It should perform a re-join. --> we have to re-join", roomJid);
             @synchronized(_stateLockObject) {
                 [_joining removeObject:roomJid];
             }
@@ -527,7 +532,7 @@ static NSMutableDictionary* _uiHandler;
             if([self checkIfStillBookmarked:roomJid onAccount:account])
                 [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES andBookmarksUpdate:YES];
             else
-                DDLogWarn(@"Not re-joining because this muc got removed from favorites table in the meantime");
+                DDLogWarn(@"Not re-joining %@ because this muc got removed from favorites table in the meantime", roomJid);
         }
     }];
 }

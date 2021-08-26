@@ -959,12 +959,12 @@ NSString* const kStanza = @"stanza";
                 return;
             }
             
-            //don't parse any more if we reached > 100 stanzas already parsed and waiting in parse queue
+            //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
             //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
             //should create a backpressure ino the tcp stream, too
-            while([self->_parseQueue operationCount] > 100)
+            while([self->_parseQueue operationCount] > 50)
             {
-                DDLogInfo(@"Sleeping 0.5 seconds because parse queue has > 100 entries...");
+                DDLogInfo(@"Sleeping 0.5 seconds because parse queue has > 50 entries...");
                 [NSThread sleepForTimeInterval:0.5];
             }
 #ifndef QueryStatistics

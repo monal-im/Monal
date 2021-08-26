@@ -3598,7 +3598,7 @@ NSString* const kStanza = @"stanza";
                     {
                         DDLogDebug(@"Calling iq handler with faked error iq: %@", errorIq);
                         if(iqHandler[@"handler"] != nil)
-                            $call(iqHandler[@"handler"], $ID(account, self), $ID(errorIq));
+                            $call(iqHandler[@"handler"], $ID(account, self), $ID(iqNode, errorIq));
                         else if(iqHandler[@"errorHandler"] != nil)
                             ((monal_iq_handler_t) iqHandler[@"errorHandler"])(errorIq);
                         

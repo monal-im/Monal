@@ -174,7 +174,7 @@
                     //(e.g. [MLFiletransfer isIdle] is not YES)
                     if([self.handlerList count] == 0 && !self.incomingPushWaiting)
                     {
-                        DDLogInfo(@"Disconnecting and killing appex now");
+                        DDLogInfo(@"Shutting down appex now");
                         
                         //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
                         //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
@@ -188,7 +188,7 @@
                         [self killAppex];
                     }
                     else
-                        DDLogInfo(@"NOT shutting down, got new pipelined incomng push");
+                        DDLogInfo(@"NOT shutting down appex: got new pipelined incomng push");
                 }
             });
         }
@@ -241,7 +241,7 @@
         //this will terminate/freeze the app extension afterwards
         while([self.handlerList count])
         {
-            DDLogDebug(@"Feeding handler next");
+            DDLogDebug(@"Feeding next handler");
             void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
             [self generateNotificationForHandler:handler];

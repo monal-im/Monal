@@ -2786,6 +2786,21 @@ static NSDateFormatter* dbFormatter;
                     FOREIGN KEY('account_id', 'archive_jid') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
             );"];
         }];
+        
+#ifdef TARGET_OS_SIMULATOR
+        //dummy contacts for friedrich
+        for(NSDictionary* entry in [self enabledAccountList])
+        {
+            [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', muc_type, 'muc_nick', 'full_name') \
+            VALUES(?, ?, 1, 'group', ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET muc=1, muc_type='group', muc_nick=?, full_name=?;" andArguments:@[entry[kAccountID], @"group@example.org", @"myNick", @"Group", @"myNick", @"Group"]];
+            [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', muc_type, 'muc_nick', 'full_name') \
+            VALUES(?, ?, 1, 'channel', ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET muc=1, muc_type='channel', muc_nick=?, full_name=?;" andArguments:@[entry[kAccountID], @"channel@example.org", @"myNick", @"Channel", @"myNick", @"Channel"]];
+            [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc') \
+            VALUES(?, ?, ?, ?, 0) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;" andArguments:@[entry[kAccountID], @"user@example.org", @"", @"User Name", @0, @"User Name"]];
+            
+            break;      //only for first enabled account
+        }
+#endif
     }];
     
     // Vacuum after db updates

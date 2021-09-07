@@ -111,4 +111,5 @@ while True:
     logline = ("%s" % str(decoded["formattedMessage"])).rstrip()
     print(logline, file=logfd)
     print(colorize(logline, **kwargs), flush=True)
-    last_counter = decoded["_counter"]
+    if "_counter" in decoded:
+        last_counter = decoded["_counter"]

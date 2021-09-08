@@ -22,6 +22,100 @@ NSString *const kAskSubscribe=@"subscribe";
 
 @implementation MLContact
 
++(MLContact*) makeDummyContact:(int) type
+{
+    if(type==1)
+    {
+        return [self contactFromDictionary:@{
+            @"buddy_name": @"user@example.org",
+            @"nick_name": @"",
+            @"full_name": @"",
+            @"subscription": kSubBoth,
+            @"ask": @"",
+            @"account_id": @1,
+            //@"muc_subject": nil,
+            //@"muc_nick": nil,
+            @"Muc": @NO,
+            @"pinned": @NO,
+            @"blocked": @NO,
+            @"encrypt": @NO,
+            @"muted": @NO,
+            @"status": @"",
+            @"state": @"online",
+            @"count": @1,
+            @"isActiveChat": @YES,
+        }];
+    }
+    else if(type==2)
+    {
+        return [self contactFromDictionary:@{
+            @"buddy_name": @"group@example.org",
+            @"nick_name": @"",
+            @"full_name": @"Die coole Gruppe",
+            @"subscription": kSubBoth,
+            @"ask": @"",
+            @"account_id": @1,
+            //@"muc_subject": nil,
+            @"muc_nick": @"my_group_nick",
+            @"muc_type": @"group",
+            @"Muc": @YES,
+            @"pinned": @NO,
+            @"blocked": @NO,
+            @"encrypt": @NO,
+            @"muted": @NO,
+            @"status": @"",
+            @"state": @"online",
+            @"count": @1,
+            @"isActiveChat": @YES,
+        }];
+    }
+    else if(type==3)
+    {
+        return [self contactFromDictionary:@{
+            @"buddy_name": @"channel@example.org",
+            @"nick_name": @"",
+            @"full_name": @"Der coolste Channel überhaupt",
+            @"subscription": kSubBoth,
+            @"ask": @"",
+            @"account_id": @1,
+            //@"muc_subject": nil,
+            @"muc_nick": @"my_channel_nick",
+            @"muc_type": @"channel",
+            @"Muc": @YES,
+            @"pinned": @NO,
+            @"blocked": @NO,
+            @"encrypt": @NO,
+            @"muted": @NO,
+            @"status": @"",
+            @"state": @"online",
+            @"count": @1,
+            @"isActiveChat": @YES,
+        }];
+    }
+    else
+    {
+        return [self contactFromDictionary:@{
+            @"buddy_name": @"user2@example.org",
+            @"nick_name": @"",
+            @"full_name": @"Zweiter User mit Roster Name",
+            @"subscription": kSubBoth,
+            @"ask": @"",
+            @"account_id": @1,
+            //@"muc_subject": nil,
+            //@"muc_nick": nil,
+            @"Muc": @NO,
+            @"pinned": @NO,
+            @"blocked": @NO,
+            @"encrypt": @NO,
+            @"muted": @NO,
+            @"status": @"",
+            @"state": @"online",
+            @"count": @1,
+            @"isActiveChat": @YES,
+        }];
+    }
+}
+
 +(BOOL) supportsSecureCoding
 {
     return YES;

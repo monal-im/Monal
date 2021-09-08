@@ -23,6 +23,8 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @interface MLContact : NSObject <NSSecureCoding>
 
++(MLContact*) makeDummyContact:(int) type;
+
 +(BOOL) supportsSecureCoding;
 
 +(NSString*) ownDisplayNameForAccount:(xmpp*) account;

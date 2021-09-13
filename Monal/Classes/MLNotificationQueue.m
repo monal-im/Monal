@@ -86,12 +86,14 @@
         toFlush = _entries;
         _entries = [[NSMutableArray alloc] init];
     }
+    DDLogVerbose(@"Notifications in queue '%@': %@", [self name], toFlush);
     for(NSDictionary* entry in toFlush)
         [_lowerQueue postNotificationName:entry[@"name"] object:entry[@"obj"] userInfo:entry[@"userInfo"]];
     @synchronized(_entries) {
         if([_entries count])
             @throw [NSException exceptionWithName:@"NotificationQueueException" reason:[NSString stringWithFormat:@"Tried to add more entries to queue while flushing: %@", _queueName] userInfo:nil];
     }
+    DDLogVerbose(@"Done flushing %@ notifications in queue '%@'", @([toFlush count]), [self name]);
     return [toFlush count];
 }
 

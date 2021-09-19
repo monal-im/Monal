@@ -507,8 +507,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     {
         //disconnect to prevent endless loops trying to connect
         dispatch_async(queue, ^{
-            DDLogVerbose(@"manager disconnecting");
+            DDLogVerbose(@"manager disconnecting: %@", xmppAccount.accountNo);
             [xmppAccount disconnect];
+            DDLogVerbose(@"manager disconnected: %@", xmppAccount.accountNo);
         });
     }
     dispatch_barrier_sync(queue, ^{

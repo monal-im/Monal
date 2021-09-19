@@ -1653,8 +1653,16 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         // count # of msgs in message table
-        NSNumber* lowest_unread = [self.db executeScalar:@"SELECT MIN(latest_read_message_history_id) FROM buddylist;"];
-        return [self.db executeScalar:@"SELECT COUNT(M.message_history_id) FROM message_history AS M INNER JOIN buddylist AS B ON M.account_id=B.account_id AND M.buddy_name=B.buddy_name WHERE M.unread=1 AND M.inbound=1 AND B.muted=0 AND M.message_history_id>?;" andArguments:@[lowest_unread]];
+        return [self.db executeScalar:@"SELECT Count(M.message_history_id) \
+                                        FROM   message_history AS M \
+                                        LEFT JOIN buddylist AS B \
+                                                    ON M.account_id = B.account_id \
+                                                        AND M.buddy_name = B.buddy_name \
+                                        WHERE  M.message_history_id > (SELECT Min(latest_read_message_history_id) \
+                                                                    FROM   buddylist) \
+                                            AND M.inbound = 1 \
+                                            AND M.unread = 1 \
+                                            AND B.muted = 0;"];
     }];
 }
 

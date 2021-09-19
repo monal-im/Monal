@@ -190,7 +190,6 @@ struct XMPPLoginQRCode : Codable
                 do
                 {
                     let loginData = try jsonDecoder.decode(XMPPLoginQRCode.self, from: qrCodeData)
-                    print(loginData)
                     handleOmemoAccountLogin(loginData: loginData)
                     return
                 } catch
@@ -224,7 +223,8 @@ struct XMPPLoginQRCode : Codable
         {
             if(self.loginDelegate != nil)
             {
-                self.loginDelegate?.MLQRCodeAccountLoginScanned(jid: loginData.address, password: loginData.password)
+				self.navigationController?.popViewController(animated: true)
+				self.loginDelegate?.MLQRCodeAccountLoginScanned(jid: loginData.address, password: loginData.password)
             }
             else
             {
@@ -279,7 +279,8 @@ struct XMPPLoginQRCode : Codable
                     // call handler
                     if(self.contactDelegate != nil)
                     {
-                        self.contactDelegate?.MLQRCodeContactScanned(jid: parsedJid, fingerprints: omemoFingerprints)
+						self.navigationController?.popViewController(animated: true)
+						self.contactDelegate?.MLQRCodeContactScanned(jid: parsedJid, fingerprints: omemoFingerprints)
                         return
                     }
                     else

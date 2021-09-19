@@ -58,7 +58,6 @@
     @synchronized(self) {
         DDLogInfo(@"Now killing appex process, goodbye...");
         [DDLog flushLog];
-        usleep(10000);
         exit(0);
     }
 }

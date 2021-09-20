@@ -186,7 +186,7 @@
 
 -(void) omemoBundleFetchFinished:(NSNotification*) notification
 {
-    if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
+    if(notification == nil || [notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
     {
         [[NSNotificationCenter defaultCenter] removeObserver:self name:kMonalUpdateBundleFetchStatus object:nil];
         dispatch_async(dispatch_get_main_queue(), ^{

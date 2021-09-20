@@ -2774,7 +2774,6 @@ NSString* const kStanza = @"stanza";
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
     
     //join MUCs from muc_favorites db
-    //andBookmarksUpdate: could be yes or no, should not matter here--> use yes because this was hardcorded before this parameter was added
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
         [MLMucProcessor join:entry[@"room"] onAccount:self];
 }

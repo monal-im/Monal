@@ -1097,7 +1097,7 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"ping already sent, ignoring second ping request.");
             return;
         }
-        else if([_parseQueue operationCount] > 4)
+        else if([self->_parseQueue operationCount] > 4)
         {
             DDLogWarn(@"parseQueue overflow, delaying ping by 10 seconds.");
             createTimer(10.0, (^{
@@ -3590,8 +3590,8 @@ NSString* const kStanza = @"stanza";
                 [self dispatchAsyncOnReceiveQueue:^{
                     //extract this from _iqHandlers to make sure we only handle iqs didn't get handled in the meantime
                     NSMutableDictionary* iqHandler = nil;
-                    @synchronized(_iqHandlers) {
-                        iqHandler = _iqHandlers[iqid];
+                    @synchronized(self->_iqHandlers) {
+                        iqHandler = self->_iqHandlers[iqid];
                     }
                     if(iqHandler)
                     {
@@ -3602,8 +3602,8 @@ NSString* const kStanza = @"stanza";
                             ((monal_iq_handler_t) iqHandler[@"errorHandler"])(errorIq);
                         
                         //remove handler after calling it
-                        @synchronized(_iqHandlers) {
-                            [_iqHandlers removeObjectForKey:iqid];
+                        @synchronized(self->_iqHandlers) {
+                            [self->_iqHandlers removeObjectForKey:iqid];
                         }
                     }
                     else

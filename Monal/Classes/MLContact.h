@@ -88,6 +88,8 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(void) updateWithContact:(MLContact*) contact;
 -(void) refresh;
 
+@property (strong, readonly) NSString* description;
+
 @end
 
 NS_ASSUME_NONNULL_END

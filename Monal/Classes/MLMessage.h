@@ -124,6 +124,8 @@ The of the message in the DB , should be int
 -(BOOL) isEqualToMessage:(MLMessage*) message;
 -(BOOL) isEqual:(id) object;
 
+@property (strong, readonly) NSString* description;
+
 @end
 
 NS_ASSUME_NONNULL_END

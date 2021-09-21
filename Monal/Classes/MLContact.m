@@ -305,6 +305,11 @@ NSString *const kAskSubscribe=@"subscribe";
     return [self.contactJid hash] ^ [self.accountId hash];
 }
 
+-(NSString*) description
+{
+    return [NSString stringWithFormat:@"%@: %@", self.accountId, self.contactJid];
+}
+
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo
 {
     assert(jid != nil);

@@ -3786,4 +3786,9 @@ NSString* const kStanza = @"stanza";
     [self sendPresence];
 }
 
+-(NSString*) description
+{
+    return [NSString stringWithFormat:@"%@: %@", self.accountNo, self.connectionProperties.identity.jid];
+}
+
 @end

@@ -34,19 +34,14 @@
     
     if(self.link)
     {
-        NSURL* url= [NSURL URLWithString:[self.link stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
-        if([url.scheme isEqualToString:@"xmpp"] )
+        NSURL* url = [NSURL URLWithString:[self.link stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
+        if([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"])
         {
-            MonalAppDelegate* delegate =(MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-            [delegate handleXMPPURL:url];
-        }
-        
-        else if ([url.scheme isEqualToString:@"http"] ||
-                 [url.scheme isEqualToString:@"https"]) {
             SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
             [self.parent presentViewController:safariView animated:YES completion:nil];
         }
-        
+        else
+            [[UIApplication sharedApplication] performSelector:@selector(openURL:) withObject:url];
     }
 }
 

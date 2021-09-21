@@ -1963,6 +1963,9 @@ enum msgSentState {
         if(pos.location == NSNotFound) {
             pos = [lowerCase rangeOfString:@"http://"];
         }
+        if(pos.location == NSNotFound) {
+            pos = [lowerCase rangeOfString:@"xmpp:"];
+        }
         
         NSRange pos2;
         if(pos.location != NSNotFound)
@@ -2139,6 +2142,7 @@ enum msgSentState {
         if(cell.link)
         {
             if([cell respondsToSelector:@selector(openlink:)]) {
+                DDLogVerbose(@"Trying to open link in chat cell");
                 [(MLChatCell *)cell openlink:self];
             } else  {
                 self.photos = [[NSMutableArray alloc] init];

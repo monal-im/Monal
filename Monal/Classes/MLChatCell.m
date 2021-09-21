@@ -48,13 +48,14 @@
     
     if(self.link)
     {
-        NSURL *url= [NSURL URLWithString:self.link];
-        
-        if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
+        NSURL* url = [NSURL URLWithString:self.link];
+        if([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"])
+        {
             SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
             [self.parent presentViewController:safariView animated:YES completion:nil];
         }
-        
+        else
+            [[UIApplication sharedApplication] performSelector:@selector(openURL:) withObject:url];
     }
 }
 

@@ -142,20 +142,8 @@
     @synchronized(self) {
         DDLogInfo(@"Handling expired push: %lu", (unsigned long)[self.handlerList count]);
         
-        if([self.handlerList count] <= 0 && !self.incomingPushWaiting)
-        {
-            //post sync errors for all non-idle accounts
-            //do this *before* we feed the last handler to make sure apple allows us to post this syncError notification
-            [HelperTools updateSyncErrorsWithDeleteOnly:NO];
-        }
-        
-        //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
-        void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
-        [self.handlerList removeObject:handler];
-        [self generateNotificationForHandler:handler];
-        
         //disconnect if this was the last handler and no new push comes in in the next 1500ms
-        if([self.handlerList count] == 0 && !self.incomingPushWaiting)
+        if([self.handlerList count] <= 1 && !self.incomingPushWaiting)
         {
             DDLogInfo(@"Last push expired and currently no new push pending, shutting down in 1500ms");
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -169,11 +157,19 @@
                 usleep(1500000);
                 
                 @synchronized(self) {
+                    //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
+                    void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
+                    [self.handlerList removeObject:handler];
+                    [self generateNotificationForHandler:handler];
+                    
                     //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
                     //(e.g. [MLFiletransfer isIdle] is not YES)
                     if([self.handlerList count] == 0 && !self.incomingPushWaiting)
                     {
                         DDLogInfo(@"Shutting down appex now");
+                        
+                        //post sync errors for all accounts still not idle now
+                        [HelperTools updateSyncErrorsWithDeleteOnly:NO];
                         
                         //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
                         //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
@@ -190,6 +186,13 @@
                         DDLogInfo(@"NOT shutting down appex: got new pipelined incomng push");
                 }
             });
+        }
+        else
+        {
+            //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
+            void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
+            [self.handlerList removeObject:handler];
+            [self generateNotificationForHandler:handler];
         }
     }
 }

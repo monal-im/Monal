@@ -64,7 +64,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 /**
  used to display the badge on a row
  */
-@property (nonatomic, assign) NSInteger unreadCount;
+@property (nonatomic, readonly) NSInteger unreadCount;
 
 @property (nonatomic, assign) BOOL isPinned;
 @property (nonatomic, assign) BOOL isBlocked;
@@ -87,6 +87,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 -(void) updateWithContact:(MLContact*) contact;
 -(void) refresh;
+-(void) updateUnreadCount;
 
 @property (strong, readonly) NSString* description;
 

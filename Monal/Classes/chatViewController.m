@@ -804,9 +804,7 @@ enum msgSentState {
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:self.xmppAccount userInfo:@{@"messagesArray":unread}];
                     
                     // update unread counter
-                    self.contact.unreadCount -= unread.count;
-                    if(self.contact.unreadCount < 0)
-                        self.contact.unreadCount = 0;
+                    [self.contact updateUnreadCount];
 
                     //refresh contact in active contacts view
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];

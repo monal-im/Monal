@@ -19,6 +19,11 @@ NSString *const kSubFrom=@"from";
 NSString *const kSubRemove=@"remove";
 NSString *const kAskSubscribe=@"subscribe";
 
+@interface MLContact ()
+{
+    NSInteger _unreadCount;
+}
+@end
 
 @implementation MLContact
 
@@ -65,7 +70,7 @@ NSString *const kAskSubscribe=@"subscribe";
             @"muted": @NO,
             @"status": @"",
             @"state": @"online",
-            @"count": @1,
+            @"count": @2,
             @"isActiveChat": @YES,
         }];
     }
@@ -88,7 +93,7 @@ NSString *const kAskSubscribe=@"subscribe";
             @"muted": @NO,
             @"status": @"",
             @"state": @"online",
-            @"count": @1,
+            @"count": @3,
             @"isActiveChat": @YES,
         }];
     }
@@ -110,7 +115,7 @@ NSString *const kAskSubscribe=@"subscribe";
             @"muted": @NO,
             @"status": @"",
             @"state": @"online",
-            @"count": @1,
+            @"count": @4,
             @"isActiveChat": @YES,
         }];
     }
@@ -134,6 +139,41 @@ NSString *const kAskSubscribe=@"subscribe";
     }
     DDLogVerbose(@"Calculated ownDisplayName for '%@': %@", account.connectionProperties.identity.jid, displayName);
     return displayName;
+}
+
++(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo
+{
+    assert(jid != nil);
+    assert(accountNo != nil && accountNo.intValue >= 0);
+    // MLContact* contact = [MLContact contactFromDictionary:[[DataLayer sharedInstance] dictForUsername:jid forAccount:accountNo]];
+    NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
+    
+    // check if we know this contact and return a dummy one if not
+    if(contactDict == nil)
+    {
+        DDLogInfo(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
+        return [self contactFromDictionary:@{
+            @"buddy_name": jid.lowercaseString,
+            @"nick_name": @"",
+            @"full_name": @"",
+            @"subscription": kSubNone,
+            @"ask": @"",
+            @"account_id": accountNo,
+            //@"muc_subject": nil,
+            //@"muc_nick": nil,
+            @"Muc": @NO,
+            @"pinned": @NO,
+            @"blocked": @NO,
+            @"encrypt": @NO,
+            @"muted": @NO,
+            @"status": @"",
+            @"state": @"offline",
+            @"count": @0,
+            @"isActiveChat": @NO,
+        }];
+    }
+    else
+        return [self contactFromDictionary:contactDict];
 }
 
 -(NSString*) contactDisplayName
@@ -164,33 +204,6 @@ NSString *const kAskSubscribe=@"subscribe";
     return displayName;
 }
 
-+(MLContact*) contactFromDictionary:(NSDictionary*) dic
-{
-    MLContact* contact = [[MLContact alloc] init];
-    contact.contactJid = [dic objectForKey:@"buddy_name"];
-    contact.nickName = [dic objectForKey:@"nick_name"];
-    contact.fullName = [dic objectForKey:@"full_name"];
-    contact.subscription = [dic objectForKey:@"subscription"];
-    contact.ask = [dic objectForKey:@"ask"];
-    contact.accountId = [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
-    contact.groupSubject = [dic objectForKey:@"muc_subject"];
-    contact.accountNickInGroup = [dic objectForKey:@"muc_nick"];
-    contact.mucType = [dic objectForKey:@"muc_type"];
-    contact.isGroup = [[dic objectForKey:@"Muc"] boolValue];
-    if(contact.isGroup  && !contact.mucType)
-        contact.mucType = @"channel";       //default value
-    contact.isPinned = [[dic objectForKey:@"pinned"] boolValue];
-    contact.isBlocked = [[dic objectForKey:@"blocked"] boolValue];
-    contact.statusMessage = [dic objectForKey:@"status"];
-    contact.state = [dic objectForKey:@"state"];
-    contact.unreadCount = [[dic objectForKey:@"count"] integerValue];
-    contact.isActiveChat = [[dic objectForKey:@"isActiveChat"] boolValue];
-    contact.isEncrypted = [[dic objectForKey:@"encrypt"] boolValue];
-    contact.isMuted = [[dic objectForKey:@"muted"] boolValue];
-    contact.lastMessageTime = [dic objectForKey:@"lastMessageTime"];
-    return contact;
-}
-
 #pragma mark - NSCoding
 
 -(void) encodeWithCoder:(NSCoder*) coder
@@ -209,7 +222,7 @@ NSString *const kAskSubscribe=@"subscribe";
     [coder encodeBool:self.isBlocked forKey:@"isBlocked"];
     [coder encodeObject:self.statusMessage forKey:@"statusMessage"];
     [coder encodeObject:self.state forKey:@"state"];
-    [coder encodeInteger:self.unreadCount forKey:@"unreadCount"];
+    [coder encodeInteger:self->_unreadCount forKey:@"unreadCount"];
     [coder encodeBool:self.isActiveChat forKey:@"isActiveChat"];
     [coder encodeBool:self.isEncrypted forKey:@"isEncrypted"];
     [coder encodeBool:self.isMuted forKey:@"isMuted"];
@@ -233,7 +246,7 @@ NSString *const kAskSubscribe=@"subscribe";
     self.isBlocked = [coder decodeBoolForKey:@"isBlocked"];
     self.statusMessage = [coder decodeObjectForKey:@"statusMessage"];
     self.state = [coder decodeObjectForKey:@"state"];
-    self.unreadCount = [coder decodeIntegerForKey:@"unreadCount"];
+    self->_unreadCount = [coder decodeIntegerForKey:@"unreadCount"];
     self.isActiveChat = [coder decodeBoolForKey:@"isActiveChat"];
     self.isEncrypted = [coder decodeBoolForKey:@"isEncrypted"];
     self.isMuted = [coder decodeBoolForKey:@"isMuted"];
@@ -257,7 +270,7 @@ NSString *const kAskSubscribe=@"subscribe";
     self.isBlocked = contact.isBlocked;
     self.statusMessage = contact.statusMessage;
     self.state = contact.state;
-    self.unreadCount = contact.unreadCount;
+    self->_unreadCount = contact->_unreadCount;
     self.isActiveChat = contact.isActiveChat;
     self.isEncrypted = contact.isEncrypted;
     self.isMuted = contact.isEncrypted;
@@ -267,6 +280,11 @@ NSString *const kAskSubscribe=@"subscribe";
 -(void) refresh
 {
     [self updateWithContact:[MLContact createContactFromJid:self.contactJid andAccountNo:self.accountId]];
+}
+
+-(void) updateUnreadCount
+{
+    _unreadCount = -1;      // mark it as "uncached" --> will be recalculated on next access
 }
 
 -(BOOL) isSubscribed
@@ -310,39 +328,39 @@ NSString *const kAskSubscribe=@"subscribe";
     return [NSString stringWithFormat:@"%@: %@", self.accountId, self.contactJid];
 }
 
-+(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo
+// this will cache the unread count on first access
+-(NSInteger) unreadCount
 {
-    assert(jid != nil);
-    assert(accountNo != nil && accountNo.intValue >= 0);
-    // MLContact* contact = [MLContact contactFromDictionary:[[DataLayer sharedInstance] dictForUsername:jid forAccount:accountNo]];
-    NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
-    
-    // check if we know this contact and return a dummy one if not
-    if(contactDict == nil)
-    {
-        DDLogInfo(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
-        return [self contactFromDictionary:@{
-            @"buddy_name": jid.lowercaseString,
-            @"nick_name": @"",
-            @"full_name": @"",
-            @"subscription": kSubNone,
-            @"ask": @"",
-            @"account_id": accountNo,
-            //@"muc_subject": nil,
-            //@"muc_nick": nil,
-            @"Muc": @NO,
-            @"pinned": @NO,
-            @"blocked": @NO,
-            @"encrypt": @NO,
-            @"muted": @NO,
-            @"status": @"",
-            @"state": @"offline",
-            @"count": @0,
-            @"isActiveChat": @NO,
-        }];
-    }
-    else
-        return [self contactFromDictionary:contactDict];
+    if(_unreadCount == -1)
+        _unreadCount = [[[DataLayer sharedInstance] countUserUnreadMessages:self.contactJid forAccount:self.accountId] integerValue];
+    return _unreadCount;
+}
+
++(MLContact*) contactFromDictionary:(NSDictionary*) dic
+{
+    MLContact* contact = [[MLContact alloc] init];
+    contact.contactJid = [dic objectForKey:@"buddy_name"];
+    contact.nickName = [dic objectForKey:@"nick_name"];
+    contact.fullName = [dic objectForKey:@"full_name"];
+    contact.subscription = [dic objectForKey:@"subscription"];
+    contact.ask = [dic objectForKey:@"ask"];
+    contact.accountId = [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
+    contact.groupSubject = [dic objectForKey:@"muc_subject"];
+    contact.accountNickInGroup = [dic objectForKey:@"muc_nick"];
+    contact.mucType = [dic objectForKey:@"muc_type"];
+    contact.isGroup = [[dic objectForKey:@"Muc"] boolValue];
+    if(contact.isGroup  && !contact.mucType)
+        contact.mucType = @"channel";       //default value
+    contact.isPinned = [[dic objectForKey:@"pinned"] boolValue];
+    contact.isBlocked = [[dic objectForKey:@"blocked"] boolValue];
+    contact.statusMessage = [dic objectForKey:@"status"];
+    contact.state = [dic objectForKey:@"state"];
+    contact->_unreadCount = -1;
+    contact.isActiveChat = [[dic objectForKey:@"isActiveChat"] boolValue];
+    contact.isEncrypted = [[dic objectForKey:@"encrypt"] boolValue];
+    contact.isMuted = [[dic objectForKey:@"muted"] boolValue];
+    contact.lastMessageTime = [dic objectForKey:@"lastMessageTime"];
+    return contact;
 }
 
 @end

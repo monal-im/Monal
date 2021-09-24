@@ -1794,7 +1794,7 @@ static NSDateFormatter* dbFormatter;
         return @0;
     return [self.db idReadTransaction:^{
         // count # messages from a specific user in messages table
-        return [self.db executeScalar:@"SELECT COUNT(message_history_id) FROM message_history AS h LEFT JOIN buddylist AS b ON h.account_id=b.account_id AND h.buddy_name=b.buddy_name WHERE h.message_history_id > b.latest_read_message_history_id AND h.unread=1 AND h.account_id=? AND h.buddy_name=? AND h.inbound=1;" andArguments:@[accountNo, buddy]];
+        return [self.db executeScalar:@"SELECT COALESCE(COUNT(message_history_id),0) FROM message_history AS h WHERE h.message_history_id > (SELECT COALESCE(latest_read_message_history_id, 0) FROM buddylist WHERE account_id=? AND buddy_name=?) AND h.unread=1 AND h.account_id=? AND h.buddy_name=? AND h.inbound=1;" andArguments:@[accountNo, buddy, accountNo, buddy]];
     }];
 }
 

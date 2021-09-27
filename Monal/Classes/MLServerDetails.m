@@ -106,7 +106,7 @@ enum MLServerDetailsSections {
     // supportsHTTPUpload
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0363: HTTP File Upload", @""),
-        @"Description":NSLocalizedString(@"Upload files to the server to share with others.", @""),
+        @"Description":[NSString stringWithFormat:NSLocalizedString(@"Upload files to the server to share with others. (Maximum allowed size of files reported by the server: %lu)", @""), connection.uploadSize],
         @"Color": connection.supportsHTTPUpload ? @"Green" : @"Red"
     }];
 

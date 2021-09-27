@@ -29,12 +29,14 @@ NS_ASSUME_NONNULL_BEGIN
 //server details
 @property (nonatomic, strong) NSSet* _Nullable serverFeatures;
 
-@property (nonatomic, strong)  NSMutableArray* _Nullable discoveredServices;
-@property (nonatomic, strong)  NSString* _Nullable uploadServer;
+@property (nonatomic, strong) NSMutableArray* _Nullable discoveredServices;
 
-@property (nonatomic, strong)  NSString* _Nullable conferenceServer;
+@property (nonatomic, strong) NSString* _Nullable conferenceServer;
 
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
+@property (nonatomic, strong) NSString* _Nullable uploadServer;
+@property (nonatomic, assign) NSInteger uploadSize;
+
 // client state
 @property (nonatomic, assign) BOOL supportsClientState;
 //message archive

@@ -436,6 +436,16 @@ $$handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         DDLogInfo(@"supports http upload with server: %@", iqNode.from);
         account.connectionProperties.supportsHTTPUpload = YES;
         account.connectionProperties.uploadServer = iqNode.from;
+        //search all data forms for FORM_TYPE urn:xmpp:http:upload:0
+        for(XMPPDataForm* dataForm in [iqNode find:@"{http://jabber.org/protocol/disco#info}query/{jabber:x:data}x"])
+        {
+            DDLogVerbose(@"Handling XMPPDataForm: %@", dataForm);
+            if([@"urn:xmpp:http:upload:0" isEqualToString:dataForm[@"FORM_TYPE"]])
+            {
+                account.connectionProperties.uploadSize = [dataForm[@"max-file-size"] integerValue];
+                DDLogInfo(@"Upload max filesize: %lu", account.connectionProperties.uploadSize);
+            }
+        }
     }
 $$
 
@@ -447,6 +457,16 @@ $$handler(handleServiceDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         DDLogInfo(@"supports http upload with server: %@", iqNode.from);
         account.connectionProperties.supportsHTTPUpload = YES;
         account.connectionProperties.uploadServer = iqNode.from;
+        //search all data forms for FORM_TYPE urn:xmpp:http:upload:0
+        for(XMPPDataForm* dataForm in [iqNode find:@"{http://jabber.org/protocol/disco#info}query/{jabber:x:data}x"])
+        {
+            DDLogVerbose(@"Handling XMPPDataForm: %@", dataForm);
+            if([@"urn:xmpp:http:upload:0" isEqualToString:dataForm[@"FORM_TYPE"]])
+            {
+                account.connectionProperties.uploadSize = [dataForm[@"max-file-size"] integerValue];
+                DDLogInfo(@"Upload max filesize: %lu", account.connectionProperties.uploadSize);
+            }
+        }
     }
     
     if(!account.connectionProperties.conferenceServer && [features containsObject:@"http://jabber.org/protocol/muc"])

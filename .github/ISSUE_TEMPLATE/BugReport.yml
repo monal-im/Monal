@@ -75,7 +75,7 @@ body:
   - type: input
     id: xmpp_server_software_version
     attributes:
-      label: XMPP Server Software
+      label: XMPP Server Software Version
       description: Which software version is the XMPP-Server running? Try to reach out to your provider if possible.
       placeholder: "1.0.1"
     validations:

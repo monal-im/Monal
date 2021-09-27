@@ -317,7 +317,7 @@ void logException(NSException* exception)
     [self.fileLogger setLogFormatter:formatter];
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
-    self.fileLogger.maximumFileSize = 1024 * 1024 * 64;
+    self.fileLogger.maximumFileSize = 1024 * 1024 * 1024;
     [DDLog addLogger:self.fileLogger];
     
     //network logger

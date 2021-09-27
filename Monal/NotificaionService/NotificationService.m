@@ -157,11 +157,6 @@
                 usleep(1500000);
                 
                 @synchronized(self) {
-                    //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
-                    void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
-                    [self.handlerList removeObject:handler];
-                    [self generateNotificationForHandler:handler];
-                    
                     //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
                     //(e.g. [MLFiletransfer isIdle] is not YES)
                     if([self.handlerList count] == 0 && !self.incomingPushWaiting)
@@ -175,15 +170,21 @@
                         //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
                         //use feedAllWaitingHandlersWithCompletion:nil instead of feedAllWaitingHandlers, because feedAllWaitingHandlers
                         //would sync-dispatch to a new thread and use @synchronized there --> that would create a deadlock with this thread
-                        //NOTICE: this call will disconnect and feed the handler afterwards, which makes it possible to post any syncErrors
-                        [self feedAllWaitingHandlersWithCompletion:nil];
-                        
-                        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-                        [self killAppex];
+                        //NOTICE: this call will disconnect and feed the handler afterwards
+                        [self feedAllWaitingHandlersWithCompletion:^{
+                            //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                            [self killAppex];
+                        }];
+                        return;
                     }
-                    else
-                        DDLogInfo(@"NOT shutting down appex: got new pipelined incomng push");
+                    
+                    //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
+                    void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
+                    [self.handlerList removeObject:handler];
+                    [self generateNotificationForHandler:handler];
+                    
+                    DDLogInfo(@"NOT shutting down appex: got new pipelined incomng push");
                 }
             });
         }

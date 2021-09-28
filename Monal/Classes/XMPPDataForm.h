@@ -26,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) setField:(NSString*) name withType:(NSString* _Nullable) type andValue:(NSString*) value;
 -(NSDictionary* _Nullable) getField:(NSString*) name;
 -(void) removeField:(NSString*) name;
+@property (strong, readonly) NSString* description;
 
 //NSMutableDictionary interface (not complete, but nearly complete)
 @property(readonly) NSUInteger count;

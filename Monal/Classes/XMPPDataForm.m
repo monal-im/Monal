@@ -65,14 +65,14 @@
         return nil;
     if([fieldNode check:@"/@type"])
         return @{
-            @"name": [fieldNode findFirst:@"/@var"],
-            @"type": [fieldNode findFirst:@"/@type"],
-            @"value": [fieldNode findFirst:@"value#"],
+            @"name": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"/@var"]],
+            @"type": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"/@type"]],
+            @"value": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"value#"]],
             @"options": [fieldNode find:@"option/value#"]
         };
     return @{
-        @"name": [fieldNode findFirst:@"/@var"],
-        @"value": [fieldNode findFirst:@"value#"],
+        @"name": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"/@var"]],
+        @"value": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"value#"]],
         @"options": [fieldNode find:@"option/value#"]
     };
 }
@@ -100,6 +100,18 @@
     return self[@"FORM_TYPE"];
 }
 
+-(NSString*) description
+{
+    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+    for(NSString* key in [self allKeys])
+        dict[key] = [self getField:key];
+    return [NSString stringWithFormat:@"XMPPDataForm%@%@ %@",
+        self.type ? [NSString stringWithFormat:@"[%@]", self.type] : @"",
+        self.formType ? [NSString stringWithFormat:@"{%@}", self.formType] : @"",
+        dict
+    ];
+}
+
 //*** NSMutableDictionary interface below
 
 -(id _Nullable) objectForKeyedSubscript:(NSString* _Nonnull) key
@@ -123,12 +135,12 @@
 
 -(NSArray*) allKeys
 {
-    return [self findFirst:@"field@var"];
+    return [self find:@"field@var"];
 }
 
 -(NSArray*) allValues
 {
-    return [self findFirst:@"field/value#"];
+    return [self find:@"field/value#"];
 }
 
 -(NSUInteger) count

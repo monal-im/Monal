@@ -146,6 +146,12 @@
         if([self.handlerList count] <= 1 && !self.incomingPushWaiting)
         {
             DDLogInfo(@"Last push expired and currently no new push pending, shutting down in 1500ms");
+            
+            //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
+            void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
+            [self.handlerList removeObject:handler];
+            [self generateNotificationForHandler:handler];
+            
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 //wait 1500ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
                 //after a push expired we have ~5 seconds run time left to do the clean disconnect
@@ -176,15 +182,9 @@
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                             [self killAppex];
                         }];
-                        return;
                     }
-                    
-                    //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
-                    void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
-                    [self.handlerList removeObject:handler];
-                    [self generateNotificationForHandler:handler];
-                    
-                    DDLogInfo(@"NOT shutting down appex: got new pipelined incomng push");
+                    else
+                        DDLogInfo(@"NOT shutting down appex: got new pipelined incomng push");
                 }
             });
         }

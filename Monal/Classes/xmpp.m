@@ -433,15 +433,25 @@ NSString* const kStanza = @"stanza";
             _catchupDone &&
             _cancelPingTimer == nil &&
             !unackedCount &&
-            ![_parseQueue operationCount] &&
-            [_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
+            ![_parseQueue operationCount] &&        //if something blocks the parse queue it is either an incoming stanza currently processed or waiting to be processed
+            //[_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
             ![_sendQueue operationCount] &&
             ![_inCatchup count]
         )
     )
         retval = YES;
     _lastIdleState = retval;
-    DDLogVerbose(@"%@ --> Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t_cancelPingTimer = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_parseQueue operationCount] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t[[_inCatchup count] = %lu\n\t--> %@",
+    DDLogVerbose(@("%@ --> Idle check:\n"
+            "\t_accountState < kStateReconnecting = %@\n"
+            "\t_reconnectInProgress = %@\n"
+            "\t_catchupDone = %@\n"
+            "\t_cancelPingTimer = %@\n"
+            "\t[self.unAckedStanzas count] = %lu\n"
+            "\t[_parseQueue operationCount] = %lu\n"
+            //"\t[_receiveQueue operationCount] = %lu\n"
+            "\t[_sendQueue operationCount] = %lu\n"
+            "\t[[_inCatchup count] = %lu\n\t--> %@"
+        ),
         self.accountNo,
         _accountState < kStateReconnecting ? @"YES" : @"NO",
         _reconnectInProgress ? @"YES" : @"NO",
@@ -449,7 +459,7 @@ NSString* const kStanza = @"stanza";
         _cancelPingTimer == nil ? @"none" : @"running timer",
         unackedCount,
         (unsigned long)[_parseQueue operationCount],
-        (unsigned long)[_receiveQueue operationCount],
+        //(unsigned long)[_receiveQueue operationCount],
         (unsigned long)[_sendQueue operationCount],
         (unsigned long)[_inCatchup count],
         retval ? @"idle" : @"NOT IDLE"

@@ -7,6 +7,7 @@
 //
 
 #import "XMPPEdit.h"
+#import "xmpp.h"
 #import "MBProgressHUD.h"
 #import "MLBlockedUsersTableViewController.h"
 #import "MLButtonCell.h"
@@ -22,6 +23,10 @@
 @import MobileCoreServices;
 @import AVFoundation;
 @import UniformTypeIdentifiers.UTCoreTypes;
+
+@interface MLXMPPConnection ()
+@property (nonatomic) MLXMPPServer* server;
+@end
 
 @interface XMPPEdit()
 
@@ -285,6 +290,12 @@
             {
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
                 xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+                //it is okay to only update the server settings here:
+                //1) if the account was not yet connected, the settings from our db (which got updated with our dict prior
+                //      to connecting) will be used upon connecting 
+                //2) if the account is already connected, the settings will be updated (account.connectionProperties.server)
+                //      and used when connecting next time (still using the old smacks session of course)
+                account.connectionProperties.server = [[MLXMPPServer alloc] initWithHost:[dic objectForKey:kServer] andPort:[dic objectForKey:kPort] andDirectTLS:[[dic objectForKey:kDirectTLS] boolValue]];
                 if(self.statusMessageChanged)
                     [account publishStatusMessage:self.statusMessage];
                 if(self.rosterNameChanged)

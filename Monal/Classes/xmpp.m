@@ -873,9 +873,6 @@ NSString* const kStanza = @"stanza";
         [self->_oStream setDelegate:nil];
         [self->_oStream removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
         
-        //clean up send queue now that the delegate was removed (_streamHasSpace can not switch to YES now)
-        [self cleanupSendQueue];
-
         DDLogInfo(@"closing output stream");
         @try
         {
@@ -887,6 +884,9 @@ NSString* const kStanza = @"stanza";
         }
         self->_oStream=nil;
         
+        //clean up send queue now that the delegate was removed (_streamHasSpace can not switch to YES now)
+        [self cleanupSendQueue];
+
         DDLogInfo(@"resetting internal stream state to disconnected");
         self->_startTLSComplete = NO;
         self->_catchupDone = NO;
@@ -2077,6 +2077,7 @@ NSString* const kStanza = @"stanza";
                 DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
                 DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
             }
+            usleep(1000000);        //try to avoid race conditions between tls setup and stream writes by sleeping some time
             self->_startTLSComplete=YES;
             
             //stop everything coming after this (we don't want to process stanzas that came in *before* a secure TLS context was established!)

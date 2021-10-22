@@ -33,7 +33,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
 -(BOOL) isEqualToMessage:(MLMessage*) message;
--(BOOL) isEqual:(id) object;
+-(BOOL) isEqual:(id _Nullable) object;
 
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
 

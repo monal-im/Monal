@@ -122,7 +122,7 @@ The of the message in the DB , should be int
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
 -(BOOL) isEqualToMessage:(MLMessage*) message;
--(BOOL) isEqual:(id) object;
+-(BOOL) isEqual:(id _Nullable) object;
 
 @property (strong, readonly) NSString* description;
 

@@ -13,3 +13,8 @@ FOUNDATION_EXPORT double monalxmppVersionNumber;
 
 //! Project version string for monalxmpp.
 FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
+
+#import "MLContact.h"
+#import "DataLayer.h"
+#import "xmpp.h"
+#import "MLXMPPManager.h"

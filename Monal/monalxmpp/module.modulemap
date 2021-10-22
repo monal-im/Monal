@@ -1,0 +1,16 @@
+module MLContactPrivate {
+  header "../Classes/MLContact.h"
+  export *
+}
+module DataLayerPrivate {
+  header "../Classes/DataLayer.h"
+  export *
+}
+module xmppPrivate {
+  header "../Classes/xmpp.h"
+  export *
+}
+module MLXMPPManagerPrivate {
+  header "../Classes/MLXMPPManager.h"
+  export *
+}

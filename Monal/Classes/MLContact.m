@@ -307,15 +307,16 @@ NSString *const kAskSubscribe=@"subscribe";
            [self.accountId isEqualToString:contact.accountId];
 }
 
--(BOOL) isEqual:(id) object
+-(BOOL) isEqual:(id _Nullable) object
 {
-    if(self == object)
+    if(object == nil || self == object)
         return YES;
-    if([object isKindOfClass:[MLContact class]])
+    else if([object isKindOfClass:[MLContact class]])
         return [self isEqualToContact:(MLContact*)object];
-    if([object isKindOfClass:[MLMessage class]])
+    else if([object isKindOfClass:[MLMessage class]])
         return [self isEqualToMessage:(MLMessage*)object];
-    return NO;
+    else
+        return NO;
 }
 
 -(NSUInteger) hash

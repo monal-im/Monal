@@ -1016,19 +1016,17 @@ enum msgSentState {
 //this is needed to prevent segues invoked programmatically
 -(void) performSegueWithIdentifier:(NSString*) identifier sender:(id) sender
 {
+#if !defined(TARGET_IPHONE_SIMULATOR) && !defined(IS_ALPHA)
     if([self shouldPerformSegueWithIdentifier:identifier sender:sender] == NO)
+#endif
     {
         if([identifier isEqualToString:@"showDetails"])
         {
             // Display warning
-            UIAlertController* groupDetailsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Groupchat/channel details", @"")
-                                                                                message:NSLocalizedString(@"Groupchat/channel details are currently not implemented in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [groupDetailsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                [groupDetailsWarning dismissViewControllerAnimated:YES completion:nil];
-            }]];
-            [self presentViewController:groupDetailsWarning animated:YES completion:nil];
+            UIViewController* detailsViewController = [[ContactDetailsInterface new] makeContactDetails: self.contact];
+            [self presentViewController:detailsViewController animated:YES completion:^{}];
+            return;
         }
-        return;
     }
     [super performSegueWithIdentifier:identifier sender:sender];
 }
@@ -1038,9 +1036,9 @@ enum msgSentState {
 {
     [self sendChatState:NO];
 
-    if([segue.identifier isEqualToString:@"showDetails"])
+    if([segue.identifier isEqualToString:@"showDetails"] && !self.contact.isGroup)
     {
-        UINavigationController *nav = segue.destinationViewController;
+        UINavigationController* nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact = self.contact;
         details.completion = ^{
@@ -1055,9 +1053,9 @@ enum msgSentState {
 {
     [self stopEditing];
     [self.chatInput resignFirstResponder];
-    
+
     [self presentViewController:self.filePicker animated:YES completion:nil];
-    
+
     return;
 }
 

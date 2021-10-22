@@ -60,6 +60,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  */
 @property (nonatomic, copy) NSString* statusMessage;
 @property (nonatomic, copy) NSDate* lastMessageTime;
+@property (nonatomic, readonly) NSDate* lastInteractionTime;
 
 /**
  used to display the badge on a row

@@ -336,6 +336,11 @@ NSString *const kAskSubscribe=@"subscribe";
     return _unreadCount;
 }
 
+-(NSDate*) lastInteractionTime
+{
+    return [[DataLayer sharedInstance] lastInteractionOfJid:self.contactJid forAccountNo:self.accountId];
+}
+
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic
 {
     MLContact* contact = [[MLContact alloc] init];

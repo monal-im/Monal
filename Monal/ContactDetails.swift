@@ -11,6 +11,7 @@ import monalxmpp
 
 struct ContactDetails: View {
     var contact : MLContact = MLContact()
+    @Environment(\.presentationMode) var presentationMode
 
     init(withContact: MLContact) {
             // UITableView.appearance().separatorColor = .none
@@ -20,8 +21,14 @@ struct ContactDetails: View {
 
     var body: some View {
         VStack {
-            Spacer()
-                .frame(height: 20)
+            HStack {
+                Spacer()
+                    .frame(width: 20, height: 50)
+                Button("Close") {
+                    presentationMode.self.wrappedValue.dismiss()
+                }
+                Spacer()
+            }
             Text(contact.contactDisplayName())
             ContactDetailsHeader(withContact: contact)
             Spacer()

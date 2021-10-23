@@ -99,7 +99,7 @@ while True:
     decoded = json.loads(str(payload, "UTF-8"))
     
     # check if _counter jumped over some lines
-    if last_counter != None and decoded["_counter"] != last_counter + 1:
+    if "_counter" in decoded and last_counter != None and decoded["_counter"] != last_counter + 1:
         logline = "counter jumped from %d to %d leaving out %d lines" % (last_counter, decoded["_counter"], decoded["_counter"] - last_counter - 1)
         print(logline, file=logfd)
         print(colorize(logline, ansi=15, ansi_bg=0), flush=True)

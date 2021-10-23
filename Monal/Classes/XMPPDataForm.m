@@ -11,9 +11,17 @@
 
 @interface MLXMLNode()
 @property (atomic, strong, readwrite) NSString* element;
+-(void) invalidateUpstreamCache;
 @end
 
 @implementation XMPPDataForm
+
+static NSRegularExpression* dataFormQueryRegex;
+
++(void) initialize
+{
+    dataFormQueryRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*)?(@[a-zA-Z0-9_:-]+|%[a-zA-Z0-9_:-]+)?" options:0 error:nil];
+}
 
 //this simple init is not public api because type and form type are mandatory in xep-0004
 -(id _Nonnull) init
@@ -56,6 +64,7 @@
     [self addChild:[[MLXMLNode alloc] initWithElement:@"field" withAttributes:attrs andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:value]
     ] andData:nil]];
+    [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 
 -(NSDictionary* _Nullable) getField:(NSString* _Nonnull) name
@@ -80,11 +89,13 @@
 -(void) removeField:(NSString* _Nonnull) name
 {
     [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:name]]]];
+    [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 
 -(void) setType:(NSString* _Nonnull) type
 {
     self.attributes[@"type"] = type;
+    [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 -(NSString*) type
 {
@@ -98,6 +109,47 @@
 -(NSString*) formType
 {
     return self[@"FORM_TYPE"];
+}
+
+-(id _Nullable) processDataFormQuery:(NSString*) query
+{
+    //parse query
+    NSMutableDictionary* parsedQuery = [[NSMutableDictionary alloc] init];
+    NSArray* matches = [dataFormQueryRegex matchesInString:query options:0 range:NSMakeRange(0, [query length])];
+    if(![matches count])
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Could not parse data form query!" userInfo:@{
+            @"node": self,
+            @"query": query
+        }];
+    NSTextCheckingResult* match = matches.firstObject;
+    NSRange formTypeRange = [match rangeAtIndex:2];
+    NSRange typeRange = [match rangeAtIndex:3];
+    NSRange extractionCommandRange = [match rangeAtIndex:4];
+    if(formTypeRange.location != NSNotFound)
+        parsedQuery[@"formType"] = [query substringWithRange:formTypeRange];
+    else
+        parsedQuery[@"formType"] = @"*";
+    if(typeRange.location != NSNotFound)
+        parsedQuery[@"type"] = [query substringWithRange:typeRange];
+    else
+        parsedQuery[@"type"] = @"*";
+    if(extractionCommandRange.location != NSNotFound)
+    {
+        NSString* extractionCommand = [query substringWithRange:extractionCommandRange];
+        parsedQuery[@"extractionCommand"] = [extractionCommand substringToIndex:1];
+        parsedQuery[@"var"] = [extractionCommand substringFromIndex:1];
+    }
+    
+    //process query
+    if(!([@"*" isEqualToString:parsedQuery[@"formType"]] || (self.formType != nil && [self.formType isEqualToString:parsedQuery[@"formType"]])))
+        return nil;
+    if(!([@"*" isEqualToString:parsedQuery[@"type"]] || (self.type != nil && [self.type isEqualToString:parsedQuery[@"type"]])))
+        return nil;
+    if([parsedQuery[@"extractionCommand"] isEqualToString:@"@"])
+        return self[parsedQuery[@"var"]];
+    if([parsedQuery[@"extractionCommand"] isEqualToString:@"%"])
+        return [self getField:parsedQuery[@"var"]];
+    return self;        //we did not use any extraction command, but filtered by formType and type only
 }
 
 -(NSString*) description
@@ -122,7 +174,11 @@
 -(void) setObject:(id _Nullable) obj forKeyedSubscript:(NSString*) key
 {
     if(!obj)
-        return [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:key]]]];
+    {
+        [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:key]]]];
+        [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
+        return;
+    }
     MLXMLNode* fieldNode = [self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:key]]];
     if(!fieldNode)
         return [self setField:key withValue:[NSString stringWithFormat:@"%@", obj]];
@@ -131,6 +187,7 @@
         [fieldNode addChild:[[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"%@", obj]]];
     else
         valueNode.data = [NSString stringWithFormat:@"%@", obj];
+    [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 
 -(NSArray*) allKeys
@@ -176,6 +233,7 @@
 {
     for(MLXMLNode* child in self.children)
         [self removeChild:child];
+    [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 
 -(void) removeObjectsForKeys:(NSArray*) keyArray

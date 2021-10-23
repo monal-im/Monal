@@ -12,6 +12,7 @@
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
+#import "XMPPDataForm.h"
 
 @interface MLXMLNode()
 {
@@ -43,7 +44,7 @@ static NSRegularExpression* attributeFilterRegex;
     
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
     pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^((\\{[^}]+\\})?([^/]+))?(/.*)?" options:NSRegularExpressionCaseInsensitive error:nil];
-    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=]+=[^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$)(\\|(bool|int|float|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=]+=[^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|float|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
     attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=]+)=([^>]+)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
 
 //     testcases for stanza
@@ -154,7 +155,7 @@ static NSRegularExpression* attributeFilterRegex;
 
     _element = [decoder decodeObjectOfClass:[NSString class] forKey:@"element"];
     _attributes = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableDictionary class], [NSDictionary class], [NSMutableString class], [NSString class]]] forKey:@"attributes"];
-    NSArray* decodedChildren = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableArray class], [NSArray class], [MLXMLNode class], [XMPPIQ class], [XMPPMessage class], [XMPPPresence class]]] forKey:@"children"];
+    NSArray* decodedChildren = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableArray class], [NSArray class], [MLXMLNode class], [XMPPIQ class], [XMPPMessage class], [XMPPPresence class], [XMPPDataForm class]]] forKey:@"children"];
     for(MLXMLNode* child in decodedChildren)
         [self addChild:child];
     _data = [decoder decodeObjectOfClass:[NSString class] forKey:@"data"];
@@ -201,11 +202,9 @@ static NSRegularExpression* attributeFilterRegex;
     if(!copy.attributes[@"xmlns"])
         copy.attributes[@"xmlns"] = _attributes[@"xmlns"];
     [_children addObject:copy];
-    //invalidate caches of all nodes upstream in our tree
-    for(MLXMLNode* node = self; node; node = node.parent)
-        node.cache = [[NSMutableDictionary alloc] init];
+    [self invalidateUpstreamCache];
     //this one can be removed if the query path component ".." is removed from our language
-    [copy invalidateCache];
+    [copy invalidateDownstreamCache];
 }
 
 -(void) removeChild:(MLXMLNode*) child
@@ -215,9 +214,7 @@ static NSRegularExpression* attributeFilterRegex;
     NSInteger index = [_children indexOfObject:child];
     if(index != NSNotFound)
         [_children removeObjectAtIndex:index];
-    //invalidate caches of all nodes upstream in our tree
-    for(MLXMLNode* node = self; node; node = node.parent)
-        node.cache = [[NSMutableDictionary alloc] init];
+    [self invalidateUpstreamCache];
 }
 
 -(NSArray*) children
@@ -225,11 +222,18 @@ static NSRegularExpression* attributeFilterRegex;
     return [NSArray arrayWithArray:_children];
 }
 
--(void) invalidateCache
+-(void) invalidateUpstreamCache
+{
+    //invalidate caches of all nodes upstream in our tree
+    for(MLXMLNode* node = self; node; node = node.parent)
+        node.cache = [[NSMutableDictionary alloc] init];
+}
+
+-(void) invalidateDownstreamCache
 {
     self.cache = [[NSMutableDictionary alloc] init];
     for(MLXMLNode* node in _children)
-        [node invalidateCache];
+        [node invalidateDownstreamCache];
 }
 
 //query language similar to the one prosody uses (which in turn is loosely based on xpath)
@@ -316,7 +320,7 @@ static NSRegularExpression* attributeFilterRegex;
     NSArray* matches = [pathSplitterRegex matchesInString:queryString options:0 range:NSMakeRange(0, [queryString length])];
     if(![matches count])
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML query has syntax errors (no matches for path splitter regex)!" userInfo:@{
-            @"node": self,
+            @"self": self,
             @"queryString": queryString,
         }];
     NSTextCheckingResult* match = matches.firstObject;
@@ -324,7 +328,7 @@ static NSRegularExpression* attributeFilterRegex;
     NSRange restRange = [match rangeAtIndex:4];
     if(pathComponentRange.location == NSNotFound || !pathComponentRange.length)
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML query has syntax errors (could not extract first path component)!" userInfo:@{
-            @"node": self,
+            @"self": self,
             @"queryString": queryString,
         }];
     NSString* pathComponent = [queryString substringWithRange:pathComponentRange];
@@ -338,7 +342,7 @@ static NSRegularExpression* attributeFilterRegex;
     {
         if(!self.parent)
             @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML query tries to ascend to non-existent parent element!" userInfo:@{
-                @"node": self,
+                @"self": self,
                 @"queryString": queryString,
                 @"pathComponent": pathComponent,
                 @"parsedEntry": parsedEntry
@@ -346,9 +350,16 @@ static NSRegularExpression* attributeFilterRegex;
         return [self.parent find:rest];
     }
     
+    //shortcut for dataform subqueries: allow empty element names and namespaces, they get autofilled with {jabber:x:data}x
+    if(!parsedEntry[@"elementName"] && !parsedEntry[@"namespace"] && [parsedEntry[@"extractionCommand"] isEqualToString:@"\\"])
+    {
+        parsedEntry[@"elementName"] = @"x";
+        parsedEntry[@"namespace"] = @"jabber:x:data";
+    }
+    
     if(!parsedEntry[@"elementName"] && !parsedEntry[@"namespace"])
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML queries must not contain a path component having neither element name nor namespace!" userInfo:@{
-            @"node": self,
+            @"self": self,
             @"queryString": queryString,
             @"pathComponent": pathComponent,
             @"parsedEntry": parsedEntry
@@ -418,7 +429,8 @@ static NSRegularExpression* attributeFilterRegex;
                 //sanity check
                 if([rest length] > 0)
                     @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Extraction commands are only allowed for terminal nodes of XML queries!" userInfo:@{
-                        @"node": self,
+                        @"self": self,
+                        @"node": node,
                         @"queryString": queryString,
                         @"pathComponent": pathComponent,
                         @"parsedEntry": parsedEntry
@@ -431,11 +443,38 @@ static NSRegularExpression* attributeFilterRegex;
                     singleResult = [self processConversionCommand:parsedEntry[@"conversionCommand"] forXMLString:node.attributes[parsedEntry[@"attribute"]]];
                 else if([parsedEntry[@"extractionCommand"] isEqualToString:@"$"] && node.element)
                     singleResult = [self processConversionCommand:parsedEntry[@"conversionCommand"] forXMLString:node.element];
+                else if([parsedEntry[@"extractionCommand"] isEqualToString:@"\\"])
+                {
+                    if(![node respondsToSelector:NSSelectorFromString(@"processDataFormQuery:")])
+                        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Data form extractions can only be used on data forms! This exception means you have a bug somewhere else in your code (probably at the source of your elemt you are trying to use in your data form query)!" userInfo:@{
+                            @"self": self,
+                            @"node": node,
+                            @"queryString": queryString,
+                            @"pathComponent": pathComponent,
+                            @"parsedEntry": parsedEntry
+                        }];
+                    //faster than NSMethodInvocation, but way less readable, see https://stackoverflow.com/a/20058585/3528174
+                    id extraction = ((id (*)(id, SEL, NSString*))[node methodForSelector:NSSelectorFromString(@"processDataFormQuery:")])(node, NSSelectorFromString(@"processDataFormQuery:"), parsedEntry[@"dataFormQuery"]);
+                    if(extraction)      //only add this to our results if the data form query succeeded
+                    {
+                        //check if we try to operate a conversion command on something not a single extracted simple form field of type NSString
+                        if(parsedEntry[@"conversionCommand"] && ![extraction isKindOfClass:[NSString class]])
+                            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Conversion commands can not be used on data form extractions returning the whole data form or an NSArray/NSDictionary!" userInfo:@{
+                                @"self": self,
+                                @"node": node,
+                                @"queryString": queryString,
+                                @"pathComponent": pathComponent,
+                                @"parsedEntry": parsedEntry
+                            }];
+                        singleResult = [self processConversionCommand:parsedEntry[@"conversionCommand"] forXMLString:(NSString*)extraction];
+                    }
+                }
                 else if([parsedEntry[@"extractionCommand"] isEqualToString:@"@"] && [parsedEntry[@"attribute"] isEqualToString:@"@"])
                 {
                     if(parsedEntry[@"conversionCommand"])
                         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Conversion commands can not be used on attribute dict extractions (e.g. extraction command '@@')!" userInfo:@{
-                            @"node": self,
+                            @"self": self,
+                            @"node": node,
                             @"queryString": queryString,
                             @"pathComponent": pathComponent,
                             @"parsedEntry": parsedEntry
@@ -447,9 +486,10 @@ static NSRegularExpression* attributeFilterRegex;
             }
             else
             {
-                if(parsedEntry[@"conversionType"])
+                if(parsedEntry[@"conversionCommand"])
                     @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Conversion commands are only allowed for terminal nodes of XML queries that use an extraction command!" userInfo:@{
-                        @"node": self,
+                        @"self": self,
+                        @"node": node,
                         @"queryString": queryString,
                         @"pathComponent": pathComponent,
                         @"parsedEntry": parsedEntry
@@ -507,7 +547,7 @@ static NSRegularExpression* attributeFilterRegex;
     NSArray* matches = [componentParserRegex matchesInString:entry options:0 range:NSMakeRange(0, [entry length])];
     if(![matches count])
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Could not parse path component!" userInfo:@{
-            @"node": self,
+            @"self": self,
             @"queryEntry": entry
         }];
     NSTextCheckingResult* match = matches.firstObject;
@@ -542,7 +582,7 @@ static NSRegularExpression* attributeFilterRegex;
             }];
             if(error)
                 @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Attribute filter regex can not be compiled!" userInfo:@{
-                    @"node": self,
+                    @"self": self,
                     @"queryEntry": entry,
                     @"filterName": attributeFilterName,
                     @"filterValue": attributeFilterValue,
@@ -553,10 +593,12 @@ static NSRegularExpression* attributeFilterRegex;
     if(extractionCommandRange.location != NSNotFound)
     {
         NSString* extractionCommand = [entry substringWithRange:extractionCommandRange];
+        retval[@"extractionCommand"] = [extractionCommand substringToIndex:1];
         unichar command = [extractionCommand characterAtIndex:0];
         if(command == '@')
             retval[@"attribute"] = [extractionCommand substringFromIndex:1];
-        retval[@"extractionCommand"] = [extractionCommand substringToIndex:1];
+        if(command == '\\')
+            retval[@"dataFormQuery"] = [extractionCommand substringWithRange:NSMakeRange(1, extractionCommandRange.length-2)];
     }
     if(conversionCommandRange.location != NSNotFound)
         retval[@"conversionCommand"] = [entry substringWithRange:conversionCommandRange];

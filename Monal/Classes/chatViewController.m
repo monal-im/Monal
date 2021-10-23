@@ -1671,7 +1671,7 @@ enum msgSentState {
             NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:messagesSection];
           //  if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
             {
-                [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+                [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionTop animated:YES];
             }
         }
     });

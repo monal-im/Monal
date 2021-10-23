@@ -163,7 +163,12 @@
     return composedImage;
 }
 
--(void) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion:(void (^)(UIImage *))completion
+-(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo
+{
+    return [self getIconForContact:contact andAccount:accountNo withCompletion:nil];
+}
+
+-(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion:(void (^)(UIImage *))completion
 {
     NSString* filename = [self fileNameforContact:contact];
     
@@ -207,6 +212,7 @@
             completion(toreturn);
         });
     }
+    return toreturn;
 }
 
 

@@ -14,3 +14,7 @@ module MLXMPPManagerPrivate {
   header "../Classes/MLXMPPManager.h"
   export *
 }
+module MLImageManagerPrivate {
+  header "../Classes/MLImageManager.h"
+  export *
+}

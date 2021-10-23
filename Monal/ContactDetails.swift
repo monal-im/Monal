@@ -20,11 +20,13 @@ struct ContactDetails: View {
 
     var body: some View {
         VStack {
+            Spacer()
+                .frame(height: 20)
+            Text(contact.contactDisplayName())
             ContactDetailsHeader(withContact: contact)
             Spacer()
                 .frame(height: 20)
-            Text("upper")
-            Text("lower")
+            Text("Lorem impsum...")
             Spacer()
         }
     }

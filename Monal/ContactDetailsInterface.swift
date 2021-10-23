@@ -12,7 +12,6 @@ import monalxmpp
 
 @objc
 class ContactDetailsInterface: NSObject {
- 
     @objc func makeContactDetails(_ contact: MLContact) -> UIViewController {
         let details = ContactDetails(withContact: contact)
         return UIHostingController(rootView: details)

@@ -21,14 +21,30 @@ struct ContactDetailsHeader: View {
 
     var body: some View {
         VStack {
-            Text(contact.fullName)
-            Image("noicon_muc")
-                .resizable()
-                .frame(minWidth: 100, idealWidth: 200, maxWidth: 300, minHeight: 100, idealHeight: 200, maxHeight: 300, alignment: .center)
-                .scaledToFit()
+            if(!contact.isGroup) {
+                Image(uiImage: MLImageManager.sharedInstance().getIconForContact(contact.contactJid, andAccount:contact.accountId)!)
+                    .resizable()
+                    .frame(minWidth: 100, idealWidth: 200, maxWidth: 300, minHeight: 100, idealHeight: 200, maxHeight: 300, alignment: .center)
+                    .scaledToFit()
+            } else if(contact.mucType == "group") {
+                Image("noicon_muc")
+                    .resizable()
+                    .frame(minWidth: 100, idealWidth: 200, maxWidth: 300, minHeight: 100, idealHeight: 200, maxHeight: 300, alignment: .center)
+                    .scaledToFit()
+            } else {
+                Image("noicon_channel")
+                    .resizable()
+                    .frame(minWidth: 100, idealWidth: 200, maxWidth: 300, minHeight: 100, idealHeight: 200, maxHeight: 300, alignment: .center)
+                    .scaledToFit()
+            }
             Text(contact.contactJid)
             if(!contact.isGroup) {
-                Text("Zuletzt gesehen: \(contact.lastInteractionTime)")
+                if(contact.lastInteractionTime.timeIntervalSince1970 > 0) {
+                    Text(String(format: NSLocalizedString("Last seen: %@", comment: ""),
+                        DateFormatter.localizedString(from: contact.lastInteractionTime, dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short)))
+                } else {
+                    Text(String(format: NSLocalizedString("Last seen: %@", comment: ""), NSLocalizedString("now", comment: "")))
+                }
             }
             HStack {
                 Spacer()

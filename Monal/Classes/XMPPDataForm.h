@@ -21,9 +21,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (atomic, strong) NSString* type;
 @property (atomic, strong) NSString* formType;
--(void) setFieldWithDictionary:(NSDictionary*) field;
--(void) setField:(NSString*) name withValue:(NSString*) value;
--(void) setField:(NSString*) name withType:(NSString* _Nullable) type andValue:(NSString*) value;
+@property (atomic, strong) NSString* _Nullable title;
+@property (atomic, strong) NSString* _Nullable instructions;
+-(MLXMLNode*) setFieldWithDictionary:(NSDictionary*) field;
+-(MLXMLNode*) setField:(NSString*) name withValue:(NSString*) value;
+-(MLXMLNode*) setField:(NSString*) name withType:(NSString* _Nullable) type andValue:(NSString*) value;
 -(NSDictionary* _Nullable) getField:(NSString*) name;
 -(void) removeField:(NSString*) name;
 @property (strong, readonly) NSString* description;

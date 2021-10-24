@@ -191,30 +191,37 @@ static NSRegularExpression* attributeFilterRegex;
     [_attributes setObject:[xmlns copy] forKey:kXMLNS];
 }
 
--(void) addChild:(MLXMLNode*) child
+-(MLXMLNode*) addChild:(MLXMLNode*) child
 {
     if(!child)
-        return;
-    MLXMLNode* copy = [child copy];
-    copy.parent = self;
+        return nil;
+    MLXMLNode* insertedChild = [child copy];
+    insertedChild.parent = self;
     //namespace inheritance (will be stripped by XMLString later on)
     //we do this here to make sure manual created nodes always have a namespace like the nodes created by the xml parser do
-    if(!copy.attributes[@"xmlns"])
-        copy.attributes[@"xmlns"] = _attributes[@"xmlns"];
-    [_children addObject:copy];
+    if(!insertedChild.attributes[@"xmlns"])
+        insertedChild.attributes[@"xmlns"] = _attributes[@"xmlns"];
+    [_children addObject:insertedChild];
     [self invalidateUpstreamCache];
     //this one can be removed if the query path component ".." is removed from our language
-    [copy invalidateDownstreamCache];
+    [insertedChild invalidateDownstreamCache];
+    return insertedChild;
 }
 
--(void) removeChild:(MLXMLNode*) child
+-(MLXMLNode*) removeChild:(MLXMLNode*) child
 {
+    MLXMLNode* foundChild = nil;
     if(!child)
-        return;
+        return foundChild;
     NSInteger index = [_children indexOfObject:child];
     if(index != NSNotFound)
+    {
+        foundChild = [_children objectAtIndex:index];
+        foundChild.parent = nil;
         [_children removeObjectAtIndex:index];
-    [self invalidateUpstreamCache];
+        [self invalidateUpstreamCache];
+    }
+    return foundChild;
 }
 
 -(NSArray*) children

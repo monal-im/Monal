@@ -378,7 +378,8 @@ void logException(NSException* exception)
             @"urn:xmpp:idle:1",
             @"http://jabber.org/protocol/chatstates",
             @"jabber:iq:version",
-            @"urn:xmpp:chat-markers:0"
+            @"urn:xmpp:chat-markers:0",
+            @"urn:xmpp:eme:0"
         ];
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });

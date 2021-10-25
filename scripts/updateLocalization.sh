@@ -3,10 +3,10 @@
 cd "$(dirname "$0")"
 cd ../Monal
 
-for folder in "localization/external" "shareSheet-iOS/localization/external"; do
-    git fetch origin
-    git reset --hard origin/main
-done
+# for folder in "localization/external" "shareSheet-iOS/localization/external"; do
+#     git fetch origin
+#     git reset --hard origin/main
+# done
 
 # Run bartycrouch
 # https://github.com/Flinesoft/BartyCrouch#exclude-specific-views--nslocalizedstrings-from-localization
@@ -24,8 +24,8 @@ for folder in "localization/external" "shareSheet-iOS/localization/external"; do
             # Remove default comments that are not supported by weblate
             sed -i '' '/^\/\* No comment provided by engineer\. \*\/$/d' $file
     done
-    git add -u
-    git status
-    git commit -m "Updated translations"
-    git push
+#     git add -u
+#     git status
+#     git commit -m "Updated translations"
+#     git push
 done

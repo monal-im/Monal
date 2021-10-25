@@ -24,6 +24,57 @@
 @import AVFoundation;
 @import UniformTypeIdentifiers.UTCoreTypes;
 
+enum kSettingSection {
+    kSettingSectionAvatar,
+    kSettingSectionAccount,
+    kSettingSectionGeneral,
+    kSettingSectionAdvanced,
+    kSettingSectionEdit,
+    kSettingSectionCount
+};
+
+enum kSettingsAvatarRows {
+    SettingsAvatarRowsCnt
+};
+
+enum kSettingsAccountRows {
+    SettingsEnabledRow,
+    SettingsDisplayNameRow,
+    SettingsStatusMessageRow,
+    SettingsServerDetailsRow,
+    SettingsAccountRowsCnt
+};
+
+enum kSettingsGeneralRows {
+    SettingsChangePasswordRow,
+    SettingsOmemoKeysRow,
+    SettingsMAMPreferencesRow,
+    SettingsBlockedUsersRow,
+    SettingsGeneralRowsCnt
+};
+
+enum kSettingsAdvancedRows {
+    SettingsJidRow,
+    SettingsPasswordRow,
+    SettingsServerRow,
+    SettingsPortRow,
+    SettingsDirectTLSRow,
+    SettingsResourceRow,
+    SettingsClearOmemoSessionRow,
+    SettingsAdvancedRowsCnt
+};
+
+enum kSettingsEditRows {
+    SettingsClearHistoryRow,
+    SettingsDeleteAccountRow,
+    SettingsEditRowsCnt
+};
+
+//this will hold all disabled rows of all enums (this is needed because the code below still references these rows)
+enum DummySettingsRows {
+    DummySettingsRowsBegin = 100,
+};
+
 @interface MLXMPPConnection ()
 @property (nonatomic) MLXMPPServer* server;
 @end
@@ -396,82 +447,81 @@
 
 #pragma mark table view datasource methods
 
-- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+-(CGFloat) tableView:(UITableView*) tableView heightForHeaderInSection:(NSInteger) section
 {
     if (section == 0)
-    {
         return 100;
-    }
     else
-    {
         return UITableViewAutomaticDimension;
-    }
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat) tableView:(UITableView*) tableView heightForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     return 40;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     DDLogVerbose(@"xmpp edit view section %ld, row %ld", indexPath.section, indexPath.row);
 
-    MLSwitchCell* thecell = (MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+    MLSwitchCell* thecell = (MLSwitchCell*)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
     [thecell clear];
 
     // load cells from interface builder
-    if(indexPath.section == 1)
+    if(indexPath.section == kSettingSectionAccount)
     {
         //the user
         switch (indexPath.row)
         {
-            case 0: {
+            case SettingsEnabledRow: {
                 [thecell initCell:NSLocalizedString(@"Enabled", @"") withToggle:self.enabled andTag:1];
                 break;
             }
-            case 1: {
+            case SettingsDisplayNameRow: {
                 [thecell initCell:NSLocalizedString(@"Display Name", @"") withTextField:self.rosterName andPlaceholder:@"" andTag:1];
                 thecell.cellLabel.text = NSLocalizedString(@"Display Name", @"");
                 thecell.textInputField.keyboardType = UIKeyboardTypeAlphabet;
                 break;
             }
-            case 2: {
+            case SettingsStatusMessageRow: {
                 [thecell initCell:NSLocalizedString(@"Status Message", @"") withTextField:self.statusMessage andPlaceholder:NSLocalizedString(@"Your status", @"") andTag:6];
+                break;
+            }
+            case SettingsServerDetailsRow: {
+                [thecell initTapCell:NSLocalizedString(@"Server Support Details", @"")];
+                thecell.accessoryType = UITableViewCellAccessoryDetailButton;
                 break;
             }
         }
     }
-    else if(indexPath.section == 2)
+    else if(indexPath.section == kSettingSectionGeneral)
     {
         switch (indexPath.row)
         {
-            // general
-            case 0: {
+            case SettingsChangePasswordRow: {
                 [thecell initTapCell:NSLocalizedString(@"Change Password", @"")];
                 thecell.cellLabel.text = NSLocalizedString(@"Change Password", @"");
                 break;
             }
-            case 1: {
+            case SettingsOmemoKeysRow: {
                 [thecell initTapCell:NSLocalizedString(@"Encryption Keys (OMEMO)", @"")];
                 break;
             }
-            case 2: {
+            case SettingsMAMPreferencesRow: {
                 [thecell initTapCell:NSLocalizedString(@"Message Archive Preferences", @"")];
                 break;
             }
-            case 3: {
+            case SettingsBlockedUsersRow: {
                 [thecell initTapCell:NSLocalizedString(@"Blocked Users", @"")];
                 break;
             }
         }
     }
-    else if(indexPath.section == 3)
+    else if(indexPath.section == kSettingSectionAdvanced)
     {
         switch (indexPath.row)
         {
-            //advanced
-            case 0: {
+            case SettingsJidRow: {
                 if(self.editMode)
                 {
                     // don't allow jid editing
@@ -485,37 +535,36 @@
                 }
                 break;
             }
-            case 1: {
+            case SettingsPasswordRow: {
                 [thecell initCell:NSLocalizedString(@"Password", @"") withTextField:self.password secureEntry:YES andPlaceholder:NSLocalizedString(@"Enter your password here", @"") andTag:3];
                 break;
             }
-            case 2:  {
+            case SettingsServerRow:  {
                 [thecell initCell:NSLocalizedString(@"Server", @"") withTextField:self.server andPlaceholder:NSLocalizedString(@"Optional Hardcoded Hostname", @"") andTag:4];
-                thecell.accessoryType = UITableViewCellAccessoryDetailButton;
                 break;
             }
-            case 3:  {
+            case SettingsPortRow:  {
                 [thecell initCell:NSLocalizedString(@"Port", @"") withTextField:self.port andPlaceholder:NSLocalizedString(@"Optional Port", @"") andTag:5];
                 break;
             }
-            case 4: {
-                [thecell initCell:NSLocalizedString(@"Direct TLS", @"") withToggle:self.directTLS andTag:2];
+            case SettingsDirectTLSRow: {
+                [thecell initCell:NSLocalizedString(@"Always use direct TLS, not STARTTLS", @"") withToggle:self.directTLS andTag:2];
                 break;
             }
-            case 5: {
+            case SettingsResourceRow: {
                 [thecell initCell:NSLocalizedString(@"Resource", @"") withLabel:self.resource];
                 break;
             }
-            case 6: {
+            case SettingsClearOmemoSessionRow: {
                 [thecell initCell:NSLocalizedString(@"Clear own omemo session", @"DEBUG - XMPPEdit") withLabel:nil];
                 break;
             }
         }
     }
-    else if (indexPath.section == 4 && self.editMode == YES)
+    else if (indexPath.section == kSettingSectionEdit && self.editMode == YES)
     {
         switch (indexPath.row) {
-            case 0:
+            case SettingsClearHistoryRow:
             {
                 MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
                 buttonCell.buttonText.text = NSLocalizedString(@"Clear Chat History", @"");
@@ -524,7 +573,7 @@
                 buttonCell.tag = 0;
                 return buttonCell;
             }
-            case 1:
+            case SettingsDeleteAccountRow:
             {
                 MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
                 buttonCell.buttonText.text = NSLocalizedString(@"Delete Account", @"");
@@ -537,17 +586,16 @@
     }
     thecell.textInputField.delegate = self;
     if(thecell.textInputField.hidden == YES)
-    {
         [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
-    }
     return thecell;
 }
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+-(NSInteger)numberOfSectionsInTableView:(UITableView*) tableView
+{
     return [self.sectionArray count];
 }
 
--(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+-(UIView*) tableView:(UITableView*) tableView viewForHeaderInSection:(NSInteger) section
 {
     if (section == 0)
     {
@@ -580,71 +628,78 @@
     }
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+-(NSString*) tableView:(UITableView*) tableView titleForHeaderInSection:(NSInteger) section
 {
     return [self.sectionArray objectAtIndex:section];
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+-(NSInteger) tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
 {
-    //avatar image
-    if(section == 0)
-        return 0;
-    // account
-    else if(section == 1)
-        return 3;
-    // General settings
-    else if(section == 2)
-        return 4;
-    // Advanced settings
-    else if(section == 3)
-        return 7;
+    if(section == kSettingSectionAvatar)
+        return SettingsAvatarRowsCnt;
+    else if(section == kSettingSectionAccount)
+        return SettingsAccountRowsCnt;
+    else if(section == kSettingSectionGeneral)
+        return SettingsGeneralRowsCnt;
+    else if(section == kSettingSectionAdvanced)
+        return SettingsAdvancedRowsCnt;
+    else if(section == kSettingSectionEdit && self.editMode)
+        return SettingsEditRowsCnt;
     else
-        return self.editMode ? 2 : 0;
+        return 0;
 }
 
 #pragma mark -  table view delegate
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
+-(void) tableView:(UITableView*) tableView didSelectRowAtIndexPath:(NSIndexPath*) newIndexPath
 {
     DDLogVerbose(@"selected log section %ld , row %ld", newIndexPath.section, newIndexPath.row);
     
-    if(newIndexPath.section == 2)
+    if(newIndexPath.section == kSettingSectionAccount)
     {
         switch(newIndexPath.row)
         {
-            case 0:
+            case SettingsServerDetailsRow:
+                [self performSegueWithIdentifier:@"showServerDetails" sender:self];
+                break;
+        }
+    }
+    else if(newIndexPath.section == kSettingSectionGeneral)
+    {
+        switch(newIndexPath.row)
+        {
+            case SettingsChangePasswordRow:
                 [self performSegueWithIdentifier:@"showPassChange" sender:self];
                 break;
-            case 1:
+            case SettingsOmemoKeysRow:
                 [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
                 break;
-            case 2:
+            case SettingsMAMPreferencesRow:
                 [self performSegueWithIdentifier:@"showMAMPref" sender:self];
                 break;
-            case 3:
+            case SettingsBlockedUsersRow:
                 [self performSegueWithIdentifier:@"showBlockedUsers" sender:self];
                 break;
         }
     }
-    else if(newIndexPath.section == 3)
+    else if(newIndexPath.section == kSettingSectionAdvanced)
     {
         switch(newIndexPath.row)
         {
-            case 6:
+            case SettingsClearOmemoSessionRow:
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
                 xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
                 [account.omemo clearAllSessionsForJid:account.connectionProperties.identity.jid];
                 break;
         }
     }
-    else if(newIndexPath.section == 4)
+    else if(newIndexPath.section == kSettingSectionEdit)
     {
         switch(newIndexPath.row)
         {
-            case 0:
+            case SettingsClearHistoryRow:
                 [self clearHistoryClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
                 break;
-            case 1:
+            case SettingsDeleteAccountRow:
                 [self deleteAccountClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
                 break;
         }
@@ -652,13 +707,13 @@
 
 }
 
--(void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
+-(void) tableView:(UITableView*) tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath*) indexPath
 {
-    if(indexPath.section == 3)
+    if(indexPath.section == kSettingSectionAccount)
     {
         switch(indexPath.row)
         {
-            case 2:
+            case SettingsServerDetailsRow:
                 [self performSegueWithIdentifier:@"showServerDetails" sender:self];
                 break;
         }
@@ -668,7 +723,7 @@
 
 #pragma mark - segeue
 
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+-(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     if([segue.identifier isEqualToString:@"showServerDetails"])
     {
@@ -710,7 +765,7 @@
 
 #pragma mark -  text input  fielddelegate
 
-- (void)textFieldDidBeginEditing:(UITextField *)textField
+-(void) textFieldDidBeginEditing:(UITextField*) textField
 {
     self.currentTextField = textField;
     if(textField.tag == 1) //user input field
@@ -725,7 +780,7 @@
     }
 }
 
-- (void)textFieldDidEndEditing:(UITextField *)textField
+-(void) textFieldDidEndEditing:(UITextField*) textField
 {
     switch (textField.tag) {
         case 1: {
@@ -759,15 +814,14 @@
     }
 }
 
-- (BOOL)textFieldShouldReturn:(UITextField *)textField
+-(BOOL) textFieldShouldReturn:(UITextField*) textField
 {
-
     [textField resignFirstResponder];
     return true;
 }
 
 
--(void) toggleSwitch:(id)sender
+-(void) toggleSwitch:(id) sender
 {
     UISwitch* toggle = (UISwitch*) sender;
 
@@ -796,44 +850,42 @@
 }
 
 #pragma mark - doc picker
--(void)pickImgFile:(id)sender
+-(void) pickImgFile:(id) sender
 {
     [self presentViewController:self.imagePicker animated:YES completion:nil];
-
     return;
 }
 
-- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls
+-(void) documentPicker:(UIDocumentPickerViewController*) controller didPickDocumentsAtURLs:(NSArray<NSURL*>*) urls
 {
-    NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] init];
-    [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
-        NSData *data =[NSData dataWithContentsOfURL:newURL];
-        UIImage *pickImg = [UIImage imageWithData:data];
+    NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
+    [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL* _Nonnull newURL) {
+        NSData* data =[NSData dataWithContentsOfURL:newURL];
+        UIImage* pickImg = [UIImage imageWithData:data];
         [self useAvatarImage:pickImg];
     }];
 }
 
--(void)getPhotoAction:(UIGestureRecognizer *) recognizer
+-(void) getPhotoAction:(UIGestureRecognizer*) recognizer
 {
-    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
-
-    if (!account) return;
-    
-    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+    if (!account)
+        return;
+    UIAlertController* actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
                                                                             message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
 #if TARGET_OS_MACCATALYST
     [self pickImgFile:nil];
 #else
-    UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+    UIImagePickerController* imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate = self;
 
-    UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
         imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
         [self presentViewController:imagePicker animated:YES completion:nil];
     }];
 
-    UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
         imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
         [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
             if(granted)
@@ -861,14 +913,14 @@
     [self presentViewController:actionControll animated:YES completion:nil];
 }
 
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *, id> *)info
+-(void) imagePickerController:(UIImagePickerController*) picker didFinishPickingMediaWithInfo:(NSDictionary<NSString*, id>*) info
 {
-    NSString *mediaType = info[UIImagePickerControllerMediaType];
+    NSString* mediaType = info[UIImagePickerControllerMediaType];
     if([mediaType isEqualToString:(NSString*) kUTTypeImage]) {
-        UIImage *selectedImage = info[UIImagePickerControllerEditedImage];
+        UIImage* selectedImage = info[UIImagePickerControllerEditedImage];
         if(!selectedImage) selectedImage = info[UIImagePickerControllerOriginalImage];
         
-        TOCropViewController *cropViewController = [[TOCropViewController alloc] initWithImage:selectedImage];
+        TOCropViewController* cropViewController = [[TOCropViewController alloc] initWithImage:selectedImage];
         cropViewController.delegate = self;
         cropViewController.transitioningDelegate = nil;
         //set square aspect ratio and don't let the user change that (this is a avatar which should be square for maximum compatibility with other clients)
@@ -885,7 +937,7 @@
         [picker dismissViewControllerAnimated:YES completion:nil];
 }
 
--(void) imagePickerControllerDidCancel:(UIImagePickerController *)picker
+-(void) imagePickerControllerDidCancel:(UIImagePickerController*) picker
 {
     [picker dismissViewControllerAnimated:YES completion:nil];
 }
@@ -924,9 +976,7 @@
 
 #pragma mark -- TOCropViewController delagate
 
-- (void)cropViewController:(nonnull TOCropViewController *)cropViewController
-    didCropToImage:(nonnull UIImage *)image withRect:(CGRect)cropRect
-                     angle:(NSInteger)angle
+-(void) cropViewController:(nonnull TOCropViewController*) cropViewController didCropToImage:(UIImage* _Nonnull) image withRect:(CGRect) cropRect angle:(NSInteger) angle
 {
     [self useAvatarImage:image];
     [self dismissViewControllerAnimated:YES completion:nil];

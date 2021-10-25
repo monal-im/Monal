@@ -2766,6 +2766,9 @@ NSString* const kStanza = @"stanza";
     [self queryDisco];
     [self purgeOfflineStorage];
     [self sendPresence];            //this will trigger a replay of offline stanzas on prosody (no XEP-0013 support anymore 😡)
+    //the offline messages will come in *after* we started to query mam, because the disco result comes in first (and this is what triggers mam catchup)
+    //--> no holes in our history can be caused by these offline messages in conjunction with mam catchup,
+    //    however all offline messages will be received twice (as offline message AND via mam catchup)
     
     //send own csi state (this must be done *after* presences to not delay/filter incoming presence flood needed to prime our database
     [self sendCurrentCSIState];

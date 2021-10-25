@@ -27,9 +27,10 @@ void logException(NSException* exception);
 
 +(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id _Nullable) additionalData;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
-+(NSDictionary*) pushServer;
-+(NSString*) stringFromToken:(NSData*) tokenIn;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
++(NSDictionary*) pushServer;
++(NSString*) bytesToHuman:(int64_t) bytes;
++(NSString*) stringFromToken:(NSData*) tokenIn;
 +(void) configureFileProtectionFor:(NSString*) file;
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
 +(void) clearSyncErrorsOnAppForeground;

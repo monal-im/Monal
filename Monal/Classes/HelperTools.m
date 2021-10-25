@@ -54,12 +54,42 @@ void logException(NSException* exception)
     [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@(isSevere)}];
 }
 
++(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString*) description
+{
+    if(description == nil || [description isEqualToString:@""])
+        description = @"XMPP Error";
+    NSString* errorReason = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
+    NSString* errorText = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
+    NSString* message = [NSString stringWithFormat:@"%@: %@", description, errorReason];
+    if(errorText && ![errorText isEqualToString:@""])
+        message = [NSString stringWithFormat:@"%@: %@ (%@)", description, errorReason, errorText];
+    return message;
+}
+
 +(NSDictionary*) pushServer
 {
     return @{
         @"jid": @"ios13push.monal.im",
         @"url": @"https://ios13push.monal.im:5281/push_appserver",
     };
+}
+
++(NSString*) bytesToHuman:(int64_t) bytes
+{
+    NSArray* suffixes = @[@"B", @"KiB", @"MiB", @"GiB", @"TiB", @"PiB", @"EiB"];
+    NSString* prefix = @"";
+    double size = bytes;
+    if(size < 0)
+    {
+        prefix = @"-";
+        size *= -1;
+    }
+    for(NSString* suffix in suffixes)
+        if(size < 1024)
+            return [NSString stringWithFormat:@"%@%.1F %@", prefix, size, suffix];
+        else
+            size /= 1024.0;
+    return [NSString stringWithFormat:@"%lld B", bytes];
 }
 
 +(NSString*) stringFromToken:(NSData*) tokenIn
@@ -73,18 +103,6 @@ void logException(NSException* exception)
         counter++;
     }
     return token;
-}
-
-+(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString*) description
-{
-    if(description == nil || [description isEqualToString:@""])
-        description = @"XMPP Error";
-    NSString* errorReason = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
-    NSString* errorText = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
-    NSString* message = [NSString stringWithFormat:@"%@: %@", description, errorReason];
-    if(errorText && ![errorText isEqualToString:@""])
-        message = [NSString stringWithFormat:@"%@: %@ (%@)", description, errorReason, errorText];
-    return message;
 }
 
 +(void) configureFileProtectionFor:(NSString*) file

@@ -598,8 +598,8 @@
 		3D2B186F262A12A10092E181 /* MLUploadQueueItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueItem.m; sourceTree = "<group>"; };
 		3D4BC2C72626294200292F14 /* MLUploadQueueDocumentCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueDocumentCell.h; sourceTree = "<group>"; };
 		3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueDocumentCell.m; sourceTree = "<group>"; };
-		3D65B78C27234B74005A30F4 /* ContactDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
-		3D65B790272350F0005A30F4 /* ContactDetailsInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailsInterface.swift; sourceTree = "<group>"; };
+		3D65B78C27234B74005A30F4 /* ContactDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContactDetails.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
+		3D65B790272350F0005A30F4 /* ContactDetailsInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContactDetailsInterface.swift; path = ContactDetailsInterface.swift; sourceTree = "<group>"; };
 		3D9EE5322617677700135D46 /* MLUploadQueueImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueImageCell.h; sourceTree = "<group>"; };
 		3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueImageCell.m; sourceTree = "<group>"; };
 		3DBAD1E42627A2BC0078BD27 /* MLUploadQueueBaseCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueBaseCell.h; sourceTree = "<group>"; };
@@ -694,7 +694,7 @@
 		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
 		C1943A4A25309A9D0036172F /* MLReloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReloadCell.h; sourceTree = "<group>"; };
 		C1943A4B25309A9D0036172F /* MLReloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLReloadCell.m; sourceTree = "<group>"; };
-		C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailsHeader.swift; sourceTree = "<group>"; };
+		C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContactDetailsHeader.swift; path = ContactDetailsHeader.swift; sourceTree = "<group>"; };
 		C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatViewHelper.h; sourceTree = "<group>"; };
 		C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatViewHelper.m; sourceTree = "<group>"; };
 		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
@@ -1163,6 +1163,9 @@
 				26EC40FB17BDD8560031304D /* ContactDetails.m */,
 				268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */,
 				268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */,
+				3D65B790272350F0005A30F4 /* ContactDetailsInterface.swift */,
+				3D65B78C27234B74005A30F4 /* ContactDetails.swift */,
+				C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */,
 				2673CABB21D8617300256507 /* MLContactDetailHeader.h */,
 				2673CABC21D8617300256507 /* MLContactDetailHeader.m */,
 				2673CABE21D9242E00256507 /* MLKeysTableViewController.h */,
@@ -1193,7 +1196,6 @@
 		26B2A4B41B73040000272E63 /* Monal-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				3D65B790272350F0005A30F4 /* ContactDetailsInterface.swift */,
 				C1E4654424EE515200CA5AAF /* GeneralLocalization */,
 				2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */,
 				26B2A4BA1B73061400272E63 /* Images.xcassets */,
@@ -1206,8 +1208,6 @@
 				26D59D9220714F32006F1DEE /* UIColor+Theme.m */,
 				2633CB4523215558006D0277 /* MLXMPPActivityItem.h */,
 				2633CB4623215558006D0277 /* MLXMPPActivityItem.m */,
-				C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */,
-				3D65B78C27234B74005A30F4 /* ContactDetails.swift */,
 			);
 			name = "Monal-iOS";
 			sourceTree = "<group>";

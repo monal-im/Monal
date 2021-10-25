@@ -488,7 +488,7 @@ enum DummySettingsRows {
                 break;
             }
             case SettingsServerDetailsRow: {
-                [thecell initTapCell:NSLocalizedString(@"Server Support Details", @"")];
+                [thecell initTapCell:NSLocalizedString(@"Protocol support of your server (XEPs)", @"")];
                 thecell.accessoryType = UITableViewCellAccessoryDetailButton;
                 break;
             }

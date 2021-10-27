@@ -19,7 +19,7 @@
 
 @class MLQRCodeScanner;
 
-#define FIRST_LOGIN_TIMEOUT 60.0
+#define FIRST_LOGIN_TIMEOUT 30.0
 
 @interface MLLogInViewController ()
 

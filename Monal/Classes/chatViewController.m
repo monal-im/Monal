@@ -1807,10 +1807,9 @@ enum msgSentState {
         if(self.moreMessagesAvailable && !self.viewIsScrolling) {
             [self loadOldMsgHistory];
             // Allow loading of more messages after a few seconds
-            monal_void_block_t __block allowAutoLoading = ^{
+            createTimer(10, (^{
                 self.viewIsScrolling = NO;
-            };
-            createTimer(10, allowAutoLoading);
+            }));
         }
     }
 }

@@ -546,18 +546,16 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if(self.activeChats != nil && _contactToOpen != nil)
     {
         // the timer makes sure the view is properly initialized when opning the chat
-        createTimer(0.5, (^{
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(_contactToOpen != nil)
-                {
-                    DDLogDebug(@"Opening chat for contact %@", [contact contactJid]);
-                    // open new chat
-                    [(ActiveChatsViewController*)self.activeChats presentChatWithContact:_contactToOpen];
-                }
-                else
-                    DDLogDebug(@"_contactToOpen changed to nil, not opening chat for contact %@", [contact contactJid]);
-                _contactToOpen = nil;
-            });
+        createQueuedTimer(0.5, dispatch_get_main_queue(), (^{
+            if(_contactToOpen != nil)
+            {
+                DDLogDebug(@"Opening chat for contact %@", [contact contactJid]);
+                // open new chat
+                [(ActiveChatsViewController*)self.activeChats presentChatWithContact:_contactToOpen];
+            }
+            else
+                DDLogDebug(@"_contactToOpen changed to nil, not opening chat for contact %@", [contact contactJid]);
+            _contactToOpen = nil;
         }));
     }
     else

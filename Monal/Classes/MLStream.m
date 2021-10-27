@@ -257,6 +257,9 @@
         sec_protocol_options_add_tls_application_protocol(options, "xmpp-client");
         sec_protocol_options_set_tls_resumption_enabled(options, 1);
         sec_protocol_options_set_tls_tickets_enabled(options, 1);
+        sec_protocol_options_set_tls_ocsp_enabled(options, 1);
+        sec_protocol_options_set_tls_false_start_enabled(options, 1);
+        sec_protocol_options_set_min_tls_protocol_version(options, tls_protocol_version_TLSv12);
     }, ^(nw_protocol_options_t tcp_options) {
         nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
         nw_tcp_options_set_no_delay(tcp_options, YES);              //disable nagle's algorithm

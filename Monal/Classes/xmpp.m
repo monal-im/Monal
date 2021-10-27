@@ -47,7 +47,7 @@
 @import AVFoundation;
 
 #define STATE_VERSION 5
-#define CONNECT_TIMEOUT 8.0
+#define CONNECT_TIMEOUT 10.0
 #define IQ_TIMEOUT 20.0
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";
@@ -2077,7 +2077,7 @@ NSString* const kStanza = @"stanza";
                 DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
                 DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
             }
-            usleep(1000000);        //try to avoid race conditions between tls setup and stream writes by sleeping some time
+            usleep(500000);        //try to avoid race conditions between tls setup and stream writes by sleeping some time
             self->_startTLSComplete=YES;
             
             //stop everything coming after this (we don't want to process stanzas that came in *before* a secure TLS context was established!)

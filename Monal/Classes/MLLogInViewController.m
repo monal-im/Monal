@@ -11,6 +11,7 @@
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
 #import "xmpp.h"
+#import "MLNotificationQueue.h"
 
 @import SAMKeychain;
 @import QuartzCore;
@@ -157,6 +158,8 @@
             {
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
                 [[DataLayer sharedInstance] removeAccount:self.accountNo];
+                // trigger UI removal
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             }
         }));
     }
@@ -246,6 +249,8 @@
             {
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
                 [[DataLayer sharedInstance] removeAccount:self.accountNo];
+                // trigger UI removal
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             }
         });
     }

@@ -143,23 +143,21 @@
         [SAMKeychain setPassword:password forService:kMonalKeychainName account:self.accountNo];
         [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
         
-        self.cancelFirstLoginTimer = createTimer(FIRST_LOGIN_TIMEOUT, (^{
+        self.cancelFirstLoginTimer = createQueuedTimer(FIRST_LOGIN_TIMEOUT, dispatch_get_main_queue(), (^{
             DDLogError(@"First login took too long, cancelling and displaying error message to user");
             self.cancelFirstLoginTimer = nil;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.loginHUD.hidden=YES;
-                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                    [alert dismissViewControllerAnimated:YES completion:nil];
-                }]];
-                [self presentViewController:alert animated:YES completion:nil];
-                
-                if(self.accountNo)
-                {
-                    [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
-                    [[DataLayer sharedInstance] removeAccount:self.accountNo];
-                }
-            });
+            self.loginHUD.hidden=YES;
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Timeout Error", @"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:alert animated:YES completion:nil];
+            
+            if(self.accountNo)
+            {
+                [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+                [[DataLayer sharedInstance] removeAccount:self.accountNo];
+            }
         }));
     }
 }
@@ -231,6 +229,11 @@
     xmpp* xmppAccount = notification.object;
     if(xmppAccount != nil && [xmppAccount.accountNo isEqualToString:self.accountNo])
     {
+        if(self.cancelFirstLoginTimer != nil)
+        {
+            self.cancelFirstLoginTimer();
+            self.cancelFirstLoginTimer = nil;
+        }
         dispatch_async(dispatch_get_main_queue(), ^{
             self.loginHUD.hidden=YES;
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];

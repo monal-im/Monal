@@ -3307,7 +3307,7 @@ NSString* const kStanza = @"stanza";
 
 - (void)stream:(NSStream*) stream handleEvent:(NSStreamEvent) eventCode
 {
-    DDLogVerbose(@"Stream %@ has event", stream);
+    DDLogDebug(@"Stream %@ has event %lu", stream, (unsigned long)eventCode);
     switch(eventCode)
     {
         case NSStreamEventOpenCompleted:
@@ -3322,6 +3322,11 @@ NSString* const kStanza = @"stanza";
         //for writing
         case NSStreamEventHasSpaceAvailable:
         {
+            if(stream != _oStream)
+            {
+                DDLogDebug(@"Ignoring NSStreamEventHasSpaceAvailable event on wrong stream %@", stream);
+                break;
+            }
             [_sendQueue addOperationWithBlock: ^{
                 DDLogVerbose(@"Stream %@ has space to write", stream);
                 self->_streamHasSpace=YES;
@@ -3392,8 +3397,15 @@ NSString* const kStanza = @"stanza";
         
         case NSStreamEventEndEncountered:
         {
-            DDLogInfo(@"%@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
-            [self reconnect];
+            DDLogInfo(@"%@ Stream %@ encountered eof, trying to reconnect via parse queue in 1 second", [stream class], stream);
+            //use a timer to make sure the incoming data was pushed *through* the MLPipe and reached the parseQueue already when pushng our reconnct block onto the parseQueue
+            createTimer(1.0, (^{
+                //add this to parseQueue to make sure we completely handle everything that came in before the connection was closed, before handling the close event itself
+                [_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                    DDLogInfo(@"Inside parseQueue: %@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
+                    [self reconnect];
+                }]] waitUntilFinished:NO];
+            }));
             break;
         }
     }

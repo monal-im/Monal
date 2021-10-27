@@ -67,8 +67,7 @@
     
     DebugParser(@"Current stack: %@", _currentStack);
     //add new node to tree
-    if(depth > 0)
-        newNode.parent = [_currentStack lastObject];
+    newNode.parent = [_currentStack lastObject];
     [_currentStack addObject:newNode];
 }
 

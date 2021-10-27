@@ -194,6 +194,26 @@ static NSMutableDictionary* _typingNotifications;
             decrypted = [account.omemo decryptMessage:messageNode];
     }
     
+    //implement reading support for EME for messages having a fallback body (e.g. no silent key exchanges) that could not be decrypted
+    //this sets the var "decrypted" to the locally generated "fallback body"
+    if([messageNode check:@"body#"] && !decrypted && [messageNode check:@"{urn:xmpp:eme:0}encryption@namespace"])
+    {
+        if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"eu.siacs.conversations.axolotl"])
+            decrypted = NSLocalizedString(@"Message was encrypted with OMEMO but could not be decrypted", @"");
+        else
+        {
+            NSString* encryptionName = [messageNode check:@"{urn:xmpp:eme:0}encryption@name"] ? [messageNode findFirst:@"{urn:xmpp:eme:0}encryption@name"] : [messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"];
+            //hardcoded names mandated by XEP 0380
+            if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"urn:xmpp:otr:0"])
+                encryptionName = @"OTR";
+            else if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"jabber:x:encrypted"])
+                encryptionName = @"Legacy OpenPGP";
+            else if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"urn:xmpp:openpgp:0"])
+                encryptionName = @"OpenPGP for XMPP";
+            decrypted = [NSString stringWithFormat:NSLocalizedString(@"Message was encrypted with '%@' which isn't supported by Monal", @""), encryptionName];
+        }
+    }
+    
     NSString* buddyName = [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
     NSString* ownNick;
     NSString* actualFrom = messageNode.fromUser;

@@ -18,11 +18,14 @@
 
 @class MLQRCodeScanner;
 
+#define FIRST_LOGIN_TIMEOUT 60.0
+
 @interface MLLogInViewController ()
 
 @property (nonatomic, strong) MBProgressHUD* loginHUD;
 @property (nonatomic, weak) UITextField* activeField;
 @property (nonatomic, strong) NSString* accountNo;
+@property (nonatomic, strong) monal_void_block_t cancelFirstLoginTimer;
 
 @end
 
@@ -129,7 +132,6 @@
     [dic setObject:@YES forKey:kEnabled];
     [dic setObject:@NO forKey:kDirectTLS];
     
-    
     NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
     if(accountID)
     {
@@ -140,6 +142,25 @@
         [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
         [SAMKeychain setPassword:password forService:kMonalKeychainName account:self.accountNo];
         [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
+        
+        self.cancelFirstLoginTimer = createTimer(FIRST_LOGIN_TIMEOUT, (^{
+            DDLogError(@"First login took too long, cancelling and displaying error message to user");
+            self.cancelFirstLoginTimer = nil;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.loginHUD.hidden=YES;
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    [alert dismissViewControllerAnimated:YES completion:nil];
+                }]];
+                [self presentViewController:alert animated:YES completion:nil];
+                
+                if(self.accountNo)
+                {
+                    [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+                    [[DataLayer sharedInstance] removeAccount:self.accountNo];
+                }
+            });
+        }));
     }
 }
 
@@ -148,6 +169,11 @@
     xmpp* xmppAccount = notification.object;
     if(xmppAccount != nil && [xmppAccount.accountNo isEqualToString:self.accountNo])
     {
+        if(self.cancelFirstLoginTimer != nil)
+        {
+            self.cancelFirstLoginTimer();
+            self.cancelFirstLoginTimer = nil;
+        }
         [[NSNotificationCenter defaultCenter] removeObserver:self name:kXMPPError object:nil];
         [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
         dispatch_async(dispatch_get_main_queue(), ^{

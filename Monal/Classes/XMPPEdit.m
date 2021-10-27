@@ -75,8 +75,10 @@ enum DummySettingsRows {
     DummySettingsRowsBegin = 100,
 };
 
+
 @interface MLXMPPConnection ()
 @property (nonatomic) MLXMPPServer* server;
+@property (nonatomic) MLXMPPIdentity* identity;
 @end
 
 @interface XMPPEdit()
@@ -126,9 +128,7 @@ enum DummySettingsRows {
     _db = [DataLayer sharedInstance];
     
     if(![_accountno isEqualToString:@"-1"])
-    {
         self.editMode = YES;
-    }
     
     DDLogVerbose(@"got account number %@", _accountno);
     
@@ -155,9 +155,8 @@ enum DummySettingsRows {
 
         NSString* pass = [SAMKeychain passwordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@", self.accountno]];
 
-        if(pass) {
+        if(pass)
             self.password = pass;
-        }
 
         self.server = [settings objectForKey:@"server"];
 
@@ -276,25 +275,20 @@ enum DummySettingsRows {
 
     NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
     [dic setObject:domain.lowercaseString forKey:kDomain];
-
-    if(user) [dic setObject:user.lowercaseString forKey:kUsername];
-
-    if(self.server) {
-        [dic setObject:self.server  forKey:kServer];
-    }
-    if(self.port ) {
+    if(user)
+        [dic setObject:user.lowercaseString forKey:kUsername];
+    if(self.server)
+        [dic setObject:self.server forKey:kServer];
+    if(self.port)
         [dic setObject:self.port forKey:kPort];
-    }
-    
     [dic setObject:self.resource forKey:kResource];
-
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
     [dic setObject:[NSNumber numberWithBool:self.directTLS] forKey:kDirectTLS];
     [dic setObject:self.accountno forKey:kAccountID];
     if(self.rosterName)
         [dic setObject:self.rosterName forKey:kRosterName];
     if(self.statusMessage)
-    [dic setObject:self.statusMessage forKey:@"statusMessage"];
+        [dic setObject:self.statusMessage forKey:@"statusMessage"];
 
     if(!self.editMode)
     {
@@ -344,9 +338,10 @@ enum DummySettingsRows {
                 //it is okay to only update the server settings here:
                 //1) if the account was not yet connected, the settings from our db (which got updated with our dict prior
                 //      to connecting) will be used upon connecting 
-                //2) if the account is already connected, the settings will be updated (account.connectionProperties.server)
+                //2) if the account is already connected, the settings will be updated (account.connectionProperties.identity and account.connectionProperties.server)
                 //      and used when connecting next time (still using the old smacks session of course)
-                account.connectionProperties.server = [[MLXMPPServer alloc] initWithHost:[dic objectForKey:kServer] andPort:[dic objectForKey:kPort] andDirectTLS:[[dic objectForKey:kDirectTLS] boolValue]];
+                account.connectionProperties.identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@", [dic objectForKey:kUsername], [dic objectForKey:kDomain]] password:self.password andResource:[dic objectForKey:kResource]];
+                account.connectionProperties.server = [[MLXMPPServer alloc] initWithHost:(dic[kServer] == nil ? @"" : dic[kServer]) andPort:(dic[kPort] == nil ? @"5222" : dic[kPort]) andDirectTLS:[[dic objectForKey:kDirectTLS] boolValue]];
                 if(self.statusMessageChanged)
                     [account publishStatusMessage:self.statusMessage];
                 if(self.rosterNameChanged)

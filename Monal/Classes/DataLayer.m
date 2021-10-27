@@ -244,12 +244,15 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary
+-(BOOL) updateAccounWithDictionary:(NSDictionary*) dictionary
 {
     return [self.db boolWriteTransaction:^{
+//         // delete old self chat for omemo foreign key, if username or domain changed
+//         [self.db executeNonQuery:@"DELETE FROM buddylist WHERE account_id=? AND buddy_name=(SELECT (username || '@' || domain) FROM account WHERE account_id=? AND (username!=? OR domain!=?));" andArguments:@[[dictionary objectForKey:kAccountID], [dictionary objectForKey:kAccountID], [dictionary objectForKey:kUsername], [dictionary objectForKey:kDomain]]];
+        
         NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=? WHERE account_id=?;";
-        NSString* server = (NSString *) [dictionary objectForKey:kServer];
-        NSString* port = (NSString *)[dictionary objectForKey:kPort];
+        NSString* server = (NSString*)[dictionary objectForKey:kServer];
+        NSString* port = (NSString*)[dictionary objectForKey:kPort];
         NSArray* params = @[server == nil ? @"" : server,
                         port == nil ? @"5222" : port,
                         ((NSString*)[dictionary objectForKey:kUsername]),
@@ -261,7 +264,10 @@ static NSDateFormatter* dbFormatter;
                         [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
                         [dictionary objectForKey:kAccountID]
         ];
-        return [self.db executeNonQuery:query andArguments:params];
+        BOOL result = [self.db executeNonQuery:query andArguments:params];
+//         // insert self chat for omemo foreign key
+//         [self.db executeNonQuery:@"INSERT OR IGNORE INTO buddylist ('account_id', 'buddy_name', 'muc') SELECT account_id, (username || '@' || domain), 0 FROM account WHERE account_id=?;" andArguments:@[[dictionary objectForKey:kAccountID]]];
+        return result;
     }];
 }
 

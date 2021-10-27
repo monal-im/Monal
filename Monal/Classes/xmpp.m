@@ -2216,7 +2216,7 @@ NSString* const kStanza = @"stanza";
     if(!encrypt && !isUpload)
     {
         [self.omemo encryptMessage:messageNode withMessage:message toContact:contact.contactJid];
-        [self addEME:@"eu.siacs.conversations.axolotl" withName:@"OMEMO" toMessageNode:messageNode];
+        //[self addEME:@"eu.siacs.conversations.axolotl" withName:@"OMEMO" toMessageNode:messageNode];
     }
     // WARNING NOT FOR PRODUCTION END
 #endif

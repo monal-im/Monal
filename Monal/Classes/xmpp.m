@@ -3816,7 +3816,7 @@ NSString* const kStanza = @"stanza";
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@", self.accountNo, self.connectionProperties.identity.jid];
+    return [NSString stringWithFormat:@"%@[%@]: %@", self.accountNo, _internalID, self.connectionProperties.identity.jid];
 }
 
 @end

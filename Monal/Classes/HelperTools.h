@@ -11,9 +11,11 @@
 
 #include "metamacros.h"
 
-#define createTimer(timeout, handler, ...)						metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startTimer:timeout withHandler:handler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_createTimer(timeout, handler, __VA_ARGS__))
-#define _createTimer(timeout, handler, cancelHandler, ...)		[HelperTools startTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
-#define MLAssert(check, text, ...)                              metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools MLAssert:check withText:text andUserData:nil])([HelperTools MLAssert:check withText:text andUserData:metamacro_head(__VA_ARGS__)])
+#define createTimer(timeout, handler, ...)						            createQueuedTimer(timeout, nil, handler, __VA_ARGS__)
+#define createQueuedTimer(timeout, queue, handler, ...)						metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue])(_createQueuedTimer(timeout, queue, handler, __VA_ARGS__))
+#define _createQueuedTimer(timeout, queue, handler, cancelHandler, ...)		[HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue]
+
+#define MLAssert(check, text, ...)                                          metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools MLAssert:check withText:text andUserData:nil])([HelperTools MLAssert:check withText:text andUserData:metamacro_head(__VA_ARGS__)])
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -70,9 +72,8 @@ void logException(NSException* exception);
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title;
 +(CIImage*) createQRCodeFromString:(NSString*) input;
 
-//don't use these two directly, but via createTimer() makro
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andFile:(char*) file andLine:(int) line andFunc:(char*) func;
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func;
+//don't use these four directly, but via createTimer() makro
++(monal_void_block_t) startQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue;
 
 +(NSString*) appBuildVersionInfo;
 

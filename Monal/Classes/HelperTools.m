@@ -524,14 +524,11 @@ void logException(NSException* exception)
 }
 
 //don't use this directly, but via createTimer() makro
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andFile:(char*) file andLine:(int) line andFunc:(char*) func
++(monal_void_block_t) startQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue
 {
-    return [self startTimer:timeout withHandler:handler andCancelHandler:nil andFile:file andLine:line andFunc:func];
-}
-
-//don't use this directly, but via createTimer() makro
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func
-{
+    if(queue == nil)
+        queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    
     NSString* fileStr = [NSString stringWithFormat:@"%s", file];
     NSString* funcStr = [NSString stringWithFormat:@"%s", func];
     NSArray* filePathComponents = [fileStr pathComponents];
@@ -539,12 +536,11 @@ void logException(NSException* exception)
     if([filePathComponents count]>1)
         fileName = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
     
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     if(timeout<=0.001)
     {
         //DDLogVerbose(@"Timer timeout is smaller than 0.001, dispatching handler directly.");
         if(handler)
-            dispatch_async(q_background, ^{
+            dispatch_async(queue, ^{
                 handler();
             });
         return ^{ };        //empty cancel block because this "timer" already triggered
@@ -553,7 +549,7 @@ void logException(NSException* exception)
     NSString* uuid = [[NSUUID UUID] UUIDString];
     
     //DDLogDebug(@"setting up timer %@(%G)", uuid, timeout);
-    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, q_background);
+    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
     dispatch_source_set_timer(timer,
                               dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout*NSEC_PER_SEC)),
                               DISPATCH_TIME_FOREVER,

@@ -2988,7 +2988,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) getMAMPrefs
 {
-    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType];
     [query mamArchivePref];
     [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleMamPrefs)];
 }

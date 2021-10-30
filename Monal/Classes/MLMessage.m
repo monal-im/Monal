@@ -121,7 +121,7 @@
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@ {messageID: %@, stanzaID: %@} --> %@", self.accountId, self.participantJid, self.messageId, self.stanzaId, self.messageDBId];
+    return [NSString stringWithFormat:@"%@: %@ {messageID: %@, stanzaID: %@} --> %@", self.accountId, self.participantJid ? self.participantJid : self.buddyName, self.messageId, self.stanzaId, self.messageDBId];
 }
 
 @end

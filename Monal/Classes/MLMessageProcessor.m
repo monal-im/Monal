@@ -166,7 +166,10 @@ static NSMutableDictionary* _typingNotifications;
         messageId = [messageNode findFirst:@"/@id"];
     if(messageId == nil || !messageId.length)
     {
-        DDLogWarn(@"Empty ID using random UUID");
+        if([messageNode check:@"body#"])
+            DDLogWarn(@"Empty ID using random UUID");
+        else
+            DDLogInfo(@"Empty ID using random UUID");
         messageId = [[NSUUID UUID] UUIDString];
     }
     

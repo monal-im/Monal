@@ -45,7 +45,7 @@ static NSMutableDictionary* _RRCache;
     NSString* serviceDiscoveryString = [NSString stringWithFormat:@"_xmpp%@-client._tcp.%@", secure ? @"s" : @"", domain];
     res = DNSServiceQueryRecord(
         &sdRef,
-        0,
+        kDNSServiceFlagsReturnIntermediates,
         0,
         [serviceDiscoveryString UTF8String],
         kDNSServiceType_SRV,
@@ -128,6 +128,13 @@ static NSMutableDictionary* _RRCache;
         });
         
         @synchronized(self.discoveredServers) {
+            //early return
+            if([self.discoveredServers count] == 0)
+            {
+                DDLogInfo(@"No SRV records could be found, returning empty NSArray...");
+                return @[];
+            }
+            
             //we ignore weights here for simplicity
             [self.discoveredServers sortUsingDescriptors:@[[[NSSortDescriptor alloc] initWithKey:@"priority" ascending:YES]]];
         
@@ -175,14 +182,14 @@ static NSMutableDictionary* _RRCache;
         }
     }
     */
-    return [self doRealDnsDiscoverOnDomain:domain withTimeout:4ul];     //short query timeout (we are waiting for this query)
+    return [self doRealDnsDiscoverOnDomain:domain withTimeout:8ul];     //short query timeout (we are waiting for this query)
 }
 
 
 // ********************************************** C code below **********************************************
 
 
-char *ConvertDomainLabelToCString_withescape(const domainLabel* label, char *ptr, char esc)
+char* ConvertDomainLabelToCString_withescape(const domainLabel* label, char* ptr, char esc)
 {
     const u_char *      src = label->c;                         // Domain label we're reading
     const u_char        len = *src++;                           // Read length of this (non-null) label

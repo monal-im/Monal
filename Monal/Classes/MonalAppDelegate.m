@@ -859,10 +859,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogWarn(@"*** BGTASK EXPIRED ***");
         [DDLog flushLog];
         
+        BOOL background = [HelperTools isInBackground];
+        
         @synchronized(self) {
             //ui background tasks expire at the same time as background fetching tasks
             //--> we have to check if an ui bg task is running and don't disconnect, if so
-            BOOL background = [HelperTools isInBackground];
             if(background && _bgTask == UIBackgroundTaskInvalid)
             {
                 //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
@@ -880,6 +881,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             [DDLog flushLog];
             [task setTaskCompletedWithSuccess:!background];
             _bgFetch = nil;
+        }
+        
+        if(background)
+        {
+            //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
         }
     };
     
@@ -999,6 +1006,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                             [DDLog flushLog];
                             completionHandler(UIBackgroundFetchResultFailed);
                             [_wakeupCompletions removeObjectForKey:completionId];
+                            
+                            if(background)
+                            {
+                                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                            }
                         }
                         else
                             DDLogWarn(@"Wakeup completion %@ got already handled and was removed from list!", completionId);
@@ -1011,4 +1024,3 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 }
 
 @end
-

@@ -977,15 +977,28 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         {
                             DDLogInfo(@"Handling wakeup completion %@", completionId);
                             
-                            //remove this handler from list
-                            [_wakeupCompletions removeObjectForKey:completionId];
-                            
-                            //retry background check (now handling idle state because no running background timer is blocking it)
-                            [self checkIfBackgroundTaskIsStillNeeded];
+                            //we have to check if an ui bg task or background fetching task is running and don't disconnect, if so
+                            BOOL background = [HelperTools isInBackground];
+                            if(background && (_bgTask == UIBackgroundTaskInvalid || _bgFetch != nil))
+                            {
+                                //this has to be before account disconnects, to detect which accounts are/are not idle (e.g. don't have/have a sync error)
+                                BOOL wasIdle = [[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle];
+                                [HelperTools updateSyncErrorsWithDeleteOnly:NO];
+                                
+                                //disconnect all accounts to prevent TCP buffer leaking
+                                [[MLXMPPManager sharedInstance] disconnectAll];
+                                
+                                //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
+                                //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
+                                if(!wasIdle)
+                                    [self scheduleBackgroundFetchingTask];
+                            }
                             
                             //call completion (should be done *after* the idle state check because it could freeze the app)
                             DDLogInfo(@"Calling wakeup completion handler...");
+                            [DDLog flushLog];
                             completionHandler(UIBackgroundFetchResultFailed);
+                            [_wakeupCompletions removeObjectForKey:completionId];
                         }
                         else
                             DDLogWarn(@"Wakeup completion %@ got already handled and was removed from list!", completionId);

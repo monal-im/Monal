@@ -435,7 +435,8 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0392.html" />
-        <xmpp:status>planned</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>5.1</xmpp:since>
         <xmpp:note>XEP-0392: Consistent Color Generation</xmpp:note>
       </xmpp:SupportedXep>
     </implements>

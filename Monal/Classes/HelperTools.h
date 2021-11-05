@@ -31,6 +31,7 @@ void logException(NSException* exception);
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 +(NSDictionary*) pushServer;
++(UIColor*) generateColorFromJid:(NSString*) jid;
 +(NSString*) bytesToHuman:(int64_t) bytes;
 +(NSString*) stringFromToken:(NSData*) tokenIn;
 +(void) configureFileProtectionFor:(NSString*) file;

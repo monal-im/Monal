@@ -74,6 +74,34 @@ void logException(NSException* exception)
     };
 }
 
++(UIColor*) generateColorFromJid:(NSString*) jid
+{
+    //cache generated colors
+    static NSMutableDictionary* cache;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        cache = [[NSMutableDictionary alloc] init];
+    });
+    if(cache[jid] != nil)
+        return cache[jid];
+    
+    //XEP-0392 implementation
+    NSData* hash = [self sha1:[jid dataUsingEncoding:NSUTF8StringEncoding]];
+    uint16_t rawHue = CFSwapInt16LittleToHost(*(uint16_t*)[hash bytes]);
+    double hue = ((double)rawHue / 65536.0) * 360.0;
+    double saturation = 1.0;
+    double lightness = 0.5;
+    
+    //convert HSL to HSB/HSV color space
+    double brightness = lightness + saturation * MIN(lightness, 1-lightness);
+    double newSaturation = 0.0;
+    if(brightness != 0)
+        newSaturation = 2 * (1 - lightness / brightness);
+    
+    //create and return UIColor instance from HSB/HSV values
+    return cache[jid] = [[UIColor alloc] initWithHue:hue saturation:newSaturation brightness:brightness alpha:1.0];
+}
+
 +(NSString*) bytesToHuman:(int64_t) bytes
 {
     NSArray* suffixes = @[@"B", @"KiB", @"MiB", @"GiB", @"TiB", @"PiB", @"EiB"];
@@ -660,7 +688,7 @@ void logException(NSException* exception)
     return [[NSData alloc] initWithBase64EncodedString:string options:NSDataBase64DecodingIgnoreUnknownCharacters];
 }
 
-+ (NSString *)hexadecimalString:(NSData*) data
++(NSString*) hexadecimalString:(NSData*) data
 {
     /* Returns hexadecimal string of NSData. Empty string if data is empty.   */
     

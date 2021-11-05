@@ -146,6 +146,7 @@
 		541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CBF254AA0E700FD7B28 /* MLHandler.m */; };
 		541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CC3254D369100FD7B28 /* MLPubSubProcessor.h */; };
 		541E4CC7254D370200FD7B28 /* MLPubSubProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */; };
+		54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 544656BA2534910D006B2953 /* XMPPDataForm.m */; };
 		544656BD25349133006B2953 /* XMPPDataForm.h in Headers */ = {isa = PBXBuildFile; fileRef = 544656BC25349133006B2953 /* XMPPDataForm.h */; };
 		54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = 54507CE4255D8C14007092F4 /* MLFiletransfer.m */; };
@@ -598,8 +599,8 @@
 		3D2B186F262A12A10092E181 /* MLUploadQueueItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueItem.m; sourceTree = "<group>"; };
 		3D4BC2C72626294200292F14 /* MLUploadQueueDocumentCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueDocumentCell.h; sourceTree = "<group>"; };
 		3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueDocumentCell.m; sourceTree = "<group>"; };
-		3D65B78C27234B74005A30F4 /* ContactDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContactDetails.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
-		3D65B790272350F0005A30F4 /* ContactDetailsInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContactDetailsInterface.swift; path = ContactDetailsInterface.swift; sourceTree = "<group>"; };
+		3D65B78C27234B74005A30F4 /* ContactDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
+		3D65B790272350F0005A30F4 /* ContactDetailsInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailsInterface.swift; sourceTree = "<group>"; };
 		3D9EE5322617677700135D46 /* MLUploadQueueImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueImageCell.h; sourceTree = "<group>"; };
 		3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueImageCell.m; sourceTree = "<group>"; };
 		3DBAD1E42627A2BC0078BD27 /* MLUploadQueueBaseCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueBaseCell.h; sourceTree = "<group>"; };
@@ -623,6 +624,8 @@
 		541E4CBF254AA0E700FD7B28 /* MLHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLHandler.m; sourceTree = "<group>"; };
 		541E4CC3254D369100FD7B28 /* MLPubSubProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPubSubProcessor.h; sourceTree = "<group>"; };
 		541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPubSubProcessor.m; sourceTree = "<group>"; };
+		54391BB9273499E80050DAFB /* UIColor+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIColor+Extension.h"; path = "Classes/UIColor+Extension.h"; sourceTree = "<group>"; };
+		54391BBA273499E80050DAFB /* UIColor+Extension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIColor+Extension.m"; path = "Classes/UIColor+Extension.m"; sourceTree = "<group>"; };
 		544656BA2534910D006B2953 /* XMPPDataForm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPDataForm.m; sourceTree = "<group>"; };
 		544656BC25349133006B2953 /* XMPPDataForm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPDataForm.h; sourceTree = "<group>"; };
 		54507CE4255D8C14007092F4 /* MLFiletransfer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLFiletransfer.m; sourceTree = "<group>"; };
@@ -694,7 +697,7 @@
 		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
 		C1943A4A25309A9D0036172F /* MLReloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReloadCell.h; sourceTree = "<group>"; };
 		C1943A4B25309A9D0036172F /* MLReloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLReloadCell.m; sourceTree = "<group>"; };
-		C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContactDetailsHeader.swift; path = ContactDetailsHeader.swift; sourceTree = "<group>"; };
+		C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailsHeader.swift; sourceTree = "<group>"; };
 		C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatViewHelper.h; sourceTree = "<group>"; };
 		C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatViewHelper.m; sourceTree = "<group>"; };
 		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
@@ -1208,6 +1211,8 @@
 				26D59D9220714F32006F1DEE /* UIColor+Theme.m */,
 				2633CB4523215558006D0277 /* MLXMPPActivityItem.h */,
 				2633CB4623215558006D0277 /* MLXMPPActivityItem.m */,
+				54391BB9273499E80050DAFB /* UIColor+Extension.h */,
+				54391BBA273499E80050DAFB /* UIColor+Extension.m */,
 			);
 			name = "Monal-iOS";
 			sourceTree = "<group>";
@@ -2190,6 +2195,7 @@
 				2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */,
 				E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */,
 				C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */,
+				54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */,
 				C1B1982625AB31B800D5028E /* MLBlockedUsersTableViewController.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,

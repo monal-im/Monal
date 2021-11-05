@@ -2,7 +2,7 @@
 //  UIColor+Extension.h
 //  Monal
 //
-//  Created by ich on 04.11.21.
+//  Created by Thilo Molitor on 04.11.21.
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 
@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface UIColor (Extension)
-
+-(BOOL) isLightColor;
 @end
 
 NS_ASSUME_NONNULL_END

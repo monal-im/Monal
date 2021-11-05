@@ -10,11 +10,11 @@
 #import "HelperTools.h"
 #import "DataLayer.h"
 #import "AESGcm.h"
+#import "UIColor+Extension.h"
 
 
 @interface MLImageManager()
 @property (nonatomic, strong) NSCache* iconCache;
-@property (nonatomic, strong) UIImage* noIcon;
 @property (nonatomic, strong) NSString* documentsDirectory;
 @end
 
@@ -57,11 +57,6 @@
 
 #pragma mark cache
 
--(UIImage*) noIcon{
-    if(!_noIcon) _noIcon=[UIImage imageNamed:@"noicon"];
-    return _noIcon;
-}
-
 -(NSCache*) iconCache
 {
     if(!_iconCache) _iconCache=[[NSCache alloc] init];
@@ -71,7 +66,6 @@
 -(void) purgeCache
 {
     _iconCache=nil;
-    _noIcon=nil;
 }
 
 
@@ -107,7 +101,38 @@
 
 #pragma mark user icons
 
--(NSString *) fileNameforContact:(NSString *) contact {
+-(UIImage*) generateDummyIconForContact:(MLContact*) contact
+{
+    UIColor* background = [HelperTools generateColorFromJid:contact.contactJid];
+    UIColor* foreground = [UIColor blackColor];
+    if(![background isLightColor])
+        foreground = [UIColor whiteColor];
+    
+    UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(200, 200)];
+    return [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull context) {
+        [background setFill];
+        [context fillRect:renderer.format.bounds];
+        
+        NSString* contactLetter = [[[contact contactDisplayName] substringToIndex:1] uppercaseString];
+        
+        NSMutableParagraphStyle* paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+        paragraphStyle.alignment = NSTextAlignmentCenter;
+        NSDictionary* attributes = @{
+            NSFontAttributeName: [[UIFont preferredFontForTextStyle:UIFontTextStyleLargeTitle] fontWithSize:120],
+            NSForegroundColorAttributeName: foreground,
+            NSParagraphStyleAttributeName: paragraphStyle
+        };
+        CGSize textSize = [contactLetter sizeWithAttributes:attributes];
+        CGRect textRect = CGRectMake(floorf((renderer.format.bounds.size.width - textSize.width) / 2),
+                                    floorf((renderer.format.bounds.size.height - textSize.height) / 2),
+                                    textSize.width,
+                                    textSize.height);
+        [contactLetter drawInRect:textRect withAttributes:attributes];
+    }];
+}
+
+-(NSString*) fileNameforContact:(NSString*) contact
+{
     return [NSString stringWithFormat:@"%@.png", [contact lowercaseString]];;
 }
 
@@ -178,7 +203,8 @@
     
     //check cache
     toreturn = [self.iconCache objectForKey:cacheKey];
-    if(!toreturn) {
+    if(!toreturn)
+    {
         NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
         writablePath = [writablePath stringByAppendingPathComponent:accountNo];
         writablePath = [writablePath stringByAppendingPathComponent:filename];
@@ -188,30 +214,22 @@
             toreturn = savedImage;
 
         if(toreturn == nil)
-        {
-            toreturn = self.noIcon;
-        }
+            toreturn = [self generateDummyIconForContact:[MLContact createContactFromJid:contact andAccountNo:accountNo]];
 
         toreturn = [MLImageManager circularImage:toreturn];
 
         //uiimage image named is cached if avaialable
         if(toreturn)
-        {
             [self.iconCache setObject:toreturn forKey:cacheKey];
-        }
         if(completion)
-        {
             dispatch_async(dispatch_get_main_queue(), ^{
                 completion(toreturn);
             });
-        }
     }
     else if(completion)
-    {
         dispatch_async(dispatch_get_main_queue(), ^{
             completion(toreturn);
         });
-    }
     return toreturn;
 }
 

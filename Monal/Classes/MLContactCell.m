@@ -79,8 +79,9 @@
         }
         else if ([lastMessage.messageType isEqualToString:kMessageTypeMessageDraft])
         {
-            NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@", @""), lastMessage.messageText];
-            [self showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
+            NSString* draftPreviewPrefix = NSLocalizedString(@"Draft:", @"");
+            NSString* draftPreview = [NSString stringWithFormat:@"%@ %@", draftPreviewPrefix, lastMessage.messageText];
+            [self showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, draftPreviewPrefix.length)];
         }
         else if([lastMessage.messageType isEqualToString:kMessageTypeGeo])
             [self showStatusText:NSLocalizedString(@"📍 A Location", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
@@ -152,7 +153,7 @@
     }
 }
 
--(void) showStatusTextItalic:(NSString *) text withItalicRange:(NSRange)italicRange
+-(void) showStatusTextItalic:(NSString*) text withItalicRange:(NSRange) italicRange
 {
     UIFont* italicFont = [UIFont italicSystemFontOfSize:self.statusText.font.pointSize];
     NSMutableAttributedString* italicString = [[NSMutableAttributedString alloc] initWithString:text];

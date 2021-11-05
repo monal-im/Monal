@@ -68,6 +68,11 @@
     _iconCache=nil;
 }
 
+-(void) purgeCacheForContact:(NSString*) contact andAccount:(NSString*) accountNo
+{
+    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@",accountNo,contact]];
+}
+
 
 #pragma mark chat bubbles
 

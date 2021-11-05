@@ -43,7 +43,8 @@ $$handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSStri
                 DDLogInfo(@"User %@ disabled his avatar", jid);
                 [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:nil];
                 [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
-                [[MLImageManager sharedInstance] purgeCache];       //delete cache to make sure the image will be regenerated
+                //delete cache to make sure the image will be regenerated
+                [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                     @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
                 }];
@@ -68,7 +69,8 @@ $$handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSStri
         DDLogInfo(@"User %@ disabled his avatar", jid);
         [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:nil];
         [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
-        [[MLImageManager sharedInstance] purgeCache];       //delete cache to make sure the image will be regenerated
+        //delete cache to make sure the image will be regenerated
+        [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
             @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
         }];
@@ -88,7 +90,8 @@ $$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(N
     {
         [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
         [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
-        [[MLImageManager sharedInstance] purgeCache];       //delete cache to make sure the image will be regenerated
+        //delete cache to make sure the image will be regenerated
+        [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
             @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
         }];
@@ -116,7 +119,8 @@ $$handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NS
                 MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
                 if(contact)     //ignore updates for jids not in our roster
                 {
-                    [[MLImageManager sharedInstance] purgeCache];       //delete cache to make sure the image will be regenerated
+                    //delete cache to make sure the image will be regenerated
+                    [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                         @"contact": contact
                     }];
@@ -142,7 +146,8 @@ $$handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NS
             MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
             if(contact)     //ignore updates for jids not in our roster
             {
-                [[MLImageManager sharedInstance] purgeCache];       //delete cache to make sure the image will be regenerated
+                //delete cache to make sure the image will be regenerated
+                [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                     @"contact": contact
                 }];

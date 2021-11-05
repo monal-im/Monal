@@ -1327,7 +1327,8 @@ enum msgSentState {
     [self presentViewController:actionControll animated:YES completion:nil];
 }
 
-- (void) picker:(PHPickerViewController*) picker didFinishPicking:(NSArray<PHPickerResult*>*) results API_AVAILABLE(ios(14)) {
+-(void) picker:(PHPickerViewController*) picker didFinishPicking:(NSArray<PHPickerResult*>*) results
+{
     [self dismissViewControllerAnimated:YES completion:nil];
     for(PHPickerResult* userSelection in results) {
         NSItemProvider* provider = userSelection.itemProvider;
@@ -1361,12 +1362,12 @@ enum msgSentState {
         else
         {
             [provider loadObjectOfClass:[UIImage class] completionHandler:^(__kindof id<NSItemProviderReading>  _Nullable object, NSError * _Nullable error) {
-    #ifdef TARGET_OS_SIMULATOR
+#ifdef TARGET_OS_SIMULATOR
                 if(NSStringFromClass([object class]) == nil) {
                     DDLogError(@"Could not add user-selected image to the upload queue! This is a known issue for iOS Simulator when trying to load HDR images, see https://developer.apple.com/forums/thread/665265");
                     return;
                 }
-    #endif
+#endif
                 assert([object isKindOfClass: [UIImage class]]);
                 UIImage* image = (UIImage*)object;
 

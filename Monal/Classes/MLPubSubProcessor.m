@@ -357,7 +357,7 @@ $$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID
     //don't publish an empty bookmarks node if there is nothing to publish at all
     if([ownFavorites count] == 0)
     {
-        DDLogInfo(@"neither a pep item was found, nor do we have any local mu favorites: don't publish anything");
+        DDLogInfo(@"neither a pep item was found, nor do we have any local muc favorites: don't publish anything");
         return;
     }
     
@@ -396,8 +396,14 @@ $$
 $$handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
+        //item-not-found means: nick already deleted --> ignore this error
+        if([errorIq check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+        {
+            DDLogWarn(@"Roster name was already deleted from pep, ignoring error!");
+            return;
+        }
         DDLogWarn(@"Could not publish roster name to pep!");
-        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own nickname on account %@", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own nickname", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
         return;
     }
 $$
@@ -405,8 +411,14 @@ $$
 $$handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
+        //item-not-found means: avatar already deleted --> ignore this error
+        if([errorIq check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+        {
+            DDLogWarn(@"Avatar image was already deleted from pep, ignoring error!");
+            return;
+        }
         DDLogWarn(@"Could not delete avatar image from pep!");
-        [self handleErrorWithDescription:NSLocalizedString(@"Failed to delete own avatar on account %@", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to delete own avatar", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
         return;
     }
 $$
@@ -415,7 +427,7 @@ $$handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(X
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar metadata to pep!");
-        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own avatar on account %@", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own avatar", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
         return;
     }
 $$
@@ -424,7 +436,7 @@ $$handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPI
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar image data for hash %@!", imageHash);
-        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own avatar on account %@", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own avatar", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
         return;
     }
     

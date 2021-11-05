@@ -3753,7 +3753,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) publishRosterName:(NSString* _Nullable) rosterName
 {
-    DDLogInfo(@"Publishing own nickname: %@", rosterName);
+    DDLogInfo(@"Publishing own nickname: '%@'", rosterName);
     if(!rosterName || !rosterName.length)
         [self.pubsub deleteNode:@"http://jabber.org/protocol/nick" andHandler:$newHandler(MLPubSubProcessor, rosterNamePublished)];
     else

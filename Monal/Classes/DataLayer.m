@@ -2839,7 +2839,11 @@ static NSDateFormatter* dbFormatter;
     if(!accountNo || !archiveJid)
         return nil;
     NSData* data = (NSData*)[self.db idReadTransaction:^{
-        return [self.db executeScalar:@"SELECT stanza FROM delayed_message_stanzas WHERE account_id=? AND archive_jid=? ORDER BY id ASC LIMIT 1;" andArguments:@[]];
+        NSArray* entries = [self.db executeReader:@"SELECT id, stanza FROM delayed_message_stanzas WHERE account_id=? AND archive_jid=? ORDER BY id ASC LIMIT 1;" andArguments:@[accountNo, archiveJid]];
+        if(![entries count])
+            return (NSData*)nil;
+        [self.db executeNonQuery:@"DELETE FROM delayed_message_stanzas WHERE id=?;" andArguments:@[entries[0][@"id"]]];
+        return (NSData*)entries[0][@"stanza"];
     }];
     if(data)
     {

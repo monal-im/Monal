@@ -3673,10 +3673,18 @@ NSString* const kStanza = @"stanza";
 //this method is needed to not have a retain cycle (happens when using a block instead of this method in mamFinishedFor:)
 -(void) _handleInternalMamFinishedFor:(NSString*) archiveJid
 {
+    if(self.accountState < kStateBound)
+    {
+        DDLogWarn(@"Aborting delayed replac because not >= kStateBound anymore! Stanzas will remain in DB ang will be handled after next smacks reconnect.");
+        return;
+    }
+    
     //pick the next delayed message stanza (will return nil if there isn't any left)
     MLXMLNode* delayedStanza = [[DataLayer sharedInstance] getNextDelayedMessageStanzaForArchiveJid:archiveJid andAccountNo:self.accountNo];
+    DDLogDebug(@"Got delayed stanza: %@", delayedStanza);
     if(delayedStanza == nil)
     {
+        DDLogInfo(@"Catchup finished for jid %@", archiveJid);
         [_inCatchup removeObjectForKey:archiveJid];
         
         //handle old mamFinished code as soon as all delayed messages have been processed
@@ -3686,6 +3694,7 @@ NSString* const kStanza = @"stanza";
             if(!_catchupDone)
             {
                 _catchupDone = YES;
+                DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
                 //don't queue this notification because it should be handled INLINE inside the receive queue
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
             }
@@ -3708,6 +3717,7 @@ NSString* const kStanza = @"stanza";
     [self dispatchOnReceiveQueue:^{
         //handle delayed message stanzas delivered while the mam catchup was in progress
         //the first call is handled directly, while all subsequent self-invocations are handled by dispatching it async to the receiveQueue
+        //the async dispatcing makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
         [self _handleInternalMamFinishedFor:archiveJid];
     }];
 }

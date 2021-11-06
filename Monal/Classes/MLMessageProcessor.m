@@ -118,7 +118,8 @@ static NSMutableDictionary* _typingNotifications;
     {
         XMPPMessage* errorReply = [[XMPPMessage alloc] init];
         [errorReply.attributes setObject:@"error" forKey:@"type"];
-        [errorReply.attributes setObject:messageNode.from forKey:@"to"];        //this has to be the full jid here
+        [errorReply.attributes setObject:messageNode.from forKey:@"to"];                       //this has to be the full jid here
+        [errorReply.attributes setObject:[messageNode findFirst:@"/@id"] forKey:@"id"];        //don't set origin id here
         [errorReply addChild:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"feature-not-implemented" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
             [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" withAttributes:@{} andChildren:@[] andData:@"MUC-PMs are not supported here!"]

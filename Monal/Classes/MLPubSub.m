@@ -27,6 +27,16 @@
 
 @implementation MLPubSub
 
+static NSDictionary* _defaultOptions;
+
++(void) initialize
+{
+    _defaultOptions = @{
+        @"pubsub#notify_retract": @"true",
+        @"pubsub#notify_delete": @"true"
+    };
+}
+
 -(id) initWithAccount:(xmpp*) account
 {
     self = [super init];
@@ -103,7 +113,7 @@
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"configure" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
     ] andData:nil]];
-    [_account sendIq:query withHandler:$newHandler(self, handleConfigureResult1,
+    [_account sendIq:query withHandler:$newHandler(self, handleConfigFormResult,
         $ID(node),
         $ID(configOptions),
         $ID(handler)
@@ -136,6 +146,10 @@
     }
     if(!configOptions)
         configOptions = @{};
+    
+    //update config options with our own defaults if not already present
+    configOptions = [[self class] copyDefaultNodeOptions:_defaultOptions forConfigForm:nil into:configOptions];
+    
     DDLogDebug(@"Publishing item on node '%@': %@", node, item);
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
@@ -386,6 +400,15 @@
     DDLogDebug(@"All pubsub handlers called");
 }
 
++(NSDictionary*) copyDefaultNodeOptions:(NSDictionary*) defaultOptions forConfigForm:(XMPPDataForm* _Nullable) configForm into:(NSDictionary*) configOptions
+{
+    NSMutableDictionary* retval = [configOptions mutableCopy];
+    for(NSString* option in defaultOptions)
+        if((configForm == nil || configForm[option] != nil) && retval[option] == nil)
+            retval[option] = defaultOptions[option];
+    return retval;
+}
+
 $$handler(handleFetch, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSMutableArray*, queryItems), $_ID(NSMutableDictionary*, data), $_HANDLER(handler))
     MLPubSub* me = account.pubsub;
     
@@ -444,7 +467,7 @@ $$handler(handleInternalFetch, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID
 $$
 
 
-$$handler(handleConfigureResult1, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
+$$handler(handleConfigFormResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Got error iq for pubsub configure request 1: %@", iqNode);
@@ -469,6 +492,9 @@ $$handler(handleConfigureResult1, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $
         $call(handler, $ID(account), $BOOL(success, NO), $ID(errorReason, NSLocalizedString(@"Unexpected server response: invalid PEP config form", @"")));
         return;
     }
+    
+    //update config options with our own defaults if not already present
+    configOptions = [self copyDefaultNodeOptions:_defaultOptions forConfigForm:dataForm into:configOptions];
     
     for(NSString* option in configOptions)
     {
@@ -496,12 +522,12 @@ $$handler(handleConfigureResult1, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"configure" withAttributes:@{@"node": node} andChildren:@[dataForm] andData:nil]
     ] andData:nil]];
-    [account sendIq:query withHandler:$newHandler(self, handleConfigureResult2,
+    [account sendIq:query withHandler:$newHandler(self, handleConfigureResult,
         $ID(handler)
     )];
 $$
 
-$$handler(handleConfigureResult2, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_HANDLER(handler))
+$$handler(handleConfigureResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Got error iq for pubsub configure request 2: %@", iqNode);

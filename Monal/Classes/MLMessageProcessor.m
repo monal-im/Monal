@@ -88,7 +88,7 @@ static NSMutableDictionary* _typingNotifications;
             errorReason:errorText
         ];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
-            @"MessageID": [messageNode findFirst:@"/@id"],
+            kMessageId: [messageNode findFirst:@"/@id"],
             @"errorType": errorType,
             @"errorReason": errorText
         }];

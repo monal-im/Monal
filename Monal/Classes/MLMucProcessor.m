@@ -540,22 +540,14 @@
     }];
 }
 
-$$handler(handleDiscoResponseInvalidation, $_ID(xmpp*, account), $_ID(NSString*, roomJid))
-    [account.mucProcessor handleDiscoResponseInvalidationWithRoomJid:roomJid];
-$$
--(void) handleDiscoResponseInvalidationWithRoomJid:(NSString*) roomJid
-{
+$$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $_ID(xmpp*, account), $_ID(NSString*, roomJid))
     DDLogInfo(@"Removing muc '%@' from _joining...", roomJid);
     @synchronized(_stateLockObject) {
         [_joining removeObject:roomJid];
     }
 }
 
-$$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $_BOOL(join), $_BOOL(updateBookmarks))
-    [account.mucProcessor handleDiscoResponseWithIqNode:iqNode andRoomJid:roomJid andJoin:join andUpdateBookmarks:updateBookmarks];
-$$
--(void) handleDiscoResponseWithIqNode:(XMPPIQ*) iqNode andRoomJid:(NSString*) roomJid andJoin:(BOOL) join andUpdateBookmarks:(BOOL) updateBookmarks
-{
+$$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $_BOOL(join), $_BOOL(updateBookmarks))
     MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!", (@{
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
@@ -689,11 +681,7 @@ $$
     [_account send:presence];
 }
 
-$$handler(handleMembersList, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, type))
-    [account.mucProcessor handleMembersListWithIqNode:iqNode andType:type];
-$$
--(void) handleMembersListWithIqNode:(XMPPIQ*) iqNode andType:(NSString*) type
-{
+$$instance_handler(handleMembersList, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
     for(NSDictionary* entry in [iqNode find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
     {
@@ -707,11 +695,7 @@ $$
     }
 }
 
-$$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
-    [account.mucProcessor handleMamResponseWithLatestIdWithIqNode:iqNode];
-$$
--(void) handleMamResponseWithLatestIdWithIqNode:(XMPPIQ*) iqNode
-{
+$$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
@@ -731,11 +715,7 @@ $$
     [_account mamFinishedFor:iqNode.fromUser];
 }
 
-$$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
-    [account.mucProcessor handleCatchupWithIqNode:iqNode andSecondTry:secondTry];
-$$
--(void) handleCatchupWithIqNode:(XMPPIQ*) iqNode andSecondTry:(BOOL)secondTry
-{
+$$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam catchup query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);

@@ -341,7 +341,11 @@ enum DummySettingsRows {
                 //2) if the account is already connected, the settings will be updated (account.connectionProperties.identity and account.connectionProperties.server)
                 //      and used when connecting next time (still using the old smacks session of course)
                 account.connectionProperties.identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@", [dic objectForKey:kUsername], [dic objectForKey:kDomain]] password:self.password andResource:[dic objectForKey:kResource]];
+                MLXMPPServer* oldServer = account.connectionProperties.server;
                 account.connectionProperties.server = [[MLXMPPServer alloc] initWithHost:(dic[kServer] == nil ? @"" : dic[kServer]) andPort:(dic[kPort] == nil ? @"5222" : dic[kPort]) andDirectTLS:[[dic objectForKey:kDirectTLS] boolValue]];
+                [account.connectionProperties.server updateConnectServer:[oldServer connectServer]];
+                [account.connectionProperties.server updateConnectPort:[oldServer connectPort]];
+                [account.connectionProperties.server updateConnectTLS:[oldServer isDirectTLS]];
                 if(self.statusMessageChanged)
                     [account publishStatusMessage:self.statusMessage];
                 if(self.rosterNameChanged)

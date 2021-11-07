@@ -3785,7 +3785,7 @@ NSString* const kStanza = @"stanza";
 {
     DDLogInfo(@"Publishing own nickname: '%@'", rosterName);
     if(!rosterName || !rosterName.length)
-        [self.pubsub deleteNode:@"http://jabber.org/protocol/nick" andHandler:$newHandler(MLPubSubProcessor, rosterNamePublished)];
+        [self.pubsub deleteNode:@"http://jabber.org/protocol/nick" andHandler:$newHandler(MLPubSubProcessor, rosterNameDeleted)];
     else
         [self.pubsub publishItem:
             [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": @"current"} andChildren:@[

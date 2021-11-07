@@ -396,14 +396,23 @@ $$
 $$handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
+        DDLogWarn(@"Could not publish roster name to pep!");
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own nickname", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
+        return;
+    }
+$$
+
+$$handler(rosterNameDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(!success)
+    {
         //item-not-found means: nick already deleted --> ignore this error
         if([errorIq check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
         {
             DDLogWarn(@"Roster name was already deleted from pep, ignoring error!");
             return;
         }
-        DDLogWarn(@"Could not publish roster name to pep!");
-        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own nickname", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
+        DDLogWarn(@"Could not remove roster name from pep!");
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to delete own nickname", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
         return;
     }
 $$

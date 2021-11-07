@@ -150,20 +150,7 @@ static NSDictionary* _defaultOptions;
     //update config options with our own defaults if not already present
     configOptions = [[self class] copyDefaultNodeOptions:_defaultOptions forConfigForm:nil into:configOptions];
     
-    DDLogDebug(@"Publishing item on node '%@': %@", node, item);
-    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"publish" withAttributes:@{@"node": node} andChildren:@[item] andData:nil],
-        [[MLXMLNode alloc] initWithElement:@"publish-options" withAttributes:@{} andChildren:@[
-            [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:configOptions]
-        ] andData:nil]
-    ] andData:nil]];
-    [_account sendIq:query withHandler:$newHandler(self, handlePublishResult,
-        $ID(item),
-        $ID(node),
-        $ID(configOptions),
-        $ID(handler)
-    )];
+    [self internalPublishItem:item onNode:node withConfigOptions:configOptions andHandler:handler];
 }
 
 -(void) retractItemWithId:(NSString*) itemId onNode:(NSString*) node
@@ -328,6 +315,26 @@ static NSDictionary* _defaultOptions;
 }
 
 //*** internal methods below
+
+-(void) internalPublishItem:(MLXMLNode*) item onNode:(NSString*) node withConfigOptions:(NSDictionary*) configOptions andHandler:(MLHandler* _Nullable) handler
+{
+    DDLogDebug(@"Publishing item on node '%@': %@", node, item);
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"publish" withAttributes:@{@"node": node} andChildren:@[item] andData:nil]
+    ] andData:nil]];
+    //only add publish-options if present
+    if([configOptions count] > 0)
+        [[query findFirst:@"{http://jabber.org/protocol/pubsub}pubsub"] addChild:[[MLXMLNode alloc] initWithElement:@"publish-options" withAttributes:@{} andChildren:@[
+            [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:configOptions]
+        ] andData:nil]];
+    [_account sendIq:query withHandler:$newHandler(self, handlePublishResult,
+        $ID(item),
+        $ID(node),
+        $ID(configOptions),
+        $ID(handler)
+    )];
+}
 
 //NOTE: this will be called for iq *or* message stanzas carrying pubsub data.
 -(NSMutableDictionary*) handleItems:(MLXMLNode* _Nullable) items fromJid:(NSString* _Nullable) jid withData:(NSMutableDictionary*) data
@@ -518,6 +525,7 @@ $$handler(handleConfigFormResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $
     }
     
     //reconfigure the node
+    dataForm.type = @"submit";
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"configure" withAttributes:@{@"node": node} andChildren:@[dataForm] andData:nil]
@@ -539,17 +547,18 @@ $$handler(handleConfigureResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_
     $call(handler, $ID(account), $BOOL(success, YES));
 $$
 
-$$handler(handlePublishAgain, $_ID(xmpp*, account), $_BOOL(success), $_ID(MLXMLNode*, item), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions))
+$$handler(handlePublishAgain, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(MLXMLNode*, item), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
     MLPubSub* me = account.pubsub;
     
     if(!success)
     {
         DDLogError(@"Publish failed for node '%@' even after configuring it!", node);
+        $call(handler, $ID(account), $BOOL(success, NO), $ID(errorIq), $ID(errorReason));
         return;
     }
     
     //try again
-    [me publishItem:item onNode:node withConfigOptions:configOptions];
+    [me internalPublishItem:item onNode:node withConfigOptions:configOptions andHandler:handler];
 $$
 
 $$handler(handlePublishResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(MLXMLNode*, item), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
@@ -560,11 +569,12 @@ $$handler(handlePublishResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         //check if this node is already present and configured --> reconfigure it according to our access-model
         if([iqNode check:@"error<type=cancel>/{http://jabber.org/protocol/pubsub#errors}precondition-not-met"])
         {
-            DDLogWarn(@"Node precondition not met, reconfiguring node %@", node);
+            DDLogWarn(@"Node precondition not met, reconfiguring node: %@", node);
             [me configureNode:node withConfigOptions:configOptions andHandler:$newHandler(self, handlePublishAgain,
                 $ID(item),
                 $ID(node),
-                $ID(configOptions)
+                $ID(configOptions),      //modern servers support XEP-0060 Version 1.15.0 (2017-12-12) --> all node config options are allowed as preconditions
+                $HANDLER(handler)
             )];
             return;
         }

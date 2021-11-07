@@ -1236,6 +1236,18 @@ NSString* const kStanza = @"stanza";
 {
     NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
     @synchronized(_stateLockObject) {
+        if(([hvalue integerValue] - [self.lastHandledOutboundStanza integerValue]) > [self.unAckedStanzas count])
+        {
+            //stanza counting bugs on the server are fatal
+            NSString* message = @"Server acknowledged more stanzas than sent by client";
+            [self send:[[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
+                [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
+            ] andData:nil]];
+            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
+            [self reconnect];
+        }
+        
         self.lastHandledOutboundStanza = hvalue;
         if([self.unAckedStanzas count]>0)
         {

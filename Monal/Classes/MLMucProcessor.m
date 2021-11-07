@@ -24,25 +24,24 @@
 #define CURRENT_MUC_STATE_VERSION @4
 
 @interface MLMucProcessor()
-
+{
+    //persistent state
+    NSObject* _stateLockObject;
+    NSMutableDictionary* _roomFeatures;
+    NSMutableSet* _joining;
+    NSMutableSet* _firstJoin;
+    NSDate* _lastPing;
+    NSMutableSet* _noUpdateBookmarks;
+    //this won't be persisted because it is only for the ui
+    NSMutableDictionary* _uiHandler;
+}
 @end
 
 @implementation MLMucProcessor
 
-static NSObject* _stateLockObject;
-
-//persistent state
-static NSMutableDictionary* _roomFeatures;
-static NSMutableSet* _joining;
-static NSMutableSet* _firstJoin;
-static NSDate* _lastPing;
-static NSMutableSet* _noUpdateBookmarks;
-
-//this won't be persisted because it is only for the ui
-static NSMutableDictionary* _uiHandler;
-
-+(void) initialize
+-(id) init
 {
+    self = [super init];
     _stateLockObject = [[NSObject alloc] init];
     _roomFeatures = [[NSMutableDictionary alloc] init];
     _joining = [[NSMutableSet alloc] init];
@@ -50,9 +49,10 @@ static NSMutableDictionary* _uiHandler;
     _uiHandler = [[NSMutableDictionary alloc] init];
     _lastPing = [NSDate date];
     _noUpdateBookmarks = [[NSMutableSet alloc] init];
+    return self;
 }
 
-+(void) setInternalState:(NSDictionary*) state
+-(void) setInternalState:(NSDictionary*) state
 {
     //ignore state having wrong version code
     if(!state[@"version"] || ![state[@"version"] isEqual:CURRENT_MUC_STATE_VERSION])
@@ -68,7 +68,7 @@ static NSMutableDictionary* _uiHandler;
     }
 }
 
-+(NSDictionary*) getInternalState
+-(NSDictionary*) getInternalState
 {
     @synchronized(_stateLockObject) {
         return @{
@@ -82,7 +82,7 @@ static NSMutableDictionary* _uiHandler;
     }
 }
 
-+(void) resetForNewSession
+-(void) resetForNewSession
 {
     _roomFeatures = [[NSMutableDictionary alloc] init];
     _joining = [[NSMutableSet alloc] init];
@@ -90,14 +90,14 @@ static NSMutableDictionary* _uiHandler;
 
 }
 
-+(BOOL) isJoining:(NSString*) room
+-(BOOL) isJoining:(NSString*) room
 {
     @synchronized(_stateLockObject) {
         return [_joining containsObject:room];
     }
 }
 
-+(void) addUIHandler:(monal_id_block_t) handler forMuc:(NSString*) room
+-(void) addUIHandler:(monal_id_block_t) handler forMuc:(NSString*) room
 {
     //this will replace the old handler
     @synchronized(_stateLockObject) {
@@ -105,21 +105,21 @@ static NSMutableDictionary* _uiHandler;
     }
 }
 
-+(void) removeUIHandlerForMuc:(NSString*) room
+-(void) removeUIHandlerForMuc:(NSString*) room
 {
     @synchronized(_stateLockObject) {
         [_uiHandler removeObjectForKey:room];
     }
 }
 
-+(monal_id_block_t) getUIHandlerForMuc:(NSString*) room
+-(monal_id_block_t) getUIHandlerForMuc:(NSString*) room
 {
     @synchronized(_stateLockObject) {
         return _uiHandler[room];
     }
 }
 
-+(void) processPresence:(XMPPPresence*) presenceNode forAccount:(xmpp*) account
+-(void) processPresence:(XMPPPresence*) presenceNode forAccount:(xmpp*) account
 {
     //check for nickname conflict while joining and retry with underscore added to the end
     if([self isJoining:presenceNode.fromUser] && [presenceNode findFirst:@"/<type=error>/error/{urn:ietf:params:xml:ns:xmpp-stanzas}conflict"])
@@ -175,7 +175,7 @@ static NSMutableDictionary* _uiHandler;
         [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:account.accountNo];
 }
 
-+(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account
+-(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account
 {
     //handle muc status codes
     [self handleStatusCodes:messageNode forAccount:account];
@@ -200,7 +200,7 @@ static NSMutableDictionary* _uiHandler;
     return NO;
 }
 
-+(void) handleStatusCodes:(XMPPStanza*) node forAccount:(xmpp*) account
+-(void) handleStatusCodes:(XMPPStanza*) node forAccount:(xmpp*) account
 {
     NSSet* presenceCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
     NSSet* messageCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}message/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
@@ -358,13 +358,13 @@ static NSMutableDictionary* _uiHandler;
                 {
                     DDLogInfo(@"Querying muc mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
                     [mamQuery setMAMQueryAfter:lastStanzaId];
-                    [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
+                    [account sendIq:mamQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, NO))];
                 }
                 else
                 {
                     DDLogInfo(@"Querying muc mam:2 archive for latest stanzaid to prime database");
                     [mamQuery setMAMQueryForLatestId];
-                    [account sendIq:mamQuery withHandler:$newHandler(self, handleMamResponseWithLatestId)];
+                    [account sendIq:mamQuery withHandler:$newHandler([self class], handleMamResponseWithLatestId)];
                 }
             }
             
@@ -392,12 +392,12 @@ static NSMutableDictionary* _uiHandler;
     }
 }
 
-+(void) join:(NSString*) room onAccount:(xmpp*) account
+-(void) join:(NSString*) room onAccount:(xmpp*) account
 {
     [self sendDiscoQueryFor:room onAccount:account withJoin:YES andBookmarksUpdate:YES];
 }
 
-+(void) leave:(NSString*) room onAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks
+-(void) leave:(NSString*) room onAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks
 {
     room = [room lowercaseString];
     NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
@@ -423,7 +423,7 @@ static NSMutableDictionary* _uiHandler;
     [self deleteMuc:room forAccount:account withBookmarksUpdate:updateBookmarks keepBuddylistEntry:NO];
 }
 
-+(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks
+-(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks
 {
     if(roomJid == nil || account == nil)
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Room jid or account must not be nil!" userInfo:nil];
@@ -447,10 +447,10 @@ static NSMutableDictionary* _uiHandler;
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:roomJid];
     [discoInfo setDiscoInfoNode];
-    [account sendIq:discoInfo withHandler:$newHandlerWithInvalidation(self, handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
+    [account sendIq:discoInfo withHandler:$newHandlerWithInvalidation([self class], handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
 }
 
-+(void) pingAllMucsOnAccount:(xmpp*) account
+-(void) pingAllMucsOnAccount:(xmpp*) account
 {
     if([[NSDate date] timeIntervalSinceDate:_lastPing] < 3600)
     {
@@ -462,7 +462,7 @@ static NSMutableDictionary* _uiHandler;
         [self ping:entry[@"room"] onAccount:account];
 }
 
-+(void) ping:(NSString*) roomJid onAccount:(xmpp*) account
+-(void) ping:(NSString*) roomJid onAccount:(xmpp*) account
 {
     if(![[DataLayer sharedInstance] isBuddyMuc:roomJid forAccount:account.accountNo])
     {
@@ -537,14 +537,22 @@ static NSMutableDictionary* _uiHandler;
     }];
 }
 
-$$handler(handleDiscoResponseInvalidation, $_ID(NSString*, roomJid))
+$$handler(handleDiscoResponseInvalidation, $_ID(xmpp*, account), $_ID(NSString*, roomJid))
+    [account.mucProcessor handleDiscoResponseInvalidationWithRoomJid:roomJid];
+$$
+-(void) handleDiscoResponseInvalidationWithRoomJid:(NSString*) roomJid
+{
     DDLogInfo(@"Removing muc '%@' from _joining...", roomJid);
     @synchronized(_stateLockObject) {
         [_joining removeObject:roomJid];
     }
-$$
+}
 
 $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $_BOOL(join), $_BOOL(updateBookmarks))
+    [account.mucProcessor handleDiscoResponseWithAccount:account andIqNode:iqNode andRoomJid:roomJid andJoin:join andUpdateBookmarks:updateBookmarks];
+$$
+-(void) handleDiscoResponseWithAccount:(xmpp*) account andIqNode:(XMPPIQ*) iqNode andRoomJid:(NSString*) roomJid andJoin:(BOOL) join andUpdateBookmarks:(BOOL) updateBookmarks
+{
     MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!", (@{
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
@@ -664,7 +672,7 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         [self sendJoinPresenceFor:iqNode.fromUser onAccount:account];
 $$
 
-+(void) sendJoinPresenceFor:(NSString*) room onAccount:(xmpp*) account
+-(void) sendJoinPresenceFor:(NSString*) room onAccount:(xmpp*) account
 {
     NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
     DDLogInfo(@"Trying to join muc '%@' with nick '%@' on account %@...", room, nick, account.accountNo);
@@ -679,6 +687,10 @@ $$
 }
 
 $$handler(handleMembersList, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, type))
+    [account.mucProcessor handleMembersListWithAccount:account andIqNode:iqNode andType:type];
+$$
+-(void) handleMembersListWithAccount:(xmpp*) account andIqNode:(XMPPIQ*) iqNode andType:(NSString*) type
+{
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
     for(NSDictionary* entry in [iqNode find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
     {
@@ -690,9 +702,13 @@ $$handler(handleMembersList, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(N
             item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
         [[DataLayer sharedInstance] addMember:item toMuc:iqNode.fromUser forAccountId:account.accountNo];
     }
-$$
+}
 
 $$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+    [account.mucProcessor handleMamResponseWithLatestIdWithAccount:account andIqNode:iqNode];
+$$
+-(void) handleMamResponseWithLatestIdWithAccount:(xmpp*) account andIqNode:(XMPPIQ*) iqNode
+{
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
@@ -710,9 +726,13 @@ $$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
     if([iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
         [[DataLayer sharedInstance] setLastStanzaId:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"] forMuc:iqNode.fromUser andAccount:account.accountNo];
     [account mamFinishedFor:iqNode.fromUser];
-$$
+}
 
 $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
+    [account.mucProcessor handleCatchupWithAccount:account andIqNode:iqNode andSecondTry:secondTry];
+$$
+-(void) handleCatchupWithAccount:(xmpp*) account andIqNode:(XMPPIQ*) iqNode andSecondTry:(BOOL)secondTry
+{
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam catchup query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
@@ -724,7 +744,7 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
             [mamQuery setiqTo:iqNode.fromUser];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
             [mamQuery setCompleteMAMQuery];
-            [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, YES))];
+            [account sendIq:mamQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, YES))];
         }
         else
         {
@@ -740,16 +760,16 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
         XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
         [pageQuery setiqTo:iqNode.fromUser];
-        [account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
+        [account sendIq:pageQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, NO))];
     }
     else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
     {
         DDLogVerbose(@"Muc mam catchup finished");
         [account mamFinishedFor:iqNode.fromUser];
     }
-$$
+}
 
-+(void) handleError:(NSString*) description forMuc:(NSString*) room withNode:(XMPPStanza*) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
+-(void) handleError:(NSString*) description forMuc:(NSString*) room withNode:(XMPPStanza*) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
 {
     monal_id_block_t uiHandler = [self getUIHandlerForMuc:room];
     //call ui handler if registered for this room
@@ -776,13 +796,13 @@ $$
         [HelperTools postError:description withNode:node andAccount:account andIsSevere:isSevere];
 }
 
-+(void) updateBookmarksForAccount:(xmpp*) account
+-(void) updateBookmarksForAccount:(xmpp*) account
 {
     DDLogVerbose(@"Updating bookmarks on account %@", account.connectionProperties.identity.jid);
     [account.pubsub fetchNode:@"storage:bookmarks" from:account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
 }
 
-+(BOOL) checkIfStillBookmarked:(NSString*) room onAccount:(xmpp*) account
+-(BOOL) checkIfStillBookmarked:(NSString*) room onAccount:(xmpp*) account
 {
     room = [room lowercaseString];
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
@@ -791,7 +811,7 @@ $$
     return NO;
 }
 
-+(void) deleteMuc:(NSString*) room forAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry
+-(void) deleteMuc:(NSString*) room forAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry
 {
     DDLogInfo(@"Deleting muc %@ on account %@...", room, account.accountNo);
     //delete muc from favorites table and update bookmarks if requested
@@ -811,7 +831,7 @@ $$
     }
 }
 
-+(NSString*) calculateNickForMuc:(NSString*) room onAccount:(xmpp*) account
+-(NSString*) calculateNickForMuc:(NSString*) room onAccount:(xmpp*) account
 {
     NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
     //use the account display name as nick, if nothing can be found in buddylist and muc_favorites db tables

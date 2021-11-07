@@ -48,6 +48,7 @@ FOUNDATION_EXPORT NSString* const kData;
 @class XMPPPresence;
 @class MLOMEMO;
 @class MLMessageProcessor;
+@class MLMucProcessor;
 
 typedef void (^xmppCompletion)(BOOL success, NSString* _Nullable message);
 typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
@@ -80,6 +81,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 @property (nonatomic, strong) MLOMEMO* omemo;
 @property (nonatomic, strong) MLPubSub* pubsub;
+@property (nonatomic, strong) MLMucProcessor* mucProcessor;
 
 //calculated
 @property (nonatomic, strong) NSDate* connectedTime;

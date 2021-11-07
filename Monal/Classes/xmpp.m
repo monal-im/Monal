@@ -61,9 +61,10 @@ NSString* const kStanza = @"stanza";
 @end
 
 @interface MLMucProcessor ()
-+(NSDictionary*) getInternalState;
-+(void) setInternalState:(NSDictionary*) state;
-+(void) resetForNewSession;
+-(id) init;
+-(NSDictionary*) getInternalState;
+-(void) setInternalState:(NSDictionary*) state;
+-(void) resetForNewSession;
 @end
 
 @interface xmpp()
@@ -208,6 +209,9 @@ NSString* const kStanza = @"stanza";
     
     //init pubsub as early as possible to allow other classes or other parts of this file to register pubsub nodes they are interested in
     self.pubsub = [[MLPubSub alloc] initWithAccount:self];
+    
+    //init muc processor
+    self.mucProcessor = [[MLMucProcessor alloc] init];
     
     _stateLockObject = [[NSObject alloc] init];
     [self initSM3];
@@ -1452,7 +1456,7 @@ NSString* const kStanza = @"stanza";
                 {
                     //only handle presences for mucs we know
                     if([[DataLayer sharedInstance] isBuddyMuc:presenceNode.fromUser forAccount:self.accountNo])
-                        [MLMucProcessor processPresence:presenceNode forAccount:self];
+                        [self.mucProcessor processPresence:presenceNode forAccount:self];
                     else
                         DDLogError(@"Got presence of unknown muc %@, ignoring...", presenceNode.fromUser);
                     
@@ -1843,7 +1847,7 @@ NSString* const kStanza = @"stanza";
             }
             
             //ping all mucs to check if we are still connected (XEP-0410)
-            [MLMucProcessor pingAllMucsOnAccount:self];
+            [self.mucProcessor pingAllMucsOnAccount:self];
             
             @synchronized(_stateLockObject) {
                 //signal finished catchup if our current outgoing stanza counter is acked, this introduces an additional roundtrip to make sure
@@ -2328,7 +2332,7 @@ NSString* const kStanza = @"stanza";
             [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
         
         [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
-        [values setObject:[MLMucProcessor getInternalState] forKey:@"mucState"];
+        [values setObject:[self.mucProcessor getInternalState] forKey:@"mucState"];
         [values setObject:_runningMamQueries forKey:@"runningMamQueries"];
         [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
@@ -2570,7 +2574,7 @@ NSString* const kStanza = @"stanza";
                 [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
             
             if([dic objectForKey:@"mucState"])
-                [MLMucProcessor setInternalState:[dic objectForKey:@"mucState"]];
+                [self.mucProcessor setInternalState:[dic objectForKey:@"mucState"]];
             
             if([dic objectForKey:@"runningMamQueries"])
                 _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
@@ -2757,7 +2761,7 @@ NSString* const kStanza = @"stanza";
     }
     
     //clear muc state
-    [MLMucProcessor resetForNewSession];
+    [self.mucProcessor resetForNewSession];
     
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
@@ -2825,7 +2829,7 @@ NSString* const kStanza = @"stanza";
     
     //join MUCs from muc_favorites db
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
-        [MLMucProcessor join:entry[@"room"] onAccount:self];
+        [self.mucProcessor join:entry[@"room"] onAccount:self];
 }
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
@@ -3161,12 +3165,12 @@ NSString* const kStanza = @"stanza";
 
 -(void) joinMuc:(NSString* _Nonnull) room
 {
-    [MLMucProcessor join:room onAccount:self];
+    [self.mucProcessor join:room onAccount:self];
 }
 
 -(void) leaveMuc:(NSString* _Nonnull) room
 {
-    [MLMucProcessor leave:room onAccount:self withBookmarksUpdate:YES];
+    [self.mucProcessor leave:room onAccount:self withBookmarksUpdate:YES];
 }
 
 -(void) checkJidType:(NSString*) jid withCompletion:(void (^)(NSString* type, NSString* _Nullable errorMessage)) completion

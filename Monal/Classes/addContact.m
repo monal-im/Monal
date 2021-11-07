@@ -127,13 +127,14 @@
             else if([type isEqualToString:@"muc"])
             {
                 [self displayJoinHUD];
-                [MLMucProcessor addUIHandler:^(id _data) {
+                NSString* accountNo = account.accountNo;            //needed to not retain 'account' in the block below
+                [account.mucProcessor addUIHandler:^(id _data) {
                     NSDictionary* data = (NSDictionary*)_data;
                     [self hideJoinHUD];
                     if([data[@"success"] boolValue])
                     {
                         if(self.completion)
-                            self.completion([MLContact createContactFromJid:jid andAccountNo:account.accountNo]);
+                            self.completion([MLContact createContactFromJid:jid andAccountNo:accountNo]);
                         [self dismissViewControllerAnimated:YES completion:nil];
                     }
                     else

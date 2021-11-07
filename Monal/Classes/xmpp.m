@@ -61,7 +61,7 @@ NSString* const kStanza = @"stanza";
 @end
 
 @interface MLMucProcessor ()
--(id) init;
+-(id) initWithAccount:(xmpp*) account;
 -(NSDictionary*) getInternalState;
 -(void) setInternalState:(NSDictionary*) state;
 -(void) resetForNewSession;
@@ -211,7 +211,7 @@ NSString* const kStanza = @"stanza";
     self.pubsub = [[MLPubSub alloc] initWithAccount:self];
     
     //init muc processor
-    self.mucProcessor = [[MLMucProcessor alloc] init];
+    self.mucProcessor = [[MLMucProcessor alloc] initWithAccount:self];
     
     _stateLockObject = [[NSObject alloc] init];
     [self initSM3];
@@ -1456,7 +1456,7 @@ NSString* const kStanza = @"stanza";
                 {
                     //only handle presences for mucs we know
                     if([[DataLayer sharedInstance] isBuddyMuc:presenceNode.fromUser forAccount:self.accountNo])
-                        [self.mucProcessor processPresence:presenceNode forAccount:self];
+                        [self.mucProcessor processPresence:presenceNode];
                     else
                         DDLogError(@"Got presence of unknown muc %@, ignoring...", presenceNode.fromUser);
                     
@@ -1847,7 +1847,7 @@ NSString* const kStanza = @"stanza";
             }
             
             //ping all mucs to check if we are still connected (XEP-0410)
-            [self.mucProcessor pingAllMucsOnAccount:self];
+            [self.mucProcessor pingAllMucs];
             
             @synchronized(_stateLockObject) {
                 //signal finished catchup if our current outgoing stanza counter is acked, this introduces an additional roundtrip to make sure
@@ -2829,7 +2829,7 @@ NSString* const kStanza = @"stanza";
     
     //join MUCs from muc_favorites db
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
-        [self.mucProcessor join:entry[@"room"] onAccount:self];
+        [self.mucProcessor join:entry[@"room"]];
 }
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
@@ -3165,12 +3165,12 @@ NSString* const kStanza = @"stanza";
 
 -(void) joinMuc:(NSString* _Nonnull) room
 {
-    [self.mucProcessor join:room onAccount:self];
+    [self.mucProcessor join:room];
 }
 
 -(void) leaveMuc:(NSString* _Nonnull) room
 {
-    [self.mucProcessor leave:room onAccount:self withBookmarksUpdate:YES];
+    [self.mucProcessor leave:room withBookmarksUpdate:YES];
 }
 
 -(void) checkJidType:(NSString*) jid withCompletion:(void (^)(NSString* type, NSString* _Nullable errorMessage)) completion

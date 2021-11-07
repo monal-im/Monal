@@ -19,13 +19,13 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) addUIHandler:(monal_id_block_t) handler forMuc:(NSString*) room;
 -(void) removeUIHandlerForMuc:(NSString*) room;
 
--(void) processPresence:(XMPPPresence*) presenceNode forAccount:(xmpp*) account;
--(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account;
+-(void) processPresence:(XMPPPresence*) presenceNode;
+-(BOOL) processMessage:(XMPPMessage*) messageNode;
 
--(void) join:(NSString*) room onAccount:(xmpp*) account;
--(void) leave:(NSString*) room onAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks;
--(void) pingAllMucsOnAccount:(xmpp*) account;
--(void) ping:(NSString*) roomJid onAccount:(xmpp*) account;
+-(void) join:(NSString*) room;
+-(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks;
+-(void) pingAllMucs;
+-(void) ping:(NSString*) roomJid;
 
 @end
 

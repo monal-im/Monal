@@ -24,9 +24,9 @@
 @end
 
 @interface MLMucProcessor ()
--(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks;
--(void) sendJoinPresenceFor:(NSString*) room onAccount:(xmpp*) account;
--(NSString*) calculateNickForMuc:(NSString*) room onAccount:(xmpp*) account;
+-(void) sendDiscoQueryFor:(NSString*) roomJid withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks;
+-(void) sendJoinPresenceFor:(NSString*) room;
+-(NSString*) calculateNickForMuc:(NSString*) room;
 @end
 
 @implementation MLPubSubProcessor
@@ -197,10 +197,10 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
                     DDLogInfo(@"Entering muc '%@' on account %@ because it got added to bookmarks...", room, account.accountNo);
                     //make sure we update our favorites table right away, to counter any race conditions when joining multiple mucs with one bookmarks update
                     if(nick == nil)
-                        nick = [account.mucProcessor calculateNickForMuc:room onAccount:account];
+                        nick = [account.mucProcessor calculateNickForMuc:room];
                     [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];
                     //try to join muc, but don't perform a bookmarks update (this muc came in through a bookmark already)
-                    [account.mucProcessor sendDiscoQueryFor:room onAccount:account withJoin:YES andBookmarksUpdate:NO];
+                    [account.mucProcessor sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:NO];
                 }
                 //check if it is a known entry that changed autojoin to false
                 else if(ownFavorites[room] != nil && ![autojoin boolValue])
@@ -208,7 +208,7 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
                     DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
                     //delete local favorites entry and leave room afterwards
                     [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                    [account.mucProcessor leave:room onAccount:account withBookmarksUpdate:NO];
+                    [account.mucProcessor leave:room withBookmarksUpdate:NO];
                 }
                 //check for nickname changes
                 else if(ownFavorites[room] != nil && nick != nil)
@@ -225,7 +225,7 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
                         //rejoin the muc (e.g. change nick)
                         //we don't have to do a full disco because we are sure this is a real muc and we are joined already
                         //(only real mucs are part of our local favorites list and this list is joined automatically)
-                        [account.mucProcessor sendJoinPresenceFor:room onAccount:account];
+                        [account.mucProcessor sendJoinPresenceFor:room];
                     }
                 }
             }
@@ -238,7 +238,7 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
                 DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
                 //delete local favorites entry and leave room afterwards
                 [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                [account.mucProcessor leave:room onAccount:account withBookmarksUpdate:NO];
+                [account.mucProcessor leave:room withBookmarksUpdate:NO];
             }
             
             return;      //we only need the first pep item (there should be only one item in the first place)
@@ -252,7 +252,7 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
         DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
         //delete local favorites entry and leave room afterwards
         [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-        [account.mucProcessor leave:room onAccount:account withBookmarksUpdate:NO];
+        [account.mucProcessor leave:room withBookmarksUpdate:NO];
     }
 $$
 

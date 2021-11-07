@@ -175,7 +175,7 @@ static NSMutableDictionary* _typingNotifications;
     }
     
     //handle muc status changes or invites (this checks for the muc namespace itself)
-    if([account.mucProcessor processMessage:messageNode forAccount:account])
+    if([account.mucProcessor processMessage:messageNode])
         return message;     //the muc processor said we have stop processing
     
     NSString* decrypted;

@@ -25,6 +25,7 @@
 
 @interface MLMucProcessor()
 {
+    __weak xmpp* _account;
     //persistent state
     NSObject* _stateLockObject;
     NSMutableDictionary* _roomFeatures;
@@ -39,9 +40,10 @@
 
 @implementation MLMucProcessor
 
--(id) init
+-(id) initWithAccount:(xmpp*) account
 {
     self = [super init];
+    _account = account;
     _stateLockObject = [[NSObject alloc] init];
     _roomFeatures = [[NSMutableDictionary alloc] init];
     _joining = [[NSMutableSet alloc] init];
@@ -119,22 +121,22 @@
     }
 }
 
--(void) processPresence:(XMPPPresence*) presenceNode forAccount:(xmpp*) account
+-(void) processPresence:(XMPPPresence*) presenceNode
 {
     //check for nickname conflict while joining and retry with underscore added to the end
     if([self isJoining:presenceNode.fromUser] && [presenceNode findFirst:@"/<type=error>/error/{urn:ietf:params:xml:ns:xmpp-stanzas}conflict"])
     {
         //load old nickname from db, add underscore and write it back to db so that it can be used by our next join
-        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:presenceNode.fromUser forAccount:account.accountNo];
+        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:presenceNode.fromUser forAccount:_account.accountNo];
         nick = [NSString stringWithFormat:@"%@_", nick];
-        [[DataLayer sharedInstance] initMuc:presenceNode.fromUser forAccountId:account.accountNo andMucNick:nick];
+        [[DataLayer sharedInstance] initMuc:presenceNode.fromUser forAccountId:_account.accountNo andMucNick:nick];
         
         //try to join again
         DDLogInfo(@"Retrying muc join of %@ with new nick (appended underscore): %@", presenceNode.fromUser, nick);
         @synchronized(_stateLockObject) {
             [_joining removeObject:presenceNode.fromUser];
         }
-        [self sendJoinPresenceFor:presenceNode.fromUser onAccount:account];
+        [self sendJoinPresenceFor:presenceNode.fromUser];
         return;
     }
     
@@ -147,16 +149,16 @@
         }
         
         //delete muc from favorites table and update bookmarks
-        if([self checkIfStillBookmarked:presenceNode.fromUser onAccount:account])
-            [self deleteMuc:presenceNode.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:YES];
+        if([self checkIfStillBookmarked:presenceNode.fromUser])
+            [self deleteMuc:presenceNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
-        [self handleError:NSLocalizedString(@"Groupchat error", @"") forMuc:presenceNode.fromUser withNode:presenceNode andAccount:account andIsSevere:YES];
+        [self handleError:NSLocalizedString(@"Groupchat error", @"") forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:YES];
         return;
     }
     
     //handle muc status codes in self-presences
     if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
-        [self handleStatusCodes:presenceNode forAccount:account];
+        [self handleStatusCodes:presenceNode];
     
     //extract info if present (use an empty dict if no info is present)
     NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
@@ -170,21 +172,21 @@
     
     //handle presences
     if([presenceNode check:@"/<type=unavailable>"])
-        [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:account.accountNo];
+        [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
     else
-        [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:account.accountNo];
+        [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
 }
 
--(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account
+-(BOOL) processMessage:(XMPPMessage*) messageNode
 {
     //handle muc status codes
-    [self handleStatusCodes:messageNode forAccount:account];
+    [self handleStatusCodes:messageNode];
     
     //handle mediated invites
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
         DDLogInfo(@"Got mediated muc invite from %@ for %@ --> joining...", [messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"], messageNode.fromUser);
-        [self sendDiscoQueryFor:messageNode.fromUser onAccount:account withJoin:YES andBookmarksUpdate:YES];
+        [self sendDiscoQueryFor:messageNode.fromUser withJoin:YES andBookmarksUpdate:YES];
         return YES;     //stop processing in MLMessageProcessor
     }
     
@@ -192,7 +194,7 @@
     if([messageNode check:@"{jabber:x:conference}x@jid"] && [[messageNode findFirst:@"{jabber:x:conference}x@jid"] length] > 0)
     {
         DDLogInfo(@"Got direct muc invite from %@ for %@ --> joining...", messageNode.fromUser, [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
-        [self sendDiscoQueryFor:[messageNode findFirst:@"{jabber:x:conference}x@jid"] onAccount:account withJoin:YES andBookmarksUpdate:YES];
+        [self sendDiscoQueryFor:[messageNode findFirst:@"{jabber:x:conference}x@jid"] withJoin:YES andBookmarksUpdate:YES];
         return YES;     //stop processing in MLMessageProcessor
     }
     
@@ -200,7 +202,7 @@
     return NO;
 }
 
--(void) handleStatusCodes:(XMPPStanza*) node forAccount:(xmpp*) account
+-(void) handleStatusCodes:(XMPPStanza*) node
 {
     NSSet* presenceCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
     NSSet* messageCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}message/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
@@ -219,7 +221,7 @@
                     XMPPIQ* configNode = [[XMPPIQ alloc] initWithType:kiqSetType];
                     [configNode setiqTo:node.fromUser];
                     [configNode setInstantRoom];
-                    [account send:configNode];
+                    [_account send:configNode];
                     break;
                 }
                 //muc service changed our nick
@@ -230,7 +232,7 @@
                     {
                         //update nick in database
                         DDLogInfo(@"Updating muc %@ nick in database to nick provided by server: '%@'...", node.fromUser, node.fromResource);
-                        [[DataLayer sharedInstance] updateOwnNickName:node.fromResource forMuc:node.fromUser forAccount:account.accountNo];
+                        [[DataLayer sharedInstance] updateOwnNickName:node.fromResource forMuc:node.fromUser forAccount:_account.accountNo];
                     }
                     break;
                 }
@@ -243,7 +245,7 @@
                     {
                         //muc got destroyed
                         if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
-                            [self deleteMuc:node.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                            [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                         else
                             ;           //ignore other non-joining self-presences for now
                     }
@@ -256,7 +258,7 @@
                     @synchronized(_stateLockObject) {
                         [_joining removeObject:node.fromUser];
                     }
-                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
+                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                 }
                 //kicked from room
                 case 307:
@@ -265,7 +267,7 @@
                     @synchronized(_stateLockObject) {
                         [_joining removeObject:node.fromUser];
                     }
-                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
+                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                 }
                 //removed because of affiliation change --> reenter room
                 case 321:
@@ -274,7 +276,7 @@
                     @synchronized(_stateLockObject) {
                         [_joining removeObject:node.fromUser];
                     }
-                    [self sendDiscoQueryFor:node.fromUser onAccount:account withJoin:YES andBookmarksUpdate:YES];
+                    [self sendDiscoQueryFor:node.fromUser withJoin:YES andBookmarksUpdate:YES];
                 }
                 //removed because room is now members only (an we are not a member)
                 case 322:
@@ -283,8 +285,8 @@
                     @synchronized(_stateLockObject) {
                         [_joining removeObject:node.fromUser];
                     }
-                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
-                    [self deleteMuc:node.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                    [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                 }
                 //removed because of system shutdown
                 case 332:
@@ -293,7 +295,7 @@
                     @synchronized(_stateLockObject) {
                         [_joining removeObject:node.fromUser];
                     }
-                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
+                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                 }
                 default:
                     DDLogInfo(@"Got unhandled muc status code in presence from %@: %@", node.from, code);
@@ -311,12 +313,12 @@
             
             //we joined successfully --> add muc to our favorites (this will use the already up to date nick from buddylist db table)
             //and update bookmarks if this was the first time we joined this muc
-            [[DataLayer sharedInstance] addMucFavorite:node.fromUser forAccountId:account.accountNo andMucNick:nil];
+            [[DataLayer sharedInstance] addMucFavorite:node.fromUser forAccountId:_account.accountNo andMucNick:nil];
             @synchronized(_stateLockObject) {
                 DDLogVerbose(@"_firstJoin set: %@\n_noUpdateBookmarks set: %@", _firstJoin, _noUpdateBookmarks);
                 //only update bookmarks on first join AND if not requested otherwise (batch join etc.)
                 if([_firstJoin containsObject:node.fromUser] && ![_noUpdateBookmarks containsObject:node.fromUser])
-                    [self updateBookmarksForAccount:account];
+                    [self updateBookmarks];
                 [_firstJoin removeObject:node.fromUser];
                 [_noUpdateBookmarks removeObject:node.fromUser];
             }
@@ -328,7 +330,8 @@
                 dispatch_async(dispatch_get_main_queue(), ^{
                     uiHandler(@{
                         @"success": @YES,
-                        @"muc": node.fromUser
+                        @"muc": node.fromUser,
+                        @"account": _account
                     });
                 });
             }
@@ -350,21 +353,21 @@
                 //this will do a catchup of everything we might have missed since our last connection
                 //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
                 //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
-                NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:node.fromUser andAccount:account.accountNo];
-                [account delayIncomingMessageStanzasForArchiveJid:node.fromUser];
+                NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:node.fromUser andAccount:_account.accountNo];
+                [_account delayIncomingMessageStanzasForArchiveJid:node.fromUser];
                 XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
                 [mamQuery setiqTo:node.fromUser];
                 if(lastStanzaId)
                 {
                     DDLogInfo(@"Querying muc mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
                     [mamQuery setMAMQueryAfter:lastStanzaId];
-                    [account sendIq:mamQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, NO))];
+                    [_account sendIq:mamQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, NO))];
                 }
                 else
                 {
                     DDLogInfo(@"Querying muc mam:2 archive for latest stanzaid to prime database");
                     [mamQuery setMAMQueryForLatestId];
-                    [account sendIq:mamQuery withHandler:$newHandler([self class], handleMamResponseWithLatestId)];
+                    [_account sendIq:mamQuery withHandler:$newHandler([self class], handleMamResponseWithLatestId)];
                 }
             }
             
@@ -383,7 +386,7 @@
                 case 104:
                 {
                     DDLogInfo(@"Muc config of %@ changed, sending new disco info query to reload muc config...", node.fromUser);
-                    [self sendDiscoQueryFor:node.from onAccount:account withJoin:NO andBookmarksUpdate:NO];
+                    [self sendDiscoQueryFor:node.from withJoin:NO andBookmarksUpdate:NO];
                     break;
                 }
                 default:
@@ -392,40 +395,40 @@
     }
 }
 
--(void) join:(NSString*) room onAccount:(xmpp*) account
+-(void) join:(NSString*) room
 {
-    [self sendDiscoQueryFor:room onAccount:account withJoin:YES andBookmarksUpdate:YES];
+    [self sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:YES];
 }
 
--(void) leave:(NSString*) room onAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks
+-(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks
 {
     room = [room lowercaseString];
-    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:_account.accountNo];
     if(nick == nil)
     {
-        DDLogError(@"Cannot leave room '%@' on account %@ because nick is nil!", room, account.accountNo);
+        DDLogError(@"Cannot leave room '%@' on account %@ because nick is nil!", room, _account);
         return;
     }
     @synchronized(_stateLockObject) {
         if([_joining containsObject:room])
         {
-            DDLogInfo(@"Aborting join of room '%@' on account %@", room, account.accountNo);
+            DDLogInfo(@"Aborting join of room '%@' on account %@", room, _account);
             [_joining removeObject:room];
         }
     }
-    DDLogInfo(@"Leaving room '%@' on account %@ using nick '%@'...", room, account.accountNo, nick);
+    DDLogInfo(@"Leaving room '%@' on account %@ using nick '%@'...", room, _account, nick);
     //send unsubscribe even if we are not fully joined (join aborted), just to make sure we *really* leave ths muc
     XMPPPresence* presence = [[XMPPPresence alloc] init];
     [presence leaveRoom:room withNick:nick];
-    [account send:presence];
+    [_account send:presence];
     
     //delete muc from favorites table and update bookmarks if requested
-    [self deleteMuc:room forAccount:account withBookmarksUpdate:updateBookmarks keepBuddylistEntry:NO];
+    [self deleteMuc:room withBookmarksUpdate:updateBookmarks keepBuddylistEntry:NO];
 }
 
--(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks
+-(void) sendDiscoQueryFor:(NSString*) roomJid withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks
 {
-    if(roomJid == nil || account == nil)
+    if(roomJid == nil || _account == nil)
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Room jid or account must not be nil!" userInfo:nil];
     roomJid = [roomJid lowercaseString];
     DDLogInfo(@"Querying disco for muc %@...", roomJid);
@@ -447,10 +450,10 @@
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:roomJid];
     [discoInfo setDiscoInfoNode];
-    [account sendIq:discoInfo withHandler:$newHandlerWithInvalidation([self class], handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
+    [_account sendIq:discoInfo withHandler:$newHandlerWithInvalidation([self class], handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
 }
 
--(void) pingAllMucsOnAccount:(xmpp*) account
+-(void) pingAllMucs
 {
     if([[NSDate date] timeIntervalSinceDate:_lastPing] < 3600)
     {
@@ -458,30 +461,30 @@
         return;
     }
     _lastPing = [NSDate date];
-    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
-        [self ping:entry[@"room"] onAccount:account];
+    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
+        [self ping:entry[@"room"]];
 }
 
--(void) ping:(NSString*) roomJid onAccount:(xmpp*) account
+-(void) ping:(NSString*) roomJid
 {
-    if(![[DataLayer sharedInstance] isBuddyMuc:roomJid forAccount:account.accountNo])
+    if(![[DataLayer sharedInstance] isBuddyMuc:roomJid forAccount:_account.accountNo])
     {
         DDLogWarn(@"Tried to muc-ping non-muc jid '%@', trying to join regularily with disco...", roomJid);
         @synchronized(_stateLockObject) {
             [_joining removeObject:roomJid];
         }
         //this will check if this jid really is not a muc and delete it fom favorites and bookmarks, if not (and join normally if it turns out is a muc after all)
-        [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES andBookmarksUpdate:YES];
+        [self sendDiscoQueryFor:roomJid withJoin:YES andBookmarksUpdate:YES];
         return;
     }
     
     XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType];
     [ping setiqTo:roomJid];
-    ping.toResource = [[DataLayer sharedInstance] ownNickNameforMuc:roomJid forAccount:account.accountNo];
+    ping.toResource = [[DataLayer sharedInstance] ownNickNameforMuc:roomJid forAccount:_account.accountNo];
     [ping setPing];
     //we don't need to handle this across smacks resumes or reconnects, because a new ping will be issued on the next smacks resume
     //(and full reconnets will rejoin all mucs anyways)
-    [account sendIq:ping withResponseHandler:^(XMPPIQ* result) {
+    [_account sendIq:ping withResponseHandler:^(XMPPIQ* result) {
         DDLogInfo(@"Muc ping returned: we are still connected to %@, everything is fine", roomJid);
     } andErrorHandler:^(XMPPIQ* error) {
         if(error == nil)
@@ -498,8 +501,8 @@
             }
             //check if muc is still in our favorites table before we try to join it (could be deleted by a bookmarks update just after we sent out our ping)
             //this has to be done to avoid such a race condition that would otherwise re-add the muc back
-            if([self checkIfStillBookmarked:roomJid onAccount:account])
-                [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES andBookmarksUpdate:YES];
+            if([self checkIfStillBookmarked:roomJid])
+                [self sendDiscoQueryFor:roomJid withJoin:YES andBookmarksUpdate:YES];
             else
                 DDLogWarn(@"Not re-joining because muc %@ got removed from favorites table in the meantime", roomJid);
         }
@@ -529,8 +532,8 @@
             }
             //check if muc is still in our favorites table before we try to join it (could be deleted by a bookmarks updae just after we sent out our ping)
             //this has to be done to avoid such a race condition that would otherwise re-add the muc back
-            if([self checkIfStillBookmarked:roomJid onAccount:account])
-                [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES andBookmarksUpdate:YES];
+            if([self checkIfStillBookmarked:roomJid])
+                [self sendDiscoQueryFor:roomJid withJoin:YES andBookmarksUpdate:YES];
             else
                 DDLogWarn(@"Not re-joining %@ because this muc got removed from favorites table in the meantime", roomJid);
         }
@@ -549,9 +552,9 @@ $$
 }
 
 $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $_BOOL(join), $_BOOL(updateBookmarks))
-    [account.mucProcessor handleDiscoResponseWithAccount:account andIqNode:iqNode andRoomJid:roomJid andJoin:join andUpdateBookmarks:updateBookmarks];
+    [account.mucProcessor handleDiscoResponseWithIqNode:iqNode andRoomJid:roomJid andJoin:join andUpdateBookmarks:updateBookmarks];
 $$
--(void) handleDiscoResponseWithAccount:(xmpp*) account andIqNode:(XMPPIQ*) iqNode andRoomJid:(NSString*) roomJid andJoin:(BOOL) join andUpdateBookmarks:(BOOL) updateBookmarks
+-(void) handleDiscoResponseWithIqNode:(XMPPIQ*) iqNode andRoomJid:(NSString*) roomJid andJoin:(BOOL) join andUpdateBookmarks:(BOOL) updateBookmarks
 {
     MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!", (@{
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
@@ -567,7 +570,7 @@ $$
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         //make sure to update remote bookmarks, even if updateBookmarks == NO
-        [self deleteMuc:iqNode.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:YES];
+        [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
         return;
     }
@@ -578,7 +581,7 @@ $$
         @synchronized(_stateLockObject) {
             [_joining removeObject:iqNode.fromUser];
         }
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@", @""), roomJid] forMuc:roomJid withNode:iqNode andAccount:account andIsSevere:YES];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:YES];
         return;
     }
     
@@ -592,16 +595,16 @@ $$
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         //make sure to update remote bookmarks, even if updateBookmarks == NO
-        [self deleteMuc:iqNode.fromUser forAccount:account withBookmarksUpdate:YES keepBuddylistEntry:NO];
+        [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:NO];
     
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@: This is not a groupchat!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andAccount:account andIsSevere:YES];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@: This is not a groupchat!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andIsSevere:YES];
         return;
     }
     
     //the join (join=YES) was aborted by a call to leave (isJoining: returns NO)
     if(join && ![self isJoining:iqNode.fromUser])
     {
-        DDLogWarn(@"Ignoring muc disco result for '%@' on account %@: not joining anymore...", iqNode.fromUser, account.accountNo);
+        DDLogWarn(@"Ignoring muc disco result for '%@' on account %@: not joining anymore...", iqNode.fromUser, _account);
         return;
     }
     
@@ -614,12 +617,12 @@ $$
         mucType = @"group";
     
     //update db with new infos
-    if(![[DataLayer sharedInstance] isBuddyMuc:iqNode.fromUser forAccount:account.accountNo])
+    if(![[DataLayer sharedInstance] isBuddyMuc:iqNode.fromUser forAccount:_account.accountNo])
     {
-        NSString* nick = [self calculateNickForMuc:iqNode.fromUser onAccount:account];
+        NSString* nick = [self calculateNickForMuc:iqNode.fromUser];
         //add new muc buddy (potentially deleting a non-muc buddy having the same jid)
         DDLogInfo(@"Adding new muc %@ using nick '%@' to buddylist...", iqNode.fromUser, nick);
-        [[DataLayer sharedInstance] initMuc:iqNode.fromUser forAccountId:account.accountNo andMucNick:nick];
+        [[DataLayer sharedInstance] initMuc:iqNode.fromUser forAccountId:_account.accountNo andMucNick:nick];
         //add this room to firstJoin list
         @synchronized(_stateLockObject) {
             [_firstJoin addObject:iqNode.fromUser];
@@ -629,27 +632,27 @@ $$
     }
     
     DDLogInfo(@"Clearing muc participants and members tables for %@", iqNode.fromUser);
-    [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser forAccountId:account.accountNo];
+    [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser forAccountId:_account.accountNo];
     
-    if(![mucType isEqualToString:[[DataLayer sharedInstance] getMucTypeOfRoom:iqNode.fromUser andAccount:account.accountNo]])
+    if(![mucType isEqualToString:[[DataLayer sharedInstance] getMucTypeOfRoom:iqNode.fromUser andAccount:_account.accountNo]])
     {
         DDLogInfo(@"Configuring muc %@ to type '%@'...", iqNode.fromUser, mucType);
-        [[DataLayer sharedInstance] updateMucTypeTo:mucType forRoom:iqNode.fromUser andAccount:account.accountNo];
+        [[DataLayer sharedInstance] updateMucTypeTo:mucType forRoom:iqNode.fromUser andAccount:_account.accountNo];
     }
     
     if(mucName && [mucName length])
     {
-        MLContact* mucContact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
+        MLContact* mucContact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo];
         if(![mucName isEqualToString:mucContact.fullName])
         {
             DDLogInfo(@"Configuring muc %@ to use name '%@'...", iqNode.fromUser, mucName);
-            [[DataLayer sharedInstance] setFullName:mucName forContact:iqNode.fromUser andAccount:account.accountNo];
+            [[DataLayer sharedInstance] setFullName:mucName forContact:iqNode.fromUser andAccount:_account.accountNo];
         }
     }
     
     DDLogDebug(@"Updating muc contact...");
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-        @"contact": [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo]
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+        @"contact": [MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo]
     }];
     
     @synchronized(_stateLockObject) {
@@ -664,18 +667,18 @@ $$
         XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
         [discoInfo setiqTo:iqNode.fromUser];
         [discoInfo setMucListQueryFor:type];
-        [account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
+        [_account sendIq:discoInfo withHandler:$newHandler([self class], handleMembersList, $ID(type))];
     }
     
     // now try to join this room if requested
     if(join)
-        [self sendJoinPresenceFor:iqNode.fromUser onAccount:account];
+        [self sendJoinPresenceFor:iqNode.fromUser];
 $$
 
--(void) sendJoinPresenceFor:(NSString*) room onAccount:(xmpp*) account
+-(void) sendJoinPresenceFor:(NSString*) room
 {
-    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
-    DDLogInfo(@"Trying to join muc '%@' with nick '%@' on account %@...", room, nick, account.accountNo);
+    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:_account.accountNo];
+    DDLogInfo(@"Trying to join muc '%@' with nick '%@' on account %@...", room, nick, _account);
     @synchronized(_stateLockObject) {
         [_joining addObject:room];       //add room to "currently joining" list
         //we don't need to force saving of our new state because once this outgoing join presence gets handled by smacks the whole state will be saved
@@ -683,13 +686,13 @@ $$
     
     XMPPPresence* presence = [[XMPPPresence alloc] init];
     [presence joinRoom:room withNick:nick];
-    [account send:presence];
+    [_account send:presence];
 }
 
 $$handler(handleMembersList, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, type))
-    [account.mucProcessor handleMembersListWithAccount:account andIqNode:iqNode andType:type];
+    [account.mucProcessor handleMembersListWithIqNode:iqNode andType:type];
 $$
--(void) handleMembersListWithAccount:(xmpp*) account andIqNode:(XMPPIQ*) iqNode andType:(NSString*) type
+-(void) handleMembersListWithIqNode:(XMPPIQ*) iqNode andType:(NSString*) type
 {
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
     for(NSDictionary* entry in [iqNode find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
@@ -700,19 +703,19 @@ $$
         //update jid to be a bare jid and add muc nick to our dict
         if(item[@"jid"])
             item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
-        [[DataLayer sharedInstance] addMember:item toMuc:iqNode.fromUser forAccountId:account.accountNo];
+        [[DataLayer sharedInstance] addMember:item toMuc:iqNode.fromUser forAccountId:_account.accountNo];
     }
 }
 
 $$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
-    [account.mucProcessor handleMamResponseWithLatestIdWithAccount:account andIqNode:iqNode];
+    [account.mucProcessor handleMamResponseWithLatestIdWithIqNode:iqNode];
 $$
--(void) handleMamResponseWithLatestIdWithAccount:(xmpp*) account andIqNode:(XMPPIQ*) iqNode
+-(void) handleMamResponseWithLatestIdWithIqNode:(XMPPIQ*) iqNode
 {
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
-        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query newest stanzaid for groupchat %@", @""), iqNode.fromUser] withNode:iqNode andAccount:account andIsSevere:YES];
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query newest stanzaid for groupchat %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
         return;
     }
     DDLogVerbose(@"Got latest muc stanza id to prime database with: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
@@ -724,14 +727,14 @@ $$
     //no more messages will get lost
     //we ignore this single message loss here, because it should be super rare and solving it would be really complicated
     if([iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
-        [[DataLayer sharedInstance] setLastStanzaId:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"] forMuc:iqNode.fromUser andAccount:account.accountNo];
-    [account mamFinishedFor:iqNode.fromUser];
+        [[DataLayer sharedInstance] setLastStanzaId:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"] forMuc:iqNode.fromUser andAccount:_account.accountNo];
+    [_account mamFinishedFor:iqNode.fromUser];
 }
 
 $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
-    [account.mucProcessor handleCatchupWithAccount:account andIqNode:iqNode andSecondTry:secondTry];
+    [account.mucProcessor handleCatchupWithIqNode:iqNode andSecondTry:secondTry];
 $$
--(void) handleCatchupWithAccount:(xmpp*) account andIqNode:(XMPPIQ*) iqNode andSecondTry:(BOOL)secondTry
+-(void) handleCatchupWithIqNode:(XMPPIQ*) iqNode andSecondTry:(BOOL)secondTry
 {
     if([iqNode check:@"/<type=error>"])
     {
@@ -744,12 +747,12 @@ $$
             [mamQuery setiqTo:iqNode.fromUser];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
             [mamQuery setCompleteMAMQuery];
-            [account sendIq:mamQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, YES))];
+            [_account sendIq:mamQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, YES))];
         }
         else
         {
-            [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for groupchat %@", @""), iqNode.fromUser] withNode:iqNode andAccount:account andIsSevere:YES];
-            [account mamFinishedFor:iqNode.fromUser];
+            [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for groupchat %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
+            [_account mamFinishedFor:iqNode.fromUser];
         }
         return;
     }
@@ -760,16 +763,16 @@ $$
         XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
         [pageQuery setiqTo:iqNode.fromUser];
-        [account sendIq:pageQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, NO))];
+        [_account sendIq:pageQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, NO))];
     }
     else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
     {
         DDLogVerbose(@"Muc mam catchup finished");
-        [account mamFinishedFor:iqNode.fromUser];
+        [_account mamFinishedFor:iqNode.fromUser];
     }
 }
 
--(void) handleError:(NSString*) description forMuc:(NSString*) room withNode:(XMPPStanza*) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
+-(void) handleError:(NSString*) description forMuc:(NSString*) room withNode:(XMPPStanza*) node andIsSevere:(BOOL) isSevere
 {
     monal_id_block_t uiHandler = [self getUIHandlerForMuc:room];
     //call ui handler if registered for this room
@@ -783,6 +786,7 @@ $$
         NSDictionary* data = @{
             @"success": @NO,
             @"muc": room,
+            @"account": _account,
             @"errorMessage": message
         };
         
@@ -793,52 +797,52 @@ $$
     }
     //otherwise call the general error handler
     else
-        [HelperTools postError:description withNode:node andAccount:account andIsSevere:isSevere];
+        [HelperTools postError:description withNode:node andAccount:_account andIsSevere:isSevere];
 }
 
--(void) updateBookmarksForAccount:(xmpp*) account
+-(void) updateBookmarks
 {
-    DDLogVerbose(@"Updating bookmarks on account %@", account.connectionProperties.identity.jid);
-    [account.pubsub fetchNode:@"storage:bookmarks" from:account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
+    DDLogVerbose(@"Updating bookmarks on account %@", _account);
+    [_account.pubsub fetchNode:@"storage:bookmarks" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
 }
 
--(BOOL) checkIfStillBookmarked:(NSString*) room onAccount:(xmpp*) account
+-(BOOL) checkIfStillBookmarked:(NSString*) room
 {
     room = [room lowercaseString];
-    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
+    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
         if([room isEqualToString:[entry[@"room"] lowercaseString]])
             return YES;
     return NO;
 }
 
--(void) deleteMuc:(NSString*) room forAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry
+-(void) deleteMuc:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry
 {
-    DDLogInfo(@"Deleting muc %@ on account %@...", room, account.accountNo);
+    DDLogInfo(@"Deleting muc %@ on account %@...", room, _account);
     //delete muc from favorites table and update bookmarks if requested
-    [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+    [[DataLayer sharedInstance] deleteMuc:room forAccountId:_account.accountNo];
     if(updateBookmarks)
-        [self updateBookmarksForAccount:account];
+        [self updateBookmarks];
     
     //update buddylist (e.g. contact list) if requested
     if(keepBuddylistEntry)
         ;       //TODO: mark entry as destroyed
     else
     {
-        [[DataLayer sharedInstance] removeBuddy:room forAccount:account.accountNo];
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{
-            @"contact": [MLContact createContactFromJid:room andAccountNo:account.accountNo]
+        [[DataLayer sharedInstance] removeBuddy:room forAccount:_account.accountNo];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:_account userInfo:@{
+            @"contact": [MLContact createContactFromJid:room andAccountNo:_account.accountNo]
         }];
     }
 }
 
--(NSString*) calculateNickForMuc:(NSString*) room onAccount:(xmpp*) account
+-(NSString*) calculateNickForMuc:(NSString*) room
 {
-    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:_account.accountNo];
     //use the account display name as nick, if nothing can be found in buddylist and muc_favorites db tables
     if(!nick)
     {
-        nick = [MLContact ownDisplayNameForAccount:account];
-        DDLogInfo(@"Using default nick '%@' for room %@", nick, room);
+        nick = [MLContact ownDisplayNameForAccount:_account];
+        DDLogInfo(@"Using default nick '%@' for room %@ on account %@", nick, room, _account);
     }
     return nick;
 }

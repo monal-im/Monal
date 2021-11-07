@@ -164,7 +164,7 @@ const int KEY_SIZE = 16;
     }
 }
 
-$$handler(devicelistHandler, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+$$instance_handler(devicelistHandler, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
     //type will be "publish", "retract", "purge" or "delete", "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
     assert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"]);
@@ -174,7 +174,7 @@ $$handler(devicelistHandler, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(N
             NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub#event}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
 
-            [account.omemo processOMEMODevices:deviceSet from:jid];
+            [self processOMEMODevices:deviceSet from:jid];
         }
     }
 $$
@@ -230,7 +230,7 @@ $$
     [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:$newHandler(self, handleBundleFetchResult, $ID(rid, deviceid))];
 }
 
-$$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data), $_ID(NSString*, rid))
+$$instance_handler(handleBundleFetchResult, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data), $_ID(NSString*, rid))
     if(errorIq)
     {
         DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);
@@ -241,7 +241,7 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
             if(ridFromIQ)
             {
                 SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.intValue];
-                [account.omemo.monalSignalStore markDeviceAsDeleted:address];
+                [self.monalSignalStore markDeviceAsDeleted:address];
             }
         }
     }
@@ -250,8 +250,8 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         if(!rid || !jid)
             return;
         // check that a corresponding buddy exists -> prevent foreign key errors
-        if([[DataLayer sharedInstance] isContactInList:jid forAccount:account.accountNo] == NO) {
-            DDLogWarn(@"Skipping processOMEMOKeys: jid %@ not a known buddy. AccountNo: %@", jid, account.accountNo);
+        if([[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo] == NO) {
+            DDLogWarn(@"Skipping processOMEMOKeys: jid %@ not a known buddy. AccountNo: %@", jid, self.account.accountNo);
             return;
         }
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
@@ -266,27 +266,27 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         }
         if(receivedKeys)
         {
-            [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
+            [self processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
         }
     }
-    if(account.omemo.openBundleFetchCnt > 1 && account.omemo.loggedIn)
+    if(self.openBundleFetchCnt > 1 && self.loggedIn)
     {
-        account.omemo.openBundleFetchCnt--;
-        account.omemo.closedBundleFetchCnt++;
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateBundleFetchStatus object:account.omemo userInfo:@{
-            @"accountNo": account.accountNo,
-            @"completed": @(account.omemo.closedBundleFetchCnt),
-            @"all": @(account.omemo.openBundleFetchCnt + account.omemo.closedBundleFetchCnt)
+        self.openBundleFetchCnt--;
+        self.closedBundleFetchCnt++;
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
+            @"accountNo": self.account.accountNo,
+            @"completed": @(self.closedBundleFetchCnt),
+            @"all": @(self.openBundleFetchCnt + self.closedBundleFetchCnt)
         }];
     }
     else
     {
-        account.omemo.openBundleFetchCnt = 0;
-        account.omemo.closedBundleFetchCnt = 0;
-        if(account.omemo.hasCatchUpDone && account.omemo.loggedIn)
+        self.openBundleFetchCnt = 0;
+        self.closedBundleFetchCnt = 0;
+        if(self.hasCatchUpDone && self.loggedIn)
         {
-            [account.omemo sendLocalDevicesIfNeeded];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": account.accountNo}];
+            [self sendLocalDevicesIfNeeded];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": self.account.accountNo}];
         }
     }
 $$
@@ -296,7 +296,7 @@ $$
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
 }
 
-$$handler(handleManualDevices, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data))
+$$instance_handler(handleManualDevices, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data))
     if(errorIq)
     {
         DDLogWarn(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorIq);
@@ -319,7 +319,7 @@ $$handler(handleManualDevices, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(
             NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
 
-            [account.omemo processOMEMODevices:deviceSet from:jid];
+            [self processOMEMODevices:deviceSet from:jid];
         }
     }
 $$

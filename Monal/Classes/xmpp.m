@@ -1389,7 +1389,7 @@ NSString* const kStanza = @"stanza";
             {
                 DDLogError(@"sanity check failed for presence node, ignoring presence: %@", presenceNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
-                [self incrementLastHandledStanza];
+                [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                 return;
             }
             
@@ -1404,7 +1404,7 @@ NSString* const kStanza = @"stanza";
             {
                 DDLogError(@"sanity check failed presence node, ignoring presence: %@", presenceNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
-                [self incrementLastHandledStanza];
+                [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                 return;
             }
             
@@ -1445,7 +1445,7 @@ NSString* const kStanza = @"stanza";
                         DDLogError(@"Got presence of unknown muc %@, ignoring...", presenceNode.fromUser);
                     
                     //mark this stanza as handled
-                    [self incrementLastHandledStanza];
+                    [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                     return;
                 }
 
@@ -1543,7 +1543,7 @@ NSString* const kStanza = @"stanza";
             }
             
             //only mark stanza as handled *after* processing it
-            [self incrementLastHandledStanza];
+            [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
         }
         else if([parsedStanza check:@"/{jabber:client}message"])
         {
@@ -1557,7 +1557,7 @@ NSString* const kStanza = @"stanza";
             {
                 DDLogError(@"sanity check failed for outer message node, ignoring message: %@", outerMessageNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
-                [self incrementLastHandledStanza];
+                [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                 return;
             }
             
@@ -1572,7 +1572,7 @@ NSString* const kStanza = @"stanza";
             {
                 DDLogError(@"sanity check failed for outer message node, ignoring message: %@", outerMessageNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
-                [self incrementLastHandledStanza];
+                [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                 return;
             }
             
@@ -1588,7 +1588,7 @@ NSString* const kStanza = @"stanza";
                         DDLogError(@"mam results must be asked for, ignoring this spoofed mam result having queryid: %@!", [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]);
                         DDLogError(@"allowed mam queryids are: %@", _runningMamQueries);
                         //even these stanzas have to be counted by smacks
-                        [self incrementLastHandledStanza];
+                        [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                         return;
                     }
                 }
@@ -1609,7 +1609,7 @@ NSString* const kStanza = @"stanza";
                 {
                     DDLogError(@"carbon copies must be from our bare jid, ignoring this spoofed carbon copy!");
                     //even these stanzas have to be counted by smacks
-                    [self incrementLastHandledStanza];
+                    [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                     return;
                 }
                 
@@ -1629,7 +1629,7 @@ NSString* const kStanza = @"stanza";
             {
                 DDLogError(@"sanity check failed for inner message node, ignoring message: %@", messageNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
-                [self incrementLastHandledStanza];
+                [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                 return;
             }
             
@@ -1644,7 +1644,7 @@ NSString* const kStanza = @"stanza";
             {
                 DDLogError(@"sanity check failed for inner message node, ignoring message: %@", messageNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
-                [self incrementLastHandledStanza];
+                [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                 return;
             }
             
@@ -1708,7 +1708,7 @@ NSString* const kStanza = @"stanza";
                 [self addMessageToMamPageArray:@{@"outerMessageNode": outerMessageNode, @"messageNode": messageNode}];       //add message to mam page array to be processed later
             
             //only mark stanza as handled *after* processing it
-            [self incrementLastHandledStanza];
+            [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
         }
         else if([parsedStanza check:@"/{jabber:client}iq"])
         {
@@ -1719,7 +1719,7 @@ NSString* const kStanza = @"stanza";
             {
                 DDLogError(@"sanity check failed for iq node, ignoring iq: %@", iqNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
-                [self incrementLastHandledStanza];
+                [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                 return;
             }
             
@@ -1735,7 +1735,7 @@ NSString* const kStanza = @"stanza";
             {
                 DDLogError(@"sanity check failed for iq node, ignoring iq: %@", iqNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
-                [self incrementLastHandledStanza];
+                [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                 return;
             }
             
@@ -1770,7 +1770,7 @@ NSString* const kStanza = @"stanza";
             }
             
             //only mark stanza as handled *after* processing it
-            [self incrementLastHandledStanza];
+            [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}enabled"])
         {
@@ -2607,8 +2607,11 @@ NSString* const kStanza = @"stanza";
     return newState;
 }
 
--(void) incrementLastHandledStanza
+-(void) incrementLastHandledStanzaWithDelayedReplay:(BOOL) delayedReplay
 {
+    //don't ack messages twice
+    if(delayedReplay)
+        return;
     @synchronized(_stateLockObject) {
         if(self.connectionProperties.supportsSM3)
         {

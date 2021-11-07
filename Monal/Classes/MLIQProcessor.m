@@ -143,7 +143,7 @@
     DDLogWarn(@"Got unhandled error IQ: %@", iqNode);
 }
 
-$$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
+$$static_handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Mam catchup query returned error: %@", [iqNode findFirst:@"error"]);
@@ -178,7 +178,7 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(sec
     }
 $$
 
-$$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
@@ -198,7 +198,7 @@ $$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
     [account mamFinishedFor:account.connectionProperties.identity.jid];
 $$
 
-$$handler(handleCarbonsEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleCarbonsEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"carbon enable iq returned error: %@", [iqNode findFirst:@"error"]);
@@ -208,7 +208,7 @@ $$handler(handleCarbonsEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     account.connectionProperties.usingCarbons2 = YES;
 $$
 
-$$handler(handleBind, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleBind, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Binding our resource returned an error: %@", [iqNode findFirst:@"error"]);
@@ -252,7 +252,7 @@ $$handler(handleBind, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
 $$
 
 //proxy handler
-$$handler(handleRoster, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleRoster, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     [self processRosterWithAccount:account andIqNode:iqNode];
 $$
 
@@ -327,7 +327,7 @@ $$
 }
 
 //features advertised on our own jid/account
-$$handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Disco info query to our account returned an error: %@", [iqNode findFirst:@"error"]);
@@ -399,7 +399,7 @@ $$handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
 $$
 
 //features advertised on our server
-$$handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Disco info query to our server returned an error: %@", [iqNode findFirst:@"error"]);
@@ -441,7 +441,7 @@ $$handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     }
 $$
 
-$$handler(handleServiceDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleServiceDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
     
     if(!account.connectionProperties.supportsHTTPUpload && [features containsObject:@"urn:xmpp:http:upload:0"])
@@ -457,7 +457,7 @@ $$handler(handleServiceDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         account.connectionProperties.conferenceServer = iqNode.from;
 $$
 
-$$handler(handleServerDiscoItems, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleServerDiscoItems, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     account.connectionProperties.discoveredServices = [[NSMutableArray alloc] init];
     for(NSDictionary* item in [iqNode find:@"{http://jabber.org/protocol/disco#items}query/item@@"])
     {
@@ -473,7 +473,7 @@ $$handler(handleServerDiscoItems, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
 $$
 
 //entity caps of some contact
-$$handler(handleEntityCapsDisco, $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleEntityCapsDisco, $_ID(XMPPIQ*, iqNode))
     NSMutableArray* identities = [[NSMutableArray alloc] init];
     for(MLXMLNode* identity in [iqNode find:@"{http://jabber.org/protocol/disco#info}query/identity"])
         [identities addObject:[NSString stringWithFormat:@"%@/%@//%@", [identity findFirst:@"/@category"], [identity findFirst:@"/@type"], [identity findFirst:@"/@name"]]];
@@ -482,7 +482,7 @@ $$handler(handleEntityCapsDisco, $_ID(XMPPIQ*, iqNode))
     [[DataLayer sharedInstance] setCaps:features forVer:ver];
 $$
 
-$$handler(handleMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"MAM prefs query returned an error: %@", [iqNode findFirst:@"error"]);
@@ -498,7 +498,7 @@ $$handler(handleMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     }
 $$
 
-$$handler(handleSetMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleSetMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Seting MAM prefs returned an error: %@", [iqNode findFirst:@"error"]);
@@ -507,7 +507,7 @@ $$handler(handleSetMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     }
 $$
 
-$$handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Registering on appserver returned an error: %@", [iqNode findFirst:@"error"]);
@@ -532,7 +532,7 @@ $$handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
     [account sendIq:enable withHandler:$newHandler(MLIQProcessor, handlePushEnabled)];
 $$
 
-$$handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Enabling push returned an error: %@", [iqNode findFirst:@"error"]);
@@ -544,7 +544,7 @@ $$handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     account.connectionProperties.pushEnabled = YES;
 $$
 
-$$handler(handleBlocklist, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$static_handler(handleBlocklist, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if(!account.connectionProperties.supportsBlocking) return;
 
     if([iqNode check:@"/<type=result>/{urn:xmpp:blocking}blocklist"])

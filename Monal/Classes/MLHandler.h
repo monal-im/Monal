@@ -13,7 +13,7 @@ have to be declared in any interface to be usable). The argument number
 or order does not matter, feel free to reorder or even remove arguments
 you don't need. Syntax:
 ```
-$$handler(myHandlerName, $_ID(xmpp*, account), $_BOOL(success))
+$$static_handler(myHandlerName, $_ID(xmpp*, account), $_BOOL(success))
     // your code comes here
     // variables defined/imported: account, success
     // variables that could be defined/imported: var1, success, account
@@ -29,7 +29,7 @@ Synax:
 $$instance_handler(myHandlerName, instanceToUse, $_ID(xmpp*, account), $_BOOL(success))
     // your code comes here
     // 'self' is now the instance of the class extracted by the instanceToUse statement.
-    // instead of the class instance as it would be if $$handler() was used instead of $$instance_handler()
+    // instead of the class instance as it would be if $$static_handler() was used instead of $$instance_handler()
     // variables defined/imported: account, success
     // variables that could be defined/imported: var1, success, account
 $$
@@ -70,11 +70,11 @@ just like with "normal" handlers:
 $$instance_handler(myHandlerName, [account getInstanceToUse], $_ID(xmpp*, account), $_BOOL(success))
         // your code comes here
         // 'self' is now the instance of the class extracted by [account getInstanceToUse]
-        // instead of the class instance as it would be if $$handler() was used instead of $$instance_handler()
+        // instead of the class instance as it would be if $$static_handler() was used instead of $$instance_handler()
 $$
 
 // definition of invalidation method
-$$handler(myInvalidationName, $_BOOL(done), $_ID(NSString*, var1))
+$$static_handler(myInvalidationName, $_BOOL(done), $_ID(NSString*, var1))
         // your code comes here
         // variables imported: var1, done
         // variables that could have been imported: var1, success, done
@@ -105,7 +105,7 @@ $invalidate(h, $BOOL(done, YES))
 #define $HANDLER(name, ...)                                               metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : nilWrapper(name) )( _packID(name, __VA_ARGS__) )
 
 //declare handler, the order of provided arguments does not matter because we use named arguments
-#define $$handler(name, ...)                                              +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
+#define $$static_handler(name, ...)                                              +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
 #define $$instance_handler(name, instance, ...)                           +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) ); [instance MLInstanceHandler_##name##_withArguments:_callerArgs andBoundArguments:_boundArgs]; } -(void) MLInstanceHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
 #define $_ID(type, var)                                                   type var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
 #define $_BOOL(var)                                                       BOOL var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] boolValue] : [_boundArgs[@#var] boolValue]

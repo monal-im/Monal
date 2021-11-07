@@ -31,7 +31,7 @@
 
 @implementation MLPubSubProcessor
 
-$$handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+$$static_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
     DDLogDebug(@"Got new avatar metadata from '%@'", jid);
     if([type isEqualToString:@"publish"])
     {
@@ -77,7 +77,7 @@ $$handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSStri
     }
 $$
 
-$$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID(NSDictionary*, data))
+$$static_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID(NSDictionary*, data))
     //ignore errors here (e.g. simply don't update the avatar image)
     //(this should never happen if other clients and servers behave properly)
     if(!success)
@@ -99,7 +99,7 @@ $$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(N
     }
 $$
 
-$$handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+$$static_handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
     //new/updated nickname
     if([type isEqualToString:@"publish"])
     {
@@ -156,7 +156,7 @@ $$handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NS
     }
 $$
 
-$$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+$$static_handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
     if(![jid isEqualToString:account.connectionProperties.identity.jid])
     {
         DDLogWarn(@"Ignoring bookmarks update not coming from our own jid");
@@ -256,7 +256,7 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
     }
 $$
 
-$$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
+$$static_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
     if(!success)
     {
         //item-not-found means: no bookmarks in storage --> use an empty data dict
@@ -384,7 +384,7 @@ $$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID
     } andHandler:$newHandler(self, bookmarksPublished)];
 $$
 
-$$handler(bookmarksPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$static_handler(bookmarksPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         DDLogWarn(@"Could not publish bookmarks to pep!");
@@ -393,7 +393,7 @@ $$handler(bookmarksPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ
     }
 $$
 
-$$handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$static_handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         DDLogWarn(@"Could not publish roster name to pep!");
@@ -402,7 +402,7 @@ $$handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPI
     }
 $$
 
-$$handler(rosterNameDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$static_handler(rosterNameDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         //item-not-found means: nick already deleted --> ignore this error
@@ -417,7 +417,7 @@ $$handler(rosterNameDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*
     }
 $$
 
-$$handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$static_handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         //item-not-found means: avatar already deleted --> ignore this error
@@ -432,7 +432,7 @@ $$handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, er
     }
 $$
 
-$$handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$static_handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar metadata to pep!");
@@ -441,7 +441,7 @@ $$handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(X
     }
 $$
 
-$$handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSString*, imageHash), $_ID(NSData*, imageData))
+$$static_handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSString*, imageHash), $_ID(NSData*, imageData))
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar image data for hash %@!", imageHash);

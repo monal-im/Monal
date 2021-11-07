@@ -561,11 +561,45 @@ $$handler(handlePublishAgain, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ
     [me internalPublishItem:item onNode:node withConfigOptions:configOptions andHandler:handler];
 $$
 
+$$handler(handleConfigureAfterPublish, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
+    MLPubSub* me = account.pubsub;
+    
+    if(!success)
+    {
+        DDLogError(@"Second publish attempt failed again for node '%@', not configuring it!", node);
+        $call(handler, $ID(account), $BOOL(success, NO), $ID(errorIq), $ID(errorReason));
+        return;
+    }
+    
+    //configure node after publishing it
+    [me configureNode:node withConfigOptions:configOptions andHandler:handler];
+$$
+
 $$handler(handlePublishResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(MLXMLNode*, item), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
     MLPubSub* me = account.pubsub;
     
     if([iqNode check:@"/<type=error>"])
     {
+        //NOTE: workaround for old ejabberd versions <= 21.07 only supporting two special settings as preconditions
+        if([@"http://www.process-one.net/en/ejabberd/" isEqualToString:account.connectionProperties.serverIdentity] && [configOptions count] > 0 && [iqNode check:@"error<type=wait>/{urn:ietf:params:xml:ns:xmpp-stanzas}resource-constraint"])
+        {
+            DDLogWarn(@"ejabberd <= 21.07 workaround for old preconditions handling active for node: %@", node);
+            
+            //make sure we don't try all preconditions from configOptions again: only these two listed preconditions are safe to use with ejabberd
+            NSMutableDictionary* publishPreconditions = [[NSMutableDictionary alloc] init];
+            if(configOptions[@"pubsub#persist_items"])
+                publishPreconditions[@"pubsub#persist_items"] = configOptions[@"pubsub#persist_items"];
+            if(configOptions[@"pubsub#persist_items"])
+                publishPreconditions[@"pubsub#access_model"] = configOptions[@"pubsub#access_model"];
+            
+            [me internalPublishItem:item onNode:node withConfigOptions:publishPreconditions andHandler:$newHandler(self, handleConfigureAfterPublish,
+                $ID(node),
+                $ID(configOptions),
+                $HANDLER(handler)
+            )];
+            return;
+        }
+        
         //check if this node is already present and configured --> reconfigure it according to our access-model
         if([iqNode check:@"error<type=cancel>/{http://jabber.org/protocol/pubsub#errors}precondition-not-met"])
         {

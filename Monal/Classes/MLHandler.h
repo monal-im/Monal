@@ -14,9 +14,24 @@ or order does not matter, feel free to reorder or even remove arguments
 you don't need. Syntax:
 ```
 $$handler(myHandlerName, $_ID(xmpp*, account), $_BOOL(success))
-        // your code comes here
-        // variables defined/imported: account, success
-        // variables that could be defined/imported: var1, success, account
+    // your code comes here
+    // variables defined/imported: account, success
+    // variables that could be defined/imported: var1, success, account
+$$
+```
+
+Instance handlers are instance methods instead of static methods.
+You need to specify on which instance these handlers should operate.
+This instane extraxtion statement (the second argument to $$instance_handler() can be everything that
+returns an objc object. For example: "account.omemo" or "[account getInstanceToUse]" or just "account".
+Synax:
+```
+$$instance_handler(myHandlerName, instanceToUse, $_ID(xmpp*, account), $_BOOL(success))
+    // your code comes here
+    // 'self' is now the instance of the class extracted by the instanceToUse statement.
+    // instead of the class instance as it would be if $$handler() was used instead of $$instance_handler()
+    // variables defined/imported: account, success
+    // variables that could be defined/imported: var1, success, account
 $$
 ```
 
@@ -48,11 +63,14 @@ $call(h, $ID(account), $ID(otherAccountVarWithSameValue, account))
 
 - You can add an invalidation method to a handler when creating the
 MLHandler object (after invalidating a handler you can not call or
-invalidate it again!):
+invalidate it again!). Invalidation handlers can be instance handlers or static handlers,
+just like with "normal" handlers:
 ```
-// definition of normal handler method
-$$handler(myHandlerName, $_ID(xmpp*, account), $_BOOL(success))
+// definition of normal handler method as instance_handler
+$$instance_handler(myHandlerName, [account getInstanceToUse], $_ID(xmpp*, account), $_BOOL(success))
         // your code comes here
+        // 'self' is now the instance of the class extracted by [account getInstanceToUse]
+        // instead of the class instance as it would be if $$handler() was used instead of $$instance_handler()
 $$
 
 // definition of invalidation method
@@ -88,12 +106,13 @@ $invalidate(h, $BOOL(done, YES))
 
 //declare handler, the order of provided arguments does not matter because we use named arguments
 #define $$handler(name, ...)                                              +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
-#define $_ID(type, var)                                                   type var = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
-#define $_BOOL(var)                                                       BOOL var = _callerArgs[@#var] ? [_callerArgs[@#var] boolValue] : [_boundArgs[@#var] boolValue]
-#define $_INT(var)                                                        int var = _callerArgs[@#var] ? [_callerArgs[@#var] intValue] : [_boundArgs[@#var] boolValue]
-#define $_DOUBLE(var)                                                     double var = _callerArgs[@#var] ? [_callerArgs[@#var] doubleValue] : [_boundArgs[@#var] boolValue]
-#define $_INTEGER(var)                                                    NSInteger var = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] boolValue]
-#define $_HANDLER(var)                                                    MLHandler* var = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
+#define $$instance_handler(name, instance, ...)                           +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) ); [instance MLInstanceHandler_##name##_withArguments:_callerArgs andBoundArguments:_boundArgs]; } -(void) MLInstanceHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
+#define $_ID(type, var)                                                   type var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
+#define $_BOOL(var)                                                       BOOL var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] boolValue] : [_boundArgs[@#var] boolValue]
+#define $_INT(var)                                                        int var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] intValue] : [_boundArgs[@#var] boolValue]
+#define $_DOUBLE(var)                                                     double var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] doubleValue] : [_boundArgs[@#var] boolValue]
+#define $_INTEGER(var)                                                    NSInteger var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] boolValue]
+#define $_HANDLER(var)                                                    MLHandler* var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
 #define $$                                                                }
 
 //call handler/invalidation

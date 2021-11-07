@@ -501,10 +501,10 @@ enum msgSentState {
     // change text values
     dispatch_async(dispatch_get_main_queue(), ^{
         self.navBarContactJid.text = jidLabelText;
-        [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
-                   self.navBarIcon.image=image;
-          }];
         self.sendButton.enabled = sendButtonEnabled;
+        [[MLImageManager sharedInstance] getIconForContact:self.contact withCompletion:^(UIImage *image) {
+            self.navBarIcon.image=image;
+        }];
     });
 }
 

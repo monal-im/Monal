@@ -33,23 +33,16 @@
 {
     self.accountNo = contact.accountId.integerValue;
     self.username = contact.contactJid;
-
+    
     [self showDisplayName:contact.contactDisplayName];
     [self setPinned:contact.isPinned];
     [self setCount:(long)contact.unreadCount];
     [self displayLastMessage:lastMessage forContact:contact];
-
-    if(contact.isGroup)
-    {
-        if([@"channel" isEqualToString:contact.mucType])
-            self.userImage.image = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_channel"]];
-        else
-            self.userImage.image = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_muc"]];
-    }
-    else
-        [[MLImageManager sharedInstance] getIconForContact:contact.contactJid andAccount:contact.accountId withCompletion:^(UIImage *image) {
-            self.userImage.image = image;
-        }];
+    
+    [[MLImageManager sharedInstance] getIconForContact:contact withCompletion:^(UIImage *image) {
+        self.userImage.image = image;
+    }];
+    
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:contact.contactJid onAccount:contact.accountId];
     self.muteBadge.hidden = !muted;
 }

@@ -615,7 +615,7 @@ enum DummySettingsRows {
         UITapGestureRecognizer* touchUserAvatarRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getPhotoAction:)];
         [self.userAvatarImageView addGestureRecognizer:touchUserAvatarRecognizer];
         
-        [[MLImageManager sharedInstance] getIconForContact:self.jid andAccount:self.accountno withCompletion:^(UIImage *image) {
+        [[MLImageManager sharedInstance] getIconForContact:[MLContact createContactFromJid:self.jid andAccountNo:self.accountno] withCompletion:^(UIImage *image) {
             [self.userAvatarImageView setImage:image];
         }];
         

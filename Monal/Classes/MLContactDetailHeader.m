@@ -54,7 +54,7 @@
         lastInteractionStr = NSLocalizedString(@"now", @"");
     self.lastInteraction.text = [NSString stringWithFormat:NSLocalizedString(@"Last seen: %@", @""), lastInteractionStr];
 
-    [[MLImageManager sharedInstance] getIconForContact:contact.contactJid andAccount:contact.accountId withCompletion:^(UIImage* image) {
+    [[MLImageManager sharedInstance] getIconForContact:contact withCompletion:^(UIImage* image) {
         self.buddyIconView.image = image;
     }];
 

@@ -173,7 +173,7 @@
     }
     
     //remove from cache if its there
-    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@",accountNo,contact]];
+    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@", accountNo, contact]];
     
 }
 
@@ -193,38 +193,43 @@
     return composedImage;
 }
 
--(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo
+-(UIImage*) getIconForContact:(MLContact*) contact
 {
-    return [self getIconForContact:contact andAccount:accountNo withCompletion:nil];
+    return [self getIconForContact:contact withCompletion:nil];
 }
 
--(UIImage*) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion:(void (^)(UIImage *))completion
+-(UIImage*) getIconForContact:(MLContact*) contact withCompletion:(void (^)(UIImage *))completion
 {
-    NSString* filename = [self fileNameforContact:contact];
+    NSString* filename = [self fileNameforContact:contact.contactJid];
     
     __block UIImage* toreturn = nil;
     //get filname from DB
-    NSString* cacheKey = [NSString stringWithFormat:@"%@_%@",accountNo,contact];
+    NSString* cacheKey = [NSString stringWithFormat:@"%@_%@", contact.accountId, contact.contactJid];
     
     //check cache
     toreturn = [self.iconCache objectForKey:cacheKey];
     if(!toreturn)
     {
-        NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-        writablePath = [writablePath stringByAppendingPathComponent:accountNo];
-        writablePath = [writablePath stringByAppendingPathComponent:filename];
-
-        UIImage* savedImage = [UIImage imageWithContentsOfFile:writablePath];
-        if(savedImage)
-            toreturn = savedImage;
-
-        if(toreturn == nil)
+        if(contact.isGroup)
+            toreturn = [@"channel" isEqualToString:contact.mucType] ? [UIImage imageNamed:@"noicon_channel"] : [UIImage imageNamed:@"noicon_muc"];
+        else
         {
-            toreturn = [self generateDummyIconForContact:[MLContact createContactFromJid:contact andAccountNo:accountNo]];
-            //delete avatar hash from db if the file containing our image data vanished (will only be done on first call, because of self.iconCache)
-            [[DataLayer sharedInstance] setAvatarHash:@"" forContact:contact andAccount:accountNo];
-        }
+            NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+            writablePath = [writablePath stringByAppendingPathComponent:contact.accountId];
+            writablePath = [writablePath stringByAppendingPathComponent:filename];
 
+            UIImage* savedImage = [UIImage imageWithContentsOfFile:writablePath];
+            if(savedImage)
+                toreturn = savedImage;
+
+            if(toreturn == nil)
+            {
+                toreturn = [self generateDummyIconForContact:[MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]];
+                //delete avatar hash from db if the file containing our image data vanished (will only be done on first call, because of self.iconCache)
+                [[DataLayer sharedInstance] setAvatarHash:@"" forContact:contact.contactJid andAccount:contact.accountId];
+            }
+        }
+        
         toreturn = [MLImageManager circularImage:toreturn];
 
         //uiimage image named is cached if avaialable

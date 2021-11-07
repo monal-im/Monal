@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @import UIKit;
+@class MLContact;
 
 @interface MLImageManager : NSObject
 
@@ -37,8 +38,8 @@
 /**
  retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
  */
--(UIImage* _Nullable) getIconForContact:(NSString*_Nonnull) contact andAccount:(NSString *_Nonnull) accountNo withCompletion:(void (^_Nullable)(UIImage *_Nullable))completion;
--(UIImage* _Nullable) getIconForContact:(NSString*_Nonnull) contact andAccount:(NSString *_Nonnull) accountNo;
+-(UIImage* _Nullable) getIconForContact:(MLContact* _Nonnull) contact withCompletion:(void (^_Nullable)(UIImage *_Nullable))completion;
+-(UIImage* _Nullable) getIconForContact:(MLContact* _Nonnull) contact;
 +(UIImage* _Nonnull) circularImage:(UIImage* _Nonnull) image;
 
 -(UIImage* _Nullable) getBackground:(BOOL) forceReload;

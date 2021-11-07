@@ -2017,6 +2017,11 @@ NSString* const kStanza = @"stanza";
                     DDLogInfo(@"Server supports roster pre approval");
                     self.connectionProperties.supportsRosterPreApproval = YES;
                 }
+                if([parsedStanza check:@"{http://jabber.org/protocol/caps}c@node"])
+                {
+                    DDLogInfo(@"Server identity: %@", [parsedStanza findFirst:@"{http://jabber.org/protocol/caps}c@node"]);
+                    self.connectionProperties.serverIdentity = [parsedStanza findFirst:@"{http://jabber.org/protocol/caps}c@node"];
+                }
                 
                 MLXMLNode* resumeNode = nil;
                 @synchronized(_stateLockObject) {

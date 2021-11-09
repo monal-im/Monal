@@ -23,9 +23,13 @@ struct ContactDetailsHeader: View {
         VStack {
             Image(uiImage: MLImageManager.sharedInstance().getIconFor(contact)!)
                 .resizable()
-                .frame(minWidth: 100, idealWidth: 200, maxWidth: 300, minHeight: 100, idealHeight: 200, maxHeight: 300, alignment: .center)
+                .frame(minWidth: 50, idealWidth: 100, maxWidth: 200, minHeight: 50, idealHeight: 100, maxHeight: 200, alignment: .center)
                 .scaledToFit()
+            Spacer()
+                .frame(height: 20)
             Text(contact.contactJid)
+            Spacer()
+                .frame(height: 20)
             if(!contact.isGroup) {
                 if(contact.lastInteractionTime.timeIntervalSince1970 > 0) {
                     Text(String(format: NSLocalizedString("Last seen: %@", comment: ""),
@@ -34,6 +38,7 @@ struct ContactDetailsHeader: View {
                     Text(String(format: NSLocalizedString("Last seen: %@", comment: ""), NSLocalizedString("now", comment: "")))
                 }
             }
+            /*
             HStack {
                 Spacer()
                 Image(systemName: "moon")
@@ -43,6 +48,7 @@ struct ContactDetailsHeader: View {
                 Image(systemName: "lock")
                 Spacer()
             }
+            */
         }
     }
 }

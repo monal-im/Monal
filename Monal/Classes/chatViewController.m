@@ -1022,7 +1022,6 @@ enum msgSentState {
     {
         if([identifier isEqualToString:@"showDetails"])
         {
-            // Display warning
             UIViewController* detailsViewController = [[ContactDetailsInterface new] makeContactDetails: self.contact];
             [self presentViewController:detailsViewController animated:YES completion:^{}];
             return;
@@ -1036,14 +1035,22 @@ enum msgSentState {
 {
     [self sendChatState:NO];
 
-    if([segue.identifier isEqualToString:@"showDetails"] && !self.contact.isGroup)
+    if([segue.identifier isEqualToString:@"showDetails"])
     {
-        UINavigationController* nav = segue.destinationViewController;
-        ContactDetails* details = (ContactDetails *)nav.topViewController;
-        details.contact = self.contact;
-        details.completion = ^{
-            [self viewWillAppear:YES];
-        };
+        if(self.contact.isGroup)
+        {
+            //segue.destinationViewController = [[UINavigationController alloc] initWithRootViewController:[[ContactDetailsInterface new] makeContactDetails: self.contact]];
+            //segue.destinationViewController.toolbarHidden = NO;
+        }
+        else
+        {
+            UINavigationController* nav = segue.destinationViewController;
+            ContactDetails* details = (ContactDetails *)nav.topViewController;
+            details.contact = self.contact;
+            details.completion = ^{
+                [self viewWillAppear:YES];
+            };
+        }
     }
 }
 

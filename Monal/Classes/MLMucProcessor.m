@@ -331,7 +331,7 @@
                     uiHandler(@{
                         @"success": @YES,
                         @"muc": node.fromUser,
-                        @"account": _account
+                        @"account": self->_account
                     });
                 });
             }
@@ -496,8 +496,8 @@
         if([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}not-acceptable"])
         {
             DDLogWarn(@"Ping failed with 'not-acceptable' --> we have to re-join %@", roomJid);
-            @synchronized(_stateLockObject) {
-                [_joining removeObject:roomJid];
+            @synchronized(self->_stateLockObject) {
+                [self->_joining removeObject:roomJid];
             }
             //check if muc is still in our favorites table before we try to join it (could be deleted by a bookmarks update just after we sent out our ping)
             //this has to be done to avoid such a race condition that would otherwise re-add the muc back
@@ -527,8 +527,8 @@
         else
         {
             DDLogWarn(@"Any other error happened: The client is probably not joined to %@ any more. It should perform a re-join. --> we have to re-join", roomJid);
-            @synchronized(_stateLockObject) {
-                [_joining removeObject:roomJid];
+            @synchronized(self->_stateLockObject) {
+                [self->_joining removeObject:roomJid];
             }
             //check if muc is still in our favorites table before we try to join it (could be deleted by a bookmarks updae just after we sent out our ping)
             //this has to be done to avoid such a race condition that would otherwise re-add the muc back

@@ -3427,7 +3427,7 @@ NSString* const kStanza = @"stanza";
             //use a timer to make sure the incoming data was pushed *through* the MLPipe and reached the parseQueue already when pushng our reconnct block onto the parseQueue
             createTimer(1.0, (^{
                 //add this to parseQueue to make sure we completely handle everything that came in before the connection was closed, before handling the close event itself
-                [_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     DDLogInfo(@"Inside parseQueue: %@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
                     [self reconnect];
                 }]] waitUntilFinished:NO];

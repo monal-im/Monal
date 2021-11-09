@@ -82,6 +82,15 @@ enum DummySettingsRows {
 @end
 
 @interface XMPPEdit()
+@property (nonatomic, strong) DataLayer* db;
+@property (nonatomic, strong) NSMutableDictionary* sectionDictionary;
+
+@property (nonatomic, assign) BOOL editMode;
+// Used for QR-Code scanning
+@property (nonatomic, strong) NSString* jid;
+@property (nonatomic, strong) NSString* password;
+
+@property (nonatomic, strong) NSString* accountType;
 
 @property (nonatomic, strong) NSString *rosterName;
 @property (nonatomic, strong) NSString *statusMessage;
@@ -139,7 +148,20 @@ enum DummySettingsRows {
     self.avatarChanged = NO;
     self.rosterNameChanged = NO;
     self.statusMessageChanged = NO;
-
+    
+    //default strings used for edit and new mode
+    self.sectionDictionary = [[NSMutableDictionary alloc] init];
+    for(int entry = 0; entry < kSettingSectionCount; entry++)
+        switch(entry)
+        {
+            case kSettingSectionAvatar: self.sectionDictionary[@(entry)] = @""; break;
+            case kSettingSectionAccount: self.sectionDictionary[@(entry)] = @""; break;
+            case kSettingSectionGeneral: self.sectionDictionary[@(entry)] = NSLocalizedString(@"General", @""); break;
+            case kSettingSectionAdvanced: self.sectionDictionary[@(entry)] = NSLocalizedString(@"Advanced Settings", @""); break;
+            case kSettingSectionEdit: self.sectionDictionary[@(entry)] = @""; break;
+            default: self.sectionDictionary[@(entry)] = @""; break;
+        }
+    
     if(self.originIndex && self.originIndex.section == 0)
     {
         //edit
@@ -152,7 +174,7 @@ enum DummySettingsRows {
         }
 
         self.jid = [NSString stringWithFormat:@"%@@%@", [settings objectForKey:@"username"], [settings objectForKey:@"domain"]];
-
+        self.sectionDictionary[@(kSettingSectionAccount)] = [NSString stringWithFormat:NSLocalizedString(@"Account (%@)", @""), self.jid];
         NSString* pass = [SAMKeychain passwordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@", self.accountno]];
 
         if(pass)
@@ -169,13 +191,9 @@ enum DummySettingsRows {
         
         self.rosterName = [settings objectForKey:kRosterName];
         self.statusMessage = [settings objectForKey:@"statusMessage"];
-        self.sectionArray = @[
-            @"",
-            [NSString stringWithFormat:NSLocalizedString(@"Account (%@)", @""), self.jid],
-            NSLocalizedString(@"General", @""),
-            NSLocalizedString(@"Advanced Settings", @""),
-            @""
-        ];
+        
+        //overwrite account section heading in edit mode
+        self.sectionDictionary[@(kSettingSectionAccount)] = [NSString stringWithFormat:NSLocalizedString(@"Account (%@)", @""), self.jid];
     }
     else
     {
@@ -186,13 +204,8 @@ enum DummySettingsRows {
         self.rosterName = @"";
         self.statusMessage = @"";
         self.enabled = YES;
-        self.sectionArray = @[
-            @"",
-            NSLocalizedString(@"Account (new)", @""),
-            NSLocalizedString(@"General", @""),
-            NSLocalizedString(@"Advanced Settings", @""),
-            @""
-        ];
+        //overwrite account section heading in new mode
+        self.sectionDictionary[@(kSettingSectionAccount)] = NSLocalizedString(@"Account (new)", @"");
     }
 #if TARGET_OS_MACCATALYST
     self.imagePicker = [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[UTTypeImage]];
@@ -592,9 +605,9 @@ enum DummySettingsRows {
     return thecell;
 }
 
--(NSInteger)numberOfSectionsInTableView:(UITableView*) tableView
+-(NSInteger) numberOfSectionsInTableView:(UITableView*) tableView
 {
-    return [self.sectionArray count];
+    return kSettingSectionCount;
 }
 
 -(UIView*) tableView:(UITableView*) tableView viewForHeaderInSection:(NSInteger) section
@@ -615,9 +628,13 @@ enum DummySettingsRows {
         UITapGestureRecognizer* touchUserAvatarRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getPhotoAction:)];
         [self.userAvatarImageView addGestureRecognizer:touchUserAvatarRecognizer];
         
-        [[MLImageManager sharedInstance] getIconForContact:[MLContact createContactFromJid:self.jid andAccountNo:self.accountno] withCompletion:^(UIImage *image) {
-            [self.userAvatarImageView setImage:image];
-        }];
+        //use noicon image for account creation
+        if(!self.jid)
+            [self.userAvatarImageView setImage:[MLImageManager circularImage:[UIImage imageNamed:@"noicon"]]];
+        else
+            [[MLImageManager sharedInstance] getIconForContact:[MLContact createContactFromJid:self.jid andAccountNo:self.accountno] withCompletion:^(UIImage *image) {
+                [self.userAvatarImageView setImage:image];
+            }];
         
         [avatarView addSubview:self.userAvatarImageView];
         
@@ -632,7 +649,7 @@ enum DummySettingsRows {
 
 -(NSString*) tableView:(UITableView*) tableView titleForHeaderInSection:(NSInteger) section
 {
-    return [self.sectionArray objectAtIndex:section];
+    return self.sectionDictionary[@(section)];
 }
 
 -(NSInteger) tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
@@ -706,7 +723,6 @@ enum DummySettingsRows {
                 break;
         }
     }
-
 }
 
 -(void) tableView:(UITableView*) tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath*) indexPath

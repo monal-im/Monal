@@ -1711,9 +1711,11 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"UPDATE message_history SET unread=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname]];
         //make sure the latest_read_message_history_id field in our buddylist is updated
         //(we use the newest history entry for this buddyname here)
-        [self.db executeNonQuery:@"UPDATE buddylist SET latest_read_message_history_id=(\
+        [self.db executeNonQuery:@"UPDATE buddylist SET latest_read_message_history_id=IFNULL((\
             SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND inbound=1 ORDER BY message_history_id DESC LIMIT 1\
-        ) WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname, accountNo, buddyname]];
+        ), (\
+            SELECT message_history_id FROM message_history ORDER BY message_history_id DESC LIMIT 1\
+        )) WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname, accountNo, buddyname]];
         //remove contact from active chats list
         [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname]];
     }];

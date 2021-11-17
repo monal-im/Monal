@@ -48,7 +48,7 @@
 
 #define STATE_VERSION 5
 #define CONNECT_TIMEOUT 10.0
-#define IQ_TIMEOUT 20.0
+#define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";
 
@@ -3624,7 +3624,7 @@ NSString* const kStanza = @"stanza";
 {
     //only handle iq timeouts while the parseQueue is almost empty
     //(a long backlog in the parse queue could trigger spurious iq timeouts for iqs we already received an answer to, but didn't process it yet)
-    if([_parseQueue operationCount] > 4 || _accountState < kStateBound)
+    if([_parseQueue operationCount] > 4 || _accountState < kStateBound || !_catchupDone)
         return;
     
     @synchronized(_iqHandlers) {

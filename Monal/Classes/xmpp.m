@@ -3811,9 +3811,9 @@ NSString* const kStanza = @"stanza";
         [image drawInRect:dimensions];
     }];
     
-    //now reduce quality until image data is smaller than ~240kb
+    //now reduce quality until image data is smaller than ~60kb
     NSData* data;
-    unsigned long limit = 240000;        //should work for ejabberd >= 19.02 and prosody >= 0.11
+    unsigned long limit = 60000;         //should work for ejabberd >= 19.02 and prosody >= 0.11
     CGFloat quality = 0.8;               //start here
     do
     {

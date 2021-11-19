@@ -190,14 +190,11 @@
 {
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     
-    //this will add a badge having a minimum of 1 to make sure people see that something happened (even after swiping away all notifications)
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
     NSInteger unread = 0;
     if(unreadMsgCnt != nil)
         unread = [unreadMsgCnt integerValue];
     DDLogVerbose(@"Raw badge value: %lu", (long)unread);
-    if(!unread)
-        unread = 1;     //use this as fallback to always show a badge if a notification is shown
     DDLogDebug(@"Adding badge value: %lu", (long)unread);
     content.badge = [NSNumber numberWithInteger:unread];
     

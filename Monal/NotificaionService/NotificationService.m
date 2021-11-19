@@ -363,9 +363,18 @@
 
 -(void) updateUnread
 {
+    DDLogVerbose(@"updating app badge via updateUnread");
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     UNMutableNotificationContent* content = [self generateNotificationForHandler:nil];
-    DDLogVerbose(@"updating app badge via updateUnread");
+    
+    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
+    NSInteger unread = 0;
+    if(unreadMsgCnt != nil)
+        unread = [unreadMsgCnt integerValue];
+    DDLogVerbose(@"Raw badge value: %lu", (long)unread);
+    DDLogDebug(@"Adding badge value: %lu", (long)unread);
+    content.badge = [NSNumber numberWithInteger:unread];
+    
     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"badge_update" content:content trigger:nil];
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
         if(error)

@@ -947,6 +947,9 @@ NSString* const kStanza = @"stanza";
                     [self connect];
                 self->_reconnectInProgress = NO;
             }];
+        }), (^{
+            DDLogInfo(@"Reconnect got aborted...");
+            self->_reconnectInProgress = NO;
         }));
         DDLogInfo(@"reconnect exits");
     }];

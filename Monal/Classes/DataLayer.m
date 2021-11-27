@@ -465,7 +465,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
 
     return [self.db idReadTransaction:^{
-        NSArray* results = [self.db executeReader:@"SELECT b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
+        NSArray* results = [self.db executeReader:@"SELECT b.lastInteraction, b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
             CASE \
                 WHEN a.buddy_name IS NOT NULL THEN 1 \
                 ELSE 0 \
@@ -485,11 +485,15 @@ static NSDateFormatter* dbFormatter;
             return (NSMutableDictionary*)nil;
         else
         {
-            // add unread message count to contact dict
             NSMutableDictionary* contact = [results[0] mutableCopy];
             //correctly extract timestamp
             if(contact[@"lastMessageTime"])
                 contact[@"lastMessageTime"] = [dbFormatter dateFromString:contact[@"lastMessageTime"]];
+            //correctly extract NSDate object or 1970, if last interaction is zero
+            if(!contact[@"lastInteraction"] || ![contact[@"lastInteraction"] integerValue])
+                contact[@"lastInteraction"] = [[NSDate date] initWithTimeIntervalSince1970:0];
+            else
+                contact[@"lastInteraction"] = [NSDate dateWithTimeIntervalSince1970:[contact[@"lastInteraction"] integerValue]];
             return contact;
         }
     }];

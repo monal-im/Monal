@@ -176,6 +176,30 @@ NSString *const kAskSubscribe=@"subscribe";
         return [self contactFromDictionary:contactDict];
 }
 
+-(id) init
+{
+    self = [super init];
+    // watch for changes in lastInteractionTime and update dynamically
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLastInteractionTimeUpdate:) name:kMonalLastInteractionUpdatedNotice object:nil];
+    return self;
+}
+
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void) handleLastInteractionTimeUpdate:(NSNotification*) notification
+{
+    NSDictionary* data = notification.userInfo;
+    if(![self.contactJid isEqualToString:data[@"jid"]] || ![self.accountId isEqualToString:data[@"accountNo"]])
+        return;     // ignore other accounts or contacts
+    if([data[@"isTyping"] boolValue] == YES)
+        return;     // ignore typing notifications
+    self.lastInteractionTime = data[@"lastInteraction"];
+    //self.lastInteractionTime = [[DataLayer sharedInstance] lastInteractionOfJid:self.contactJid forAccountNo:self.accountId];
+}
+
 -(NSString*) contactDisplayName
 {
     NSString* displayName;
@@ -227,6 +251,7 @@ NSString *const kAskSubscribe=@"subscribe";
     [coder encodeBool:self.isEncrypted forKey:@"isEncrypted"];
     [coder encodeBool:self.isMuted forKey:@"isMuted"];
     [coder encodeObject:self.lastMessageTime forKey:@"lastMessageTime"];
+    [coder encodeObject:self.lastInteractionTime forKey:@"lastInteractionTime"];
 }
 
 -(instancetype) initWithCoder:(NSCoder*) coder
@@ -251,6 +276,7 @@ NSString *const kAskSubscribe=@"subscribe";
     self.isEncrypted = [coder decodeBoolForKey:@"isEncrypted"];
     self.isMuted = [coder decodeBoolForKey:@"isMuted"];
     self.lastMessageTime = [coder decodeObjectForKey:@"lastMessageTime"];
+    self.lastInteractionTime = [coder decodeObjectForKey:@"lastInteractionTime"];
     return self;
 }
 
@@ -275,6 +301,8 @@ NSString *const kAskSubscribe=@"subscribe";
     self.isEncrypted = contact.isEncrypted;
     self.isMuted = contact.isEncrypted;
     self.lastMessageTime = contact.lastMessageTime;
+    // don't update lastInteractionTime from contact, we dynamically update ourselves by handling kMonalLastInteractionUpdatedNotice
+    // self.lastInteractionTime = contact.lastInteractionTime;
 }
 
 -(void) refresh
@@ -337,11 +365,6 @@ NSString *const kAskSubscribe=@"subscribe";
     return _unreadCount;
 }
 
--(NSDate*) lastInteractionTime
-{
-    return [[DataLayer sharedInstance] lastInteractionOfJid:self.contactJid forAccountNo:self.accountId];
-}
-
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic
 {
     MLContact* contact = [[MLContact alloc] init];
@@ -366,6 +389,8 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.isEncrypted = [[dic objectForKey:@"encrypt"] boolValue];
     contact.isMuted = [[dic objectForKey:@"muted"] boolValue];
     contact.lastMessageTime = [dic objectForKey:@"lastMessageTime"];
+    // initial value comes from db, all other values get updated by our kMonalLastInteractionUpdatedNotice handler
+    contact.lastInteractionTime = [dic objectForKey:@"lastInteraction"];
     return contact;
 }
 

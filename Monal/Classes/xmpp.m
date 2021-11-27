@@ -1486,7 +1486,7 @@ NSString* const kStanza = @"stanza";
                         [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self.accountNo];
                         [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self.accountNo];
 
-                        //handle last interaction time (only updae db if the last interaction time is NEWER than the one already in our db, needed for multiclient setups)
+                        //handle last interaction time (only update db if the last interaction time is NEWER than the one already in our db, needed for multiclient setups)
                         if([presenceNode check:@"{urn:xmpp:idle:1}idle@since"])
                         {
                             NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:presenceNode.fromUser forAccountNo:self.accountNo];

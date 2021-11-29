@@ -46,14 +46,12 @@ struct ContactDetailsHeader: View {
     }
 }
 
-/*
 struct ContactDetailsHeader_Previews: PreviewProvider {
     static var previews: some View {
-        ContactDetailsHeader(contact: MLContact.makeDummyContact(0))
-        ContactDetailsHeader(contact: MLContact.makeDummyContact(1))
-        ContactDetailsHeader(contact: MLContact.makeDummyContact(2))
-        ContactDetailsHeader(contact: MLContact.makeDummyContact(3))
-        ContactDetailsHeader(contact: MLContact.makeDummyContact(4))
+        ContactDetailsHeader(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)))
+        ContactDetailsHeader(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(1)))
+        ContactDetailsHeader(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(2)))
+        ContactDetailsHeader(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(3)))
+        ContactDetailsHeader(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(4)))
     }
 }
-*/

@@ -81,10 +81,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, copy) NSString* subscription; //roster subbscription state
 @property (nonatomic, copy) NSString* ask; //whether we have tried to subscribe
 
-/**
- picks nick, full or note part of jid to display
- */
--(NSString*) contactDisplayName;
+@property (nonatomic, readonly) NSString* contactDisplayName;
 
 -(void) updateWithContact:(MLContact*) contact;
 -(void) refresh;

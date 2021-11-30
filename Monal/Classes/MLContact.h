@@ -77,6 +77,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, copy) NSString* groupSubject;
 @property (nonatomic, copy) NSString* mucType;
 @property (nonatomic, copy) NSString* accountNickInGroup;
+@property (nonatomic, assign) BOOL isMentionOnly;
 
 @property (nonatomic, copy) NSString* subscription; //roster subbscription state
 @property (nonatomic, copy) NSString* ask; //whether we have tried to subscribe
@@ -93,6 +94,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 // *** mutating methods (for swiftui etc.) below ***
 
 -(void) toggleMute:(BOOL) mute;
+-(void) toggleMentionOnly:(BOOL) mentionOnly;
 -(BOOL) toggleEncryption:(BOOL) encrypt;
 
 @end

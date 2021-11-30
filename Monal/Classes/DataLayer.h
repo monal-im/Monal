@@ -236,6 +236,10 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) unMuteJid:(NSString*) jid onAccount:(NSString*) accountNo;
 -(BOOL) isMutedJid:(NSString*) jid onAccount:(NSString*) accountNo;
 
+-(void) setMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSString*) accountNo;
+-(void) setMucAlertOnAll:(NSString*) jid onAccount:(NSString*) accountNo;
+-(BOOL) isMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSString*) accountNo;
+
 -(void) blockJid:(NSString *) jid withAccountNo:(NSString*) accountNo;
 -(void) unBlockJid:(NSString *) jid withAccountNo:(NSString*) accountNo;
 -(u_int8_t) isBlockedJid:(NSString *) jid withAccountNo:(NSString*) accountNo;

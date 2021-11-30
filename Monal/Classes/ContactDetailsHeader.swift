@@ -32,12 +32,32 @@ struct ContactDetailsHeader: View {
                     Text(String(format: NSLocalizedString("Last seen: %@", comment: ""), NSLocalizedString("now", comment: "")))
                 }
             }
+            Spacer()
+                .frame(height: 20)
             HStack {
                 Spacer()
                 Button(action: {
-                    contact.obj.toggleMute(!contact.isMuted)
+                    if(contact.isGroup) {
+                        if(!contact.isMuted && !contact.isMentionOnly) {
+                            contact.obj.toggleMentionOnly(true)
+                        } else if(!contact.isMuted && contact.isMentionOnly) {
+                            contact.obj.toggleMentionOnly(false)
+                            contact.obj.toggleMute(true)
+                        } else {
+                            contact.obj.toggleMentionOnly(false)
+                            contact.obj.toggleMute(false)
+                        }
+                    } else {
+                        contact.obj.toggleMute(!contact.isMuted)
+                    }
                 }) {
-                    Image(systemName: contact.isMuted ? "moon.fill" : "sun.max.fill")
+                    if(contact.isMuted) {
+                        Image(systemName: "bell.slash.fill")
+                    } else if(contact.isGroup && contact.isMentionOnly) {
+                        Image(systemName: "bell.badge.fill")
+                    } else {
+                        Image(systemName: "bell.fill")
+                    }
                 }
                 /*
                 Spacer().frame(width: 20)

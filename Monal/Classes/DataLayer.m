@@ -465,7 +465,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
 
     return [self.db idReadTransaction:^{
-        NSArray* results = [self.db executeReader:@"SELECT b.lastInteraction, b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
+        NSArray* results = [self.db executeReader:@"SELECT b.lastInteraction, b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, mentionOnly, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
             CASE \
                 WHEN a.buddy_name IS NOT NULL THEN 1 \
                 ELSE 0 \
@@ -2802,6 +2802,10 @@ static NSDateFormatter* dbFormatter;
                     FOREIGN KEY('account_id', 'archive_jid') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
             );"];
         }];
+        
+        [self updateDBTo:5.105 withBlock:^{
+            [self.db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN mentionOnly BOOL DEFAULT FALSE"];
+        }];
     }];
     
     // Vacuum after db updates
@@ -2924,7 +2928,7 @@ static NSDateFormatter* dbFormatter;
         return;
     }
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"UPDATE buddylist SET muted=1 WHERE account_id=? AND buddy_name=?" andArguments:@[accountNo, jid]];
+        [self.db executeNonQuery:@"UPDATE buddylist SET muted=1 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, jid]];
     }];
 }
 
@@ -2936,7 +2940,7 @@ static NSDateFormatter* dbFormatter;
         return;
     }
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"UPDATE buddylist SET muted=0 WHERE account_id=? AND buddy_name=?" andArguments:@[accountNo, jid]];
+        [self.db executeNonQuery:@"UPDATE buddylist SET muted=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, jid]];
     }];
 }
 
@@ -2949,6 +2953,43 @@ static NSDateFormatter* dbFormatter;
     }
     return [self.db boolReadTransaction:^{
         NSNumber* count = (NSNumber*)[self.db executeScalar:@"SELECT COUNT(buddy_name) FROM buddylist WHERE account_id=? AND buddy_name=? AND muted=1;" andArguments: @[accountNo, jid]];
+        return count.boolValue;
+    }];
+}
+
+-(void) setMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSString*) accountNo
+{
+    if(!jid || !accountNo)
+    {
+        unreachable();
+        return;
+    }
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"UPDATE buddylist SET mentionOnly=1 WHERE account_id=? AND buddy_name=? AND muc=1;" andArguments:@[accountNo, jid]];
+    }];
+}
+
+-(void) setMucAlertOnAll:(NSString*) jid onAccount:(NSString*) accountNo
+{
+    if(!jid || !accountNo)
+    {
+        unreachable();
+        return;
+    }
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"UPDATE buddylist SET mentionOnly=0 WHERE account_id=? AND buddy_name=? AND muc=1;" andArguments:@[accountNo, jid]];
+    }];
+}
+
+-(BOOL) isMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSString*) accountNo
+{
+    if(!jid || !accountNo)
+    {
+        unreachable();
+        return NO;
+    }
+    return [self.db boolReadTransaction:^{
+        NSNumber* count = (NSNumber*)[self.db executeScalar:@"SELECT COUNT(buddy_name) FROM buddylist WHERE account_id=? AND buddy_name=? AND mentionOnly=1 AND muc=1;" andArguments: @[accountNo, jid]];
         return count.boolValue;
     }];
 }

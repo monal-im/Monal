@@ -73,6 +73,7 @@
 
 -(void) handleFiletransferUpdate:(NSNotification*) notification
 {
+    xmpp* xmppAccount = notification.object;
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     NSString* idval = [self identifierWithMessage:message];
     
@@ -81,56 +82,77 @@
         for(UNNotificationRequest* request in requests)
             if([request.identifier isEqualToString:idval])
             {
-                [self internalMessageHandlerWithMessage:message showAlert:YES andSound:YES];
+                [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:YES];
             }
     }];
     [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
         for(UNNotification* notification in notifications)
              if([notification.request.identifier isEqualToString:idval])
             {
-                [self internalMessageHandlerWithMessage:message showAlert:YES andSound:NO];
+                [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:NO];
             }
     }];
 }
 
 -(void) handleNewMessage:(NSNotification*) notification
 {
+    xmpp* xmppAccount = notification.object;
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     BOOL showAlert = notification.userInfo[@"showAlert"] ? [notification.userInfo[@"showAlert"] boolValue] : NO;
-    [self internalMessageHandlerWithMessage:message showAlert:showAlert andSound:YES];
+    [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:showAlert andSound:YES];
 }
 
--(void) internalMessageHandlerWithMessage:(MLMessage*) message showAlert:(BOOL) showAlert andSound:(BOOL) sound
+-(void) internalMessageHandlerWithMessage:(MLMessage*) message andAccount:(xmpp*) xmppAccount showAlert:(BOOL) showAlert andSound:(BOOL) sound
 {
     if([message.messageType isEqualToString:kMessageTypeStatus])
         return;
-    
     DDLogVerbose(@"notification manager should show notification for: %@", message.messageText);
+    if(!showAlert)
+    {
+        DDLogDebug(@"not showing notification: showAlert is NO");
+        return;
+    }
+    
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.buddyName onAccount:message.accountId];
     if(message.isMuc == YES)
     {
-        if(message.participantJid != nil) {
+        if(!muted && message.participantJid != nil)
             muted |= [[DataLayer sharedInstance] isMutedJid:message.participantJid onAccount:message.accountId];
+        if(!muted && [[DataLayer sharedInstance] isMucAlertOnMentionOnly:message.buddyName onAccount:message.accountId])
+        {
+            NSString* displayName = [MLContact ownDisplayNameForAccount:xmppAccount];
+            NSString* ownJid = xmppAccount.connectionProperties.identity.jid;
+            NSString* userPart = [HelperTools splitJid:ownJid][@"user"];
+            if(!(
+                [message.messageText localizedCaseInsensitiveContainsString:displayName] ||
+                [message.messageText localizedCaseInsensitiveContainsString:ownJid] ||
+                [message.messageText localizedCaseInsensitiveContainsString:userPart]
+            ))
+                muted = YES;
         }
     }
-    if(muted == NO && showAlert == YES)
+    if(muted)
     {
-        if([HelperTools isNotInFocus])
+        DDLogDebug(@"not showing notification: this contact got muted");
+        return;
+    }
+    
+    if([HelperTools isNotInFocus])
+    {
+        DDLogVerbose(@"notification manager should show notification in background: %@", message.messageText);
+        [self showModernNotificaionForMessage:message withSound:sound];
+    }
+    else
+    {
+        //don't show notifications for open chats
+        if(![message isEqualToContact:self.currentContact])
         {
-            DDLogVerbose(@"notification manager should show notification in background: %@", message.messageText);
+            DDLogVerbose(@"notification manager should show notification in foreground: %@", message.messageText);
             [self showModernNotificaionForMessage:message withSound:sound];
         }
         else
-        {
-            //don't show notifications for open chats
-            if(![message isEqualToContact:self.currentContact])
-                [self showModernNotificaionForMessage:message withSound:sound];
-            else
-                DDLogDebug(@"not showing notification: chat is open");
-        }
+            DDLogDebug(@"not showing notification: chat is open");
     }
-    else
-        DDLogDebug(@"not showing notification: showAlert is NO (or this contact got muted)");
 }
 
 -(void) handleDisplayedMessages:(NSNotification*) notification

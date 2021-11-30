@@ -244,6 +244,7 @@ NSString *const kAskSubscribe=@"subscribe";
     [coder encodeObject:self.accountNickInGroup forKey:@"accountNickInGroup"];
     [coder encodeObject:self.mucType forKey:@"mucType"];
     [coder encodeBool:self.isGroup forKey:@"isGroup"];
+    [coder encodeBool:self.isMentionOnly forKey:@"isMentionOnly"];
     [coder encodeBool:self.isPinned forKey:@"isPinned"];
     [coder encodeBool:self.isBlocked forKey:@"isBlocked"];
     [coder encodeObject:self.statusMessage forKey:@"statusMessage"];
@@ -269,6 +270,7 @@ NSString *const kAskSubscribe=@"subscribe";
     self.accountNickInGroup = [coder decodeObjectForKey:@"accountNickInGroup"];
     self.mucType = [coder decodeObjectForKey:@"mucType"];
     self.isGroup = [coder decodeBoolForKey:@"isGroup"];
+    self.isMentionOnly = [coder decodeBoolForKey:@"isMentionOnly"];
     self.isPinned = [coder decodeBoolForKey:@"isPinned"];
     self.isBlocked = [coder decodeBoolForKey:@"isBlocked"];
     self.statusMessage = [coder decodeObjectForKey:@"statusMessage"];
@@ -294,6 +296,7 @@ NSString *const kAskSubscribe=@"subscribe";
     self.accountNickInGroup = contact.accountNickInGroup;
     self.mucType = contact.mucType;
     self.isGroup = contact.isGroup;
+    self.isMentionOnly = contact.isMentionOnly;
     self.isPinned = contact.isPinned;
     self.isBlocked = contact.isBlocked;
     self.statusMessage = contact.statusMessage;
@@ -382,6 +385,7 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.isGroup = [[dic objectForKey:@"Muc"] boolValue];
     if(contact.isGroup  && !contact.mucType)
         contact.mucType = @"channel";       //default value
+    contact.isMentionOnly = [[dic objectForKey:@"mentionOnly"] boolValue];
     contact.isPinned = [[dic objectForKey:@"pinned"] boolValue];
     contact.isBlocked = [[dic objectForKey:@"blocked"] boolValue];
     contact.statusMessage = [dic objectForKey:@"status"];
@@ -405,6 +409,17 @@ NSString *const kAskSubscribe=@"subscribe";
     else
         [[DataLayer sharedInstance] unMuteJid:self.contactJid onAccount:self.accountId];
     self.isMuted = mute;
+}
+
+-(void) toggleMentionOnly:(BOOL) mentionOnly
+{
+    if(!self.isGroup || self.isMentionOnly == mentionOnly)
+        return;
+    if(mentionOnly)
+        [[DataLayer sharedInstance] setMucAlertOnMentionOnly:self.contactJid onAccount:self.accountId];
+    else
+        [[DataLayer sharedInstance] setMucAlertOnAll:self.contactJid onAccount:self.accountId];
+    self.isMentionOnly = mentionOnly;
 }
 
 -(BOOL) toggleEncryption:(BOOL) encrypt

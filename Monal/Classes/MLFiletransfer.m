@@ -98,7 +98,8 @@ static NSMutableSet* _currentlyTransfering;
             //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = contentLength;
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
+            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
             
             //check done, remove from "currently checking/downloading list"
             [self markAsComplete:historyId];
@@ -238,7 +239,8 @@ static NSMutableSet* _currentlyTransfering;
             //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = filetransferSize;
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
+            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
             
             //download done, remove from "currently checking/downloading list"
             [self markAsComplete:historyId];

@@ -11,6 +11,7 @@ import monalxmpp
 
 struct ContactDetailsHeader: View {
     @StateObject var contact: ObservableKVOWrapper<MLContact>
+    @State private var showingCannotEncryptAlert = false
 
     var body: some View {
         VStack {
@@ -23,25 +24,40 @@ struct ContactDetailsHeader: View {
             Text(contact.contactJid as String)
             Spacer()
                 .frame(height: 20)
-            if(contact.isGroup as Bool == false) {
+            if(!contact.isGroup) {
                 if((contact.lastInteractionTime as Date).timeIntervalSince1970 > 0) {
                     Text(String(format: NSLocalizedString("Last seen: %@", comment: ""),
-                        DateFormatter.localizedString(from: contact.lastInteractionTime as Date, dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short)))
+                        DateFormatter.localizedString(from: contact.lastInteractionTime, dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short)))
                 } else {
                     Text(String(format: NSLocalizedString("Last seen: %@", comment: ""), NSLocalizedString("now", comment: "")))
                 }
             }
-            /*
             HStack {
                 Spacer()
-                Image(systemName: "moon")
+                Button(action: {
+                    contact.obj.toggleMute(!contact.isMuted)
+                }) {
+                    Image(systemName: contact.isMuted ? "moon.fill" : "sun.max.fill")
+                }
+                /*
                 Spacer().frame(width: 20)
-                Image(systemName: "phone")
+                Button(action: {
+                    print("button pressed")
+                }) {
+                    Image(systemName: "phone")
+                }
+                */
                 Spacer().frame(width: 20)
-                Image(systemName: "lock")
+                Button(action: {
+                    showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
+                }) {
+                    Image(systemName: contact.isEncrypted ? "lock.fill" : "lock.open.fill")
+                }
+                .alert(isPresented: $showingCannotEncryptAlert) {
+                    Alert(title: Text("Encryption Not Supported"), message: Text("This contact does not appear to have any devices that support encryption."), dismissButton: .default(Text("Close")))
+                }
                 Spacer()
             }
-            */
         }
     }
 }

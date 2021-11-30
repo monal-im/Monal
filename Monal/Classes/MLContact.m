@@ -11,6 +11,8 @@
 #import "HelperTools.h"
 #import "DataLayer.h"
 #import "xmpp.h"
+#import "MLXMPPManager.h"
+#import "MLOMEMO.h"
 
 NSString *const kSubBoth=@"both";
 NSString *const kSubNone=@"none";
@@ -392,6 +394,41 @@ NSString *const kAskSubscribe=@"subscribe";
     // initial value comes from db, all other values get updated by our kMonalLastInteractionUpdatedNotice handler
     contact.lastInteractionTime = [dic objectForKey:@"lastInteraction"];
     return contact;
+}
+
+-(void) toggleMute:(BOOL) mute
+{
+    if(self.isMuted == mute)
+        return;
+    if(mute)
+        [[DataLayer sharedInstance] muteJid:self.contactJid onAccount:self.accountId];
+    else
+        [[DataLayer sharedInstance] unMuteJid:self.contactJid onAccount:self.accountId];
+    self.isMuted = mute;
+}
+
+-(BOOL) toggleEncryption:(BOOL) encrypt
+{
+#ifdef DISABLE_OMEMO
+    return NO;
+#else
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    if(account == nil)
+        return NO;
+    NSArray* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
+    if(encrypt && knownDevices.count == 0 && !self.isEncrypted)
+        return NO;
+    
+    if(self.isEncrypted == encrypt)
+        return YES;
+    
+    if(encrypt)
+        [[DataLayer sharedInstance] encryptForJid:self.contactJid andAccountNo:self.accountId];
+    else
+        [[DataLayer sharedInstance] disableEncryptForJid:self.contactJid andAccountNo:self.accountId];
+    self.isEncrypted = encrypt;
+    return YES;
+#endif
 }
 
 @end

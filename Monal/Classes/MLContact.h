@@ -89,6 +89,12 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @property (strong, readonly) NSString* description;
 
+
+// *** mutating methods (for swiftui etc.) below ***
+
+-(void) toggleMute:(BOOL) mute;
+-(BOOL) toggleEncryption:(BOOL) encrypt;
+
 @end
 
 NS_ASSUME_NONNULL_END

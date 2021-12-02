@@ -202,7 +202,7 @@ NSString *const kAskSubscribe=@"subscribe";
     NSDictionary* data = notification.userInfo;
     if(![self.contactJid isEqualToString:data[@"jid"]] || ![self.accountId isEqualToString:data[@"accountNo"]])
         return;     // ignore other accounts or contacts
-    if([data[@"isTyping"] boolValue] == YES)
+    if(data[@"lastInteraction"] == nil)
         return;     // ignore typing notifications
     self.lastInteractionTime = data[@"lastInteraction"];
     //self.lastInteractionTime = [[DataLayer sharedInstance] lastInteractionOfJid:self.contactJid forAccountNo:self.accountId];
@@ -513,6 +513,8 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.lastMessageTime = [dic objectForKey:@"lastMessageTime"];
     // initial value comes from db, all other values get updated by our kMonalLastInteractionUpdatedNotice handler
     contact.lastInteractionTime = [dic objectForKey:@"lastInteraction"];
+    if(contact.lastInteractionTime == nil)
+        contact.lastInteractionTime = [[NSDate date] initWithTimeIntervalSince1970:0];
     return contact;
 }
 

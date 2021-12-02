@@ -68,14 +68,16 @@ struct ContactDetailsHeader: View {
                 }
                 */
 #if !DISABLE_OMEMO
-                Spacer().frame(width: 20)
-                Button(action: {
-                    showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
-                }) {
-                    Image(systemName: contact.isEncrypted ? "lock.fill" : "lock.open.fill")
-                }
-                .alert(isPresented: $showingCannotEncryptAlert) {
-                    Alert(title: Text("Encryption Not Supported"), message: Text("This contact does not appear to have any devices that support encryption."), dismissButton: .default(Text("Close")))
+                if(!contact.isGroup) {
+                    Spacer().frame(width: 20)
+                    Button(action: {
+                        showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
+                    }) {
+                        Image(systemName: contact.isEncrypted ? "lock.fill" : "lock.open.fill")
+                    }
+                    .alert(isPresented: $showingCannotEncryptAlert) {
+                        Alert(title: Text("Encryption Not Supported"), message: Text("This contact does not appear to have any devices that support encryption."), dismissButton: .default(Text("Close")))
+                    }
                 }
 #endif
                 Spacer()

@@ -13,6 +13,7 @@
 #import "xmpp.h"
 #import "MLXMPPManager.h"
 #import "MLOMEMO.h"
+#import "MLNotificationQueue.h"
 
 NSString *const kSubBoth=@"both";
 NSString *const kSubNone=@"none";
@@ -24,6 +25,7 @@ NSString *const kAskSubscribe=@"subscribe";
 @interface MLContact ()
 {
     NSInteger _unreadCount;
+    monal_void_block_t _cancelNickChange;
 }
 @end
 
@@ -183,6 +185,7 @@ NSString *const kAskSubscribe=@"subscribe";
     self = [super init];
     // watch for changes in lastInteractionTime and update dynamically
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLastInteractionTimeUpdate:) name:kMonalLastInteractionUpdatedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBlockListRefresh:) name:kMonalBlockListRefresh object:nil];
     return self;
 }
 
@@ -200,6 +203,14 @@ NSString *const kAskSubscribe=@"subscribe";
         return;     // ignore typing notifications
     self.lastInteractionTime = data[@"lastInteraction"];
     //self.lastInteractionTime = [[DataLayer sharedInstance] lastInteractionOfJid:self.contactJid forAccountNo:self.accountId];
+}
+
+-(void) handleBlockListRefresh:(NSNotification*) notification
+{
+    NSDictionary* data = notification.userInfo;
+    if(![self.accountId isEqualToString:data[@"accountNo"]])
+        return;         // ignore other accounts
+    self.isBlocked = [[DataLayer sharedInstance] isBlockedJid:self.contactJid withAccountNo:self.accountId] == kBlockingMatchedNodeHost;
 }
 
 -(void) refresh
@@ -241,10 +252,23 @@ NSString *const kAskSubscribe=@"subscribe";
     return displayName;
 }
 
+-(void) setContactDisplayName:(NSString*) name
+{
+    self.nickName = name;
+    // abort old change timer and start a new one
+    if(_cancelNickChange)
+        _cancelNickChange();
+    // delay changes because we don't want to update the roster on our server too often while typing
+    _cancelNickChange = createTimer(1.0, (^{
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+        [account updateRosterItem:self.contactJid withName:self.nickName];
+    }));
+}
+
 -(BOOL) isSubscribed
 {
     return [self.subscription isEqualToString:kSubBoth]
-        || [self.subscription isEqualToString:kSubFrom];
+        || [self.subscription isEqualToString:kSubTo];
 }
 
 // this will cache the unread count on first access
@@ -299,6 +323,43 @@ NSString *const kAskSubscribe=@"subscribe";
     self.isEncrypted = encrypt;
     return YES;
 #endif
+}
+
+-(void) togglePinnedChat:(BOOL) pinned
+{
+    if(self.isPinned == pinned)
+        return;
+    if(pinned)
+        [[DataLayer sharedInstance] pinChat:self.accountId andBuddyJid:self.contactJid];
+    else
+        [[DataLayer sharedInstance] unPinChat:self.accountId andBuddyJid:self.contactJid];
+    self.isPinned = pinned;
+    // update active chats
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact":self, @"pinningChanged": @YES}];
+}
+
+-(BOOL) toggleBlocked:(BOOL) block
+{
+    if(self.isBlocked == block)
+        return YES;
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    if(!account.connectionProperties.supportsBlocking)
+        return NO;
+    [[MLXMPPManager sharedInstance] blocked:block Jid:self];
+    return YES;
+}
+
+-(void) removeFromRoster
+{
+    [[MLXMPPManager sharedInstance] removeContact:self];
+    // announce that this contact was removed
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId] userInfo:@{@"contact": self}];
+}
+
+-(void) addToRoster
+{
+    [[MLXMPPManager sharedInstance] addContact:self];
 }
 
 #pragma mark - NSCoding

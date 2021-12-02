@@ -43,8 +43,16 @@
         self.userImage.image = image;
     }];
     
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:contact.contactJid onAccount:contact.accountId];
-    self.muteBadge.hidden = !muted;
+    if(contact.isGroup && contact.isMentionOnly)
+    {
+        self.muteBadge.hidden = YES;
+        self.mentionBadge.hidden = NO;
+    }
+    else
+    {
+        self.muteBadge.hidden = !contact.isMuted;
+        self.mentionBadge.hidden = YES;
+    }
 }
 
 -(void) displayLastMessage:(MLMessage* _Nullable) lastMessage forContact:(MLContact*) contact

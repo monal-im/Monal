@@ -61,7 +61,7 @@
                             <constraint firstAttribute="height" constant="14" id="Xbr-kc-Y3g"/>
                         </constraints>
                     </imageView>
-                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="bell.badge.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="zAx-7T-RJd">
+                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="bell.badge" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="zAx-7T-RJd">
                         <rect key="frame" x="282.5" y="24" width="12" height="12.5"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="12" id="zjH-c6-9Xp"/>
@@ -119,6 +119,6 @@
     <resources>
         <image name="NotificationBubble" width="22" height="22"/>
         <image name="bell.slash.fill" catalog="system" width="128" height="121"/>
-        <image name="bell.badge.fill" catalog="system" width="128" height="121"/>
+        <image name="bell.badge" catalog="system" width="128" height="121"/>
     </resources>
 </document>

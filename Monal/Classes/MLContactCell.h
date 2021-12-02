@@ -22,6 +22,7 @@
 @property (nonatomic, weak) IBOutlet UIImageView* _Nullable userImage;
 @property (nonatomic, weak) IBOutlet UIButton* _Nullable badge;
 @property (nonatomic, weak) IBOutlet UIImageView* _Nullable muteBadge;
+@property (nonatomic, weak) IBOutlet UIImageView* _Nullable mentionBadge;
 
 @property (nonatomic, assign) BOOL isPinned;
 

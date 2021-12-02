@@ -67,6 +67,7 @@ struct ContactDetailsHeader: View {
                     Image(systemName: "phone")
                 }
                 */
+#if !DISABLE_OMEMO
                 Spacer().frame(width: 20)
                 Button(action: {
                     showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
@@ -76,6 +77,7 @@ struct ContactDetailsHeader: View {
                 .alert(isPresented: $showingCannotEncryptAlert) {
                     Alert(title: Text("Encryption Not Supported"), message: Text("This contact does not appear to have any devices that support encryption."), dismissButton: .default(Text("Close")))
                 }
+#endif
                 Spacer()
             }
         }

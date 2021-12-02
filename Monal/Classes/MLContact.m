@@ -178,7 +178,7 @@ NSString *const kAskSubscribe=@"subscribe";
         return [self contactFromDictionary:contactDict];
 }
 
--(id) init
+-(instancetype) init
 {
     self = [super init];
     // watch for changes in lastInteractionTime and update dynamically
@@ -200,6 +200,16 @@ NSString *const kAskSubscribe=@"subscribe";
         return;     // ignore typing notifications
     self.lastInteractionTime = data[@"lastInteraction"];
     //self.lastInteractionTime = [[DataLayer sharedInstance] lastInteractionOfJid:self.contactJid forAccountNo:self.accountId];
+}
+
+-(void) refresh
+{
+    [self updateWithContact:[MLContact createContactFromJid:self.contactJid andAccountNo:self.accountId]];
+}
+
+-(void) updateUnreadCount
+{
+    _unreadCount = -1;      // mark it as "uncached" --> will be recalculated on next access
 }
 
 -(NSString*) contactDisplayName
@@ -228,6 +238,66 @@ NSString *const kAskSubscribe=@"subscribe";
     }
     DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, displayName);
     return displayName;
+}
+
+-(BOOL) isSubscribed
+{
+    return [self.subscription isEqualToString:kSubBoth]
+        || [self.subscription isEqualToString:kSubFrom];
+}
+
+// this will cache the unread count on first access
+-(NSInteger) unreadCount
+{
+    if(_unreadCount == -1)
+        _unreadCount = [[[DataLayer sharedInstance] countUserUnreadMessages:self.contactJid forAccount:self.accountId] integerValue];
+    return _unreadCount;
+}
+
+-(void) toggleMute:(BOOL) mute
+{
+    if(self.isMuted == mute)
+        return;
+    if(mute)
+        [[DataLayer sharedInstance] muteJid:self.contactJid onAccount:self.accountId];
+    else
+        [[DataLayer sharedInstance] unMuteJid:self.contactJid onAccount:self.accountId];
+    self.isMuted = mute;
+}
+
+-(void) toggleMentionOnly:(BOOL) mentionOnly
+{
+    if(!self.isGroup || self.isMentionOnly == mentionOnly)
+        return;
+    if(mentionOnly)
+        [[DataLayer sharedInstance] setMucAlertOnMentionOnly:self.contactJid onAccount:self.accountId];
+    else
+        [[DataLayer sharedInstance] setMucAlertOnAll:self.contactJid onAccount:self.accountId];
+    self.isMentionOnly = mentionOnly;
+}
+
+-(BOOL) toggleEncryption:(BOOL) encrypt
+{
+#ifdef DISABLE_OMEMO
+    return NO;
+#else
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    if(account == nil)
+        return NO;
+    NSArray* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
+    if(encrypt && knownDevices.count == 0 && !self.isEncrypted)
+        return NO;
+    
+    if(self.isEncrypted == encrypt)
+        return YES;
+    
+    if(encrypt)
+        [[DataLayer sharedInstance] encryptForJid:self.contactJid andAccountNo:self.accountId];
+    else
+        [[DataLayer sharedInstance] disableEncryptForJid:self.contactJid andAccountNo:self.accountId];
+    self.isEncrypted = encrypt;
+    return YES;
+#endif
 }
 
 #pragma mark - NSCoding
@@ -310,22 +380,6 @@ NSString *const kAskSubscribe=@"subscribe";
     // self.lastInteractionTime = contact.lastInteractionTime;
 }
 
--(void) refresh
-{
-    [self updateWithContact:[MLContact createContactFromJid:self.contactJid andAccountNo:self.accountId]];
-}
-
--(void) updateUnreadCount
-{
-    _unreadCount = -1;      // mark it as "uncached" --> will be recalculated on next access
-}
-
--(BOOL) isSubscribed
-{
-    return [self.subscription isEqualToString:kSubBoth]
-        || [self.subscription isEqualToString:kSubFrom];
-}
-
 -(BOOL) isEqualToMessage:(MLMessage*) message
 {
     return message != nil &&
@@ -362,14 +416,6 @@ NSString *const kAskSubscribe=@"subscribe";
     return [NSString stringWithFormat:@"%@: %@", self.accountId, self.contactJid];
 }
 
-// this will cache the unread count on first access
--(NSInteger) unreadCount
-{
-    if(_unreadCount == -1)
-        _unreadCount = [[[DataLayer sharedInstance] countUserUnreadMessages:self.contactJid forAccount:self.accountId] integerValue];
-    return _unreadCount;
-}
-
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic
 {
     MLContact* contact = [[MLContact alloc] init];
@@ -398,52 +444,6 @@ NSString *const kAskSubscribe=@"subscribe";
     // initial value comes from db, all other values get updated by our kMonalLastInteractionUpdatedNotice handler
     contact.lastInteractionTime = [dic objectForKey:@"lastInteraction"];
     return contact;
-}
-
--(void) toggleMute:(BOOL) mute
-{
-    if(self.isMuted == mute)
-        return;
-    if(mute)
-        [[DataLayer sharedInstance] muteJid:self.contactJid onAccount:self.accountId];
-    else
-        [[DataLayer sharedInstance] unMuteJid:self.contactJid onAccount:self.accountId];
-    self.isMuted = mute;
-}
-
--(void) toggleMentionOnly:(BOOL) mentionOnly
-{
-    if(!self.isGroup || self.isMentionOnly == mentionOnly)
-        return;
-    if(mentionOnly)
-        [[DataLayer sharedInstance] setMucAlertOnMentionOnly:self.contactJid onAccount:self.accountId];
-    else
-        [[DataLayer sharedInstance] setMucAlertOnAll:self.contactJid onAccount:self.accountId];
-    self.isMentionOnly = mentionOnly;
-}
-
--(BOOL) toggleEncryption:(BOOL) encrypt
-{
-#ifdef DISABLE_OMEMO
-    return NO;
-#else
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
-    if(account == nil)
-        return NO;
-    NSArray* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
-    if(encrypt && knownDevices.count == 0 && !self.isEncrypted)
-        return NO;
-    
-    if(self.isEncrypted == encrypt)
-        return YES;
-    
-    if(encrypt)
-        [[DataLayer sharedInstance] encryptForJid:self.contactJid andAccountNo:self.accountId];
-    else
-        [[DataLayer sharedInstance] disableEncryptForJid:self.contactJid andAccountNo:self.accountId];
-    self.isEncrypted = encrypt;
-    return YES;
-#endif
 }
 
 @end

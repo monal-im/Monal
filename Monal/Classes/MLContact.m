@@ -304,7 +304,7 @@ NSString *const kAskSubscribe=@"subscribe";
     self->_unreadCount = contact->_unreadCount;
     self.isActiveChat = contact.isActiveChat;
     self.isEncrypted = contact.isEncrypted;
-    self.isMuted = contact.isEncrypted;
+    self.isMuted = contact.isMuted;
     self.lastMessageTime = contact.lastMessageTime;
     // don't update lastInteractionTime from contact, we dynamically update ourselves by handling kMonalLastInteractionUpdatedNotice
     // self.lastInteractionTime = contact.lastInteractionTime;

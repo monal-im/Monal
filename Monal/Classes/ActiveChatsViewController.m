@@ -156,30 +156,32 @@ static NSMutableSet* _smacksWarningDisplayed;
         [self insertOrMoveContact:contact completion:nil];
     else
     {
-        __block NSIndexPath* indexPath = nil;
-        for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++)
-        {
-            NSMutableArray* curContactArray = [self getChatArrayForSection:section];
-            // check if contact is already displayed -> get coresponding indexPath
-            NSUInteger rowIdx = 0;
-            for(MLContact* rowContact in curContactArray)
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSIndexPath* indexPath = nil;
+            for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++)
             {
-                if([rowContact isEqualToContact:contact])
+                NSMutableArray* curContactArray = [self getChatArrayForSection:section];
+                // check if contact is already displayed -> get coresponding indexPath
+                NSUInteger rowIdx = 0;
+                for(MLContact* rowContact in curContactArray)
                 {
-                    //this MLContact instance is used in various ui parts, not just this file --> update all properties but keep the instance intact
-                    [rowContact updateWithContact:contact];
-                    indexPath = [NSIndexPath indexPathForRow:rowIdx inSection:section];
-                    break;
+                    if([rowContact isEqualToContact:contact])
+                    {
+                        //this MLContact instance is used in various ui parts, not just this file --> update all properties but keep the instance intact
+                        [rowContact updateWithContact:contact];
+                        indexPath = [NSIndexPath indexPathForRow:rowIdx inSection:section];
+                        break;
+                    }
+                    rowIdx++;
                 }
-                rowIdx++;
             }
-        }
-        // reload contact entry if we found it
-        if(indexPath) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-            });
-        }
+            // reload contact entry if we found it
+            if(indexPath)
+            {
+                    DDLogDebug(@"Reloading row at %@", indexPath);
+                    [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            }
+        });
     }
 }
 
@@ -203,10 +205,12 @@ static NSMutableSet* _smacksWarningDisplayed;
     // ignore all removals that aren't in foreground
     if([removedContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact] == NO)
         return;
-    // remove contact from activechats table
-    [self refreshDisplay];
-    // open placeholder
-    [self presentChatWithContact:nil];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // remove contact from activechats table
+        [self refreshDisplay];
+        // open placeholder
+        [self presentChatWithContact:nil];
+    });
 }
 
 
@@ -389,7 +393,11 @@ static NSMutableSet* _smacksWarningDisplayed;
     
     // show placeholder if contact is nil, open chat otherwise
     if(contact == nil)
-        [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
+    {
+        // only show placeholder if we use a split view
+        if([HelperTools deviceUsesSplitView] == YES)
+            [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
+    }
     else
         [self performSegueWithIdentifier:@"showConversation" sender:contact];
 }

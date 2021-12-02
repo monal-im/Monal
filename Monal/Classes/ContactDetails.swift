@@ -47,7 +47,7 @@ struct ContactDetails: View {
                 Spacer()
                     .frame(height: 20)
                 Button(action: {
-                    if(contact.isSubscribed) {
+                    if(contact.isInRoster) {
                         showingRemoveContactConfirmation = true
                     } else {
                         //showingAddContactConfirmation = true
@@ -56,7 +56,7 @@ struct ContactDetails: View {
                 }) {
                     if(contact.isGroup) {
                         Text(contact.mucType == "group" ? "Leave Group" : "Leave Channel")
-                    } else if(contact.isSubscribed) {
+                    } else if(contact.isInRoster) {
                         Text("Remove from contacts")
                     } else {
                         Text("Add to contacts")
@@ -72,6 +72,7 @@ struct ContactDetails: View {
                                 Text("Yes"),
                                 action: {
                                     contact.obj.removeFromRoster()
+                                    self.delegate.dismiss()
                                 }
                             )
                         ]

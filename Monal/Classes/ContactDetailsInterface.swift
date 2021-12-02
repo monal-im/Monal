@@ -63,7 +63,7 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
             }))
             self.observedMembers.add(member)
         }
-        DDLogDebug("Returning value for member \(member)")
+        DDLogDebug("Returning value for member \(member): \(self.obj.value(forKey:member) as! T)")
         return self.obj.value(forKey:member) as! T
     }
 }

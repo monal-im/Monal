@@ -82,7 +82,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, copy) NSString* subscription; //roster subbscription state
 @property (nonatomic, copy) NSString* ask; //whether we have tried to subscribe
 
-@property (nonatomic, readonly) NSString* contactDisplayName;
+@property (nonatomic, strong) NSString* contactDisplayName;
 
 -(void) updateWithContact:(MLContact*) contact;
 -(void) refresh;
@@ -96,6 +96,10 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(void) toggleMute:(BOOL) mute;
 -(void) toggleMentionOnly:(BOOL) mentionOnly;
 -(BOOL) toggleEncryption:(BOOL) encrypt;
+-(void) togglePinnedChat:(BOOL) pinned;
+-(BOOL) toggleBlocked:(BOOL) block;
+-(void) removeFromRoster;
+-(void) addToRoster;
 
 @end
 

@@ -52,19 +52,50 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
     }
     
     subscript<T>(dynamicMember member: String) -> T {
-        if(!self.observedMembers.contains(member)) {
-            DDLogDebug("Adding observer for member \(member)")
-            self.observers.append(KVOObserver(obj:self.obj, keyPath:member, objectWillChange: {
-                DDLogDebug("Observer said \(member) has changed")
-                DispatchQueue.main.async {
-                    DDLogDebug("Calling self.objectWillChange.send()...")
-                    self.objectWillChange.send()
-                }
-            }))
-            self.observedMembers.add(member)
+        get {
+            if(!self.observedMembers.contains(member)) {
+                DDLogDebug("Adding observer for member \(member)")
+                self.observers.append(KVOObserver(obj:self.obj, keyPath:member, objectWillChange: {
+                    DDLogDebug("Observer said \(member) has changed")
+                    DispatchQueue.main.async {
+                        DDLogDebug("Calling self.objectWillChange.send()...")
+                        self.objectWillChange.send()
+                    }
+                }))
+                self.observedMembers.add(member)
+            }
+            DDLogDebug("Returning value for member \(member): \(self.obj.value(forKey:member) as! T)")
+            return self.obj.value(forKey:member) as! T
         }
-        DDLogDebug("Returning value for member \(member): \(self.obj.value(forKey:member) as! T)")
-        return self.obj.value(forKey:member) as! T
+        set {
+            self.obj.setValue(newValue, forKey:member)
+        }
+    }
+}
+
+// clear button for text fields, see https://stackoverflow.com/a/58896723/3528174
+struct ClearButton: ViewModifier
+{
+    @Binding var text: String
+
+    public func body(content: Content) -> some View
+    {
+        ZStack(alignment: .trailing)
+        {
+            content
+            if !text.isEmpty
+            {
+                Button(action:
+                {
+                    self.text = ""
+                })
+                {
+                    Image(systemName: "delete.left")
+                        .foregroundColor(Color(UIColor.opaqueSeparator))
+                }
+                .padding(.trailing, 8)
+            }
+        }
     }
 }
 

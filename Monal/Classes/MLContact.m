@@ -166,6 +166,7 @@ NSString *const kAskSubscribe=@"subscribe";
             //@"muc_subject": nil,
             //@"muc_nick": nil,
             @"Muc": @NO,
+            @"mentionOnly": @NO,
             @"pinned": @NO,
             @"blocked": @NO,
             @"encrypt": @NO,
@@ -174,6 +175,8 @@ NSString *const kAskSubscribe=@"subscribe";
             @"state": @"offline",
             @"count": @0,
             @"isActiveChat": @NO,
+            @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],
+            //@"lastMessageTime": nil
         }];
     }
     else
@@ -271,6 +274,13 @@ NSString *const kAskSubscribe=@"subscribe";
         || [self.subscription isEqualToString:kSubTo];
 }
 
+-(BOOL) isInRoster
+{
+    return [self.subscription isEqualToString:kSubBoth]
+        || [self.subscription isEqualToString:kSubTo]
+        || [self.ask isEqualToString:kAskSubscribe];
+}
+
 // this will cache the unread count on first access
 -(NSInteger) unreadCount
 {
@@ -353,8 +363,6 @@ NSString *const kAskSubscribe=@"subscribe";
 -(void) removeFromRoster
 {
     [[MLXMPPManager sharedInstance] removeContact:self];
-    // announce that this contact was removed
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId] userInfo:@{@"contact": self}];
 }
 
 -(void) addToRoster

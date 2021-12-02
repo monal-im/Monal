@@ -27,7 +27,7 @@ struct ContactDetails: View {
             .navigationBarItems(leading: Button(action : {
                 self.delegate.dismiss()
             }){
-                Image(systemName: "arrow.left")
+                Image(systemName: "arrow.backward")
             })
             .navigationTitle(contact.contactDisplayName as String)
         }

@@ -214,6 +214,7 @@ NSString *const kAskSubscribe=@"subscribe";
 
 -(NSString*) contactDisplayName
 {
+    DDLogVerbose(@"Calculating contact display name...");
     NSString* displayName;
     if(self.nickName && self.nickName.length > 0)
     {

@@ -54,7 +54,7 @@ struct ContactDetailsHeader: View {
                     if(contact.isMuted) {
                         Image(systemName: "bell.slash.fill")
                     } else if(contact.isGroup && contact.isMentionOnly) {
-                        Image(systemName: "bell.badge.fill")
+                        Image(systemName: "bell.badge")
                     } else {
                         Image(systemName: "bell.fill")
                     }

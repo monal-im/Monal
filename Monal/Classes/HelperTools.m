@@ -13,6 +13,7 @@
 #import "MLPubSub.h"
 #import "MLUDPLogger.h"
 #import "XMPPStanza.h"
+#import "XMPPDataForm.h"
 #import "xmpp.h"
 #import "MLNotificationQueue.h"
 
@@ -391,21 +392,32 @@ void logException(NSException* exception)
     return [[[NSBundle mainBundle] executablePath] containsString:@".appex/"];
 }
 
-+(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features
++(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features andForms:(NSArray*) forms
 {
     // see https://xmpp.org/extensions/xep-0115.html#ver
     NSMutableString* unhashed = [[NSMutableString alloc] init];
     
-    //generate identities string
+    //generate identities string (must be sorted according to XEP-0115)
+    identities = [identities sortedArrayUsingSelector:@selector(compare:)];
     for(NSString* identity in identities)
-        [unhashed appendString:[NSString stringWithFormat:@"%@<", identity]];
+        [unhashed appendString:[NSString stringWithFormat:@"%@<", [self _replaceLowerThanInString:identity]]];
     
     //append features string
     [unhashed appendString:[self generateStringOfFeatureSet:features]];
     
+    //append forms string
+    [unhashed appendString:[self generateStringOfCapsForms:forms]];
+    
     NSString* hashedBase64 = [self encodeBase64WithData:[self sha1:[unhashed dataUsingEncoding:NSUTF8StringEncoding]]];
     DDLogVerbose(@"ver string: unhashed %@, hashed-64 %@", unhashed, hashedBase64);
     return hashedBase64;
+}
+
++(NSString*) _replaceLowerThanInString:(NSString*) str
+{
+    NSMutableString* retval = [str mutableCopy];
+    [retval replaceOccurrencesOfString:@"<" withString:@"&lt;" options:NSLiteralSearch range:NSMakeRange(0, retval.length)];
+    return [retval copy];       //make immutable
 }
 
 +(NSSet*) getOwnFeatureSet
@@ -435,12 +447,34 @@ void logException(NSException* exception)
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features
 {
     // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
-    NSArray* featuresArray = [[features allObjects] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    NSArray* featuresArray = [[features allObjects] sortedArrayUsingSelector:@selector(compare:)];
     NSMutableString* toreturn = [[NSMutableString alloc] init];
     for(NSString* feature in featuresArray)
     {
-        [toreturn appendString:feature];
+        [toreturn appendString:[self _replaceLowerThanInString:feature]];
         [toreturn appendString:@"<"];
+    }
+    return toreturn;
+}
+
++(NSString*) generateStringOfCapsForms:(NSArray*) forms
+{
+    // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
+    NSMutableString* toreturn = [[NSMutableString alloc] init];
+    for(XMPPDataForm* form in [forms sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"formType" ascending:YES selector:@selector(compare:)]]])
+    {
+        [toreturn appendString:[self _replaceLowerThanInString:form.formType]];
+        [toreturn appendString:@"<"];
+        for(NSString* field in [[form allKeys] sortedArrayUsingSelector:@selector(compare:)])
+        {
+            [toreturn appendString:[self _replaceLowerThanInString:field]];
+            [toreturn appendString:@"<"];
+            for(NSString* value in [[form getField:field][@"allValues"] sortedArrayUsingSelector:@selector(compare:)])
+            {
+                [toreturn appendString:[self _replaceLowerThanInString:value]];
+                [toreturn appendString:@"<"];
+            }
+        }
     }
     return toreturn;
 }

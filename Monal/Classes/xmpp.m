@@ -205,7 +205,7 @@ NSString* const kStanza = @"stanza";
     } andChildren:@[] andData:nil];
     _capsFeatures = [HelperTools getOwnFeatureSet];
     NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];
-    [self setCapsHash:[HelperTools getEntityCapsHashForIdentities:@[client] andFeatures:_capsFeatures]];
+    [self setCapsHash:[HelperTools getEntityCapsHashForIdentities:@[client] andFeatures:_capsFeatures andForms:@[]]];
     
     //init pubsub as early as possible to allow other classes or other parts of this file to register pubsub nodes they are interested in
     self.pubsub = [[MLPubSub alloc] initWithAccount:self];
@@ -315,7 +315,7 @@ NSString* const kStanza = @"stanza";
         [featuresSet addObject:[NSString stringWithFormat:@"%@+notify", pubsubNode]];
     }
     _capsFeatures = featuresSet;
-    [self setCapsHash:[HelperTools getEntityCapsHashForIdentities:@[client] andFeatures:_capsFeatures]];
+    [self setCapsHash:[HelperTools getEntityCapsHashForIdentities:@[client] andFeatures:_capsFeatures andForms:@[]]];
     
     //persist this new state if the pubsub implementation tells us to
     if(persistState)

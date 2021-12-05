@@ -50,7 +50,7 @@ void logException(NSException* exception);
 +(BOOL) isAppExtension;
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features;
 +(NSSet*) getOwnFeatureSet;
-+(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features;
++(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features andForms:(NSArray*) forms;
 +(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction;
 +(NSDate*) parseDateTimeString:(NSString*) datetime;
 +(NSString*) generateDateTimeString:(NSDate*) datetime;

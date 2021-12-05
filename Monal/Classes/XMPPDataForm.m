@@ -93,18 +93,24 @@ static NSRegularExpression* dataFormQueryRegex;
     NSMutableDictionary* options = [[NSMutableDictionary alloc] init];
     for(MLXMLNode* option in [fieldNode find:@"option"])
         options[[NSString stringWithFormat:@"%@", [option findFirst:@"value#"]]] = [NSString stringWithFormat:@"%@", ([option check:@"@label"] ? [option findFirst:@"@label"] : [option findFirst:@"value#"])];
+    NSMutableArray* allValues = [[NSMutableArray alloc] init];
+    for(id value in [fieldNode find:@"value#"])
+        if(value != nil)        //only safeguard, should never happen
+            [allValues addObject:[NSString stringWithFormat:@"%@", value]];
     if([fieldNode check:@"/@type"])
         return @{
             @"name": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"/@var"]],
             @"type": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"/@type"]],
             @"value": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"value#"]],
-            @"options": [options copy],     //immutable copy
+            @"allValues": [allValues copy],     //immutable copy
+            @"options": [options copy],         //immutable copy
             @"description": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"description#"]],
             @"required": @([fieldNode check:@"required"]),
         };
     return @{
         @"name": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"/@var"]],
         @"value": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"value#"]],
+        @"allValues": [allValues copy],     //immutable copy
         @"options": [options copy],         //immutable copy
         @"description": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"description#"]],
         @"required": @([fieldNode check:@"required"]),

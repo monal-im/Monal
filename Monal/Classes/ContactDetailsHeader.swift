@@ -19,9 +19,11 @@ struct ContactDetailsHeader: View {
                 .resizable()
                 .frame(minWidth: 50, idealWidth: 100, maxWidth: 200, minHeight: 50, idealHeight: 100, maxHeight: 200, alignment: .center)
                 .scaledToFit()
+            
             Spacer()
                 .frame(height: 20)
             Text(contact.contactJid as String)
+            
             Spacer()
                 .frame(height: 20)
             if(!contact.isGroup) {
@@ -32,6 +34,7 @@ struct ContactDetailsHeader: View {
                     Text(String(format: NSLocalizedString("Last seen: %@", comment: ""), NSLocalizedString("now", comment: "")))
                 }
             }
+            
             Spacer()
                 .frame(height: 20)
             HStack {
@@ -81,6 +84,14 @@ struct ContactDetailsHeader: View {
                 }
 #endif
                 Spacer()
+            }
+            
+            if((contact.statusMessage as String).count > 0) {
+                Spacer()
+                    .frame(height: 20)
+                Text("Status message:")
+                Text(contact.statusMessage as String)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }

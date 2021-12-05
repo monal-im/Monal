@@ -1485,32 +1485,6 @@ NSString* const kStanza = @"stanza";
                         [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self.accountNo];
                         [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self.accountNo];
                         [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self.accountNo];
-
-                        //handle last interaction time (only update db if the last interaction time is NEWER than the one already in our db, needed for multiclient setups)
-                        if([presenceNode check:@"{urn:xmpp:idle:1}idle@since"])
-                        {
-                            NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:presenceNode.fromUser forAccountNo:self.accountNo];
-                            if([[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] compare:lastInteraction] == NSOrderedDescending)
-                            {
-                                [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andAccountNo:self.accountNo];
-
-                                [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-                                    @"jid": presenceNode.fromUser,
-                                    @"accountNo": self.accountNo,
-                                    @"lastInteraction": [presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"],
-                                    @"isTyping": @NO
-                                }];
-                            }
-                        }
-                        else
-                        {
-                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-                                @"jid": presenceNode.fromUser,
-                                @"accountNo": self.accountNo,
-                                @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
-                                @"isTyping": @NO
-                            }];
-                        }
                     }
                     else
                     {
@@ -1558,7 +1532,41 @@ NSString* const kStanza = @"stanza";
                         [self sendIq:discoInfo withHandler:$newHandler(MLIQProcessor, handleEntityCapsDisco)];
                     }
                 }
+                
+                //handle last interaction time (only update db if the last interaction time is NEWER than the one already in our db, needed for multiclient setups)
+                //this must be done *after* parsing the ver attribute to get the cached capabilities
+                if(![presenceNode check:@"/@type"] && presenceNode.from)
+                {
+                    if(presenceNode.fromResource && [presenceNode check:@"{urn:xmpp:idle:1}idle@since"])
+                    {
+                        NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:presenceNode.fromUser forAccountNo:self.accountNo];
+                        if([[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] compare:lastInteraction] == NSOrderedDescending)
+                        {
+                            [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andAccountNo:self.accountNo];
 
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                                @"jid": presenceNode.fromUser,
+                                @"accountNo": self.accountNo,
+                                @"lastInteraction": [presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"],
+                                @"isTyping": @NO
+                            }];
+                        }
+                    }
+                    else if(presenceNode.fromResource)
+                    {
+                        NSString* capsVer = [[DataLayer sharedInstance] getVerForUser:presenceNode.fromUser andResource:presenceNode.fromResource];
+                        NSSet* caps = [[DataLayer sharedInstance] getCapsforVer:capsVer];
+                        if([caps containsObject:@"urn:xmpp:idle:1"])
+                        {
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                                @"jid": presenceNode.fromUser,
+                                @"accountNo": self.accountNo,
+                                @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
+                                @"isTyping": @NO
+                            }];
+                        }
+                    }
+                }
             }
             
             //only mark stanza as handled *after* processing it

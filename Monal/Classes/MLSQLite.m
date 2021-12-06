@@ -42,23 +42,25 @@ static NSMutableDictionary* currentTransactions;
 //this allows for concurrent reads/writes
 +(id) sharedInstanceForFile:(NSString*) dbFile
 {
-    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    if(threadData[@"_sqliteInstancesForThread"] && threadData[@"_sqliteInstancesForThread"][dbFile])
-        return threadData[@"_sqliteInstancesForThread"][dbFile];
-    MLSQLite* newInstance = [[self alloc] initWithFile:dbFile];
-    //init dictionaries if neccessary
-    if(!threadData[@"_sqliteInstancesForThread"])
-        threadData[@"_sqliteInstancesForThread"] = [[NSMutableDictionary alloc] init];
-    if(!threadData[@"_sqliteTransactionsRunning"])
-        threadData[@"_sqliteTransactionsRunning"] = [[NSMutableDictionary alloc] init];
-    if(!threadData[@"_sqliteStartedReadTransaction"])
-        threadData[@"_sqliteStartedReadTransaction"] = [[NSMutableDictionary alloc] init];
-    //save thread-local instance
-    threadData[@"_sqliteInstancesForThread"][dbFile] = newInstance;
-    //init data for nested transactions
-    threadData[@"_sqliteTransactionsRunning"][dbFile] = [NSNumber numberWithInt:0];
-    threadData[@"_sqliteStartedReadTransaction"][dbFile] = @NO;
-    return newInstance;
+    @synchronized(self) {
+        NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+        if(threadData[@"_sqliteInstancesForThread"] && threadData[@"_sqliteInstancesForThread"][dbFile])
+            return threadData[@"_sqliteInstancesForThread"][dbFile];
+        MLSQLite* newInstance = [[self alloc] initWithFile:dbFile];
+        //init dictionaries if neccessary
+        if(!threadData[@"_sqliteInstancesForThread"])
+            threadData[@"_sqliteInstancesForThread"] = [[NSMutableDictionary alloc] init];
+        if(!threadData[@"_sqliteTransactionsRunning"])
+            threadData[@"_sqliteTransactionsRunning"] = [[NSMutableDictionary alloc] init];
+        if(!threadData[@"_sqliteStartedReadTransaction"])
+            threadData[@"_sqliteStartedReadTransaction"] = [[NSMutableDictionary alloc] init];
+        //save thread-local instance
+        threadData[@"_sqliteInstancesForThread"][dbFile] = newInstance;
+        //init data for nested transactions
+        threadData[@"_sqliteTransactionsRunning"][dbFile] = [NSNumber numberWithInt:0];
+        threadData[@"_sqliteStartedReadTransaction"][dbFile] = @NO;
+        return newInstance;
+    }
 }
 
 -(id) initWithFile:(NSString*) dbFile

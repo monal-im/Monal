@@ -346,6 +346,8 @@ static NSDateFormatter* dbFormatter;
     {
         NSError* error;
         NSMutableDictionary* dic = (NSMutableDictionary*)[NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
+            [NSData class],
+            [NSMutableData class],
             [NSMutableDictionary class],
             [NSDictionary class],
             [NSMutableSet class],
@@ -2859,6 +2861,8 @@ static NSDateFormatter* dbFormatter;
     {
         NSError* error;
         MLXMLNode* stanza = (MLXMLNode*)[NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
+            [NSData class],
+            [NSMutableData class],
             [NSMutableDictionary class],
             [NSDictionary class],
             [NSMutableSet class],

@@ -185,7 +185,7 @@
 
 -(void) showDisplayName:(NSString *) name
 {
-    if(![self.displayName.text isEqualToString:name])
+    if(self.displayName && ![self.displayName.text isEqualToString:name])
     {
         self.centeredDisplayName.text = name;
         self.displayName.text = name;

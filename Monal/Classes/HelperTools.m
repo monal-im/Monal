@@ -6,6 +6,8 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
+#include "hsluv.h"
+
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import "HelperTools.h"
@@ -89,18 +91,13 @@ void logException(NSException* exception)
     //XEP-0392 implementation
     NSData* hash = [self sha1:[jid dataUsingEncoding:NSUTF8StringEncoding]];
     uint16_t rawHue = CFSwapInt16LittleToHost(*(uint16_t*)[hash bytes]);
-    double hue = ((double)rawHue / 65536.0) * 360.0;
-    double saturation = 1.0;
-    double lightness = 0.5;
+    double hue = (rawHue / 65536.0) * 360.0;
+    double saturation = 100.0;
+    double lightness = 50.0;
     
-    //convert HSL to HSB/HSV color space
-    double brightness = lightness + saturation * MIN(lightness, 1-lightness);
-    double newSaturation = 0.0;
-    if(brightness != 0)
-        newSaturation = 2 * (1 - lightness / brightness);
-    
-    //create and return UIColor instance from HSB/HSV values
-    return cache[jid] = [[UIColor alloc] initWithHue:hue saturation:newSaturation brightness:brightness alpha:1.0];
+    double r, g, b;
+    hsluv2rgb(hue, saturation, lightness, &r, &g, &b);
+    return cache[jid] = [UIColor colorWithRed:r green:g blue:b alpha:1];
 }
 
 +(NSString*) bytesToHuman:(int64_t) bytes

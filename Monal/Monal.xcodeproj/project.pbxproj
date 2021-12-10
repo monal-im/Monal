@@ -146,6 +146,8 @@
 		541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CBF254AA0E700FD7B28 /* MLHandler.m */; };
 		541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CC3254D369100FD7B28 /* MLPubSubProcessor.h */; };
 		541E4CC7254D370200FD7B28 /* MLPubSubProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */; };
+		542CF3FF2763314F002C3710 /* hsluv.c in Sources */ = {isa = PBXBuildFile; fileRef = 542CF3FD2763314E002C3710 /* hsluv.c */; };
+		542CF4002763314F002C3710 /* hsluv.h in Headers */ = {isa = PBXBuildFile; fileRef = 542CF3FE2763314F002C3710 /* hsluv.h */; };
 		54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 544656BA2534910D006B2953 /* XMPPDataForm.m */; };
 		544656BD25349133006B2953 /* XMPPDataForm.h in Headers */ = {isa = PBXBuildFile; fileRef = 544656BC25349133006B2953 /* XMPPDataForm.h */; };
@@ -624,6 +626,8 @@
 		541E4CBF254AA0E700FD7B28 /* MLHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLHandler.m; sourceTree = "<group>"; };
 		541E4CC3254D369100FD7B28 /* MLPubSubProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPubSubProcessor.h; sourceTree = "<group>"; };
 		541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPubSubProcessor.m; sourceTree = "<group>"; };
+		542CF3FD2763314E002C3710 /* hsluv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hsluv.c; sourceTree = "<group>"; };
+		542CF3FE2763314F002C3710 /* hsluv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hsluv.h; sourceTree = "<group>"; };
 		54391BB9273499E80050DAFB /* UIColor+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIColor+Extension.h"; path = "Classes/UIColor+Extension.h"; sourceTree = "<group>"; };
 		54391BBA273499E80050DAFB /* UIColor+Extension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIColor+Extension.m"; path = "Classes/UIColor+Extension.m"; sourceTree = "<group>"; };
 		544656BA2534910D006B2953 /* XMPPDataForm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPDataForm.m; sourceTree = "<group>"; };
@@ -1370,6 +1374,8 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				542CF3FD2763314E002C3710 /* hsluv.c */,
+				542CF3FE2763314F002C3710 /* hsluv.h */,
 				541B6AB3262BC9040038B936 /* MLStream.h */,
 				541B6AB2262BC9040038B936 /* MLStream.m */,
 				54A22D2C26185E7E00B56EAD /* MLNotificationQueue.h */,
@@ -1545,6 +1551,7 @@
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
 				541E4CBC254AA08700FD7B28 /* MLSQLite.h in Headers */,
 				C1613B5A2520723D0062C0C2 /* MLBasePaser.h in Headers */,
+				542CF4002763314F002C3710 /* hsluv.h in Headers */,
 				54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */,
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
 				540E13A924CF78D00038FDA0 /* MLLogFormatter.h in Headers */,
@@ -2253,6 +2260,7 @@
 				540E13A724CF78900038FDA0 /* MLLogFormatter.m in Sources */,
 				C158D41425A0AC630005AA40 /* MLMucProcessor.m in Sources */,
 				54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */,
+				542CF3FF2763314F002C3710 /* hsluv.c in Sources */,
 				389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
 				26CC57D623A08D7100ABB92A /* MLMetaInfo.m in Sources */,

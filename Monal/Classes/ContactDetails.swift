@@ -25,9 +25,13 @@ struct ContactDetails: View {
                 
                 Spacer()
                     .frame(height: 20)
-                TextField("Nickname", text: $contact.contactDisplayName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .modifier(ClearButton(text: $contact.contactDisplayName))
+                HStack {
+                    Spacer().frame(width: 20)
+                    TextField("Nickname", text: $contact.nickNameView)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .modifier(ClearButton(text: $contact.nickNameView))
+                    Spacer().frame(width: 20)
+                }
                 
                 Spacer()
                     .frame(height: 20)

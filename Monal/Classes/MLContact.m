@@ -255,8 +255,20 @@ NSString *const kAskSubscribe=@"subscribe";
     return displayName;
 }
 
--(void) setContactDisplayName:(NSString*) name
++(NSSet*) keyPathsForValuesAffectingContactDisplayName
 {
+    return [NSSet setWithObjects:@"nickName", @"fullName", @"contactJid", nil];
+}
+
+-(NSString*) nickNameView
+{
+    return self.nickName;
+}
+
+-(void) setNickNameView:(NSString*) name
+{
+    if([self.nickName isEqualToString:name])
+        return;             //no change at all
     self.nickName = name;
     // abort old change timer and start a new one
     if(_cancelNickChange)

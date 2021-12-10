@@ -50,6 +50,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  usually user assigned nick name
  */
 @property (nonatomic, copy) NSString* nickName;
+@property (nonatomic, strong) NSString* nickNameView;
 
 /**
  xmpp state text
@@ -83,7 +84,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, copy) NSString* subscription; //roster subbscription state
 @property (nonatomic, copy) NSString* ask; //whether we have tried to subscribe
 
-@property (nonatomic, strong) NSString* contactDisplayName;
+@property (nonatomic, readonly) NSString* contactDisplayName;
 
 -(void) updateWithContact:(MLContact*) contact;
 -(void) refresh;

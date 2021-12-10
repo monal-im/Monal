@@ -15,7 +15,7 @@ struct ContactDetailsHeader: View {
 
     var body: some View {
         VStack {
-            Image(uiImage: MLImageManager.sharedInstance().getIconFor(contact.obj)!)
+            Image(uiImage: contact.avatar)
                 .resizable()
                 .frame(minWidth: 50, idealWidth: 100, maxWidth: 200, minHeight: 50, idealHeight: 100, maxHeight: 200, alignment: .center)
                 .scaledToFit()

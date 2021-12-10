@@ -14,6 +14,7 @@
 #import "MLXMPPManager.h"
 #import "MLOMEMO.h"
 #import "MLNotificationQueue.h"
+#import "MLImageManager.h"
 
 NSString *const kSubBoth=@"both";
 NSString *const kSubNone=@"none";
@@ -189,6 +190,7 @@ NSString *const kAskSubscribe=@"subscribe";
     // watch for changes in lastInteractionTime and update dynamically
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLastInteractionTimeUpdate:) name:kMonalLastInteractionUpdatedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBlockListRefresh:) name:kMonalBlockListRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRefresh object:nil];
     return self;
 }
 
@@ -214,6 +216,18 @@ NSString *const kAskSubscribe=@"subscribe";
     if(![self.accountId isEqualToString:data[@"accountNo"]])
         return;         // ignore other accounts
     self.isBlocked = [[DataLayer sharedInstance] isBlockedJid:self.contactJid withAccountNo:self.accountId] == kBlockingMatchedNodeHost;
+}
+
+-(void) handleContactRefresh:(NSNotification*) notification
+{
+    NSDictionary* data = notification.userInfo;
+    MLContact* contact = data[@"contact"];
+    if(![self.contactJid isEqualToString:contact.contactJid] || ![self.accountId isEqualToString:contact.accountId])
+        return;     // ignore other accounts or contacts
+    [self updateWithContact:contact];
+    [[MLImageManager sharedInstance] getIconForContact:self withCompletion:^(UIImage* avatar) {
+        self.avatar = avatar;
+    }];
 }
 
 -(void) refresh

@@ -224,7 +224,7 @@
 
             if(toreturn == nil)
             {
-                toreturn = [self generateDummyIconForContact:[MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]];
+                toreturn = [self generateDummyIconForContact:contact];
                 //delete avatar hash from db if the file containing our image data vanished (will only be done on first call, because of self.iconCache)
                 [[DataLayer sharedInstance] setAvatarHash:@"" forContact:contact.contactJid andAccount:contact.accountId];
             }

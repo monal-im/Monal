@@ -20,6 +20,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @class xmpp;
 @class MLMessage;
+@class UIImage;
 
 @interface MLContact : NSObject <NSSecureCoding>
 
@@ -41,10 +42,9 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 /**
  account number in the database should be an integer
  */
-
 @property (nonatomic, copy) NSString* accountId;
 @property (nonatomic, copy) NSString* contactJid;
-
+@property (nonatomic, copy) UIImage* avatar;
 @property (nonatomic, copy) NSString* fullName;
 /**
  usually user assigned nick name

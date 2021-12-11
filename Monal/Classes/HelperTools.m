@@ -155,6 +155,15 @@ void logException(NSException* exception)
 
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid
 {
+    //cache results
+    static NSMutableDictionary* cache;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        cache = [[NSMutableDictionary alloc] init];
+    });
+    if(cache[jid] != nil)
+        return cache[jid];
+    
     NSMutableDictionary<NSString*, NSString*>* retval = [[NSMutableDictionary alloc] init];
     NSArray* parts = [jid componentsSeparatedByString:@"/"];
     
@@ -183,7 +192,7 @@ void logException(NSException* exception)
     if([retval[@"resource"] isEqualToString:@""])
         [retval removeObjectForKey:@"resource"];
     
-    return retval;
+    return cache[jid] = [retval copy];          //return immutable copy
 }
 
 +(void) clearSyncErrorsOnAppForeground

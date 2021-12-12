@@ -116,6 +116,9 @@ static NSMutableDictionary* _typingNotifications;
         ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"]
     )
     {
+        //ignore muc pms without id attribute (we can't send out errors pointing to this message without an id)
+        if([messageNode findFirst:@"/@id"] == nil)
+            return message;
         XMPPMessage* errorReply = [[XMPPMessage alloc] init];
         [errorReply.attributes setObject:@"error" forKey:@"type"];
         [errorReply.attributes setObject:messageNode.from forKey:@"to"];                       //this has to be the full jid here

@@ -6,6 +6,7 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 
+import UIKit
 import SwiftUI
 import monalxmpp
 
@@ -35,6 +36,18 @@ struct ContactDetails: View {
                 Group {
                     Spacer()
                         .frame(height: 20)
+                    NavigationLink(destination: Resources(contact: contact)) {
+                        Text("Resources")
+                    }
+                    
+                    Spacer()
+                        .frame(height: 20)
+                    NavigationLink(destination: KeysTable(contact: contact)) {
+                        Text("OMEMO Keys")
+                    }
+                    
+                    Spacer()
+                        .frame(height: 20)
                     Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {
                         contact.obj.togglePinnedChat(!contact.isPinned);
                     }
@@ -47,14 +60,6 @@ struct ContactDetails: View {
                     .alert(isPresented: $showingCannotBlockAlert) {
                         Alert(title: Text("Blocking Not Supported"), message: Text("The server does not support blocking (XEP-0191)."), dismissButton: .default(Text("Close")))
                     }
-                    
-                    /*
-                    Spacer()
-                        .frame(height: 20)
-                    NavigationLink(destination: BasicNavigationPhotoView(contact: contact)) {
-                        Text("See Photo")
-                    }
-                    */
                     
                     Spacer()
                         .frame(height: 20)
@@ -122,6 +127,30 @@ struct ContactDetails: View {
             })
             .navigationTitle(contact.contactDisplayName as String)
         }
+    }
+}
+
+struct KeysTable: UIViewControllerRepresentable {
+    @ObservedObject var contact: ObservableKVOWrapper<MLContact>
+    func makeUIViewController(context: Context) -> UIViewController {
+        let controller = MLKeysTableViewController()
+        controller.contact = self.contact.obj
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+    }
+}
+
+struct Resources: UIViewControllerRepresentable {
+    @ObservedObject var contact: ObservableKVOWrapper<MLContact>
+    func makeUIViewController(context: Context) -> UIViewController {
+        let controller = MLResourcesTableViewController()
+        controller.contact = self.contact.obj
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
     }
 }
 

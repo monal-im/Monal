@@ -19,3 +19,5 @@ FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 #import "xmpp.h"
 #import "MLXMPPManager.h"
 #import "MLImageManager.h"
+#import "MLResourcesTableViewController.h"
+#import "MLKeysTableViewController.h"

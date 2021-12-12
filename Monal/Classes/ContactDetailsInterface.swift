@@ -105,7 +105,6 @@ class ContactDetailsInterface: NSObject {
     func makeContactDetails(_ contact: MLContact) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let details = ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact))
-        //let details = ContactDetails(delegate:delegate, contact:contact)
         let host = UIHostingController(rootView:AnyView(details))
         details.delegate.host = host
         return host

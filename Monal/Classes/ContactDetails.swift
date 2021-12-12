@@ -13,6 +13,7 @@ import monalxmpp
 struct ContactDetails: View {
     var delegate: SheetDismisserProtocol
     @StateObject var contact: ObservableKVOWrapper<MLContact>
+    @State private var showingBlockContactConfirmation = false
     @State private var showingCannotBlockAlert = false
     @State private var showingRemoveContactConfirmation = false
     @State private var showingAddContactConfirmation = false
@@ -36,29 +37,43 @@ struct ContactDetails: View {
                 Group {
                     Spacer()
                         .frame(height: 20)
-                    NavigationLink(destination: Resources(contact: contact)) {
-                        Text("Resources")
-                    }
-                    
-                    Spacer()
-                        .frame(height: 20)
-                    NavigationLink(destination: KeysTable(contact: contact)) {
-                        Text("OMEMO Keys")
-                    }
-                    
-                    Spacer()
-                        .frame(height: 20)
                     Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {
                         contact.obj.togglePinnedChat(!contact.isPinned);
                     }
                     
                     Spacer()
                         .frame(height: 20)
-                    Button(contact.isBlocked ? "Unblock Contact" : "Block Contact") {
-                        showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
+                    Button(action: {
+                        if(!contact.isBlocked) {
+                            showingBlockContactConfirmation = true
+                        } else {
+                            showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
+                        }
+                    }) {
+                        if(!contact.isBlocked) {
+                            Text("Block Contact")
+                                .foregroundColor(.red)
+                        } else {
+                            Text("Unblock Contact")
+                        }
                     }
                     .alert(isPresented: $showingCannotBlockAlert) {
-                        Alert(title: Text("Blocking Not Supported"), message: Text("The server does not support blocking (XEP-0191)."), dismissButton: .default(Text("Close")))
+                        Alert(title: Text("Blocking/Unblocking Not Supported"), message: Text("The server does not support blocking (XEP-0191)."), dismissButton: .default(Text("Close")))
+                    }
+                    .actionSheet(isPresented: $showingBlockContactConfirmation) {
+                        ActionSheet(
+                            title: Text("Block Contact"),
+                            message: Text("Do you really want to block this contact? You won't receive any messages from this contact."),
+                            buttons: [
+                                .cancel(),
+                                .destructive(
+                                    Text("Yes"),
+                                    action: {
+                                        showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
+                                    }
+                                )
+                            ]
+                        )
                     }
                     
                     Spacer()
@@ -113,6 +128,13 @@ struct ContactDetails: View {
                             }
                         }
                     }
+                    
+                    Spacer()
+                        .frame(height: 20)
+                    NavigationLink(destination: Resources(contact: contact)) {
+                        Text("Resources")
+                    }
+
                 }
                 
                 //make sure everything is aligned to the top of our view instead of vertically centered
@@ -127,18 +149,6 @@ struct ContactDetails: View {
             })
             .navigationTitle(contact.contactDisplayName as String)
         }
-    }
-}
-
-struct KeysTable: UIViewControllerRepresentable {
-    @ObservedObject var contact: ObservableKVOWrapper<MLContact>
-    func makeUIViewController(context: Context) -> UIViewController {
-        let controller = MLKeysTableViewController()
-        controller.contact = self.contact.obj
-        return controller
-    }
-    
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
     }
 }
 

@@ -22,7 +22,3 @@ module MLResourcesTableViewControllerPrivate {
     header "../Classes/MLResourcesTableViewController.h"
     export *
 }
-module MLKeysTableViewControllerPrivate {
-    header "../Classes/MLKeysTableViewController.h"
-    export *
-}

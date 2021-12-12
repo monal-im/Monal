@@ -52,6 +52,11 @@ AVPlayer *avplayer;
     NSURL* videoFileUrl = [[NSURL alloc] initFileURLWithPath:fileUrlStr isDirectory:NO];
     if(videoFileUrl == nil)
         return;
+    
+    //some translations needed
+    if([@"audio/mpeg" isEqualToString:mimeType])
+        mimeType = @"audio/mp4";
+    
     AVURLAsset* videoAsset = [[AVURLAsset alloc] initWithURL:videoFileUrl options:@{
         @"AVURLAssetOutOfBandMIMETypeKey": mimeType
     }];

@@ -2851,7 +2851,7 @@ NSString* const kStanza = @"stanza";
     XMPPIQ* iqBlocked = [[XMPPIQ alloc] initWithType:kiqSetType];
     
     [iqBlocked setBlocked:blocked forJid:blockedJid];
-    [self send:iqBlocked];
+    [self sendIq:iqBlocked withHandler:$newHandler(MLIQProcessor, handleBlocked, $ID(blockedJid))];
 }
 
 -(void) fetchBlocklist

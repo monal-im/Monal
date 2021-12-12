@@ -502,7 +502,7 @@ $$
 $$class_handler(handleSetMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
-        DDLogError(@"Seting MAM prefs returned an error: %@", [iqNode findFirst:@"error"]);
+        DDLogError(@"Setting MAM prefs returned an error: %@", [iqNode findFirst:@"error"]);
         [HelperTools postError:NSLocalizedString(@"XMPP mam preferences error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
         return;
     }
@@ -561,6 +561,17 @@ $$class_handler(handleBlocklist, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         [account updateLocalBlocklistCache:blockedJids];
         // notify the views
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
+    }
+$$
+
+$$class_handler(handleBlocked, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, blockedJid))
+    if(!account.connectionProperties.supportsBlocking) return;
+    
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Blocking returned an error: %@", [iqNode findFirst:@"error"]);
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to block contact %@", @""), blockedJid] withNode:iqNode andAccount:account andIsSevere:NO];
+        return;
     }
 $$
 

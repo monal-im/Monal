@@ -2,7 +2,7 @@
 //  XMPPStanza.m
 //  monalxmpp
 //
-//  Created by tmolitor on 24.09.20.
+//  Created by Thilo Molitor on 24.09.20.
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 

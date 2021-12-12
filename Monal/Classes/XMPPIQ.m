@@ -65,7 +65,7 @@ NSString* const kiqErrorType = @"error";
         @"node": @"v1-register-push",
         @"action": @"execute"
     } andChildren:@[
-        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"https://github.com/tmolitor-stud-tu/mod_push_appserver/#v1-register-push" andDictionary:@{
+        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"https://github.com/Thilo Molitor-stud-tu/mod_push_appserver/#v1-register-push" andDictionary:@{
             @"type": @"apns",
             @"node": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
             @"token": token

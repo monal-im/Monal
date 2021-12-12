@@ -604,7 +604,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
     XMPPDataForm* dataForm = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/{jabber:x:data}x"];
     NSString* mucName = dataForm[@"muc#roomconfig_roomname"];
     NSString* mucType = @"channel";
-    //both are needed for omemo, see discussion with holger 2021-01-02/03 -- tmolitor
+    //both are needed for omemo, see discussion with holger 2021-01-02/03 -- Thilo Molitor
     if([features containsObject:@"muc_nonanonymous"] && [features containsObject:@"muc_membersonly"])
         mucType = @"group";
     

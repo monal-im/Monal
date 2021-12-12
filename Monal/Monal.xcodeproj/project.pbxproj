@@ -148,6 +148,8 @@
 		541E4CC7254D370200FD7B28 /* MLPubSubProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */; };
 		542CF3FF2763314F002C3710 /* hsluv.c in Sources */ = {isa = PBXBuildFile; fileRef = 542CF3FD2763314E002C3710 /* hsluv.c */; };
 		542CF4002763314F002C3710 /* hsluv.h in Headers */ = {isa = PBXBuildFile; fileRef = 542CF3FE2763314F002C3710 /* hsluv.h */; };
+		542CF4252765DC44002C3710 /* MLContactOMEMOKeys.m in Sources */ = {isa = PBXBuildFile; fileRef = 542CF4242765DC44002C3710 /* MLContactOMEMOKeys.m */; };
+		542CF42C2765DC62002C3710 /* MLContactOMEMOKeys.h in Headers */ = {isa = PBXBuildFile; fileRef = 542CF42B2765DC62002C3710 /* MLContactOMEMOKeys.h */; };
 		54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 544656BA2534910D006B2953 /* XMPPDataForm.m */; };
 		544656BD25349133006B2953 /* XMPPDataForm.h in Headers */ = {isa = PBXBuildFile; fileRef = 544656BC25349133006B2953 /* XMPPDataForm.h */; };
@@ -628,6 +630,8 @@
 		541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPubSubProcessor.m; sourceTree = "<group>"; };
 		542CF3FD2763314E002C3710 /* hsluv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hsluv.c; sourceTree = "<group>"; };
 		542CF3FE2763314F002C3710 /* hsluv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hsluv.h; sourceTree = "<group>"; };
+		542CF4242765DC44002C3710 /* MLContactOMEMOKeys.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactOMEMOKeys.m; sourceTree = "<group>"; };
+		542CF42B2765DC62002C3710 /* MLContactOMEMOKeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactOMEMOKeys.h; sourceTree = "<group>"; };
 		54391BB9273499E80050DAFB /* UIColor+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIColor+Extension.h"; path = "Classes/UIColor+Extension.h"; sourceTree = "<group>"; };
 		54391BBA273499E80050DAFB /* UIColor+Extension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIColor+Extension.m"; path = "Classes/UIColor+Extension.m"; sourceTree = "<group>"; };
 		544656BA2534910D006B2953 /* XMPPDataForm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPDataForm.m; sourceTree = "<group>"; };
@@ -1102,6 +1106,8 @@
 				2661102A238F17CB0030A4EE /* MLContact.m */,
 				26611024238F17B20030A4EE /* MLMessage.h */,
 				26611025238F17B20030A4EE /* MLMessage.m */,
+				542CF4242765DC44002C3710 /* MLContactOMEMOKeys.m */,
+				542CF42B2765DC62002C3710 /* MLContactOMEMOKeys.h */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -1544,6 +1550,7 @@
 			files = (
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
+				542CF42C2765DC62002C3710 /* MLContactOMEMOKeys.h in Headers */,
 				54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */,
 				544656BD25349133006B2953 /* XMPPDataForm.h in Headers */,
 				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
@@ -2246,6 +2253,7 @@
 				26CC57D323A08D7100ABB92A /* DataLayer.m in Sources */,
 				26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */,
 				C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */,
+				542CF4252765DC44002C3710 /* MLContactOMEMOKeys.m in Sources */,
 				26CC57D423A08D7100ABB92A /* MLImageManager.m in Sources */,
 				540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */,
 				26CC57C823A0892100ABB92A /* MLMessage.m in Sources */,

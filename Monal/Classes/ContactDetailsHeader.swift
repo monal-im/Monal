@@ -19,6 +19,7 @@ struct ContactDetailsHeader: View {
                 .resizable()
                 .frame(minWidth: 50, idealWidth: 100, maxWidth: 200, minHeight: 50, idealHeight: 100, maxHeight: 200, alignment: .center)
                 .scaledToFit()
+                .shadow(radius: 7)
             
             Spacer()
                 .frame(height: 20)

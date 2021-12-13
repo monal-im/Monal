@@ -27,7 +27,8 @@
     static dispatch_once_t once;
     static MLImageManager* sharedInstance;
     dispatch_once(&once, ^{
-        sharedInstance = [[MLImageManager alloc] init] ;
+        DDLogVerbose(@"Creating shared image manager instance...");
+        sharedInstance = [[MLImageManager alloc] init];
     });
     return sharedInstance;
 }
@@ -41,16 +42,9 @@
     
     self.documentsDirectory = [[fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path];
     
-    NSString *writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"imagecache"];
-    NSError *error;
-    [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
+    NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"imagecache"];
+    [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:nil];
     [HelperTools configureFileProtectionFor:writablePath];
-    
-    //for notifications
-    NSString *writablePath2 = [self.documentsDirectory stringByAppendingPathComponent:@"tempImage"];
-    NSError *error2;
-    [fileManager createDirectoryAtPath:writablePath2 withIntermediateDirectories:YES attributes:nil error:&error2];
-    [HelperTools configureFileProtectionFor:writablePath2];
     
     return self;
 }
@@ -73,6 +67,25 @@
     [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@",accountNo,contact]];
 }
 
+-(void) cleanupHashes
+{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSArray<MLContact*>* contactList = [[DataLayer sharedInstance] contactList];
+    
+    for(MLContact* contact in contactList)
+    {
+        NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+        writablePath = [writablePath stringByAppendingPathComponent:contact.accountId];
+        writablePath = [writablePath stringByAppendingPathComponent:[self fileNameforContact:contact.contactJid]];
+
+        if(![fileManager isReadableFileAtPath:writablePath])
+        {
+            DDLogDebug(@"Deleting orphan hash of contact: %@", contact);
+            //delete avatar hash from db if the file containing our image data vanished
+            [[DataLayer sharedInstance] setAvatarHash:@"" forContact:contact.contactJid andAccount:contact.accountId];
+        }
+    }
+}
 
 #pragma mark chat bubbles
 
@@ -145,7 +158,7 @@
 {
     //documents directory/buddyicons/account no/contact
     
-    NSString* filename= [self fileNameforContact:contact];
+    NSString* filename = [self fileNameforContact:contact];
     
     NSFileManager* fileManager = [NSFileManager defaultManager];
     
@@ -157,9 +170,7 @@
     writablePath = [writablePath stringByAppendingPathComponent:filename];
     
     if([fileManager fileExistsAtPath:writablePath])
-    {
         [fileManager removeItemAtPath:writablePath error:nil];
-    }
 
     if(data)
     {
@@ -223,11 +234,7 @@
                 toreturn = savedImage;
 
             if(toreturn == nil)
-            {
                 toreturn = [self generateDummyIconForContact:contact];
-                //delete avatar hash from db if the file containing our image data vanished (will only be done on first call, because of self.iconCache)
-                [[DataLayer sharedInstance] setAvatarHash:@"" forContact:contact.contactJid andAccount:contact.accountId];
-            }
         }
         
         toreturn = [MLImageManager circularImage:toreturn];

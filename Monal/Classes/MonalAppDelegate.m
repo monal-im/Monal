@@ -124,6 +124,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [MLFiletransfer doStartupCleanup];
     });
     
+    //do image manager cleanup in a new thread to not slow down app startup
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [[MLImageManager sharedInstance] cleanupHashes];
+    });
+    
     //only proceed with launching if the NotificationServiceExtension is *not* running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {

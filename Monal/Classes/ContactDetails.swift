@@ -146,7 +146,7 @@ struct ContactDetails: View {
                 self.delegate.dismiss()
             }){
                 Image(systemName: "arrow.backward")
-            })
+            }.keyboardShortcut(.Escape, modifiers: []))
             .navigationTitle(contact.contactDisplayName as String)
         }
     }

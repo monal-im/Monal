@@ -6,6 +6,7 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 
+import MobileCoreServices
 import SwiftUI
 import monalxmpp
 
@@ -23,7 +24,18 @@ struct ContactDetailsHeader: View {
             
             Spacer()
                 .frame(height: 20)
-            Text(contact.contactJid as String)
+            HStack {
+                Text(contact.contactJid as String)
+                //for ios >= 15.0
+                //.textSelection(.enabled)
+                Spacer().frame(width: 10)
+                Button(action: {
+                    UIPasteboard.general.setValue(contact.contactJid as String, forPasteboardType: kUTTypeUTF8PlainText as String)
+                }) {
+                    Image(systemName: "doc.on.doc")
+                        .foregroundColor(.black)
+                }
+            }
             
             Spacer()
                 .frame(height: 20)

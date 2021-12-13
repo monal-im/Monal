@@ -316,6 +316,9 @@ $$
                                              forContact:contact[@"jid"]
                                              andAccount:account.accountNo];
             
+            //regenerate avatar if the nickame has changed
+            if(![contactObj.nickName isEqualToString:[contact objectForKey:@"name"]])
+                [[MLImageManager sharedInstance] purgeCacheForContact:contact[@"jid"] andAccount:account.accountNo];
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo]
             }];

@@ -225,9 +225,9 @@ NSString *const kAskSubscribe=@"subscribe";
     if(![self.contactJid isEqualToString:contact.contactJid] || ![self.accountId isEqualToString:contact.accountId])
         return;     // ignore other accounts or contacts
     [self updateWithContact:contact];
-    [[MLImageManager sharedInstance] getIconForContact:self withCompletion:^(UIImage* avatar) {
-        self.avatar = avatar;
-    }];
+    UIImage* newAvatar = [[MLImageManager sharedInstance] getIconForContact:self];
+    if(newAvatar != self.avatar || ![UIImagePNGRepresentation(newAvatar) isEqual:UIImagePNGRepresentation(self.avatar)])
+        self.avatar = newAvatar;
 }
 
 -(void) refresh
@@ -541,6 +541,7 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.lastInteractionTime = [dic objectForKey:@"lastInteraction"];
     if(contact.lastInteractionTime == nil)
         contact.lastInteractionTime = [[NSDate date] initWithTimeIntervalSince1970:0];
+    contact.avatar = [[MLImageManager sharedInstance] getIconForContact:contact];
     return contact;
 }
 

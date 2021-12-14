@@ -33,7 +33,7 @@ struct ContactDetailsHeader: View {
                     UIPasteboard.general.setValue(contact.contactJid as String, forPasteboardType: kUTTypeUTF8PlainText as String)
                 }) {
                     Image(systemName: "doc.on.doc")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                 }
             }
             
@@ -98,6 +98,7 @@ struct ContactDetailsHeader: View {
 #endif
                 Spacer()
             }
+                .foregroundColor(.primary)
             
             if((contact.statusMessage as String).count > 0) {
                 Spacer()

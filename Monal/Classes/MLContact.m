@@ -537,7 +537,7 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.isEncrypted = [[dic objectForKey:@"encrypt"] boolValue];
     contact.isMuted = [[dic objectForKey:@"muted"] boolValue];
     // initial value comes from db, all other values get updated by our kMonalLastInteractionUpdatedNotice handler
-    contact.lastInteractionTime = nilDefault([dic objectForKey:@"lastInteraction"], [[NSDate date] initWithTimeIntervalSince1970:0]);
+    contact.lastInteractionTime = [dic objectForKey:@"lastInteraction"];        //no default needed, already done in DataLayer
     contact.avatar = nilDefault([[MLImageManager sharedInstance] getIconForContact:contact], [[UIImage alloc] init]);
     return contact;
 }

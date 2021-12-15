@@ -109,7 +109,11 @@ struct ContactDetails: View {
                             Button(action: {
                                 showingAddContactConfirmation = true
                             }) {
-                                Text("Add to contacts")
+                                if(contact.isGroup) {
+                                    Text(contact.mucType == "group" ? "Add Group to Favorites" : "Add Channel to Favorites")
+                                } else {
+                                    Text("Add to contacts")
+                                }
                             }
                             .actionSheet(isPresented: $showingAddContactConfirmation) {
                                 ActionSheet(

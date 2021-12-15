@@ -636,29 +636,37 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) addContact:(MLContact*) contact
 {
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
-    [account addToRoster:contact.contactJid];
-    
-    BOOL approve = NO;
-    // approve contact ahead of time if possible
-    if(account.connectionProperties.supportsRosterPreApproval)
-        approve = YES;
-    // just in case there was a pending request
-    else if([contact.state isEqualToString:kSubTo]  || [contact.state isEqualToString:kSubNone] )
-        approve = YES;
-    // approve contact requests not catched by the above checks (can that even happen?)
-    else if([[DataLayer sharedInstance] hasContactRequestForAccount:account.accountNo andBuddyName:contact.contactJid])
-        approve = YES;
-    if(approve)
+    if(account)
     {
-        // delete existing contact request if exists
-        [[DataLayer sharedInstance] deleteContactRequest:contact];
-        // and approve the new contact
-        [self approveContact:contact];
-    }
+        if(contact.isGroup)
+            [account joinMuc:contact.contactJid];
+        else
+        {
+            [account addToRoster:contact.contactJid];
+            
+            BOOL approve = NO;
+            // approve contact ahead of time if possible
+            if(account.connectionProperties.supportsRosterPreApproval)
+                approve = YES;
+            // just in case there was a pending request
+            else if([contact.state isEqualToString:kSubTo]  || [contact.state isEqualToString:kSubNone] )
+                approve = YES;
+            // approve contact requests not catched by the above checks (can that even happen?)
+            else if([[DataLayer sharedInstance] hasContactRequestForAccount:account.accountNo andBuddyName:contact.contactJid])
+                approve = YES;
+            if(approve)
+            {
+                // delete existing contact request if exists
+                [[DataLayer sharedInstance] deleteContactRequest:contact];
+                // and approve the new contact
+                [self approveContact:contact];
+            }
 #ifndef DISABLE_OMEMO
-    // Request omemo devicelist
-    [account.omemo queryOMEMODevices:contact.contactJid];
+            // Request omemo devicelist
+            [account.omemo queryOMEMODevices:contact.contactJid];
 #endif// DISABLE_OMEMO
+        }
+    }
 }
 
 -(void) getEntitySoftWareVersionForContact:(MLContact *) contact andResource:(NSString*) resource

@@ -85,8 +85,10 @@ struct ContactDetails: View {
                             }) {
                                 if(contact.isGroup) {
                                     Text(contact.mucType == "group" ? "Leave Group" : "Leave Channel")
+                                        .foregroundColor(.red)
                                 } else {
                                     Text("Remove from contacts")
+                                        .foregroundColor(.red)
                                 }
                             }
                             .actionSheet(isPresented: $showingRemoveContactConfirmation) {

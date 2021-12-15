@@ -18,7 +18,7 @@
     MLXMLNode* delay = [[MLXMLNode alloc] initWithElement:@"delay" andNamespace:@"urn:xmpp:delay"];
     delay.attributes[@"from"] = from;
     delay.attributes[@"stamp"] = [HelperTools generateDateTimeString:[NSDate date]];
-    [self addChild:delay];
+    [self addChildNode:delay];
 }
 
 -(NSString*) id

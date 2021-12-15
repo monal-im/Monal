@@ -27,7 +27,7 @@
 -(id) initWithHash:(NSString*) version
 {
     self = [self init];
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"c" andNamespace:@"http://jabber.org/protocol/caps" withAttributes:@{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"c" andNamespace:@"http://jabber.org/protocol/caps" withAttributes:@{
         @"node": @"http://monal.im/",
         @"hash": @"sha-1",
         @"ver": version
@@ -38,7 +38,7 @@
 #pragma mark own state
 -(void) setShow:(NSString*) showVal
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"show" withAttributes:@{} andChildren:@[] andData:showVal]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"show" withAttributes:@{} andChildren:@[] andData:showVal]];
 }
 
 -(void) setAway
@@ -53,14 +53,14 @@
 
 -(void) setStatus:(NSString*) status
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"status" withAttributes:@{} andChildren:@[] andData:status]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"status" withAttributes:@{} andChildren:@[] andData:status]];
 }
 
 -(void) setLastInteraction:(NSDate*) date
 {
     MLXMLNode* idle = [[MLXMLNode alloc] initWithElement:@"idle" andNamespace:@"urn:xmpp:idle:1"];
     [idle.attributes setValue:[HelperTools generateDateTimeString:date] forKey:@"since"];
-    [self addChild:idle];
+    [self addChildNode:idle];
 }
 
 #pragma mark MUC 
@@ -68,7 +68,7 @@
 -(void) joinRoom:(NSString*) room withNick:(NSString*) nick
 {
     [self.attributes setObject:[NSString stringWithFormat:@"%@/%@", room, nick] forKey:@"to"];
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"http://jabber.org/protocol/muc" withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"http://jabber.org/protocol/muc" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"history" withAttributes:@{@"maxstanzas": @"0"} andChildren:@[] andData:nil]
     ] andData:nil]];
 }

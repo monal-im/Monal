@@ -128,7 +128,7 @@ static NSRegularExpression* attributeFilterRegex;
     self = [self initWithElement:element];
     [_attributes addEntriesFromDictionary:[[NSDictionary alloc] initWithDictionary:attributes copyItems:YES]];
     for(MLXMLNode* child in children)
-        [self addChild:child];
+        [self addChildNode:child];
     _data = nil;
     if(data)
         _data = [data copy];
@@ -157,7 +157,7 @@ static NSRegularExpression* attributeFilterRegex;
     _attributes = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableDictionary class], [NSDictionary class], [NSMutableString class], [NSString class]]] forKey:@"attributes"];
     NSArray* decodedChildren = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableArray class], [NSArray class], [MLXMLNode class], [XMPPIQ class], [XMPPMessage class], [XMPPPresence class], [XMPPDataForm class]]] forKey:@"children"];
     for(MLXMLNode* child in decodedChildren)
-        [self addChild:child];
+        [self addChildNode:child];
     _data = [decoder decodeObjectOfClass:[NSString class] forKey:@"data"];
 
     return self;
@@ -181,7 +181,7 @@ static NSRegularExpression* attributeFilterRegex;
     MLXMLNode* copy = [[[self class] alloc] initWithElement:_element];
     copy.attributes = [[NSMutableDictionary alloc] initWithDictionary:_attributes copyItems:YES];
     for(MLXMLNode* child in _children)
-        [copy addChild:child];
+        [copy addChildNode:child];
     copy.data = _data ? [_data copy] : nil;
     return copy;
 }
@@ -191,7 +191,7 @@ static NSRegularExpression* attributeFilterRegex;
     [_attributes setObject:[xmlns copy] forKey:kXMLNS];
 }
 
--(MLXMLNode*) addChild:(MLXMLNode*) child
+-(MLXMLNode*) addChildNode:(MLXMLNode*) child
 {
     if(!child)
         return nil;

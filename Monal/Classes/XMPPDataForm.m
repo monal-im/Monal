@@ -54,18 +54,18 @@ static NSRegularExpression* dataFormQueryRegex;
     {
         for(NSString* option in field[@"options"])
             if([field[@"options"][option] isEqualToString:option])
-                [fieldNode addChild:[[MLXMLNode alloc] initWithElement:@"option" withAttributes:@{} andChildren:@[
+                [fieldNode addChildNode:[[MLXMLNode alloc] initWithElement:@"option" withAttributes:@{} andChildren:@[
                     [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:option]
                 ] andData:nil]];
             else
-                [fieldNode addChild:[[MLXMLNode alloc] initWithElement:@"option" withAttributes:@{@"label": field[@"options"][option]} andChildren:@[
+                [fieldNode addChildNode:[[MLXMLNode alloc] initWithElement:@"option" withAttributes:@{@"label": field[@"options"][option]} andChildren:@[
                     [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:option]
                 ] andData:nil]];
     }
     if(field[@"description"])
-        [fieldNode addChild:[[MLXMLNode alloc] initWithElement:@"desc" withAttributes:@{} andChildren:@[] andData:field[@"description"]]];
+        [fieldNode addChildNode:[[MLXMLNode alloc] initWithElement:@"desc" withAttributes:@{} andChildren:@[] andData:field[@"description"]]];
     if(field[@"required"] && [field[@"required"] boolValue])
-        [fieldNode addChild:[[MLXMLNode alloc] initWithElement:@"required" withAttributes:@{} andChildren:@[] andData:nil]];
+        [fieldNode addChildNode:[[MLXMLNode alloc] initWithElement:@"required" withAttributes:@{} andChildren:@[] andData:nil]];
     return fieldNode;
 }
 
@@ -78,7 +78,7 @@ static NSRegularExpression* dataFormQueryRegex;
 {
     NSDictionary* attrs = type ? @{@"type": type, @"var": name} : @{@"var": name};
     [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", name]]];
-    MLXMLNode* field = [self addChild:[[MLXMLNode alloc] initWithElement:@"field" withAttributes:attrs andChildren:@[
+    MLXMLNode* field = [self addChildNode:[[MLXMLNode alloc] initWithElement:@"field" withAttributes:attrs andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:value]
     ] andData:nil]];
     [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
@@ -151,7 +151,7 @@ static NSRegularExpression* dataFormQueryRegex;
     if([self check:@"title"])
         ((MLXMLNode*)[self findFirst:@"title"]).data = title;
     else
-        [self addChild:[[MLXMLNode alloc] initWithElement:@"title" andData:title]];
+        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"title" andData:title]];
 }
 
 -(NSString* _Nullable) instructions
@@ -163,7 +163,7 @@ static NSRegularExpression* dataFormQueryRegex;
     if([self check:@"instructions"])
         ((MLXMLNode*)[self findFirst:@"instructions"]).data = instructions;
     else
-        [self addChild:[[MLXMLNode alloc] initWithElement:@"instructions" andData:instructions]];
+        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"instructions" andData:instructions]];
 }
 
 -(id _Nullable) processDataFormQuery:(NSString*) query
@@ -242,7 +242,7 @@ static NSRegularExpression* dataFormQueryRegex;
     }
     MLXMLNode* valueNode = [fieldNode findFirst:@"value"];
     if(!valueNode)
-        [fieldNode addChild:[[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"%@", obj]]];
+        [fieldNode addChildNode:[[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"%@", obj]]];
     else
         valueNode.data = [NSString stringWithFormat:@"%@", obj];
     [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change

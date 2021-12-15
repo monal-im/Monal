@@ -52,7 +52,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Adds a new child node (this creates a copy of the node and changes the copy's parent property to its new parent
  */
--(MLXMLNode* _Nullable) addChild:(MLXMLNode*) child;
+-(MLXMLNode* _Nullable) addChildNode:(MLXMLNode*) child;
 
 /**
  Removes child by reference

@@ -44,7 +44,7 @@ NSString* const kMessageHeadlineType = @"headline";
     if([self check:@"{urn:xmpp:sid:0}origin-id"])
         ((MLXMLNode*)[self findFirst:@"{urn:xmpp:sid:0}origin-id"]).attributes[@"id"] = idval;
     else
-        [self addChild:[[MLXMLNode alloc] initWithElement:@"origin-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{@"id":idval} andChildren:@[] andData:nil]];
+        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"origin-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{@"id":idval} andChildren:@[] andData:nil]];
 }
 
 -(void) setBody:(NSString*) messageBody
@@ -53,7 +53,7 @@ NSString* const kMessageHeadlineType = @"headline";
     if(body)
         body.data = messageBody;
     else
-        [self addChild:[[MLXMLNode alloc] initWithElement:@"body" withAttributes:@{} andChildren:@[] andData:messageBody]];
+        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"body" withAttributes:@{} andChildren:@[] andData:messageBody]];
 }
 
 -(void) setOobUrl:(NSString*) link
@@ -61,11 +61,11 @@ NSString* const kMessageHeadlineType = @"headline";
     MLXMLNode* oobElement = [self findFirst:@"{jabber:x:oob}x"];
     MLXMLNode* oobElementUrl = [self findFirst:@"{jabber:x:oob}x/url"];
     if(oobElement && oobElementUrl == nil)
-        [oobElement addChild:[[MLXMLNode alloc] initWithElement:@"url" withAttributes:@{} andChildren:@[] andData:link]];
+        [oobElement addChildNode:[[MLXMLNode alloc] initWithElement:@"url" withAttributes:@{} andChildren:@[] andData:link]];
     else if(oobElement && oobElementUrl)
         oobElementUrl.data = link;
     else
-        [self addChild:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:oob" withAttributes:@{} andChildren:@[
+        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:oob" withAttributes:@{} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"url" withAttributes:@{} andChildren:@[] andData:link]
         ] andData:nil]];
     [self setBody:link];    //http filetransfers must have a message body equal to the oob link to be recognized as filetransfer
@@ -73,7 +73,7 @@ NSString* const kMessageHeadlineType = @"headline";
 
 -(void) setLMCFor:(NSString*) id
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"replace" andNamespace:@"urn:xmpp:message-correct:0" withAttributes:@{@"id": id} andChildren:@[] andData:nil]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"replace" andNamespace:@"urn:xmpp:message-correct:0" withAttributes:@{@"id": id} andChildren:@[] andData:nil]];
 }
 
 /**
@@ -81,28 +81,28 @@ NSString* const kMessageHeadlineType = @"headline";
  */
 -(void) setReceipt:(NSString*) messageId
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"received" andNamespace:@"urn:xmpp:receipts" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"received" andNamespace:@"urn:xmpp:receipts" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
 }
 
 -(void) setChatmarkerReceipt:(NSString*) messageId
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"received" andNamespace:@"urn:xmpp:chat-markers:0" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"received" andNamespace:@"urn:xmpp:chat-markers:0" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
 }
 
 -(void) setDisplayed:(NSString*) messageId
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"displayed" andNamespace:@"urn:xmpp:chat-markers:0" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"displayed" andNamespace:@"urn:xmpp:chat-markers:0" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
 }
 
 -(void) setStoreHint
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"store" andNamespace:@"urn:xmpp:hints"]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"store" andNamespace:@"urn:xmpp:hints"]];
 }
 
 -(void) setNoStoreHint
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"no-store" andNamespace:@"urn:xmpp:hints"]];
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"no-storage" andNamespace:@"urn:xmpp:hints"]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"no-store" andNamespace:@"urn:xmpp:hints"]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"no-storage" andNamespace:@"urn:xmpp:hints"]];
 }
 
 @end

@@ -1628,7 +1628,7 @@ NSString* const kStanza = @"stanza";
                 //move mam:2 delay timestamp into forwarded message stanza if the forwarded stanza does not have one already
                 //that makes parsing a lot easier later on and should not do any harm, even when resending/forwarding this inner stanza
                 if([outerMessageNode check:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{urn:xmpp:delay}delay"] && ![messageNode check:@"{urn:xmpp:delay}delay"])
-                    [messageNode addChild:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{urn:xmpp:delay}delay"]];
+                    [messageNode addChildNode:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{urn:xmpp:delay}delay"]];
                 
                 DDLogDebug(@"mam extracted, messageNode is now: %@", messageNode);
             }
@@ -1648,7 +1648,7 @@ NSString* const kStanza = @"stanza";
                 //move carbon copy delay timestamp into forwarded message stanza if the forwarded stanza does not have one already
                 //that makes parsing a lot easier later on and should not do any harm, even when resending/forwarding this inner stanza
                 if([outerMessageNode check:@"{urn:xmpp:delay}delay"] && ![messageNode check:@"{urn:xmpp:delay}delay"])
-                    [messageNode addChild:[outerMessageNode findFirst:@"{urn:xmpp:delay}delay"]];
+                    [messageNode addChildNode:[outerMessageNode findFirst:@"{urn:xmpp:delay}delay"]];
                 
                 DDLogDebug(@"carbon extracted, messageNode is now: %@", messageNode);
             }
@@ -2222,12 +2222,12 @@ NSString* const kStanza = @"stanza";
 -(void) addEME:(NSString*) encryptionNamesapce withName:(NSString* _Nullable) name toMessageNode:(XMPPMessage*) messageNode
 {
     if(name)
-        [messageNode addChild:[[MLXMLNode alloc] initWithElement:@"encryption" andNamespace:@"urn:xmpp:eme:0" withAttributes:@{
+        [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"encryption" andNamespace:@"urn:xmpp:eme:0" withAttributes:@{
             @"namespace": encryptionNamesapce,
             @"name": name
         } andChildren:@[] andData:nil]];
     else
-        [messageNode addChild:[[MLXMLNode alloc] initWithElement:@"encryption" andNamespace:@"urn:xmpp:eme:0" withAttributes:@{
+        [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"encryption" andNamespace:@"urn:xmpp:eme:0" withAttributes:@{
             @"namespace": encryptionNamesapce
         } andChildren:@[] andData:nil]];
 }
@@ -2282,8 +2282,8 @@ NSString* const kStanza = @"stanza";
     //request receipts and chat-markers in 1:1 or groups (no channels!)
     if(!contact.isGroup || [@"group" isEqualToString:contact.mucType])
     {
-        [messageNode addChild:[[MLXMLNode alloc] initWithElement:@"request" andNamespace:@"urn:xmpp:receipts"]];
-        [messageNode addChild:[[MLXMLNode alloc] initWithElement:@"markable" andNamespace:@"urn:xmpp:chat-markers:0"]];
+        [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"request" andNamespace:@"urn:xmpp:receipts"]];
+        [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"markable" andNamespace:@"urn:xmpp:chat-markers:0"]];
     }
 
     //for MAM
@@ -2305,9 +2305,9 @@ NSString* const kStanza = @"stanza";
     messageNode.attributes[@"to"] = jid;
     [messageNode setNoStoreHint];
     if(isTyping)
-        [messageNode addChild:[[MLXMLNode alloc] initWithElement:@"composing" andNamespace:@"http://jabber.org/protocol/chatstates"]];
+        [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"composing" andNamespace:@"http://jabber.org/protocol/chatstates"]];
     else
-        [messageNode addChild:[[MLXMLNode alloc] initWithElement:@"active" andNamespace:@"http://jabber.org/protocol/chatstates"]];
+        [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"active" andNamespace:@"http://jabber.org/protocol/chatstates"]];
     [self send:messageNode];
 }
 
@@ -3660,7 +3660,7 @@ NSString* const kStanza = @"stanza";
                     errorIq.from = [_iqHandlers[iqid][@"iq"] to];
                 else
                     errorIq.from = self.connectionProperties.identity.jid;
-                [errorIq addChild:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
+                [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
                     [[MLXMLNode alloc] initWithElement:@"remote-server-timeout" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
                     [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"No response in %d seconds", (int)IQ_TIMEOUT]],
                 ] andData:nil]];

@@ -308,7 +308,7 @@ $$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success)
                 
                 //add or update nickname
                 if(![conference check:@"nick"])
-                    [conference addChild:[[MLXMLNode alloc] initWithElement:@"nick"]];
+                    [conference addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
                 ((MLXMLNode*)[conference findFirst:@"nick"]).data = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
                 
                 //update autojoin value to true
@@ -323,7 +323,7 @@ $$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success)
         for(NSString* room in toAdd)
         {
             DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
-            [[data[itemId] findFirst:@"{storage:bookmarks}storage"] addChild:[[MLXMLNode alloc] initWithElement:@"conference" withAttributes:@{
+            [[data[itemId] findFirst:@"{storage:bookmarks}storage"] addChildNode:[[MLXMLNode alloc] initWithElement:@"conference" withAttributes:@{
                 @"jid": room,
                 @"name": [[MLContact createContactFromJid:room andAccountNo:account.accountNo] contactDisplayName],
                 @"autojoin": @"true",

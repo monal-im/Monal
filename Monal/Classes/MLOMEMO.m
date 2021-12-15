@@ -569,7 +569,7 @@ $$
                 [self needNewSessionForContact:encryptForJid andDevice:device];
                 continue;
             }
-            [xmlHeader addChild:[[MLXMLNode alloc] initWithElement:@"key" withAttributes:@{
+            [xmlHeader addChildNode:[[MLXMLNode alloc] initWithElement:@"key" withAttributes:@{
                 @"rid": [NSString stringWithFormat:@"%@", device],
                 @"prekey": (deviceEncryptedKey.type == SignalCiphertextTypePreKeyMessage ? @"1" : @"0"),
             } andChildren:@[] andData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]]];
@@ -613,7 +613,7 @@ $$
                 DDLogWarn(@"Could not encrypt message: AESGcm error");
                 return;
             }
-            [encrypted addChild:[[MLXMLNode alloc] initWithElement:@"payload" andData:[HelperTools encodeBase64WithData:encryptedPayload.body]]];
+            [encrypted addChildNode:[[MLXMLNode alloc] initWithElement:@"payload" andData:[HelperTools encodeBase64WithData:encryptedPayload.body]]];
         }
         else
         {
@@ -653,8 +653,8 @@ $$
             [self addEncryptionKeyForAllDevices:overrideDevices encryptForJid:toContact withEncryptedPayload:encryptedPayload withXMLHeader:header];
         }
         
-        [encrypted addChild:header];
-        [messageNode addChild:encrypted];
+        [encrypted addChildNode:header];
+        [messageNode addChildNode:encrypted];
     }
 }
 
@@ -871,7 +871,7 @@ $$
 {
     MLXMLNode* listNode = [[MLXMLNode alloc] initWithElement:@"list" andNamespace:@"eu.siacs.conversations.axolotl"];
     for(NSNumber* deviceNum in devices)
-        [listNode addChild:[[MLXMLNode alloc] initWithElement:@"device" withAttributes:@{kId: [deviceNum stringValue]} andChildren:@[] andData:nil]];
+        [listNode addChildNode:[[MLXMLNode alloc] initWithElement:@"device" withAttributes:@{kId: [deviceNum stringValue]} andChildren:@[] andData:nil]];
     
     // publish devices via pubsub
     [self.account.pubsub publishItem:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{kId: @"current"} andChildren:@[
@@ -893,7 +893,7 @@ $$
         MLXMLNode* preKeyPublic = [[MLXMLNode alloc] initWithElement:@"preKeyPublic" withAttributes:@{
             @"preKeyId": [NSString stringWithFormat:@"%d", prekey.preKeyId],
         } andChildren:@[] andData:[HelperTools encodeBase64WithData:prekey.keyPair.publicKey]];
-        [prekeyNode addChild:preKeyPublic];
+        [prekeyNode addChildNode:preKeyPublic];
     };
     
     // send bundle via pubsub interface

@@ -420,7 +420,7 @@ $$class_handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNod
         {
             DDLogInfo(@"enabling carbons");
             XMPPIQ* carbons = [[XMPPIQ alloc] initWithType:kiqSetType];
-            [carbons addChild:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:carbons:2"]];
+            [carbons addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:carbons:2"]];
             [account sendIq:carbons withHandler:$newHandler(self, handleCarbonsEnabled)];
         }
     }
@@ -619,7 +619,7 @@ $$
 +(void) respondWithErrorTo:(XMPPIQ*) iqNode onAccount:(xmpp*) account
 {
     XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-    [errorIq addChild:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+    [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"service-unavailable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
     ] andData:nil]];
     [account send:errorIq];

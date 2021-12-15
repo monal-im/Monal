@@ -105,7 +105,7 @@
         if(depth > 2)      //don't add all received stanzas/nonzas as childs to our stream header (that would create a memory leak!)
         {
             DebugParser(@"Adding %@ to parent %@", currentNode.element, currentNode.parent.element);
-            [currentNode.parent addChild:currentNode];
+            [currentNode.parent addChildNode:currentNode];
         }
     }
     [_currentStack removeLastObject];

@@ -224,9 +224,9 @@ $$class_handler(handleBind, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         return;
     }
     
-    DDLogInfo(@"Now bound to full jid: %@", [iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]);
+    DDLogInfo(@"Now bound to fullJid: %@", [iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]);
     [account.connectionProperties.identity bindJid:[iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]];
-    DDLogDebug(@"jid=%@, resource=%@, fullJid=%@", account.connectionProperties.identity.jid, account.connectionProperties.identity.resource, account.connectionProperties.identity.fullJid);
+    DDLogDebug(@"bareJid=%@, resource=%@, fullJid=%@", account.connectionProperties.identity.jid, account.connectionProperties.identity.resource, account.connectionProperties.identity.fullJid);
     
     //update resource in db (could be changed by server)
     NSMutableDictionary* accountDict = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo]];

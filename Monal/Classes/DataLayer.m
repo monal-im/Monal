@@ -253,16 +253,17 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=? WHERE account_id=?;";
         NSString* server = (NSString*)[dictionary objectForKey:kServer];
         NSString* port = (NSString*)[dictionary objectForKey:kPort];
-        NSArray* params = @[server == nil ? @"" : server,
-                        port == nil ? @"5222" : port,
-                        ((NSString*)[dictionary objectForKey:kUsername]),
-                        ((NSString*)[dictionary objectForKey:kResource]),
-                        ((NSString*)[dictionary objectForKey:kDomain]),
-                        [dictionary objectForKey:kEnabled],
-                        [dictionary objectForKey:kDirectTLS],
-                        [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
-                        [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
-                        [dictionary objectForKey:kAccountID]
+        NSArray* params = @[
+            server == nil ? @"" : server,
+            port == nil ? @"5222" : port,
+            ((NSString*)[dictionary objectForKey:kUsername]),
+            ((NSString*)[dictionary objectForKey:kResource]),
+            ((NSString*)[dictionary objectForKey:kDomain]),
+            [dictionary objectForKey:kEnabled],
+            [dictionary objectForKey:kDirectTLS],
+            [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
+            [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
+            [dictionary objectForKey:kAccountID]
         ];
         BOOL result = [self.db executeNonQuery:query andArguments:params];
 //         // insert self chat for omemo foreign key

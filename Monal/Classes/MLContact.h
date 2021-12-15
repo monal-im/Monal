@@ -61,7 +61,6 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  xmpp status message
  */
 @property (nonatomic, copy) NSString* statusMessage;
-@property (nonatomic, copy) NSDate* lastMessageTime;
 @property (nonatomic, copy) NSDate* lastInteractionTime;
 
 /**

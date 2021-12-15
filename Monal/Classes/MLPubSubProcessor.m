@@ -31,7 +31,7 @@
 
 @implementation MLPubSubProcessor
 
-$$class_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+$$class_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     DDLogDebug(@"Got new avatar metadata from '%@'", jid);
     if([type isEqualToString:@"publish"])
     {
@@ -77,7 +77,7 @@ $$class_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(
     }
 $$
 
-$$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID(NSDictionary*, data))
+$$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     //ignore errors here (e.g. simply don't update the avatar image)
     //(this should never happen if other clients and servers behave properly)
     if(!success)
@@ -99,7 +99,7 @@ $$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), 
     }
 $$
 
-$$class_handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+$$class_handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     //new/updated nickname
     if([type isEqualToString:@"publish"])
     {
@@ -156,7 +156,7 @@ $$class_handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $
     }
 $$
 
-$$class_handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+$$class_handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(![jid isEqualToString:account.connectionProperties.identity.jid])
     {
         DDLogWarn(@"Ignoring bookmarks update not coming from our own jid");
@@ -256,7 +256,7 @@ $$class_handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_
     }
 $$
 
-$$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
+$$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(!success)
     {
         //item-not-found means: no bookmarks in storage --> use an empty data dict

@@ -325,7 +325,7 @@ static NSDictionary* _defaultOptions;
     ] andData:nil]];
     //only add publish-options if present
     if([configOptions count] > 0)
-        [[query findFirst:@"{http://jabber.org/protocol/pubsub}pubsub"] addChild:[[MLXMLNode alloc] initWithElement:@"publish-options" withAttributes:@{} andChildren:@[
+        [(MLXMLNode*)[query findFirst:@"{http://jabber.org/protocol/pubsub}pubsub"] addChild:[[MLXMLNode alloc] initWithElement:@"publish-options" withAttributes:@{} andChildren:@[
             [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:configOptions]
         ] andData:nil]];
     [_account sendIq:query withHandler:$newHandler(self, handlePublishResult,

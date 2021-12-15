@@ -47,8 +47,15 @@ typedef enum NotificationPrivacySettingOption {
 //some useful macros
 #define weakify(var) __weak __typeof__(var) AHKWeak_##var = var
 #define strongify(var) _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
-#define nilWrapper(var) (var ? var : [NSNull null])
+#define nilWrapper(var) (var == nil ? var : [NSNull null])
 #define nilExtractor(var) (var == [NSNull null] ? nil : var)
+
+//see https://stackoverflow.com/a/62984543/3528174
+#define STRIP_PARENTHESES(X) __ESC(__ISH X)
+#define __ISH(...) __ISH __VA_ARGS__
+#define __ESC(...) __ESC_(__VA_ARGS__)
+#define __ESC_(...) __VAN ## __VA_ARGS__
+#define __VAN__ISH
 
 #if defined(IS_ALPHA) || defined(DEBUG)
     #define unreachable() { \

@@ -105,7 +105,7 @@ $invalidate(h, $BOOL(done, YES))
 #define $HANDLER(name, ...)                                               metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : nilWrapper(name) )( _packID(name, __VA_ARGS__) )
 
 //declare handler, the order of provided arguments does not matter because we use named arguments
-#define $$class_handler(name, ...)                                              +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
+#define $$class_handler(name, ...)                                        +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
 #define $$instance_handler(name, instance, ...)                           +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) ); [instance MLInstanceHandler_##name##_withArguments:_callerArgs andBoundArguments:_boundArgs]; } -(void) MLInstanceHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
 #define $_ID(type, var)                                                   type var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
 #define $_BOOL(var)                                                       BOOL var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] boolValue] : [_boundArgs[@#var] boolValue]
@@ -120,7 +120,8 @@ $invalidate(h, $BOOL(done, YES))
 #define $invalidate(handler, ...)                                         [handler invalidateWithArguments:@{ __VA_ARGS__ }]
 
 //internal stuff
-#define _expand_import(num, param)                                        param
+#define _expand_import(num, param)                                        _expand_import_inner(param)
+#define _expand_import_inner(X)                                           STRIP_PARENTHESES(X)
 #define _packID(name, value, ...)                                         @#name : nilWrapper(value)
 #define _packBOOL(name, value, ...)                                       @#name : [NSNumber numberWithBool: value ]
 #define _packINT(name, value, ...)                                        @#name : [NSNumber numberWithInt: value ]

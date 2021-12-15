@@ -875,7 +875,6 @@ NSString* const kStanza = @"stanza";
         [self->_iPipe close];
         self->_iPipe = nil;
         [self->_oStream setDelegate:nil];
-        [self->_oStream removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
         
         DDLogInfo(@"closing output stream");
         @try
@@ -890,6 +889,9 @@ NSString* const kStanza = @"stanza";
         
         //clean up send queue now that the delegate was removed (_streamHasSpace can not switch to YES now)
         [self cleanupSendQueue];
+        
+        //remove from runloop *after* cleaning up sendQueue (maybe this fixes a rare crash)
+        [self->_oStream removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 
         DDLogInfo(@"resetting internal stream state to disconnected");
         self->_startTLSComplete = NO;

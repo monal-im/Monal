@@ -3712,7 +3712,7 @@ NSString* const kStanza = @"stanza";
 {
     if(self.accountState < kStateBound)
     {
-        DDLogWarn(@"Aborting delayed replac because not >= kStateBound anymore! Stanzas will remain in DB ang will be handled after next smacks reconnect.");
+        DDLogWarn(@"Aborting delayed replay because not >= kStateBound anymore! Remaining stanzas will be kept in DB and be handled after next smacks reconnect.");
         return;
     }
     
@@ -3742,10 +3742,12 @@ NSString* const kStanza = @"stanza";
         //now *really* process delayed message stanza
         [self processInput:delayedStanza withDelayedReplay:YES];
         
-        //add processing of next delayed message stanza to receiveQueue
-        [self dispatchAsyncOnReceiveQueue:^{
+        //add async processing of next delayed message stanza to receiveQueue
+        //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
+        //and makes sure we process every delayed stanza in its own receive queue operation and its own db transaction
+        [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
             [self _handleInternalMamFinishedFor:archiveJid];
-        }];
+        }]] waitUntilFinished:NO];
     }
 }
 -(void) mamFinishedFor:(NSString*) archiveJid
@@ -3753,9 +3755,12 @@ NSString* const kStanza = @"stanza";
     //we should be already in the receive queue, but just to make sure (sync dispatch will do nothing if we already are in the right queue)
     [self dispatchOnReceiveQueue:^{
         //handle delayed message stanzas delivered while the mam catchup was in progress
-        //the first call is handled directly, while all subsequent self-invocations are handled by dispatching it async to the receiveQueue
-        //the async dispatcing makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
-        [self _handleInternalMamFinishedFor:archiveJid];
+        //the first call and all subsequent self-invocations are handled by dispatching it async to the receiveQueue
+        //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
+        //and makes sure we process every delayed stanza in its own receive queue operation and its own db transaction
+        [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+            [self _handleInternalMamFinishedFor:archiveJid];
+        }]] waitUntilFinished:NO];
     }];
 }
 

@@ -3746,7 +3746,9 @@ NSString* const kStanza = @"stanza";
         //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
         //and makes sure we process every delayed stanza in its own receive queue operation and its own db transaction
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-            [self _handleInternalMamFinishedFor:archiveJid];
+            [[DataLayer sharedInstance] createTransaction:^{
+                [self _handleInternalMamFinishedFor:archiveJid];
+            }];
         }]] waitUntilFinished:NO];
     }
 }
@@ -3759,7 +3761,9 @@ NSString* const kStanza = @"stanza";
         //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
         //and makes sure we process every delayed stanza in its own receive queue operation and its own db transaction
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-            [self _handleInternalMamFinishedFor:archiveJid];
+            [[DataLayer sharedInstance] createTransaction:^{
+                [self _handleInternalMamFinishedFor:archiveJid];
+            }];
         }]] waitUntilFinished:NO];
     }];
 }

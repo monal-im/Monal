@@ -2851,7 +2851,7 @@ static NSDateFormatter* dbFormatter;
 {
     if(!accountNo || !archiveJid)
         return nil;
-    NSData* data = (NSData*)[self.db idReadTransaction:^{
+    NSData* data = (NSData*)[self.db idWriteTransaction:^{
         NSArray* entries = [self.db executeReader:@"SELECT id, stanza FROM delayed_message_stanzas WHERE account_id=? AND archive_jid=? ORDER BY id ASC LIMIT 1;" andArguments:@[accountNo, archiveJid]];
         if(![entries count])
             return (NSData*)nil;

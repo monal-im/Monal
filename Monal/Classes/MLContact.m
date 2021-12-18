@@ -27,6 +27,7 @@ NSString *const kAskSubscribe=@"subscribe";
 {
     NSInteger _unreadCount;
     monal_void_block_t _cancelNickChange;
+    UIImage* _avatar;
 }
 @end
 
@@ -223,9 +224,13 @@ NSString *const kAskSubscribe=@"subscribe";
     if(![self.contactJid isEqualToString:contact.contactJid] || ![self.accountId isEqualToString:contact.accountId])
         return;     // ignore other accounts or contacts
     [self updateWithContact:contact];
-    UIImage* newAvatar = [[MLImageManager sharedInstance] getIconForContact:self];
-    if(newAvatar != self.avatar || ![UIImagePNGRepresentation(newAvatar) isEqual:UIImagePNGRepresentation(self.avatar)])
-        self.avatar = newAvatar;
+    //only handle avatar updates if the property was already used and the old avatar is cached in this contact
+    if(_avatar != nil)
+    {
+        UIImage* newAvatar = [[MLImageManager sharedInstance] getIconForContact:self];
+        if(newAvatar != self->_avatar)
+            self.avatar = newAvatar;            //use self.avatar instead of _avatar to make sure KVO works properly
+    }
 }
 
 -(void) refresh
@@ -295,6 +300,24 @@ NSString *const kAskSubscribe=@"subscribe";
 +(NSSet*) keyPathsForValuesAffectingNickNameView
 {
     return [NSSet setWithObjects:@"nickName", nil];
+}
+
+-(UIImage*) avatar
+{
+    //return already cached image
+    if(_avatar != nil)
+        return _avatar;
+    //load avatar from MLImageManager (use self.avatar instead of _avatar to make sure KVO works properly)
+    self.avatar = [[MLImageManager sharedInstance] getIconForContact:self];
+    return _avatar;
+}
+
+-(void) setAvatar:(UIImage*) avatar
+{
+    if(avatar != nil)
+        _avatar = avatar;
+    else
+        _avatar = [[UIImage alloc] init];           //empty dummy image, to not save nil (should never happen, MLImageManager has default images)
 }
 
 -(BOOL) isSubscribed
@@ -538,7 +561,7 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.isMuted = [[dic objectForKey:@"muted"] boolValue];
     // initial value comes from db, all other values get updated by our kMonalLastInteractionUpdatedNotice handler
     contact.lastInteractionTime = [dic objectForKey:@"lastInteraction"];        //no default needed, already done in DataLayer
-    contact.avatar = nilDefault([[MLImageManager sharedInstance] getIconForContact:contact], [[UIImage alloc] init]);
+    contact->_avatar = nil;
     return contact;
 }
 

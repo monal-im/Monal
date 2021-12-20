@@ -422,6 +422,12 @@ NSString *const kAskSubscribe=@"subscribe";
     [[MLXMPPManager sharedInstance] addContact:self];
 }
 
+-(void) clearHistory
+{
+    [[DataLayer sharedInstance] clearMessagesWithBuddy:self.contactJid onAccount:self.accountId];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+}
+
 #pragma mark - NSCoding
 
 -(void) encodeWithCoder:(NSCoder*) coder

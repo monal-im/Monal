@@ -101,6 +101,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(BOOL) toggleBlocked:(BOOL) block;
 -(void) removeFromRoster;
 -(void) addToRoster;
+-(void) clearHistory;
 
 @end
 

@@ -17,6 +17,7 @@ struct ContactDetails: View {
     @State private var showingCannotBlockAlert = false
     @State private var showingRemoveContactConfirmation = false
     @State private var showingAddContactConfirmation = false
+    @State private var showingClearHistoryConfirmation = false
 
     var body: some View {
         NavigationView {
@@ -133,6 +134,30 @@ struct ContactDetails: View {
                                 )
                             }
                         }
+                    }
+                    
+                    Spacer()
+                        .frame(height: 20)
+                    Button(action: {
+                        showingClearHistoryConfirmation = true
+                    }) {
+                        Text("Clear chat history for this contact")
+                            .foregroundColor(.red)
+                    }
+                    .actionSheet(isPresented: $showingClearHistoryConfirmation) {
+                        ActionSheet(
+                            title: Text("Clear History"),
+                            message: Text("Do you really want to clear all messages exchanged with this contact? If using OMEMO you won't even be able to load them from your server again."),
+                            buttons: [
+                                .cancel(),
+                                .destructive(
+                                    Text("Yes"),
+                                    action: {
+                                        contact.obj.clearHistory()
+                                    }
+                                )
+                            ]
+                        )
                     }
                     
                     Spacer()

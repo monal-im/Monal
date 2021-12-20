@@ -86,6 +86,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     //upgrade url preview
     [self upgradeBoolUserSettingsIfUnset:@"ShowURLPreview" toDefault:YES];
+    
+    //upgrade message autodeletion
+    [self upgradeBoolUserSettingsIfUnset:@"AutodeleteAllMessagesAfter3Days" toDefault:NO];
 
     // upgrade udp logger
     [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];

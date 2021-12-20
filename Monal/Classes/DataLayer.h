@@ -195,6 +195,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) setMessageHistoryId:(NSNumber*) historyId messageType:(NSString*) messageType;
 
 -(void) clearMessages:(NSString *) accountNo;
+-(void) autodeleteAllMessagesAfter3Days;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
 -(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSString*) accountNo;

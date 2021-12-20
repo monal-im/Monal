@@ -176,7 +176,7 @@ NSString* const kStanza = @"stanza";
     //WARNING: pubsub node registrations should only be made *after* the first readState call
     [self readState];
     
-    // don't init omemo on account creation
+    // don't init omemo on ibr account creation
     if(accountNo.intValue >= 0)
     {
         // init omemo
@@ -191,6 +191,10 @@ NSString* const kStanza = @"stanza";
     
     //we want to get automatic bookmark updates (XEP-0048)
     [self.pubsub registerForNode:@"storage:bookmarks" withHandler:$newHandler(MLPubSubProcessor, bookmarksHandler)];
+    
+    //autodelete messages old enough (first invocation)
+    if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
+        [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
     
     return self;
 }
@@ -645,6 +649,10 @@ NSString* const kStanza = @"stanza";
 
 -(void) connect
 {
+    //autodelete messages old enough (second invocation)
+    if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
+        [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
+    
     if(![[MLXMPPManager sharedInstance] hasConnectivity])
     {
         DDLogInfo(@"no connectivity, ignoring connect call.");

@@ -1,23 +1,22 @@
 # Monal for XMPP
-## A cross platform, modern XMPP client for iOS and MacOS
+## A cross platform, modern XMPP client for iOS and macOS
 [![Alpha build status](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml/badge.svg?branch=alpha.build)](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml)
 [![Translation status](https://hosted.weblate.org/widgets/monal/-/svg-badge.svg)](https://hosted.weblate.org/engage/monal/?utm_source=widget)
 
 This is the Monal XMPP client as found in the app store.  If you want to  use the latest stable versions, search for Monal in the iOS or OSX app store. [Visit the blog to read about the development](https://monal.im)!
 
-You can get the current releases in the App Store:
+Find the current stable releases here:
 
-* [iOS](https://itunes.apple.com/us/app/monal-free-xmpp-chat/id317711500?mt=8)
+* [iOS App Store](https://apps.apple.com/app/id317711500)
+* [macOS App Store](https://apps.apple.com/app/id1499227291)
 
-* [Mac](https://apps.apple.com/app/id1499227291?mt=12)
-
-### Impressions from the iOS version
+### iOS Screenshots
 <p float="left">
 <img src ="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.58.26-1.png" width=250 >
 <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.56.17-4.png" width="250">  <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.51-1.png" width="250">
 </p>
 
-### Impressions from the MacOS version
+### macOS Screenshot
 
 <img src="https://monal.im/wp-content/uploads/2020/02/Screen-Shot-2020-02-15-at-10.28.38-PM-1.png" width="500">
 

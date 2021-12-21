@@ -165,7 +165,6 @@ struct ContactDetails: View {
                     NavigationLink(destination: Resources(contact: contact)) {
                         Text("Resources")
                     }
-
                 }
                 
                 //make sure everything is aligned to the top of our view instead of vertically centered
@@ -195,17 +194,6 @@ struct Resources: UIViewControllerRepresentable {
     }
 }
 
-/*
-struct BasicNavigationPhotoView : View {
-    @ObservedObject var contact: ObservableKVOWrapper<MLContact>
-    var body: some View {
-        Image(systemName: "clock")
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-            .navigationBarTitle(Text("Here we are now"))
-    }
-}
-*/
 
 struct ContactDetails_Previews: PreviewProvider {
     static var delegate = SheetDismisserProtocol()

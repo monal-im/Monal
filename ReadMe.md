@@ -5,7 +5,7 @@
 
 This is the Monal XMPP client as found in the app store.  If you want to  use the latest stable versions, search for Monal in the iOS or OSX app store. [Visit the blog to read about the development](https://monal.im)!
 
-Find the current releases here:
+Find the current stable releases here:
 
 * [iOS App Store](https://apps.apple.com/app/id317711500)
 * [macOS App Store](https://apps.apple.com/app/id1499227291)

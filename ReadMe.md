@@ -7,7 +7,7 @@ This is the Monal XMPP client as found in the app store.  If you want to  use th
 
 Find the current releases here:
 
-* [iOS App Store](https://itunes.apple.com/us/app/monal-free-xmpp-chat/id317711500)
+* [iOS App Store](https://apps.apple.com/app/id317711500)
 * [macOS App Store](https://apps.apple.com/app/id1499227291)
 
 ### iOS Screenshots

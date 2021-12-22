@@ -188,12 +188,7 @@ $$
 {
     if(self.monalSignalStore.deviceid == 0)
         return;
-    [self publishKeysViaPubSub:@{
-        @"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey,
-        @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature,
-        @"identityKey":self.monalSignalStore.identityKeyPair.publicKey,
-        @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]
-    } andPreKeys:[self.monalSignalStore readPreKeys] withDeviceId:self.monalSignalStore.deviceid];
+    [self publishKeysViaPubSubPreKeyId:[NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId] withIdentityKey:self.monalSignalStore.identityKeyPair.publicKey withSignedPreKeySignature:self.monalSignalStore.signedPreKey.signature withSignedPreKeyPublic:self.monalSignalStore.signedPreKey.keyPair.publicKey  andPreKeys:[self.monalSignalStore readPreKeys] withDeviceId:self.monalSignalStore.deviceid];
 }
 
 /*
@@ -794,7 +789,6 @@ $$
                 // nothing todo as generateNewKeysIfNeeded sends out the new bundle if new keys were generated
             }
         }
-
         if(!decryptedKey)
         {
             DDLogError(@"Could not decrypt to obtain key.");
@@ -890,7 +884,7 @@ $$
 /**
  publishes signal keys and prekeys
  */
--(void) publishKeysViaPubSub:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(u_int32_t) deviceid
+-(void) publishKeysViaPubSubPreKeyId:(NSString* _Nonnull) signedPreKeyId withIdentityKey:(NSData* _Nonnull) identityKey withSignedPreKeySignature:(NSData* _Nonnull) signedPreKeySignature withSignedPreKeyPublic:(NSData* _Nonnull) signedPreKeyPublic andPreKeys:(NSArray*) prekeys withDeviceId:(u_int32_t) deviceid
 {
     MLXMLNode* prekeyNode = [[MLXMLNode alloc] initWithElement:@"prekeys"];
     for(SignalPreKey* prekey in prekeys)
@@ -905,10 +899,10 @@ $$
     [self.account.pubsub publishItem:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{kId: @"current"} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"bundle" andNamespace:@"eu.siacs.conversations.axolotl" withAttributes:@{} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"signedPreKeyPublic" withAttributes:@{
-                @"signedPreKeyId": keys[@"signedPreKeyId"]
-            } andChildren:@[] andData:[HelperTools encodeBase64WithData: keys[@"signedPreKeyPublic"]]],
-            [[MLXMLNode alloc] initWithElement:@"signedPreKeySignature" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithData:[keys objectForKey:@"signedPreKeySignature"]]],
-            [[MLXMLNode alloc] initWithElement:@"identityKey" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithData:[keys objectForKey:@"identityKey"]]],
+                @"signedPreKeyId": signedPreKeyId
+            } andChildren:@[] andData:[HelperTools encodeBase64WithData: signedPreKeyPublic]],
+            [[MLXMLNode alloc] initWithElement:@"signedPreKeySignature" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithData:signedPreKeySignature]],
+            [[MLXMLNode alloc] initWithElement:@"identityKey" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithData:identityKey]],
             prekeyNode,
         ] andData:nil]
     ] andData:nil] onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid] withConfigOptions:@{

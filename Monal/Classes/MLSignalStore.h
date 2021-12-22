@@ -34,7 +34,7 @@
  */
 -(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName;
 -(NSArray<NSNumber*>*) knownDevicesWithValidSessionEntryForName:(NSString*) addrName;
--(NSMutableArray *) readPreKeys;
+-(NSMutableArray<SignalPreKey*>*) readPreKeys;
 
 -(void) deleteDeviceforAddress:(SignalAddress*)address;
 

@@ -93,13 +93,13 @@
     }];
 }
 
--(NSMutableArray *) readPreKeys
+-(NSMutableArray<SignalPreKey*>*) readPreKeys
 {
     NSArray* keys = [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeReader:@"SELECT prekeyid, preKey FROM signalPreKey WHERE account_id=? AND keyUsed=0;" andArguments:@[self.accountId]];
     }];
     
-    NSMutableArray* array = [[NSMutableArray alloc] initWithCapacity:keys.count];
+    NSMutableArray<SignalPreKey*>* array = [[NSMutableArray alloc] initWithCapacity:keys.count];
     for (NSDictionary* row in keys)
     {
         SignalPreKey* key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
@@ -114,7 +114,7 @@
         return [self.sqliteDatabase executeScalar:@"SELECT prekeyid FROM signalPreKey WHERE account_id=? ORDER BY prekeyid DESC LIMIT 1;" andArguments:@[self.accountId]];
     }];
 
-    if(highestId==nil) {
+    if(highestId == nil) {
         return 0; // Default value -> first preKeyId will be 1
     } else {
         return highestId.intValue;
@@ -146,7 +146,7 @@
  * provided recipient ID + device ID tuple.
  * or nil if not found.
  */
-- (nullable NSData*) sessionRecordForAddress:(SignalAddress*)address
+- (NSData* _Nullable) sessionRecordForAddress:(SignalAddress*)address
 {
     return [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:@"SELECT recordData FROM signalContactSession WHERE account_id=? AND contactName=? AND contactDeviceId=?;" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];

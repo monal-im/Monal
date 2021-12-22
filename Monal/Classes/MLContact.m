@@ -387,6 +387,17 @@ NSString *const kAskSubscribe=@"subscribe";
 #endif
 }
 
+-(void) omemoSessionReset
+{
+#ifndef DISABLE_OMEMO
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    if(account == nil || account.omemo == nil) {
+        return;
+    }
+    [account.omemo clearAllSessionsForJid:self.contactJid];
+#endif
+}
+
 -(void) togglePinnedChat:(BOOL) pinned
 {
     if(self.isPinned == pinned)
@@ -398,6 +409,9 @@ NSString *const kAskSubscribe=@"subscribe";
     self.isPinned = pinned;
     // update active chats
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    if(account == nil) {
+        return;
+    }
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact":self, @"pinningChanged": @YES}];
 }
 

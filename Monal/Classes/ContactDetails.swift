@@ -18,6 +18,7 @@ struct ContactDetails: View {
     @State private var showingRemoveContactConfirmation = false
     @State private var showingAddContactConfirmation = false
     @State private var showingClearHistoryConfirmation = false
+    @State private var showingResetOmemoSessionConfirmation = false
 
     var body: some View {
         NavigationView {
@@ -166,6 +167,30 @@ struct ContactDetails: View {
                         Text("Resources")
                     }
                 }
+#if !DISABLE_OMEMO
+                Spacer()
+                    .frame(height: 30)
+                Button(action: {
+                    showingResetOmemoSessionConfirmation = true
+                }) {
+                    Text("Reset OMEMO session")
+                }
+                .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
+                    ActionSheet(
+                        title: Text("Reset OMEMO session"),
+                        message: Text("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!"),
+                        buttons: [
+                            .cancel(),
+                            .destructive(
+                                Text("Yes"),
+                                action: {
+                                    contact.obj.omemoSessionReset()
+                                }
+                            )
+                        ]
+                    )
+                }
+#endif
                 
                 //make sure everything is aligned to the top of our view instead of vertically centered
                 Spacer()

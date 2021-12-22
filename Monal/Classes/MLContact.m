@@ -35,7 +35,7 @@ NSString *const kAskSubscribe=@"subscribe";
 
 +(MLContact*) makeDummyContact:(int) type
 {
-    if(type==1)
+    if(type == 1)
     {
         return [self contactFromDictionary:@{
             @"buddy_name": @"user@example.org",
@@ -55,9 +55,10 @@ NSString *const kAskSubscribe=@"subscribe";
             @"state": @"online",
             @"count": @1,
             @"isActiveChat": @YES,
+            @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],
         }];
     }
-    else if(type==2)
+    else if(type == 2)
     {
         return [self contactFromDictionary:@{
             @"buddy_name": @"group@example.org",
@@ -78,9 +79,10 @@ NSString *const kAskSubscribe=@"subscribe";
             @"state": @"online",
             @"count": @2,
             @"isActiveChat": @YES,
+            @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640153174],
         }];
     }
-    else if(type==3)
+    else if(type == 3)
     {
         return [self contactFromDictionary:@{
             @"buddy_name": @"channel@example.org",
@@ -101,6 +103,7 @@ NSString *const kAskSubscribe=@"subscribe";
             @"state": @"online",
             @"count": @3,
             @"isActiveChat": @YES,
+            @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640157074],
         }];
     }
     else
@@ -123,6 +126,7 @@ NSString *const kAskSubscribe=@"subscribe";
             @"state": @"online",
             @"count": @4,
             @"isActiveChat": @YES,
+            @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640157174],
         }];
     }
 }

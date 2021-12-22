@@ -50,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSData *) getIdentityForAddress:(SignalAddress*)address;
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 
--(void) queryOMEMODevices:(NSString *) jid;
+-(void) queryOMEMODevices:(NSString*) jid;
 
 -(void) sendLocalDevicesIfNeeded;
 -(void) untrustAllDevicesFrom:(NSString*)jid;

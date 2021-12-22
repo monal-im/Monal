@@ -449,8 +449,7 @@ enum msgSentState {
 -(IBAction) toggleEncryption:(id)sender
 {
 #ifndef DISABLE_OMEMO
-    NSArray* devices = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid];
-    [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withKnownDevices:devices withSelf:self afterToggle:^() {
+    [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withSelf:self afterToggle:^() {
         [self displayEncryptionStateInUI];
     }];
 #endif

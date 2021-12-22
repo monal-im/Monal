@@ -523,9 +523,8 @@ enum ContactDetailsAboutRows {
 -(IBAction) toggleEncryption:(id)sender
 {
 #ifndef DISABLE_OMEMO
-    NSArray* devices = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid];
     [MLChatViewHelper<ContactDetails*>
-        toggleEncryptionForContact:self.contact withKnownDevices:devices withSelf:self afterToggle:^() {
+        toggleEncryptionForContact:self.contact withSelf:self afterToggle:^() {
         [self refreshLock];
     }];
 #endif

@@ -376,8 +376,11 @@ NSString *const kAskSubscribe=@"subscribe";
     if(account == nil || account.omemo == nil)
         return NO;
     NSArray* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
-    if(encrypt && !self.isEncrypted && knownDevices.count == 0)
+    if(!self.isEncrypted && encrypt && knownDevices.count == 0) {
+        // request devicelist again
+        [account.omemo queryOMEMODevices:self.contactJid];
         return NO;
+    }
     
     if(self.isEncrypted == encrypt)
         return YES;

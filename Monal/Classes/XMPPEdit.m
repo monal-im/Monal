@@ -706,8 +706,8 @@ enum DummySettingsRows {
         {
             case SettingsClearOmemoSessionRow:
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-                xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
-                [account.omemo clearAllSessionsForJid:account.connectionProperties.identity.jid];
+                MLContact* contact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountno];
+                [contact resetOmemoSession];
                 break;
         }
     }

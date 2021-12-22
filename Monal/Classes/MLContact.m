@@ -369,10 +369,10 @@ NSString *const kAskSubscribe=@"subscribe";
     return NO;
 #else
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
-    if(account == nil)
+    if(account == nil || account.omemo == nil)
         return NO;
     NSArray* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
-    if(encrypt && knownDevices.count == 0 && !self.isEncrypted)
+    if(encrypt && !self.isEncrypted && knownDevices.count == 0)
         return NO;
     
     if(self.isEncrypted == encrypt)
@@ -387,7 +387,7 @@ NSString *const kAskSubscribe=@"subscribe";
 #endif
 }
 
--(void) omemoSessionReset
+-(void) resetOmemoSession
 {
 #ifndef DISABLE_OMEMO
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];

@@ -184,7 +184,7 @@ struct ContactDetails: View {
                             .destructive(
                                 Text("Yes"),
                                 action: {
-                                    contact.obj.omemoSessionReset()
+                                    contact.obj.resetOmemoSession()
                                 }
                             )
                         ]

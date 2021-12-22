@@ -20,7 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
     NSLock* signalLock;
 }
 @property (nonatomic, strong) MLSignalStore* monalSignalStore;
-@property (nonatomic, assign) BOOL hasCatchUpDone;
 @property (nonatomic) unsigned long openBundleFetchCnt;
 @property (nonatomic) unsigned long closedBundleFetchCnt;
 

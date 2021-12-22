@@ -24,6 +24,12 @@
 
 #include <stdlib.h>
 
+typedef enum {
+    LoggedOut,
+    LoggedIn,
+    CatchupDone
+} OmemoLoginState;
+
 @interface MLOMEMO ()
 
 @property (atomic, strong) SignalContext* signalContext;
@@ -31,11 +37,11 @@
 @property (nonatomic, strong) NSString* accountJid;
 
 @property (nonatomic, weak) xmpp* account;
-@property (nonatomic, strong) NSMutableSet<NSNumber*>* ownReceivedDeviceList;
-@property (nonatomic, assign) BOOL loggedIn;
+@property (nonatomic, assign) OmemoLoginState omemoLoginState;
 
 // jid -> @[deviceID1, deviceID2]
-@property (nonatomic, strong) NSMutableDictionary* devicesThatAreNotInDeviceList;
+@property (nonatomic, strong) NSMutableSet<NSNumber*>* ownReceivedDeviceList;
+@property (nonatomic, strong) NSMutableDictionary<NSString*, NSMutableSet<NSNumber*>*>* devicesThatAreNotInDeviceList;
 @end
 
 static const size_t MIN_OMEMO_KEYS = 25;
@@ -51,8 +57,7 @@ const int KEY_SIZE = 16;
     self.accountJid = account.connectionProperties.identity.jid;
     self.account = account;
     self.ownReceivedDeviceList = [[NSMutableSet alloc] init];
-    self.loggedIn = NO;
-    self.hasCatchUpDone = NO;
+    self.omemoLoginState = LoggedOut;
     self.openBundleFetchCnt = 0;
     self.closedBundleFetchCnt = 0;
 
@@ -87,7 +92,7 @@ const int KEY_SIZE = 16;
         return;
     if(self.account == notiAccount)
     {
-        self.loggedIn = YES;
+        self.omemoLoginState = LoggedIn;
         // We don't have to clear ownReceivedDeviceList as it would have been cleared by a reconnect
     }
 }
@@ -99,8 +104,8 @@ const int KEY_SIZE = 16;
         return;
     if(self.account == notiAccount)
     {
-        self.hasCatchUpDone = YES;
-        if(!self.openBundleFetchCnt && self.loggedIn) // check if we have a session were we loggedIn
+        self.omemoLoginState = CatchupDone;
+        if(!self.openBundleFetchCnt) // check if we have a session were we loggedIn
         {
             [self sendLocalDevicesIfNeeded];
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": self.account.accountNo}];
@@ -269,7 +274,7 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $_ID(xmpp*, account),
             [self processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
         }
     }
-    if(self.openBundleFetchCnt > 1 && self.loggedIn)
+    if(self.openBundleFetchCnt > 1 && self.omemoLoginState >= LoggedIn)
     {
         self.openBundleFetchCnt--;
         self.closedBundleFetchCnt++;
@@ -283,7 +288,7 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $_ID(xmpp*, account),
     {
         self.openBundleFetchCnt = 0;
         self.closedBundleFetchCnt = 0;
-        if(self.hasCatchUpDone && self.loggedIn)
+        if(self.omemoLoginState == CatchupDone)
         {
             [self sendLocalDevicesIfNeeded];
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": self.account.accountNo}];
@@ -377,7 +382,7 @@ $$
                 // save own receivedDevices for catchupDone handling
                 [self.ownReceivedDeviceList unionSet:receivedDevices];
             }
-            if(self.hasCatchUpDone == true && !self.openBundleFetchCnt)
+            if(self.omemoLoginState == CatchupDone && !self.openBundleFetchCnt)
             {
                 // the catchup done handler or the bundleFetch handler will send our own devices while logging in
                 [self sendOMEMODevice:receivedDevices force:NO];
@@ -725,7 +730,7 @@ $$
         return nil;
     }
     
-    NSMutableSet<NSNumber*>* devicesThatAreNotInList = [self.devicesThatAreNotInDeviceList objectForKey:messageNode.fromUser];
+    NSSet<NSNumber*>* devicesThatAreNotInList = [self.devicesThatAreNotInDeviceList objectForKey:messageNode.fromUser];
     if(devicesThatAreNotInList && [devicesThatAreNotInList containsObject:sid]) {
 #ifdef IS_ALPHA
         return @"ERROR: NEW ERROR";

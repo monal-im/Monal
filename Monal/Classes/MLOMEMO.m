@@ -41,7 +41,8 @@ typedef enum {
 
 // jid -> @[deviceID1, deviceID2]
 @property (nonatomic, strong) NSMutableSet<NSNumber*>* ownReceivedDeviceList;
-@property (nonatomic, strong) NSMutableDictionary<NSString*, NSMutableSet<NSNumber*>*>* devicesThatAreNotInDeviceList;
+@property (nonatomic, strong) NSMutableDictionary<NSString*, NSMutableSet<NSNumber*>*>* brokenSessions;
+
 @end
 
 static const size_t MIN_OMEMO_KEYS = 25;
@@ -61,7 +62,7 @@ const int KEY_SIZE = 16;
     self.openBundleFetchCnt = 0;
     self.closedBundleFetchCnt = 0;
 
-    self.devicesThatAreNotInDeviceList = [[NSMutableDictionary alloc] init];
+    self.brokenSessions = [[NSMutableDictionary alloc] init];
 
     [self setupSignal];
 
@@ -94,6 +95,8 @@ const int KEY_SIZE = 16;
     {
         self.omemoLoginState = LoggedIn;
         // We don't have to clear ownReceivedDeviceList as it would have been cleared by a reconnect
+        // rebuild broken omemo session after catchup
+        [self rebuildSessions];
     }
 }
 
@@ -344,16 +347,7 @@ $$
             {
                 [self queryOMEMOBundleFrom:source andDevice:[deviceId stringValue]];
             }
-            // unblock
-            // TODO:
-            NSMutableSet<NSNumber*>* devicesThatAreNotInList = [self.devicesThatAreNotInDeviceList objectForKey:source];
-            if(devicesThatAreNotInList && [devicesThatAreNotInList containsObject:deviceId])
-            {
-                [devicesThatAreNotInList removeObject:deviceId];
-                [self.devicesThatAreNotInDeviceList setObject:devicesThatAreNotInList forKey:source];
-            }
         }
-        
         // remove devices from our signalStorage when they are no longer published
         for(NSNumber* deviceId in existingDevices)
         {
@@ -366,6 +360,17 @@ $$
                     [self.monalSignalStore markDeviceAsDeleted:address];
                 }
             }
+        }
+        // remove broken rids that are no longer available
+        NSMutableSet<NSNumber*>* brokenContactRids = [self.brokenSessions objectForKey:source];
+        if(brokenContactRids)
+        {
+            for(NSNumber* brokenRid in brokenContactRids) {
+                if(![receivedDevices containsObject:brokenRid]) {
+                    [brokenContactRids removeObject:brokenRid];
+                }
+            }
+            [self.brokenSessions setObject:brokenContactRids forKey:source];
         }
         
         // TODO: delete deviceid from new session array
@@ -449,11 +454,14 @@ $$
     }
 }
 
--(void) processOMEMOKeys:(MLXMLNode*) iqNode forJid:(NSString*) jid andRid:(NSString*) rid
+-(void) processOMEMOKeys:(MLXMLNode*) iqNode forJid:(NSString*) jid andRid:(NSString*) ridString
 {
     assert(self.signalContext);
     {
-        if(!rid)
+        if(!ridString)
+            return;
+        NSNumber* rid = @([ridString intValue]);
+        if(rid == nil)
             return;
 
         NSArray* bundles = [iqNode find:@"/{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}bundle"];
@@ -528,7 +536,7 @@ $$
     }
 }
 
--(void) sendKeyTransportElement:(NSString*) jid removeBrokenSessionForRid:(NSString*) rid
+-(void) sendKeyTransportElement:(NSString*) jid removeBrokenSessionForRid:(NSNumber*) rid
 {
     // The needed device bundle for this contact/device was fetched
     // Send new keys
@@ -541,7 +549,13 @@ $$
     DDLogDebug(@"Send KeyTransportElement to jid: %@", jid);
     if(self.account) [self.account send:messageNode];
 
-    // Remove device from list
+    NSMutableSet<NSNumber*>* brokenContactRids = [self.brokenSessions objectForKey:jid];
+    if(brokenContactRids) {
+        if([brokenContactRids containsObject:rid]) {
+            [brokenContactRids removeObject:rid];
+        }
+        [self.brokenSessions setObject:brokenContactRids forKey:jid];
+    }
     // TODO: remove broken session mark?
 }
 
@@ -660,49 +674,56 @@ $$
 
 -(void) needNewSessionForContact:(NSString*) contact andDevice:(NSNumber*) deviceId
 {
-    [self sendOMEMOBundle];
-    
-    if(deviceId.intValue == self.monalSignalStore.deviceid)
-    {
-        // We should not generate a new session to our own device
-        return;
-    }
-
-    SignalAddress* address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)deviceId.intValue];
-
-    // mark session as broken
-    [self.monalSignalStore markSessionAsBroken:address];
-    
-    // TODO:
-    NSMutableSet<NSNumber*>* devicesThatAreNotInList = [self.devicesThatAreNotInDeviceList objectForKey:contact];
-    if(!devicesThatAreNotInList)
+    NSMutableSet<NSNumber*>* contactBrokenRids = [self.brokenSessions objectForKey:contact];
+    if(!contactBrokenRids)
     {
         // first broken session for contact -> create new set
-        devicesThatAreNotInList = [[NSMutableSet<NSNumber*> alloc] init];
+        contactBrokenRids = [[NSMutableSet<NSNumber*> alloc] init];
     }
     // add device to broken session contact set
-    if([devicesThatAreNotInList containsObject:deviceId])
-    {
-        return;
-    }
-    [devicesThatAreNotInList addObject:deviceId];
-    [self.devicesThatAreNotInDeviceList setObject:devicesThatAreNotInList forKey:contact];
+    [contactBrokenRids addObject:deviceId];
 
-    // DEBUG START
-    if(![self.accountJid isEqualToString:contact])
-    {
-        [self queryOMEMODevices:self.accountJid];
+    if(self.omemoLoginState == LoggedIn) {
+        [self rebuildSessions];
     }
-    [self queryOMEMODevices:contact];
-    // DEBUG END
-    
-    // request device bundle again -> check for new preKeys
-    // use received preKeys to build new session
-    // [self queryOMEMOBundleFrom:contact andDevice:deviceId.stringValue];
-    // rebuild session when preKeys of the requested bundle arrived
 }
 
--(NSString *) decryptMessage:(XMPPMessage *) messageNode
+-(void) rebuildSessions
+{
+    if(self.omemoLoginState < LoggedIn) {
+        DDLogInfo(@"Ignoring rebuildSessionsstate %u", self.omemoLoginState);
+        return;
+    }
+    if([self.brokenSessions count] == 0 && [self generateNewKeysIfNeeded]) {
+        return;
+    }
+    [self sendOMEMOBundle];
+    
+    for(NSString* contactJid in self.brokenSessions) {
+        NSSet* rids = [self.brokenSessions objectForKey:contactJid];
+        for(NSNumber* rid in rids) {
+            if(rid.intValue == self.monalSignalStore.deviceid)
+            {
+                // We should not generate a new session to our own device
+                continue;
+            }
+            
+            SignalAddress* address = [[SignalAddress alloc] initWithName:contactJid deviceId:(uint32_t)rid.intValue];
+            
+            // mark session as broken
+            [self.monalSignalStore markSessionAsBroken:address];
+        }
+        // query omemo devices of broken contact
+        [self queryOMEMODevices:contactJid];
+        
+        // request device bundle again -> check for new preKeys
+        // use received preKeys to build new session
+        // [self queryOMEMOBundleFrom:contact andDevice:deviceId.stringValue];
+        // rebuild session when preKeys of the requested bundle arrived
+    }
+}
+
+-(NSString*) decryptMessage:(XMPPMessage *) messageNode
 {
     if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
     {
@@ -725,10 +746,10 @@ $$
         return nil;
     }
     
-    NSSet<NSNumber*>* devicesThatAreNotInList = [self.devicesThatAreNotInDeviceList objectForKey:messageNode.fromUser];
-    if(devicesThatAreNotInList && [devicesThatAreNotInList containsObject:sid]) {
+    NSMutableSet<NSNumber*>* contactBrokenRids = [self.brokenSessions objectForKey:messageNode.fromUser];
+    if(contactBrokenRids && [contactBrokenRids containsObject:sid]) {
 #ifdef IS_ALPHA
-        return @"ERROR: NEW ERROR";
+        return @"Dedupl. broken session error";
 #else
         return nil;
 #endif
@@ -781,7 +802,7 @@ $$
         if(messagetype == SignalCiphertextTypePreKeyMessage)
         {
             // check if we need to generate new preKeys
-            if(![self generateNewKeysIfNeeded]) {
+            if(self.omemoLoginState == LoggedIn && ![self generateNewKeysIfNeeded]) {
                 // send new bundle without the used preKey if no new keys were generated
                 [self sendOMEMOBundle];
             }
@@ -799,6 +820,11 @@ $$
         {
             // save last successfull decryption time
             [self.monalSignalStore updateLastSuccessfulDecryptTime:address];
+            if(contactBrokenRids) {
+                [contactBrokenRids removeObject:sid];
+                [self.brokenSessions setObject:contactBrokenRids forKey:messageNode.fromUser];
+            }
+            
             // if no payload is available -> KeyTransportElement
             if(isKeyTransportElement)
             {
@@ -819,7 +845,7 @@ $$
             {
                 key = decryptedKey;
             }
-            if(key){
+            if(key) {
                 NSString* ivStr = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/iv#"];
                 NSString* encryptedPayload = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/payload#"];
 

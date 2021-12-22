@@ -40,7 +40,7 @@ struct ContactDetailsHeader: View {
             Spacer()
                 .frame(height: 20)
             if(!contact.isGroup) {
-                if((contact.lastInteractionTime as Date).timeIntervalSince1970 > 0) {
+                if(contact.lastInteractionTime != nil && (contact.lastInteractionTime as Date).timeIntervalSince1970 > 0) {
                     Text(String(format: NSLocalizedString("Last seen: %@", comment: ""),
                         DateFormatter.localizedString(from: contact.lastInteractionTime, dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short)))
                 } else {

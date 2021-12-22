@@ -174,6 +174,7 @@ struct ContactDetails: View {
                     showingResetOmemoSessionConfirmation = true
                 }) {
                     Text("Reset OMEMO session")
+                        .foregroundColor(.red)
                 }
                 .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
                     ActionSheet(

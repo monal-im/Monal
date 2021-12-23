@@ -544,9 +544,6 @@ static NSMutableSet* _smacksWarningDisplayed;
     } else {
         chatContact = [self.unpinnedContacts objectAtIndex:indexPath.row];
     }
-
-    
-    
     // Display msg draft or last msg
     MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:chatContact.contactJid forAccount:chatContact.accountId];
 
@@ -606,7 +603,6 @@ static NSMutableSet* _smacksWarningDisplayed;
     } else {
         selected = self.unpinnedContacts[indexPath.row];
     }
-    
     [self presentChatWithContact:selected];
 }
 

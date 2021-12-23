@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLChatViewHelper<ClassType> : NSObject
 
-+(void) toggleEncryptionForContact:(MLContact*) contact withKnownDevices:(NSArray*) knownDevices withSelf:(id) andSelf afterToggle:(void (^)(void)) afterToggle;
++(void) toggleEncryptionForContact:(MLContact*) contact withSelf:(id) andSelf afterToggle:(void (^)(void)) afterToggle;
 
 @end
 

@@ -654,8 +654,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [[MLXMPPManager sharedInstance] nowBackgrounded];
     DDLogInfo(@"|~~| 80%% |~~|");
     [HelperTools updateSyncErrorsWithDeleteOnly:NO];
-    [[MLXMPPManager sharedInstance] disconnectAll];
     DDLogInfo(@"|~~| 100%% |~~|");
+    [[MLXMPPManager sharedInstance] disconnectAll];
     DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
     [DDLog flushLog];
 }

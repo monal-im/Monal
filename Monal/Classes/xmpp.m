@@ -858,7 +858,11 @@ NSString* const kStanza = @"stanza";
         {
             //send one last ack before closing the stream (xep version 1.5.2)
             if(self.accountState>=kStateBound)
-                [self sendLastAck];
+            {
+                [_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                    [self sendLastAck];
+                }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
+            }
             [self persistState];
         }
         

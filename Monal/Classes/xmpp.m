@@ -1880,13 +1880,29 @@ NSString* const kStanza = @"stanza";
                 weakify(self);
                 [self addSmacksHandler:^{
                     strongify(self);
-                    DDLogVerbose(@"Inside resume smacks handler: catchup done (%@)", self.lastOutboundStanza);
-                    if(!self->_catchupDone)
+                    DDLogInfo(@"Inside resume smacks handler: catchup *possibly* done (%@)", self.lastOutboundStanza);
+                    //having no entry at all means catchup and replay are done
+                    //if replay is not done yet, the kMonalFinishedCatchup notification will be triggered by the replay handler once the replay is finished
+                    if(_inCatchup[self.connectionProperties.identity.jid] == nil && !self->_catchupDone)
                     {
                         self->_catchupDone = YES;
-                        DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
+                        DDLogInfo(@"Replay really done, now posting kMonalFinishedCatchup notification");
                         //don't queue this notification because it should be handled INLINE inside the receive queue
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
+                    }
+                    
+                    //handle all delayed replays not yet done and resume them (e.g. all _inCatchup entries being NO)
+                    for(NSString* archiveJid in self->_inCatchup)
+                    {
+                        if([self->_inCatchup[archiveJid] boolValue] == NO)  //NO means no mam catchup running, but delayed replay not yet done --> resume delayed replay
+                        {
+                            DDLogInfo(@"Resuming replay of delayed stanzas for %@...", archiveJid);
+                            //this will put a truly async block onto the receive queue which will resume the delayed stanza replay
+                            //this replay will race with new live stanzas coming in, but that does not matter:
+                            //every incominglive stanza will be put into our replay queue and replayed once its time comes
+                            //the kMonalFinishedCatchup notification will be triggered by the replay handler once the replay is finished (e.g. the replay queue in our db is empty)
+                            [self mamFinishedFor:archiveJid];
+                        }
                     }
                 }];
             }
@@ -3703,7 +3719,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) delayIncomingMessageStanzasForArchiveJid:(NSString*) archiveJid
 {
-    _inCatchup[archiveJid] = @YES;
+    _inCatchup[archiveJid] = @YES;      //catchup not done and replay not finished
 }
 
 -(void) delayIncomingMessageStanzaUntilCatchupDone:(XMPPMessage*) originalParsedStanza
@@ -3730,7 +3746,7 @@ NSString* const kStanza = @"stanza";
     if(delayedStanza == nil)
     {
         DDLogInfo(@"Catchup finished for jid %@", archiveJid);
-        [_inCatchup removeObjectForKey:archiveJid];
+        [_inCatchup removeObjectForKey:archiveJid];     //catchup done and replay finished
         
         //handle old mamFinished code as soon as all delayed messages have been processed
         //we need to wait for all delayed messages because at least omemo needs the pep headline messages coming in during mam catchup
@@ -3760,10 +3776,12 @@ NSString* const kStanza = @"stanza";
         }]] waitUntilFinished:NO];
     }
 }
+
 -(void) mamFinishedFor:(NSString*) archiveJid
 {
     //we should be already in the receive queue, but just to make sure (sync dispatch will do nothing if we already are in the right queue)
     [self dispatchOnReceiveQueue:^{
+        _inCatchup[archiveJid] = @NO;       //catchup done, but replay not finished
         //handle delayed message stanzas delivered while the mam catchup was in progress
         //the first call and all subsequent self-invocations are handled by dispatching it async to the receiveQueue
         //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue

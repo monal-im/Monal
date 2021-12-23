@@ -1896,9 +1896,10 @@ NSString* const kStanza = @"stanza";
                     }
                     
                     //handle all delayed replays not yet done and resume them (e.g. all _inCatchup entries being NO)
-                    for(NSString* archiveJid in self->_inCatchup)
+                    NSDictionary* catchupCopy = [self->_inCatchup copy];
+                    for(NSString* archiveJid in catchupCopy)
                     {
-                        if([self->_inCatchup[archiveJid] boolValue] == NO)  //NO means no mam catchup running, but delayed replay not yet done --> resume delayed replay
+                        if([catchupCopy[archiveJid] boolValue] == NO)  //NO means no mam catchup running, but delayed replay not yet done --> resume delayed replay
                         {
                             DDLogInfo(@"Resuming replay of delayed stanzas for %@...", archiveJid);
                             //this will put a truly async block onto the receive queue which will resume the delayed stanza replay
@@ -3791,6 +3792,12 @@ NSString* const kStanza = @"stanza";
 {
     //we should be already in the receive queue, but just to make sure (sync dispatch will do nothing if we already are in the right queue)
     [self dispatchOnReceiveQueue:^{
+        //don't loop over delayed stanzas twice
+        if([_inCatchup[archiveJid] boolValue] == NO)
+        {
+            DDLogWarn(@"Not starting second delayed stanza loop, another one is already running!");
+            return;
+        }
         _inCatchup[archiveJid] = @NO;       //catchup done, but replay not finished
         //handle delayed message stanzas delivered while the mam catchup was in progress
         //the first call and all subsequent self-invocations are handled by dispatching it async to the receiveQueue

@@ -646,16 +646,17 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
     [self scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
-    DDLogInfo(@"|~~| 25%% |~~|");
+    DDLogInfo(@"|~~| 20%% |~~|");
     [self updateUnread];
-    DDLogInfo(@"|~~| 50%% |~~|");
+    DDLogInfo(@"|~~| 40%% |~~|");
     [[HelperTools defaultsDB] synchronize];
-    DDLogInfo(@"|~~| 75%% |~~|");
+    DDLogInfo(@"|~~| 60%% |~~|");
     [[MLXMPPManager sharedInstance] nowBackgrounded];
+    DDLogInfo(@"|~~| 80%% |~~|");
+    [[MLXMPPManager sharedInstance] disconnectAll];
+    DDLogInfo(@"|~~| 100%% |~~|");
     DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
     [DDLog flushLog];
-    //give the server some more time to send smacks acks (it doesn't matter if we get killed because of this, we're terminating anyways)
-    usleep(1000000);
 }
 
 #pragma mark - error feedback

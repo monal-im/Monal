@@ -3740,41 +3740,47 @@ NSString* const kStanza = @"stanza";
         return;
     }
     
-    //pick the next delayed message stanza (will return nil if there isn't any left)
-    MLXMLNode* delayedStanza = [[DataLayer sharedInstance] getNextDelayedMessageStanzaForArchiveJid:archiveJid andAccountNo:self.accountNo];
-    DDLogDebug(@"Got delayed stanza: %@", delayedStanza);
-    if(delayedStanza == nil)
-    {
-        DDLogInfo(@"Catchup finished for jid %@", archiveJid);
-        [_inCatchup removeObjectForKey:archiveJid];     //catchup done and replay finished
-        
-        //handle old mamFinished code as soon as all delayed messages have been processed
-        //we need to wait for all delayed messages because at least omemo needs the pep headline messages coming in during mam catchup
-        if([self.connectionProperties.identity.jid isEqualToString:archiveJid])
-        {
-            if(!_catchupDone)
+    [MLNotificationQueue queueNotificationsInBlock:^{
+        DDLogVerbose(@"Creating db transaction for delayed stanza handling of jid %@", archiveJid);
+        [[DataLayer sharedInstance] createTransaction:^{
+            //pick the next delayed message stanza (will return nil if there isn't any left)
+            MLXMLNode* delayedStanza = [[DataLayer sharedInstance] getNextDelayedMessageStanzaForArchiveJid:archiveJid andAccountNo:self.accountNo];
+            DDLogDebug(@"Got delayed stanza: %@", delayedStanza);
+            if(delayedStanza == nil)
             {
-                _catchupDone = YES;
-                DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
-                //don't queue this notification because it should be handled INLINE inside the receive queue
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
+                DDLogInfo(@"Catchup finished for jid %@", archiveJid);
+                [_inCatchup removeObjectForKey:archiveJid];     //catchup done and replay finished
+                
+                //handle old mamFinished code as soon as all delayed messages have been processed
+                //we need to wait for all delayed messages because at least omemo needs the pep headline messages coming in during mam catchup
+                if([self.connectionProperties.identity.jid isEqualToString:archiveJid])
+                {
+                    if(!_catchupDone)
+                    {
+                        _catchupDone = YES;
+                        DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
+                        //don't queue this notification because it should be handled INLINE inside the receive queue
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
+                    }
+                }
             }
-        }
-    }
-    else
-    {
-        //now *really* process delayed message stanza
-        [self processInput:delayedStanza withDelayedReplay:YES];
-        
-        //add async processing of next delayed message stanza to receiveQueue
-        //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
-        //and makes sure we process every delayed stanza in its own receive queue operation and its own db transaction
-        [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-            [[DataLayer sharedInstance] createTransaction:^{
-                [self _handleInternalMamFinishedFor:archiveJid];
-            }];
-        }]] waitUntilFinished:NO];
-    }
+            else
+            {
+                //now *really* process delayed message stanza
+                [self processInput:delayedStanza withDelayedReplay:YES];
+                
+                DDLogDebug(@"Delayed Stanza finished processing: %@", delayedStanza);
+                
+                //add async processing of next delayed message stanza to receiveQueue
+                //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
+                //and makes sure we process every delayed stanza in its own receive queue operation and its own db transaction
+                [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                    [self _handleInternalMamFinishedFor:archiveJid];
+                }]] waitUntilFinished:NO];
+            }
+        }];
+        DDLogVerbose(@"Transaction for delayed stanza handling for jid %@ ended", archiveJid);
+    } onQueue:@"delayedStanzaReplay"];
 }
 
 -(void) mamFinishedFor:(NSString*) archiveJid
@@ -3787,9 +3793,7 @@ NSString* const kStanza = @"stanza";
         //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
         //and makes sure we process every delayed stanza in its own receive queue operation and its own db transaction
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-            [[DataLayer sharedInstance] createTransaction:^{
-                [self _handleInternalMamFinishedFor:archiveJid];
-            }];
+            [self _handleInternalMamFinishedFor:archiveJid];
         }]] waitUntilFinished:NO];
     }];
 }

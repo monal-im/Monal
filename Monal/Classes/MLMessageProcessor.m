@@ -191,7 +191,7 @@ static NSMutableDictionary* _typingNotifications;
             {
 //use the fallback body on alpha builds (changes are good this fallback body really is the cleartext of the message because of "opportunistic" encryption)
 #ifndef IS_ALPHA
-                decrypted = NSLocalizedString(@"Message was encrypted with omemo and can't be decrypted anymore", @"");
+                decrypted = NSLocalizedString(@"Message was encrypted with OMEMO and can't be decrypted anymore", @"");
 #endif
             }
             else
@@ -201,6 +201,12 @@ static NSMutableDictionary* _typingNotifications;
             decrypted = [account.omemo decryptMessage:messageNode];
     }
     
+#ifdef IS_ALPHA
+    //thats the negation of our case from line 193
+    //--> opportunistic omemo in alpha builds should use the fallback body instead of the EME error because the fallback body could be the cleartext message
+    //    (it could be a real omemo fallback, too, but there is no harm in using that instead of the EME message)
+    if(!([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] && isMLhistory && [messageNode check:@"body#"]))
+#endif
     //implement reading support for EME for messages having a fallback body (e.g. no silent key exchanges) that could not be decrypted
     //this sets the var "decrypted" to the locally generated "fallback body"
     if([messageNode check:@"body#"] && !decrypted && [messageNode check:@"{urn:xmpp:eme:0}encryption@namespace"])

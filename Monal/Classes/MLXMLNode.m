@@ -353,11 +353,6 @@ static NSRegularExpression* attributeFilterRegex;
         }];
     NSTextCheckingResult* match = matches.firstObject;
     NSRange pathComponent1Range = [match rangeAtIndex:1];
-    if(pathComponent1Range.location == NSNotFound || !pathComponent1Range.length)
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML query has syntax errors (could not extract first path component)!" userInfo:@{
-            @"self": self,
-            @"queryString": queryString,
-        }];
     NSRange pathComponent2Range = [match rangeAtIndex:7];
     NSRange pathComponent3Range = [match rangeAtIndex:15];
     NSString* pathComponent1 = @"";

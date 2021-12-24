@@ -43,7 +43,7 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
     
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
-    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^((\\{[^}]+\\})?([^/]+))?(/.*)?" options:NSRegularExpressionCaseInsensitive error:nil];
+    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=]+=[^>]+\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=]+=[^>]+\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|float|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
     componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=]+=[^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|float|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
     attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~]+)([=~])([^>]+)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
 
@@ -352,17 +352,30 @@ static NSRegularExpression* attributeFilterRegex;
             @"queryString": queryString,
         }];
     NSTextCheckingResult* match = matches.firstObject;
-    NSRange pathComponentRange = [match rangeAtIndex:1];
-    NSRange restRange = [match rangeAtIndex:4];
-    if(pathComponentRange.location == NSNotFound || !pathComponentRange.length)
+    NSRange pathComponent1Range = [match rangeAtIndex:1];
+    if(pathComponent1Range.location == NSNotFound || !pathComponent1Range.length)
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML query has syntax errors (could not extract first path component)!" userInfo:@{
             @"self": self,
             @"queryString": queryString,
         }];
-    NSString* pathComponent = [queryString substringWithRange:pathComponentRange];
+    NSRange pathComponent2Range = [match rangeAtIndex:7];
+    NSRange pathComponent3Range = [match rangeAtIndex:15];
+    NSString* pathComponent1 = @"";
+    NSString* pathComponent2 = @"";
+    NSString* pathComponent3 = @"";
+    if(pathComponent1Range.location != NSNotFound && pathComponent1Range.length > 0)
+        pathComponent1 = [queryString substringWithRange:pathComponent1Range];
+    if(pathComponent2Range.location != NSNotFound && pathComponent2Range.length > 0)
+        pathComponent2 = [queryString substringWithRange:pathComponent2Range];
+    if(pathComponent3Range.location != NSNotFound && pathComponent3Range.length > 0)
+        pathComponent3 = [queryString substringWithRange:pathComponent3Range];
+    
+    NSString* pathComponent = pathComponent1;
     NSString* rest = @"";
-    if(restRange.location != NSNotFound && restRange.length > 1)
-        rest = [[queryString substringWithRange:restRange] substringFromIndex:1];
+    if(![pathComponent2 length])
+        pathComponent = [NSString stringWithFormat:@"%@%@", pathComponent1, pathComponent3];
+    else
+        rest = [NSString stringWithFormat:@"%@%@", [pathComponent2 substringFromIndex:1], pathComponent3];
     NSMutableDictionary* parsedEntry = [self parseQueryEntry:pathComponent arguments:args];
     
     //check if the parent element was selected and ask our parent to check the rest of our query path if needed

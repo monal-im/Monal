@@ -77,7 +77,7 @@ static NSRegularExpression* dataFormQueryRegex;
 -(MLXMLNode*) setField:(NSString* _Nonnull) name withType:(NSString* _Nullable) type andValue:(NSString* _Nonnull) value
 {
     NSDictionary* attrs = type ? @{@"type": type, @"var": name} : @{@"var": name};
-    [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", name]]];
+    [self removeChild:[self findFirst:@"field<var=%@>", name]];
     MLXMLNode* field = [self addChildNode:[[MLXMLNode alloc] initWithElement:@"field" withAttributes:attrs andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:value]
     ] andData:nil]];
@@ -87,7 +87,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(NSDictionary* _Nullable) getField:(NSString* _Nonnull) name
 {
-    MLXMLNode* fieldNode = [self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:name]]];
+    MLXMLNode* fieldNode = [self findFirst:@"field<var=%@>", name];
     if(!fieldNode)
         return nil;
     NSMutableDictionary* options = [[NSMutableDictionary alloc] init];
@@ -119,7 +119,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(void) removeField:(NSString* _Nonnull) name
 {
-    [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:name]]]];
+    [self removeChild:[self findFirst:@"field<var=%@>", name]];
     [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 
@@ -223,18 +223,18 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(id _Nullable) objectForKeyedSubscript:(NSString* _Nonnull) key
 {
-    return [self findFirst:[NSString stringWithFormat:@"field<var=%@>/value#", [NSRegularExpression escapedPatternForString:key]]];
+    return [self findFirst:@"field<var=%@>/value#", key];
 }
 
 -(void) setObject:(id _Nullable) obj forKeyedSubscript:(NSString*) key
 {
     if(!obj)
     {
-        [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:key]]]];
+        [self removeChild:[self findFirst:@"field<var=%@>", key]];
         [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
         return;
     }
-    MLXMLNode* fieldNode = [self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:key]]];
+    MLXMLNode* fieldNode = [self findFirst:@"field<var=%@>", key];
     if(!fieldNode)
     {
         [self setField:key withValue:[NSString stringWithFormat:@"%@", obj]];
@@ -274,7 +274,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(id) valueForKey:(NSString*) key
 {
-    return [self findFirst:[NSString stringWithFormat:@"field<var=%@>/value#", [NSRegularExpression escapedPatternForString:key]]];
+    return [self findFirst:[NSString stringWithFormat:@"field<var=%@>/value#", key]];
 }
 
 -(id) objectForKey:(NSString*) key

@@ -502,7 +502,7 @@ $$
             NSNumber* preKeyId = preKeyIds[preKeyIdxToTest];
             if(preKeyId == nil)
                 continue;;
-            NSData* key = [bundle findFirst:[NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKeyId]];
+            NSData* key = [bundle findFirst:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKeyId];
             if(!key)
                 continue;
 

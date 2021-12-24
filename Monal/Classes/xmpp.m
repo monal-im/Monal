@@ -3792,12 +3792,6 @@ NSString* const kStanza = @"stanza";
 {
     //we should be already in the receive queue, but just to make sure (sync dispatch will do nothing if we already are in the right queue)
     [self dispatchOnReceiveQueue:^{
-        //don't loop over delayed stanzas twice
-        if([_inCatchup[archiveJid] boolValue] == NO)
-        {
-            DDLogWarn(@"Not starting second delayed stanza loop, another one is already running!");
-            return;
-        }
         _inCatchup[archiveJid] = @NO;       //catchup done, but replay not finished
         //handle delayed message stanzas delivered while the mam catchup was in progress
         //the first call and all subsequent self-invocations are handled by dispatching it async to the receiveQueue

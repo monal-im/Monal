@@ -31,7 +31,6 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) sendOMEMOBundle;
 -(void) queryOMEMOBundleFrom:(NSString*) jid andDevice:(NSString*) deviceid;
 -(void) sendOMEMODeviceWithForce:(BOOL) force;
--(void) sendOMEMODevice:(NSSet<NSNumber*>*) receivedDevices force:(BOOL) force;
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString*) source;
 
 /*

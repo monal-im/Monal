@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MLContactOMEMOKeys : NSObject
 
 -(instancetype) initWithContact:(MLContact*) contact;
-@property(nonatomic) NSMutableArray* devices;
+@property(nonatomic) NSArray<NSNumber*>* devices;
 
 @end
 

@@ -57,7 +57,9 @@ const int KEY_SIZE = 16;
     self = [super init];
     self.accountJid = account.connectionProperties.identity.jid;
     self.account = account;
-    self.ownReceivedDeviceList = [[NSMutableSet alloc] init];
+    NSArray<NSNumber*>* ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];
+    self.ownReceivedDeviceList = [[NSMutableSet alloc] initWithArray:ownCachedDevices];
+
     self.omemoLoginState = LoggedOut;
     self.openBundleFetchCnt = 0;
     self.closedBundleFetchCnt = 0;
@@ -162,13 +164,12 @@ const int KEY_SIZE = 16;
             [self sendOMEMOBundle];
 
         [self sendOMEMODeviceWithForce:YES];
-        [self.ownReceivedDeviceList addObject:[NSNumber numberWithInt:(self.monalSignalStore.deviceid)]];
     }
     else
     {
         // Generate single use keys
         [self generateNewKeysIfNeeded];
-        [self sendOMEMODevice:self.ownReceivedDeviceList force:NO];
+        [self sendOMEMODeviceWithForce:NO];
     }
 }
 
@@ -373,19 +374,18 @@ $$
             [self.brokenSessions setObject:brokenContactRids forKey:source];
         }
         
-        // TODO: delete deviceid from new session array
         // Send our own device id when it is missing on the server
         if(!source || [source caseInsensitiveCompare:self.accountJid] == NSOrderedSame)
         {
             if(receivedDevices.count > 0)
             {
                 // save own receivedDevices for catchupDone handling
-                [self.ownReceivedDeviceList unionSet:receivedDevices];
+                [self.ownReceivedDeviceList setSet:receivedDevices];
             }
-            if(self.omemoLoginState == CatchupDone && !self.openBundleFetchCnt)
+            if(self.omemoLoginState == CatchupDone)
             {
                 // the catchup done handler or the bundleFetch handler will send our own devices while logging in
-                [self sendOMEMODevice:receivedDevices force:NO];
+                [self sendOMEMODeviceWithForce:NO];
             }
         }
     }
@@ -428,29 +428,12 @@ $$
 
 -(void) sendOMEMODeviceWithForce:(BOOL) force
 {
-    NSArray* ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];
-    NSSet<NSNumber*>* ownCachedDevicesSet = [[NSSet alloc] initWithArray:ownCachedDevices];
-    [self sendOMEMODevice:ownCachedDevicesSet force:force];
-}
-
--(void) sendOMEMODevice:(NSSet<NSNumber*>*) receivedDevices force:(BOOL) force
-{
-    NSMutableSet<NSNumber*>* devices = [[NSMutableSet alloc] init];
-    if(receivedDevices && [receivedDevices count] > 0)
-    {
-        [devices unionSet:receivedDevices];
-    }
-
     // Check if our own device string is already in our set
-    if(![devices containsObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]] || force)
+    if(![self.ownReceivedDeviceList containsObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]] || force)
     {
-        [devices addObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]];
+        [self.ownReceivedDeviceList addObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]];
         [self sendOMEMOBundle];
-        [self publishDevicesViaPubSub:devices];
-    }
-    if(devices.count > 0)
-    {
-        [self.ownReceivedDeviceList unionSet:devices];
+        [self publishDevicesViaPubSub:self.ownReceivedDeviceList];
     }
 }
 

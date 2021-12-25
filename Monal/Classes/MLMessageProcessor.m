@@ -113,7 +113,7 @@ static NSMutableDictionary* _typingNotifications;
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(
         ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
-        ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"]
+        ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] && [messageNode check:@"body#"]
     )
     {
         //ignore muc pms without id attribute (we can't send out errors pointing to this message without an id)
@@ -132,7 +132,7 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     
-    if([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"])
+    if([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"])
     {
         // Ignore all group chat msgs from unkown groups
         if([[DataLayer sharedInstance] isContactInList:messageNode.fromUser forAccount:account.accountNo] == NO)
@@ -278,7 +278,7 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     
-    //ignore all other groupchat messages coming from bare jid (only handle subject updates above)
+    //let mlmucprocesor handle all other muc related message stanzas
     if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
         return message;
     

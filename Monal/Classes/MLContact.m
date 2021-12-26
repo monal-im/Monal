@@ -399,9 +399,8 @@ NSString *const kAskSubscribe=@"subscribe";
 {
 #ifndef DISABLE_OMEMO
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
-    if(account == nil || account.omemo == nil) {
+    if(account == nil || account.omemo == nil)
         return;
-    }
     [account.omemo clearAllSessionsForJid:self.contactJid];
 #endif
 }
@@ -417,9 +416,8 @@ NSString *const kAskSubscribe=@"subscribe";
     self.isPinned = pinned;
     // update active chats
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
-    if(account == nil) {
+    if(account == nil)
         return;
-    }
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact":self, @"pinningChanged": @YES}];
 }
 
@@ -428,6 +426,8 @@ NSString *const kAskSubscribe=@"subscribe";
     if(self.isBlocked == block)
         return YES;
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    if(account == nil)
+        return NO;
     if(!account.connectionProperties.supportsBlocking)
         return NO;
     [[MLXMPPManager sharedInstance] blocked:block Jid:self];
@@ -478,7 +478,7 @@ NSString *const kAskSubscribe=@"subscribe";
 
 -(instancetype) initWithCoder:(NSCoder*) coder
 {
-    self = [super init];
+    self = [self init];
     self.contactJid = [coder decodeObjectForKey:@"contactJid"];
     self.nickName = [coder decodeObjectForKey:@"nickName"];
     self.fullName = [coder decodeObjectForKey:@"fullName"];

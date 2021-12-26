@@ -167,31 +167,35 @@ struct ContactDetails: View {
                         Text("Resources")
                     }
                 }
+                
+                //even more buttons
+                Group {
 #if !DISABLE_OMEMO
-                Spacer()
-                    .frame(height: 30)
-                Button(action: {
-                    showingResetOmemoSessionConfirmation = true
-                }) {
-                    Text("Reset OMEMO session")
-                        .foregroundColor(.red)
-                }
-                .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
-                    ActionSheet(
-                        title: Text("Reset OMEMO session"),
-                        message: Text("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!"),
-                        buttons: [
-                            .cancel(),
-                            .destructive(
-                                Text("Yes"),
-                                action: {
-                                    contact.obj.resetOmemoSession()
-                                }
-                            )
-                        ]
-                    )
-                }
+                    Spacer()
+                        .frame(height: 30)
+                    Button(action: {
+                        showingResetOmemoSessionConfirmation = true
+                    }) {
+                        Text("Reset OMEMO session")
+                            .foregroundColor(.red)
+                    }
+                    .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
+                        ActionSheet(
+                            title: Text("Reset OMEMO session"),
+                            message: Text("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!"),
+                            buttons: [
+                                .cancel(),
+                                .destructive(
+                                    Text("Yes"),
+                                    action: {
+                                        contact.obj.resetOmemoSession()
+                                    }
+                                )
+                            ]
+                        )
+                    }
 #endif
+                }
                 
                 //make sure everything is aligned to the top of our view instead of vertically centered
                 Spacer()

@@ -42,6 +42,7 @@ typedef enum {
 // jid -> @[deviceID1, deviceID2]
 @property (nonatomic, strong) NSMutableSet<NSNumber*>* ownReceivedDeviceList;
 @property (nonatomic, strong) NSMutableDictionary<NSString*, NSMutableSet<NSNumber*>*>* brokenSessions;
+@property (nonatomic, strong) NSMutableSet<NSString*>* openPreKeySession;
 
 @end
 
@@ -59,6 +60,7 @@ const int KEY_SIZE = 16;
     self.account = account;
     NSArray<NSNumber*>* ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];
     self.ownReceivedDeviceList = [[NSMutableSet alloc] initWithArray:ownCachedDevices];
+    self.openPreKeySession = [[NSMutableSet alloc] init];
 
     self.omemoLoginState = LoggedOut;
     self.openBundleFetchCnt = 0;
@@ -112,10 +114,19 @@ const int KEY_SIZE = 16;
         self.omemoLoginState = CatchupDone;
         if(!self.openBundleFetchCnt) // check if we have a session were we loggedIn
         {
-            [self sendLocalDevicesIfNeeded];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": self.account.accountNo}];
+            [self catchupAndOmemoDone];
         }
     }
+}
+
+-(void) catchupAndOmemoDone
+{
+    [self sendLocalDevicesIfNeeded];
+    // send out
+    for(NSString* preKeyJid in self.openPreKeySession) {
+        [self sendKeyTransportElement:preKeyJid removeBrokenSessionForRid:nil];
+    }
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": self.account.accountNo}];
 }
 
 -(void) setupSignal
@@ -157,16 +168,19 @@ const int KEY_SIZE = 16;
 
 -(void) sendLocalDevicesIfNeeded
 {
+    DDLogInfo(@"sendLocalDevicesIfNeeded");
     if([self.ownReceivedDeviceList count] == 0) {
         // we need to publish a new devicelist if we did not receive our own list after a new connection
         // Generate single use keys
         if([self generateNewKeysIfNeeded] == NO)
+            DDLogInfo(@"Sending Bundle eventhough no new keys were generated");
             [self sendOMEMOBundle];
 
         [self sendOMEMODeviceWithForce:YES];
     }
     else
     {
+        DDLogInfo(@"Publishing first OMEMO device");
         // Generate single use keys
         [self generateNewKeysIfNeeded];
         [self sendOMEMODeviceWithForce:NO];
@@ -289,8 +303,7 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $_ID(xmpp*, account),
         self.closedBundleFetchCnt = 0;
         if(self.omemoLoginState == CatchupDone)
         {
-            [self sendLocalDevicesIfNeeded];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": self.account.accountNo}];
+            [self catchupAndOmemoDone];
         }
     }
 $$
@@ -431,6 +444,7 @@ $$
     // Check if our own device string is already in our set
     if(![self.ownReceivedDeviceList containsObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]] || force)
     {
+        DDLogInfo(@"Publishing OMEMO Devices with Force %u", force);
         [self.ownReceivedDeviceList addObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]];
         [self sendOMEMOBundle];
         [self publishDevicesViaPubSub:self.ownReceivedDeviceList];
@@ -519,8 +533,10 @@ $$
     }
 }
 
--(void) sendKeyTransportElement:(NSString*) jid removeBrokenSessionForRid:(NSNumber*) rid
+-(void) sendKeyTransportElement:(NSString*) jid removeBrokenSessionForRid:(NSNumber* _Nullable) rid
 {
+    [self.openPreKeySession removeObject:jid];
+
     // The needed device bundle for this contact/device was fetched
     // Send new keys
     XMPPMessage* messageNode = [[XMPPMessage alloc] init];
@@ -530,16 +546,17 @@ $$
     // Send KeyTransportElement only to the one device (overrideDevices)
     [self encryptMessage:messageNode withMessage:nil toContact:jid];
     DDLogDebug(@"Send KeyTransportElement to jid: %@", jid);
-    if(self.account) [self.account send:messageNode];
+    [self.account send:messageNode];
 
-    NSMutableSet<NSNumber*>* brokenContactRids = [self.brokenSessions objectForKey:jid];
-    if(brokenContactRids) {
-        if([brokenContactRids containsObject:rid]) {
-            [brokenContactRids removeObject:rid];
+    if(rid != nil) {
+        NSMutableSet<NSNumber*>* brokenContactRids = [self.brokenSessions objectForKey:jid];
+        if(brokenContactRids) {
+            if([brokenContactRids containsObject:rid]) {
+                [brokenContactRids removeObject:rid];
+            }
+            [self.brokenSessions setObject:brokenContactRids forKey:jid];
         }
-        [self.brokenSessions setObject:brokenContactRids forKey:jid];
     }
-    // TODO: remove broken session mark?
 }
 
 -(void) addEncryptionKeyForAllDevices:(NSArray*) devices encryptForJid:(NSString*) encryptForJid withEncryptedPayload:(MLEncryptedPayload*) encryptedPayload withXMLHeader:(MLXMLNode*) xmlHeader {
@@ -774,7 +791,7 @@ $$
         SignalCiphertext* ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
         NSError* error;
         NSData* decryptedKey = [cipher decryptCiphertext:ciphertext error:&error];
-        if(error) {
+        if(error != nil) {
             DDLogError(@"Could not decrypt to obtain key: %@", error);
             [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
             return [NSString stringWithFormat:@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
@@ -782,18 +799,7 @@ $$
         NSData* key;
         NSData* auth;
 
-        if(messagetype == SignalCiphertextTypePreKeyMessage)
-        {
-            // check if we need to generate new preKeys
-            if(self.omemoLoginState == LoggedIn && ![self generateNewKeysIfNeeded]) {
-                // send new bundle without the used preKey if no new keys were generated
-                [self sendOMEMOBundle];
-            }
-            else {
-                // nothing todo as generateNewKeysIfNeeded sends out the new bundle if new keys were generated
-            }
-        }
-        if(!decryptedKey)
+        if(decryptedKey == nil)
         {
             DDLogError(@"Could not decrypt to obtain key.");
             [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
@@ -801,6 +807,22 @@ $$
         }
         else
         {
+            if(messagetype == SignalCiphertextTypePreKeyMessage)
+            {
+                // check if we need to generate new preKeys
+                if(self.omemoLoginState == LoggedIn) {
+                    if([self generateNewKeysIfNeeded] == NO) {
+                        // send new bundle without the used preKey if no new keys were generated
+                        // nothing todo if generateNewKeysIfNeeded == YES as it sends out the new bundle if new keys were generated
+                        [self sendOMEMOBundle];
+                    }
+                    // build session
+                    [self sendKeyTransportElement:messageNode.fromUser removeBrokenSessionForRid:sid];
+                }
+                else {
+                    [self.openPreKeySession addObject:messageNode.fromUser];
+                }
+            }
             // save last successfull decryption time
             [self.monalSignalStore updateLastSuccessfulDecryptTime:address];
             if(contactBrokenRids) {

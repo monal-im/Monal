@@ -120,7 +120,7 @@ const int KEY_SIZE = 16;
 {
     [self sendLocalDevicesIfNeeded];
     // send out
-    for(NSString* preKeyJid in self.openPreKeySession) {
+    for(NSString* preKeyJid in [self.openPreKeySession copy]) {
         [self sendKeyTransportElement:preKeyJid removeBrokenSessionForRid:nil];
     }
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": self.account.accountNo}];

@@ -88,7 +88,7 @@ enum ContactDetailsAboutRows {
     self.navigationItem.title = self.contact.contactDisplayName;
 
     if(self.contact.isGroup) {
-       NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+       NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact];
         self.groupMemberCount = members.count;
         self.navigationItem.title = NSLocalizedString(@"Group Chat", @"");
     }

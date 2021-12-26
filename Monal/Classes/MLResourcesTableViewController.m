@@ -9,6 +9,7 @@
 #import "MLResourcesTableViewController.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
+#import "MLContactSoftwareVersionInfo.h"
 
 @interface MLResourcesTableViewController ()
 @property (nonatomic, strong) NSArray *resources;
@@ -36,7 +37,7 @@
 {
     [super viewWillAppear:animated];
     
-    self.resources = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+    self.resources = [[DataLayer sharedInstance] resourcesForContact:self.contact];
     
     if (!self.contact.isGroup) {
         [self querySoftwareVersion];
@@ -153,10 +154,9 @@
         for (NSDictionary* resourceDic in self.resources)
         {
             NSString* resourceTitle = [resourceDic objectForKey:@"resource"];
-            NSArray* versionDBInfoArr = [[DataLayer sharedInstance] getSoftwareVersionInfoForContact:self.contact.contactJid resource:resourceTitle andAccount:self.contact.accountId];
-            
-            if(versionDBInfoArr && [versionDBInfoArr count] >= 1) {
-                [self.versionInfoDic setObject:versionDBInfoArr[0] forKey:resourceTitle];
+            MLContactSoftwareVersionInfo* versionDBInfo = [[DataLayer sharedInstance] getSoftwareVersionInfoForContact:self.contact.contactJid resource:resourceTitle andAccount:self.contact.accountId];
+            if(versionDBInfo != nil) {
+                [self.versionInfoDic setObject:versionDBInfo forKey:resourceTitle];
             }
         }
     }

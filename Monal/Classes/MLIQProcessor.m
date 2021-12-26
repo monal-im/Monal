@@ -13,6 +13,7 @@
 #import "MLImageManager.h"
 #import "HelperTools.h"
 #import "MLNotificationQueue.h"
+#import "MLContactSoftwareVersionInfo.h"
 
 @interface MLIQProcessor()
 
@@ -590,21 +591,19 @@ $$
     if(!iqPlatformOS)
         iqPlatformOS = @"";
     
-    NSArray *versionDBInfoArr = [[DataLayer sharedInstance] getSoftwareVersionInfoForContact:iqNode.fromUser resource:iqNode.fromResource andAccount:account.accountNo];
+    MLContactSoftwareVersionInfo* versionDBInfo = [[DataLayer sharedInstance] getSoftwareVersionInfoForContact:iqNode.fromUser resource:iqNode.fromResource andAccount:account.accountNo];
     
-    if ((versionDBInfoArr != nil) && ([versionDBInfoArr count] > 0)) {
-        NSDictionary *versionInfoDBDic = versionDBInfoArr[0];        
-        
-        if (!([[versionInfoDBDic objectForKey:@"platform_App_Name"] isEqualToString:iqAppName] &&
-            [[versionInfoDBDic objectForKey:@"platform_App_Version"] isEqualToString:iqAppVersion] &&
-            [[versionInfoDBDic objectForKey:@"platform_OS"] isEqualToString:iqPlatformOS]))
+    if (versionDBInfo != nil) {
+        if (!([versionDBInfo.appName isEqualToString:iqAppName] &&
+            [versionDBInfo.appVersion isEqualToString:iqAppVersion] &&
+            [versionDBInfo.platformOs isEqualToString:iqPlatformOS]))
         {
+            MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS];
+
             [[DataLayer sharedInstance] setSoftwareVersionInfoForContact:iqNode.fromUser
                                                                 resource:iqNode.fromResource
                                                               andAccount:account.accountNo
-                                                             withAppName:iqAppName
-                                                              appVersion:iqAppVersion
-                                                           andPlatformOS:iqPlatformOS];
+                                                        withSoftwareInfo:newSoftwareVersionInfo];
             
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh
                                                                 object:account

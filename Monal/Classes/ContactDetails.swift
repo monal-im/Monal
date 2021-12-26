@@ -163,7 +163,7 @@ struct ContactDetails: View {
                     
                     Spacer()
                         .frame(height: 20)
-                    NavigationLink(destination: Resources(contact: contact)) {
+                    NavigationLink(destination: ContactResources(contact: contact)) {
                         Text("Resources")
                     }
                 }

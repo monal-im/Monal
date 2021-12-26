@@ -11,6 +11,7 @@
 #import "XMPPPresence.h"
 #import "MLMessage.h"
 #import "MLContact.h"
+#import "MLContactSoftwareVersionInfo.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -58,14 +59,12 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSMutableArray<MLContact*>*) searchContactsWithString:(NSString*) search;
 
 -(NSMutableArray<MLContact*>*) contactList;
--(NSArray*) resourcesForContact:(NSString*)contact ;
--(NSArray*) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account;
+-(NSArray<NSString*>*) resourcesForContact:(MLContact* _Nonnull)contact ;
+-(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account;
 -(void) setSoftwareVersionInfoForContact:(NSString*)contact
                                 resource:(NSString*)resource
                               andAccount:(NSString*)account
-                             withAppName:(NSString*)appName
-                              appVersion:(NSString*)appVersion
-                           andPlatformOS:(NSString*)platformOS;
+                                withSoftwareInfo:(MLContactSoftwareVersionInfo*) newSoftwareInfo;
 
 #pragma mark Ver string and Capabilities
 

@@ -16,6 +16,7 @@
 #import "XMPPIQ.h"
 #import "XMPPDataForm.h"
 #import "MLFiletransfer.h"
+#import "MLContactSoftwareVersionInfo.h"
 
 @interface DataLayer()
 @property (readonly, strong) MLSQLite* db;
@@ -646,40 +647,38 @@ static NSDateFormatter* dbFormatter;
 }
 
 
--(NSArray*) resourcesForContact:(NSString*) contact
+-(NSArray<NSString*>*) resourcesForContact:(MLContact* _Nonnull) contact
 {
-    if(!contact)
-        return nil;
     return [self.db idReadTransaction:^{
-        NSString* query1 = @"select resource from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where  buddy_name=?;";
-        NSArray* params = @[contact ];
-        NSArray* resources = [self.db executeReader:query1 andArguments:params];
+        NSArray<NSString*>* resources = [self.db executeScalarReader:@"SELECT resource FROM buddy_resources AS A INNER JOIN buddylist AS B ON a.buddy_id=b.buddy_id WHERE  buddy_name=?;" andArguments:@[contact.contactJid]];
         return resources;
     }];
 }
 
--(NSArray*) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account
+-(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account
 {
     if(!account)
         return nil;
-    return [self.db idReadTransaction:^{
-        NSString* query1 = @"select platform_App_Name, platform_App_Version, platform_OS from buddy_resources where buddy_id in (select buddy_id from buddylist where account_id=? and buddy_name=?) and resource=?";
-        NSArray* params = @[account, contact, resource];
-        NSArray* resources = [self.db executeReader:query1 andArguments:params];
+    NSArray<NSDictionary*>* versionInfoArr = [self.db idReadTransaction:^{
+        NSArray<NSDictionary*>* resources = [self.db executeReader:@"SELECT platform_App_Name, platform_App_Version, platform_OS FROM buddy_resources WHERE buddy_id IN (SELECT buddy_id FROM buddylist WHERE account_id=? AND buddy_name=?) AND resource=?" andArguments:@[account, contact, resource]];
         return resources;
     }];
+    if(versionInfoArr == nil || versionInfoArr.count == 0) {
+        return nil;
+    } else {
+        NSDictionary* versionInfo = versionInfoArr.firstObject;
+        return [[MLContactSoftwareVersionInfo alloc] initWithJid:contact andRessource:resource andAppName:versionInfo[@"platform_App_Name"] andAppVersion:versionInfo[@"platform_App_Version"] andPlatformOS:versionInfo[@"platform_OS"]];
+    }
 }
 
 -(void) setSoftwareVersionInfoForContact:(NSString*)contact
                                 resource:(NSString*)resource
                               andAccount:(NSString*)account
-                             withAppName:(NSString*)appName
-                              appVersion:(NSString*)appVersion
-                           andPlatformOS:(NSString*)platformOS
+                        withSoftwareInfo:(MLContactSoftwareVersionInfo*) newSoftwareInfo
 {
     [self.db voidWriteTransaction:^{
         NSString* query = @"update buddy_resources set platform_App_Name=?, platform_App_Version=?, platform_OS=? where buddy_id in (select buddy_id from buddylist where account_id=? and buddy_name=?) and resource=?";
-        NSArray* params = @[appName, appVersion, platformOS, account, contact, resource];
+        NSArray* params = @[newSoftwareInfo.appName, newSoftwareInfo.appVersion, newSoftwareInfo.platformOs, account, contact, resource];
         [self.db executeNonQuery:query andArguments:params];
     }];
 }

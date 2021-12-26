@@ -164,7 +164,8 @@ NSString* const kStanza = @"stanza";
 {
     //initialize ivars depending on provided arguments
     self = [super init];
-    _internalID = [[NSUUID UUID] UUIDString];
+    u_int32_t i = arc4random();
+    _internalID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
     DDLogVerbose(@"Created account %@ with id %@", accountNo, _internalID);
     self.accountNo = accountNo;
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];

@@ -319,14 +319,14 @@
 
 -(UIImage*) imageForEmptyDataSet:(UIScrollView*) scrollView
 {
-    return [UIImage imageNamed:@"river"];
+    return nil;
 }
 
 -(NSAttributedString*) titleForEmptyDataSet:(UIScrollView*) scrollView
 {
-    NSString *text = NSLocalizedString(@"You need friends for this ride", @"");
+    NSString* text = NSLocalizedString(@"You need friends for this ride", @"");
     
-    NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
+    NSDictionary* attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: [UIColor darkGrayColor]};
     
     return [[NSAttributedString alloc] initWithString:text attributes:attributes];

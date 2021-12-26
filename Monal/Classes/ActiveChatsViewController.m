@@ -616,12 +616,12 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 #pragma mark - empty data set
 
-- (UIImage *)imageForEmptyDataSet:(UIScrollView *)scrollView
+- (UIImage*)imageForEmptyDataSet:(UIScrollView*)scrollView
 {
-    return [UIImage imageNamed:@"river"];
+    return nil;
 }
 
-- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
+- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *) scrollView
 {
     NSString* text = NSLocalizedString(@"No one is here", @"");
     
@@ -631,7 +631,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     return [[NSAttributedString alloc] initWithString:text attributes:attributes];
 }
 
-- (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
+- (NSAttributedString*)descriptionForEmptyDataSet:(UIScrollView*) scrollView
 {
     NSString* text = NSLocalizedString(@"When you start talking to someone,\n they will show up here.", @"");
     

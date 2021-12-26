@@ -58,17 +58,9 @@ const int KEY_SIZE = 16;
     self = [super init];
     self.accountJid = account.connectionProperties.identity.jid;
     self.account = account;
-    NSArray<NSNumber*>* ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];
-    self.ownReceivedDeviceList = [[NSMutableSet alloc] initWithArray:ownCachedDevices];
-    self.openPreKeySession = [[NSMutableSet alloc] init];
-
     self.omemoLoginState = LoggedOut;
     self.openBundleFetchCnt = 0;
     self.closedBundleFetchCnt = 0;
-
-    self.brokenSessions = [[NSMutableDictionary alloc] init];
-
-    [self setupSignal];
 
     // Make sure that our own jid is included in the buddylist
     if([[DataLayer sharedInstance] isContactInList:self.accountJid forAccount:account.accountNo] == NO) {
@@ -78,6 +70,11 @@ const int KEY_SIZE = 16;
         DDLogWarn(@"Own jid is missing in buddylist: jid: %@ accountNo: %@", self.accountJid, account.accountNo);
         [[DataLayer sharedInstance] addContact:self.accountJid forAccount:account.accountNo nickname:nil andMucNick:nil];
     }
+    [self setupSignal];
+    self.brokenSessions = [[NSMutableDictionary alloc] init];
+    NSArray<NSNumber*>* ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];
+    self.ownReceivedDeviceList = [[NSMutableSet alloc] initWithArray:ownCachedDevices];
+    self.openPreKeySession = [[NSMutableSet alloc] init];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loggedIn:) name:kMLHasConnectedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupDone:) name:kMonalFinishedCatchup object:nil];

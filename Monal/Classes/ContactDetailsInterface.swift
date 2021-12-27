@@ -114,6 +114,17 @@ struct ClearButton: ViewModifier
     }
 }
 
+// lazy loading of navigation destination views, see https://stackoverflow.com/a/61234030/3528174
+struct NavigationLazyView<Content: View>: View {
+    let build: () -> Content
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+    var body: Content {
+        build()
+    }
+}
+
 @objc
 class ContactDetailsInterface: NSObject {
     @objc

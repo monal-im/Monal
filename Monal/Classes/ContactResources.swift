@@ -28,9 +28,9 @@ struct ContactResources: View {
         _contact = StateObject(wrappedValue: contact)
 
         if let previewMock = previewMockOpt {
-            self.contactVersionInfos = previewMock
+            _contactVersionInfos = State(wrappedValue: previewMock)
         } else {
-            self.contactVersionInfos = OrderedDictionary()
+            _contactVersionInfos = State(wrappedValue: OrderedDictionary())
             for ressourceName in DataLayer.sharedInstance().resources(for: contact.obj) {
                 // query software version from contact
                 MLXMPPManager.sharedInstance()
@@ -58,8 +58,10 @@ struct ContactResources: View {
                     }
                 }
                 .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalXmppUserSoftWareVersionRefresh"))) { notification in
-                    if let userInfo = notification.userInfo, let softwareInfo = userInfo["versionInfo"] as? MLContactSoftwareVersionInfo {
-                        self.contactVersionInfos[softwareInfo.resource] = softwareInfo
+                    if let obj = notification.object as? xmpp, let userInfo = notification.userInfo, let softwareInfo = userInfo["versionInfo"] as? MLContactSoftwareVersionInfo {
+                        if softwareInfo.fromJid == contact.obj.contactJid && obj.accountNo == contact.obj.accountId {
+                            self.contactVersionInfos[softwareInfo.resource] = softwareInfo
+                        }
                     }
                 }
             }

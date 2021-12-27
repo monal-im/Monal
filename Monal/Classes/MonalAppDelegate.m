@@ -897,12 +897,23 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         }
     };
     
+    //only proceed with our BGTASK if the NotificationServiceExtension is not running
+    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+    {
+        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
+            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        }];
+    }
+    
     if([[MLXMPPManager sharedInstance] hasConnectivity])
     {
         for(xmpp* xmppAccount in [[MLXMPPManager sharedInstance] connectedXMPP])
         {
             //try to send a ping. if it fails, it will reconnect
             DDLogVerbose(@"app delegate pinging");
+            [xmppAccount unfreezed];
             [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         }
     }

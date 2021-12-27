@@ -2519,6 +2519,12 @@ NSString* const kStanza = @"stanza";
             NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
             NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
             @synchronized(_iqHandlers) {
+                //remove all current persistent handlers...
+                NSMutableDictionary* handlersCopy = [_iqHandlers copy];
+                for(NSString* iqid in handlersCopy)
+                    if(handlersCopy[iqid][@"handler"] != nil)
+                        [_iqHandlers removeObjectForKey:iqid];
+                //...and replace them with persistent handlers loaded from state
                 for(NSString* iqid in persistentIqHandlers)
                 {
                     _iqHandlers[iqid] = [persistentIqHandlers[iqid] mutableCopy];
@@ -2791,7 +2797,7 @@ NSString* const kStanza = @"stanza";
     @synchronized(_iqHandlers) {
         //make sure this works even if the invalidation handlers add a new iq to the list
         NSMutableDictionary* handlersCopy = [_iqHandlers mutableCopy];
-        _iqHandlers = [[NSMutableDictionary alloc] init];
+        [_iqHandlers removeAllObjects];
         
         for(NSString* iqid in handlersCopy)
         {
@@ -3697,7 +3703,7 @@ NSString* const kStanza = @"stanza";
                 
                 //make sure our fake error iq is handled inside the receiveQueue
                 [self dispatchAsyncOnReceiveQueue:^{
-                    //extract this from _iqHandlers to make sure we only handle iqs didn't get handled in the meantime
+                    //extract this from _iqHandlers to make sure we only handle iqs that didn't get handled in the meantime
                     NSMutableDictionary* iqHandler = nil;
                     @synchronized(self->_iqHandlers) {
                         iqHandler = self->_iqHandlers[iqid];

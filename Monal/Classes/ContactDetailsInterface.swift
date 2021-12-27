@@ -51,19 +51,34 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
         self.obj = obj
     }
     
+    private func addObserverForMember(_ member: String){
+        if(!self.observedMembers.contains(member)) {
+            DDLogDebug("Adding observer for member \(member)")
+            self.observers.append(KVOObserver(obj:self.obj, keyPath:member, objectWillChange: {
+                DDLogDebug("Observer said \(member) has changed")
+                DispatchQueue.main.async {
+                    DDLogDebug("Calling self.objectWillChange.send()...")
+                    self.objectWillChange.send()
+                }
+            }))
+            self.observedMembers.add(member)
+        }
+    }
+    
+    subscript<T>(member: String) -> T {
+        get {
+            addObserverForMember(member)
+            DDLogDebug("Returning value for member \(member): \(String(describing:self.obj.value(forKeyPath:member)))")
+            return self.obj.value(forKeyPath:member) as! T
+        }
+        set {
+            self.obj.setValue(newValue, forKey:member)
+        }
+    }
+    
     subscript<T>(dynamicMember member: String) -> T {
         get {
-            if(!self.observedMembers.contains(member)) {
-                DDLogDebug("Adding observer for member \(member)")
-                self.observers.append(KVOObserver(obj:self.obj, keyPath:member, objectWillChange: {
-                    DDLogDebug("Observer said \(member) has changed")
-                    DispatchQueue.main.async {
-                        DDLogDebug("Calling self.objectWillChange.send()...")
-                        self.objectWillChange.send()
-                    }
-                }))
-                self.observedMembers.add(member)
-            }
+            addObserverForMember(member)
             DDLogDebug("Returning value for member \(member): \(String(describing:self.obj.value(forKey:member)))")
             return self.obj.value(forKey:member) as! T
         }

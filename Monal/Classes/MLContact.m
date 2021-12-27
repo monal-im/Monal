@@ -504,27 +504,27 @@ NSString *const kAskSubscribe=@"subscribe";
 
 -(void) updateWithContact:(MLContact*) contact
 {
-    self.contactJid = contact.contactJid;
-    self.nickName = contact.nickName;
-    self.fullName = contact.fullName;
-    self.subscription = contact.subscription;
-    self.ask = contact.ask;
-    self.accountId = contact.accountId;
-    self.groupSubject = contact.groupSubject;
-    self.accountNickInGroup = contact.accountNickInGroup;
-    self.mucType = contact.mucType;
-    self.isGroup = contact.isGroup;
-    self.isMentionOnly = contact.isMentionOnly;
-    self.isPinned = contact.isPinned;
-    self.isBlocked = contact.isBlocked;
-    self.statusMessage = contact.statusMessage;
-    self.state = contact.state;
-    self->_unreadCount = contact->_unreadCount;
-    self.isActiveChat = contact.isActiveChat;
-    self.isEncrypted = contact.isEncrypted;
-    self.isMuted = contact.isMuted;
+    updateIfIdNotEqual(self.contactJid, contact.contactJid);
+    updateIfIdNotEqual(self.nickName, contact.nickName);
+    updateIfIdNotEqual(self.fullName, contact.fullName);
+    updateIfIdNotEqual(self.subscription, contact.subscription);
+    updateIfIdNotEqual(self.ask, contact.ask);
+    updateIfIdNotEqual(self.accountId, contact.accountId);
+    updateIfIdNotEqual(self.groupSubject, contact.groupSubject);
+    updateIfIdNotEqual(self.accountNickInGroup, contact.accountNickInGroup);
+    updateIfIdNotEqual(self.mucType, contact.mucType);
+    updateIfPrimitiveNotEqual(self.isGroup, contact.isGroup);
+    updateIfPrimitiveNotEqual(self.isMentionOnly, contact.isMentionOnly);
+    updateIfPrimitiveNotEqual(self.isPinned, contact.isPinned);
+    updateIfPrimitiveNotEqual(self.isBlocked, contact.isBlocked);
+    updateIfIdNotEqual(self.statusMessage, contact.statusMessage);
+    updateIfIdNotEqual(self.state, contact.state);
+    updateIfPrimitiveNotEqual(self->_unreadCount, contact->_unreadCount);
+    updateIfPrimitiveNotEqual(self.isActiveChat, contact.isActiveChat);
+    updateIfPrimitiveNotEqual(self.isEncrypted, contact.isEncrypted);
+    updateIfPrimitiveNotEqual(self.isMuted, contact.isMuted);
     // don't update lastInteractionTime from contact, we dynamically update ourselves by handling kMonalLastInteractionUpdatedNotice
-    // self.lastInteractionTime = contact.lastInteractionTime;
+    // updateIfIdNotEqual(self.lastInteractionTime, contact.lastInteractionTime);
 }
 
 -(BOOL) isEqualToMessage:(MLMessage*) message

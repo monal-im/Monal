@@ -45,11 +45,14 @@ typedef enum NotificationPrivacySettingOption {
 
 
 //some useful macros
-#define weakify(var)            __weak __typeof__(var) AHKWeak_##var = var
-#define strongify(var)          _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
-#define nilWrapper(var)         (var == nil           ? [NSNull null] : var)
-#define nilExtractor(var)       (var == [NSNull null] ? nil           : var)
-#define nilDefault(var, def)    (var == nil ? def : var)
+#define weakify(var)                        __weak __typeof__(var) AHKWeak_##var = var
+#define strongify(var)                      _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
+#define nilWrapper(var)                     (var == nil           ? [NSNull null] : var)
+#define nilExtractor(var)                   (var == [NSNull null] ? nil           : var)
+#define nilDefault(var, def)                (var == nil ? def : var)
+#define updateIfIdNotEqual(a, b)            if(a != b && ![a isEqual:b]) a = b
+#define updateIfPrimitiveNotEqual(a, b)     if(a != b) a = b
+
 
 //see https://stackoverflow.com/a/62984543/3528174
 #define STRIP_PARENTHESES(X) __ESC(__ISH X)

@@ -605,12 +605,9 @@ $$
                                                               andAccount:account.accountNo
                                                         withSoftwareInfo:newSoftwareVersionInfo];
             
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh            
                                                                 object:account
-                                                              userInfo:@{@"platform_App_Name":iqAppName,
-                                                                         @"platform_App_Version":iqAppVersion,
-                                                                         @"platform_OS":iqPlatformOS,
-                                                                         @"fromResource":iqNode.fromResource}];
+                                                              userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
         }
     }
 }

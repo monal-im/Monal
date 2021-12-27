@@ -171,7 +171,7 @@ struct ContactDetails: View {
                     
                     //even more buttons
                     Group {
-    #if !DISABLE_OMEMO
+#if !DISABLE_OMEMO
                         Spacer()
                             .frame(height: 30)
                         Button(action: {
@@ -195,7 +195,7 @@ struct ContactDetails: View {
                                 ]
                             )
                         }
-    #endif
+#endif
                     }
                     
                     //make sure everything is aligned to the top of our view instead of vertically centered
@@ -209,7 +209,7 @@ struct ContactDetails: View {
             }){
                 Image(systemName: "arrow.backward")
             }.keyboardShortcut(.escape, modifiers: []))
-            .navigationTitle(contact.contactDisplayName as String)
+            .navigationBarTitle(contact.contactDisplayName as String, displayMode: .inline)
         }
     }
 }

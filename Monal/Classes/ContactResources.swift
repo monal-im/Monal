@@ -10,7 +10,7 @@ import monalxmpp
 import SwiftUI
 import OrderedCollections
 
-func resourceRowElement(k: String, v: String, space: CGFloat = 5) -> some View {
+func resourceRowElement(_ k: String, _ v: String, space: CGFloat = 5) -> some View {
     HStack {
         Text(k)
         Spacer()
@@ -22,22 +22,22 @@ func resourceRowElement(k: String, v: String, space: CGFloat = 5) -> some View {
 
 struct ContactResources: View {
     @StateObject var contact: ObservableKVOWrapper<MLContact>
-    private var contactVersionInfos: OrderedDictionary<String, MLContactSoftwareVersionInfo> = OrderedDictionary()
-
+    @State var contactVersionInfos: OrderedDictionary<String, MLContactSoftwareVersionInfo>
+    
     init(contact: ObservableKVOWrapper<MLContact>, previewMockOpt: OrderedDictionary<String, MLContactSoftwareVersionInfo>? = nil) {
         _contact = StateObject(wrappedValue: contact)
 
         if let previewMock = previewMockOpt {
             self.contactVersionInfos = previewMock
         } else {
-            let ressourceNames: Array<String> = DataLayer.sharedInstance().resources(for: contact.obj)
-            for ressourceName in ressourceNames {
-                // query software version
+            self.contactVersionInfos = OrderedDictionary()
+            for ressourceName in DataLayer.sharedInstance().resources(for: contact.obj) {
+                // query software version from contact
                 MLXMPPManager.sharedInstance()
                     .getEntitySoftWareVersion(for: contact.obj, andResource: ressourceName)
 
-                let softwareInfoOpt: MLContactSoftwareVersionInfo? = DataLayer.sharedInstance().getSoftwareVersionInfo(forContact: contact.obj.contactJid, resource: ressourceName, andAccount: contact.obj.accountId)
-                if let softwareInfo = softwareInfoOpt {
+                // load already known software version info from database
+                if let softwareInfo = DataLayer.sharedInstance().getSoftwareVersionInfo(forContact: contact.obj.contactJid, resource: ressourceName, andAccount: contact.obj.accountId) {
                     self.contactVersionInfos[ressourceName] = softwareInfo
                 }
             }
@@ -45,20 +45,28 @@ struct ContactResources: View {
     }
 
     var body: some View {
-        VStack {
-            ForEach(self.contactVersionInfos.keys, id: \.self) { resourceKey in
-                if let versionInfo = self.contactVersionInfos[resourceKey] {
-                    VStack {
-                        resourceRowElement(k: "Resource:", v: versionInfo.resource)
-                        resourceRowElement(k: "Client Name:", v: versionInfo.appName)
-                        resourceRowElement(k: "Client Version:", v: versionInfo.appVersion)
-                        resourceRowElement(k: "OS:", v: versionInfo.platformOs)
+        ScrollView {
+            List {
+                ForEach(self.contactVersionInfos.keys, id: \.self) { resourceKey in
+                    if let versionInfo = self.contactVersionInfos[resourceKey] {
+                        VStack {
+                            resourceRowElement("Resource:", versionInfo.resource)
+                            resourceRowElement("Client Name:", versionInfo.appName)
+                            resourceRowElement("Client Version:", versionInfo.appVersion)
+                            resourceRowElement("OS:", versionInfo.platformOs)
+                        }
                     }
-                    Spacer().frame(height: 30)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalXmppUserSoftWareVersionRefresh"))) { notification in
+                    if let userInfo = notification.userInfo, let softwareInfo = userInfo["versionInfo"] as? MLContactSoftwareVersionInfo {
+                        self.contactVersionInfos[softwareInfo.resource] = softwareInfo
+                    }
                 }
             }
             Spacer()
         }
+        //.navigationBarTitle(String(format: NSLocalizedString("Clients of %@", comment: ""), contact.contactDisplayName))
+        .navigationBarTitle("Clients")
     }
 }
 
@@ -67,7 +75,6 @@ func previewMock() -> OrderedDictionary<String, MLContactSoftwareVersionInfo> {
     previewMock["m1"] = MLContactSoftwareVersionInfo.init(jid: "test1@monal.im", andRessource: "m1", andAppName: "Monal", andAppVersion: "1.1.1", andPlatformOS: "ios")
     previewMock["m2"] = MLContactSoftwareVersionInfo.init(jid: "test1@monal.im", andRessource: "m2", andAppName: "Monal", andAppVersion: "1.1.2", andPlatformOS: "macOS")
     previewMock["m3"] = MLContactSoftwareVersionInfo.init(jid: "test1@monal.im", andRessource: "m3", andAppName: "Monal", andAppVersion: "1.1.2", andPlatformOS: "macOS")
-
     return previewMock
 }
 

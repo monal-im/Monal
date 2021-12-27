@@ -18,7 +18,7 @@ struct ContactDetailsHeader: View {
         VStack {
             Image(uiImage: contact.avatar)
                 .resizable()
-                .frame(minWidth: 50, idealWidth: 100, maxWidth: 200, minHeight: 50, idealHeight: 100, maxHeight: 200, alignment: .center)
+                .frame(minWidth: 100, idealWidth: 150, maxWidth: 200, minHeight: 100, idealHeight: 150, maxHeight: 200, alignment: .center)
                 .scaledToFit()
                 .shadow(radius: 7)
             

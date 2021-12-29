@@ -479,7 +479,7 @@ $$instance_handler(handleConfigFormResult, account.pubsub, $_ID(xmpp*, account),
         return;
     }
     
-    XMPPDataForm* dataForm = [[iqNode findFirst:@"{http://jabber.org/protocol/pubsub#owner}pubsub/configure/{jabber:x:data}x"] copy];
+    XMPPDataForm* dataForm = [[iqNode findFirst:@"{http://jabber.org/protocol/pubsub#owner}pubsub/configure/\\{http://jabber.org/protocol/pubsub#node_config}form\\"] copy];
     if(!dataForm)
     {
         DDLogError(@"Server returned invalid config form, aborting!");

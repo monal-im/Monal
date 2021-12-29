@@ -46,8 +46,7 @@
                 weakself.captchaImage.image= [UIImage imageWithData:captchaImage];
                 weakself.hiddenFields = hiddenFields;
             } else {
-                //show error image
-                //self.captchaImage.image=
+                //TODO: hide captcha image and corresponding input field
             }
             [weakself.xmppAccount disconnect:YES];  //we dont want to see any time out errors
         });
@@ -64,7 +63,7 @@
 
 -(void) createXMPPInstance
 {
-    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing@yax.im" password:@"nothing" andResource:@"MonalReg"];
+    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"nothing@%@", kRegServer] password:@"nothing" andResource:@"MonalReg"];
     MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:@"" andPort:[NSNumber numberWithInt:5222] andDirectTLS:NO];
     self.xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:@"-1"];
 }

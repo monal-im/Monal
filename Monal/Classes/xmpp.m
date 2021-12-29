@@ -2234,7 +2234,7 @@ NSString* const kStanza = @"stanza";
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
                 if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
                     DDLogDebug(@"SEND: redacted sasl element: %@", [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
-                else if([stanza check:@"{jabber:iq:register}query"])
+                else if([stanza check:@"/{jabber:client}iq<type=set>/{jabber:iq:register}query"])
                     DDLogDebug(@"SEND: redacted register/change password iq");
                 else
                     DDLogDebug(@"SEND: %@", stanza);
@@ -3347,7 +3347,7 @@ NSString* const kStanza = @"stanza";
                 NSMutableDictionary* hiddenFormFields = [[NSMutableDictionary alloc] init];
                 for(MLXMLNode* field in [result find:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/field<type=hidden>"])
                     hiddenFormFields[[field findFirst:@"/@var"]] = [field findFirst:@"value#"];
-                self->_regFormCompletion([result findFirst:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/{*}data"], hiddenFormFields);
+                self->_regFormCompletion([result findFirst:@"{jabber:iq:register}query/{urn:xmpp:bob}data#|base64"], hiddenFormFields);
             });
     } andErrorHandler:^(XMPPIQ* error) {
         //dispatch completion handler outside of the receiveQueue

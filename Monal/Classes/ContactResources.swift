@@ -23,14 +23,14 @@ func resourceRowElement(_ k: String, _ v: String, space: CGFloat = 5) -> some Vi
 struct ContactResources: View {
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     @State var contactVersionInfos: OrderedDictionary<String, MLContactSoftwareVersionInfo>
-    
-    init(contact: ObservableKVOWrapper<MLContact>, previewMockOpt: OrderedDictionary<String, MLContactSoftwareVersionInfo>? = nil) {
-        _contact = StateObject(wrappedValue: contact)
 
-        if let previewMock = previewMockOpt {
-            _contactVersionInfos = State(wrappedValue: previewMock)
+    init(contact: ObservableKVOWrapper<MLContact>, previewMock: OrderedDictionary<String, MLContactSoftwareVersionInfo>? = nil) {
+        _contact = StateObject(wrappedValue: contact)
+        
+        if previewMock != nil {
+            self.contactVersionInfos = previewMock!
         } else {
-            _contactVersionInfos = State(wrappedValue: OrderedDictionary())
+            var tmpInfos = OrderedDictionary<String, MLContactSoftwareVersionInfo>()
             for ressourceName in DataLayer.sharedInstance().resources(for: contact.obj) {
                 // query software version from contact
                 MLXMPPManager.sharedInstance()
@@ -38,16 +38,17 @@ struct ContactResources: View {
 
                 // load already known software version info from database
                 if let softwareInfo = DataLayer.sharedInstance().getSoftwareVersionInfo(forContact: contact.obj.contactJid, resource: ressourceName, andAccount: contact.obj.accountId) {
-                    self.contactVersionInfos[ressourceName] = softwareInfo
+                    tmpInfos[ressourceName] = softwareInfo
                 }
             }
+            self.contactVersionInfos = tmpInfos
         }
     }
 
     var body: some View {
-        ScrollView {
+        VStack {
             List {
-                ForEach(self.contactVersionInfos.keys, id: \.self) { resourceKey in
+                ForEach(Array(self.contactVersionInfos.keys), id: \.self) { resourceKey in
                     if let versionInfo = self.contactVersionInfos[resourceKey] {
                         VStack {
                             resourceRowElement("Resource:", versionInfo.resource)
@@ -57,8 +58,8 @@ struct ContactResources: View {
                         }
                     }
                 }
-                .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalXmppUserSoftWareVersionRefresh"))) { notification in
-                    if let obj = notification.object as? xmpp, let userInfo = notification.userInfo, let softwareInfo = userInfo["versionInfo"] as? MLContactSoftwareVersionInfo {
+                .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalXmppUserSoftWareVersionRefresh")).receive(on: RunLoop.main)) { notification in
+                    if let obj = notification.object as? xmpp, let softwareInfo = notification.userInfo?["versionInfo"] as? MLContactSoftwareVersionInfo {
                         if softwareInfo.fromJid == contact.obj.contactJid && obj.accountNo == contact.obj.accountId {
                             self.contactVersionInfos[softwareInfo.resource] = softwareInfo
                         }
@@ -67,8 +68,8 @@ struct ContactResources: View {
             }
             Spacer()
         }
-        //.navigationBarTitle(String(format: NSLocalizedString("Clients of %@", comment: ""), contact.contactDisplayName))
-        .navigationBarTitle("Clients")
+        //.navigationBarTitle(String(format: NSLocalizedString("Devices of %@", comment: ""), contact.contactDisplayName))
+        .navigationBarTitle("Devices")
     }
 }
 
@@ -82,6 +83,6 @@ func previewMock() -> OrderedDictionary<String, MLContactSoftwareVersionInfo> {
 
 struct ContactResources_Previews: PreviewProvider {
     static var previews: some View {
-        ContactResources(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)), previewMockOpt: previewMock())
+        ContactResources(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)), previewMock:previewMock())
     }
 }

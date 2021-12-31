@@ -19,6 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) NSString* platformOs;
 
 -(instancetype) initWithJid:(NSString*) jid andRessource:(NSString*) ressource andAppName:(NSString*) appName andAppVersion:(NSString*) appVersion andPlatformOS:(NSString*) platformOs;
+-(BOOL) isEqual:(id _Nullable) object;
+-(NSUInteger) hash;
 
 @end
 

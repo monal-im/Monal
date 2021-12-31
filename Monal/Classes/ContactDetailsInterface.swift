@@ -120,6 +120,9 @@ struct NavigationLazyView<Content: View>: View {
     init(_ build: @autoclosure @escaping () -> Content) {
         self.build = build
     }
+    init(withClosure build: @escaping () -> Content) {
+        self.build = build
+    }
     var body: Content {
         build()
     }

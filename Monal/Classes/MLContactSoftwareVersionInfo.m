@@ -22,8 +22,27 @@
     self.appName = appName;
     self.appVersion = appVersion;
     self.platformOs = platformOs;
-    
     return self;
+}
+
+-(BOOL) isEqual:(id _Nullable) object
+{
+    if(object == nil || self == object)
+        return YES;
+    else if([object isKindOfClass:[MLContactSoftwareVersionInfo class]])
+        return [self.fromJid isEqualToString:((MLContactSoftwareVersionInfo*)object).fromJid] && [self.resource isEqualToString:((MLContactSoftwareVersionInfo*)object).resource];
+    else
+        return NO;
+}
+
+-(NSUInteger) hash
+{
+    return [self.fromJid hash] ^ [self.resource hash] ^ [self.appName hash] ^ [self.appVersion hash] ^ [self.platformOs hash];
+}
+
+-(NSString*) id
+{
+    return [NSString stringWithFormat:@"%@/%@", self.fromJid, self.resource];
 }
 
 @end

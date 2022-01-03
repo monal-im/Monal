@@ -90,8 +90,7 @@
 
 -(void) subscribeContact:(NSString*) jid
 {
-    [self.attributes setObject:jid forKey:@"to"];
-    [self.attributes setObject:@"subscribe" forKey:@"type"];
+    [self subscribeContact:jid withPreauthToken:nil];
 }
 
 -(void) subscribedContact:(NSString*) jid
@@ -104,6 +103,17 @@
 {
     [self.attributes setObject:jid forKey:@"to"];
     [self.attributes setObject:@"unsubscribed" forKey:@"type"];
+}
+
+-(void) subscribeContact:(NSString*) jid withPreauthToken:(NSString* _Nullable) token
+{
+    [self.attributes setObject:jid forKey:@"to"];
+    [self.attributes setObject:@"subscribe" forKey:@"type"];
+    if(token != nil)
+        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"preauth" andNamespace:@"urn:xmpp:pars:0" withAttributes:@{
+            @"token": token
+        } andChildren:@[] andData:nil]];
+    
 }
 
 @end

@@ -135,7 +135,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 /**
  adds a new contact to the roster
  */
--(void) addToRoster:(NSString*) contact;
+-(void) addToRoster:(NSString*) contact withPreauthToken:(NSString* _Nullable) preauthToken;
 
 /**
  adds a new contact to the roster

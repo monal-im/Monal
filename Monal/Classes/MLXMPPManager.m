@@ -380,7 +380,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     return account.connectedTime;
 }
 
--(xmpp*) getConnectedAccountForID:(NSString*) accountNo
+-(xmpp* _Nullable) getConnectedAccountForID:(NSString*) accountNo
 {
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
@@ -543,7 +543,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 #pragma mark -  XMPP commands
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
+-(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString *messageId)) completion
 {
     NSString* msgid = [[NSUUID UUID] UUIDString];
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
@@ -582,7 +582,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         DDLogError(@"Could not add message to history!");
 }
 
--(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^)(BOOL success, NSString* messageId)) completion
+-(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {
     BOOL success = NO;
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
@@ -638,6 +638,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) addContact:(MLContact*) contact
 {
+    [self addContact:contact withPreauthToken:nil];
+}
+
+-(void) addContact:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken
+{
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
     {
@@ -645,14 +650,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             [account joinMuc:contact.contactJid];
         else
         {
-            [account addToRoster:contact.contactJid];
+            [account addToRoster:contact.contactJid withPreauthToken:preauthToken];
             
             BOOL approve = NO;
             // approve contact ahead of time if possible
             if(account.connectionProperties.supportsRosterPreApproval)
                 approve = YES;
             // just in case there was a pending request
-            else if([contact.state isEqualToString:kSubTo]  || [contact.state isEqualToString:kSubNone] )
+            else if([contact.state isEqualToString:kSubTo] || [contact.state isEqualToString:kSubNone])
                 approve = YES;
             // approve contact requests not catched by the above checks (can that even happen?)
             else if([[DataLayer sharedInstance] hasContactRequestForAccount:account.accountNo andBuddyName:contact.contactJid])
@@ -710,7 +715,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - APNS
 
--(void) setPushToken:(NSString*) token
+-(void) setPushToken:(NSString* _Nullable) token
 {
     if(token && ![token isEqualToString:_pushToken])
     {
@@ -743,7 +748,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - share sheet added
 
--(MLContact*) sendAllOutboxes
+-(MLContact* _Nullable) sendAllOutboxes
 {
     //send all sharesheet outboxes (this method will be called by AppDelegate if opened via monalOpen:// url)
     MLContact* lastRecipientContact = nil;

@@ -3268,10 +3268,10 @@ NSString* const kStanza = @"stanza";
 }
 
 
--(void) addToRoster:(NSString*) contact
+-(void) addToRoster:(NSString*) contact withPreauthToken:(NSString* _Nullable) preauthToken
 {
     XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence subscribeContact:contact];
+    [presence subscribeContact:contact withPreauthToken:preauthToken];
     [self send:presence];   //add them
 }
 

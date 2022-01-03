@@ -21,6 +21,7 @@
 #import "xmpp.h"
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
+#import "MLMucProcessor.h"
 
 @import NotificationBannerSwift;
 
@@ -393,27 +394,74 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
  */
 -(void) handleXMPPURL:(NSURL*) url
 {
-    //TODO just uses fist account. maybe change in the future
+    //TODO just uses fist enabled account. maybe change in the future
     xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+    NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+    NSString* jid = components.path;
+    BOOL isRegister = NO;
+    BOOL isRoster = NO;
+    BOOL isGroupJoin = NO;
+    BOOL isIbr = NO;
+    NSString* preauthToken = nil;
+    for(NSURLQueryItem* item in components.queryItems)
+    {
+        if([item.name isEqualToString:@"register"])
+            isRegister = YES;
+        if([item.name isEqualToString:@"roster"])
+            isRoster = YES;
+        if([item.name isEqualToString:@"join"])
+            isGroupJoin = YES;
+        if([item.name isEqualToString:@"ibr"] && [item.value isEqualToString:@"y"])
+            isIbr = YES;
+        if([item.name isEqualToString:@"preauth"])
+            preauthToken = [item.value copy];
+    }
+    
+    if(isRegister)
+    {
+        DDLogError(@"Handling of register invites not implemented yet!");
+        return;
+    }
+    
+    if(isRoster && account==nil && isIbr)
+    {
+        DDLogError(@"Handling of register+add invites not implemented yet!");
+        return;
+    }
+    
+    if(isRoster && account)
+    {
+        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+        //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
+        [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
+        [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
+        [self openChatOfContact:contact];
+        return;
+    }
+    
+    if(isGroupJoin && account)
+    {
+        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+        [[MLXMPPManager sharedInstance] addContact:contact];    //will handle group joins and normal contacts transparently
+        //wait for join to finish before opening contact
+        NSString* accountNo = account.accountNo;        //needed because of retain cycle
+        [account.mucProcessor addUIHandler:^(id _data) {
+            [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:accountNo];
+            [self openChatOfContact:contact];
+        } forMuc:jid];
+        return;
+    }
+    
+    //fallback: only add to local roster, but don't subscribe
+    //TODO: show toast in chatView that informs the user that this contact was not added to his contact list
     if(account)
     {
-        NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-        NSString* jid = components.path;
-        BOOL isGroup = NO;
-        
-        for(NSURLQueryItem* item in components.queryItems)
-        {
-            if([item.name isEqualToString:@"join"])
-                isGroup = YES;
-        }
-        
-        if(isGroup)
-            [account joinMuc:jid];
-        
         [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
         MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
         [self openChatOfContact:contact];
     }
+    
+    DDLogError(@"No account available to handel xmpp: uri!");
 }
 
 -(BOOL) application:(UIApplication*) app openURL:(NSURL*) url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*) options

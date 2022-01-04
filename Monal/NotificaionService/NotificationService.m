@@ -385,7 +385,7 @@
 @end
 
 @interface NotificationService () {
-    void (^_handler)(UNNotificationContent* _Nonnull);
+    NSMutableArray* _handlers;
 }
 @end
 
@@ -437,7 +437,7 @@
 -(void) didReceiveNotificationRequest:(UNNotificationRequest*) request withContentHandler:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
     DDLogInfo(@"Notification handler called (request id: %@)", request.identifier);
-    _handler = contentHandler;
+    [_handlers addObject:contentHandler];
     
     //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)
     if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
@@ -460,11 +460,17 @@
 -(void) serviceExtensionTimeWillExpire
 {
     DDLogError(@"notification handler expired, that should never happen!");
-    if(_handler != nil)
+#ifndef IS_ALPHA
+    if([_handlers count] > 0)
     {
-        UNMutableNotificationContent* emptyContent = [[UNMutableNotificationContent alloc] init];
-        _handler(emptyContent);
+        //we feed all handlers, even if already done by the normal system,just to make sure
+        for(void (^_handler)(UNNotificationContent* _Nonnull) in _handlers)
+        {
+            UNMutableNotificationContent* emptyContent = [[UNMutableNotificationContent alloc] init];
+            _handler(emptyContent);
+        }
     }
+#endif
     DDLogInfo(@"Committing suicide...");
     [DDLog flushLog];
     exit(0);

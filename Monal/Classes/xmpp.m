@@ -47,7 +47,7 @@
 @import AVFoundation;
 
 #define STATE_VERSION 5
-#define CONNECT_TIMEOUT 10.0
+#define CONNECT_TIMEOUT 12.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";
@@ -889,6 +889,8 @@ NSString* const kStanza = @"stanza";
         self->_iPipe = nil;
         [self->_oStream setDelegate:nil];
         
+        //sadly closing the output stream does not unblock a hanging [_oStream write:maxLength:] call
+        //blocked by an ios/max runtime race condition with starttls
         DDLogInfo(@"closing output stream");
         @try
         {
@@ -2138,6 +2140,7 @@ NSString* const kStanza = @"stanza";
             
             //this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
             DDLogInfo(@"configuring/starting tls handshake");
+            self->_streamHasSpace = NO;         //make sure we do not try to sed any data while the tls handshake is still performed
             NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
             [settings setObject:(NSNumber*)kCFBooleanTrue forKey:(NSString*)kCFStreamSSLValidatesCertificateChain];
             [settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
@@ -2149,8 +2152,7 @@ NSString* const kStanza = @"stanza";
                 DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
                 DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
             }
-            usleep(500000);        //try to avoid race conditions between tls setup and stream writes by sleeping some time
-            self->_startTLSComplete=YES;
+            self->_startTLSComplete = YES;
             
             //stop everything coming after this (we don't want to process stanzas that came in *before* a secure TLS context was established!)
             //if we do not do this we could be prone to mitm attacks injecting xml elements into the stream before it gets encrypted

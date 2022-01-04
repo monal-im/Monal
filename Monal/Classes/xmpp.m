@@ -2007,6 +2007,12 @@ NSString* const kStanza = @"stanza";
             //perform logic to handle stream
             if(self.accountState < kStateLoggedIn)
             {
+                if([parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
+                {
+                    DDLogInfo(@"Server supports Pre-Authenticated IBR");
+                    self.connectionProperties.supportsPreauthIbr = YES;
+                }
+                
                 if(_registration)
                 {
                     DDLogInfo(@"Registration: Calling requestRegForm");

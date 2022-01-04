@@ -458,6 +458,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     int index=0;
     int pos=-1;
     xmpp* account;
+    BOOL lastConnectedAccount = NO;
     @synchronized(_connectedXMPP) {
         for(xmpp* xmppAccount in _connectedXMPP)
         {
@@ -474,11 +475,18 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         {
             [_connectedXMPP removeObjectAtIndex:pos];
             DDLogVerbose(@"removed account at pos  %d", pos);
+
+            if([_connectedXMPP count] == 0)
+                lastConnectedAccount = YES;
         }
     }
     if(account)
     {
         DDLogVerbose(@"got account and cleaning up.. ");
+        if(lastConnectedAccount)
+        {
+            [account unregisterPush];
+        }
         [account disconnect:YES];
         account = nil;
         DDLogVerbose(@"done cleaning up account ");
@@ -769,6 +777,21 @@ $$
         for(xmpp* xmppAccount in [self connectedXMPP])
             [xmppAccount enablePush];
 }
+
+-(void) unregisterPush
+{
+    @synchronized (_connectedXMPP) {
+        for(xmpp* xmppAccount in _connectedXMPP)
+        {
+            if(xmppAccount)
+            {
+                [xmppAccount unregisterPush];
+                break;
+            }
+        }
+    }
+}
+
 
 #pragma mark - share sheet added
 

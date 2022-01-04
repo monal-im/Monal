@@ -30,7 +30,7 @@ void logException(NSException* exception);
 +(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id _Nullable) additionalData;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
-+(NSDictionary*) pushServer;
++(NSString*) pushServer;
 +(UIColor*) generateColorFromJid:(NSString*) jid;
 +(NSString*) bytesToHuman:(int64_t) bytes;
 +(NSString*) stringFromToken:(NSData*) tokenIn;

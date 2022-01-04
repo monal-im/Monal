@@ -11,11 +11,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^welcomeCompletion)(void);
-
 @interface MLWelcomeViewController : UIViewController
 
-@property (nonatomic, strong) welcomeCompletion completion; 
+@property (nonatomic, strong) monal_void_block_t completion; 
 
 @end
 

@@ -115,7 +115,7 @@
                                                             <color key="titleShadowColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                                         </state>
                                                         <connections>
-                                                            <segue destination="0z4-cM-T8Y" kind="show" id="WIW-8L-yzU"/>
+                                                            <segue destination="0z4-cM-T8Y" kind="show" identifier="register" id="WIW-8L-yzU"/>
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TZB-oT-VmG" userLabel="scanQRCode" customClass="GLTintButton">
@@ -275,7 +275,7 @@
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <textInputTraits key="textInputTraits" autocorrectionType="no" keyboardType="emailAddress"/>
                                                                 <connections>
-                                                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="bPy-jN-pDj"/>
+                                                                    <outlet property="delegate" destination="0z4-cM-T8Y" id="bPy-jN-pDj"/>
                                                                 </connections>
                                                             </textField>
                                                         </subviews>
@@ -295,7 +295,7 @@
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <textInputTraits key="textInputTraits" autocorrectionType="no" secureTextEntry="YES"/>
                                                                 <connections>
-                                                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="KtP-aT-Hn7"/>
+                                                                    <outlet property="delegate" destination="0z4-cM-T8Y" id="KtP-aT-Hn7"/>
                                                                 </connections>
                                                             </textField>
                                                         </subviews>
@@ -337,7 +337,7 @@
                                                         </state>
                                                         <connections>
                                                             <action selector="openTos:" destination="0z4-cM-T8Y" eventType="touchUpInside" id="d0u-Xo-vk0"/>
-                                                            <action selector="useWithoutAccount:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="W6R-BG-ehI"/>
+                                                            <action selector="useWithoutAccount:" destination="0z4-cM-T8Y" eventType="touchUpInside" id="W6R-BG-ehI"/>
                                                         </connections>
                                                     </button>
                                                 </subviews>
@@ -545,6 +545,22 @@
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Alo-OJ-GQj" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2470" y="-2628"/>
+        </scene>
+        <!--Register Navigation Controller-->
+        <scene sceneID="aaa-9t-O9K">
+            <objects>
+                <navigationController storyboardIdentifier="register" definesPresentationContext="YES" id="aaa-dL-UsN" userLabel="Register Navigation Controller" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="aaa-4R-Mbn">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="0z4-cM-T8Y" kind="relationship" relationship="rootViewController" id="aaa-ez-qjU"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="aaa-OJ-GQj" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-2470" y="-2628"/>
         </scene>

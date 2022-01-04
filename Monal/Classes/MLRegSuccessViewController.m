@@ -24,16 +24,25 @@
 {
     [super viewWillAppear:animated];
     //set QR code
-    self.jid.text= self.registeredAccount; 
+    self.jid.text = self.registeredAccount; 
 }
 
 -(IBAction) close:(id) sender
 {
-    // open privacy settings
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
-        [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
-        return;
-    }
+    //call completion handler if given (e.g. add contact and open chatview)
+    if(self.completionHandler)
+        self.completionHandler();
+    
+    // open privacy settings after 1 second
+    //(if we directly segue to an open chat, this will be done after 0.5 seconds,
+    //waiting 1 second makes sure the privacy settings will still be opened while
+    //the open chat lies one ui layer beneath it and can be used as soon as sthe privacy settings get dismissed)
+    createQueuedTimer(1.0, dispatch_get_main_queue(), (^{
+        if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
+            [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+            return;
+        }
+    }));
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 

@@ -618,11 +618,23 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - contact
 
+//this handler will simply retry the removeContact: call
+$$class_handler(handleRemoveContact, $_ID(MLContact*, contact))
+    [[MLXMPPManager sharedInstance] removeContact:contact];
+$$
+
 -(void) removeContact:(MLContact*) contact
 {
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
     {
+        //queue remove contact for execution once bound (e.g. on catchup done)
+        if(account.accountState < kStateBound)
+        {
+            [account addReconnectionHandler:$newHandler(self, handleRemoveContact, $ID(contact))];
+            return;
+        }
+        
         if(contact.isGroup)
         {
             //if MUC
@@ -641,11 +653,23 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self addContact:contact withPreauthToken:nil];
 }
 
+//this handler will simply retry the addContact:withPreauthToken: call
+$$class_handler(handleAddContact, $_ID(MLContact*, contact), $_ID(NSString*, preauthToken))
+    [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
+$$
+
 -(void) addContact:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken
 {
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
     {
+        //queue add contact for execution once bound (e.g. on catchup done)
+        if(account.accountState < kStateBound)
+        {
+            [account addReconnectionHandler:$newHandler(self, handleAddContact, $ID(contact), $ID(preauthToken))];
+            return;
+        }
+        
         if(contact.isGroup)
             [account joinMuc:contact.contactJid];
         else

@@ -387,45 +387,97 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 /**
  xmpp:romeo@montague.net?message;subject=Test%20Message;body=Here%27s%20a%20test%20message
-          or
  xmpp:coven@chat.shakespeare.lit?join;password=cauldronburn
+ 
+ xmpp:example.com?register;preauth=3c7efeafc1bb10d034
+ xmpp:romeo@example.com?register;preauth=3c7efeafc1bb10d034
+ xmpp:contact@example.com?roster;preauth=3c7efeafc1bb10d034
+ xmpp:contact@example.com?roster;preauth=3c7efeafc1bb10d034;ibr=y
          
  @link https://xmpp.org/extensions/xep-0147.html
+ @link https://docs.modernxmpp.org/client/invites/
  */
 -(void) handleXMPPURL:(NSURL*) url
 {
     //TODO just uses fist enabled account. maybe change in the future
     xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
     NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+    DDLogVerbose(@"URI path '%@'", components.path);
+    DDLogVerbose(@"URI query '%@'", components.query);
+    
     NSString* jid = components.path;
+    NSDictionary* jidParts = [HelperTools splitJid:jid];
     BOOL isRegister = NO;
     BOOL isRoster = NO;
     BOOL isGroupJoin = NO;
     BOOL isIbr = NO;
     NSString* preauthToken = nil;
-    for(NSURLQueryItem* item in components.queryItems)
+    //someone had the really superior (NOT!) idea to split uri query parts by ';' instead of the standard '&' making all existing uri libs useless
+    //see: https://xmpp.org/extensions/xep-0147.html
+    //blame this author: Peter Saint-Andre
+    NSArray* queryItems = [components.query componentsSeparatedByString:@";"];
+    for(NSString* item in queryItems)
     {
-        if([item.name isEqualToString:@"register"])
+        NSArray* itemParts = [item componentsSeparatedByString:@"="];
+        NSString* name = itemParts[0];
+        NSString* value = @"";
+        if([itemParts count] > 1)
+            value = itemParts[1];
+        DDLogVerbose(@"URI part '%@' = '%@'", name, value);
+        if([name isEqualToString:@"register"])
             isRegister = YES;
-        if([item.name isEqualToString:@"roster"])
+        if([name isEqualToString:@"roster"])
             isRoster = YES;
-        if([item.name isEqualToString:@"join"])
+        if([name isEqualToString:@"join"])
             isGroupJoin = YES;
-        if([item.name isEqualToString:@"ibr"] && [item.value isEqualToString:@"y"])
+        if([name isEqualToString:@"ibr"] && [value isEqualToString:@"y"])
             isIbr = YES;
-        if([item.name isEqualToString:@"preauth"])
-            preauthToken = [item.value copy];
+        if([name isEqualToString:@"preauth"])
+            preauthToken = [value copy];
     }
     
-    if(isRegister)
+    if(!jidParts[@"host"])
     {
-        DDLogError(@"Handling of register invites not implemented yet!");
+        DDLogError(@"Ignoring xmpp: uri without host jid part!");
         return;
     }
     
-    if(isRoster && account==nil && isIbr)
+    if(isRegister || (isRoster && account==nil && isIbr))
     {
-        DDLogError(@"Handling of register+add invites not implemented yet!");
+        NSString* username = nilDefault(jidParts[@"node"], @"");
+        NSString* host = jidParts[@"host"];
+        
+        if(isRoster)
+            username = @"";         //roster does not specify a predefined username for the new account, register does (optional)
+        
+        //this should never happen
+        MLAssert(self.activeChats != nil, @"Can not handle register invite, active chats not loaded!", (@{
+           @"components": components,
+           @"username": username,
+           @"host": host,
+        }));
+        
+        weakify(self);
+        [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^{
+            strongify(self);
+            xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+            
+            //this should never happen
+            MLAssert(account != nil, @"Can not use account after register!", (@{
+                @"components": components,
+                @"username": username,
+                @"host": host,
+            }));
+            
+            if(account != nil)      //silence memory warning despite assertion above
+            {
+                MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
+                [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
+                [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
+                [self openChatOfContact:contact];
+            }
+        }];
         return;
     }
     

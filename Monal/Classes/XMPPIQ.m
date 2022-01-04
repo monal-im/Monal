@@ -328,6 +328,13 @@ NSString* const kiqErrorType = @"error";
 
 #pragma mark - Account Management
 
+-(void) submitRegToken:(NSString*) token
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"preauth" andNamespace:@"urn:xmpp:pars:0" withAttributes:@{
+        @"token": token
+    } andChildren:@[] andData:nil]];
+}
+
 -(void) getRegistrationFields
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace]];

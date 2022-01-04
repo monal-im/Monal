@@ -30,6 +30,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.loginHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    self.loginHUD.mode = MBProgressHUDModeIndeterminate;
+    self.loginHUD.removeFromSuperViewOnHide=YES;
 }
 
 - (void) viewWillAppear:(BOOL)animated
@@ -37,33 +40,50 @@
     [super viewWillAppear:animated];
     [self registerForKeyboardNotifications];
     
+    //default ibr server
+    if(!self.registerServer || !self.registerServer.length)
+        self.registerServer = kRegServer;
+    
+    if(self.registerUsername)
+        self.jid.text = self.registerUsername;
+    
     [self createXMPPInstance];
     
-    __weak MLRegisterViewController *weakself = self;
-    [self.xmppAccount requestRegFormWithCompletion:^(NSData *captchaImage, NSDictionary *hiddenFields) {
+    self.loginHUD.label.text = NSLocalizedString(@"Loading registration form", @"");
+    self.loginHUD.hidden = NO;
+    
+    weakify(self);
+    [self.xmppAccount requestRegFormWithToken:self.registerToken andCompletion:^(NSData *captchaImage, NSDictionary *hiddenFields) {
         dispatch_async(dispatch_get_main_queue(), ^{
+            strongify(self);
+            self.loginHUD.hidden = YES;
             if(captchaImage) {
-                weakself.captchaImage.image= [UIImage imageWithData:captchaImage];
-                weakself.hiddenFields = hiddenFields;
+                self.captchaImage.image= [UIImage imageWithData:captchaImage];
+                self.hiddenFields = hiddenFields;
             } else {
                 //TODO: hide captcha image and corresponding input field
             }
-            [weakself.xmppAccount disconnect:YES];  //we dont want to see any time out errors
         });
     } andErrorCompletion:^(BOOL success, NSString* error) {
-        NSString *displayMessage = error;
-        if(displayMessage.length==0) displayMessage = NSLocalizedString(@"Could not request registration form. Please check your internet connection and try again.", @ "");
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @ "") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [alert dismissViewControllerAnimated:YES completion:nil];
-        }]];
-        [self presentViewController:alert animated:YES completion:nil];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            strongify(self);
+            self.loginHUD.hidden = YES;
+            NSString* displayMessage = error;
+            if(!displayMessage || !displayMessage.length)
+                displayMessage = NSLocalizedString(@"Could not request registration form. Please check your internet connection and try again.", @ "");
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @ "") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:nil];
+                [self dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:alert animated:YES completion:nil];
+        });
     }];
 }
 
 -(void) createXMPPInstance
 {
-    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"nothing@%@", kRegServer] password:@"nothing" andResource:@"MonalReg"];
+    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"nothing@%@", self.registerServer] password:@"nothing" andResource:@"MonalReg"];
     MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:@"" andPort:[NSNumber numberWithInt:5222] andDirectTLS:NO];
     self.xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:@"-1"];
 }
@@ -90,17 +110,12 @@
         return;
     }
     
-    self.loginHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     self.loginHUD.label.text = NSLocalizedString(@"Signing Up", @"");
-    self.loginHUD.mode = MBProgressHUDModeIndeterminate;
-    self.loginHUD.removeFromSuperViewOnHide=YES;
+    self.loginHUD.hidden = NO;
     
     NSString* jid = [self.jid.text.lowercaseString copy];
     NSString* pass = [self.password.text copy];
     NSString* code = [self.captcha.text copy];
-    [self createXMPPInstance];
-
-    self.loginHUD.hidden = NO;
     
     [self.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: self.hiddenFields withCompletion:^(BOOL success, NSString *message) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -120,7 +135,7 @@
             else
             {
                 NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
-                [dic setObject:kRegServer forKey:kDomain];
+                [dic setObject:self.registerServer forKey:kDomain];
                 [dic setObject:jid forKey:kUsername];
                 [dic setObject:[HelperTools encodeRandomResource] forKey:kResource];
                 [dic setObject:@YES forKey:kEnabled];
@@ -147,7 +162,8 @@
     {
         [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
         MLRegSuccessViewController* dest = (MLRegSuccessViewController *) segue.destinationViewController;
-        dest.registeredAccount = [NSString stringWithFormat:@"%@@%@",self.jid.text, kRegServer];
+        dest.registeredAccount = [NSString stringWithFormat:@"%@@%@", self.jid.text, self.registerServer];
+        dest.completionHandler = self.completionHandler;
     }
 }
 

@@ -12,6 +12,7 @@
 #import "MLXMPPManager.h"
 #import "xmpp.h"
 #import "MLNotificationQueue.h"
+#import "MLRegisterViewController.h"
 
 @import SAMKeychain;
 @import QuartzCore;
@@ -364,9 +365,16 @@
     {
         MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
         qrCodeScanner.loginDelegate = self;
+        return;     //do not remove observers
     }
-    else
-        [self removeObservers];
+    
+    [self removeObservers];
+    
+    if([segue.identifier isEqualToString:@"register"])
+    {
+        MLRegisterViewController* dest = (MLRegisterViewController*) segue.destinationViewController;
+        dest.registerServer = kRegServer;
+    }
 }
 
 -(void) MLQRCodeAccountLoginScannedWithJid:(NSString*) jid password:(NSString*) password

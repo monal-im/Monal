@@ -241,8 +241,16 @@
         <!--Login-->
         <scene sceneID="VNB-KG-5f7">
             <objects>
-                <viewControllerPlaceholder storyboardIdentifier="Login" storyboardName="Login" id="DkD-PA-Cmm" sceneMemberID="viewController"/>
+                <viewControllerPlaceholder storyboardIdentifier="login" storyboardName="Login" id="DkD-PA-Cmm" sceneMemberID="viewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ccl-9E-t0H" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2628" y="-1383"/>
+        </scene>
+        <!--Register-->
+        <scene sceneID="AAA-KG-5f7">
+            <objects>
+                <viewControllerPlaceholder referencedIdentifier="register" storyboardName="Login" id="AAA-PA-Cmm" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="AAA-9E-t0H" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-2628" y="-1383"/>
         </scene>
@@ -363,6 +371,7 @@
                         <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="RNX-bQ-8Zb"/>
                         <segue destination="2g1-pP-Xxv" kind="presentation" identifier="showIntro" id="nUl-6E-4GO"/>
                         <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="sv2-wf-aN0"/>
+                        <segue destination="AAA-PA-Cmm" kind="presentation" identifier="showRegister" id="AAA-wf-aN0"/>
                         <segue destination="cmS-oG-cv9" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot9"/>
                         <segue destination="iM6-Fx-aHL" kind="showDetail" identifier="showConversationPlaceholder" id="xp1-3q-JGG"/>
                     </connections>

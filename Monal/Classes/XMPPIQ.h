@@ -91,7 +91,7 @@ removes a contact from the roster
  */
 -(void) setRemoveFromRoster:(NSString*) jid;
 
--(void) setUpdateRosterItem:(NSString* _Nonnull) jid withName:(NSString* _Nonnull) name;
+-(void) setUpdateRosterItem:(NSString*) jid withName:(NSString*) name;
 
 /**
  Requests a full roster from the server. A null version will not set the ver attribute
@@ -106,7 +106,7 @@ removes a contact from the roster
 /**
  sets up an iq that requests a http upload slot
  */
--(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType;
+-(void) httpUploadforFile:(NSString*) file ofSize:(NSNumber*) filesize andContentType:(NSString*) contentType;
 
 #pragma mark MUC
 
@@ -117,11 +117,12 @@ removes a contact from the roster
 
 #pragma mark - account
 
--(void) changePasswordForUser:(NSString* _Nonnull) user newPassword:(NSString* _Nonnull) newPsss;
+-(void) submitRegToken:(NSString*) token;
 -(void) getRegistrationFields;
--(void) registerUser:(NSString* _Nonnull) user withPassword:(NSString* _Nonnull) newPass captcha:(NSString* _Nonnull) captcha andHiddenFields:(NSDictionary* _Nonnull) hiddenFields;
+-(void) registerUser:(NSString*) user withPassword:(NSString*) newPass captcha:(NSString*) captcha andHiddenFields:(NSDictionary*) hiddenFields;
+-(void) changePasswordForUser:(NSString*) user newPassword:(NSString*) newPass;
 
--(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;
+-(void) setBlocked:(BOOL) blocked forJid:(NSString*) blockedJid;
 -(void) requestBlockList;
 
 @end

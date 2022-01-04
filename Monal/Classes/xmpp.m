@@ -96,6 +96,7 @@ NSString* const kStanza = @"stanza";
     monal_void_block_t _cancelReconnectTimer;
     NSMutableArray* _smacksAckHandler;
     NSMutableDictionary* _iqHandlers;
+    NSMutableArray* _reconnectionHandlers;
     NSMutableDictionary* _runningMamQueries;
     BOOL _SRVDiscoveryDone;
     BOOL _startTLSComplete;
@@ -113,6 +114,7 @@ NSString* const kStanza = @"stanza";
     //registration related stuff
     BOOL _registration;
     BOOL _registrationSubmission;
+    NSString* _registrationToken;
     xmppDataCompletion _regFormCompletion;
     xmppCompletion _regFormErrorCompletion;
     xmppCompletion _regFormSubmitCompletion;
@@ -232,6 +234,7 @@ NSString* const kStanza = @"stanza";
     _firstLoginForThisInstance = YES;
     _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
+    _reconnectionHandlers = [[NSMutableArray alloc] init];
     _mamPageArrays = [[NSMutableDictionary alloc] init];
     _runningMamQueries = [[NSMutableDictionary alloc] init];
     _inCatchup = [[NSMutableDictionary alloc] init];
@@ -711,7 +714,7 @@ NSString* const kStanza = @"stanza";
             return;
         }
         
-        //return here if we are just registering a new account
+        //return here if we are just registering a new account (we don't want to time out while registering)
         if(self->_registration || self->_registrationSubmission)
             return;
         
@@ -773,6 +776,11 @@ NSString* const kStanza = @"stanza";
                                 ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                         }
                         self->_iqHandlers = [[NSMutableDictionary alloc] init];
+                    }
+                    
+                    //clear all reconnection handlers
+                    @synchronized(self->_reconnectionHandlers) {
+                        [self->_reconnectionHandlers removeAllObjects];
                     }
 
                     //persist these changes
@@ -847,6 +855,11 @@ NSString* const kStanza = @"stanza";
                             ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                     }
                     self->_iqHandlers = [[NSMutableDictionary alloc] init];
+                }
+                
+                //clear all reconnection handlers
+                @synchronized(self->_reconnectionHandlers) {
+                    [self->_reconnectionHandlers removeAllObjects];
                 }
 
                 //persist these changes
@@ -935,7 +948,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) reconnect:(double) wait
 {
-    //we never want to
+    //we never want to reconnect while registering
     if(_registration || _registrationSubmission)
         return;
 
@@ -1892,10 +1905,8 @@ NSString* const kStanza = @"stanza";
                     //if replay is not done yet, the kMonalFinishedCatchup notification will be triggered by the replay handler once the replay is finished
                     if(_inCatchup[self.connectionProperties.identity.jid] == nil && !self->_catchupDone)
                     {
-                        self->_catchupDone = YES;
                         DDLogInfo(@"Replay really done, now posting kMonalFinishedCatchup notification");
-                        //don't queue this notification because it should be handled INLINE inside the receive queue
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
+                        [self handleFinishedCatchup];
                     }
                     
                     //handle all delayed replays not yet done and resume them (e.g. all _inCatchup entries being NO)
@@ -2017,8 +2028,21 @@ NSString* const kStanza = @"stanza";
                 
                 if(_registration)
                 {
-                    DDLogInfo(@"Registration: Calling requestRegForm");
-                    [self requestRegForm];
+                    //make sure this does not time out while the user is filling out the registration form
+                    //but still have a timeout for the connection until this point
+                    if(self->_cancelLoginTimer)
+                        self->_cancelLoginTimer();
+                    self->_cancelLoginTimer = nil;
+                    if(_registrationToken && self.connectionProperties.supportsPreauthIbr)
+                    {
+                        DDLogInfo(@"Registration: Calling submitRegToken");
+                        [self submitRegToken:_registrationToken];
+                    }
+                    else
+                    {
+                        DDLogInfo(@"Registration: Directly calling requestRegForm");
+                        [self requestRegForm];
+                    }
                 }
                 else if(_registrationSubmission)
                 {
@@ -2234,9 +2258,10 @@ NSString* const kStanza = @"stanza";
         //only exceptions: an outgoing bind request or jabber:iq:register stanza (this is allowed before binding a resource)
         BOOL isBindRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/resource"];
         BOOL isRegisterRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{jabber:iq:register}query"];
+        BOOL isPreauthRegisterRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"/<type=set>/{urn:xmpp:pars:0}preauth"];
         if(
             self.accountState>=kStateBound ||
-            (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest || isRegisterRequest))
+            (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest || isRegisterRequest || isPreauthRegisterRequest))
         )
         {
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
@@ -2375,6 +2400,10 @@ NSString* const kStanza = @"stanza";
                 }
         }
         [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
+        
+        @synchronized(self->_reconnectionHandlers) {
+            [values setObject:self->_reconnectionHandlers forKey:@"reconnectionHandlers"];
+        }
 
         [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
         if(self.connectionProperties.uploadServer)
@@ -2538,6 +2567,11 @@ NSString* const kStanza = @"stanza";
                     _iqHandlers[iqid] = [persistentIqHandlers[iqid] mutableCopy];
                     persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", persistentIqHandlers[iqid][@"timeout"], persistentIqHandlers[iqid][@"handler"]];
                 }
+            }
+            
+            @synchronized(self->_reconnectionHandlers) {
+                [_reconnectionHandlers removeAllObjects];
+                [_reconnectionHandlers addObjectsFromArray:[dic objectForKey:@"reconnectionHandlers"]];
             }
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
@@ -2889,6 +2923,12 @@ NSString* const kStanza = @"stanza";
         [self.mucProcessor join:entry[@"room"]];
 }
 
+-(void) addReconnectionHandler:(MLHandler*) handler
+{
+    [_reconnectionHandlers addObject:handler];
+    [self persistState];
+}
+
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
 {
     if(!self.connectionProperties.supportsBlocking)
@@ -2918,13 +2958,14 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark vcard
 
--(void)getEntitySoftWareVersion:(NSString *) user
+-(void) getEntitySoftWareVersion:(NSString*) user
 {
-    NSArray *userDataArr = [user componentsSeparatedByString:@"/"];
-    NSString *userWithoutResources = userDataArr[0];
+    NSArray* userDataArr = [user componentsSeparatedByString:@"/"];
+    NSString* userWithoutResources = userDataArr[0];
     
-    if ([[DataLayer sharedInstance] checkCap:@"jabber:iq:version" forUser:userWithoutResources andAccountNo:self.accountNo]) {
-        XMPPIQ* iqEntitySoftWareVersion= [[XMPPIQ alloc] initWithType:kiqGetType];
+    if([[DataLayer sharedInstance] checkCap:@"jabber:iq:version" forUser:userWithoutResources andAccountNo:self.accountNo])
+    {
+        XMPPIQ* iqEntitySoftWareVersion = [[XMPPIQ alloc] initWithType:kiqGetType];
         [iqEntitySoftWareVersion getEntitySoftWareVersionTo:user];
         [self send:iqEntitySoftWareVersion];
     }
@@ -3320,10 +3361,11 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
--(void) requestRegFormWithCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion
+-(void) requestRegFormWithToken:(NSString* _Nullable) token andCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion
 {
     //this is a registration request
     _registration = YES;
+    _registrationToken = token;
     _regFormCompletion = completion;
     _regFormErrorCompletion = errorCompletion;
     [self connect];
@@ -3339,7 +3381,31 @@ NSString* const kStanza = @"stanza";
     self.regCode = captcha;
     self.regHidden = hiddenFields;
     _regFormSubmitCompletion = completion;
-    [self connect];
+    if(_accountState < kStateHasStream)
+        [self connect];
+    else
+    {
+        DDLogInfo(@"Registration: Calling submitRegForm");
+        [self submitRegForm];
+    }
+}
+
+-(void) submitRegToken:(NSString*) token
+{
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [iq setiqTo:self.connectionProperties.identity.domain];
+    [iq submitRegToken:token];
+    
+    [self sendIq:iq withResponseHandler:^(XMPPIQ* result) {
+        DDLogInfo(@"Registration: Calling requestRegForm from submitRegToken handler");
+        [self requestRegForm];
+    } andErrorHandler:^(XMPPIQ* error) {
+        //dispatch completion handler outside of the receiveQueue
+        if(self->_regFormErrorCompletion)
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                self->_regFormErrorCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not submit registration token"]);
+            });
+    }];
 }
 
 -(void) requestRegForm
@@ -3381,7 +3447,7 @@ NSString* const kStanza = @"stanza";
         //dispatch completion handler outside of the receiveQueue
         if(self->_regFormSubmitCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                self->_regFormSubmitCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not submit registration"]);
+                self->_regFormSubmitCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not submit registration form"]);
             });
     }];
 }
@@ -3777,10 +3843,8 @@ NSString* const kStanza = @"stanza";
                 {
                     if(!_catchupDone)
                     {
-                        _catchupDone = YES;
                         DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
-                        //don't queue this notification because it should be handled INLINE inside the receive queue
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
+                        [self handleFinishedCatchup];
                     }
                 }
             }
@@ -3816,6 +3880,23 @@ NSString* const kStanza = @"stanza";
             [self _handleInternalMamFinishedFor:archiveJid];
         }]] waitUntilFinished:NO];
     }];
+}
+
+-(void) handleFinishedCatchup
+{
+    self->_catchupDone = YES;
+    
+    //call all reconnection handlers and clear them afterwards
+    @synchronized(_reconnectionHandlers) {
+        NSArray* handlers = [_reconnectionHandlers copy];
+        [_reconnectionHandlers removeAllObjects];
+        for(MLHandler* handler in handlers)
+            $call(handler, $ID(account, self));
+    }
+    [self persistState];
+    
+    //don't queue this notification because it should be handled INLINE inside the receive queue
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
 }
 
 -(void) addMessageToMamPageArray:(NSDictionary*) messageDictionary

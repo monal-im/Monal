@@ -73,6 +73,19 @@ NSString* const kiqErrorType = @"error";
     ] andData:nil]];
 }
 
+-(void) setUnregisterOnAppserver
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"command" andNamespace:@"http://jabber.org/protocol/commands" withAttributes:@{
+        @"node": @"v1-unregister-push",
+        @"action": @"execute"
+    } andChildren:@[
+        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"https://github.com/tmolitor-stud-tu/mod_push_appserver/#v1-unregister-push" andDictionary:@{
+            @"type": @"apns",
+            @"node": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
+        }]
+    ] andData:nil]];
+}
+
 -(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
@@ -88,7 +101,7 @@ NSString* const kiqErrorType = @"error";
 -(void) setPushDisable
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"disable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
-        @"jid": [HelperTools pushServer][@"jid"],
+        @"jid": [HelperTools pushServer],
         @"node": [[[UIDevice currentDevice] identifierForVendor] UUIDString]
     } andChildren:@[] andData:nil]];
 }

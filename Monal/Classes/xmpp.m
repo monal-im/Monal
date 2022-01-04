@@ -3745,7 +3745,7 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"registering (and enabling) push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         XMPPIQ* registerNode = [[XMPPIQ alloc] initWithType:kiqSetType];
         [registerNode setRegisterOnAppserverWithToken:pushToken];
-        [registerNode setiqTo:[HelperTools pushServer][@"jid"]];
+        [registerNode setiqTo:[HelperTools pushServer]];
         [self sendIq:registerNode withHandler:$newHandler(MLIQProcessor, handleAppserverNodeRegistered)];
     }
     else if(![MLXMPPManager sharedInstance].hasAPNSToken && self.accountState >= kStateBound)
@@ -3763,6 +3763,15 @@ NSString* const kStanza = @"stanza";
     {
         DDLogInfo(@"NOT registering and enabling push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
     }
+}
+
+-(void) unregisterPush
+{
+    DDLogInfo(@"Unregistering push");
+
+    XMPPIQ* unregisterNode = [[XMPPIQ alloc] initWithType:kiqSetType to:[HelperTools pushServer]];
+    [unregisterNode setUnregisterOnAppserver];
+    [self send:unregisterNode];
 }
 
 -(void) updateIqHandlerTimeouts

@@ -69,12 +69,13 @@ void logException(NSException* exception)
     return message;
 }
 
-+(NSDictionary*) pushServer
++(NSString*) pushServer
 {
-    return @{
-        @"jid": @"ios13push.monal.im",
-        @"url": @"https://ios13push.monal.im:5281/push_appserver",
-    };
+#ifdef IS_ALPHA
+    return @"alpha.push.monal-im.org";
+#else
+    return @"ios13push.monal.im";
+#endif
 }
 
 +(UIColor*) generateColorFromJid:(NSString*) jid

@@ -2850,8 +2850,8 @@ NSString* const kStanza = @"stanza";
     //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
     _accountState = kStateBound;
     
-    //don't queue this notification because it should be handled INLINE inside the receive queue
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:self];
+    //inform other parts of monal about our new state
+    [[MLNotificationQueue currentQueue] postNotificationName:kMLHasConnectedNotice object:self];
     [self accountStatusChanged];
     
     //now fetch roster, request disco and send initial presence

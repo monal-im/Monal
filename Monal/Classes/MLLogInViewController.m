@@ -370,11 +370,13 @@
     
     [self removeObservers];
     
+    /*
     if([segue.identifier isEqualToString:@"register"])
     {
         MLRegisterViewController* dest = (MLRegisterViewController*) segue.destinationViewController;
         dest.registerServer = kRegServer;
     }
+    */
 }
 
 -(void) MLQRCodeAccountLoginScannedWithJid:(NSString*) jid password:(NSString*) password

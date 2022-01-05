@@ -16,10 +16,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) IBOutlet UITextField* jid;
 @property (nonatomic, weak) IBOutlet UITextField* password;
 @property (nonatomic, weak) IBOutlet UITextField* captcha;
-@property (nonatomic, weak) IBOutlet UIButton* registerButton;
 @property (nonatomic, weak) IBOutlet UIScrollView* scrollView;
-@property (nonatomic, weak) IBOutlet UIView* contentView;
 @property (nonatomic, weak) IBOutlet UIImageView* captchaImage;
+@property (nonatomic, weak) IBOutlet UILabel* disclaimer;
+@property (nonatomic, weak) IBOutlet UIButton* tos;
 
 @property (nonatomic, strong) NSString* registerServer;
 @property (nonatomic, strong) NSString* registerUsername;

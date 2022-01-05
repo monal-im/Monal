@@ -42,7 +42,17 @@
     
     //default ibr server
     if(!self.registerServer || !self.registerServer.length)
+    {
         self.registerServer = kRegServer;
+        self.disclaimer.text = NSLocalizedString(@"yax.im is a public server, not affiliated with Monal. This page is provided for convenience.", @"");
+        self.tos.hidden = NO;
+    }
+    else
+    {
+        self.disclaimer.text = [NSString stringWithFormat:NSLocalizedString(@"Using server '%@' that was provided by the registration link you used.", @""), self.registerServer];
+        self.tos.hidden = YES;
+    }
+
     
     if(self.registerUsername)
         self.jid.text = self.registerUsername;
@@ -58,10 +68,13 @@
             strongify(self);
             self.loginHUD.hidden = YES;
             if(captchaImage) {
-                self.captchaImage.image= [UIImage imageWithData:captchaImage];
                 self.hiddenFields = hiddenFields;
+                self.captchaImage.image = [UIImage imageWithData:captchaImage];
+                self.captcha.hidden = NO;
+                self.captchaImage.hidden = NO;
             } else {
-                //TODO: hide captcha image and corresponding input field
+                self.captcha.hidden = YES;
+                self.captchaImage.hidden = YES;
             }
         });
     } andErrorCompletion:^(BOOL success, NSString* error) {
@@ -156,7 +169,7 @@
     }];
 }
 
--(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+-(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     if([segue.identifier isEqualToString:@"showSuccess"])
     {
@@ -167,24 +180,23 @@
     }
 }
 
--(IBAction) useWithoutAccount:(id)sender
+-(IBAction) useWithoutAccount:(id) sender
 {
     [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(IBAction) tapAction:(id)sender
+-(IBAction) tapAction:(id) sender
 {
     [self.view endEditing:YES];
 }
 
--(IBAction) openTos:(id)sender;
+-(IBAction) openTos:(id) sender;
 {
-   // [self openLink:@"https://blabber.im/en/nutzungsbedingungen/"];
     [self openLink:@"https://yaxim.org/yax.im/"];
 }
 
--(void) openLink:(NSString *) link
+-(void) openLink:(NSString*) link
 {
     NSURL *url= [NSURL URLWithString:link];
     
@@ -196,34 +208,32 @@
 
 #pragma mark -textfield delegate
 
-- (void)textFieldDidBeginEditing:(UITextField *)textField
+-(void) textFieldDidBeginEditing:(UITextField*) textField
 {
-    self.activeField= textField;
+    self.activeField = textField;
 }
 
-- (void)textFieldDidEndEditing:(UITextField *)textField
+-(void) textFieldDidEndEditing:(UITextField*) textField
 {
-    self.activeField=nil;
+    self.activeField = nil;
 }
 
 
 
 #pragma mark - keyboard management
 
-- (void)registerForKeyboardNotifications
+-(void) registerForKeyboardNotifications
 {
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWasShown:)
                                                  name:UIKeyboardDidShowNotification object:nil];
-    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWillBeHidden:)
                                                  name:UIKeyboardWillHideNotification object:nil];
-    
 }
 
 // Called when the UIKeyboardDidShowNotification is sent.
-- (void)keyboardWasShown:(NSNotification*)aNotification
+-(void) keyboardWasShown:(NSNotification*) aNotification
 {
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
@@ -235,13 +245,14 @@
     // If active text field is hidden by keyboard, scroll it so it's visible
     CGRect aRect = self.view.frame;
     aRect.size.height -= kbSize.height;
-    if (!CGRectContainsPoint(aRect, self.activeField.frame.origin) ) {
+    if(!CGRectContainsPoint(aRect, self.activeField.frame.origin))
+    {
         [self.scrollView scrollRectToVisible:self.activeField.frame animated:YES];
     }
 }
 
 // Called when the UIKeyboardWillHideNotification is sent
-- (void)keyboardWillBeHidden:(NSNotification*)aNotification
+-(void) keyboardWillBeHidden:(NSNotification*) aNotification
 {
     UIEdgeInsets contentInsets = UIEdgeInsetsZero;
     self.scrollView.contentInset = contentInsets;
@@ -250,8 +261,7 @@
 
 -(void) dealloc
 {
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [nc removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 

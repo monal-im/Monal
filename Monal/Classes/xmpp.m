@@ -47,7 +47,7 @@
 @import AVFoundation;
 
 #define STATE_VERSION 5
-#define CONNECT_TIMEOUT 12.0
+#define CONNECT_TIMEOUT 15.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";
@@ -651,6 +651,21 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
+-(void) reinitLoginTimer
+{
+    //cancel old timer if existing and...
+    if(self->_cancelLoginTimer != nil)
+        self->_cancelLoginTimer();
+    //...replace it with new timer
+    self->_cancelLoginTimer = createTimer(CONNECT_TIMEOUT, (^{
+        [self dispatchAsyncOnReceiveQueue: ^{
+            self->_cancelLoginTimer = nil;
+            DDLogInfo(@"login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
+            [self reconnect];
+        }];
+    }));
+}
+
 -(void) connect
 {
     //autodelete messages old enough (second invocation)
@@ -718,13 +733,7 @@ NSString* const kStanza = @"stanza";
         if(self->_registration || self->_registrationSubmission)
             return;
         
-        self->_cancelLoginTimer = createTimer(CONNECT_TIMEOUT, (^{
-            [self dispatchAsyncOnReceiveQueue: ^{
-                self->_cancelLoginTimer = nil;
-                DDLogInfo(@"login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
-                [self reconnect];
-            }];
-        }));
+        [self reinitLoginTimer];
     }];
 }
 
@@ -1408,6 +1417,10 @@ NSString* const kStanza = @"stanza";
     else
         DDLogInfo(@"RECV Stanza: %@", parsedStanza);
     
+    //restart logintimer for every incoming stanza when not logged in (don't do anything without a running timer)
+    if(!delayedReplay && _cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
+        [self reinitLoginTimer];
+    
     //only process most stanzas/nonzas after having a secure context
     if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
     {
@@ -1868,7 +1881,6 @@ NSString* const kStanza = @"stanza";
             //now we are bound again
             _accountState = kStateBound;
             _connectedTime = [NSDate date];
-            _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
             _exponentialBackoff = 0;
             [self accountStatusChanged];
 
@@ -1992,6 +2004,7 @@ NSString* const kStanza = @"stanza";
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
             self->_accountState = kStateLoggedIn;
+            _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
             if(_cancelLoginTimer)
             {
                 _cancelLoginTimer();        //we are now logged in --> cancel running login timer
@@ -2832,7 +2845,6 @@ NSString* const kStanza = @"stanza";
     
     //we are now bound
     _connectedTime = [NSDate date];
-    _usableServersList = [[NSMutableArray alloc] init];     //reset list to start again with the highest SRV priority on next connect
     _exponentialBackoff = 0;
     
     //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
@@ -3464,7 +3476,13 @@ NSString* const kStanza = @"stanza";
             DDLogVerbose(@"Stream %@ open completed", stream);
             //reset _streamHasSpace to its default value until the fist NSStreamEventHasSpaceAvailable event occurs
             if(stream == _oStream)
+            {
                 self->_streamHasSpace = NO;
+                
+                //restart logintimer when our output stream becomes readable (don't do anything without a running timer)
+                if(_cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
+                    [self reinitLoginTimer];
+            }
             break;
         }
         
@@ -3600,6 +3618,10 @@ NSString* const kStanza = @"stanza";
             break;
         }
     }
+    
+    //restart logintimer for new write to our stream while not logged in (don't do anything without a running timer)
+    if(_cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
+        [self reinitLoginTimer];
 
     if(requestAck)
     {

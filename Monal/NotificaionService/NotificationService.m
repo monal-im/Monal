@@ -58,6 +58,7 @@
     @synchronized(self) {
         DDLogInfo(@"Now killing appex process, goodbye...");
         [DDLog flushLog];
+        usleep(500000);            //wait some time for notifications to be handled by the system (500ms)
         exit(0);
     }
 }
@@ -418,7 +419,7 @@
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
     [DDLog flushLog];
-    usleep(100000);     //wait for initial connectivity check
+    usleep(100000);     //wait for initial connectivity check (100ms)
 }
 
 -(id) init
@@ -469,6 +470,7 @@
             UNMutableNotificationContent* emptyContent = [[UNMutableNotificationContent alloc] init];
             _handler(emptyContent);
         }
+        usleep(500000);            //wait some time for notifications to be handled by the system (500ms)
     }
 #endif
     DDLogInfo(@"Committing suicide...");

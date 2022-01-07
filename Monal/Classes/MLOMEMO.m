@@ -788,10 +788,17 @@ $$
         SignalCiphertext* ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
         NSError* error;
         NSData* decryptedKey = [cipher decryptCiphertext:ciphertext error:&error];
-        if(error != nil) {
+        if(error != nil)
+        {
             DDLogError(@"Could not decrypt to obtain key: %@", error);
             [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
-            return [NSString stringWithFormat:@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
+#ifdef IS_ALPHA
+            if(isKeyTransportElement)
+                return [NSString stringWithFormat:@"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
+#endif
+            if(!isKeyTransportElement)
+                return [NSString stringWithFormat:@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
+            return nil;
         }
         NSData* key;
         NSData* auth;
@@ -800,7 +807,13 @@ $$
         {
             DDLogError(@"Could not decrypt to obtain key.");
             [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
-            return NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.", @"");
+#ifdef IS_ALPHA
+            if(isKeyTransportElement)
+                return NSLocalizedString(@"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person.", @"");
+#endif
+            if(!isKeyTransportElement)
+                return NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.", @"");
+            return nil;
         }
         else
         {
@@ -832,22 +845,23 @@ $$
             {
                 // nothing to do
                 DDLogInfo(@"KeyTransportElement received from device: %@", sid);
-#ifdef DEBUG_ALPHA
+#ifdef IS_ALPHA
                 return [NSString stringWithFormat:@"ALPHA_DEBUG_MESSAGE: KeyTransportElement received from device: %@", sid];
 #else
                 return nil;
 #endif
             }
+            
             if(decryptedKey.length == 16 * 2)
             {
                 key = [decryptedKey subdataWithRange:NSMakeRange(0, 16)];
                 auth = [decryptedKey subdataWithRange:NSMakeRange(16, 16)];
             }
             else
-            {
                 key = decryptedKey;
-            }
-            if(key) {
+            
+            if(key)
+            {
                 NSString* ivStr = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/iv#"];
                 NSString* encryptedPayload = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/payload#"];
 

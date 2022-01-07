@@ -1528,6 +1528,7 @@ NSString* const kStanza = @"stanza";
                         [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self.accountNo];
                         [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self.accountNo];
                         [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self.accountNo];
+
                     }
                     else
                     {

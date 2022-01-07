@@ -450,6 +450,121 @@ NSString *const kAskSubscribe=@"subscribe";
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 }
 
+-(void) setContactDisplayName:(NSString*) name
+{
+    self.nickName = name;
+    // abort old change timer and start a new one
+    if(_cancelNickChange)
+        _cancelNickChange();
+    // delay changes because we don't want to update the roster on our server too often while typing
+    _cancelNickChange = createTimer(1.0, (^{
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+        [account updateRosterItem:self.contactJid withName:self.nickName];
+    }));
+}
+
+-(BOOL) isSubscribed
+{
+    return [self.subscription isEqualToString:kSubBoth]
+        || [self.subscription isEqualToString:kSubTo];
+}
+
+-(BOOL) isInRoster
+{
+    return [self.subscription isEqualToString:kSubBoth]
+        || [self.subscription isEqualToString:kSubTo]
+        || [self.ask isEqualToString:kAskSubscribe];
+}
+
+// this will cache the unread count on first access
+-(NSInteger) unreadCount
+{
+    if(_unreadCount == -1)
+        _unreadCount = [[[DataLayer sharedInstance] countUserUnreadMessages:self.contactJid forAccount:self.accountId] integerValue];
+    return _unreadCount;
+}
+
+-(void) toggleMute:(BOOL) mute
+{
+    if(self.isMuted == mute)
+        return;
+    if(mute)
+        [[DataLayer sharedInstance] muteJid:self.contactJid onAccount:self.accountId];
+    else
+        [[DataLayer sharedInstance] unMuteJid:self.contactJid onAccount:self.accountId];
+    self.isMuted = mute;
+}
+
+-(void) toggleMentionOnly:(BOOL) mentionOnly
+{
+    if(!self.isGroup || self.isMentionOnly == mentionOnly)
+        return;
+    if(mentionOnly)
+        [[DataLayer sharedInstance] setMucAlertOnMentionOnly:self.contactJid onAccount:self.accountId];
+    else
+        [[DataLayer sharedInstance] setMucAlertOnAll:self.contactJid onAccount:self.accountId];
+    self.isMentionOnly = mentionOnly;
+}
+
+-(BOOL) toggleEncryption:(BOOL) encrypt
+{
+#ifdef DISABLE_OMEMO
+    return NO;
+#else
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    if(account == nil)
+        return NO;
+    NSArray* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
+    if(encrypt && knownDevices.count == 0 && !self.isEncrypted)
+        return NO;
+    
+    if(self.isEncrypted == encrypt)
+        return YES;
+    
+    if(encrypt)
+        [[DataLayer sharedInstance] encryptForJid:self.contactJid andAccountNo:self.accountId];
+    else
+        [[DataLayer sharedInstance] disableEncryptForJid:self.contactJid andAccountNo:self.accountId];
+    self.isEncrypted = encrypt;
+    return YES;
+#endif
+}
+
+-(void) togglePinnedChat:(BOOL) pinned
+{
+    if(self.isPinned == pinned)
+        return;
+    if(pinned)
+        [[DataLayer sharedInstance] pinChat:self.accountId andBuddyJid:self.contactJid];
+    else
+        [[DataLayer sharedInstance] unPinChat:self.accountId andBuddyJid:self.contactJid];
+    self.isPinned = pinned;
+    // update active chats
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact":self, @"pinningChanged": @YES}];
+}
+
+-(BOOL) toggleBlocked:(BOOL) block
+{
+    if(self.isBlocked == block)
+        return YES;
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    if(!account.connectionProperties.supportsBlocking)
+        return NO;
+    [[MLXMPPManager sharedInstance] blocked:block Jid:self];
+    return YES;
+}
+
+-(void) removeFromRoster
+{
+    [[MLXMPPManager sharedInstance] removeContact:self];
+}
+
+-(void) addToRoster
+{
+    [[MLXMPPManager sharedInstance] addContact:self];
+}
+
 #pragma mark - NSCoding
 
 -(void) encodeWithCoder:(NSCoder*) coder

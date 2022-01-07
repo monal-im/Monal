@@ -797,7 +797,7 @@ $$
                 return [NSString stringWithFormat:@"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
 #endif
             if(!isKeyTransportElement)
-                return [NSString stringWithFormat:@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
+                return [NSString stringWithFormat:NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", @""), error];
             return nil;
         }
         NSData* key;
@@ -809,7 +809,7 @@ $$
             [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
 #ifdef IS_ALPHA
             if(isKeyTransportElement)
-                return NSLocalizedString(@"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person.", @"");
+                return @"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person.", @"";
 #endif
             if(!isKeyTransportElement)
                 return NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.", @"");

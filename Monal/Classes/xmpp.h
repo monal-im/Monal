@@ -204,7 +204,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) changePassword:(NSString*) newPass withCompletion:(xmppCompletion _Nullable) completion;
 
 -(void) requestRegFormWithToken:(NSString* _Nullable) token andCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
--(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
+-(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary*) hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
 
 -(void) publishRosterName:(NSString* _Nullable) rosterName;
 

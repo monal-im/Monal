@@ -308,32 +308,6 @@
                                                             <constraint firstAttribute="bottom" secondItem="rHr-ew-oBM" secondAttribute="bottom" constant="8" id="nxl-Bq-ta3"/>
                                                         </constraints>
                                                     </view>
-                                                    
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7rH-jb-dRr" customClass="GLCapsuleView">
-                                                        <rect key="frame" x="32" y="297" width="224" height="46"/>
-                                                        <subviews>
-                                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter the code you see above" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="nRE-Ax-qd6">
-                                                                <rect key="frame" x="8" y="8" width="208" height="30"/>
-                                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                                <textInputTraits key="textInputTraits" autocorrectionType="no"/>
-                                                                <connections>
-                                                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="SSB-sR-hTa"/>
-                                                                </connections>
-                                                            </textField>
-                                                        </subviews>
-                                                        <color key="backgroundColor" systemColor="secondarySystemBackgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="trailing" secondItem="nRE-Ax-qd6" secondAttribute="trailing" constant="8" id="61S-tf-tvG"/>
-                                                            <constraint firstAttribute="bottom" secondItem="nRE-Ax-qd6" secondAttribute="bottom" constant="8" id="ETc-g4-Pi2"/>
-                                                            <constraint firstItem="nRE-Ax-qd6" firstAttribute="leading" secondItem="7rH-jb-dRr" secondAttribute="leading" constant="8" id="kN5-Sb-n6m"/>
-                                                            <constraint firstAttribute="height" constant="46" id="peT-7X-7c8"/>
-                                                            <constraint firstItem="nRE-Ax-qd6" firstAttribute="top" secondItem="7rH-jb-dRr" secondAttribute="top" constant="8" id="q9O-CK-1hs"/>
-                                                        </constraints>
-                                                    </view>
-                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="vVj-Ir-R3d">
-                                                        <rect key="frame" x="32" y="142" width="224" height="121"/>
-                                                    </imageView>
-                                                    
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dpn-up-7bR" customClass="GLTintButton">
                                                         <rect key="frame" x="32" y="110" width="224" height="46"/>
                                                         <constraints>

@@ -3383,7 +3383,7 @@ NSString* const kStanza = @"stanza";
     [self connect];
 }
 
--(void) registerUser:(NSString *) username withPassword:(NSString *) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion) completion
+-(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary*) hiddenFields withCompletion:(xmppCompletion) completion
 {
     //this is a registration submission
     _registration = NO;

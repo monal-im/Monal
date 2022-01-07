@@ -63,10 +63,11 @@
     self.loginHUD.hidden = NO;
     
     weakify(self);
-    [self.xmppAccount requestRegFormWithToken:self.registerToken andCompletion:^(NSData *captchaImage, NSDictionary *hiddenFields) {
+    [self.xmppAccount requestRegFormWithToken:self.registerToken andCompletion:^(NSData* captchaImage, NSDictionary* hiddenFields) {
         dispatch_async(dispatch_get_main_queue(), ^{
             strongify(self);
             self.loginHUD.hidden = YES;
+            /*
             if(captchaImage) {
                 self.hiddenFields = hiddenFields;
                 self.captchaImage.image = [UIImage imageWithData:captchaImage];
@@ -76,6 +77,7 @@
                 self.captcha.hidden = YES;
                 self.captchaImage.hidden = YES;
             }
+            */
         });
     } andErrorCompletion:^(BOOL success, NSString* error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -128,7 +130,7 @@
     
     NSString* jid = [self.jid.text.lowercaseString copy];
     NSString* pass = [self.password.text copy];
-    NSString* code = [self.captcha.text copy];
+    NSString* code = nil;       //[self.captcha.text copy];
     
     [self.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: self.hiddenFields withCompletion:^(BOOL success, NSString *message) {
         dispatch_async(dispatch_get_main_queue(), ^{

@@ -358,7 +358,7 @@
                                                     <constraint firstAttribute="bottom" secondItem="dpn-up-7bR" secondAttribute="bottom" constant="44" id="pmf-vu-NPn"/>
                                                 </constraints>
                                             </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Like email, you can make your account on many sites and talk to anyone. You can use this form to make an account with the selected server." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DfQ-Vo-v2C">
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Like email, you can make your account on many sites and talk to anyone. You can use this form to make an account with the selected server." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EfQ-Vo-v2C">
                                                 <rect key="frame" x="32" y="8" width="256" height="125.5"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="21"/>
                                                 <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -374,14 +374,14 @@
                                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                                         <constraints>
                                             <constraint firstAttribute="trailing" secondItem="nIY-Zh-Y3h" secondAttribute="trailing" constant="16" id="Hsc-FD-QPm"/>
-                                            <constraint firstItem="DfQ-Vo-v2C" firstAttribute="top" secondItem="n4p-Hz-bDB" secondAttribute="top" constant="8" id="Jz4-Uv-xnN"/>
+                                            <constraint firstItem="EfQ-Vo-v2C" firstAttribute="top" secondItem="n4p-Hz-bDB" secondAttribute="top" constant="8" id="Jz4-Uv-xnN"/>
                                             <constraint firstItem="arw-q8-u8I" firstAttribute="centerX" secondItem="n4p-Hz-bDB" secondAttribute="centerX" id="L6i-m2-dfE"/>
-                                            <constraint firstAttribute="trailing" secondItem="DfQ-Vo-v2C" secondAttribute="trailing" constant="32" id="Nbd-SD-fwx"/>
+                                            <constraint firstAttribute="trailing" secondItem="EfQ-Vo-v2C" secondAttribute="trailing" constant="32" id="Nbd-SD-fwx"/>
                                             <constraint firstItem="arw-q8-u8I" firstAttribute="leading" secondItem="n4p-Hz-bDB" secondAttribute="leading" constant="16" id="WYj-VP-lPE"/>
                                             <constraint firstAttribute="height" constant="717" id="huH-rE-iGZ"/>
-                                            <constraint firstItem="DfQ-Vo-v2C" firstAttribute="leading" secondItem="n4p-Hz-bDB" secondAttribute="leading" constant="32" id="icU-Tz-XHS"/>
+                                            <constraint firstItem="EfQ-Vo-v2C" firstAttribute="leading" secondItem="n4p-Hz-bDB" secondAttribute="leading" constant="32" id="icU-Tz-XHS"/>
                                             <constraint firstItem="arw-q8-u8I" firstAttribute="top" secondItem="nIY-Zh-Y3h" secondAttribute="bottom" constant="8" id="jKt-mJ-gNL"/>
-                                            <constraint firstItem="nIY-Zh-Y3h" firstAttribute="top" secondItem="DfQ-Vo-v2C" secondAttribute="bottom" constant="32" id="rwN-kJ-4Zf"/>
+                                            <constraint firstItem="nIY-Zh-Y3h" firstAttribute="top" secondItem="EfQ-Vo-v2C" secondAttribute="bottom" constant="32" id="rwN-kJ-4Zf"/>
                                             <constraint firstItem="nIY-Zh-Y3h" firstAttribute="leading" secondItem="n4p-Hz-bDB" secondAttribute="leading" constant="16" id="wye-DG-f0Z"/>
                                             <constraint firstAttribute="trailing" secondItem="arw-q8-u8I" secondAttribute="trailing" constant="16" id="xin-Ow-fQy"/>
                                         </constraints>

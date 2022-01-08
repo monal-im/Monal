@@ -44,7 +44,7 @@ jobs:
       - name: Run build
         run: ./scripts/build.sh
       - name: validate ios app
-        run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --asc-provider AnurodhPokharel17643632 -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+        run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider AnurodhPokharel17643632 -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       - name: push tag to beta repo
         run: |
           buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')

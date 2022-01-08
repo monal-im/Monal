@@ -45,7 +45,7 @@ jobs:
       - name: Run build
         run: ./scripts/build.sh
       - name: validate ios app
-        run: xcrun altool --validate-app -f ./Monal/build/ipa/Monal.ipa -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+        run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       - name: push tag to stable repo
         run: |
           buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')

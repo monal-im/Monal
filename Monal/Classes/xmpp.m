@@ -882,7 +882,7 @@ NSString* const kStanza = @"stanza";
             //send one last ack before closing the stream (xep version 1.5.2)
             if(self.accountState>=kStateBound)
             {
-                [_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                [self->_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     [self sendLastAck];
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
             }
@@ -1915,7 +1915,7 @@ NSString* const kStanza = @"stanza";
                     DDLogInfo(@"Inside resume smacks handler: catchup *possibly* done (%@)", self.lastOutboundStanza);
                     //having no entry at all means catchup and replay are done
                     //if replay is not done yet, the kMonalFinishedCatchup notification will be triggered by the replay handler once the replay is finished
-                    if(_inCatchup[self.connectionProperties.identity.jid] == nil && !self->_catchupDone)
+                    if(self->_inCatchup[self.connectionProperties.identity.jid] == nil && !self->_catchupDone)
                     {
                         DDLogInfo(@"Replay really done, now posting kMonalFinishedCatchup notification");
                         [self handleFinishedCatchup];
@@ -3857,13 +3857,13 @@ NSString* const kStanza = @"stanza";
             if(delayedStanza == nil)
             {
                 DDLogInfo(@"Catchup finished for jid %@", archiveJid);
-                [_inCatchup removeObjectForKey:archiveJid];     //catchup done and replay finished
+                [self->_inCatchup removeObjectForKey:archiveJid];     //catchup done and replay finished
                 
                 //handle old mamFinished code as soon as all delayed messages have been processed
                 //we need to wait for all delayed messages because at least omemo needs the pep headline messages coming in during mam catchup
                 if([self.connectionProperties.identity.jid isEqualToString:archiveJid])
                 {
-                    if(!_catchupDone)
+                    if(!self->_catchupDone)
                     {
                         DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
                         [self handleFinishedCatchup];
@@ -3880,7 +3880,7 @@ NSString* const kStanza = @"stanza";
                 //add async processing of next delayed message stanza to receiveQueue
                 //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
                 //and makes sure we process every delayed stanza in its own receive queue operation and its own db transaction
-                [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     [self _handleInternalMamFinishedFor:archiveJid];
                 }]] waitUntilFinished:NO];
             }
@@ -3893,12 +3893,12 @@ NSString* const kStanza = @"stanza";
 {
     //we should be already in the receive queue, but just to make sure (sync dispatch will do nothing if we already are in the right queue)
     [self dispatchOnReceiveQueue:^{
-        _inCatchup[archiveJid] = @NO;       //catchup done, but replay not finished
+        self->_inCatchup[archiveJid] = @NO;       //catchup done, but replay not finished
         //handle delayed message stanzas delivered while the mam catchup was in progress
         //the first call and all subsequent self-invocations are handled by dispatching it async to the receiveQueue
         //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
         //and makes sure we process every delayed stanza in its own receive queue operation and its own db transaction
-        [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+        [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
             [self _handleInternalMamFinishedFor:archiveJid];
         }]] waitUntilFinished:NO];
     }];

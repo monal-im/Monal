@@ -135,7 +135,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 /**
  adds a new contact to the roster
  */
--(void) addToRoster:(NSString*) contact;
+-(void) addToRoster:(NSString*) contact withPreauthToken:(NSString* _Nullable) preauthToken;
 
 /**
  adds a new contact to the roster
@@ -203,8 +203,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 -(void) changePassword:(NSString*) newPass withCompletion:(xmppCompletion _Nullable) completion;
 
--(void) requestRegFormWithCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
--(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
+-(void) requestRegFormWithToken:(NSString* _Nullable) token andCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
+-(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary*) hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
 
 -(void) publishRosterName:(NSString* _Nullable) rosterName;
 
@@ -221,6 +221,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 +(NSMutableDictionary*) invalidateState:(NSDictionary*) dic;
 -(void) updateIqHandlerTimeouts;
+
+-(void) addReconnectionHandler:(MLHandler*) handler;
 
 @end
 

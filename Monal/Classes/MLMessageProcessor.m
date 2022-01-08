@@ -113,14 +113,17 @@ static NSMutableDictionary* _typingNotifications;
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(
         ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
-        ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"]
+        ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] && [messageNode check:@"body#"]
     )
     {
+        //ignore muc pms without id attribute (we can't send out errors pointing to this message without an id)
+        if([messageNode findFirst:@"/@id"] == nil)
+            return message;
         XMPPMessage* errorReply = [[XMPPMessage alloc] init];
         [errorReply.attributes setObject:@"error" forKey:@"type"];
         [errorReply.attributes setObject:messageNode.from forKey:@"to"];                       //this has to be the full jid here
         [errorReply.attributes setObject:[messageNode findFirst:@"/@id"] forKey:@"id"];        //don't set origin id here
-        [errorReply addChild:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+        [errorReply addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"feature-not-implemented" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
             [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" withAttributes:@{} andChildren:@[] andData:@"MUC-PMs are not supported here!"]
         ] andData:nil]];
@@ -129,7 +132,7 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     
-    if([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"])
+    if([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"])
     {
         // Ignore all group chat msgs from unkown groups
         if([[DataLayer sharedInstance] isContactInList:messageNode.fromUser forAccount:account.accountNo] == NO)
@@ -177,46 +180,6 @@ static NSMutableDictionary* _typingNotifications;
     //handle muc status changes or invites (this checks for the muc namespace itself)
     if([account.mucProcessor processMessage:messageNode])
         return message;     //the muc processor said we have stop processing
-    
-    NSString* decrypted;
-    if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
-    {
-        if(isMLhistory)
-        {
-            //only show error for real messages having a fallback body, not for silent key exchange messages
-            if([messageNode check:@"body#"])
-            {
-//use the fallback body on alpha builds (changes are good this fallback body really is the cleartext of the message because of "opportunistic" encryption)
-#ifndef IS_ALPHA
-                decrypted = NSLocalizedString(@"Message was encrypted with omemo and can't be decrypted anymore", @"");
-#endif
-            }
-            else
-                DDLogInfo(@"Ignoring encrypted mam history message without fallback body");
-        }
-        else
-            decrypted = [account.omemo decryptMessage:messageNode];
-    }
-    
-    //implement reading support for EME for messages having a fallback body (e.g. no silent key exchanges) that could not be decrypted
-    //this sets the var "decrypted" to the locally generated "fallback body"
-    if([messageNode check:@"body#"] && !decrypted && [messageNode check:@"{urn:xmpp:eme:0}encryption@namespace"])
-    {
-        if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"eu.siacs.conversations.axolotl"])
-            decrypted = NSLocalizedString(@"Message was encrypted with OMEMO but could not be decrypted", @"");
-        else
-        {
-            NSString* encryptionName = [messageNode check:@"{urn:xmpp:eme:0}encryption@name"] ? [messageNode findFirst:@"{urn:xmpp:eme:0}encryption@name"] : [messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"];
-            //hardcoded names mandated by XEP 0380
-            if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"urn:xmpp:otr:0"])
-                encryptionName = @"OTR";
-            else if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"jabber:x:encrypted"])
-                encryptionName = @"Legacy OpenPGP";
-            else if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"urn:xmpp:openpgp:0"])
-                encryptionName = @"OpenPGP for XMPP";
-            decrypted = [NSString stringWithFormat:NSLocalizedString(@"Message was encrypted with '%@' which isn't supported by Monal", @""), encryptionName];
-        }
-    }
     
     NSString* buddyName = [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
     NSString* ownNick;
@@ -269,9 +232,55 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     
-    //ignore all other groupchat messages coming from bare jid (only handle subject updates above)
+    //ignore all other groupchat messages coming from bare jid (e.g. not being a "normal" muc message nor a subject update handled above)
     if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
         return message;
+    
+    NSString* decrypted;
+    if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
+    {
+        if(isMLhistory)
+        {
+            //only show error for real messages having a fallback body, not for silent key exchange messages
+            if([messageNode check:@"body#"])
+            {
+//use the fallback body on alpha builds (changes are good this fallback body really is the cleartext of the message because of "opportunistic" encryption)
+#ifndef IS_ALPHA
+                decrypted = NSLocalizedString(@"Message was encrypted with OMEMO and can't be decrypted anymore", @"");
+#endif
+            }
+            else
+                DDLogInfo(@"Ignoring encrypted mam history message without fallback body");
+        }
+        else
+            decrypted = [account.omemo decryptMessage:messageNode];
+    }
+    
+#ifdef IS_ALPHA
+    //thats the negation of our case from line 193
+    //--> opportunistic omemo in alpha builds should use the fallback body instead of the EME error because the fallback body could be the cleartext message
+    //    (it could be a real omemo fallback, too, but there is no harm in using that instead of the EME message)
+    if(!([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] && isMLhistory && [messageNode check:@"body#"]))
+#endif
+    //implement reading support for EME for messages having a fallback body (e.g. no silent key exchanges) that could not be decrypted
+    //this sets the var "decrypted" to the locally generated "fallback body"
+    if([messageNode check:@"body#"] && !decrypted && [messageNode check:@"{urn:xmpp:eme:0}encryption@namespace"])
+    {
+        if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"eu.siacs.conversations.axolotl"])
+            decrypted = NSLocalizedString(@"Message was encrypted with OMEMO but could not be decrypted", @"");
+        else
+        {
+            NSString* encryptionName = [messageNode check:@"{urn:xmpp:eme:0}encryption@name"] ? [messageNode findFirst:@"{urn:xmpp:eme:0}encryption@name"] : [messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"];
+            //hardcoded names mandated by XEP 0380
+            if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"urn:xmpp:otr:0"])
+                encryptionName = @"OTR";
+            else if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"jabber:x:encrypted"])
+                encryptionName = @"Legacy OpenPGP";
+            else if([[messageNode findFirst:@"{urn:xmpp:eme:0}encryption@namespace"] isEqualToString:@"urn:xmpp:openpgp:0"])
+                encryptionName = @"OpenPGP for XMPP";
+            decrypted = [NSString stringWithFormat:NSLocalizedString(@"Message was encrypted with '%@' which isn't supported by Monal", @""), encryptionName];
+        }
+    }
     
     if([messageNode check:@"body#"] || decrypted)
     {

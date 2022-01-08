@@ -174,11 +174,19 @@
     if([presenceNode check:@"/<type=unavailable>"])
         [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
     else
+    {
+        if(item[@"jid"] != nil)
+            [self handleMembersListUpdate:presenceNode];
         [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+    }
 }
 
 -(BOOL) processMessage:(XMPPMessage*) messageNode
 {
+    //handle member list updates of offline members (useful for members-only mucs)
+    if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/item"])
+        [self handleMembersListUpdate:messageNode];
+    
     //handle muc status codes
     [self handleStatusCodes:messageNode];
     
@@ -200,6 +208,25 @@
     
     //continue processing in MLMessageProcessor
     return NO;
+}
+
+-(void) handleMembersListUpdate:(XMPPStanza*) node
+{
+    for(NSDictionary* entry in [node find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
+    {
+        NSMutableDictionary* item = [entry mutableCopy];
+        if(!item)
+            continue;       //ignore empty items
+        
+        //update jid to be a bare jid
+        if(item[@"jid"])
+            item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
+        
+        if([@"none" isEqualToString:item[@"affiliation"]])
+            [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:_account.accountNo];
+        else
+            [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:_account.accountNo];
+    }
 }
 
 -(void) handleStatusCodes:(XMPPStanza*) node
@@ -601,10 +628,9 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
     }
     
     //extract further muc infos
-    XMPPDataForm* dataForm = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/{jabber:x:data}x"];
-    NSString* mucName = dataForm[@"muc#roomconfig_roomname"];
+    NSString* mucName = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\"];
     NSString* mucType = @"channel";
-    //both are needed for omemo, see discussion with holger 2021-01-02/03 -- tmolitor
+    //both are needed for omemo, see discussion with holger 2021-01-02/03 -- Thilo Molitor
     if([features containsObject:@"muc_nonanonymous"] && [features containsObject:@"muc_membersonly"])
         mucType = @"group";
     
@@ -683,16 +709,7 @@ $$
 
 $$instance_handler(handleMembersList, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
-    for(NSDictionary* entry in [iqNode find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
-    {
-        NSMutableDictionary* item = [entry mutableCopy];
-        if(!item)
-            continue;
-        //update jid to be a bare jid and add muc nick to our dict
-        if(item[@"jid"])
-            item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
-        [[DataLayer sharedInstance] addMember:item toMuc:iqNode.fromUser forAccountId:_account.accountNo];
-    }
+    [self handleMembersListUpdate:iqNode];
 }
 
 $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))

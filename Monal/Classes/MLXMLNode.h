@@ -30,13 +30,13 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Query for text contents, elementNames, attributes or child elements
  */
--(NSArray*) find:(NSString*) queryString;
--(id _Nullable) findFirst:(NSString*) queryString;
+-(NSArray*) find:(NSString*) queryString, ...;
+-(id _Nullable) findFirst:(NSString*) queryString, ...;
 
 /**
  Check if the current node matches the queryString and/or its extraction command would return something
  */
--(BOOL) check:(NSString*) queryString;
+-(BOOL) check:(NSString*) queryString, ...;
 
 /**
  Quickly set an XMLNS attribute
@@ -52,7 +52,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Adds a new child node (this creates a copy of the node and changes the copy's parent property to its new parent
  */
--(MLXMLNode* _Nullable) addChild:(MLXMLNode*) child;
+-(MLXMLNode* _Nullable) addChildNode:(MLXMLNode*) child;
 
 /**
  Removes child by reference

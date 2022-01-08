@@ -2,7 +2,7 @@
 //  XMPPStanza.m
 //  monalxmpp
 //
-//  Created by tmolitor on 24.09.20.
+//  Created by Thilo Molitor on 24.09.20.
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
@@ -18,7 +18,7 @@
     MLXMLNode* delay = [[MLXMLNode alloc] initWithElement:@"delay" andNamespace:@"urn:xmpp:delay"];
     delay.attributes[@"from"] = from;
     delay.attributes[@"stamp"] = [HelperTools generateDateTimeString:[NSDate date]];
-    [self addChild:delay];
+    [self addChildNode:delay];
 }
 
 -(NSString*) id

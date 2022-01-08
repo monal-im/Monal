@@ -80,7 +80,7 @@ const long NotificationPrivacyOptionCnt = 3;
     switch (section) {
         case 0:
         {
-            return 9 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
+            return 10 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
         }
         default:
         {
@@ -170,6 +170,11 @@ const long NotificationPrivacyOptionCnt = 3;
                     [cell initTapCell:NSLocalizedString(@"Auto-Download Media Settings", @"")];
                     break;
                 }
+                case 12:
+                {
+                    [cell initCell:NSLocalizedString(@"Autodelete all messages after 3 days", @"") withToggleDefaultsKey:@"AutodeleteAllMessagesAfter3Days"];
+                    break;
+                }
                 default:
                     unreachable();
                     break;
@@ -221,6 +226,8 @@ const long NotificationPrivacyOptionCnt = 3;
                     [self performSegueWithIdentifier:@"fileTransferSettings" sender:nil];
                     break;
                 }
+                case 12:
+                    break;
             }
             break;
         }

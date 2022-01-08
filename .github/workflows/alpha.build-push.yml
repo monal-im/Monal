@@ -45,7 +45,7 @@ jobs:
       - name: Uploading to alpha site
         run: ./scripts/upload.sh
       - name: Notarize catalyst
-        run: xcrun altool --notarize-app --primary-bundle-id monal.alpha -f ./Monal/build/app/Monal.zip  -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+        run: xcrun altool --notarize-app --primary-bundle-id monal.alpha --asc-provider S8D843U34Y -f ./Monal/build/app/Monal.zip  -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       - uses: actions/upload-artifact@v2
         with:
           name: monal-catalyst

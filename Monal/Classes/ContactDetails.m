@@ -88,7 +88,7 @@ enum ContactDetailsAboutRows {
     self.navigationItem.title = self.contact.contactDisplayName;
 
     if(self.contact.isGroup) {
-       NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+       NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact];
         self.groupMemberCount = members.count;
         self.navigationItem.title = NSLocalizedString(@"Group Chat", @"");
     }
@@ -523,9 +523,8 @@ enum ContactDetailsAboutRows {
 -(IBAction) toggleEncryption:(id)sender
 {
 #ifndef DISABLE_OMEMO
-    NSArray* devices = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid];
     [MLChatViewHelper<ContactDetails*>
-        toggleEncryptionForContact:self.contact withKnownDevices:devices withSelf:self afterToggle:^() {
+        toggleEncryptionForContact:self.contact withSelf:self afterToggle:^() {
         [self refreshLock];
     }];
 #endif

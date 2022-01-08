@@ -30,6 +30,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.loginHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    self.loginHUD.mode = MBProgressHUDModeIndeterminate;
+    self.loginHUD.removeFromSuperViewOnHide=YES;
 }
 
 - (void) viewWillAppear:(BOOL)animated
@@ -37,34 +40,65 @@
     [super viewWillAppear:animated];
     [self registerForKeyboardNotifications];
     
+    //default ibr server
+    if(!self.registerServer || !self.registerServer.length)
+    {
+        self.registerServer = kRegServer;
+        self.disclaimer.text = NSLocalizedString(@"yax.im is a public server, not affiliated with Monal. This page is provided for convenience.", @"");
+        self.tos.hidden = NO;
+    }
+    else
+    {
+        self.disclaimer.text = [NSString stringWithFormat:NSLocalizedString(@"Using server '%@' that was provided by the registration link you used.", @""), self.registerServer];
+        self.tos.hidden = YES;
+    }
+
+    
+    if(self.registerUsername)
+        self.jid.text = self.registerUsername;
+    
     [self createXMPPInstance];
     
-    __weak MLRegisterViewController *weakself = self;
-    [self.xmppAccount requestRegFormWithCompletion:^(NSData *captchaImage, NSDictionary *hiddenFields) {
+    self.loginHUD.label.text = NSLocalizedString(@"Loading registration form", @"");
+    self.loginHUD.hidden = NO;
+    
+    weakify(self);
+    [self.xmppAccount requestRegFormWithToken:self.registerToken andCompletion:^(NSData* captchaImage, NSDictionary* hiddenFields) {
         dispatch_async(dispatch_get_main_queue(), ^{
+            strongify(self);
+            self.loginHUD.hidden = YES;
+            /*
             if(captchaImage) {
-                weakself.captchaImage.image= [UIImage imageWithData:captchaImage];
-                weakself.hiddenFields = hiddenFields;
+                self.hiddenFields = hiddenFields;
+                self.captchaImage.image = [UIImage imageWithData:captchaImage];
+                self.captcha.hidden = NO;
+                self.captchaImage.hidden = NO;
             } else {
-                //show error image
-                //self.captchaImage.image=
+                self.captcha.hidden = YES;
+                self.captchaImage.hidden = YES;
             }
-            [weakself.xmppAccount disconnect:YES];  //we dont want to see any time out errors
+            */
         });
     } andErrorCompletion:^(BOOL success, NSString* error) {
-        NSString *displayMessage = error;
-        if(displayMessage.length==0) displayMessage = NSLocalizedString(@"Could not request registration form. Please check your internet connection and try again.", @ "");
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @ "") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [alert dismissViewControllerAnimated:YES completion:nil];
-        }]];
-        [self presentViewController:alert animated:YES completion:nil];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            strongify(self);
+            self.loginHUD.hidden = YES;
+            NSString* displayMessage = error;
+            if(!displayMessage || !displayMessage.length)
+                displayMessage = NSLocalizedString(@"Could not request registration form. Please check your internet connection and try again.", @ "");
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @ "") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:nil];
+                [self dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:alert animated:YES completion:nil];
+        });
     }];
 }
 
 -(void) createXMPPInstance
 {
-    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing@yax.im" password:@"nothing" andResource:@"MonalReg"];
+    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"nothing@%@", self.registerServer] password:@"nothing" andResource:@"MonalReg"];
     MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:@"" andPort:[NSNumber numberWithInt:5222] andDirectTLS:NO];
     self.xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:@"-1"];
 }
@@ -91,17 +125,12 @@
         return;
     }
     
-    self.loginHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     self.loginHUD.label.text = NSLocalizedString(@"Signing Up", @"");
-    self.loginHUD.mode = MBProgressHUDModeIndeterminate;
-    self.loginHUD.removeFromSuperViewOnHide=YES;
+    self.loginHUD.hidden = NO;
     
     NSString* jid = [self.jid.text.lowercaseString copy];
     NSString* pass = [self.password.text copy];
-    NSString* code = [self.captcha.text copy];
-    [self createXMPPInstance];
-
-    self.loginHUD.hidden = NO;
+    NSString* code = nil;       //[self.captcha.text copy];
     
     [self.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: self.hiddenFields withCompletion:^(BOOL success, NSString *message) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -121,7 +150,7 @@
             else
             {
                 NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
-                [dic setObject:kRegServer forKey:kDomain];
+                [dic setObject:self.registerServer forKey:kDomain];
                 [dic setObject:jid forKey:kUsername];
                 [dic setObject:[HelperTools encodeRandomResource] forKey:kResource];
                 [dic setObject:@YES forKey:kEnabled];
@@ -142,34 +171,34 @@
     }];
 }
 
--(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+-(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     if([segue.identifier isEqualToString:@"showSuccess"])
     {
         [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
         MLRegSuccessViewController* dest = (MLRegSuccessViewController *) segue.destinationViewController;
-        dest.registeredAccount = [NSString stringWithFormat:@"%@@%@",self.jid.text, kRegServer];
+        dest.registeredAccount = [NSString stringWithFormat:@"%@@%@", self.jid.text, self.registerServer];
+        dest.completionHandler = self.completionHandler;
     }
 }
 
--(IBAction) useWithoutAccount:(id)sender
+-(IBAction) useWithoutAccount:(id) sender
 {
     [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(IBAction) tapAction:(id)sender
+-(IBAction) tapAction:(id) sender
 {
     [self.view endEditing:YES];
 }
 
--(IBAction) openTos:(id)sender;
+-(IBAction) openTos:(id) sender;
 {
-   // [self openLink:@"https://blabber.im/en/nutzungsbedingungen/"];
     [self openLink:@"https://yaxim.org/yax.im/"];
 }
 
--(void) openLink:(NSString *) link
+-(void) openLink:(NSString*) link
 {
     NSURL *url= [NSURL URLWithString:link];
     
@@ -181,34 +210,32 @@
 
 #pragma mark -textfield delegate
 
-- (void)textFieldDidBeginEditing:(UITextField *)textField
+-(void) textFieldDidBeginEditing:(UITextField*) textField
 {
-    self.activeField= textField;
+    self.activeField = textField;
 }
 
-- (void)textFieldDidEndEditing:(UITextField *)textField
+-(void) textFieldDidEndEditing:(UITextField*) textField
 {
-    self.activeField=nil;
+    self.activeField = nil;
 }
 
 
 
 #pragma mark - keyboard management
 
-- (void)registerForKeyboardNotifications
+-(void) registerForKeyboardNotifications
 {
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWasShown:)
                                                  name:UIKeyboardDidShowNotification object:nil];
-    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWillBeHidden:)
                                                  name:UIKeyboardWillHideNotification object:nil];
-    
 }
 
 // Called when the UIKeyboardDidShowNotification is sent.
-- (void)keyboardWasShown:(NSNotification*)aNotification
+-(void) keyboardWasShown:(NSNotification*) aNotification
 {
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
@@ -220,13 +247,14 @@
     // If active text field is hidden by keyboard, scroll it so it's visible
     CGRect aRect = self.view.frame;
     aRect.size.height -= kbSize.height;
-    if (!CGRectContainsPoint(aRect, self.activeField.frame.origin) ) {
+    if(!CGRectContainsPoint(aRect, self.activeField.frame.origin))
+    {
         [self.scrollView scrollRectToVisible:self.activeField.frame animated:YES];
     }
 }
 
 // Called when the UIKeyboardWillHideNotification is sent
-- (void)keyboardWillBeHidden:(NSNotification*)aNotification
+-(void) keyboardWillBeHidden:(NSNotification*) aNotification
 {
     UIEdgeInsets contentInsets = UIEdgeInsetsZero;
     self.scrollView.contentInset = contentInsets;
@@ -235,8 +263,7 @@
 
 -(void) dealloc
 {
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [nc removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 

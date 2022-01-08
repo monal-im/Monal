@@ -86,6 +86,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     //upgrade url preview
     [self upgradeBoolUserSettingsIfUnset:@"ShowURLPreview" toDefault:YES];
+    
+    //upgrade message autodeletion
+    [self upgradeBoolUserSettingsIfUnset:@"AutodeleteAllMessagesAfter3Days" toDefault:NO];
 
     // upgrade udp logger
     [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];
@@ -377,7 +380,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     return account.connectedTime;
 }
 
--(xmpp*) getConnectedAccountForID:(NSString*) accountNo
+-(xmpp* _Nullable) getConnectedAccountForID:(NSString*) accountNo
 {
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
@@ -540,7 +543,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 #pragma mark -  XMPP commands
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
+-(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString *messageId)) completion
 {
     NSString* msgid = [[NSUUID UUID] UUIDString];
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
@@ -579,7 +582,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         DDLogError(@"Could not add message to history!");
 }
 
--(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^)(BOOL success, NSString* messageId)) completion
+-(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {
     BOOL success = NO;
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
@@ -615,11 +618,23 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - contact
 
+//this handler will simply retry the removeContact: call
+$$class_handler(handleRemoveContact, $_ID(MLContact*, contact))
+    [[MLXMPPManager sharedInstance] removeContact:contact];
+$$
+
 -(void) removeContact:(MLContact*) contact
 {
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
     {
+        //queue remove contact for execution once bound (e.g. on catchup done)
+        if(account.accountState < kStateBound)
+        {
+            [account addReconnectionHandler:$newHandler(self, handleRemoveContact, $ID(contact))];
+            return;
+        }
+        
         if(contact.isGroup)
         {
             //if MUC
@@ -635,33 +650,58 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) addContact:(MLContact*) contact
 {
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
-    [account addToRoster:contact.contactJid];
-    
-    BOOL approve = NO;
-    // approve contact ahead of time if possible
-    if(account.connectionProperties.supportsRosterPreApproval)
-        approve = YES;
-    // just in case there was a pending request
-    else if([contact.state isEqualToString:kSubTo]  || [contact.state isEqualToString:kSubNone] )
-        approve = YES;
-    // approve contact requests not catched by the above checks (can that even happen?)
-    else if([[DataLayer sharedInstance] hasContactRequestForAccount:account.accountNo andBuddyName:contact.contactJid])
-        approve = YES;
-    if(approve)
-    {
-        // delete existing contact request if exists
-        [[DataLayer sharedInstance] deleteContactRequest:contact];
-        // and approve the new contact
-        [self approveContact:contact];
-    }
-#ifndef DISABLE_OMEMO
-    // Request omemo devicelist
-    [account.omemo queryOMEMODevices:contact.contactJid];
-#endif// DISABLE_OMEMO
+    [self addContact:contact withPreauthToken:nil];
 }
 
--(void) getEntitySoftWareVersionForContact:(MLContact *) contact andResource:(NSString*) resource
+//this handler will simply retry the addContact:withPreauthToken: call
+$$class_handler(handleAddContact, $_ID(MLContact*, contact), $_ID(NSString*, preauthToken))
+    [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
+$$
+
+-(void) addContact:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken
+{
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    if(account)
+    {
+        //queue add contact for execution once bound (e.g. on catchup done)
+        if(account.accountState < kStateBound)
+        {
+            [account addReconnectionHandler:$newHandler(self, handleAddContact, $ID(contact), $ID(preauthToken))];
+            return;
+        }
+        
+        if(contact.isGroup)
+            [account joinMuc:contact.contactJid];
+        else
+        {
+            [account addToRoster:contact.contactJid withPreauthToken:preauthToken];
+            
+            BOOL approve = NO;
+            // approve contact ahead of time if possible
+            if(account.connectionProperties.supportsRosterPreApproval)
+                approve = YES;
+            // just in case there was a pending request
+            else if([contact.state isEqualToString:kSubTo] || [contact.state isEqualToString:kSubNone])
+                approve = YES;
+            // approve contact requests not catched by the above checks (can that even happen?)
+            else if([[DataLayer sharedInstance] hasContactRequestForAccount:account.accountNo andBuddyName:contact.contactJid])
+                approve = YES;
+            if(approve)
+            {
+                // delete existing contact request if exists
+                [[DataLayer sharedInstance] deleteContactRequest:contact];
+                // and approve the new contact
+                [self approveContact:contact];
+            }
+#ifndef DISABLE_OMEMO
+            // Request omemo devicelist
+            [account.omemo queryOMEMODevices:contact.contactJid];
+#endif// DISABLE_OMEMO
+        }
+    }
+}
+
+-(void) getEntitySoftWareVersionForContact:(MLContact*) contact andResource:(NSString*) resource
 {
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     
@@ -699,7 +739,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - APNS
 
--(void) setPushToken:(NSString*) token
+-(void) setPushToken:(NSString* _Nullable) token
 {
     if(token && ![token isEqualToString:_pushToken])
     {
@@ -732,7 +772,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - share sheet added
 
--(MLContact*) sendAllOutboxes
+-(MLContact* _Nullable) sendAllOutboxes
 {
     //send all sharesheet outboxes (this method will be called by AppDelegate if opened via monalOpen:// url)
     MLContact* lastRecipientContact = nil;

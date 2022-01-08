@@ -13,6 +13,7 @@
 #import "MLImageManager.h"
 #import "HelperTools.h"
 #import "MLNotificationQueue.h"
+#import "MLContactSoftwareVersionInfo.h"
 
 @interface MLIQProcessor()
 
@@ -143,7 +144,7 @@
     DDLogWarn(@"Got unhandled error IQ: %@", iqNode);
 }
 
-$$static_handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
+$$class_handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Mam catchup query returned error: %@", [iqNode findFirst:@"error"]);
@@ -178,7 +179,7 @@ $$static_handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_B
     }
 $$
 
-$$static_handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
@@ -198,7 +199,7 @@ $$static_handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPI
     [account mamFinishedFor:account.connectionProperties.identity.jid];
 $$
 
-$$static_handler(handleCarbonsEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleCarbonsEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"carbon enable iq returned error: %@", [iqNode findFirst:@"error"]);
@@ -208,7 +209,7 @@ $$static_handler(handleCarbonsEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNod
     account.connectionProperties.usingCarbons2 = YES;
 $$
 
-$$static_handler(handleBind, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleBind, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Binding our resource returned an error: %@", [iqNode findFirst:@"error"]);
@@ -224,9 +225,9 @@ $$static_handler(handleBind, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         return;
     }
     
-    DDLogInfo(@"Now bound to full jid: %@", [iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]);
+    DDLogInfo(@"Now bound to fullJid: %@", [iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]);
     [account.connectionProperties.identity bindJid:[iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]];
-    DDLogDebug(@"jid=%@, resource=%@, fullJid=%@", account.connectionProperties.identity.jid, account.connectionProperties.identity.resource, account.connectionProperties.identity.fullJid);
+    DDLogDebug(@"bareJid=%@, resource=%@, fullJid=%@", account.connectionProperties.identity.jid, account.connectionProperties.identity.resource, account.connectionProperties.identity.fullJid);
     
     //update resource in db (could be changed by server)
     NSMutableDictionary* accountDict = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo]];
@@ -252,7 +253,7 @@ $$static_handler(handleBind, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
 $$
 
 //proxy handler
-$$static_handler(handleRoster, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleRoster, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     [self processRosterWithAccount:account andIqNode:iqNode];
 $$
 
@@ -316,6 +317,9 @@ $$
                                              forContact:contact[@"jid"]
                                              andAccount:account.accountNo];
             
+            //regenerate avatar if the nickame has changed
+            if(![contactObj.nickName isEqualToString:[contact objectForKey:@"name"]])
+                [[MLImageManager sharedInstance] purgeCacheForContact:contact[@"jid"] andAccount:account.accountNo];
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo]
             }];
@@ -327,7 +331,7 @@ $$
 }
 
 //features advertised on our own jid/account
-$$static_handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Disco info query to our account returned an error: %@", [iqNode findFirst:@"error"]);
@@ -399,7 +403,7 @@ $$static_handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
 $$
 
 //features advertised on our server
-$$static_handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Disco info query to our server returned an error: %@", [iqNode findFirst:@"error"]);
@@ -417,7 +421,7 @@ $$static_handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNo
         {
             DDLogInfo(@"enabling carbons");
             XMPPIQ* carbons = [[XMPPIQ alloc] initWithType:kiqSetType];
-            [carbons addChild:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:carbons:2"]];
+            [carbons addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:carbons:2"]];
             [account sendIq:carbons withHandler:$newHandler(self, handleCarbonsEnabled)];
         }
     }
@@ -441,7 +445,7 @@ $$static_handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNo
     }
 $$
 
-$$static_handler(handleServiceDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleServiceDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
     
     if(!account.connectionProperties.supportsHTTPUpload && [features containsObject:@"urn:xmpp:http:upload:0"])
@@ -457,7 +461,7 @@ $$static_handler(handleServiceDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
         account.connectionProperties.conferenceServer = iqNode.from;
 $$
 
-$$static_handler(handleServerDiscoItems, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleServerDiscoItems, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     account.connectionProperties.discoveredServices = [[NSMutableArray alloc] init];
     for(NSDictionary* item in [iqNode find:@"{http://jabber.org/protocol/disco#items}query/item@@"])
     {
@@ -473,16 +477,17 @@ $$static_handler(handleServerDiscoItems, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
 $$
 
 //entity caps of some contact
-$$static_handler(handleEntityCapsDisco, $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleEntityCapsDisco, $_ID(XMPPIQ*, iqNode))
     NSMutableArray* identities = [[NSMutableArray alloc] init];
     for(MLXMLNode* identity in [iqNode find:@"{http://jabber.org/protocol/disco#info}query/identity"])
-        [identities addObject:[NSString stringWithFormat:@"%@/%@//%@", [identity findFirst:@"/@category"], [identity findFirst:@"/@type"], [identity findFirst:@"/@name"]]];
+        [identities addObject:[NSString stringWithFormat:@"%@/%@/%@/%@", [identity findFirst:@"/@category"], [identity findFirst:@"/@type"], ([identity check:@"/@xml:lang"] ? [identity findFirst:@"/@xml:lang"] : @""), [identity findFirst:@"/@name"]]];
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
-    NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features];
+    NSArray* forms = [iqNode find:@"{http://jabber.org/protocol/disco#info}query/{jabber:x:data}x"];
+    NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features andForms:forms];
     [[DataLayer sharedInstance] setCaps:features forVer:ver];
 $$
 
-$$static_handler(handleMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"MAM prefs query returned an error: %@", [iqNode findFirst:@"error"]);
@@ -498,16 +503,16 @@ $$static_handler(handleMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     }
 $$
 
-$$static_handler(handleSetMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleSetMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
-        DDLogError(@"Seting MAM prefs returned an error: %@", [iqNode findFirst:@"error"]);
+        DDLogError(@"Setting MAM prefs returned an error: %@", [iqNode findFirst:@"error"]);
         [HelperTools postError:NSLocalizedString(@"XMPP mam preferences error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
         return;
     }
 $$
 
-$$static_handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Registering on appserver returned an error: %@", [iqNode findFirst:@"error"]);
@@ -532,7 +537,7 @@ $$static_handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPI
     [account sendIq:enable withHandler:$newHandler(MLIQProcessor, handlePushEnabled)];
 $$
 
-$$static_handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Enabling push returned an error: %@", [iqNode findFirst:@"error"]);
@@ -544,7 +549,7 @@ $$static_handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     account.connectionProperties.pushEnabled = YES;
 $$
 
-$$static_handler(handleBlocklist, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$class_handler(handleBlocklist, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if(!account.connectionProperties.supportsBlocking) return;
 
     if([iqNode check:@"/<type=result>/{urn:xmpp:blocking}blocklist"])
@@ -563,6 +568,17 @@ $$static_handler(handleBlocklist, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     }
 $$
 
+$$class_handler(handleBlocked, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, blockedJid))
+    if(!account.connectionProperties.supportsBlocking) return;
+    
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Blocking returned an error: %@", [iqNode findFirst:@"error"]);
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to block contact %@", @""), blockedJid] withNode:iqNode andAccount:account andIsSevere:NO];
+        return;
+    }
+$$
+
 +(void) iqVersionResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
     NSString* iqAppName = [iqNode findFirst:@"{jabber:iq:version}query/name#"];
@@ -575,28 +591,23 @@ $$
     if(!iqPlatformOS)
         iqPlatformOS = @"";
     
-    NSArray *versionDBInfoArr = [[DataLayer sharedInstance] getSoftwareVersionInfoForContact:iqNode.fromUser resource:iqNode.fromResource andAccount:account.accountNo];
+    MLContactSoftwareVersionInfo* versionDBInfo = [[DataLayer sharedInstance] getSoftwareVersionInfoForContact:iqNode.fromUser resource:iqNode.fromResource andAccount:account.accountNo];
     
-    if ((versionDBInfoArr != nil) && ([versionDBInfoArr count] > 0)) {
-        NSDictionary *versionInfoDBDic = versionDBInfoArr[0];        
-        
-        if (!([[versionInfoDBDic objectForKey:@"platform_App_Name"] isEqualToString:iqAppName] &&
-            [[versionInfoDBDic objectForKey:@"platform_App_Version"] isEqualToString:iqAppVersion] &&
-            [[versionInfoDBDic objectForKey:@"platform_OS"] isEqualToString:iqPlatformOS]))
+    if (versionDBInfo != nil) {
+        if (!([versionDBInfo.appName isEqualToString:iqAppName] &&
+            [versionDBInfo.appVersion isEqualToString:iqAppVersion] &&
+            [versionDBInfo.platformOs isEqualToString:iqPlatformOS]))
         {
+            MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS];
+
             [[DataLayer sharedInstance] setSoftwareVersionInfoForContact:iqNode.fromUser
                                                                 resource:iqNode.fromResource
                                                               andAccount:account.accountNo
-                                                             withAppName:iqAppName
-                                                              appVersion:iqAppVersion
-                                                           andPlatformOS:iqPlatformOS];
+                                                        withSoftwareInfo:newSoftwareVersionInfo];
             
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh            
                                                                 object:account
-                                                              userInfo:@{@"platform_App_Name":iqAppName,
-                                                                         @"platform_App_Version":iqAppVersion,
-                                                                         @"platform_OS":iqPlatformOS,
-                                                                         @"fromResource":iqNode.fromResource}];
+                                                              userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
         }
     }
 }
@@ -604,7 +615,7 @@ $$
 +(void) respondWithErrorTo:(XMPPIQ*) iqNode onAccount:(xmpp*) account
 {
     XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-    [errorIq addChild:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+    [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"service-unavailable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
     ] andData:nil]];
     [account send:errorIq];

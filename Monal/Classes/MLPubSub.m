@@ -45,7 +45,7 @@ static NSDictionary* _defaultOptions;
     return self;
 }
 
-//handler --> $$static_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
 -(void) registerForNode:(NSString*) node withHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Adding PEP handler %@ for node %@", handler, node);
@@ -57,7 +57,7 @@ static NSDictionary* _defaultOptions;
     }
 }
 
-//handler --> $$static_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
 -(void) unregisterHandler:(MLHandler*) handler forNode:(NSString*) node
 {
     DDLogInfo(@"Removing PEP handler %@ for node %@", handler, node);
@@ -69,7 +69,7 @@ static NSDictionary* _defaultOptions;
     }
 }
 
-//handler --> $$static_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
 -(void) fetchNode:(NSString*) node from:(NSString*) jid withItemsList:(NSArray*) itemsList andHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Fetching node '%@' at jid '%@' using callback %@...", node, jid, handler);
@@ -88,7 +88,7 @@ static NSDictionary* _defaultOptions;
     
     //build query
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
-    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+    [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil]
     ] andData:nil]];
 
@@ -100,7 +100,7 @@ static NSDictionary* _defaultOptions;
     )];
 }
 
-//handler --> $$static_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) configureNode:(NSString*) node withConfigOptions:(NSDictionary*) configOptions andHandler:(MLHandler*) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -110,7 +110,7 @@ static NSDictionary* _defaultOptions;
     }
     
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
+    [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"configure" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
     ] andData:nil]];
     [_account sendIq:query withHandler:$newHandler(self, handleConfigFormResult,
@@ -125,7 +125,7 @@ static NSDictionary* _defaultOptions;
     [self publishItem:item onNode:node withConfigOptions:nil andHandler:nil];
 }
 
-//handler --> $$static_handler(xxx, $_ID(xmpp*, account), $_BOOL(success))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success))
 -(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node withHandler:(MLHandler* _Nullable) handler
 {
     [self publishItem:item onNode:node withConfigOptions:nil andHandler:handler];
@@ -136,7 +136,7 @@ static NSDictionary* _defaultOptions;
     [self publishItem:item onNode:node withConfigOptions:configOptions andHandler:nil];
 }
 
-//handler --> $$static_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node withConfigOptions:(NSDictionary* _Nullable) configOptions andHandler:(MLHandler* _Nullable) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -158,7 +158,7 @@ static NSDictionary* _defaultOptions;
     [self retractItemWithId:itemId onNode:node andHandler:nil];
 }
 
-//handler --> $$static_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) retractItemWithId:(NSString*) itemId onNode:(NSString*) node andHandler:(MLHandler*) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -169,7 +169,7 @@ static NSDictionary* _defaultOptions;
     DDLogDebug(@"Retracting item '%@' on node '%@'", itemId, node);
     MLXMLNode* item = [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": itemId} andChildren:@[] andData:nil];
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+    [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"retract" withAttributes:@{@"node": node} andChildren:@[item] andData:nil]
     ] andData:nil]];
     [_account sendIq:query withHandler:$newHandler(self, handleRetractResult,
@@ -184,7 +184,7 @@ static NSDictionary* _defaultOptions;
     [self purgeNode:node andHandler:nil];
 }
 
-//handler --> $$static_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) purgeNode:(NSString*) node andHandler:(MLHandler*) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -193,7 +193,7 @@ static NSDictionary* _defaultOptions;
         return;
     }
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
+    [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"purge" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
     ] andData:nil]];
     [_account sendIq:query withHandler:$newHandler(self, handlePurgeOrDeleteResult,
@@ -207,7 +207,7 @@ static NSDictionary* _defaultOptions;
     [self deleteNode:node andHandler:nil];
 }
 
-//handler --> $$static_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) deleteNode:(NSString*) node andHandler:(MLHandler*) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -216,7 +216,7 @@ static NSDictionary* _defaultOptions;
         return;
     }
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
+    [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"delete" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
     ] andData:nil]];
     [_account sendIq:query withHandler:$newHandler(self, handlePurgeOrDeleteResult,
@@ -320,12 +320,12 @@ static NSDictionary* _defaultOptions;
 {
     DDLogDebug(@"Publishing item on node '%@': %@", node, item);
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+    [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"publish" withAttributes:@{@"node": node} andChildren:@[item] andData:nil]
     ] andData:nil]];
     //only add publish-options if present
     if([configOptions count] > 0)
-        [[query findFirst:@"{http://jabber.org/protocol/pubsub}pubsub"] addChild:[[MLXMLNode alloc] initWithElement:@"publish-options" withAttributes:@{} andChildren:@[
+        [(MLXMLNode*)[query findFirst:@"{http://jabber.org/protocol/pubsub}pubsub"] addChildNode:[[MLXMLNode alloc] initWithElement:@"publish-options" withAttributes:@{} andChildren:@[
             [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:configOptions]
         ] andData:nil]];
     [_account sendIq:query withHandler:$newHandler(self, handlePublishResult,
@@ -449,7 +449,7 @@ $$instance_handler(handleFetch, account.pubsub, $_ID(xmpp*, account), $_ID(XMPPI
         //only process data but *don't* call fetch callback because the data is still partial
         [self handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser withData:data];
         XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:iqNode.fromUser];
-        [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+        [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil],
             [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:last]
@@ -479,13 +479,13 @@ $$instance_handler(handleConfigFormResult, account.pubsub, $_ID(xmpp*, account),
         return;
     }
     
-    XMPPDataForm* dataForm = [[iqNode findFirst:@"{http://jabber.org/protocol/pubsub#owner}pubsub/configure/{jabber:x:data}x"] copy];
+    XMPPDataForm* dataForm = [[iqNode findFirst:@"{http://jabber.org/protocol/pubsub#owner}pubsub/configure/\\{http://jabber.org/protocol/pubsub#node_config}form\\"] copy];
     if(!dataForm)
     {
         DDLogError(@"Server returned invalid config form, aborting!");
         //abort config operation
         XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
-        [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
+        [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"configure" withAttributes:@{@"node": node} andChildren:@[
                 [[XMPPDataForm alloc] initWithType:@"cancel" andFormType:@"http://jabber.org/protocol/pubsub#node_config"]
             ] andData:nil]
@@ -506,7 +506,7 @@ $$instance_handler(handleConfigFormResult, account.pubsub, $_ID(xmpp*, account),
             DDLogError(@"Server returned config form not containing the required fields or options, aborting! Required field: %@", option);
             //abort config operation
             XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
-            [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
+            [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"configure" withAttributes:@{@"node": node} andChildren:@[
                     [[XMPPDataForm alloc] initWithType:@"cancel" andFormType:@"http://jabber.org/protocol/pubsub#node_config"]
                 ] andData:nil]
@@ -523,7 +523,7 @@ $$instance_handler(handleConfigFormResult, account.pubsub, $_ID(xmpp*, account),
     //reconfigure the node
     dataForm.type = @"submit";
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
+    [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"configure" withAttributes:@{@"node": node} andChildren:@[dataForm] andData:nil]
     ] andData:nil]];
     [account sendIq:query withHandler:$newHandler(self, handleConfigureResult,

@@ -61,7 +61,7 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setRegisterOnAppserverWithToken:(NSString*) token
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"command" andNamespace:@"http://jabber.org/protocol/commands" withAttributes:@{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"command" andNamespace:@"http://jabber.org/protocol/commands" withAttributes:@{
         @"node": @"v1-register-push",
         @"action": @"execute"
     } andChildren:@[
@@ -75,7 +75,7 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
         @"jid": jid,
         @"node": node
     } andChildren:@[
@@ -87,7 +87,7 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setPushDisable
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"disable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"disable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
         @"jid": [HelperTools pushServer][@"jid"],
         @"node": [[[UIDevice currentDevice] identifierForVendor] UUIDString]
     } andChildren:@[] andData:nil]];
@@ -95,14 +95,14 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setBindWithResource:(NSString*) resource
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"bind" andNamespace:@"urn:ietf:params:xml:ns:xmpp-bind" withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"bind" andNamespace:@"urn:ietf:params:xml:ns:xmpp-bind" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"resource" andData:resource]
     ] andData:nil]];
 }
 
 -(void) setMucListQueryFor:(NSString*) listType
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#admin" withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#admin" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"affiliation": listType} andChildren:@[] andData:nil]
     ] andData:nil]];
 }
@@ -110,13 +110,13 @@ NSString* const kiqErrorType = @"error";
 -(void) setDiscoInfoNode
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];
-    [self addChild:queryNode];
+    [self addChildNode:queryNode];
 }
 
 -(void) setDiscoItemNode
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items"];
-    [self addChild:queryNode];
+    [self addChildNode:queryNode];
 }
 
 -(void) setDiscoInfoWithFeatures:(NSSet*) features identity:(MLXMLNode*) identity andNode:(NSString*) node
@@ -129,12 +129,12 @@ NSString* const kiqErrorType = @"error";
     {
         MLXMLNode* featureNode = [[MLXMLNode alloc] initWithElement:@"feature"];
         featureNode.attributes[@"var"] = feature;
-        [queryNode addChild:featureNode];
+        [queryNode addChildNode:featureNode];
     }
     
-    [queryNode addChild:identity];
+    [queryNode addChildNode:identity];
     
-    [self addChild:queryNode];
+    [self addChildNode:queryNode];
 }
 
 -(void) setiqTo:(NSString*) to
@@ -145,12 +145,12 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setPing
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"ping" andNamespace:@"urn:xmpp:ping"]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"ping" andNamespace:@"urn:xmpp:ping"]];
 }
 
 -(void) setPurgeOfflineStorage
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"offline" andNamespace:@"http://jabber.org/protocol/offline" withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"offline" andNamespace:@"http://jabber.org/protocol/offline" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"purge"]
     ] andData:nil]];
 }
@@ -159,7 +159,7 @@ NSString* const kiqErrorType = @"error";
 
 -(void) mamArchivePref
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"prefs" andNamespace:@"urn:xmpp:mam:2"]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"prefs" andNamespace:@"urn:xmpp:mam:2"]];
 }
 
 -(void) updateMamArchivePrefDefault:(NSString *) pref
@@ -167,7 +167,7 @@ NSString* const kiqErrorType = @"error";
     /**
      pref is aways, never or roster
      */
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"prefs" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{@"default": pref} andChildren:@[] andData:nil]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"prefs" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{@"default": pref} andChildren:@[] andData:nil]];
 }
 
 -(void) setMAMQueryLatestMessagesForJid:(NSString* _Nullable) jid before:(NSString* _Nullable) uid
@@ -186,7 +186,7 @@ NSString* const kiqErrorType = @"error";
             [[MLXMLNode alloc] initWithElement:@"before" andData:uid]
         ] andData:nil]
     ] andData:nil];
-    [self addChild:queryNode];
+    [self addChildNode:queryNode];
 }
 
 -(void) setMAMQueryForLatestId
@@ -204,7 +204,7 @@ NSString* const kiqErrorType = @"error";
             [[MLXMLNode alloc] initWithElement:@"before"]
         ] andData:nil]
     ] andData:nil];
-    [self addChild:queryNode];
+    [self addChildNode:queryNode];
 }
 
 -(void) setMAMQueryAfter:(NSString*) uid
@@ -220,7 +220,7 @@ NSString* const kiqErrorType = @"error";
             [[MLXMLNode alloc] initWithElement:@"after" andData:uid]
         ] andData:nil]
     ] andData:nil];
-    [self addChild:queryNode];
+    [self addChildNode:queryNode];
 }
 
 -(void) setCompleteMAMQuery
@@ -235,12 +235,12 @@ NSString* const kiqErrorType = @"error";
             [[MLXMLNode alloc] initWithElement:@"max" andData:@"50"]
         ] andData:nil]
     ] andData:nil];
-    [self addChild:queryNode];
+    [self addChildNode:queryNode];
 }
 
 -(void) setRemoveFromRoster:(NSString*) jid
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{
             @"jid": jid,
             @"subscription": @"remove"
@@ -250,7 +250,7 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setUpdateRosterItem:(NSString* _Nonnull) jid withName:(NSString* _Nonnull) name
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{
             @"jid": jid,
             @"name": name,
@@ -263,12 +263,12 @@ NSString* const kiqErrorType = @"error";
     NSDictionary* attrs = @{};
     if(version)
         attrs = @{@"ver": version};
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:attrs andChildren:@[] andData:nil]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:attrs andChildren:@[] andData:nil]];
 }
 
 -(void) setVersion
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version" withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"name" andData:@"Monal"],
 #if TARGET_OS_MACCATALYST
         [[MLXMLNode alloc] initWithElement:@"os" andData:@"macOS"],
@@ -285,15 +285,15 @@ NSString* const kiqErrorType = @"error";
     
     MLXMLNode* itemNode = [[MLXMLNode alloc] initWithElement:@"item"];
     [itemNode.attributes setObject:blockedJid forKey:kJid];
-    [blockNode addChild:itemNode];
+    [blockNode addChildNode:itemNode];
     
-    [self addChild:blockNode];
+    [self addChildNode:blockNode];
 }
 
 -(void) requestBlockList
 {
     MLXMLNode* blockNode = [[MLXMLNode alloc] initWithElement:@"blocklist" andNamespace:@"urn:xmpp:blocking"];
-    [self addChild:blockNode];
+    [self addChildNode:blockNode];
 }
 
 -(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType
@@ -302,7 +302,7 @@ NSString* const kiqErrorType = @"error";
     requestNode.attributes[@"filename"] = file;
     requestNode.attributes[@"size"] = [NSString stringWithFormat:@"%@", filesize];
     requestNode.attributes[@"content-type"] = contentType;
-    [self addChild:requestNode];
+    [self addChildNode:requestNode];
 }
 
 
@@ -314,23 +314,30 @@ NSString* const kiqErrorType = @"error";
     
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version"];
     
-    [self addChild:queryNode];
+    [self addChildNode:queryNode];
 }
 
 #pragma mark MUC
 
 -(void) setInstantRoom
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#owner" withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#owner" withAttributes:@{} andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"http://jabber.org/protocol/muc#roomconfig"]
     ] andData:nil]];
 }
 
 #pragma mark - Account Management
 
+-(void) submitRegToken:(NSString*) token
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"preauth" andNamespace:@"urn:xmpp:pars:0" withAttributes:@{
+        @"token": token
+    } andChildren:@[] andData:nil]];
+}
+
 -(void) getRegistrationFields
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace]];
 }
 
 /*
@@ -345,14 +352,14 @@ NSString* const kiqErrorType = @"error";
     if(captcha)
         fields[@"ocr"] = captcha;
     [fields addEntriesFromDictionary:hiddenFields];
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" formType:kRegisterNameSpace andDictionary:fields]
     ] andData:nil]];
 }
 
 -(void) changePasswordForUser:(NSString*) user newPassword:(NSString*) newPass
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"username" andData:user],
         [[MLXMLNode alloc] initWithElement:@"password" andData:newPass],
     ] andData:nil]];

@@ -15,14 +15,16 @@
 #import "ContactDetails.h"
 #import "MLImageManager.h"
 #import "MLWelcomeViewController.h"
+#import "MLRegisterViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
 #import "MLXEPSlashMeHandler.h"
 #import "MLNotificationQueue.h"
+#import "MLSettingsAboutViewController.h"
 
 @import QuartzCore.CATransaction;
 
-@interface ActiveChatsViewController ()
+@interface ActiveChatsViewController()
 @property (atomic, strong) NSMutableArray* unpinnedContacts;
 @property (atomic, strong) NSMutableArray* pinnedContacts;
 @end
@@ -457,7 +459,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     if([segue.identifier isEqualToString:@"showIntro"])
     {
         MLWelcomeViewController* welcome = (MLWelcomeViewController*) segue.destinationViewController;
-        welcome.completion = ^(){
+        welcome.completion = ^{
             if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
             {
                 if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
@@ -465,6 +467,20 @@ static NSMutableSet* _smacksWarningDisplayed;
                 }
             }
         };
+    }
+    else if([segue.identifier isEqualToString:@"showRegister"])
+    {
+        UINavigationController* navigationController = (UINavigationController*)segue.destinationViewController;
+        MLRegisterViewController* reg = (MLRegisterViewController*)navigationController.visibleViewController;
+        NSDictionary* registerData = (NSDictionary*)sender;
+        if(registerData)
+        {
+            DDLogDebug(@"Feeding MLRegisterViewController withdata: %@", registerData);
+            reg.registerServer = nilExtractor(registerData[@"host"]);
+            reg.registerUsername = nilExtractor(registerData[@"username"]);
+            reg.registerToken = nilExtractor(registerData[@"token"]);
+            reg.completionHandler = nilExtractor(registerData[@"completion"]);
+        }
     }
     else if([segue.identifier isEqualToString:@"showConversation"])
     {
@@ -544,9 +560,6 @@ static NSMutableSet* _smacksWarningDisplayed;
     } else {
         chatContact = [self.unpinnedContacts objectAtIndex:indexPath.row];
     }
-
-    
-    
     // Display msg draft or last msg
     MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:chatContact.contactJid forAccount:chatContact.accountId];
 
@@ -606,7 +619,6 @@ static NSMutableSet* _smacksWarningDisplayed;
     } else {
         selected = self.unpinnedContacts[indexPath.row];
     }
-    
     [self presentChatWithContact:selected];
 }
 
@@ -620,12 +632,12 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 #pragma mark - empty data set
 
-- (UIImage *)imageForEmptyDataSet:(UIScrollView *)scrollView
+- (UIImage*)imageForEmptyDataSet:(UIScrollView*)scrollView
 {
-    return [UIImage imageNamed:@"river"];
+    return nil;
 }
 
-- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
+- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *) scrollView
 {
     NSString* text = NSLocalizedString(@"No one is here", @"");
     
@@ -635,7 +647,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     return [[NSAttributedString alloc] initWithString:text attributes:attributes];
 }
 
-- (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
+- (NSAttributedString*)descriptionForEmptyDataSet:(UIScrollView*) scrollView
 {
     NSString* text = NSLocalizedString(@"When you start talking to someone,\n they will show up here.", @"");
     
@@ -667,12 +679,26 @@ static NSMutableSet* _smacksWarningDisplayed;
 }
 
 #pragma mark - mac menu
+
 -(void) showContacts
 {
     // Only segue if at least one account is enabled
     if([self showAccountNumberWarningIfNeeded])
         return;
     [self performSegueWithIdentifier:@"showContacts" sender:self];
+}
+
+-(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_void_block_t) completion
+{
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
+        [self performSegueWithIdentifier:@"showRegister" sender:@{
+            @"host": nilWrapper(host),
+            @"username": nilWrapper(username),
+            @"token": nilWrapper(token),
+            @"completion": nilDefault(completion, ^{}),
+        }];
+    }];
 }
 
 -(void) showDetails

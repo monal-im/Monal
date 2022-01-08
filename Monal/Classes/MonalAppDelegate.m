@@ -21,6 +21,7 @@
 #import "xmpp.h"
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
+#import "MLMucProcessor.h"
 
 @import NotificationBannerSwift;
 
@@ -122,6 +123,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //this will also migrate our old image cache to new MLFiletransfer cache
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [MLFiletransfer doStartupCleanup];
+    });
+    
+    //do image manager cleanup in a new thread to not slow down app startup
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [[MLImageManager sharedInstance] cleanupHashes];
     });
     
     //only proceed with launching if the NotificationServiceExtension is *not* running
@@ -381,34 +387,133 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 /**
  xmpp:romeo@montague.net?message;subject=Test%20Message;body=Here%27s%20a%20test%20message
-          or
  xmpp:coven@chat.shakespeare.lit?join;password=cauldronburn
+ 
+ xmpp:example.com?register;preauth=3c7efeafc1bb10d034
+ xmpp:romeo@example.com?register;preauth=3c7efeafc1bb10d034
+ xmpp:contact@example.com?roster;preauth=3c7efeafc1bb10d034
+ xmpp:contact@example.com?roster;preauth=3c7efeafc1bb10d034;ibr=y
          
  @link https://xmpp.org/extensions/xep-0147.html
+ @link https://docs.modernxmpp.org/client/invites/
  */
 -(void) handleXMPPURL:(NSURL*) url
 {
-    //TODO just uses fist account. maybe change in the future
+    //TODO just uses fist enabled account. maybe change in the future
     xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+    NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+    DDLogVerbose(@"URI path '%@'", components.path);
+    DDLogVerbose(@"URI query '%@'", components.query);
+    
+    NSString* jid = components.path;
+    NSDictionary* jidParts = [HelperTools splitJid:jid];
+    BOOL isRegister = NO;
+    BOOL isRoster = NO;
+    BOOL isGroupJoin = NO;
+    BOOL isIbr = NO;
+    NSString* preauthToken = nil;
+    //someone had the really superior (NOT!) idea to split uri query parts by ';' instead of the standard '&' making all existing uri libs useless
+    //see: https://xmpp.org/extensions/xep-0147.html
+    //blame this author: Peter Saint-Andre
+    NSArray* queryItems = [components.query componentsSeparatedByString:@";"];
+    for(NSString* item in queryItems)
+    {
+        NSArray* itemParts = [item componentsSeparatedByString:@"="];
+        NSString* name = itemParts[0];
+        NSString* value = @"";
+        if([itemParts count] > 1)
+            value = itemParts[1];
+        DDLogVerbose(@"URI part '%@' = '%@'", name, value);
+        if([name isEqualToString:@"register"])
+            isRegister = YES;
+        if([name isEqualToString:@"roster"])
+            isRoster = YES;
+        if([name isEqualToString:@"join"])
+            isGroupJoin = YES;
+        if([name isEqualToString:@"ibr"] && [value isEqualToString:@"y"])
+            isIbr = YES;
+        if([name isEqualToString:@"preauth"])
+            preauthToken = [value copy];
+    }
+    
+    if(!jidParts[@"host"])
+    {
+        DDLogError(@"Ignoring xmpp: uri without host jid part!");
+        return;
+    }
+    
+    if(isRegister || (isRoster && account==nil && isIbr))
+    {
+        NSString* username = nilDefault(jidParts[@"node"], @"");
+        NSString* host = jidParts[@"host"];
+        
+        if(isRoster)
+            username = @"";         //roster does not specify a predefined username for the new account, register does (optional)
+        
+        //this should never happen
+        MLAssert(self.activeChats != nil, @"Can not handle register invite, active chats not loaded!", (@{
+           @"components": components,
+           @"username": username,
+           @"host": host,
+        }));
+        
+        weakify(self);
+        [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^{
+            strongify(self);
+            xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+            
+            //this should never happen
+            MLAssert(account != nil, @"Can not use account after register!", (@{
+                @"components": components,
+                @"username": username,
+                @"host": host,
+            }));
+            
+            if(account != nil)      //silence memory warning despite assertion above
+            {
+                MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
+                [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
+                [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
+                [self openChatOfContact:contact];
+            }
+        }];
+        return;
+    }
+    
+    if(isRoster && account)
+    {
+        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+        //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
+        [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
+        [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
+        [self openChatOfContact:contact];
+        return;
+    }
+    
+    if(isGroupJoin && account)
+    {
+        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+        [[MLXMPPManager sharedInstance] addContact:contact];    //will handle group joins and normal contacts transparently
+        //wait for join to finish before opening contact
+        NSString* accountNo = account.accountNo;        //needed because of retain cycle
+        [account.mucProcessor addUIHandler:^(id _data) {
+            [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:accountNo];
+            [self openChatOfContact:contact];
+        } forMuc:jid];
+        return;
+    }
+    
+    //fallback: only add to local roster, but don't subscribe
+    //TODO: show toast in chatView that informs the user that this contact was not added to his contact list
     if(account)
     {
-        NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-        NSString* jid = components.path;
-        BOOL isGroup = NO;
-        
-        for(NSURLQueryItem* item in components.queryItems)
-        {
-            if([item.name isEqualToString:@"join"])
-                isGroup = YES;
-        }
-        
-        if(isGroup)
-            [account joinMuc:jid];
-        
         [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
         MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
         [self openChatOfContact:contact];
     }
+    
+    DDLogError(@"No account available to handel xmpp: uri!");
 }
 
 -(BOOL) application:(UIApplication*) app openURL:(NSURL*) url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*) options
@@ -641,16 +746,18 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
     [self scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
-    DDLogInfo(@"|~~| 25%% |~~|");
+    DDLogInfo(@"|~~| 20%% |~~|");
     [self updateUnread];
-    DDLogInfo(@"|~~| 50%% |~~|");
+    DDLogInfo(@"|~~| 40%% |~~|");
     [[HelperTools defaultsDB] synchronize];
-    DDLogInfo(@"|~~| 75%% |~~|");
+    DDLogInfo(@"|~~| 60%% |~~|");
     [[MLXMPPManager sharedInstance] nowBackgrounded];
+    DDLogInfo(@"|~~| 80%% |~~|");
+    [HelperTools updateSyncErrorsWithDeleteOnly:NO];
+    DDLogInfo(@"|~~| 100%% |~~|");
+    [[MLXMPPManager sharedInstance] disconnectAll];
     DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
     [DDLog flushLog];
-    //give the server some more time to send smacks acks (it doesn't matter if we get killed because of this, we're terminating anyways)
-    usleep(1000000);
 }
 
 #pragma mark - error feedback
@@ -890,12 +997,23 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         }
     };
     
+    //only proceed with our BGTASK if the NotificationServiceExtension is not running
+    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+    {
+        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
+            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        }];
+    }
+    
     if([[MLXMPPManager sharedInstance] hasConnectivity])
     {
         for(xmpp* xmppAccount in [[MLXMPPManager sharedInstance] connectedXMPP])
         {
             //try to send a ping. if it fails, it will reconnect
             DDLogVerbose(@"app delegate pinging");
+            [xmppAccount unfreezed];
             [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         }
     }

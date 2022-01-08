@@ -1,20 +1,24 @@
 module MLContactPrivate {
-  header "../Classes/MLContact.h"
-  export *
+    header "../Classes/MLContact.h"
+    export *
 }
 module DataLayerPrivate {
-  header "../Classes/DataLayer.h"
-  export *
+    header "../Classes/DataLayer.h"
+    export *
 }
 module xmppPrivate {
-  header "../Classes/xmpp.h"
-  export *
+    header "../Classes/xmpp.h"
+    export *
 }
 module MLXMPPManagerPrivate {
-  header "../Classes/MLXMPPManager.h"
-  export *
+    header "../Classes/MLXMPPManager.h"
+    export *
 }
 module MLImageManagerPrivate {
-  header "../Classes/MLImageManager.h"
-  export *
+    header "../Classes/MLImageManager.h"
+    export *
+}
+module MLResourcesTableViewControllerPrivate {
+    header "../Classes/MLResourcesTableViewController.h"
+    export *
 }

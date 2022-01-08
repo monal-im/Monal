@@ -25,8 +25,8 @@
 @property (nonatomic, strong) UIImage* _Nullable chatBackground;
 
 
-+ (MLImageManager* _Nonnull )sharedInstance;
-
++(MLImageManager* _Nonnull) sharedInstance;
+-(void) cleanupHashes;
 
 /**
  Takes the string from the xmpp icon vcard info and stores it in an appropropriate place. 

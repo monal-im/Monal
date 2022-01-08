@@ -8,6 +8,8 @@
 
 #import "XMPPStanza.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /*
  pmuc-v1 = private muc
  voice-v1: indicates the user is capable of sending and receiving voice media.
@@ -24,6 +26,8 @@
 {
     
 }
+
+-(void) setLastInteraction:(NSDate*) date;
 
 /**
  initialte with a version hash string
@@ -51,18 +55,18 @@
  */
 -(void) setStatus:(NSString*) status;
 
+#pragma mark subscription
+
 /**
  unsubscribes from presence notfiction
  */
 -(void) unsubscribeContact:(NSString*) jid;
 
--(void) setLastInteraction:(NSDate*) date;
-
-#pragma mark subscription
 /**
  subscribes from presence notfiction
  */
 -(void) subscribeContact:(NSString*) jid;
+-(void) subscribeContact:(NSString*) jid withPreauthToken:(NSString* _Nullable) token;
 
 /**
 allow subscription. Called in response to a remote request. 
@@ -86,3 +90,5 @@ allow subscription. Called in response to a remote request.
 -(void) leaveRoom:(NSString*) room withNick:(NSString*) nick;
 
 @end
+
+NS_ASSUME_NONNULL_END

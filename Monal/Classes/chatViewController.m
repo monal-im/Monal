@@ -449,8 +449,7 @@ enum msgSentState {
 -(IBAction) toggleEncryption:(id)sender
 {
 #ifndef DISABLE_OMEMO
-    NSArray* devices = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid];
-    [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withKnownDevices:devices withSelf:self afterToggle:^() {
+    [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withSelf:self afterToggle:^() {
         [self displayEncryptionStateInUI];
     }];
 #endif
@@ -1655,8 +1654,6 @@ enum msgSentState {
             //update message in our list (this will copy filetransferMimeType and filetransferSize fields)
             [msgInList updateWithMessage:msg];
             
-            //TODO JIM: do something on update (maybe this is not needed because handling will be done in filetransferChatCell)
-            
             // Update table entry
             indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -1865,18 +1862,12 @@ enum msgSentState {
         DDLogVerbose(@"got filetransfer chat cell: %@ (%@)", row.filetransferMimeType, row.filetransferSize);
         NSDictionary* info = [MLFiletransfer getFileInfoForMessage:row];
         
-        //TODO JIM: here we need the download and check-file buttons
-        
         if(info && ![info[@"needsDownloading"] boolValue])
         {
             cell = [self fileTransferCellCheckerWithInfo:info direction:inboundDir tableView:tableView andMsg:row];
         }
         else if (info && [info[@"needsDownloading"] boolValue])
         {
-            //TODO JIM: explanation: this was already checked (mime ype and size are known) but not yet downloaded --> download it
-            //TODO JIM: explanation: this should not be automatically but only triggered by a button press
-            //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
-            //TODO JIM: explanation: this only handles images, because we don't want to autodownload everything
             MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inboundDir fromTable:tableView];
             NSString* fileSize = info[@"size"] ? info[@"size"] : @"0";
             [fileTransferCell initCellForMessageId:row.messageDBId andFilename:info[@"filename"] andMimeType:info[@"mimeType"] andFileSize:fileSize.longLongValue];
@@ -2343,7 +2334,6 @@ enum msgSentState {
 
 -(MLBaseCell*) fileTransferCellCheckerWithInfo:(NSDictionary*)info direction:(BOOL)inDirection tableView:(UITableView*)tableView andMsg:(MLMessage*)row{
     MLBaseCell *cell = nil;
-    //TODO JIM: explanation: this was already downloaded and it is an image --> show this image inline
     if([info[@"mimeType"] hasPrefix:@"image/"])
     {
         MLChatImageCell* imageCell = (MLChatImageCell *)[self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];

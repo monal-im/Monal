@@ -6,6 +6,8 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
+#include "hsluv.h"
+
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import "HelperTools.h"
@@ -13,6 +15,7 @@
 #import "MLPubSub.h"
 #import "MLUDPLogger.h"
 #import "XMPPStanza.h"
+#import "XMPPDataForm.h"
 #import "xmpp.h"
 #import "MLNotificationQueue.h"
 
@@ -88,18 +91,13 @@ void logException(NSException* exception)
     //XEP-0392 implementation
     NSData* hash = [self sha1:[jid dataUsingEncoding:NSUTF8StringEncoding]];
     uint16_t rawHue = CFSwapInt16LittleToHost(*(uint16_t*)[hash bytes]);
-    double hue = ((double)rawHue / 65536.0) * 360.0;
-    double saturation = 1.0;
-    double lightness = 0.5;
+    double hue = (rawHue / 65536.0) * 360.0;
+    double saturation = 100.0;
+    double lightness = 50.0;
     
-    //convert HSL to HSB/HSV color space
-    double brightness = lightness + saturation * MIN(lightness, 1-lightness);
-    double newSaturation = 0.0;
-    if(brightness != 0)
-        newSaturation = 2 * (1 - lightness / brightness);
-    
-    //create and return UIColor instance from HSB/HSV values
-    return cache[jid] = [[UIColor alloc] initWithHue:hue saturation:newSaturation brightness:brightness alpha:1.0];
+    double r, g, b;
+    hsluv2rgb(hue, saturation, lightness, &r, &g, &b);
+    return cache[jid] = [UIColor colorWithRed:r green:g blue:b alpha:1];
 }
 
 +(NSString*) bytesToHuman:(int64_t) bytes
@@ -157,6 +155,15 @@ void logException(NSException* exception)
 
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid
 {
+    //cache results
+    static NSMutableDictionary* cache;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        cache = [[NSMutableDictionary alloc] init];
+    });
+    if(cache[jid] != nil)
+        return cache[jid];
+    
     NSMutableDictionary<NSString*, NSString*>* retval = [[NSMutableDictionary alloc] init];
     NSArray* parts = [jid componentsSeparatedByString:@"/"];
     
@@ -185,7 +192,7 @@ void logException(NSException* exception)
     if([retval[@"resource"] isEqualToString:@""])
         [retval removeObjectForKey:@"resource"];
     
-    return retval;
+    return cache[jid] = [retval copy];          //return immutable copy
 }
 
 +(void) clearSyncErrorsOnAppForeground
@@ -391,21 +398,32 @@ void logException(NSException* exception)
     return [[[NSBundle mainBundle] executablePath] containsString:@".appex/"];
 }
 
-+(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features
++(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features andForms:(NSArray*) forms
 {
     // see https://xmpp.org/extensions/xep-0115.html#ver
     NSMutableString* unhashed = [[NSMutableString alloc] init];
     
-    //generate identities string
+    //generate identities string (must be sorted according to XEP-0115)
+    identities = [identities sortedArrayUsingSelector:@selector(compare:)];
     for(NSString* identity in identities)
-        [unhashed appendString:[NSString stringWithFormat:@"%@<", identity]];
+        [unhashed appendString:[NSString stringWithFormat:@"%@<", [self _replaceLowerThanInString:identity]]];
     
     //append features string
     [unhashed appendString:[self generateStringOfFeatureSet:features]];
     
+    //append forms string
+    [unhashed appendString:[self generateStringOfCapsForms:forms]];
+    
     NSString* hashedBase64 = [self encodeBase64WithData:[self sha1:[unhashed dataUsingEncoding:NSUTF8StringEncoding]]];
     DDLogVerbose(@"ver string: unhashed %@, hashed-64 %@", unhashed, hashedBase64);
     return hashedBase64;
+}
+
++(NSString*) _replaceLowerThanInString:(NSString*) str
+{
+    NSMutableString* retval = [str mutableCopy];
+    [retval replaceOccurrencesOfString:@"<" withString:@"&lt;" options:NSLiteralSearch range:NSMakeRange(0, retval.length)];
+    return [retval copy];       //make immutable
 }
 
 +(NSSet*) getOwnFeatureSet
@@ -435,12 +453,34 @@ void logException(NSException* exception)
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features
 {
     // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
-    NSArray* featuresArray = [[features allObjects] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    NSArray* featuresArray = [[features allObjects] sortedArrayUsingSelector:@selector(compare:)];
     NSMutableString* toreturn = [[NSMutableString alloc] init];
     for(NSString* feature in featuresArray)
     {
-        [toreturn appendString:feature];
+        [toreturn appendString:[self _replaceLowerThanInString:feature]];
         [toreturn appendString:@"<"];
+    }
+    return toreturn;
+}
+
++(NSString*) generateStringOfCapsForms:(NSArray*) forms
+{
+    // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
+    NSMutableString* toreturn = [[NSMutableString alloc] init];
+    for(XMPPDataForm* form in [forms sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"formType" ascending:YES selector:@selector(compare:)]]])
+    {
+        [toreturn appendString:[self _replaceLowerThanInString:form.formType]];
+        [toreturn appendString:@"<"];
+        for(NSString* field in [[form allKeys] sortedArrayUsingSelector:@selector(compare:)])
+        {
+            [toreturn appendString:[self _replaceLowerThanInString:field]];
+            [toreturn appendString:@"<"];
+            for(NSString* value in [[form getField:field][@"allValues"] sortedArrayUsingSelector:@selector(compare:)])
+            {
+                [toreturn appendString:[self _replaceLowerThanInString:value]];
+                [toreturn appendString:@"<"];
+            }
+        }
     }
     return toreturn;
 }
@@ -581,7 +621,7 @@ void logException(NSException* exception)
     dispatch_source_set_timer(timer,
                               dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout*NSEC_PER_SEC)),
                               DISPATCH_TIME_FOREVER,
-                              0ull * NSEC_PER_SEC);
+                              0.1 * NSEC_PER_SEC);      //leeway of 100ms
     
     dispatch_source_set_event_handler(timer, ^{
         DDLogDebug(@"timer %@ %@(%G) triggered (created at %@:%d in %@)", timer, uuid, timeout, fileName, line, funcStr);

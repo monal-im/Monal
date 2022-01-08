@@ -20,6 +20,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @class xmpp;
 @class MLMessage;
+@class UIImage;
 
 @interface MLContact : NSObject <NSSecureCoding>
 
@@ -41,15 +42,15 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 /**
  account number in the database should be an integer
  */
-
 @property (nonatomic, copy) NSString* accountId;
 @property (nonatomic, copy) NSString* contactJid;
-
+@property (nonatomic, copy) UIImage* avatar;
 @property (nonatomic, copy) NSString* fullName;
 /**
  usually user assigned nick name
  */
 @property (nonatomic, copy) NSString* nickName;
+@property (nonatomic, strong) NSString* nickNameView;
 
 /**
  xmpp state text
@@ -60,7 +61,6 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  xmpp status message
  */
 @property (nonatomic, copy) NSString* statusMessage;
-@property (nonatomic, copy) NSDate* lastMessageTime;
 @property (nonatomic, copy) NSDate* lastInteractionTime;
 
 /**
@@ -83,7 +83,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, copy) NSString* subscription; //roster subbscription state
 @property (nonatomic, copy) NSString* ask; //whether we have tried to subscribe
 
-@property (nonatomic, strong) NSString* contactDisplayName;
+@property (nonatomic, readonly) NSString* contactDisplayName;
 
 -(void) updateWithContact:(MLContact*) contact;
 -(void) refresh;
@@ -97,10 +97,12 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(void) toggleMute:(BOOL) mute;
 -(void) toggleMentionOnly:(BOOL) mentionOnly;
 -(BOOL) toggleEncryption:(BOOL) encrypt;
+-(void) resetOmemoSession;
 -(void) togglePinnedChat:(BOOL) pinned;
 -(BOOL) toggleBlocked:(BOOL) block;
 -(void) removeFromRoster;
 -(void) addToRoster;
+-(void) clearHistory;
 
 @end
 

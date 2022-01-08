@@ -43,9 +43,9 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
     
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
-    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^((\\{[^}]+\\})?([^/]+))?(/.*)?" options:NSRegularExpressionCaseInsensitive error:nil];
-    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=]+=[^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|float|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
-    attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=]+)=([^>]+)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
+    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=]+=[^>]+\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|float|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|float|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~]+)([=~])([^>]+)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
 
 //     testcases for stanza
 //     <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism><mechanism>SCRAM-SHA-1-PLUS</mechanism></mechanisms></stream:features>
@@ -128,7 +128,7 @@ static NSRegularExpression* attributeFilterRegex;
     self = [self initWithElement:element];
     [_attributes addEntriesFromDictionary:[[NSDictionary alloc] initWithDictionary:attributes copyItems:YES]];
     for(MLXMLNode* child in children)
-        [self addChild:child];
+        [self addChildNode:child];
     _data = nil;
     if(data)
         _data = [data copy];
@@ -157,7 +157,7 @@ static NSRegularExpression* attributeFilterRegex;
     _attributes = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableDictionary class], [NSDictionary class], [NSMutableString class], [NSString class]]] forKey:@"attributes"];
     NSArray* decodedChildren = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableArray class], [NSArray class], [MLXMLNode class], [XMPPIQ class], [XMPPMessage class], [XMPPPresence class], [XMPPDataForm class]]] forKey:@"children"];
     for(MLXMLNode* child in decodedChildren)
-        [self addChild:child];
+        [self addChildNode:child];
     _data = [decoder decodeObjectOfClass:[NSString class] forKey:@"data"];
 
     return self;
@@ -181,7 +181,7 @@ static NSRegularExpression* attributeFilterRegex;
     MLXMLNode* copy = [[[self class] alloc] initWithElement:_element];
     copy.attributes = [[NSMutableDictionary alloc] initWithDictionary:_attributes copyItems:YES];
     for(MLXMLNode* child in _children)
-        [copy addChild:child];
+        [copy addChildNode:child];
     copy.data = _data ? [_data copy] : nil;
     return copy;
 }
@@ -191,7 +191,7 @@ static NSRegularExpression* attributeFilterRegex;
     [_attributes setObject:[xmlns copy] forKey:kXMLNS];
 }
 
--(MLXMLNode*) addChild:(MLXMLNode*) child
+-(MLXMLNode*) addChildNode:(MLXMLNode*) child
 {
     if(!child)
         return nil;
@@ -262,16 +262,50 @@ static NSRegularExpression* attributeFilterRegex;
 //"|float" --> convert xml string to NSNumber
 //"|datetime" --> convert xml datetime string to NSDate
 //"|base64" --> convert base64 encoded xml string to NSData
--(NSArray*) find:(NSString* _Nonnull) queryString
+-(NSArray*) find:(NSString* _Nonnull) queryString, ... NS_FORMAT_FUNCTION(1, 2)
+{
+    va_list args;
+    va_start(args, queryString);
+    NSArray* retval = [self find:queryString arguments:args];
+    va_end(args);
+    return retval;
+}
+
+//like find: above, but only return the first match
+-(id) findFirst:(NSString* _Nonnull) queryString, ... NS_FORMAT_FUNCTION(1, 2)
+{
+    va_list args;
+    va_start(args, queryString);
+    id retval = [self find:queryString arguments:args].firstObject;
+    va_end(args);
+    return retval;
+}
+
+//like findFirst, but only check if it would return something
+-(BOOL) check:(NSString* _Nonnull) queryString, ... NS_FORMAT_FUNCTION(1, 2)
+{
+    va_list args;
+    va_start(args, queryString);
+    BOOL retval = [self find:queryString arguments:args].firstObject != nil ? YES : NO;
+    va_end(args);
+    return retval;
+}
+
+-(NSArray*) find:(NSString* _Nonnull) queryString arguments:(va_list) args
 {
     //return our own node if the query string is empty (this makes queries like "/.." possible which will return the parent node
     if(!queryString || [queryString isEqualToString:@""])
         return @[self];
     
+    va_list cacheKeyArgs;
+    va_copy(cacheKeyArgs, args);
+    NSString* cacheKey = [NSString stringWithFormat:@"%@§§%@", queryString, [[NSString alloc] initWithFormat:queryString arguments:cacheKeyArgs]];
+    va_end(cacheKeyArgs);
+    
     //return results from cache if possible
     @synchronized(self.cache) {
-        if(self.cache[queryString])
-            return self.cache[queryString];
+        if(self.cache[cacheKey])
+            return self.cache[cacheKey];
     }
     
 #ifdef QueryStatistics
@@ -294,30 +328,17 @@ static NSRegularExpression* attributeFilterRegex;
     NSArray* results;
     //check if the current element our our children should be queried "/" makes the path "absolute" instead of "relative"
     if([[queryString substringToIndex:1] isEqualToString:@"/"])
-        results = [self find:[queryString substringFromIndex:1] inNodeList:@[self]];        //absolute path (check self first)
+        results = [self find:[queryString substringFromIndex:1] inNodeList:@[self] arguments:args];        //absolute path (check self first)
     else
-        results = [self find:queryString inNodeList:_children];                             //relative path (check childs first)
+        results = [self find:queryString inNodeList:_children arguments:args];                             //relative path (check childs first)
     
     //update cache
     @synchronized(self.cache) {
-        self.cache[queryString] = results;
-        return self.cache[queryString];
+        return self.cache[cacheKey] = results;
     }
 }
 
-//like find: above, but only return the first match
--(id) findFirst:(NSString* _Nonnull) queryString
-{
-    return [self find:queryString].firstObject;
-}
-
-//like findFirst, but only check if it would return something
--(BOOL) check:(NSString* _Nonnull) queryString
-{
-    return [self findFirst:queryString] ? YES : NO;
-}
-
--(NSArray*) find:(NSString* _Nonnull) queryString inNodeList:(NSArray* _Nonnull) nodesToCheck
+-(NSArray*) find:(NSString* _Nonnull) queryString inNodeList:(NSArray* _Nonnull) nodesToCheck arguments:(va_list) args
 {
     //shortcut for empty nodesToCheck
     if(![nodesToCheck count])
@@ -331,18 +352,26 @@ static NSRegularExpression* attributeFilterRegex;
             @"queryString": queryString,
         }];
     NSTextCheckingResult* match = matches.firstObject;
-    NSRange pathComponentRange = [match rangeAtIndex:1];
-    NSRange restRange = [match rangeAtIndex:4];
-    if(pathComponentRange.location == NSNotFound || !pathComponentRange.length)
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML query has syntax errors (could not extract first path component)!" userInfo:@{
-            @"self": self,
-            @"queryString": queryString,
-        }];
-    NSString* pathComponent = [queryString substringWithRange:pathComponentRange];
+    NSRange pathComponent1Range = [match rangeAtIndex:1];
+    NSRange pathComponent2Range = [match rangeAtIndex:7];
+    NSRange pathComponent3Range = [match rangeAtIndex:15];
+    NSString* pathComponent1 = @"";
+    NSString* pathComponent2 = @"";
+    NSString* pathComponent3 = @"";
+    if(pathComponent1Range.location != NSNotFound && pathComponent1Range.length > 0)
+        pathComponent1 = [queryString substringWithRange:pathComponent1Range];
+    if(pathComponent2Range.location != NSNotFound && pathComponent2Range.length > 0)
+        pathComponent2 = [queryString substringWithRange:pathComponent2Range];
+    if(pathComponent3Range.location != NSNotFound && pathComponent3Range.length > 0)
+        pathComponent3 = [queryString substringWithRange:pathComponent3Range];
+    
+    NSString* pathComponent = pathComponent1;
     NSString* rest = @"";
-    if(restRange.location != NSNotFound && restRange.length > 1)
-        rest = [[queryString substringWithRange:restRange] substringFromIndex:1];
-    NSMutableDictionary* parsedEntry = [self parseQueryEntry:pathComponent];
+    if(![pathComponent2 length])
+        pathComponent = [NSString stringWithFormat:@"%@%@", pathComponent1, pathComponent3];
+    else
+        rest = [NSString stringWithFormat:@"%@%@", [pathComponent2 substringFromIndex:1], pathComponent3];
+    NSMutableDictionary* parsedEntry = [self parseQueryEntry:pathComponent arguments:args];
     
     //check if the parent element was selected and ask our parent to check the rest of our query path if needed
     if([pathComponent isEqualToString:@".."])
@@ -354,7 +383,7 @@ static NSRegularExpression* attributeFilterRegex;
                 @"pathComponent": pathComponent,
                 @"parsedEntry": parsedEntry
             }];
-        return [self.parent find:rest];
+        return [self.parent find:rest arguments:args];
     }
     
     //shortcut for dataform subqueries: allow empty element names and namespaces, they get autofilled with {jabber:x:data}x
@@ -413,6 +442,7 @@ static NSRegularExpression* attributeFilterRegex;
             {
                 BOOL ok = YES;
                 for(NSDictionary* filter in parsedEntry[@"attributeFilters"])
+                {
                     if(node.attributes[filter[@"name"]])
                     {
                         NSArray* matches = [filter[@"value"] matchesInString:node.attributes[filter[@"name"]] options:0 range:NSMakeRange(0, [node.attributes[filter[@"name"]] length])];
@@ -427,6 +457,7 @@ static NSRegularExpression* attributeFilterRegex;
                         ok = NO;
                         break;
                     }
+                }
                 if(!ok)
                     continue;               //this node does *not* fullfill the attribute filter regex
             }
@@ -453,7 +484,7 @@ static NSRegularExpression* attributeFilterRegex;
                 else if([parsedEntry[@"extractionCommand"] isEqualToString:@"\\"])
                 {
                     if(![node respondsToSelector:NSSelectorFromString(@"processDataFormQuery:")])
-                        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Data form extractions can only be used on data forms! This exception means you have a bug somewhere else in your code (probably at the source of your elemt you are trying to use in your data form query)!" userInfo:@{
+                        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Data form extractions can only be used on data forms! This exception means you have a bug somewhere else in your code (probably at the source of the element you are trying to use in your data form query)!" userInfo:@{
                             @"self": self,
                             @"node": node,
                             @"queryString": queryString,
@@ -502,7 +533,7 @@ static NSRegularExpression* attributeFilterRegex;
                         @"parsedEntry": parsedEntry
                     }];
                 if([rest length] > 0)            //we should descent to this node
-                    [results addObjectsFromArray:[node find:rest]];     //this will cache the subquery on this node, too
+                    [results addObjectsFromArray:[node find:rest arguments:args]];     //this will cache the subquery on this node, too
                 else                            //we should not descent to this node (we reached the end of our query)
                     [results addObject:node];
             }
@@ -539,16 +570,20 @@ static NSRegularExpression* attributeFilterRegex;
         return string;
 }
 
--(NSMutableDictionary*) parseQueryEntry:(NSString* _Nonnull) entry
+-(NSMutableDictionary*) parseQueryEntry:(NSString* _Nonnull) entry arguments:(va_list) args
 {
     static NSMutableDictionary* localCache;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         localCache = [[NSMutableDictionary alloc] init];
     });
+    va_list cacheKeyArgs;
+    va_copy(cacheKeyArgs, args);
+    NSString* cacheKey = [NSString stringWithFormat:@"%@§§%@", entry, [[NSString alloc] initWithFormat:entry arguments:cacheKeyArgs]];
+    va_end(cacheKeyArgs);
     @synchronized(localCache) {
-        if(localCache[entry])
-            return [localCache[entry] mutableCopy];
+        if(localCache[cacheKey])
+            return [localCache[cacheKey] mutableCopy];
     }
     NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
     NSArray* matches = [componentParserRegex matchesInString:entry options:0 range:NSMakeRange(0, [entry length])];
@@ -570,27 +605,53 @@ static NSRegularExpression* attributeFilterRegex;
     if(attributeFilterRange.location != NSNotFound && attributeFilterRange.length > 0)
     {
         retval[@"attributeFilters"] = [[NSMutableArray alloc] init];
-        NSString* atrributeFilters = [entry substringWithRange:attributeFilterRange];
-        NSArray* attributeFilterMatches = [attributeFilterRegex matchesInString:atrributeFilters options:0 range:NSMakeRange(0, [atrributeFilters length])];
+        NSString* attributeFilters = [entry substringWithRange:attributeFilterRange];
+        NSArray* attributeFilterMatches = [attributeFilterRegex matchesInString:attributeFilters options:0 range:NSMakeRange(0, [attributeFilters length])];
         for(NSTextCheckingResult* attributeFilterMatch in attributeFilterMatches)
         {
             NSRange attributeFilterNameRange = [attributeFilterMatch rangeAtIndex:1];
-            NSRange attributeFilterValueRange = [attributeFilterMatch rangeAtIndex:2];
-            if(attributeFilterNameRange.location == NSNotFound || attributeFilterValueRange.location == NSNotFound)
-                continue;       //ignore incomplete matches
+            NSRange attributeFilterTypeRange = [attributeFilterMatch rangeAtIndex:2];
+            NSRange attributeFilterValueRange = [attributeFilterMatch rangeAtIndex:3];
+            if(attributeFilterNameRange.location == NSNotFound || attributeFilterTypeRange.location == NSNotFound || attributeFilterValueRange.location == NSNotFound)
+                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Attribute filter not complete!" userInfo:@{
+                    @"self": self,
+                    @"queryEntry": entry,
+                    @"attributeFilters": attributeFilters
+                }];
             
-            NSString* attributeFilterName = [atrributeFilters substringWithRange:attributeFilterNameRange];
-            NSString* attributeFilterValue = [NSString stringWithFormat:@"^%@$", [atrributeFilters substringWithRange:attributeFilterValueRange]];
+            NSString* attributeFilterName = [attributeFilters substringWithRange:attributeFilterNameRange];
+            unichar attributeFilterType = [[attributeFilters substringWithRange:attributeFilterTypeRange] characterAtIndex:0];
+            NSString* attributeFilterValue = [attributeFilters substringWithRange:attributeFilterValueRange];
+            
+            NSString* attributeFilterValueRegexPattern;
+            if(attributeFilterType == '=')      //verbatim comparison using format string interpolation
+            {
+                //substitute format string specifiers inside of our attribute filter string
+                NSString* unescapedAttributeFilterValue = [[NSString alloc] initWithFormat:attributeFilterValue arguments:args];
+                NSString* escapedAttributeFilterValue = [NSRegularExpression escapedPatternForString:unescapedAttributeFilterValue];
+                attributeFilterValueRegexPattern = [NSString stringWithFormat:@"^%@$", escapedAttributeFilterValue];
+            }
+            else if(attributeFilterType == '~')      //raw regex comparison *without* format string interpolation
+                //you will have to include sring-start and string-end markers yourself as well as all other regex stuff
+                attributeFilterValueRegexPattern = attributeFilterValue;
+            else
+                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Internal attribute filter bug, this should never happen!" userInfo:@{
+                    @"self": self,
+                    @"queryEntry": entry,
+                    @"attributeFilters": attributeFilters
+                }];
+                
             NSError* error;
             [retval[@"attributeFilters"] addObject:@{
                 @"name": attributeFilterName,
                 //this regex will be cached in parsed form in the local cache of this method
-                @"value": [NSRegularExpression regularExpressionWithPattern:attributeFilterValue options:NSRegularExpressionCaseInsensitive error:&error]
+                @"value": [NSRegularExpression regularExpressionWithPattern:attributeFilterValueRegexPattern options:NSRegularExpressionCaseInsensitive error:&error]
             }];
             if(error)
                 @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Attribute filter regex can not be compiled!" userInfo:@{
                     @"self": self,
                     @"queryEntry": entry,
+                    @"filterType": @(attributeFilterType),
                     @"filterName": attributeFilterName,
                     @"filterValue": attributeFilterValue,
                     @"error": error
@@ -610,9 +671,9 @@ static NSRegularExpression* attributeFilterRegex;
     if(conversionCommandRange.location != NSNotFound)
         retval[@"conversionCommand"] = [entry substringWithRange:conversionCommandRange];
     @synchronized(localCache) {
-        localCache[entry] = [retval copy];
-        return retval;
+        localCache[cacheKey] = [retval copy];
     }
+    return retval;
 }
 
 +(NSString*) escapeForXMPP:(NSString*) targetString

@@ -2,7 +2,7 @@
 //  XMPPDataForm.h
 //  monalxmpp
 //
-//  Created by tmolitor on 12.10.20.
+//  Created by Thilo Molitor on 12.10.20.
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 

@@ -36,7 +36,8 @@
     return [MLSQLite sharedInstanceForFile:_dbPath];
 }
 
--(MLSignalStore*) initWithAccountId:(NSString *) accountId{
+-(MLSignalStore*) initWithAccountId:(NSString*) accountId
+{
     self = [super init];
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
@@ -93,13 +94,13 @@
     }];
 }
 
--(NSMutableArray *) readPreKeys
+-(NSMutableArray<SignalPreKey*>*) readPreKeys
 {
     NSArray* keys = [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeReader:@"SELECT prekeyid, preKey FROM signalPreKey WHERE account_id=? AND keyUsed=0;" andArguments:@[self.accountId]];
     }];
     
-    NSMutableArray* array = [[NSMutableArray alloc] initWithCapacity:keys.count];
+    NSMutableArray<SignalPreKey*>* array = [[NSMutableArray alloc] initWithCapacity:keys.count];
     for (NSDictionary* row in keys)
     {
         SignalPreKey* key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
@@ -114,7 +115,7 @@
         return [self.sqliteDatabase executeScalar:@"SELECT prekeyid FROM signalPreKey WHERE account_id=? ORDER BY prekeyid DESC LIMIT 1;" andArguments:@[self.accountId]];
     }];
 
-    if(highestId==nil) {
+    if(highestId == nil) {
         return 0; // Default value -> first preKeyId will be 1
     } else {
         return highestId.intValue;
@@ -146,7 +147,7 @@
  * provided recipient ID + device ID tuple.
  * or nil if not found.
  */
-- (nullable NSData*) sessionRecordForAddress:(SignalAddress*)address
+- (NSData* _Nullable) sessionRecordForAddress:(SignalAddress*) address
 {
     return [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:@"SELECT recordData FROM signalContactSession WHERE account_id=? AND contactName=? AND contactDeviceId=?;" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
@@ -173,7 +174,7 @@
  * Determine whether there is a committed session record for a
  * recipient ID + device ID tuple.
  */
-- (BOOL) sessionRecordExistsForAddress:(SignalAddress*)address;
+- (BOOL) sessionRecordExistsForAddress:(SignalAddress*) address;
 {
     NSData* preKeyData = [self sessionRecordForAddress:address];
     return preKeyData ? YES : NO;
@@ -182,7 +183,7 @@
 /**
  * Remove a session record for a recipient ID + device ID tuple.
  */
-- (BOOL) deleteSessionRecordForAddress:(SignalAddress*)address
+- (BOOL) deleteSessionRecordForAddress:(SignalAddress*) address
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
         return [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession WHERE account_id=? AND contactName=? AND contactDeviceId=?;" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
@@ -192,20 +193,20 @@
 /**
  * Returns all known devices with active sessions for a recipient
  */
-- (NSArray<NSNumber*>*) allDeviceIdsForAddressName:(NSString*)addressName
+- (NSArray<NSNumber*>*) allDeviceIdsForAddressName:(NSString*) jid
 {
     return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
+        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, jid]];
     }];
 }
 
--(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName
+-(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*) jid
 {
-    if(!addressName)
+    if(!jid)
         return nil;
     
     return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=? AND removedFromDeviceList IS NULL;" andArguments:@[self.accountId, addressName]];
+        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=? AND removedFromDeviceList IS NULL;" andArguments:@[self.accountId, jid]];
     }];
 }
 
@@ -224,7 +225,7 @@
  *
  * @return the number of deleted sessions on success, negative on failure
  */
--(int) deleteAllSessionsForAddressName:(NSString*)addressName
+-(int) deleteAllSessionsForAddressName:(NSString*) addressName
 {
     return [[self.sqliteDatabase idWriteTransaction:^{
         NSNumber* count = (NSNumber*) [self.sqliteDatabase executeScalar:@"COUNT * FROM  signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
@@ -237,7 +238,7 @@
  * Load a local serialized PreKey record.
  * return nil if not found
  */
-- (nullable NSData*) loadPreKeyWithId:(uint32_t)preKeyId;
+- (nullable NSData*) loadPreKeyWithId:(uint32_t) preKeyId;
 {
     DDLogDebug(@"Loading prekey %lu", (unsigned long)preKeyId);
     return [self.sqliteDatabase idReadTransaction:^{
@@ -249,7 +250,7 @@
  * Store a local serialized PreKey record.
  * return YES if storage successful, else NO
  */
--(BOOL) storePreKey:(NSData*)preKey preKeyId:(uint32_t)preKeyId
+-(BOOL) storePreKey:(NSData*) preKey preKeyId:(uint32_t) preKeyId
 {
     DDLogDebug(@"Storing prekey %lu", (unsigned long)preKeyId);
     return [self.sqliteDatabase boolWriteTransaction:^{
@@ -265,7 +266,7 @@
  * Determine whether there is a committed PreKey record matching the
  * provided ID.
  */
--(BOOL) containsPreKeyWithId:(uint32_t)preKeyId;
+-(BOOL) containsPreKeyWithId:(uint32_t) preKeyId;
 {
     NSData* prekey = [self loadPreKeyWithId:preKeyId];
     return prekey ? YES : NO;
@@ -274,7 +275,7 @@
 /**
  * Delete a PreKey record from local storage.
  */
--(BOOL) deletePreKeyWithId:(uint32_t)preKeyId
+-(BOOL) deletePreKeyWithId:(uint32_t) preKeyId
 {
     DDLogDebug(@"Marking prekey %lu as deleted", (unsigned long)preKeyId);
     // only mark the key for deletion -> key should be removed from pubSub
@@ -288,7 +289,7 @@
 /**
  * Load a local serialized signed PreKey record.
  */
--(nullable NSData*) loadSignedPreKeyWithId:(uint32_t)signedPreKeyId
+-(nullable NSData*) loadSignedPreKeyWithId:(uint32_t) signedPreKeyId
 {
     DDLogDebug(@"Loading signed prekey %lu", (unsigned long)signedPreKeyId);
     return [self.sqliteDatabase idReadTransaction:^{
@@ -299,7 +300,7 @@
 /**
  * Store a local serialized signed PreKey record.
  */
-- (BOOL) storeSignedPreKey:(NSData*)signedPreKey signedPreKeyId:(uint32_t)signedPreKeyId
+- (BOOL) storeSignedPreKey:(NSData*) signedPreKey signedPreKeyId:(uint32_t) signedPreKeyId
 {
     DDLogDebug(@"Storing signed prekey %lu", (unsigned long)signedPreKeyId);
     return [self.sqliteDatabase boolWriteTransaction:^{
@@ -311,7 +312,7 @@
  * Determine whether there is a committed signed PreKey record matching
  * the provided ID.
  */
-- (BOOL) containsSignedPreKeyWithId:(uint32_t)signedPreKeyId
+- (BOOL) containsSignedPreKeyWithId:(uint32_t) signedPreKeyId
 {
     return [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:@"SELECT signedPreKey FROM signalSignedPreKey WHERE account_id=? AND signedPreKeyId=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
@@ -321,7 +322,7 @@
 /**
  * Delete a SignedPreKeyRecord from local storage.
  */
-- (BOOL) removeSignedPreKeyWithId:(uint32_t)signedPreKeyId
+- (BOOL) removeSignedPreKeyWithId:(uint32_t) signedPreKeyId
 {
     DDLogDebug(@"Removing signed prekey %lu", (unsigned long)signedPreKeyId);
     return [self.sqliteDatabase boolWriteTransaction:^{
@@ -337,14 +338,14 @@
     return self.identityKeyPair;
 }
 
--(BOOL) identityPublicKeyExists:(NSData*)publicKey andPrivateKey:(NSData *) privateKey
+-(BOOL) identityPublicKeyExists:(NSData*) publicKey andPrivateKey:(NSData *) privateKey
 {
     return [[self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:@"SELECT COUNT(*) FROM signalIdentity WHERE account_id=? AND deviceid=? AND identityPublicKey=? AND identityPrivateKey=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:self.deviceid], publicKey, privateKey]];
     }] boolValue];
 }
 
-- (BOOL) storeIdentityPublicKey:(NSData*)publicKey andPrivateKey:(NSData *) privateKey
+- (BOOL) storeIdentityPublicKey:(NSData*) publicKey andPrivateKey:(NSData*) privateKey
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
         if([self identityPublicKeyExists:publicKey andPrivateKey:privateKey])
@@ -376,7 +377,7 @@
  * from the identity store, but retain any metadata that may be kept
  * alongside it.
  */
-- (BOOL) saveIdentity:(SignalAddress*)address identityKey:(nullable NSData*)identityKey;
+- (BOOL) saveIdentity:(SignalAddress*) address identityKey:(nullable NSData*) identityKey;
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
         NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
@@ -396,13 +397,13 @@
  * store.  Only if it mismatches an entry in the local store is it considered
  * 'untrusted.'
  */
--(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
+-(BOOL) isTrustedIdentity:(SignalAddress*) address identityKey:(NSData*) identityKey;
 {
     int trustLevel = [self getTrustLevel:address identityKey:identityKey].intValue;
     return (trustLevel == MLOmemoTrusted || trustLevel == MLOmemoToFU);
 }
 
--(NSData*) getIdentityForAddress:(SignalAddress*)address
+-(NSData*) getIdentityForAddress:(SignalAddress*) address
 {
     return [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:@"SELECT identity FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
@@ -415,21 +416,21 @@
  * false -> don't trust
  * -> after calling updateTrust once ToFU will be over
  */
--(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address
+-(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
         [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:(trust ? MLOmemoInternalTrusted : MLOmemoInternalNotTrusted)], self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
--(void) markDeviceAsDeleted:(SignalAddress*)address
+-(void) markDeviceAsDeleted:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
         [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET removedFromDeviceList=CURRENT_TIMESTAMP WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
--(void) removeDeviceDeletedMark:(SignalAddress*)address
+-(void) removeDeviceDeletedMark:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
         [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET removedFromDeviceList=NULL WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
@@ -461,7 +462,7 @@
     }];
 }
 
--(int) getInternalTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey
+-(int) getInternalTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey
 {
     return [[self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:(@"SELECT trustLevel FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?;") andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]];
@@ -475,7 +476,7 @@
     }];
 }
 
--(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey
+-(NSNumber*) getTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey
 {
     return [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:(@"SELECT \
@@ -498,7 +499,7 @@
  * Store a serialized sender key record for a given
  * (groupId + senderId + deviceId) tuple.
  */
--(BOOL) storeSenderKey:(nonnull NSData*)senderKey address:(nonnull SignalAddress*)address groupId:(nonnull NSString*)groupId;
+-(BOOL) storeSenderKey:(nonnull NSData*) senderKey address:(nonnull SignalAddress*) address groupId:(nonnull NSString*) groupId;
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
         return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactKey (account_id, contactName, contactDeviceId, groupId, senderKey) VALUES (?, ?, ?, ?, ?);" andArguments:@[self.accountId,address.name, [NSNumber numberWithInteger:address.deviceId], groupId,senderKey]];
@@ -509,7 +510,7 @@
  * Returns a copy of the sender key record corresponding to the
  * (groupId + senderId + deviceId) tuple.
  */
-- (nullable NSData*) loadSenderKeyForAddress:(SignalAddress*)address groupId:(NSString*)groupId;
+- (nullable NSData*) loadSenderKeyForAddress:(SignalAddress*) address groupId:(NSString*) groupId;
 {
     return [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:@"SELECT senderKey FROM signalContactKey WHERE account_id=? AND groupId=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId,groupId, [NSNumber numberWithInteger:address.deviceId], address.name]];

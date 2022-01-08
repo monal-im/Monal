@@ -36,7 +36,10 @@
     block();
     //remove own queue from stack again
     [stack removeLastObject];
-    //this will deallocate and flush the queue to the next queue in our stack (or send them to the notification center if no queue is left on the stack)
+    //flush the queue to the next queue in our stack (or send them to the notification center if no queue is left on the stack)
+    //don't use the flush deallocate because we want our flush to be "inline" thread-wise
+    [queue flush];
+    //this will deallocate our queue (flushing was already done before)
     queue = nil;
 }
 
@@ -143,7 +146,9 @@
 
 -(void) dealloc
 {
-    [self flush];
+    //there should only be one thread calling dealloc ever (per objc runtime) --> no @synchronized needed
+    if([_entries count])
+        [self flush];
 }
 
 @end

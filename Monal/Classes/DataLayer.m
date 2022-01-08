@@ -16,6 +16,7 @@
 #import "XMPPIQ.h"
 #import "XMPPDataForm.h"
 #import "MLFiletransfer.h"
+#import "MLContactSoftwareVersionInfo.h"
 
 @interface DataLayer()
 @property (readonly, strong) MLSQLite* db;
@@ -253,16 +254,17 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=? WHERE account_id=?;";
         NSString* server = (NSString*)[dictionary objectForKey:kServer];
         NSString* port = (NSString*)[dictionary objectForKey:kPort];
-        NSArray* params = @[server == nil ? @"" : server,
-                        port == nil ? @"5222" : port,
-                        ((NSString*)[dictionary objectForKey:kUsername]),
-                        ((NSString*)[dictionary objectForKey:kResource]),
-                        ((NSString*)[dictionary objectForKey:kDomain]),
-                        [dictionary objectForKey:kEnabled],
-                        [dictionary objectForKey:kDirectTLS],
-                        [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
-                        [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
-                        [dictionary objectForKey:kAccountID]
+        NSArray* params = @[
+            server == nil ? @"" : server,
+            port == nil ? @"5222" : port,
+            ((NSString*)[dictionary objectForKey:kUsername]),
+            ((NSString*)[dictionary objectForKey:kResource]),
+            ((NSString*)[dictionary objectForKey:kDomain]),
+            [dictionary objectForKey:kEnabled],
+            [dictionary objectForKey:kDirectTLS],
+            [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
+            [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
+            [dictionary objectForKey:kAccountID]
         ];
         BOOL result = [self.db executeNonQuery:query andArguments:params];
 //         // insert self chat for omemo foreign key
@@ -346,6 +348,8 @@ static NSDateFormatter* dbFormatter;
     {
         NSError* error;
         NSMutableDictionary* dic = (NSMutableDictionary*)[NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
+            [NSData class],
+            [NSMutableData class],
             [NSMutableDictionary class],
             [NSDictionary class],
             [NSMutableSet class],
@@ -465,7 +469,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
 
     return [self.db idReadTransaction:^{
-        NSArray* results = [self.db executeReader:@"SELECT b.lastInteraction, b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, mentionOnly, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
+        NSArray* results = [self.db executeReader:@"SELECT b.lastInteraction, b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, mentionOnly, b.account_id, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
             CASE \
                 WHEN a.buddy_name IS NOT NULL THEN 1 \
                 ELSE 0 \
@@ -486,14 +490,14 @@ static NSDateFormatter* dbFormatter;
         else
         {
             NSMutableDictionary* contact = [results[0] mutableCopy];
-            //correctly extract timestamp
-            if(contact[@"lastMessageTime"])
-                contact[@"lastMessageTime"] = [dbFormatter dateFromString:contact[@"lastMessageTime"]];
             //correctly extract NSDate object or 1970, if last interaction is zero
             if(!contact[@"lastInteraction"] || ![contact[@"lastInteraction"] integerValue])
                 contact[@"lastInteraction"] = [[NSDate date] initWithTimeIntervalSince1970:0];
             else
                 contact[@"lastInteraction"] = [NSDate dateWithTimeIntervalSince1970:[contact[@"lastInteraction"] integerValue]];
+            //if we have this muc in our favorites table, this muc is "subscribed"
+            if([self.db executeScalar:@"SELECT room FROM muc_favorites WHERE room=? AND account_id=?;" andArguments:@[username, accountNo]] != nil)
+                contact[@"subscription"] = @"both";
             return contact;
         }
     }];
@@ -643,40 +647,38 @@ static NSDateFormatter* dbFormatter;
 }
 
 
--(NSArray*) resourcesForContact:(NSString*) contact
+-(NSArray<NSString*>*) resourcesForContact:(MLContact* _Nonnull) contact
 {
-    if(!contact)
-        return nil;
     return [self.db idReadTransaction:^{
-        NSString* query1 = @"select resource from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where  buddy_name=?;";
-        NSArray* params = @[contact ];
-        NSArray* resources = [self.db executeReader:query1 andArguments:params];
+        NSArray<NSString*>* resources = [self.db executeScalarReader:@"SELECT resource FROM buddy_resources AS A INNER JOIN buddylist AS B ON a.buddy_id=b.buddy_id WHERE  buddy_name=?;" andArguments:@[contact.contactJid]];
         return resources;
     }];
 }
 
--(NSArray*) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account
+-(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account
 {
     if(!account)
         return nil;
-    return [self.db idReadTransaction:^{
-        NSString* query1 = @"select platform_App_Name, platform_App_Version, platform_OS from buddy_resources where buddy_id in (select buddy_id from buddylist where account_id=? and buddy_name=?) and resource=?";
-        NSArray* params = @[account, contact, resource];
-        NSArray* resources = [self.db executeReader:query1 andArguments:params];
+    NSArray<NSDictionary*>* versionInfoArr = [self.db idReadTransaction:^{
+        NSArray<NSDictionary*>* resources = [self.db executeReader:@"SELECT platform_App_Name, platform_App_Version, platform_OS FROM buddy_resources WHERE buddy_id IN (SELECT buddy_id FROM buddylist WHERE account_id=? AND buddy_name=?) AND resource=?" andArguments:@[account, contact, resource]];
         return resources;
     }];
+    if(versionInfoArr == nil || versionInfoArr.count == 0) {
+        return nil;
+    } else {
+        NSDictionary* versionInfo = versionInfoArr.firstObject;
+        return [[MLContactSoftwareVersionInfo alloc] initWithJid:contact andRessource:resource andAppName:versionInfo[@"platform_App_Name"] andAppVersion:versionInfo[@"platform_App_Version"] andPlatformOS:versionInfo[@"platform_OS"]];
+    }
 }
 
 -(void) setSoftwareVersionInfoForContact:(NSString*)contact
                                 resource:(NSString*)resource
                               andAccount:(NSString*)account
-                             withAppName:(NSString*)appName
-                              appVersion:(NSString*)appVersion
-                           andPlatformOS:(NSString*)platformOS
+                        withSoftwareInfo:(MLContactSoftwareVersionInfo*) newSoftwareInfo
 {
     [self.db voidWriteTransaction:^{
         NSString* query = @"update buddy_resources set platform_App_Name=?, platform_App_Version=?, platform_OS=? where buddy_id in (select buddy_id from buddylist where account_id=? and buddy_name=?) and resource=?";
-        NSArray* params = @[appName, appVersion, platformOS, account, contact, resource];
+        NSArray* params = @[newSoftwareInfo.appName, newSoftwareInfo.appVersion, newSoftwareInfo.platformOs, account, contact, resource];
         [self.db executeNonQuery:query andArguments:params];
     }];
 }
@@ -1402,6 +1404,36 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=?;" andArguments:@[accountNo]];
         
         [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=?;" andArguments:@[accountNo]];
+    }];
+}
+
+-(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSString*) accountNo
+{
+    [self.db voidWriteTransaction:^{
+        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=?;" andArguments:@[kMessageTypeFiletransfer, accountNo, buddy]];
+        for(NSNumber* historyId in messageHistoryIDs)
+            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
+        [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
+        
+        //better UX without deleting the active chat
+        //[self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
+    }];
+}
+
+
+-(void) autodeleteAllMessagesAfter3Days
+{
+    [self.db voidWriteTransaction:^{
+        //3 days before now
+        NSString* pastDate = [dbFormatter stringFromDate:[[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay value:-3 toDate:[NSDate date] options:0]];
+        //delete all transferred files old enough
+        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND timestamp<?;" andArguments:@[kMessageTypeFiletransfer, pastDate]];
+        for(NSNumber* historyId in messageHistoryIDs)
+            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
+        //delete all messages in history old enough
+        [self.db executeNonQuery:@"DELETE FROM message_history WHERE timestamp<?;" andArguments:@[pastDate]];
+        //delete all chats with empty history from active chats list
+        [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
     }];
 }
 
@@ -2848,7 +2880,7 @@ static NSDateFormatter* dbFormatter;
 {
     if(!accountNo || !archiveJid)
         return nil;
-    NSData* data = (NSData*)[self.db idReadTransaction:^{
+    NSData* data = (NSData*)[self.db idWriteTransaction:^{
         NSArray* entries = [self.db executeReader:@"SELECT id, stanza FROM delayed_message_stanzas WHERE account_id=? AND archive_jid=? ORDER BY id ASC LIMIT 1;" andArguments:@[accountNo, archiveJid]];
         if(![entries count])
             return (NSData*)nil;
@@ -2859,6 +2891,8 @@ static NSDateFormatter* dbFormatter;
     {
         NSError* error;
         MLXMLNode* stanza = (MLXMLNode*)[NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
+            [NSData class],
+            [NSMutableData class],
             [NSMutableDictionary class],
             [NSDictionary class],
             [NSMutableSet class],

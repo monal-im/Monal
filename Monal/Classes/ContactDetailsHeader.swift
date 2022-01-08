@@ -6,6 +6,7 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 
+import MobileCoreServices
 import SwiftUI
 import monalxmpp
 
@@ -15,13 +16,27 @@ struct ContactDetailsHeader: View {
 
     var body: some View {
         VStack {
-            Image(uiImage: MLImageManager.sharedInstance().getIconFor(contact.obj)!)
+            Image(uiImage: contact.avatar)
                 .resizable()
-                .frame(minWidth: 50, idealWidth: 100, maxWidth: 200, minHeight: 50, idealHeight: 100, maxHeight: 200, alignment: .center)
+                .frame(minWidth: 100, idealWidth: 150, maxWidth: 200, minHeight: 100, idealHeight: 150, maxHeight: 200, alignment: .center)
                 .scaledToFit()
+                .shadow(radius: 7)
+            
             Spacer()
                 .frame(height: 20)
-            Text(contact.contactJid as String)
+            HStack {
+                Text(contact.contactJid as String)
+                //for ios >= 15.0
+                //.textSelection(.enabled)
+                Spacer().frame(width: 10)
+                Button(action: {
+                    UIPasteboard.general.setValue(contact.contactJid as String, forPasteboardType: kUTTypeUTF8PlainText as String)
+                }) {
+                    Image(systemName: "doc.on.doc")
+                        .foregroundColor(.primary)
+                }
+            }
+            
             Spacer()
                 .frame(height: 20)
             if(!contact.isGroup) {
@@ -32,6 +47,7 @@ struct ContactDetailsHeader: View {
                     Text(String(format: NSLocalizedString("Last seen: %@", comment: ""), NSLocalizedString("now", comment: "")))
                 }
             }
+            
             Spacer()
                 .frame(height: 20)
             HStack {
@@ -81,6 +97,15 @@ struct ContactDetailsHeader: View {
                 }
 #endif
                 Spacer()
+            }
+                .foregroundColor(.primary)
+            
+            if((contact.statusMessage as String).count > 0) {
+                Spacer()
+                    .frame(height: 20)
+                Text("Status message:")
+                Text(contact.statusMessage as String)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }

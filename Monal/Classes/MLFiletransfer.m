@@ -101,9 +101,6 @@ static NSMutableSet* _currentlyTransfering;
             xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
             
-            //check done, remove from "currently checking/downloading list"
-            [self markAsComplete:historyId];
-            
             //try to autodownload if sizes match
             long autodownloadMaxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersWifiMaxSize"];
             if([[MLXMPPManager sharedInstance] onMobile])
@@ -115,13 +112,24 @@ static NSMutableSet* _currentlyTransfering;
             )
             {
                 DDLogInfo(@"Autodownloading file");
-                [self downloadFileForHistoryID:historyId];
+                [self downloadFileForHistoryID:historyId andForceDownload:YES];     //ignore already existing _currentlyTransfering entry leftover from this header check
             }
+            else
+            {
+                //check done, remove from "currently checking/downloading list"
+                [self markAsComplete:historyId];
+            }
+                
         }] resume];
     });
 }
 
 +(void) downloadFileForHistoryID:(NSNumber*) historyId
+{
+    [self downloadFileForHistoryID:historyId andForceDownload:NO];
+}
+
++(void) downloadFileForHistoryID:(NSNumber*) historyId andForceDownload:(BOOL) forceDownload
 {
     MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
     if(!msg)
@@ -129,10 +137,10 @@ static NSMutableSet* _currentlyTransfering;
         DDLogError(@"historyId %@ does not yield an MLMessage object, aborting", historyId);
         return;
     }
-    //make sure we don't check or download this twice
+    //make sure we don't check or download this twice (but only do this if the download is not forced anyway)
     @synchronized(_currentlyTransfering)
     {
-        if([_currentlyTransfering containsObject:historyId])
+        if(!forceDownload && [_currentlyTransfering containsObject:historyId])
         {
             DDLogDebug(@"Already checking/downloading this content, ignoring");
             return;

@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class xmpp;
 @class MLContact;
 
@@ -23,7 +25,7 @@
 
 -(BOOL) allAccountsIdle;
 
--(MLContact*) sendAllOutboxes;
+-(MLContact* _Nullable) sendAllOutboxes;
 
 #pragma  mark connectivity
 /**
@@ -58,6 +60,7 @@
  Add a contact from an account
  */
 -(void) addContact:(MLContact*) contact;
+-(void) addContact:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken;
 
 /**
  Block  a jid
@@ -73,7 +76,7 @@
 /*
  gets the connected account apecified by id. return nil otherwise
  */
--(xmpp*) getConnectedAccountForID:(NSString*) accountNo;
+-(xmpp* _Nullable) getConnectedAccountForID:(NSString*) accountNo;
 
 /**
  Returns YES if account is connected
@@ -97,8 +100,8 @@
 /**
 Sends a message to a specified contact in account. Calls completion handler on success or failure.
  */
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
--(void)sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
+-(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
+-(void)sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
 -(void) sendChatState:(BOOL) isTyping fromAccount:(NSString*) accountNo toJid:(NSString*) jid;
 
 #pragma mark XMPP settings
@@ -136,6 +139,8 @@ Sends a message to a specified contact in account. Calls completion handler on s
  */
 -(void) getEntitySoftWareVersionForContact:(MLContact*) contact andResource:(NSString*) resource;
 
--(void) setPushToken:(NSString*) token;
+-(void) setPushToken:(NSString* _Nullable) token;
 
 @end
+
+NS_ASSUME_NONNULL_END

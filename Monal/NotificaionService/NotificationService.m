@@ -58,6 +58,7 @@
     @synchronized(self) {
         DDLogInfo(@"Now killing appex process, goodbye...");
         [DDLog flushLog];
+        usleep(500000);            //wait some time for notifications to be handled by the system (500ms)
         exit(0);
     }
 }
@@ -384,7 +385,9 @@
 
 @end
 
-@interface NotificationService ()
+@interface NotificationService () {
+    NSMutableArray* _handlers;
+}
 @end
 
 @implementation NotificationService
@@ -416,7 +419,7 @@
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
     [DDLog flushLog];
-    usleep(100000);     //wait for initial connectivity check
+    usleep(100000);     //wait for initial connectivity check (100ms)
 }
 
 -(id) init
@@ -435,6 +438,7 @@
 -(void) didReceiveNotificationRequest:(UNNotificationRequest*) request withContentHandler:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
     DDLogInfo(@"Notification handler called (request id: %@)", request.identifier);
+    [_handlers addObject:contentHandler];
     
     //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)
     if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
@@ -457,7 +461,21 @@
 -(void) serviceExtensionTimeWillExpire
 {
     DDLogError(@"notification handler expired, that should never happen!");
+#ifndef IS_ALPHA
+    if([_handlers count] > 0)
+    {
+        //we feed all handlers, even if already done by the normal system,just to make sure
+        for(void (^_handler)(UNNotificationContent* _Nonnull) in _handlers)
+        {
+            UNMutableNotificationContent* emptyContent = [[UNMutableNotificationContent alloc] init];
+            _handler(emptyContent);
+        }
+        usleep(500000);            //wait some time for notifications to be handled by the system (500ms)
+    }
+#endif
+    DDLogInfo(@"Committing suicide...");
     [DDLog flushLog];
+    exit(0);
     
     /*
     //proxy to push singleton

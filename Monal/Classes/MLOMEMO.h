@@ -20,7 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
     NSLock* signalLock;
 }
 @property (nonatomic, strong) MLSignalStore* monalSignalStore;
-@property (nonatomic, assign) BOOL hasCatchUpDone;
 @property (nonatomic) unsigned long openBundleFetchCnt;
 @property (nonatomic) unsigned long closedBundleFetchCnt;
 
@@ -32,7 +31,6 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) sendOMEMOBundle;
 -(void) queryOMEMOBundleFrom:(NSString*) jid andDevice:(NSString*) deviceid;
 -(void) sendOMEMODeviceWithForce:(BOOL) force;
--(void) sendOMEMODevice:(NSSet<NSNumber*>*) receivedDevices force:(BOOL) force;
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString*) source;
 
 /*
@@ -40,7 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString* _Nullable) message toContact:(NSString*) toContact;
 -(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode;
--(void) sendKeyTransportElement:(NSString*) jid removeBrokenSessionForRid:(NSString*) rid;
+-(void) sendKeyTransportElement:(NSString*) jid removeBrokenSessionForRid:(NSNumber* _Nullable) rid;
 
 
 -(BOOL) knownDevicesForAddressNameExist:(NSString*) addressName;
@@ -51,7 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSData *) getIdentityForAddress:(SignalAddress*)address;
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 
--(void) queryOMEMODevices:(NSString *) jid;
+-(void) queryOMEMODevices:(NSString*) jid;
 
 -(void) sendLocalDevicesIfNeeded;
 -(void) untrustAllDevicesFrom:(NSString*)jid;

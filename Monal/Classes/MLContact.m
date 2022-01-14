@@ -143,7 +143,7 @@ NSString *const kAskSubscribe=@"subscribe";
     NSString* displayName = accountDic[kRosterName];
     if(!displayName || !displayName.length)
     {
-        //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
+        // default is local part, see https://docs.modernxmpp.org/client/design/#contexts
         NSDictionary* jidParts = [HelperTools splitJid:account.connectionProperties.identity.jid];
         displayName = jidParts[@"node"];
     }
@@ -308,10 +308,10 @@ NSString *const kAskSubscribe=@"subscribe";
 
 -(UIImage*) avatar
 {
-    //return already cached image
+    // return already cached image
     if(_avatar != nil)
         return _avatar;
-    //load avatar from MLImageManager (use self.avatar instead of _avatar to make sure KVO works properly)
+    // load avatar from MLImageManager (use self.avatar instead of _avatar to make sure KVO works properly)
     self.avatar = [[MLImageManager sharedInstance] getIconForContact:self];
     return _avatar;
 }
@@ -332,6 +332,7 @@ NSString *const kAskSubscribe=@"subscribe";
 
 -(BOOL) isInRoster
 {
+    // mucs have a subscription of both (ensured by the datalayer)
     return [self.subscription isEqualToString:kSubBoth]
         || [self.subscription isEqualToString:kSubTo]
         || [self.ask isEqualToString:kAskSubscribe];

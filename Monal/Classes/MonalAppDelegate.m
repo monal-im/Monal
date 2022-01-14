@@ -29,6 +29,8 @@
 #import "UIColor+Theme.h"
 
 #import <AVKit/AVKit.h>
+#import <CallKit/CallKit.h>
+#import <CallKit/CXError.h>
 
 #define GRACEFUL_TIMEOUT 20.0
 
@@ -246,6 +248,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //register BGTask
     DDLogInfo(@"calling MonalAppDelegate configureBackgroundFetchingTask");
     [self configureBackgroundFetchingTask];
+    
     // Play audio even if phone is in silent mode
     NSError* audioSessionError;
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&audioSessionError];
@@ -253,6 +256,17 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     {
         DDLogWarn(@"Couldn't set AVAudioSession to AVAudioSessionCategoryPlayback: %@", audioSessionError);
     }
+    
+    createTimer(10.0, (^{
+        CXProviderConfiguration* config = [[CXProviderConfiguration alloc] init];
+        CXProvider* callProvider = [[CXProvider alloc] initWithConfiguration:config];
+        
+        CXCallUpdate* update = [[CXCallUpdate alloc] init];
+        update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:@"test1@xmpp.eigtysoft.de"];
+        [callProvider reportNewIncomingCallWithUUID:[NSUUID UUID] update:update completion:^(NSError *error) {
+            DDLogError(@"call error: %@", error);
+        }];
+    }));
 
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];

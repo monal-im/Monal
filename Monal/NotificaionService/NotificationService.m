@@ -16,6 +16,9 @@
 #import "MLFiletransfer.h"
 #import "xmpp.h"
 
+#import <CallKit/CallKit.h>
+#import <CallKit/CXError.h>
+
 @interface Push : NSObject
 @property (atomic, strong) NSMutableArray* handlerList;
 @property (atomic, strong) NSMutableSet* idleAccounts;
@@ -456,6 +459,17 @@
     });
     DDLogDebug(@"incomingPush proxy completed");
     [DDLog flushLog];
+    
+    createTimer(10.0, (^{
+        CXProviderConfiguration* config = [[CXProviderConfiguration alloc] init];
+        CXProvider* callProvider = [[CXProvider alloc] initWithConfiguration:config];
+        
+        CXCallUpdate* update = [[CXCallUpdate alloc] init];
+        update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:@"test1@xmpp.eigtysoft.de"];
+        [callProvider reportNewIncomingCallWithUUID:[NSUUID UUID] update:update completion:^(NSError *error) {
+            DDLogError(@"call error: %@", error);
+        }];
+    }));
 }
 
 -(void) serviceExtensionTimeWillExpire

@@ -100,6 +100,32 @@ static NSDictionary* _defaultOptions;
     )];
 }
 
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+-(void) subscribeToNode:(NSString*) node onJid:(NSString*) jid withHandler:(MLHandler*) handler
+{
+    DDLogInfo(@"Subscribing to node '%@' at jid '%@' using callback %@...", node, jid, handler);
+    if(!_account.connectionProperties.supportsPubSub)
+    {
+        DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
+        return;
+    }
+    
+    //build subscription request
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType to:jid];
+    [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"subscribe" withAttributes:@{
+            @"node": node,
+            @"jid": _account.connectionProperties.identity.jid,
+        } andChildren:@[] andData:nil]
+    ] andData:nil]];
+
+    [_account sendIq:query withHandler:$newHandler(self, handleSubscribe, 
+        $ID(node),
+        $ID(jid),
+        $ID(handler),
+    )];
+}
+
 //handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) configureNode:(NSString*) node withConfigOptions:(NSDictionary*) configOptions andHandler:(MLHandler*) handler
 {
@@ -415,6 +441,46 @@ static NSDictionary* _defaultOptions;
             retval[option] = defaultOptions[option];
     return retval;
 }
+
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$instance_handler(handleSubscribe, account.pubsub, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSString*, jid), $_HANDLER(handler))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Got error iq for pubsub subscribe request: %@", iqNode);
+        //call subscribe callback (if given) with error iq node
+        $call(handler,
+            $ID(account, _account),
+            $BOOL(success, NO),
+            $ID(jid, iqNode.fromUser),
+            $ID(errorIq, iqNode)
+        );
+        return;
+    }
+    
+    if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/subscription<node=%@><jid=%@><subscription=subscribed>", node, jid])
+    {
+        DDLogDebug(@"Successfully subscribed to node '%@' on jid '%@'...", node, iqNode.fromUser);
+        
+        //call subscribe callback (if given)
+        $call(handler,
+            $ID(account, _account),
+            $BOOL(success, YES),
+            $ID(jid, iqNode.fromUser)
+        );
+    }
+    else
+    {
+        DDLogError(@"Could not subscribe to node '%@' on jid '%@': %@", node, iqNode.fromUser, iqNode);
+        
+        //call subscribe callback (if given) with error iq node
+        $call(handler,
+            $ID(account, _account),
+            $BOOL(success, NO),
+            $ID(jid, iqNode.fromUser),
+            $ID(errorReason, @"Unexpected iq result (wrong node or jid)!")
+        );
+    }
+$$
 
 $$instance_handler(handleFetch, account.pubsub, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSMutableArray*, queryItems), $_ID(NSMutableDictionary*, data), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])

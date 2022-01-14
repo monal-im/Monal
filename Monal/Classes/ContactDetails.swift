@@ -162,10 +162,12 @@ struct ContactDetails: View {
                             )
                         }
                         
-                        Spacer()
-                            .frame(height: 20)
-                        NavigationLink(destination: NavigationLazyView(ContactResources(contact: contact))) {
-                            Text("Resources")
+                        if(!contact.isGroup) {
+                            Spacer()
+                                .frame(height: 20)
+                            NavigationLink(destination: NavigationLazyView(ContactResources(contact: contact))) {
+                                Text("Resources")
+                            }
                         }
                     }
                     

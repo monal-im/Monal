@@ -26,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks;
 -(void) pingAllMucs;
 -(void) ping:(NSString*) roomJid;
+-(BOOL) checkIfStillBookmarked:(NSString*) room;
 
 @end
 

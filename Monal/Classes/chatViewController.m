@@ -2609,11 +2609,18 @@ enum msgSentState {
 
 // List of custom hardware key commands
 - (NSArray<UIKeyCommand *> *)keyCommands {
+    // shift + enter
+    UIKeyCommand* shiftEnterKey = [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(shiftEnterKeyPressed:)];
+    // enter
+    UIKeyCommand* enterKey = [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterKeyPressed:)];
+    // prefer our key commands over the system defaults
+    if (@available(iOS 15.0, macCatalyst 15.0, *)) {
+        shiftEnterKey.wantsPriorityOverSystemBehavior = true;
+        enterKey.wantsPriorityOverSystemBehavior = true;
+    }
     return @[
-            // shift + enter
-            [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(shiftEnterKeyPressed:)],
-            // enter
-            [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterKeyPressed:)],
+            shiftEnterKey,
+            enterKey,
             // command + i
             [UIKeyCommand keyCommandWithInput:@"i" modifierFlags:UIKeyModifierCommand action:@selector(commandIPressed:)],
             // command + f

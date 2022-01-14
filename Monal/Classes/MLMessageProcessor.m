@@ -132,7 +132,7 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     
-    if([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"])
+    if(([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
         // Ignore all group chat msgs from unkown groups
         if([[DataLayer sharedInstance] isContactInList:messageNode.fromUser forAccount:account.accountNo] == NO)

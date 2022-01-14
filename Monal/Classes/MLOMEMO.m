@@ -730,7 +730,25 @@ $$
     BOOL isKeyTransportElement = ![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload"];
 
     NSNumber* sid = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|int"];
-    SignalAddress* address = [[SignalAddress alloc] initWithName:messageNode.fromUser deviceId:(uint32_t)sid.intValue];
+    SignalAddress* address = nil;
+    if([messageNode check:@"/<type=groupchat>"])
+    {
+        NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:messageNode.fromResource inRoom:messageNode.fromUser forAccountId:self.account.accountNo];
+        if(mucParticipant != nil && mucParticipant[@"participant_jid"] != nil)
+            address = [[SignalAddress alloc] initWithName:mucParticipant[@"participant_jid"] deviceId:(uint32_t)sid.intValue];
+        else
+        {
+            DDLogError(@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipant);
+#ifdef IS_ALPHA
+            return [NSString stringWithFormat:@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipant];
+#else
+            return nil;
+#endif
+        }
+    }
+    else
+        address = [[SignalAddress alloc] initWithName:messageNode.fromUser deviceId:(uint32_t)sid.intValue];
+    
     if(!self.signalContext)
     {
         DDLogError(@"Missing signal context");

@@ -87,7 +87,7 @@ struct ContactDetails: View {
                                     showingRemoveContactConfirmation = true
                                 }) {
                                     if(contact.isGroup) {
-                                        Text(contact.mucType == "group" ? "Leave Group" : "Leave Channel")
+                                        Text(contact.mucType == "group" ? NSLocalizedString("Leave Group", comment: "") : NSLocalizedString("Leave Channel", comment: ""))
                                             .foregroundColor(.red)
                                     } else {
                                         Text("Remove from contacts")
@@ -115,15 +115,15 @@ struct ContactDetails: View {
                                     showingAddContactConfirmation = true
                                 }) {
                                     if(contact.isGroup) {
-                                        Text(contact.mucType == "group" ? "Add Group to Favorites" : "Add Channel to Favorites")
+                                        Text(contact.mucType == "group" ? NSLocalizedString("Add Group to Favorites", comment: "") : NSLocalizedString("Add Channel to Favorites", comment: ""))
                                     } else {
                                         Text("Add to contacts")
                                     }
                                 }
                                 .actionSheet(isPresented: $showingAddContactConfirmation) {
                                     ActionSheet(
-                                        title: Text(String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
-                                        message: Text("They will see when you are online. They will be able to send you encrypted messages."),
+                                        title: Text(contact.isGroup ? (contact.mucType == "group" ? NSLocalizedString("Add Group to Favorites", comment: "") : NSLocalizedString("Add Channel to Favorites", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
+                                        message: Text(contact.isGroup ? NSLocalizedString("You will receive subsequent messages from this conversation", comment: "") : NSLocalizedString("They will see when you are online. They will be able to send you encrypted messages.", comment: "")),
                                         buttons: [
                                             .cancel(),
                                             .default(
@@ -143,13 +143,13 @@ struct ContactDetails: View {
                         Button(action: {
                             showingClearHistoryConfirmation = true
                         }) {
-                            Text("Clear chat history for this contact")
+                            Text(NSLocalizedString("Clear chat history for this contact", comment: ""))
                                 .foregroundColor(.red)
                         }
                         .actionSheet(isPresented: $showingClearHistoryConfirmation) {
                             ActionSheet(
-                                title: Text("Clear History"),
-                                message: Text("Do you really want to clear all messages exchanged with this contact? If using OMEMO you won't even be able to load them from your server again."),
+                                title: Text(NSLocalizedString("Clear History", comment: "")),
+                                message: Text(NSLocalizedString("Do you really want to clear all messages exchanged in this conversation? If using OMEMO you won't even be able to load them from your server again.", comment: "")),
                                 buttons: [
                                     .cancel(),
                                     .destructive(
@@ -177,13 +177,13 @@ struct ContactDetails: View {
                         Button(action: {
                             showingResetOmemoSessionConfirmation = true
                         }) {
-                            Text("Reset OMEMO session")
+                            Text(NSLocalizedString("Reset OMEMO session", comment: ""))
                                 .foregroundColor(.red)
                         }
                         .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
                             ActionSheet(
-                                title: Text("Reset OMEMO session"),
-                                message: Text("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!"),
+                                title: Text(NSLocalizedString("Reset OMEMO session", comment: "")),
+                                message: Text(NSLocalizedString("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!", comment: "")),
                                 buttons: [
                                     .cancel(),
                                     .destructive(

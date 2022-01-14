@@ -1020,12 +1020,13 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSString* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSString*) accountNo
+-(NSDictionary* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSString*) accountNo
 {
     if(!nick || !room || !accountNo)
         return nil;
     return [self.db idReadTransaction:^{
-        return [self.db executeScalar:@"SELECT participant_jid FROM muc_participants WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[accountNo, room, nick]];
+        NSArray* result = [self.db executeReader:@"SELECT * FROM muc_participants WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[accountNo, room, nick]];
+        return result.count > 0 ? result[0] : nil;
     }];
 }
 

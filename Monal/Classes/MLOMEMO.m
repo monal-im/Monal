@@ -542,7 +542,7 @@ $$
 
     // Send KeyTransportElement only to the one device (overrideDevices)
     [self encryptMessage:messageNode withMessage:nil toContact:jid];
-    DDLogDebug(@"Send KeyTransportElement to jid: %@", jid);
+    DDLogDebug(@"Sending KeyTransportElement to jid: %@", jid);
     [self.account send:messageNode];
 
     if(rid != nil) {
@@ -567,7 +567,11 @@ $$
         SignalAddress* address = [[SignalAddress alloc] initWithName:encryptForJid deviceId:(uint32_t)device.intValue];
 
         NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
-
+        if(!identity)
+        {
+            DDLogWarn(@"Could not get Identity for: %@ device id %@", encryptForJid, device);
+            continue;
+        }
         // Only add encryption key for devices that are trusted
         if([self.monalSignalStore isTrustedIdentity:address identityKey:identity])
         {
@@ -588,7 +592,7 @@ $$
     }
 }
 
--(void) encryptMessage:(XMPPMessage *)messageNode withMessage:(NSString *)message toContact:(NSString *)toContact
+-(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact
 {
     [self encryptMessage:messageNode withMessage:message toContact:toContact overrideDevices:nil];
 }
@@ -604,12 +608,33 @@ $$
         // KeyTransportElements should not contain a body
         [messageNode setStoreHint];
     }
-
-    NSArray* devices = [self.monalSignalStore knownDevicesForAddressName:toContact];
-    NSArray* myDevices = [self.monalSignalStore knownDevicesForAddressName:self.accountJid];
+    NSMutableArray<NSString*>* recipients = [[NSMutableArray alloc] init];
+    if([[DataLayer sharedInstance] isBuddyMuc:toContact forAccount:self.account.accountNo])
+    {
+        for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:toContact forAccountId:self.account.accountNo])
+        {
+            if(participant[@"participant_jid"])
+            {
+                [recipients addObject:participant[@"participant_jid"]];
+            }
+        }
+    }
+    else
+    {
+        [recipients addObject:toContact];
+    }
+    NSMutableDictionary<NSString*, NSArray<NSNumber*>*>* contactDeviceMap = [[NSMutableDictionary alloc] init];
+    for(NSString* recipient in recipients)
+    {
+        //contactDeviceMap
+        NSArray<NSNumber*>* recipientDevices = [self.monalSignalStore knownDevicesForAddressName:recipient];
+        if(recipientDevices && recipientDevices.count > 0)
+            [contactDeviceMap setObject:recipientDevices forKey:recipient];
+    }
+    NSArray<NSNumber*>* myDevices = [self.monalSignalStore knownDevicesForAddressName:self.accountJid];
 
     // Check if we found omemo keys from the recipient
-    if(devices.count > 0 || overrideDevices.count > 0)
+    if(contactDeviceMap.count > 0 || overrideDevices.count > 0)
     {
         MLXMLNode* encrypted = [[MLXMLNode alloc] initWithElement:@"encrypted" andNamespace:@"eu.siacs.conversations.axolotl"];
 
@@ -653,8 +678,10 @@ $$
         if(!overrideDevices)
         {
             // normal encryption -> add encryption for all of our own devices as well as to all of our contact's devices
-            [self addEncryptionKeyForAllDevices:devices encryptForJid:toContact withEncryptedPayload:encryptedPayload withXMLHeader:header];
-
+            for(NSString* recipient in contactDeviceMap)
+            {
+                [self addEncryptionKeyForAllDevices:contactDeviceMap[recipient] encryptForJid:recipient withEncryptedPayload:encryptedPayload withXMLHeader:header];
+            }
             [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self.accountJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
         }
         else
@@ -730,13 +757,11 @@ $$
     BOOL isKeyTransportElement = ![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload"];
 
     NSNumber* sid = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|int"];
-    SignalAddress* address = nil;
+    NSString* senderJid = nil;
     if([messageNode check:@"/<type=groupchat>"])
     {
         NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:messageNode.fromResource inRoom:messageNode.fromUser forAccountId:self.account.accountNo];
-        if(mucParticipant != nil && mucParticipant[@"participant_jid"] != nil)
-            address = [[SignalAddress alloc] initWithName:mucParticipant[@"participant_jid"] deviceId:(uint32_t)sid.intValue];
-        else
+        if(mucParticipant == nil || mucParticipant[@"participant_jid"] == nil)
         {
             DDLogError(@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipant);
 #ifdef IS_ALPHA
@@ -745,9 +770,13 @@ $$
             return nil;
 #endif
         }
+        else
+            senderJid = mucParticipant[@"participant_jid"];
     }
     else
-        address = [[SignalAddress alloc] initWithName:messageNode.fromUser deviceId:(uint32_t)sid.intValue];
+        senderJid = messageNode.fromUser;
+
+    SignalAddress* address = [[SignalAddress alloc] initWithName:senderJid deviceId:(uint32_t)sid.intValue];
     
     if(!self.signalContext)
     {
@@ -755,13 +784,13 @@ $$
         return NSLocalizedString(@"Error decrypting message", @"");
     }
     // check if we received our own bundle
-    if([messageNode.fromUser isEqualToString:self.accountJid] && sid.intValue == self.monalSignalStore.deviceid)
+    if([senderJid isEqualToString:self.accountJid] && sid.intValue == self.monalSignalStore.deviceid)
     {
         // Nothing to do
         return nil;
     }
     
-    NSMutableSet<NSNumber*>* contactBrokenRids = [self.brokenSessions objectForKey:messageNode.fromUser];
+    NSMutableSet<NSNumber*>* contactBrokenRids = [self.brokenSessions objectForKey:senderJid];
     if(contactBrokenRids && [contactBrokenRids containsObject:sid]) {
 #ifdef IS_ALPHA
         return @"Dedupl. broken session error";
@@ -787,7 +816,7 @@ $$
     else if(!messageKey)
     {
         DDLogError(@"Message was not encrypted for this device: %d", self.monalSignalStore.deviceid);
-        [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
+        [self needNewSessionForContact:senderJid andDevice:sid];
         return [NSString stringWithFormat:NSLocalizedString(@"Message was not encrypted for this device. Please make sure the sender trusts deviceid %d and that they have you as a contact.", @""), self.monalSignalStore.deviceid];
     }
     else
@@ -809,7 +838,7 @@ $$
         if(error != nil)
         {
             DDLogError(@"Could not decrypt to obtain key: %@", error);
-            [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
+            [self needNewSessionForContact:senderJid andDevice:sid];
 #ifdef IS_ALPHA
             if(isKeyTransportElement)
                 return [NSString stringWithFormat:@"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
@@ -824,7 +853,7 @@ $$
         if(decryptedKey == nil)
         {
             DDLogError(@"Could not decrypt to obtain key.");
-            [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
+            [self needNewSessionForContact:senderJid andDevice:sid];
 #ifdef IS_ALPHA
             if(isKeyTransportElement)
                 return @"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person.";
@@ -845,26 +874,26 @@ $$
                         [self sendOMEMOBundle];
                     }
                     // build session
-                    [self sendKeyTransportElement:messageNode.fromUser removeBrokenSessionForRid:sid];
+                    [self sendKeyTransportElement:senderJid removeBrokenSessionForRid:sid];
                 }
                 else {
-                    [self.openPreKeySession addObject:messageNode.fromUser];
+                    [self.openPreKeySession addObject:senderJid];
                 }
             }
             // save last successfull decryption time
             [self.monalSignalStore updateLastSuccessfulDecryptTime:address];
             if(contactBrokenRids) {
                 [contactBrokenRids removeObject:sid];
-                [self.brokenSessions setObject:contactBrokenRids forKey:messageNode.fromUser];
+                [self.brokenSessions setObject:contactBrokenRids forKey:senderJid];
             }
             
             // if no payload is available -> KeyTransportElement
             if(isKeyTransportElement)
             {
                 // nothing to do
-                DDLogInfo(@"KeyTransportElement received from device: %@", sid);
+                DDLogInfo(@"KeyTransportElement received from jid: %@ device: %@", senderJid, sid);
 #ifdef IS_ALPHA
-                return [NSString stringWithFormat:@"ALPHA_DEBUG_MESSAGE: KeyTransportElement received from device: %@", sid];
+                return [NSString stringWithFormat:@"ALPHA_DEBUG_MESSAGE: KeyTransportElement received from jid: %@ device: %@", senderJid, sid];
 #else
                 return nil;
 #endif

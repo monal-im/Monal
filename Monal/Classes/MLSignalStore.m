@@ -495,15 +495,20 @@
     }];
 }
 
+-(void) deleteDeviceforAddress:(SignalAddress*)address
+{
+    [self.sqliteDatabase voidWriteTransaction:^{
+        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    }];
+ }
+
 /**
  * Store a serialized sender key record for a given
  * (groupId + senderId + deviceId) tuple.
  */
 -(BOOL) storeSenderKey:(nonnull NSData*) senderKey address:(nonnull SignalAddress*) address groupId:(nonnull NSString*) groupId;
 {
-    return [self.sqliteDatabase boolWriteTransaction:^{
-        return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactKey (account_id, contactName, contactDeviceId, groupId, senderKey) VALUES (?, ?, ?, ?, ?);" andArguments:@[self.accountId,address.name, [NSNumber numberWithInteger:address.deviceId], groupId,senderKey]];
-    }];
+    return false;
 }
 
 /**
@@ -512,16 +517,7 @@
  */
 - (nullable NSData*) loadSenderKeyForAddress:(SignalAddress*) address groupId:(NSString*) groupId;
 {
-    return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:@"SELECT senderKey FROM signalContactKey WHERE account_id=? AND groupId=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId,groupId, [NSNumber numberWithInteger:address.deviceId], address.name]];
-    }];
+    return nil;
 }
-
--(void) deleteDeviceforAddress:(SignalAddress*)address
-{
-    [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
-    }];
- }
 
 @end

@@ -187,6 +187,8 @@
 		C158D41425A0AC630005AA40 /* MLMucProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = C158D41225A0AC630005AA40 /* MLMucProcessor.m */; };
 		C1613B5A2520723D0062C0C2 /* MLBasePaser.h in Headers */ = {isa = PBXBuildFile; fileRef = C1613B572520723C0062C0C2 /* MLBasePaser.h */; };
 		C1613B5B2520723D0062C0C2 /* MLBasePaser.m in Sources */ = {isa = PBXBuildFile; fileRef = C1613B592520723C0062C0C2 /* MLBasePaser.m */; };
+		C16D18352792A4AF00F869A0 /* DataLayerMigrations.h in Headers */ = {isa = PBXBuildFile; fileRef = C16D18332792A4AF00F869A0 /* DataLayerMigrations.h */; };
+		C16D18362792A4AF00F869A0 /* DataLayerMigrations.m in Sources */ = {isa = PBXBuildFile; fileRef = C16D18342792A4AF00F869A0 /* DataLayerMigrations.m */; };
 		C1850EB825F38A2D003D506A /* MonalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1850EB725F38A2D003D506A /* MonalUITests.swift */; };
 		C1850EC625F3C5EB003D506A /* TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1850EC525F3C5EB003D506A /* TestHelper.swift */; };
 		C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */ = {isa = PBXBuildFile; fileRef = C18E7578245E8AE900AE8FB7 /* MLPipe.h */; };
@@ -702,6 +704,8 @@
 		C15D504A24C727CC002F75BB /* MLLogFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLLogFileManager.m; sourceTree = "<group>"; };
 		C1613B572520723C0062C0C2 /* MLBasePaser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLBasePaser.h; sourceTree = "<group>"; };
 		C1613B592520723C0062C0C2 /* MLBasePaser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLBasePaser.m; sourceTree = "<group>"; };
+		C16D18332792A4AF00F869A0 /* DataLayerMigrations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataLayerMigrations.h; sourceTree = "<group>"; };
+		C16D18342792A4AF00F869A0 /* DataLayerMigrations.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DataLayerMigrations.m; sourceTree = "<group>"; };
 		C1850E6625F37EC0003D506A /* Monal Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Monal Tests-Bridging-Header.h"; sourceTree = "<group>"; };
 		C1850EB525F38A2D003D506A /* MonalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1850EB725F38A2D003D506A /* MonalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonalUITests.swift; sourceTree = "<group>"; };
@@ -916,6 +920,8 @@
 				263AFDFB209B3B35007F9CEE /* MLSignalStore.m */,
 				26020B3521B957A0009A9735 /* MLMetaInfo.h */,
 				26020B3621B957A0009A9735 /* MLMetaInfo.m */,
+				C16D18332792A4AF00F869A0 /* DataLayerMigrations.h */,
+				C16D18342792A4AF00F869A0 /* DataLayerMigrations.m */,
 			);
 			name = Shared;
 			path = Classes;
@@ -1561,6 +1567,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C16D18352792A4AF00F869A0 /* DataLayerMigrations.h in Headers */,
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 				5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
@@ -2291,6 +2298,7 @@
 				541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */,
 				540E13A724CF78900038FDA0 /* MLLogFormatter.m in Sources */,
 				C158D41425A0AC630005AA40 /* MLMucProcessor.m in Sources */,
+				C16D18362792A4AF00F869A0 /* DataLayerMigrations.m in Sources */,
 				54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */,
 				542CF3FF2763314F002C3710 /* hsluv.c in Sources */,
 				389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */,

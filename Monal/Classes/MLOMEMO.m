@@ -594,11 +594,6 @@ $$
 
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact
 {
-    [self encryptMessage:messageNode withMessage:message toContact:toContact overrideDevices:nil];
-}
-
--(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact overrideDevices:(NSArray<NSNumber*>* _Nullable) overrideDevices
-{
     NSAssert(self.signalContext, @"signalContext should be inited.");
 
     if(message)
@@ -634,7 +629,7 @@ $$
     NSArray<NSNumber*>* myDevices = [self.monalSignalStore knownDevicesForAddressName:self.accountJid];
 
     // Check if we found omemo keys from the recipient
-    if(contactDeviceMap.count > 0 || overrideDevices.count > 0)
+    if(contactDeviceMap.count > 0)
     {
         MLXMLNode* encrypted = [[MLXMLNode alloc] initWithElement:@"encrypted" andNamespace:@"eu.siacs.conversations.axolotl"];
 
@@ -675,21 +670,14 @@ $$
         } andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"iv" andData:[HelperTools encodeBase64WithData:encryptedPayload.iv]],
         ] andData:nil];
-        if(!overrideDevices)
+
+        // add encryption for all of our recipients's devices
+        for(NSString* recipient in contactDeviceMap)
         {
-            // normal encryption -> add encryption for all of our own devices as well as to all of our contact's devices
-            for(NSString* recipient in contactDeviceMap)
-            {
-                [self addEncryptionKeyForAllDevices:contactDeviceMap[recipient] encryptForJid:recipient withEncryptedPayload:encryptedPayload withXMLHeader:header];
-            }
-            [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self.accountJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
+            [self addEncryptionKeyForAllDevices:contactDeviceMap[recipient] encryptForJid:recipient withEncryptedPayload:encryptedPayload withXMLHeader:header];
         }
-        else
-        {
-            // We sometimes need to send a message only to one specific device
-            // all devices in overrideDevices must belong to a single jid.
-            [self addEncryptionKeyForAllDevices:overrideDevices encryptForJid:toContact withEncryptedPayload:encryptedPayload withXMLHeader:header];
-        }
+        // add encryption fro all of our own device
+        [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self.accountJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
         
         [encrypted addChildNode:header];
         [messageNode addChildNode:encrypted];

@@ -495,7 +495,7 @@
     }];
 }
 
--(void) deleteDeviceforAddress:(SignalAddress*)address
+-(void) deleteDeviceforAddress:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
         [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];

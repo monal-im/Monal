@@ -38,25 +38,25 @@
         dbversion = (NSNumber*)[db executeScalar:@"SELECT dbversion FROM dbversion;"];
         DDLogInfo(@"Got db version %@", dbversion);
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:2.0 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:2.0 withBlock:^{
             [db executeNonQuery:@"drop table muc_favorites"];
             [db executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool, account_id int);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:2.1 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:2.1 withBlock:^{
             [db executeNonQuery:@"alter table message_history add column received bool;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:2.2 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:2.2 withBlock:^{
             [db executeNonQuery:@"alter table buddylist add column synchPoint datetime;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:2.3 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:2.3 withBlock:^{
             [db executeNonQuery:@"UPDATE account SET resource=?;" andArguments:@[[HelperTools encodeRandomResource]]];
         }];
 
         //OMEMO begins below
-        [self updateDB:db withDataLayer: dataLayer toVersion:3.1 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:3.1 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE signalIdentity (deviceid int NOT NULL PRIMARY KEY, account_id int NOT NULL unique,identityPublicKey BLOB,identityPrivateKey BLOB)"];
             [db executeNonQuery:@"CREATE TABLE signalSignedPreKey (account_id int NOT NULL,signedPreKeyId int not null,signedPreKey BLOB);"];
 
@@ -76,16 +76,16 @@
         }];
 
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:3.2 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:3.2 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE muteList (jid varchar(50));"];
             [db executeNonQuery:@"CREATE TABLE blockList (jid varchar(50));"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:3.3 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:3.3 withBlock:^{
             [db executeNonQuery:@"alter table buddylist add column encrypt bool;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:3.4 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:3.4 withBlock:^{
             [db executeNonQuery:@"alter table activechats add COLUMN lastMessageTime datetime "];
 
             //iterate current active and set their times
@@ -102,39 +102,39 @@
             }];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:3.5 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:3.5 withBlock:^{
             [db executeNonQuery:@"CREATE UNIQUE INDEX uniqueContact on buddylist (buddy_name, account_id);"];
             [db executeNonQuery:@"delete from buddy_resources"];
             [db executeNonQuery:@"CREATE UNIQUE INDEX uniqueResource on buddy_resources (buddy_id, resource);"];
         }];
 
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:3.6 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:3.6 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE imageCache (url varchar(255), path varchar(255) );"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:3.7 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:3.7 withBlock:^{
             [db executeNonQuery:@"alter table message_history add column stanzaid text;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:3.8 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:3.8 withBlock:^{
             [db executeNonQuery:@"alter table account add column airdrop bool;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:3.9 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:3.9 withBlock:^{
             [db executeNonQuery:@"alter table account add column rosterVersion varchar(50);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.0 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.0 withBlock:^{
             [db executeNonQuery:@"alter table message_history add column errorType varchar(50);"];
             [db executeNonQuery:@"alter table message_history add column errorReason varchar(50);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.1 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.1 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE subscriptionRequests(requestid integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50) collate nocase, UNIQUE(account_id,buddy_name))"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.2 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.2 withBlock:^{
             NSArray* contacts = [db executeReader:@"select distinct account_id, buddy_name, lastMessageTime from activechats;"];
             [db executeNonQuery:@"delete from activechats;"];
             [contacts enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -163,28 +163,28 @@
             [db executeNonQuery:@"CREATE UNIQUE INDEX ux_account_buddy ON activechats(account_id, buddy_name)"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.3 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.3 withBlock:^{
 
             [db executeNonQuery:@"alter table buddylist add column subscription varchar(50)"];
             [db executeNonQuery:@"alter table buddylist add column ask varchar(50)"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.4 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.4 withBlock:^{
 
             [db executeNonQuery:@"update account set rosterVersion='0';"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.5 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.5 withBlock:^{
 
             [db executeNonQuery:@"alter table account add column state blob;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.6 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.6 withBlock:^{
 
             [db executeNonQuery:@"alter table buddylist add column messageDraft text;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.7 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.7 withBlock:^{
 
             // Delete column password,account_name from account, set default value for rosterVersion to 0, increased varchar size
             [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
@@ -194,13 +194,13 @@
             [db executeNonQuery:@"DROP TABLE _accountTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.71 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.71 withBlock:^{
 
             // Only reset server to '' when server == domain
             [db executeNonQuery:@"UPDATE account SET server='' where server=domain;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.72 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.72 withBlock:^{
 
             // Delete column protocol_id from account and drop protocol table
             [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
@@ -210,7 +210,7 @@
             [db executeNonQuery:@"DROP TABLE protocol;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.73 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.73 withBlock:^{
 
             // Delete column oauth from account
             [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
@@ -219,7 +219,7 @@
             [db executeNonQuery:@"DROP TABLE _accountTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.74 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.74 withBlock:^{
             // Rename column oldstyleSSL to directTLS
             [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
@@ -227,7 +227,7 @@
             [db executeNonQuery:@"DROP TABLE _accountTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.75 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.75 withBlock:^{
             // Delete column secure from account
             [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
@@ -235,12 +235,12 @@
             [db executeNonQuery:@"DROP TABLE _accountTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.76 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.76 withBlock:^{
             // Add column for the last interaction of a contact
             [db executeNonQuery:@"alter table buddylist add column lastInteraction INTEGER NOT NULL DEFAULT 0;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.77 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.77 withBlock:^{
             // drop legacy caps tables
             [db executeNonQuery:@"DROP TABLE IF EXISTS legacy_caps;"];
             [db executeNonQuery:@"DROP TABLE IF EXISTS buddy_resources_legacy_caps;"];
@@ -251,7 +251,7 @@
             [db executeNonQuery:@"CREATE INDEX timeindex ON ver_timestamp(timestamp);" ];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.78 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.78 withBlock:^{
             // drop airdrop column
             [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
@@ -259,11 +259,11 @@
             [db executeNonQuery:@"DROP TABLE _accountTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.80 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.80 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE ipc(id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.81 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.81 withBlock:^{
             // Remove silly chats
             NSMutableArray* results = [db executeReader:@"select account_id, username, domain from account"];
             for(NSDictionary* row in results) {
@@ -275,7 +275,7 @@
             }
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.82 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.82 withBlock:^{
             //use the more appropriate name "sent" for the "delivered" column of message_history
             [db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'message_history' (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text, errorType text, errorReason text);"];
@@ -283,11 +283,11 @@
             [db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.83 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.83 withBlock:^{
             [db executeNonQuery:@"alter table activechats add column pinned bool DEFAULT FALSE;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.84 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.84 withBlock:^{
             [db executeNonQuery:@"DROP TABLE IF EXISTS ipc;"];
             //remove synchPoint from db
             [db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
@@ -304,7 +304,7 @@
             [db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.85 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.85 withBlock:^{
             //Performing upgrade on buddy_resources.
             [db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Name text;"];
             [db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Version text;"];
@@ -315,12 +315,12 @@
             [db executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.86 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.86 withBlock:^{
             //add new stanzaid field to account table that always points to the last received stanzaid (even if that does not have a body)
             [db executeNonQuery:@"ALTER TABLE account ADD lastStanzaId text;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.87 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.87 withBlock:^{
             //populate new stanzaid field in account table from message_history table
             NSString* stanzaId = (NSString*)[db executeScalar:@"SELECT stanzaid FROM message_history WHERE stanzaid!='' ORDER BY message_history_id DESC LIMIT 1;"];
             DDLogVerbose(@"Populating lastStanzaId with id %@ from history table", stanzaId);
@@ -330,7 +330,7 @@
             [db executeNonQuery:@"UPDATE message_history SET stanzaid='';"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.9 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.9 withBlock:^{
             // add timestamps to omemo prekeys
             [db executeNonQuery:@"ALTER TABLE signalPreKey RENAME TO _signalPreKeyTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'signalPreKey' ('account_id' int NOT NULL, 'prekeyid' int NOT NULL, 'preKey' BLOB, 'creationTimestamp' INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, 'pubSubRemovalTimestamp' INTEGER DEFAULT NULL, 'keyUsed' INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (account_id, prekeyid, preKey));"];
@@ -338,17 +338,17 @@
             [db executeNonQuery:@"DROP TABLE _signalPreKeyTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.91 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.91 withBlock:^{
             //not needed anymore (better handled by 4.97)
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.92 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.92 withBlock:^{
             //add displayed and displayMarkerWanted fields
             [db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN displayed BOOL DEFAULT FALSE;"];
             [db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN displayMarkerWanted BOOL DEFAULT FALSE;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.93 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.93 withBlock:^{
             //full_name should not be buddy_name anymore, but the user provided XEP-0172 nickname
             //and nick_name will be the roster name, if given
             //if none of these two are given, the local part of the jid (called node in prosody and in jidSplit:) will be used, like in other clients
@@ -357,28 +357,28 @@
             [db executeNonQuery:@"UPDATE account SET rosterVersion=?;" andArguments:@[@""]];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.94 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.94 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE account ADD COLUMN rosterName TEXT;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.95 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.95 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE account ADD COLUMN iconhash VARCHAR(200);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.96 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.96 withBlock:^{
             //not needed anymore (better handled by 4.97)
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.97 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.97 withBlock:^{
             [dataLayer invalidateAllAccountStates];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.98 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.98 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN filetransferMimeType VARCHAR(32) DEFAULT 'application/octet-stream';"];
             [db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN filetransferSize INTEGER DEFAULT 0;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.990 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.990 withBlock:^{
             // remove dupl entries from activechats && budylist
             [db executeNonQuery:@"DELETE FROM activechats \
                 WHERE ROWID NOT IN \
@@ -394,7 +394,7 @@
                     )"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.991 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.991 withBlock:^{
             //remove dirty, online, new from db
             [db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
             [db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0);"];
@@ -403,11 +403,11 @@
             [db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.992 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.992 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE account ADD COLUMN statusMessage TEXT;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.993 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.993 withBlock:^{
             //make filetransferMimeType and filetransferSize have NULL as default value
             //(this makes it possible to distinguish unknown values from known ones)
             [db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
@@ -420,18 +420,18 @@
 
         // skipping 4.994 due to invalid command
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.995 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.995 withBlock:^{
             [db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueActiveChat ON activechats(buddy_name, account_id);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.996 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.996 withBlock:^{
             //remove all icon hashes to reload all icons on next app/nse start
             //(the db upgrade mechanism will make sure that no smacks resume will take place and pep pushes come in for all avatars)
             [db executeNonQuery:@"UPDATE account SET iconhash='';"];
             [db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:4.997 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:4.997 withBlock:^{
             //create unique constraint for (account_id, buddy_name) on activechats table
             [db executeNonQuery:@"ALTER TABLE activechats RENAME TO _activechatsTMP;"];
             [db executeNonQuery:@"CREATE TABLE activechats (account_id integer not null, buddy_name varchar(50) collate nocase, lastMessageTime datetime, lastMesssage blob, pinned bool DEFAULT FALSE, UNIQUE(account_id, buddy_name));"];
@@ -447,7 +447,7 @@
             [db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.000 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.000 withBlock:^{
             // cleanup omemo tables
             [db executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id NOT IN (SELECT account_id FROM account);"];
             [db executeNonQuery:@"DELETE FROM signalContactKey WHERE account_id NOT IN (SELECT account_id FROM account);"];
@@ -456,7 +456,7 @@
             [db executeNonQuery:@"DELETE FROM signalSignedPreKey WHERE account_id NOT IN (SELECT account_id FROM account);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.001 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.001 withBlock:^{
             //do this in 5.0 branch as well
 
             //create unique constraint for (account_id, buddy_name) on activechats table
@@ -474,12 +474,12 @@
             [db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.002 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.002 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN blocked BOOL DEFAULT FALSE;"];
             [db executeNonQuery:@"DROP TABLE blockList;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.003 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.003 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
                 'account_id' TEXT NOT NULL, \
                 'node' TEXT, \
@@ -505,7 +505,7 @@
          * 1: ToFU
          * 2: trust
          */
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.004 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.004 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE signalContactIdentity RENAME TO _signalContactIdentityTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'signalContactIdentity' ( \
                  'account_id' INTEGER NOT NULL, \
@@ -533,7 +533,7 @@
             [db executeNonQuery:@"DROP TABLE _signalContactIdentityTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.005 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.005 withBlock:^{
             //remove group_name and filename columns from buddylist, resize buddy_name, full_name, nick_name and muc_subject columns and add lastStanzaId column (only used for mucs)
             [db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
             [db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(255) collate nocase, full_name varchar(255), nick_name varchar(255), iconhash varchar(200), state varchar(20), status varchar(200), Muc bool, muc_subject varchar(1024), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0, blocked BOOL DEFAULT FALSE, muc_type VARCHAR(10) DEFAULT 'channel', lastMucStanzaId text DEFAULT NULL, UNIQUE(account_id, buddy_name));"];
@@ -547,7 +547,7 @@
             [db executeNonQuery:@"CREATE TABLE muc_favorites (room VARCHAR(255) PRIMARY KEY, nick varchar(255), account_id INTEGER, UNIQUE(room, account_id));"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.006 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.006 withBlock:^{
             // recreate blocklistCache - fixes foreign key
             [db executeNonQuery:@"ALTER TABLE blocklistCache RENAME TO _blocklistCacheTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
@@ -592,13 +592,13 @@
             [db executeNonQuery:@"INSERT OR IGNORE INTO buddylist ('account_id', 'buddy_name', 'muc') SELECT account_id, (username || '@' || domain), 0 FROM account;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.007 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.007 withBlock:^{
             // remove broken omemo sessions
             [db executeNonQuery:@"DELETE FROM signalContactIdentity WHERE (account_id, contactName) NOT IN (SELECT account_id, contactName FROM signalContactSession);"];
             [db executeNonQuery:@"DELETE FROM signalContactSession WHERE (account_id, contactName) NOT IN (SELECT account_id, contactName FROM signalContactIdentity);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.008 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.008 withBlock:^{
             [db executeNonQuery:@"DROP TABLE muc_favorites;"];
             [db executeNonQuery:@"CREATE TABLE 'muc_favorites' ( \
                  'account_id' INTEGER NOT NULL, \
@@ -611,7 +611,7 @@
              );"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.009 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.009 withBlock:^{
             // add foreign key to signalContactSession
             [db executeNonQuery:@"ALTER TABLE signalContactSession RENAME TO _signalContactSessionTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'signalContactSession' ( \
@@ -673,7 +673,7 @@
             [db executeNonQuery:@"DROP TABLE _signalSignedPreKeyTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.010 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.010 withBlock:^{
             // add foreign key to activechats
             [db executeNonQuery:@"ALTER TABLE activechats RENAME TO _activechatsTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'activechats' ( \
@@ -740,7 +740,7 @@
             [db executeNonQuery:@"DROP TABLE _buddy_resourcesTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.011 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.011 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE 'muc_participants' ( \
                      'account_id' INTEGER NOT NULL, \
                      'room' VARCHAR(255) NOT NULL, \
@@ -754,15 +754,15 @@
             );"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.012 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.012 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN muted BOOL DEFAULT FALSE"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.013 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.013 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE signalContactIdentity ADD COLUMN brokenSession BOOL DEFAULT FALSE"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.014 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.014 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
             // Create a backup before changing a lot of the table style
             [db executeNonQuery:@"CREATE TABLE message_history_backup AS SELECT * FROM _message_historyTMP WHERE 0"];
@@ -828,7 +828,7 @@
             [db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.015 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.015 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE 'muc_members' ( \
                 'account_id' INTEGER NOT NULL, \
                 'room' VARCHAR(255) NOT NULL, \
@@ -841,7 +841,7 @@
         }];
 
         // Migrate muteList to new format and delete old table
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.016 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.016 withBlock:^{
             [db executeNonQuery:@"UPDATE buddylist SET muted=1 \
                 WHERE buddy_name IN ( \
                     SELECT DISTINCT jid FROM muteList \
@@ -850,29 +850,29 @@
         }];
 
         // Delete all muc's
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.017 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.017 withBlock:^{
             [db executeNonQuery:@"DELETE FROM buddylist WHERE Muc=1;"];
             [db executeNonQuery:@"DELETE FROM muc_participants;"];
             [db executeNonQuery:@"DELETE FROM muc_members;"];
             [db executeNonQuery:@"DELETE FROM muc_favorites;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.018 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.018 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN participant_jid TEXT DEFAULT NULL"];
         }];
 
         // delete message_history backup table
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.019 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.019 withBlock:^{
             [db executeNonQuery:@"DROP TABLE message_history_backup;"];
         }];
 
         //update muc favorites to have the autojoin flag set
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.020 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.020 withBlock:^{
             [db executeNonQuery:@"UPDATE muc_favorites SET autojoin=1;"];
         }];
 
         // jid's should be lower only
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.021 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.021 withBlock:^{
             [db executeNonQuery:@"UPDATE account SET username=LOWER(username), domain=LOWER(domain);"];
             [db executeNonQuery:@"UPDATE activechats SET buddy_name=lower(buddy_name);"];
             [db executeNonQuery:@"UPDATE buddylist SET buddy_name=LOWER(buddy_name);"];
@@ -885,7 +885,7 @@
             [db executeNonQuery:@"UPDATE subscriptionRequests SET buddy_name=LOWER(buddy_name);"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.022 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.022 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE subscriptionRequests RENAME TO _subscriptionRequestsTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'subscriptionRequests' ( \
                 'account_id' integer NOT NULL, \
@@ -898,7 +898,7 @@
             [db executeNonQuery:@"DROP TABLE _subscriptionRequestsTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.023 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.023 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE muc_favorites RENAME TO _muc_favoritesTMP;"];
             [db executeNonQuery:@"CREATE TABLE 'muc_favorites' ( \
                 'account_id' INTEGER NOT NULL, \
@@ -912,7 +912,7 @@
             [db executeNonQuery:@"DROP TABLE _muc_favoritesTMP;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.024 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.024 withBlock:^{
             //nicknames should be compared case sensitive --> change collation
             //we don't need to migrate our table data because the db upgrade triggers a xmpp reconnect and this in turn triggers
             //a new muc join which does clear this table anyways
@@ -930,7 +930,7 @@
             );"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.026 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.026 withBlock:^{
             //new outbox table for sharesheet
             [db executeNonQuery:@"CREATE TABLE 'sharesheet_outbox' ( \
                     'id' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
@@ -946,13 +946,13 @@
             [[HelperTools defaultsDB] synchronize];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.101 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.101 withBlock:^{
             //save the smallest unread id for faster retrieval of unread message count per contact
             //we use -1because all queries using this test for message_history_id > this field, not >=
             [db executeNonQuery:@"ALTER TABLE 'buddylist' ADD COLUMN 'latest_read_message_history_id' INTEGER NOT NULL DEFAULT -1;"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.103 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.103 withBlock:^{
             //make sure the latest_read_message_history_id is filled with correct initial values
             [db executeNonQuery:@"UPDATE buddylist AS b SET latest_read_message_history_id=IFNULL((\
                 SELECT message_history_id FROM message_history AS h\
@@ -963,7 +963,7 @@
             ));"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.104 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.104 withBlock:^{
             //database table for storage of delayed message stanzas during catchup phase (we store this into a database to make sure we don't consume too much memory)
             [db executeNonQuery:@"CREATE TABLE 'delayed_message_stanzas' ( \
                     'id' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
@@ -975,11 +975,11 @@
             );"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.105 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.105 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN mentionOnly BOOL DEFAULT FALSE"];
         }];
 
-        [self updateDB:db withDataLayer: dataLayer toVersion:5.106 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.106 withBlock:^{
             [db executeNonQuery:@"DROP TABLE signalContactKey;"];
         }];
     }];

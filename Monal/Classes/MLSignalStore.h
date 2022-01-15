@@ -21,33 +21,33 @@
 
 @interface MLSignalStore : NSObject <SignalStore>
 @property (nonatomic, assign) u_int32_t deviceid;
-@property (nonatomic, strong) SignalIdentityKeyPair *identityKeyPair;
-@property (nonatomic, strong) SignalSignedPreKey *signedPreKey;
+@property (nonatomic, strong) SignalIdentityKeyPair* identityKeyPair;
+@property (nonatomic, strong) SignalSignedPreKey* signedPreKey;
 @property (nonatomic, strong) NSArray<SignalPreKey*>* preKeys;
 
 -(MLSignalStore*) initWithAccountId:(NSString *) accountId;
 -(void) saveValues;
 
--(NSData *) getIdentityForAddress:(SignalAddress*)address;
+-(NSData*) getIdentityForAddress:(SignalAddress*) ddress;
 /**
  all devices even those without sessions
  */
--(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName;
+-(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName;
 -(NSArray<NSNumber*>*) knownDevicesWithValidSessionEntryForName:(NSString*) addrName;
 -(NSMutableArray<SignalPreKey*>*) readPreKeys;
 
--(void) deleteDeviceforAddress:(SignalAddress*)address;
+-(void) deleteDeviceforAddress:(SignalAddress*) address;
 
--(void) markDeviceAsDeleted:(SignalAddress*)address;
--(void) removeDeviceDeletedMark:(SignalAddress*)address;
--(void) updateLastSuccessfulDecryptTime:(SignalAddress*)address;
+-(void) markDeviceAsDeleted:(SignalAddress*) address;
+-(void) removeDeviceDeletedMark:(SignalAddress*) address;
+-(void) updateLastSuccessfulDecryptTime:(SignalAddress*) address;
 -(void) markSessionAsBroken:(SignalAddress*) address;
 -(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceId;
 
--(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
--(int) getInternalTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
+-(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*) address;
+-(int) getInternalTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey;
 -(void) untrustAllDevicesFrom:(NSString*) jid;
--(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
+-(NSNumber*) getTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey;
 
 -(int) getHighestPreyKeyId;
 -(int) getPreKeyCount;

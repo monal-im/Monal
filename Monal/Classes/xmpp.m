@@ -2325,7 +2325,7 @@ NSString* const kStanza = @"stanza";
 #ifdef IS_ALPHA
     // WARNING NOT FOR PRODUCTION
     // encrypt messages that should not be encrypted (but still use plaintext body for devices not speaking omemo)
-    if(!encrypt && !isUpload)
+    if(!encrypt && !isUpload && (!contact.isGroup || (contact.isGroup && [contact.mucType isEqualToString:@"group"])))
     {
         [self.omemo encryptMessage:messageNode withMessage:message toContact:contact.contactJid];
         //[self addEME:@"eu.siacs.conversations.axolotl" withName:@"OMEMO" toMessageNode:messageNode];
@@ -2335,7 +2335,7 @@ NSString* const kStanza = @"stanza";
 
 #ifndef DISABLE_OMEMO
     //TODO: implement omemo for MUCs and remove this MUC check
-    if(encrypt && !contact.isGroup)
+    if(encrypt && (!contact.isGroup || (contact.isGroup && [contact.mucType isEqualToString:@"group"])))
     {
         [self.omemo encryptMessage:messageNode withMessage:message toContact:contact.contactJid];
         [self addEME:@"eu.siacs.conversations.axolotl" withName:@"OMEMO" toMessageNode:messageNode];

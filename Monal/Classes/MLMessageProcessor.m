@@ -142,17 +142,6 @@ static NSMutableDictionary* _typingNotifications;
             return message;
         }
     }
-    else
-    {
-        //add contact if possible (ignore groupchats or already existing contacts)
-        NSString* possibleUnkownContact;
-        if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
-            possibleUnkownContact = messageNode.toUser;
-        else
-            possibleUnkownContact = messageNode.fromUser;
-        DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
-        [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil andMucNick:nil];
-    }
     
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
     //check stanza-id @by according to the rules outlined in XEP-0359
@@ -287,6 +276,18 @@ static NSMutableDictionary* _typingNotifications;
     
     if([messageNode check:@"body#"] || decrypted)
     {
+        if(!([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]))
+        {
+            //add contact if possible (ignore groupchats or already existing contacts)
+            NSString* possibleUnkownContact;
+            if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+                possibleUnkownContact = messageNode.toUser;
+            else
+                possibleUnkownContact = messageNode.fromUser;
+            DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
+            [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil andMucNick:nil];
+        }
+        
         BOOL unread = YES;
         BOOL showAlert = YES;
         

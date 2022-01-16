@@ -18,8 +18,8 @@
 -(instancetype) initWithContact:(MLContact*) contact
 {
     self = [super init];
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
 #ifndef DISABLE_OMEMO
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
     self.devices = [[NSMutableArray alloc] initWithArray:[account.omemo knownDevicesForAddressName:contact.contactJid]];
 #endif
     return self;

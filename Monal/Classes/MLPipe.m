@@ -139,7 +139,7 @@
     //only start processing if piping is possible
     if(!_output || ![_output hasSpaceAvailable])
     {
-        //DDLogVerbose(@"not starting pipe processing, _output = %@", _output);
+        DDLogVerbose(@"not starting pipe processing, _output = %@", _output);
         return;
     }
     

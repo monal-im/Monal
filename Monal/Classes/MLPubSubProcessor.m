@@ -391,6 +391,7 @@ $$class_handler(bookmarksPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(
         [self handleErrorWithDescription:NSLocalizedString(@"Failed to save groupchat bookmarks", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
         return;
     }
+    DDLogDebug(@"Published bookmarks to pep");
 $$
 
 $$class_handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
@@ -400,6 +401,7 @@ $$class_handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID
         [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own nickname", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
         return;
     }
+    DDLogDebug(@"Published roster name to pep");
 $$
 
 $$class_handler(rosterNameDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
@@ -415,6 +417,7 @@ $$class_handler(rosterNameDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(X
         [self handleErrorWithDescription:NSLocalizedString(@"Failed to delete own nickname", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
         return;
     }
+    DDLogDebug(@"Removed roster name from pep");
 $$
 
 $$class_handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
@@ -430,6 +433,7 @@ $$class_handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPI
         [self handleErrorWithDescription:NSLocalizedString(@"Failed to delete own avatar", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
         return;
     }
+    DDLogDebug(@"Removed avatar from pep");
 $$
 
 $$class_handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
@@ -439,6 +443,7 @@ $$class_handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), 
         [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own avatar", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
         return;
     }
+    DDLogDebug(@"Published avatar metadata to pep");
 $$
 
 $$class_handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSString*, imageHash), $_ID(NSData*, imageData))

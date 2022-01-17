@@ -132,7 +132,7 @@
     NSString* pass = [self.password.text copy];
     NSString* code = nil;       //[self.captcha.text copy];
     
-    [self.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: self.hiddenFields withCompletion:^(BOOL success, NSString *message) {
+	    [self.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: self.hiddenFields withCompletion:^(BOOL success, NSString *message) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.loginHUD.hidden = YES;
             [self.xmppAccount disconnect:YES];

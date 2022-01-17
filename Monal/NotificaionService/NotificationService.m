@@ -94,6 +94,7 @@
             [DDLog flushLog];
             [self feedAllWaitingHandlersWithCompletion:^{
                 //now call this new handler we did not add to our handlerList (don't update unread badge, because this needs the database potentially locked by mainapp)
+                DDLogInfo(@"Feeding last handler...");
                 [self generateNotificationForHandler:contentHandler];
             }];
             

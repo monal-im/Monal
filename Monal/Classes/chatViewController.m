@@ -8,46 +8,45 @@
 
 #import "chatViewController.h"
 #import "MLChatCell.h"
-#import "MLLinkCell.h"
 #import "MLChatImageCell.h"
 #import "MLChatMapsCell.h"
+#import "MLLinkCell.h"
 #import "MLReloadCell.h"
-
-#import "MLConstants.h"
-#import "MonalAppDelegate.h"
-#import "MBProgressHUD.h"
-#import "xmpp.h"
-#import "MLOMEMO.h"
-#import "MLMetaInfo.h"
-
-#import "MLUploadQueueItem.h"
 #import "MLUploadQueueDocumentCell.h"
 #import "MLUploadQueueImageCell.h"
+#import "MLUploadQueueItem.h"
 
-#import "IDMPhotoBrowser.h"
-#import "ContactDetails.h"
-#import "MLXMPPActivityItem.h"
-#import "MLImageManager.h"
-#import "DataLayer.h"
 #import "AESGcm.h"
+#import "ContactDetails.h"
+#import "DataLayer.h"
 #import "HelperTools.h"
-#import "MLChatViewHelper.h"
+#import "MBProgressHUD.h"
 #import "MLChatInputContainer.h"
-#import "MLXEPSlashMeHandler.h"
-#import "MLSearchViewController.h"
+#import "MLChatViewHelper.h"
+#import "MLConstants.h"
 #import "MLFiletransfer.h"
+#import "MLImageManager.h"
+#import "MLMetaInfo.h"
+#import "MLMucProcessor.h"
 #import "MLNotificationQueue.h"
+#import "MLOMEMO.h"
+#import "MLSearchViewController.h"
+#import "MLXEPSlashMeHandler.h"
+#import "MLXMPPActivityItem.h"
+#import "MonalAppDelegate.h"
+#import "xmpp.h"
 
 #import <Monal-Swift.h>
 #import <stdatomic.h>
+#import "IDMPhotoBrowser.h"
 
 #define UPLOAD_TYPE_IMAGE @"UploadTypeImage";
 #define UPLOAD_TYPE_URL @"UploadTypeURL";
 
-@import QuartzCore;
-@import MobileCoreServices;
 @import AVFoundation;
+@import MobileCoreServices;
 @import QuartzCore.CATransaction;
+@import QuartzCore;
 @import UniformTypeIdentifiers.UTCoreTypes;
 
 @class MLEmoji;
@@ -677,7 +676,7 @@ enum msgSentState {
 
     self.viewDidAppear = YES;
 
-	[self initSearchViewControler];
+    [self initSearchViewControler];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -2566,7 +2565,7 @@ enum msgSentState {
         self->_messageTable.contentOffset = newOffset;
         [self->_messageTable endUpdates];
 
-		[self doSetNotLoadingHistory];
+        [self doSetNotLoadingHistory];
     });
 }
 

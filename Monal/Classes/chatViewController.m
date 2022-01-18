@@ -1595,6 +1595,10 @@ enum msgSentState {
                 {
                     msg.errorType = [dic objectForKey:@"errorType"];
                     msg.errorReason = [dic objectForKey:@"errorReason"];
+                    
+                    //ping muc to self-heal cases where we aren't joined anymore without noticing it
+                    if(self.contact.isGroup)
+                        [self.xmppAccount.mucProcessor ping:self.contact.contactJid];
                 }
             }
             

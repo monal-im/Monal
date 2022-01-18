@@ -90,18 +90,21 @@
         DDLogDebug(@"Pinging main app again");
         if([MLProcessLock checkRemoteRunning:@"MainApp" withTimeout:2.0])       //use a high timeout to make sure the mainapp isn't running, even if the mainthread is heavily busy
         {
-            DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
-            [DDLog flushLog];
-            [self feedAllWaitingHandlersWithCompletion:^{
-                //now call this new handler we did not add to our handlerList (don't update unread badge, because this needs the database potentially locked by mainapp)
-                DDLogInfo(@"Feeding last handler...");
-                [self generateNotificationForHandler:contentHandler];
-            }];
-            
-            //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-            [self killAppex];
-            
+            //don't block calling queue until committing suicide (the appleIPC queue that invoked our push handler)
+            //doing so can lead to "new message" notifications
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
+                [DDLog flushLog];
+                [self feedAllWaitingHandlersWithCompletion:^{
+                    //now call this new handler we did not add to our handlerList (don't update unread badge, because this needs the database potentially locked by mainapp)
+                    DDLogInfo(@"Feeding last handler...");
+                    [self generateNotificationForHandler:contentHandler];
+                }];
+                
+                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                [self killAppex];
+            });
             return;
         }
         else
@@ -471,12 +474,14 @@
             UNMutableNotificationContent* emptyContent = [[UNMutableNotificationContent alloc] init];
             _handler(emptyContent);
         }
-        usleep(500000);            //wait some time for notifications to be handled by the system (500ms)
     }
 #endif
-    DDLogInfo(@"Committing suicide...");
-    [DDLog flushLog];
-    exit(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        usleep(500000);            //wait some time for notifications to be handled by the system (500ms)
+        DDLogInfo(@"Committing suicide...");
+        [DDLog flushLog];
+        exit(0);
+    });
     
     /*
     //proxy to push singleton

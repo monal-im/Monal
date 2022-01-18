@@ -216,7 +216,7 @@ struct ContactDetails: View {
     }
 }
 
-struct Resources: UIViewControllerRepresentable {
+/* struct Resources: UIViewControllerRepresentable {
     @ObservedObject var contact: ObservableKVOWrapper<MLContact>
     func makeUIViewController(context: Context) -> UIViewController {
         let controller = MLResourcesTableViewController()
@@ -226,7 +226,7 @@ struct Resources: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
     }
-}
+}*/
 
 
 struct ContactDetails_Previews: PreviewProvider {

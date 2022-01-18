@@ -14,7 +14,6 @@
 #import "MLDetailsTableViewCell.h"
 #import "MLContactDetailHeader.h"
 #import "MLKeysTableViewController.h"
-#import "MLResourcesTableViewController.h"
 #import "MLTextInputCell.h"
 #import "HelperTools.h"
 #import "MLChatViewHelper.h"
@@ -123,12 +122,7 @@ enum ContactDetailsAboutRows {
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if([segue.identifier isEqualToString:@"showResources"])
-    {
-        MLResourcesTableViewController* resourcesVC = segue.destinationViewController;
-        resourcesVC.contact = self.contact;
-    }
-    else if([segue.identifier isEqualToString:@"showKeys"])
+    if([segue.identifier isEqualToString:@"showKeys"])
     {
         MLKeysTableViewController* keysVC = segue.destinationViewController;
         keysVC.contact = self.contact;

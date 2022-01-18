@@ -54,7 +54,6 @@
 		2666F018249D380D00372E28 /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
 		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
 		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
-		2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */; };
 		2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC521D9D3F700256507 /* MLKeyCell.m */; };
 		267C9921206DE23100AB876C /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267C9920206DE23100AB876C /* UserNotifications.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */; };
@@ -421,8 +420,6 @@
 		2673CABC21D8617300256507 /* MLContactDetailHeader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactDetailHeader.m; sourceTree = "<group>"; };
 		2673CABE21D9242E00256507 /* MLKeysTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeysTableViewController.h; sourceTree = "<group>"; };
 		2673CABF21D9242E00256507 /* MLKeysTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLKeysTableViewController.m; sourceTree = "<group>"; };
-		2673CAC121D9244A00256507 /* MLResourcesTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLResourcesTableViewController.h; sourceTree = "<group>"; };
-		2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLResourcesTableViewController.m; sourceTree = "<group>"; };
 		2673CAC421D9D3F700256507 /* MLKeyCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeyCell.h; sourceTree = "<group>"; };
 		2673CAC521D9D3F700256507 /* MLKeyCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLKeyCell.m; sourceTree = "<group>"; };
 		267B671A226A200D003DB850 /* AESGcm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AESGcm.h; sourceTree = "<group>"; };
@@ -1202,8 +1199,6 @@
 				2673CABC21D8617300256507 /* MLContactDetailHeader.m */,
 				2673CABE21D9242E00256507 /* MLKeysTableViewController.h */,
 				2673CABF21D9242E00256507 /* MLKeysTableViewController.m */,
-				2673CAC121D9244A00256507 /* MLResourcesTableViewController.h */,
-				2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */,
 				2673CAC421D9D3F700256507 /* MLKeyCell.h */,
 				2673CAC521D9D3F700256507 /* MLKeyCell.m */,
 				C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */,
@@ -2196,7 +2191,6 @@
 				2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountListController.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
-				2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */,
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
 				264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */,
 				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,

@@ -482,9 +482,9 @@
 
 -(void) pingAllMucs
 {
-    if([[NSDate date] timeIntervalSinceDate:_lastPing] < 3600)
+    if([[NSDate date] timeIntervalSinceDate:_lastPing] < MUC_PING)
     {
-        DDLogInfo(@"Not pinging all mucs, last ping was less than an hour ago: %@",_lastPing);
+        DDLogInfo(@"Not pinging all mucs, last ping was less than %d seconds ago: %@", MUC_PING, _lastPing);
         return;
     }
     _lastPing = [NSDate date];

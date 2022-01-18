@@ -24,9 +24,11 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 #if TARGET_OS_MACCATALYST
 	#define SHORT_PING 16.0
 	#define LONG_PING 32.0
+    #define MUC_PING 600
 #else
 	#define SHORT_PING 4.0
 	#define LONG_PING 16.0
+    #define MUC_PING 3600
 #endif
 
 @class MLContact;

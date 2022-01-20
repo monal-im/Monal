@@ -18,6 +18,7 @@
 
 @import UserNotifications;
 @import CoreServices;
+@import Intents;
 
 @interface MLNotificationManager ()
 @property (nonatomic, assign) NotificationPrivacySettingOption notificationPrivacySetting;
@@ -140,7 +141,7 @@
     if([HelperTools isNotInFocus])
     {
         DDLogVerbose(@"notification manager should show notification in background: %@", message.messageText);
-        [self showModernNotificaionForMessage:message withSound:sound];
+        [self showNotificaionForMessage:message withSound:sound];
     }
     else
     {
@@ -148,7 +149,7 @@
         if(![message isEqualToContact:self.currentContact])
         {
             DDLogVerbose(@"notification manager should show notification in foreground: %@", message.messageText);
-            [self showModernNotificaionForMessage:message withSound:sound];
+            [self showNotificaionForMessage:message withSound:sound];
         }
         else
             DDLogDebug(@"not showing notification: chat is open");
@@ -208,10 +209,8 @@
     return [NSString stringWithFormat:@"%@_%@", message.accountId, message.buddyName];
 }
 
--(void) publishNotificationContent:(UNMutableNotificationContent*) content withID:(NSString*) idval
+-(UNMutableNotificationContent*) updateBadgeForContent:(UNMutableNotificationContent*) content
 {
-    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
     NSInteger unread = 0;
     if(unreadMsgCnt != nil)
@@ -219,10 +218,16 @@
     DDLogVerbose(@"Raw badge value: %lu", (long)unread);
     DDLogDebug(@"Adding badge value: %lu", (long)unread);
     content.badge = [NSNumber numberWithInteger:unread];
+    return content;
+}
+
+-(void) publishNotificationContent:(UNNotificationContent*) content withID:(NSString*) idval
+{
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     
     //scheduling the notification in 2 seconds will make it possible to be deleted by XEP-0333 chat-markers received directly after the message
     //this is useful in catchup scenarios
-    DDLogVerbose(@"notification manager: publishing notification in 2 seconds: %@", content.body);
+    DDLogVerbose(@"notification manager: publishing notification in 2 seconds: %@", content);
     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:2 repeats: NO]];
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
         if(error)
@@ -230,7 +235,114 @@
     }];
 }
 
--(void) showModernNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound
+-(void) showNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound
+{
+    // always use legacy notifications if we should only show a generic "New Message" notifiation without name or content
+    if(self.notificationPrivacySetting > DisplayOnlyName)
+        return [self showLegacyNotificaionForMessage:message withSound:sound];
+    
+    // use modern communication notifications on ios >= 15.0 and legacy ones otherwise
+    if(@available(iOS 15.0, macCatalyst 15.0, *))
+    {
+        DDLogDebug(@"Using communication notifications");
+        return [self showModernNotificaionForMessage:message withSound:sound];
+    }
+    return [self showLegacyNotificaionForMessage:message withSound:sound];
+}
+
+-(void) showModernNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+{
+    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    NSString* idval = [self identifierWithMessage:message];
+    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
+    
+    // only show msgText if allowed
+    NSString* msgText = NSLocalizedString(@"Open app to see more", @"");
+    if(self.notificationPrivacySetting == DisplayNameAndMessage)
+    {
+        //XEP-0245: The slash me Command
+        if([message.messageText hasPrefix:@"/me "])
+            msgText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithMessage:message];
+        else
+            msgText = message.messageText;
+        
+        // notification settings (TODO: is this reallyneeded for communication notifications?)
+        content.body = msgText;
+        content.threadIdentifier = [self threadIdentifierWithMessage:message];
+        content.categoryIdentifier = @"message";
+        
+        // user info for answer etc. (TODO: is this really needed for communication notifications?)
+        content.userInfo = @{
+            @"fromContactJid": message.buddyName,
+            @"fromContactAccountId": message.accountId,
+            @"messageId": message.messageId
+        };
+        
+        if([message.messageType isEqualToString:kMessageTypeFiletransfer])
+            msgText = NSLocalizedString(@"Sent a File 📁", @"");
+        else if([message.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
+            msgText = NSLocalizedString(@"Sent a Link 🔗", @"");
+        else if([message.messageType isEqualToString:kMessageTypeGeo])
+            msgText = NSLocalizedString(@"Sent a Location 📍", @"");
+    }
+    
+    if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
+    {
+        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
+        if(filename)
+        {
+            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
+            DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+        }
+        else
+        {
+            content.sound = [UNNotificationSound defaultSound];
+            DDLogDebug(@"Using default alert sound: %@", content.sound);
+        }
+    }
+    else
+        DDLogDebug(@"Using no alert sound");
+
+    // update badge value prior to donating the interaction to sirikit
+    [self updateBadgeForContent:content];
+    
+    INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeEmailAddress label:contact.accountId];
+    //INImage* contactImage = [INImage imageWithUIImage:contact.avatar];
+    INPerson* sender = [[INPerson alloc] initWithPersonHandle:personHandle
+                                                nameComponents:nil
+                                                    displayName:message.contactDisplayName
+                                                        image:nil
+                                            contactIdentifier:nil
+                                                customIdentifier:nil];
+    INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:nil
+                                                                outgoingMessageType:INOutgoingMessageTypeOutgoingMessageText
+                                                                            content:msgText
+                                                                speakableGroupName:nil   //(message.isMuc ? [contact contactDisplayName] : nil)
+                                                            conversationIdentifier:[self threadIdentifierWithMessage:message]
+                                                                        serviceName:contact.accountId
+                                                                            sender:sender
+                                                                        attachments:nil];
+    INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
+    interaction.direction = INInteractionDirectionIncoming;
+    [interaction donateInteractionWithCompletion:^(NSError *error) {
+        if(error)
+            DDLogError(@"Could not donate interaction: %@", error);
+        else
+        {
+            NSError* error = nil;
+            UNNotificationContent* updatedContent = [content contentByUpdatingWithProvider:intent error:&error];
+            if(error)
+                DDLogError(@"Could not update notification content: %@", error);
+            else
+            {
+                DDLogDebug(@"Publishing communication notification with id %@", idval);
+                [self publishNotificationContent:updatedContent withID:idval];
+            }
+        }
+    }];
+}
+
+-(void) showLegacyNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
@@ -338,7 +450,7 @@
         content.body = NSLocalizedString(@"Open app to see more", @"");
 
     DDLogDebug(@"Publishing notification with id %@", idval);
-    [self publishNotificationContent:content withID:idval];
+    [self publishNotificationContent:[self updateBadgeForContent:content] withID:idval];
 }
 
 -(void) dealloc

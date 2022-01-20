@@ -247,9 +247,17 @@ NSString *const kAskSubscribe=@"subscribe";
     _unreadCount = -1;      // mark it as "uncached" --> will be recalculated on next access
 }
 
--(NSString*) contactDisplayName
+-(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName;
 {
     DDLogVerbose(@"Calculating contact display name...");
+    if(fallbackName == nil)
+    {
+        //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
+        NSDictionary* jidParts = [HelperTools splitJid:self.contactJid];
+        fallbackName = jidParts[@"host"];
+        if(jidParts[@"node"] != nil)
+            fallbackName = jidParts[@"node"];
+    }
     NSString* displayName;
     if(self.nickName && self.nickName.length > 0)
     {
@@ -263,17 +271,16 @@ NSString *const kAskSubscribe=@"subscribe";
     }
     else
     {
-        //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
-        NSDictionary* jidParts = [HelperTools splitJid:self.contactJid];
-        if(jidParts[@"node"] != nil)
-            displayName = jidParts[@"node"];
-        else
-            displayName = jidParts[@"host"];
-
-        DDLogVerbose(@"Using default: %@", displayName);
+        DDLogVerbose(@"Using fallback: %@", fallbackName);
+        displayName = fallbackName;
     }
     DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, displayName);
     return nilDefault(displayName, @"");
+}
+
+-(NSString*) contactDisplayName
+{
+    return [self contactDisplayNameWithFallback:nil];
 }
 
 +(NSSet*) keyPathsForValuesAffectingContactDisplayName

@@ -11,6 +11,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class MLMessage;
+
 @interface MLXEPSlashMeHandler : NSObject
 
 + (MLXEPSlashMeHandler* )sharedInstance;
@@ -18,21 +20,12 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  By using NSString without attributes.
  */
-- (NSString*)stringSlashMeWithAccountId:(NSString*)accountId
-							displayName:(NSString*)displayName
-                             actualFrom:(NSString*)actualFrom
-                                message:(NSString*)msg
-                                isGroup:(BOOL) isGroup;
+-(NSString*) stringSlashMeWithMessage:(MLMessage*) msg;
 
 /*
 By using NSString with attributes.
 */
-- (NSMutableAttributedString*)attributedStringSlashMeWithAccountId:(NSString*)accountId
-													   displayName:(NSString*)displayName
-                                                        actualFrom:(NSString*)actualFrom
-                                                           message:(NSString*)msg
-                                                           isGroup:(BOOL)isGroup
-                                                          withFont:(UIFont*) font;
+-(NSMutableAttributedString*) attributedStringSlashMeWithMessage:(MLMessage*) msg andFont:(UIFont*) font;
 @end
 
 NS_ASSUME_NONNULL_END

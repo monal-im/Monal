@@ -241,7 +241,7 @@
     {
         content.title = [contact contactDisplayName];
         if(message.isMuc)
-            content.subtitle = [NSString stringWithFormat:NSLocalizedString(@"%@ says:", @""), message.actualFrom];
+            content.subtitle = [NSString stringWithFormat:NSLocalizedString(@"%@ says:", @""), message.contactDisplayName];
     }
     else
         content.title = NSLocalizedString(@"New Message", @"");
@@ -253,14 +253,7 @@
 
         //XEP-0245: The slash me Command
         if([message.messageText hasPrefix:@"/me "])
-        {
-            BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:message.buddyName forAccount:message.accountId];
-            msgText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:message.accountId
-                                                                           displayName:[contact contactDisplayName]
-                                                                            actualFrom:message.actualFrom
-                                                                               message:message.messageText
-                                                                               isGroup:isMuc];
-        }
+            msgText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithMessage:message];
         
         content.body = msgText;
         content.threadIdentifier = [self threadIdentifierWithMessage:message];

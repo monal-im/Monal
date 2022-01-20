@@ -90,17 +90,8 @@
         {
             if([lastMessage.messageText hasPrefix:@"/me "])
             {
-                NSString* displayName;
-                xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
-                if(lastMessage.inbound == NO)
-                    displayName = [MLContact ownDisplayNameForAccount:account];
-                else
-                    displayName = [contact contactDisplayName];
-
-                NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:contact.accountId displayName:displayName actualFrom:lastMessage.actualFrom message:lastMessage.messageText isGroup:contact.isGroup];
-
+                NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithMessage:lastMessage];
                 NSRange replacedMsgAttrRange = NSMakeRange(0, replacedMessageText.length);
-
                 [self showStatusTextItalic:replacedMessageText withItalicRange:replacedMsgAttrRange];
             }
             else

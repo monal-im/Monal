@@ -7,6 +7,8 @@
 //
 
 #import "MLXEPSlashMeHandler.h"
+#import "MLMessage.h"
+#import "MLXMPPManager.h"
 
 @implementation MLXEPSlashMeHandler
 
@@ -21,34 +23,31 @@
     return sharedInstance;
 }
 
-- (NSString*)stringSlashMeWithAccountId:(NSString*)accountId displayName:(NSString*) displayName actualFrom:(NSString*)actualFrom message:(NSString*)msg isGroup:(BOOL) isGroup
+- (NSString*) stringSlashMeWithMessage:(MLMessage*) msg
 {
     NSRange replacedRange = NSMakeRange(0, 3);
     
-    if(isGroup && actualFrom != nil)
-        displayName = actualFrom;
+    NSString* displayName;
+    if(msg.inbound == NO)
+        displayName = [MLContact ownDisplayNameForAccount:[[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId]];
+    else
+        displayName = msg.contactDisplayName;
     
-    NSMutableString *replacedMessageText = [[NSMutableString alloc] initWithString:msg];
-    NSMutableString *replacedName  = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"* %@",displayName]];
+    NSMutableString* replacedMessageText = [[NSMutableString alloc] initWithString:msg.messageText];
+    NSMutableString* replacedName  = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"* %@", displayName]];
     
     [replacedMessageText replaceCharactersInRange:replacedRange withString:replacedName];
         
     return replacedMessageText;
 }
 
-- (NSMutableAttributedString*)attributedStringSlashMeWithAccountId:(NSString*)accountId displayName:(NSString*) displayName actualFrom:(NSString*)actualFrom message:(NSString*)msg isGroup:(BOOL) isGroup withFont:(UIFont*) font
+-(NSMutableAttributedString*) attributedStringSlashMeWithMessage:(MLMessage*) msg andFont:(UIFont*) font
 {
-    NSString* resultString = [self stringSlashMeWithAccountId:(NSString*)accountId
-                                                  displayName:displayName
-                                                   actualFrom:actualFrom
-                                                      message:msg
-                                                      isGroup:isGroup];
+    NSString* resultString = [self stringSlashMeWithMessage:msg];
     
-    NSDictionary *attrMsgDict = @{
+    NSMutableAttributedString* replaceAttrMessageText = [[NSMutableAttributedString alloc] initWithString:resultString attributes:@{
         NSFontAttributeName:font
-    };
-    
-    NSMutableAttributedString *replaceAttrMessageText = [[NSMutableAttributedString alloc] initWithString:resultString attributes:attrMsgDict];
+    }];
     return replaceAttrMessageText;
 }
 

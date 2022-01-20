@@ -79,6 +79,19 @@
     self.filetransferSize = msg.filetransferSize;
 }
 
+-(NSString*) contactDisplayName
+{
+    if(self.isMuc)
+    {
+        if([@"group" isEqualToString:self.mucType])
+            return [[MLContact createContactFromJid:self.participantJid andAccountNo:self.accountId] contactDisplayNameWithFallback:self.actualFrom];
+        else
+            return self.actualFrom;
+    }
+    else
+        return [MLContact createContactFromJid:self.buddyName andAccountNo:self.accountId].contactDisplayName;
+}
+
 -(BOOL) isEqualToContact:(MLContact*) contact
 {
     return contact != nil &&

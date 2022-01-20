@@ -53,6 +53,7 @@ The of the message in the DB , should be int
  */
 @property (nonatomic, copy) NSString* actualFrom;
 @property (nonatomic, assign) BOOL isMuc;
+@property (nonatomic, readonly) NSString* contactDisplayName;
 
 @property (nonatomic, copy) NSString* messageType;
 @property (nonatomic, copy) NSString* mucType;

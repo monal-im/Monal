@@ -2000,19 +2000,9 @@ enum msgSentState {
             //XEP-0245: The slash me Command
             if([messageText hasPrefix:@"/me "])
             {
-                NSString* displayName;
-                if(row.inbound == NO)
-                    displayName = [MLContact ownDisplayNameForAccount:self.xmppAccount];
-                else
-                    displayName = [self.contact contactDisplayName];
                 UIFont* italicFont = [UIFont italicSystemFontOfSize:cell.messageBody.font.pointSize];
 
-                NSMutableAttributedString* attributedMsgString = [[MLXEPSlashMeHandler sharedInstance] attributedStringSlashMeWithAccountId:self.contact.accountId
-                                                                                                                                displayName:displayName
-                                                                                                                                 actualFrom:row.actualFrom
-                                                                                                                                    message:messageText
-                                                                                                                                    isGroup:self.contact.isGroup
-                                                                                                                                   withFont:italicFont];
+                NSMutableAttributedString* attributedMsgString = [[MLXEPSlashMeHandler sharedInstance] attributedStringSlashMeWithMessage:row andFont:italicFont];
 
                 [cell.messageBody setAttributedText:attributedMsgString];
             } else {

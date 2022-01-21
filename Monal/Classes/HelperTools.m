@@ -207,55 +207,58 @@ void logException(NSException* exception)
 
 +(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly
 {
-    @synchronized(self) {
-        NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
-        DDLogInfo(@"Updating syncError notifications: %@", syncErrorsDisplayed);
-        for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
-        {
-            //ignore already disconnected accounts (they are always "idle" but this does not reflect the real sync state)
-            if(account.accountState < kStateReconnecting && !account.reconnectInProgress)
-                continue;
-            NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
-            //dispatch this to the receive queue to make sure this account *really* is idle when testing (and not in the midde of handling one single stanza)
-            __block BOOL idle = NO;
-            [account dispatchOnReceiveQueue:^{
-                idle = account.idle;
-            }];
-            if(idle)
+    //dispatch async because we don't want to block the receive/parse/send queue invoking this check
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        @synchronized(self) {
+            NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
+            DDLogInfo(@"Updating syncError notifications: %@", syncErrorsDisplayed);
+            for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
             {
-                DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
-                [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
-                syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
-                [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
-            }
-            else if(!removeOnly)
-            {
-                if([syncErrorsDisplayed[account.connectionProperties.identity.jid] boolValue])
-                {
-                    DDLogWarn(@"NOT posting syncError notification for %@ (already did so since last app foreground)...", account.connectionProperties.identity.jid);
+                //ignore already disconnected accounts (they are always "idle" but this does not reflect the real sync state)
+                if(account.accountState < kStateReconnecting && !account.reconnectInProgress)
                     continue;
-                }
-                DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);
-                UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-                content.title = NSLocalizedString(@"Could not synchronize", @"");
-                content.subtitle = account.connectionProperties.identity.jid;
-                content.body = NSLocalizedString(@"Please open the app to retry", @"");
-                content.sound = [UNNotificationSound defaultSound];
-                content.categoryIdentifier = @"simple";
-                UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-                UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:syncErrorIdentifier content:content trigger:nil];
-                [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-                    if(error)
-                        DDLogError(@"Error posting syncError notification: %@", error);
-                    else
-                    {
-                        syncErrorsDisplayed[account.connectionProperties.identity.jid] = @YES;
-                        [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
-                    }
+                NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
+                //dispatch this to the receive queue to make sure this account *really* is idle when testing (and not in the midde of handling one single stanza)
+                __block BOOL idle = NO;
+                [account dispatchOnReceiveQueue:^{
+                    idle = account.idle;
                 }];
+                if(idle)
+                {
+                    DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
+                    [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
+                    syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
+                    [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+                }
+                else if(!removeOnly)
+                {
+                    if([syncErrorsDisplayed[account.connectionProperties.identity.jid] boolValue])
+                    {
+                        DDLogWarn(@"NOT posting syncError notification for %@ (already did so since last app foreground)...", account.connectionProperties.identity.jid);
+                        continue;
+                    }
+                    DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);
+                    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+                    content.title = NSLocalizedString(@"Could not synchronize", @"");
+                    content.subtitle = account.connectionProperties.identity.jid;
+                    content.body = NSLocalizedString(@"Please open the app to retry", @"");
+                    content.sound = [UNNotificationSound defaultSound];
+                    content.categoryIdentifier = @"simple";
+                    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+                    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:syncErrorIdentifier content:content trigger:nil];
+                    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+                        if(error)
+                            DDLogError(@"Error posting syncError notification: %@", error);
+                        else
+                        {
+                            syncErrorsDisplayed[account.connectionProperties.identity.jid] = @YES;
+                            [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+                        }
+                    }];
+                }
             }
         }
-    }
+    });
 }
 
 +(BOOL) isInBackground

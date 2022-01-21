@@ -620,6 +620,10 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
         return;
     }
     
+    //force join if this isn't already recorded as muc in our database
+    if(!join && ![[DataLayer sharedInstance] isBuddyMuc:iqNode.fromUser forAccount:_account.accountNo])
+        join = YES;
+    
     //the join (join=YES) was aborted by a call to leave (isJoining: returns NO)
     if(join && ![self isJoining:iqNode.fromUser])
     {
@@ -649,9 +653,6 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
         }
     }
     
-    DDLogInfo(@"Clearing muc participants and members tables for %@", iqNode.fromUser);
-    [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser forAccountId:_account.accountNo];
-    
     if(![mucType isEqualToString:[[DataLayer sharedInstance] getMucTypeOfRoom:iqNode.fromUser andAccount:_account.accountNo]])
     {
         DDLogInfo(@"Configuring muc %@ to type '%@'...", iqNode.fromUser, mucType);
@@ -678,19 +679,24 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
         //we don't need to force saving of our new state because once this incoming iq gets counted by smacks the whole state will be saved
     }
     
-    //load members/admins/owners list (even if not joining, because initMuc: above will delee the old list and we always have to refill it)
-    DDLogInfo(@"Querying members/admin/owner lists for muc %@...", iqNode.fromUser);
-    for(NSString* type in @[@"member", @"admin", @"owner"])
-    {
-        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-        [discoInfo setiqTo:iqNode.fromUser];
-        [discoInfo setMucListQueryFor:type];
-        [_account sendIq:discoInfo withHandler:$newHandler([self class], handleMembersList, $ID(type))];
-    }
-    
-    // now try to join this room if requested
     if(join)
+    {
+        DDLogInfo(@"Clearing muc participants and members tables for %@", iqNode.fromUser);
+        [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser forAccountId:_account.accountNo];
+    
+        //load members/admins/owners list
+        DDLogInfo(@"Querying members/admin/owner lists for muc %@...", iqNode.fromUser);
+        for(NSString* type in @[@"member", @"admin", @"owner"])
+        {
+            XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+            [discoInfo setiqTo:iqNode.fromUser];
+            [discoInfo setMucListQueryFor:type];
+            [_account sendIq:discoInfo withHandler:$newHandler([self class], handleMembersList, $ID(type))];
+        }
+    
+        //now try to join this room if requested
         [self sendJoinPresenceFor:iqNode.fromUser];
+    }
 $$
 
 -(void) sendJoinPresenceFor:(NSString*) room

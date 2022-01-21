@@ -430,7 +430,7 @@
                                                                         serviceName:message.accountId
                                                                             sender:sender
                                                                         attachments:(audioAttachment ? @[audioAttachment] : nil)];
-    if(message.isMuc)
+    if(message.isMuc && contact.avatar != nil)
         [intent setImage:[INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)] forParameterNamed:@"speakableGroupName"];
     
     /*
@@ -484,7 +484,9 @@
     INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeEmailAddress label:contact.accountId];
     NSPersonNameComponents* nameComponents = [[NSPersonNameComponents alloc] init];
     nameComponents.nickname = displayName;
-    INImage* contactImage = [INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)];
+    INImage* contactImage = nil;
+    if(contact.avatar != nil)
+        contactImage = [INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)];
     INPerson* person = [[INPerson alloc] initWithPersonHandle:personHandle
                                                 nameComponents:nameComponents
                                                     displayName:nameComponents.nickname

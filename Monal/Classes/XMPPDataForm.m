@@ -20,7 +20,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 +(void) initialize
 {
-    dataFormQueryRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*)?(@[a-zA-Z0-9_:-]+|%[a-zA-Z0-9_:-]+)?" options:0 error:nil];
+    dataFormQueryRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*)?(@[a-zA-Z0-9_:#-]+|%[a-zA-Z0-9_:#-]+)?" options:0 error:nil];
 }
 
 //this simple init is not public api because type and form type are mandatory in xep-0004

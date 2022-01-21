@@ -307,11 +307,11 @@
     [self updateBadgeForContent:content];
     
     INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeEmailAddress label:contact.accountId];
-    //INImage* contactImage = [INImage imageWithUIImage:contact.avatar];
+    INImage* contactImage = [INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)];
     INPerson* sender = [[INPerson alloc] initWithPersonHandle:personHandle
                                                 nameComponents:nil
                                                     displayName:message.contactDisplayName
-                                                        image:nil
+                                                        image:contactImage
                                             contactIdentifier:nil
                                                 customIdentifier:nil];
     INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:nil

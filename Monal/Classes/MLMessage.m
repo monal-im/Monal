@@ -83,7 +83,7 @@
 {
     if(self.isMuc)
     {
-        if([@"group" isEqualToString:self.mucType])
+        if([@"group" isEqualToString:self.mucType] && self.participantJid)
             return [[MLContact createContactFromJid:self.participantJid andAccountNo:self.accountId] contactDisplayNameWithFallback:self.actualFrom];
         else
             return self.actualFrom;

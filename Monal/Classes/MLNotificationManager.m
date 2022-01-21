@@ -141,7 +141,7 @@
     if([HelperTools isNotInFocus])
     {
         DDLogVerbose(@"notification manager should show notification in background: %@", message.messageText);
-        [self showNotificaionForMessage:message withSound:sound];
+        [self showNotificaionForMessage:message withSound:sound andAccount:xmppAccount];
     }
     else
     {
@@ -149,7 +149,7 @@
         if(![message isEqualToContact:self.currentContact])
         {
             DDLogVerbose(@"notification manager should show notification in foreground: %@", message.messageText);
-            [self showNotificaionForMessage:message withSound:sound];
+            [self showNotificaionForMessage:message withSound:sound andAccount:xmppAccount];
         }
         else
             DDLogDebug(@"not showing notification: chat is open");
@@ -235,7 +235,7 @@
     }];
 }
 
--(void) showNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound
+-(void) showNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
 {
     // always use legacy notifications if we should only show a generic "New Message" notifiation without name or content
     if(self.notificationPrivacySetting > DisplayOnlyName)
@@ -245,19 +245,21 @@
     if(@available(iOS 15.0, macCatalyst 15.0, *))
     {
         DDLogDebug(@"Using communication notifications");
-        return [self showModernNotificaionForMessage:message withSound:sound];
+        return [self showModernNotificaionForMessage:message withSound:sound andAccount:account];
     }
     return [self showLegacyNotificaionForMessage:message withSound:sound];
 }
 
--(void) showModernNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+-(void) showModernNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     NSString* idval = [self identifierWithMessage:message];
     MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     
-    // only show msgText if allowed
+    INSendMessageAttachment* audioAttachment = nil;
     NSString* msgText = NSLocalizedString(@"Open app to see more", @"");
+    
+    // only show msgText if allowed
     if(self.notificationPrivacySetting == DisplayNameAndMessage)
     {
         //XEP-0245: The slash me Command
@@ -267,7 +269,6 @@
             msgText = message.messageText;
         
         // notification settings (TODO: is this reallyneeded for communication notifications?)
-        content.body = msgText;
         content.threadIdentifier = [self threadIdentifierWithMessage:message];
         content.categoryIdentifier = @"message";
         
@@ -279,12 +280,94 @@
         };
         
         if([message.messageType isEqualToString:kMessageTypeFiletransfer])
-            msgText = NSLocalizedString(@"Sent a File 📁", @"");
+        {
+            NSDictionary* info = [MLFiletransfer getFileInfoForMessage:message];
+            if(info)
+            {
+                UNNotificationAttachment* attachment = nil;
+                NSString* mimeType = info[@"mimeType"];
+                if(![info[@"needsDownloading"] boolValue])
+                {
+                    NSString* typeHint = nil;
+                    if([mimeType hasPrefix:@"image/"])
+                    {
+                        if([mimeType isEqualToString:@"image/jpeg"])
+                            typeHint = (NSString*)kUTTypeJPEG;
+                        if([mimeType isEqualToString:@"image/png"])
+                            typeHint = (NSString*)kUTTypePNG;
+                        if([mimeType isEqualToString:@"image/gif"])
+                            typeHint = (NSString*)kUTTypeGIF;
+                    }
+                    else if([mimeType hasPrefix:@"audio/"])
+                    {
+                        if([mimeType isEqualToString:@"audio/mpeg"])
+                            typeHint = (NSString*)kUTTypeMP3;
+                        if([mimeType isEqualToString:@"audio/mp4"])
+                            typeHint = (NSString*)kUTTypeMPEG4Audio;
+                        if([mimeType isEqualToString:@"audio/wav"])
+                            typeHint = (NSString*)kUTTypeWaveformAudio;
+                        if([mimeType isEqualToString:@"audio/x-aiff"])
+                            typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
+                        
+                        if(typeHint != nil)
+                            audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
+                    }
+                    else if([mimeType hasPrefix:@"video/"])
+                    {
+                        if([mimeType isEqualToString:@"video/mpeg"])
+                            typeHint = (NSString*)kUTTypeMPEG;
+                        if([mimeType isEqualToString:@"video/mp4"])
+                            typeHint = (NSString*)kUTTypeMPEG4;
+                        if([mimeType isEqualToString:@"video/x-msvideo"])
+                            typeHint = (NSString*)kUTTypeAVIMovie;
+                        if([mimeType isEqualToString:@"video/mpeg2"])
+                            typeHint = (NSString*)kUTTypeMPEG2Video;
+                    }
+                    else if([mimeType isEqualToString:@"application/pdf"])
+                        msgText = NSLocalizedString(@"📄 A Document", @"");
+                    else
+                        msgText = NSLocalizedString(@"Sent a File 📁", @"");
+                    
+                    if(typeHint != nil)
+                    {
+                        NSError *error;
+                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+                        if(error)
+                            DDLogError(@"Error adding UNNotificationAttachment to notification: %@", error);
+                    }
+                }
+                else
+                {
+                    if([mimeType hasPrefix:@"image/"])
+                        msgText = NSLocalizedString(@"📷 An Image", @"");
+                    else if([mimeType hasPrefix:@"audio/"])
+                        msgText = NSLocalizedString(@"🎵 A Audiomessage", @"");
+                    else if([mimeType hasPrefix:@"video/"])
+                        msgText = NSLocalizedString(@"🎥 A Video", @"");
+                    else if([mimeType isEqualToString:@"application/pdf"])
+                        msgText = NSLocalizedString(@"📄 A Document", @"");
+                    else
+                        msgText = NSLocalizedString(@"Sent a File 📁", @"");
+                }
+                
+                if(attachment)
+                {
+                    content.attachments = @[attachment];
+                    msgText = @"";
+                }
+            }
+            else
+            {
+                // empty info dict default to "Sent a file"
+                msgText = NSLocalizedString(@"Sent a File 📁", @"");
+            }
+        }
         else if([message.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
             msgText = NSLocalizedString(@"Sent a Link 🔗", @"");
         else if([message.messageType isEqualToString:kMessageTypeGeo])
             msgText = NSLocalizedString(@"Sent a Location 📍", @"");
     }
+    content.body = msgText;     //save message text to notification content
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
@@ -302,26 +385,64 @@
     }
     else
         DDLogDebug(@"Using no alert sound");
-
+        
     // update badge value prior to donating the interaction to sirikit
     [self updateBadgeForContent:content];
     
-    INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeEmailAddress label:contact.accountId];
-    INImage* contactImage = [INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)];
-    INPerson* sender = [[INPerson alloc] initWithPersonHandle:personHandle
-                                                nameComponents:nil
-                                                    displayName:message.contactDisplayName
-                                                        image:contactImage
-                                            contactIdentifier:nil
-                                                customIdentifier:nil];
-    INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:nil
+    // some docu:
+    // - https://developer.apple.com/documentation/usernotifications/implementing_communication_notifications?language=objc
+    // - https://gist.github.com/Dexwell/dedef7389eae26c5b9db927dc5588905
+    // - https://stackoverflow.com/a/68705169/3528174
+    INPerson* sender = nil;
+    NSString* groupDisplayName = nil;
+    NSMutableArray* recipients = [[NSMutableArray alloc] init];
+    if(message.isMuc)
+    {
+        groupDisplayName = contact.contactDisplayName;
+        if([@"group" isEqualToString:message.mucType] && message.participantJid)
+        {
+            MLContact* contactInGroup = [MLContact createContactFromJid:message.participantJid andAccountNo:message.accountId];
+            //use MLMessage's capability to calculate the fallback name using actualFrom
+            sender = [self makeINPersonWithContact:contactInGroup andDisplayName:message.contactDisplayName andAccount:account];
+            content.subtitle = [NSString stringWithFormat:NSLocalizedString(@"%@ says:", @""), sender.displayName];
+            
+            //add other group members
+            for(NSDictionary* member in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountId:message.accountId])
+            {
+                MLContact* contactInGroup = [MLContact createContactFromJid:emptyDefault(member[@"participant_jid"], @"", member[@"member_jid"]) andAccountNo:message.accountId];
+                [recipients addObject:[self makeINPersonWithContact:contactInGroup andDisplayName:member[@"room_nick"] andAccount:account]];
+            }
+        }
+        else
+        {
+            sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
+            content.subtitle = [NSString stringWithFormat:NSLocalizedString(@"%@ says:", @""), message.contactDisplayName];
+        }
+    }
+    else
+        sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
+    
+    INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:(recipients.count > 0 ? recipients : nil)
                                                                 outgoingMessageType:INOutgoingMessageTypeOutgoingMessageText
                                                                             content:msgText
-                                                                speakableGroupName:nil   //(message.isMuc ? [contact contactDisplayName] : nil)
+                                                                speakableGroupName:(groupDisplayName ? [[INSpeakableString alloc] initWithSpokenPhrase:groupDisplayName] : nil)
                                                             conversationIdentifier:[self threadIdentifierWithMessage:message]
-                                                                        serviceName:contact.accountId
+                                                                        serviceName:message.accountId
                                                                             sender:sender
-                                                                        attachments:nil];
+                                                                        attachments:(audioAttachment ? @[audioAttachment] : nil)];
+    if(message.isMuc)
+        [intent setImage:[INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)] forParameterNamed:@"speakableGroupName"];
+    
+    /*
+    if(message.isMuc)
+    {
+        [intent setImage:avatar forParameterNamed:"speakableGroupName"];
+        [intent setImage:avatar forParameterNamed:"sender"];
+    }
+    else
+        [intent setImage:avatar forParameterNamed:"sender"];
+    */
+    
     /*
     INCallRecord* callRecord = [[INCallRecord alloc] initWithIdentifier:[self threadIdentifierWithMessage:message]
                                                             dateCreated:[NSDate date]
@@ -354,6 +475,29 @@
             }
         }
     }];
+}
+
+-(INPerson*) makeINPersonWithContact:(MLContact*) contact andDisplayName:(NSString* _Nullable) displayName andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+{
+    if(displayName == nil)
+        displayName = contact.contactDisplayName;
+    INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeEmailAddress label:contact.accountId];
+    NSPersonNameComponents* nameComponents = [[NSPersonNameComponents alloc] init];
+    nameComponents.nickname = displayName;
+    INImage* contactImage = [INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)];
+    INPerson* person = [[INPerson alloc] initWithPersonHandle:personHandle
+                                                nameComponents:nameComponents
+                                                    displayName:nameComponents.nickname
+                                                        image:contactImage
+                                            contactIdentifier:nil
+                                                customIdentifier:nil
+                                                            isMe:account.connectionProperties.identity.jid == contact.contactJid
+                                                  suggestionType:INPersonSuggestionTypeInstantMessageAddress];
+    /*
+    if(contact.isInRoster)
+        person.relationship = INPersonRelationshipFriend;
+    */
+    return person;
 }
 
 -(void) showLegacyNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound

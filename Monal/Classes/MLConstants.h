@@ -52,6 +52,7 @@ typedef enum NotificationPrivacySettingOption {
 #define nilWrapper(var)                     (var == nil           ? [NSNull null] : var)
 #define nilExtractor(var)                   (var == [NSNull null] ? nil           : var)
 #define nilDefault(var, def)                (var == nil ? def : var)
+#define emptyDefault(var, eq, def)          (var == nil || [var isEqual:eq] ? def : var)
 #define updateIfIdNotEqual(a, b)            if(a != b && ![a isEqual:b]) a = b
 #define updateIfPrimitiveNotEqual(a, b)     if(a != b) a = b
 

@@ -26,11 +26,14 @@
 		<string>com.apple.usernotifications.service</string>
 		<key>NSExtensionPrincipalClass</key>
 		<string>NotificationService</string>
-		<key>IntentsSupported</key>
-		<array>
-			<string>INSendMessageIntent</string>
-			<string>INStartCallIntent</string>
-		</array>
+		<key>NSExtensionAttributes</key>
+		<dict>
+			<key>IntentsSupported</key>
+			<array>
+				<string>INSendMessageIntent</string>
+				<string>INStartCallIntent</string>
+			</array>
+		</dict>
 	</dict>
 </dict>
 </plist>

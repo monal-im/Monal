@@ -30,6 +30,14 @@
 
 #import <AVKit/AVKit.h>
 
+#import "MLBasePaser.h"
+#import "MLXMLNode.h"
+#import "XMPPStanza.h"
+#import "XMPPDataForm.h"
+#import "XMPPIQ.h"
+#import "XMPPPresence.h"
+#import "XMPPMessage.h"
+
 #define GRACEFUL_TIMEOUT 20.0
 
 typedef void (^pushCompletion)(UIBackgroundFetchResult result);
@@ -48,11 +56,48 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 @implementation MonalAppDelegate
 
+// **************************** xml parser and query language tests ****************************
+-(void) runParserTests
+{
+    NSString* xml = @"<?xml version='1.0'?>\n\
+        <stream:stream xmlns:stream='http://etherx.jabber.org/streams' version='1.0' xmlns='jabber:client' xml:lang='en' from='xmpp.eightysoft.de' id='a344b8bb-518e-4456-9140-d15f66c1d2db'>\n\
+        <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism></mechanisms></stream:features>\n\
+        <iq id='18382ACA-EF9D-4BC9-8779-7901C63B6631' to='thilo@xmpp.eightysoft.de/Monal-iOS.ef313600' xmlns='jabber:client' type='result' from='luloku@conference.xmpp.eightysoft.de'><query xmlns='http://jabber.org/protocol/disco#info'><feature var='http://jabber.org/protocol/muc#request'/><feature var='muc_hidden'/><feature var='muc_unsecured'/><feature var='muc_membersonly'/><feature var='muc_unmoderated'/><feature var='muc_persistent'/><identity type='text' name='testchat gruppe' category='conference'/><feature var='urn:xmpp:mam:2'/><feature var='urn:xmpp:sid:0'/><feature var='muc_nonanonymous'/><feature var='http://jabber.org/protocol/muc'/><feature var='http://jabber.org/protocol/muc#stable_id'/><feature var='http://jabber.org/protocol/muc#self-ping-optimization'/><feature var='jabber:iq:register'/><feature var='vcard-temp'/><x type='result' xmlns='jabber:x:data'><field type='hidden' var='FORM_TYPE'><value>http://jabber.org/protocol/muc#roominfo</value></field><field label='Description' var='muc#roominfo_description' type='text-single'><value/></field><field label='Number of occupants' var='muc#roominfo_occupants' type='text-single'><value>2</value></field><field label='Allow members to invite new members' var='{http://prosody.im/protocol/muc}roomconfig_allowmemberinvites' type='boolean'><value>0</value></field><field label='Allow users to invite other users' var='muc#roomconfig_allowinvites' type='boolean'><value>0</value></field><field label='Title' var='muc#roomconfig_roomname' type='text-single'><value>testchat gruppe</value></field><field type='boolean' var='muc#roomconfig_changesubject'/><field type='text-single' var='{http://modules.prosody.im/mod_vcard_muc}avatar#sha1'/><field type='text-single' var='muc#roominfo_lang'><value/></field></x></query></iq>\n\
+    ";
+    
+    DDLogInfo(@"creating parser delegate");
+    MLBasePaser* delegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
+        if(parsedStanza != nil)
+        {
+            DDLogInfo(@"Got new parsed stanza: %@", parsedStanza);
+            for(NSString* query in @[
+                @"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\",
+            ])
+            {
+                id result = [parsedStanza find:query];
+                DDLogDebug(@"Query: '%@', result: '%@'", query, result);
+            }
+        }
+    }];
+    
+    //create xml parser, configure our delegate and feed it with data
+    NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[xml dataUsingEncoding:NSUTF8StringEncoding]];
+    [xmlParser setShouldProcessNamespaces:YES];
+    [xmlParser setShouldReportNamespacePrefixes:NO];
+    [xmlParser setShouldResolveExternalEntities:NO];
+    [xmlParser setDelegate:delegate];
+    DDLogInfo(@"calling parse");
+    [xmlParser parse];     //blocking operation
+    DDLogInfo(@"parse ended");
+}
+
 -(id) init
 {
     self = [super init];
     _bgTask = UIBackgroundTaskInvalid;
     _wakeupCompletions = [[NSMutableDictionary alloc] init];
+    
+    //[self runParserTests];
     return self;
 }
 

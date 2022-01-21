@@ -322,6 +322,20 @@
                                                                         serviceName:contact.accountId
                                                                             sender:sender
                                                                         attachments:nil];
+    /*
+    INCallRecord* callRecord = [[INCallRecord alloc] initWithIdentifier:[self threadIdentifierWithMessage:message]
+                                                            dateCreated:[NSDate date]
+                                                         callRecordType:INCallRecordTypeOutgoing
+                                                         callCapability:INCallCapabilityAudioCall
+                                                           callDuration:@0
+                                                                 unseen:@YES];
+    INStartCallIntent* intent = [[INStartCallIntent alloc] initWithCallRecordFilter:nil
+                                                               callRecordToCallBack:callRecord
+                                                                         audioRoute:INCallAudioRouteUnknown
+                                                                    destinationType:INCallDestinationTypeNormal
+                                                                           contacts:@[sender]
+                                                                     callCapability:INCallCapabilityAudioCall];
+    */
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionIncoming;
     [interaction donateInteractionWithCompletion:^(NSError *error) {

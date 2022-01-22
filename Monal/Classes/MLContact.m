@@ -233,7 +233,10 @@ NSString *const kAskSubscribe=@"subscribe";
     {
         UIImage* newAvatar = [[MLImageManager sharedInstance] getIconForContact:self];
         if(newAvatar != self->_avatar)
+        {
+            DDLogDebug(@"Setting new avatar for %@", self);
             self.avatar = newAvatar;            //use self.avatar instead of _avatar to make sure KVO works properly
+        }
     }
 }
 

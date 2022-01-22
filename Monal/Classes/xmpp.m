@@ -1061,6 +1061,7 @@ NSString* const kStanza = @"stanza";
                 //always process stanzas in the receiveQueue
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
                 DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount]);
+                [HelperTools report_memory];
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     if(self.accountState<kStateReconnecting)
                     {
@@ -1082,7 +1083,6 @@ NSString* const kStanza = @"stanza";
                 }]] waitUntilFinished:YES];
             }]] waitUntilFinished:NO];
         }];
-
     }
     else
     {

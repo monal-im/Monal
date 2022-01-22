@@ -7,6 +7,9 @@
 //
 
 #include "hsluv.h"
+#include <mach/mach.h>
+#include <mach/mach_error.h>
+#include <mach/mach_traps.h>
 
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
@@ -23,6 +26,7 @@
 @import CoreImage;
 @import CoreImage.CIFilterBuiltins;
 @import UIKit;
+@import AVFoundation;
 
 static DDFileLogger* _fileLogger;
 
@@ -76,6 +80,21 @@ void logException(NSException* exception)
 #else
     return @"ios13push.monal.im";
 #endif
+}
+
+
++(void) report_memory
+{
+    struct task_basic_info info;
+    mach_msg_type_number_t size = TASK_BASIC_INFO_COUNT;
+    kern_return_t kerr = task_info(mach_task_self(),
+                                    TASK_BASIC_INFO,
+                                    (task_info_t)&info,
+                                    &size);
+    if(kerr == KERN_SUCCESS)
+        DDLogDebug(@"Memory in use (in MiB): %f", ((CGFloat)info.resident_size / 1048576));
+    else
+        DDLogDebug(@"Error with task_info(): %s", mach_error_string(kerr));
 }
 
 +(UIColor*) generateColorFromJid:(NSString*) jid
@@ -326,6 +345,7 @@ void logException(NSException* exception)
         while(counter++)
         {
             DDLogInfo(@"activity(%@): %lu", appex ? @"APPEX" : @"MAINAPP", counter);
+            [self report_memory];
             //trigger iq invalidations from this background thread because timeouts aren't time critical
             //we use this to decrement the timeout value of an iq handler every second until it reaches zero
             for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)

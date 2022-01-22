@@ -491,7 +491,7 @@
                                                 nameComponents:nameComponents
                                                     displayName:nameComponents.nickname
                                                         image:contactImage
-                                            contactIdentifier:nil
+                                                contactIdentifier:nil
                                                 customIdentifier:nil
                                                             isMe:account.connectionProperties.identity.jid == contact.contactJid
                                                   suggestionType:INPersonSuggestionTypeInstantMessageAddress];

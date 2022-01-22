@@ -211,14 +211,18 @@
 
 -(UIImage*) getIconForContact:(MLContact*) contact withCompletion:(void (^)(UIImage *))completion
 {
+    DDLogVerbose(@"getIconForContact: %@", contact);
     NSString* filename = [self fileNameforContact:contact.contactJid];
+    DDLogVerbose(@"filename: %@", filename);
     
     __block UIImage* toreturn = nil;
     //get filname from DB
     NSString* cacheKey = [NSString stringWithFormat:@"%@_%@", contact.accountId, contact.contactJid];
+    DDLogVerbose(@"cache key: %@", cacheKey);
     
     //check cache
     toreturn = [self.iconCache objectForKey:cacheKey];
+    DDLogVerbose(@"after cache try: %@", toreturn);
     if(!toreturn)
     {
         if(contact.isGroup)
@@ -229,19 +233,28 @@
             writablePath = [writablePath stringByAppendingPathComponent:contact.accountId];
             writablePath = [writablePath stringByAppendingPathComponent:filename];
 
+            DDLogVerbose(@"loading avatar image at %@", writablePath);
             UIImage* savedImage = [UIImage imageWithContentsOfFile:writablePath];
             if(savedImage)
                 toreturn = savedImage;
+            DDLogVerbose(@"after file load: %@", toreturn);
 
             if(toreturn == nil)
+            {
+                DDLogVerbose(@"Generating dummy icon...");
                 toreturn = [self generateDummyIconForContact:contact];
+            }
         }
         
+        DDLogVerbose(@"Making image circular...");
         toreturn = [MLImageManager circularImage:toreturn];
 
         //uiimage image named is cached if avaialable
         if(toreturn)
+        {
+            DDLogVerbose(@"Caching image under key %@", cacheKey);
             [self.iconCache setObject:toreturn forKey:cacheKey];
+        }
         if(completion)
             dispatch_async(dispatch_get_main_queue(), ^{
                 completion(toreturn);
@@ -251,6 +264,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             completion(toreturn);
         });
+    DDLogVerbose(@"returning %@", toreturn);
     return toreturn;
 }
 

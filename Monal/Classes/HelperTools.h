@@ -37,7 +37,7 @@ void logException(NSException* exception);
 +(void) configureFileProtectionFor:(NSString*) file;
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
 +(void) clearSyncErrorsOnAppForeground;
-+(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly;
++(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly andWaitForCompletion:(BOOL) waitForCompletion;
 
 +(BOOL) isInBackground;
 +(BOOL) isNotInFocus;

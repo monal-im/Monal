@@ -175,7 +175,7 @@
                         DDLogInfo(@"Shutting down appex now");
                         
                         //post sync errors for all accounts still not idle now
-                        [HelperTools updateSyncErrorsWithDeleteOnly:NO];
+                        [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                         
                         //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
                         //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
@@ -299,7 +299,7 @@
 -(void) nowIdle:(NSNotification*) notification
 {
     //delete sync errors of all now idle accounts
-    [HelperTools updateSyncErrorsWithDeleteOnly:YES];
+    [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:NO];
     
     //use as much appex background time as possible (disconnect when the last push handler expires instead of when all accounts become idle)
     /*
@@ -319,7 +319,7 @@
     
     DDLogInfo(@"notification handler: some account idle: %@", xmppAccount.connectionProperties.identity.jid);
     [xmppAccount disconnect];
-    [HelperTools updateSyncErrorsWithDeleteOnly:YES];
+    [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:NO];
     
     [self checkIfEverythingIsIdle];
     */
@@ -328,7 +328,7 @@
 -(void) filetransfersNowIdle:(NSNotification*) notification
 {
     //delete sync errors of all now idle accounts
-    [HelperTools updateSyncErrorsWithDeleteOnly:YES];
+    [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:NO];
     
     //use as much appex background time as possible (disconnect when the last push handler expires instead of when all accounts become idle)
     /*
@@ -344,7 +344,7 @@
         DDLogInfo(@"notification handler: all accounts idle and filetransfers complete --> terminating extension");
         
         //remove syncError notifications because all accounts are idle and fully synced now
-        [HelperTools updateSyncErrorsWithDeleteOnly:NO];
+        [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:YES];
         
         [self feedAllWaitingHandlers];
     }

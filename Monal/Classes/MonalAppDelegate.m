@@ -339,7 +339,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             DDLogInfo(@"LowPoderMode is active: nowBackgrounded to reduce power consumption");
             [self addBackgroundTask];
             [[MLXMPPManager sharedInstance] nowBackgrounded];
-            [self checkIfBackgroundTaskIsStillNeeded];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self checkIfBackgroundTaskIsStillNeeded];
+            });
         }
         else
         {
@@ -689,7 +691,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //mark timer as *not* running
         _backgroundTimer = nil;
         //retry background check (now handling idle state because no running background timer is blocking it)
-        [self checkIfBackgroundTaskIsStillNeeded];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self checkIfBackgroundTaskIsStillNeeded];
+        });
     });
 }
 
@@ -743,7 +747,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [[MLXMPPManager sharedInstance] nowBackgrounded];
     
     [self startBackgroundTimer];
-    [self checkIfBackgroundTaskIsStillNeeded];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self checkIfBackgroundTaskIsStillNeeded];
+    });
 }
 
 -(void) applicationWillTerminate:(UIApplication *)application
@@ -757,7 +763,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     DDLogInfo(@"|~~| 60%% |~~|");
     [[MLXMPPManager sharedInstance] nowBackgrounded];
     DDLogInfo(@"|~~| 80%% |~~|");
-    [HelperTools updateSyncErrorsWithDeleteOnly:NO];
+    [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
     DDLogInfo(@"|~~| 100%% |~~|");
     [[MLXMPPManager sharedInstance] disconnectAll];
     DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
@@ -873,7 +879,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle])
     {
         DDLogInfo(@"### ALL ACCOUNTS IDLE AND FILETRANSFERS COMPLETE NOW ###");
-        [HelperTools updateSyncErrorsWithDeleteOnly:YES];
+        [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
         
         //use a synchronized block to disconnect only once
         @synchronized(self) {
@@ -936,7 +942,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                     if(_bgFetch == nil)
                     {
                         //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-                        [HelperTools updateSyncErrorsWithDeleteOnly:NO];
+                        [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                         
                         //disconnect all accounts to prevent TCP buffer leaking
                         [[MLXMPPManager sharedInstance] disconnectAll];
@@ -978,7 +984,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             if(background && _bgTask == UIBackgroundTaskInvalid)
             {
                 //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-                [HelperTools updateSyncErrorsWithDeleteOnly:NO];
+                [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                 
                 //disconnect all accounts to prevent TCP buffer leaking
                 [[MLXMPPManager sharedInstance] disconnectAll];
@@ -1112,7 +1118,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                             {
                                 //this has to be before account disconnects, to detect which accounts are/are not idle (e.g. don't have/have a sync error)
                                 BOOL wasIdle = [[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle];
-                                [HelperTools updateSyncErrorsWithDeleteOnly:NO];
+                                [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                                 
                                 //disconnect all accounts to prevent TCP buffer leaking
                                 [[MLXMPPManager sharedInstance] disconnectAll];

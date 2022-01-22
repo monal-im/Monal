@@ -205,10 +205,9 @@ void logException(NSException* exception)
     [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
 }
 
-+(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly
++(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly andWaitForCompletion:(BOOL) waitForCompletion
 {
-    //dispatch async because we don't want to block the receive/parse/send queue invoking this check
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+    __block monal_void_block_t updateSyncErrors = ^{
         @synchronized(self) {
             NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
             DDLogInfo(@"Updating syncError notifications: %@", syncErrorsDisplayed);
@@ -258,7 +257,13 @@ void logException(NSException* exception)
                 }
             }
         }
-    });
+    };
+    
+    //dispatch async because we don't want to block the receive/parse/send queue invoking this check
+    if(waitForCompletion)
+        updateSyncErrors();
+    else
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), updateSyncErrors);
 }
 
 +(BOOL) isInBackground

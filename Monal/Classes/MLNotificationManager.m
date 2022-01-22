@@ -479,6 +479,8 @@
 
 -(INPerson*) makeINPersonWithContact:(MLContact*) contact andDisplayName:(NSString* _Nullable) displayName andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
+    DDLogDebug(@"Building INPerson for contact: %@ using display name: %@", contact, displayName);
+    [DDLog flushLog];
     if(displayName == nil)
         displayName = contact.contactDisplayName;
     INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeEmailAddress label:contact.accountId];
@@ -486,7 +488,16 @@
     nameComponents.nickname = displayName;
     INImage* contactImage = nil;
     if(contact.avatar != nil)
-        contactImage = [INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)];
+    {
+        DDLogError(@"DEBUG EXTRACTING AVATAR DATA...");
+        [DDLog flushLog];
+        NSData* avatarData = UIImagePNGRepresentation(contact.avatar);
+        DDLogError(@"DEBUG AVATAR DATA: %@", avatarData);
+        [DDLog flushLog];
+        contactImage = [INImage imageWithImageData:avatarData];
+    }
+    DDLogError(@"DEBUG AVATAR CREATED...");
+    [DDLog flushLog];
     INPerson* person = [[INPerson alloc] initWithPersonHandle:personHandle
                                                 nameComponents:nameComponents
                                                     displayName:nameComponents.nickname
@@ -496,9 +507,11 @@
                                                             isMe:account.connectionProperties.identity.jid == contact.contactJid
                                                   suggestionType:INPersonSuggestionTypeInstantMessageAddress];
     /*
-    if(contact.isInRoster)
+    if(contact.isInRoster)	
         person.relationship = INPersonRelationshipFriend;
     */
+    DDLogError(@"DEBUG RETURNING INPerson...");
+    [DDLog flushLog];
     return person;
 }
 

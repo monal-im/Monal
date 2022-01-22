@@ -247,12 +247,16 @@
         }
         
         DDLogVerbose(@"Making image circular...");
+        [DDLog flushLog];
         toreturn = [MLImageManager circularImage:toreturn];
+        DDLogVerbose(@"Image is now: %@", toreturn);
+        [DDLog flushLog];
 
         //uiimage image named is cached if avaialable
         if(toreturn)
         {
             DDLogVerbose(@"Caching image under key %@", cacheKey);
+            [DDLog flushLog];
             [self.iconCache setObject:toreturn forKey:cacheKey];
         }
         if(completion)
@@ -265,6 +269,7 @@
             completion(toreturn);
         });
     DDLogVerbose(@"returning %@", toreturn);
+    [DDLog flushLog];
     return toreturn;
 }
 

@@ -234,6 +234,14 @@
             writablePath = [writablePath stringByAppendingPathComponent:filename];
 
             DDLogVerbose(@"loading avatar image at %@", writablePath);
+            NSFileManager* fileManager = [NSFileManager defaultManager];
+            NSError* error;
+            NSDictionary* fileAttributes = [fileManager attributesOfItemAtPath:writablePath error:&error];
+            if(error)
+                DDLogError(@"Error while getting file attributes: %@", error);
+            else
+                DDLogVerbose(@"image file size: %@", fileAttributes[NSFileSize]);
+            [DDLog flushLog];
             UIImage* savedImage = [UIImage imageWithContentsOfFile:writablePath];
             if(savedImage)
                 toreturn = savedImage;

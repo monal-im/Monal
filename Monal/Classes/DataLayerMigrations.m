@@ -982,6 +982,13 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:5.106 withBlock:^{
             [db executeNonQuery:@"DROP TABLE signalContactKey;"];
         }];
+        
+        //remove all cached hashes
+        //--> avatar images will be loaded lazyly on next non-smacks connect (because of the incoming metadata +notify on full reconnect)
+        //and replace the already saved avatar files
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.107 withBlock:^{
+            [db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
+        }];
     }];
     NSNumber* newdbversion = [db idReadTransaction:^{
         return [db executeScalar:@"SELECT dbversion FROM dbversion;"];

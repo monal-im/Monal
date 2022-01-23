@@ -9,7 +9,7 @@ before_install:
   - cd Monal
   - gem install cocoapods
   - git submodule update --init --recursive
-  - git submodule update --remote
+  - git submodule update --remote --merge
 install:
   - pod install
 script:

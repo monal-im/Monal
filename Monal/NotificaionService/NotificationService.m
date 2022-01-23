@@ -58,7 +58,6 @@
     @synchronized(self) {
         DDLogInfo(@"Now killing appex process, goodbye...");
         [DDLog flushLog];
-        usleep(500000);            //wait some time for notifications to be handled by the system (500ms)
         exit(0);
     }
 }
@@ -69,7 +68,6 @@
     createTimer(25.0, (^{
         [self pushExpired];
     }));
-    DDLogInfo(@"Pinging main app");
     
     //make sure the rest of this class knows that we got onemore push to be handled, even if it isn't added to self.handlerList yet because we want to ping the mainapp first
     @synchronized(self) {
@@ -81,36 +79,43 @@
     //             --> that would make the ping *NOT* succeed and in turn erroneously tell the appex that the mainapp was not running
     //             the appex on the other side does not use its main thread --> a ping coming from the mainapp will almost always
     //             be answered in only a few milliseconds
+    DDLogInfo(@"Pinging main app");
     if([MLProcessLock checkRemoteRunning:@"MainApp" withTimeout:2.0])
     {
         //this will make sure we still run if we get triggered immediately after the mainapp disconnected but before its process got freezed
         DDLogDebug(@"Main app already in foreground, sleeping for 5 seconds and trying again");
-        usleep(5000000);
-        
-        DDLogDebug(@"Pinging main app again");
-        if([MLProcessLock checkRemoteRunning:@"MainApp" withTimeout:2.0])       //use a high timeout to make sure the mainapp isn't running, even if the mainthread is heavily busy
-        {
-            //don't block calling queue until committing suicide (the appleIPC queue that invoked our push handler)
-            //doing so can lead to "new message" notifications
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        createTimer(5.0, (^{
+            DDLogDebug(@"Pinging main app again");
+            if([MLProcessLock checkRemoteRunning:@"MainApp" withTimeout:2.0])       //use a high timeout to make sure the mainapp isn't running, even if the mainthread is heavily busy
+            {
                 DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
                 [DDLog flushLog];
                 [self feedAllWaitingHandlersWithCompletion:^{
                     //now call this new handler we did not add to our handlerList (don't update unread badge, because this needs the database potentially locked by mainapp)
                     DDLogInfo(@"Feeding last handler...");
                     [self generateNotificationForHandler:contentHandler];
+                    
+                    //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                    [self killAppex];
                 }];
-                
-                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-                [self killAppex];
-            });
-            return;
-        }
-        else
-            DDLogDebug(@"Main app not in foreground anymore, connecting now");
+            }
+            else
+            {
+                DDLogDebug(@"Main app not in foreground anymore, handling push now");
+                [self handlePushForReal:contentHandler];
+            }
+        }));
     }
-    
+    else
+    {
+        DDLogDebug(@"Main app not in foreground, handling push now");
+        [self handlePushForReal:contentHandler];
+    }
+}
+
+-(void) handlePushForReal:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
+{
     @synchronized(self) {
         DDLogInfo(@"Now handling incoming push");
         BOOL first = NO;

@@ -57,7 +57,16 @@ $$class_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(
                     DDLogInfo(@"Avatar hash is the same, we don't need to update our avatar image data");
                     break;
                 }
-                [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:$newHandler(self, handleAvatarFetchResult)];
+                //only allow a maximum of 2MiB of image data when in appex due to appex memory limits
+                //--> ignore metadata elements bigger than this size and only hande them once not in appex anymore
+                NSUInteger avatarByteSize = [[data[entry] findFirst:@"{urn:xmpp:avatar:metadata}metadata/info@bytes|int"] unsignedIntegerValue];
+                if(![HelperTools isAppExtension] || avatarByteSize < 4096 * 1024)
+                    [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:$newHandler(self, handleAvatarFetchResult)];
+                else
+                {
+                    DDLogWarn(@"Not loading avatar image of %@ because it is too big to be handled in appex (%lu bytes), rescheduling it to be fetched in mainapp", jid, (unsigned long)avatarByteSize);
+                    [account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid), $ID(avatarHash))];
+                }
             }
             break;      //we only want to process the first item (this should also be the only item)
         }
@@ -77,6 +86,17 @@ $$class_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(
     }
 $$
 
+//this handler will simply retry the fetchNode for urn:xmpp:avatar:data if in mainapp
+$$class_handler(fetchAvatarAgain, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, avatarHash))
+    if([HelperTools isAppExtension])
+    {
+        DDLogWarn(@"Not loading avatar image of %@ because we are still in appex, rescheduling it again!", jid);
+        [account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid), $ID(avatarHash))];
+    }
+    else
+        [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:$newHandler(self, handleAvatarFetchResult)];
+$$
+
 $$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     //ignore errors here (e.g. simply don't update the avatar image)
     //(this should never happen if other clients and servers behave properly)
@@ -88,7 +108,9 @@ $$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), 
     
     for(NSString* avatarHash in data)
     {
-        [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
+        //this should be small enough to not crash the appex when loading the image from file later on but large enough to have excellent quality
+        NSData* imageData = [HelperTools resizeAvatarImage:[UIImage imageWithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]] toMaxBase64Size:1500];
+        [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:imageData];
         [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
         //delete cache to make sure the image will be regenerated
         [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];

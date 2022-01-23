@@ -109,7 +109,7 @@ $$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), 
     for(NSString* avatarHash in data)
     {
         //this should be small enough to not crash the appex when loading the image from file later on but large enough to have excellent quality
-        NSData* imageData = [HelperTools resizeAvatarImage:[UIImage imageWithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]] toMaxBase64Size:1500];
+        NSData* imageData = [HelperTools resizeAvatarImage:[UIImage imageWithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]] toMaxBase64Size:1500000];
         [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:imageData];
         [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
         //delete cache to make sure the image will be regenerated

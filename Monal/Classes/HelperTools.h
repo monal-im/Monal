@@ -31,6 +31,9 @@ void logException(NSException* exception);
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 +(NSString*) pushServer;
+
++(NSData*) resizeAvatarImage:(UIImage*) image toMaxBase64Size:(unsigned long) length;
++(void) report_memory;
 +(UIColor*) generateColorFromJid:(NSString*) jid;
 +(NSString*) bytesToHuman:(int64_t) bytes;
 +(NSString*) stringFromToken:(NSData*) tokenIn;

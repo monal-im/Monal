@@ -470,7 +470,19 @@
 -(void) serviceExtensionTimeWillExpire
 {
     DDLogError(@"notification handler expired, that should never happen!");
-#ifndef IS_ALPHA
+#ifdef IS_ALPHA
+    if([_handlers count] > 0)
+    {
+        //we feed all handlers with an error message, even if already silenced by the normal system, just to make sure
+        for(void (^_handler)(UNNotificationContent* _Nonnull) in _handlers)
+        {
+            UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
+            errorContent.title = @"Unexpected error";
+            errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
+            _handler(errorContent);
+        }
+    }
+#else
     if([_handlers count] > 0)
     {
         //we feed all handlers, even if already done by the normal system,just to make sure
@@ -481,12 +493,10 @@
         }
     }
 #endif
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        usleep(500000);            //wait some time for notifications to be handled by the system (500ms)
-        DDLogInfo(@"Committing suicide...");
-        [DDLog flushLog];
-        exit(0);
-    });
+    usleep(500000);            //wait some time for notifications to be handled by the system (500ms)
+    DDLogInfo(@"Committing suicide...");
+    [DDLog flushLog];
+    exit(0);
     
     /*
     //proxy to push singleton

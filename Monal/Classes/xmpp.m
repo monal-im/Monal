@@ -3993,6 +3993,15 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"Retracting own avatar image");
             [self.pubsub deleteNode:@"urn:xmpp:avatar:metadata" andHandler:$newHandler(MLPubSubProcessor, avatarDeleted)];
             [self.pubsub deleteNode:@"urn:xmpp:avatar:data" andHandler:$newHandler(MLPubSubProcessor, avatarDeleted)];
+            //publish empty metadata node, as per XEP-0084
+            [self.pubsub publishItem:
+                [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{} andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"metadata" andNamespace:@"urn:xmpp:avatar:metadata" withAttributes:@{} andChildren:@[] andData:nil]
+                ] andData:nil]
+            onNode:@"urn:xmpp:avatar:metadata" withConfigOptions:@{
+                @"pubsub#persist_items": @"true",
+                @"pubsub#access_model": @"presence"
+            } andHandler:$newHandler(MLPubSubProcessor, avatarDeleted)];
         }
         else
         {

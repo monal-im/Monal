@@ -177,10 +177,10 @@
         if([data writeToFile:writablePath atomically:NO])
         {
             [HelperTools configureFileProtectionFor:writablePath];
-            DDLogVerbose(@"wrote image to file");
+            DDLogVerbose(@"wrote image to file: %@", writablePath);
         }
         else
-            DDLogError(@"failed to write image");
+            DDLogError(@"failed to write image to file: %@", writablePath);
     }
     
     //remove from cache if its there

@@ -21,7 +21,7 @@ echo ""
 echo "*******************************************"
 echo "*     Update localizations submodules     *"
 echo "*******************************************"
-git submodule update --remote --init
+git submodule update --remote --init --merge
 
 echo ""
 echo "***************************************"

@@ -20,7 +20,7 @@ jobs:
       - name: Checkout submodules
         run: git submodule update --init --recursive
       - name: Checkout submodules
-        run: git submodule update --remote
+        run: git submodule update --remote --merge
       - run: git branch
       - run: git config --local user.email "pushBot@monal.im"
       - run: git config --local user.name "Monal-IM-Push[BOT]"

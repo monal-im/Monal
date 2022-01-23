@@ -984,9 +984,10 @@
         }];
         
         //remove all cached hashes
-        //--> avatar images will be loaded lazyly on next non-smacks connect (because of the incoming metadata +notify on full reconnect)
+        //--> avatar images will be loaded on next non-smacks connect (because of the incoming metadata +notify on full reconnect)
         //and replace the already saved avatar files
-        [self updateDB:db withDataLayer:dataLayer toVersion:5.107 withBlock:^{
+        //NOTE: next reconnect is now(!) due to the upgraded db version
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.108 withBlock:^{
             [db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
         }];
     }];

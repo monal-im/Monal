@@ -247,6 +247,7 @@
         }
         
         DDLogVerbose(@"Making image circular...");
+        [HelperTools report_memory];
         [DDLog flushLog];
         toreturn = [MLImageManager circularImage:toreturn];
         DDLogVerbose(@"Image is now: %@", toreturn);

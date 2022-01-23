@@ -18,7 +18,7 @@
 {
     NSMutableArray* _children;
 }
-@property (atomic, strong) NSMutableDictionary* cache;
+@property (atomic, strong) NSCache* cache;
 
 @property (atomic, strong, readwrite) NSString* element;
 @property (atomic, readwrite) NSMutableDictionary* attributes;
@@ -91,7 +91,7 @@ static NSRegularExpression* attributeFilterRegex;
     _parent = nil;
     _data = nil;
     _element = @"";
-    self.cache = [[NSMutableDictionary alloc] init];
+    self.cache = [[NSCache alloc] init];
 }
 
 -(id) init
@@ -233,12 +233,12 @@ static NSRegularExpression* attributeFilterRegex;
 {
     //invalidate caches of all nodes upstream in our tree
     for(MLXMLNode* node = self; node; node = node.parent)
-        node.cache = [[NSMutableDictionary alloc] init];
+        [node.cache removeAllObjects];
 }
 
 -(void) invalidateDownstreamCache
 {
-    self.cache = [[NSMutableDictionary alloc] init];
+    [self.cache removeAllObjects];
     for(MLXMLNode* node in _children)
         [node invalidateDownstreamCache];
 }
@@ -303,10 +303,9 @@ static NSRegularExpression* attributeFilterRegex;
     va_end(cacheKeyArgs);
     
     //return results from cache if possible
-    @synchronized(self.cache) {
-        if(self.cache[cacheKey])
-            return self.cache[cacheKey];
-    }
+    NSArray* cacheEntry = [self.cache objectForKey:cacheKey];
+    if(cacheEntry)
+        return cacheEntry;
     
 #ifdef QueryStatistics
     @synchronized(statistics) {
@@ -332,10 +331,9 @@ static NSRegularExpression* attributeFilterRegex;
     else
         results = [self find:queryString inNodeList:_children arguments:args];                             //relative path (check childs first)
     
-    //update cache
-    @synchronized(self.cache) {
-        return self.cache[cacheKey] = results;
-    }
+    //update cache and return results
+    [self.cache setObject:results forKey:cacheKey];
+    return results;
 }
 
 -(NSArray*) find:(NSString* _Nonnull) queryString inNodeList:(NSArray* _Nonnull) nodesToCheck arguments:(va_list) args
@@ -572,19 +570,18 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(NSMutableDictionary*) parseQueryEntry:(NSString* _Nonnull) entry arguments:(va_list) args
 {
-    static NSMutableDictionary* localCache;
+    static NSCache* localCache;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        localCache = [[NSMutableDictionary alloc] init];
+        localCache = [[NSCache alloc] init];
     });
     va_list cacheKeyArgs;
     va_copy(cacheKeyArgs, args);
     NSString* cacheKey = [NSString stringWithFormat:@"%@§§%@", entry, [[NSString alloc] initWithFormat:entry arguments:cacheKeyArgs]];
     va_end(cacheKeyArgs);
-    @synchronized(localCache) {
-        if(localCache[cacheKey])
-            return [localCache[cacheKey] mutableCopy];
-    }
+    NSDictionary* cacheEntry = [localCache objectForKey:cacheKey];
+    if(cacheEntry != nil)
+        return [cacheEntry mutableCopy];
     NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
     NSArray* matches = [componentParserRegex matchesInString:entry options:0 range:NSMakeRange(0, [entry length])];
     if(![matches count])
@@ -670,9 +667,7 @@ static NSRegularExpression* attributeFilterRegex;
     }
     if(conversionCommandRange.location != NSNotFound)
         retval[@"conversionCommand"] = [entry substringWithRange:conversionCommandRange];
-    @synchronized(localCache) {
-        localCache[cacheKey] = [retval copy];
-    }
+    [localCache setObject:[retval copy] forKey:cacheKey];
     return retval;
 }
 

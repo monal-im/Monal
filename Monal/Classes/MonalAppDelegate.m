@@ -676,7 +676,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 #pragma mark - memory
 -(void) applicationDidReceiveMemoryWarning:(UIApplication *)application
 {
-    [[MLImageManager sharedInstance] purgeCache];
+    DDLogWarn(@"Got memory warning!");
 }
 
 #pragma mark - backgrounding

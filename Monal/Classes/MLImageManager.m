@@ -87,6 +87,16 @@
     }
 }
 
+-(void) removeAllIcons
+{
+    NSError* error;
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+    [fileManager removeItemAtPath:writablePath error:&error];
+    if(error)
+        DDLogError(@"Got error when removing buddyicons: %@", error);
+}
+
 #pragma mark chat bubbles
 
 -(UIImage *) inboundImage
@@ -189,17 +199,20 @@
 }
 
 
-+ (UIImage*)circularImage:(UIImage *)image
++(UIImage*) circularImage:(UIImage*) image
 {
-    UIImage *composedImage;
+    UIImage* composedImage;
     UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
-    UIBezierPath *clipPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    
+    UIBezierPath* clipPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
     [clipPath addClip];
+    
     // Flip coordinates before drawing image as UIKit and CoreGraphics have inverted coordinate system
     CGContextTranslateCTM(UIGraphicsGetCurrentContext(), 0, image.size.height);
     CGContextScaleCTM(UIGraphicsGetCurrentContext(), 1, -1);
+    
     CGContextDrawImage(UIGraphicsGetCurrentContext(), CGRectMake(0, 0, image.size.width, image.size.height), image.CGImage);
-    composedImage= UIGraphicsGetImageFromCurrentImageContext();
+    composedImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return composedImage;
 }

@@ -27,6 +27,7 @@
 
 +(MLImageManager* _Nonnull) sharedInstance;
 -(void) cleanupHashes;
+-(void) removeAllIcons;
 
 /**
  Takes the string from the xmpp icon vcard info and stores it in an appropropriate place. 

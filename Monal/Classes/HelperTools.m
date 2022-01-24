@@ -85,8 +85,10 @@ void logException(NSException* exception)
 
 +(NSData*) resizeAvatarImage:(UIImage*) image toMaxBase64Size:(unsigned long) length
 {
+    //see this for different resizing techniques: https://nshipster.com/image-resizing/
     // resize image to a maximum of 600x600 pixel
-    CGRect dimensions = AVMakeRectWithAspectRatioInsideRect(image.size, CGRectMake(0, 0, 600, 600));
+    //CGRect dimensions = AVMakeRectWithAspectRatioInsideRect(image.size, CGRectMake(0, 0, 600, 600));
+    CGRect dimensions = CGRectMake(0, 0, 600, 600);
     DDLogInfo(@"Downsizing avatar image to %lux%lu pixel", (unsigned long)dimensions.size.width, (unsigned long)dimensions.size.height);
     UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:dimensions.size];
     UIImage* resizedImage = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull context) {
@@ -94,8 +96,8 @@ void logException(NSException* exception)
     }];
     
     //try with 100% quality first, before downsizing it beginning with 80% quality
-    NSData* data = UIImageJPEGRepresentation(resizedImage, 1.0);
-    DDLogDebug(@"New avatar size after resize but using quality 100%%: %lu", (unsigned long)data.length);
+    NSData* data = UIImagePNGRepresentation(resizedImage);
+    DDLogDebug(@"Avatar size without resize (e.g. png format): %lu", (unsigned long)data.length);
     
     //now reduce quality until image data is smaller than provided size
     CGFloat quality = 0.8;               //start here
@@ -107,7 +109,7 @@ void logException(NSException* exception)
         quality /= 1.3;
     }
     
-    DDLogInfo(@"Returning new avatar jpeg data with size %lu and quality %f", (unsigned long)data.length, (double)quality*1.5);
+    DDLogInfo(@"Returning new avatar jpeg data with size %lu and quality %f", (unsigned long)data.length, (double)quality*1.3);
     return data;
 }
 

@@ -484,9 +484,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     {
         DDLogVerbose(@"got account and cleaning up.. ");
         if(lastConnectedAccount)
-        {
             [account unregisterPush];
-        }
         [account disconnect:YES];
         account = nil;
         DDLogVerbose(@"done cleaning up account ");
@@ -778,17 +776,24 @@ $$
             [xmppAccount enablePush];
 }
 
+//this handler will simply retry the unregisterPush call
+$$class_handler(unregisterPushHandler)
+    [[MLXMPPManager sharedInstance] unregisterPush];
+$$
+
 -(void) unregisterPush
 {
-    @synchronized (_connectedXMPP) {
+    @synchronized(_connectedXMPP) {
         for(xmpp* xmppAccount in _connectedXMPP)
-        {
             if(xmppAccount)
             {
-                [xmppAccount unregisterPush];
+                //postpone unregister until at least one account is connected
+                if(xmppAccount.accountState < kStateBound)
+                    [xmppAccount addReconnectionHandler:$newHandler(self, unregisterPushHandler)];
+                else
+                    [xmppAccount unregisterPush];
                 break;
             }
-        }
     }
 }
 

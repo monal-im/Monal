@@ -60,7 +60,7 @@ $$class_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(
                 //only allow a maximum of 2MiB of image data when in appex due to appex memory limits
                 //--> ignore metadata elements bigger than this size and only hande them once not in appex anymore
                 NSUInteger avatarByteSize = [[data[entry] findFirst:@"{urn:xmpp:avatar:metadata}metadata/info@bytes|int"] unsignedIntegerValue];
-                if(![HelperTools isAppExtension] || avatarByteSize < 4096 * 1024)
+                if(![HelperTools isAppExtension] || avatarByteSize < 96 * 1024)
                     [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:$newHandler(self, handleAvatarFetchResult)];
                 else
                 {

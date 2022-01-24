@@ -1014,6 +1014,11 @@
             [db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
             [[MLImageManager sharedInstance] removeAllIcons];
         }];
+        
+        //this flag remains on for unclean appex shutdowns and can be used to warn (alpha) users about this
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.112 withBlock:^{
+            [db executeNonQuery:@"INSERT INTO flags (name, value) VALUES('clean_appex_shutdown', '1');"];
+        }];
     }];
     NSNumber* newdbversion = [db idReadTransaction:^{
         return [self readDBVersion:db];

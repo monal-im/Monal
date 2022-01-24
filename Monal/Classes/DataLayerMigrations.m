@@ -14,29 +14,51 @@
 
 @implementation DataLayerMigrations
 
++(NSNumber*) readDBVersion:(MLSQLite*) db
+{
+    return [NSNumber numberWithDouble:[[db executeScalar:@"SELECT value FROM flags WHERE name='dbversion';"] doubleValue]];
+}
+
 +(BOOL) updateDB:(MLSQLite*) db withDataLayer:(DataLayer*) dataLayer toVersion:(double) version withBlock:(monal_void_block_t) block
 {
     static BOOL accountStateInvalidated = NO;
-    if([(NSNumber*)[db executeScalar:@"SELECT dbversion FROM dbversion;"] doubleValue] < version)
+    if([(NSNumber*)[db executeScalar:@"SELECT value FROM flags WHERE name='dbversion';"] doubleValue] < version)
     {
         DDLogVerbose(@"Database version <%@ detected. Performing upgrade.", [NSNumber numberWithDouble:version]);
         block();
         if(!accountStateInvalidated)
             [dataLayer invalidateAllAccountStates];
         accountStateInvalidated = YES;
-        [db executeNonQuery:@"UPDATE dbversion SET dbversion=?;" andArguments:@[[NSNumber numberWithDouble:version]]];
+        [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='dbversion';" andArguments:@[[NSNumber numberWithDouble:version]]];
         DDLogDebug(@"Upgrade to %@ success", [NSNumber numberWithDouble:version]);
         return YES;
     }
     return NO;
 }
 
-
 +(BOOL) migrateDB:(MLSQLite*) db withDataLayer:(DataLayer*) dataLayer
 {
+    //migrate dbversion ino flags table (the exception indicates we are already migrated)
+    [db voidWriteTransaction:^{
+        NSNumber* alreadyMigrated = [db executeScalar:@"SELECT count(*) FROM sqlite_master WHERE type='table' AND name='dbversion';"];
+        if([alreadyMigrated boolValue])
+        {
+            NSNumber* unmigratedDBVersion = [db executeScalar:@"SELECT dbversion FROM dbversion;"];
+            DDLogInfo(@"Migrating dbversion to flags table...");
+            [db executeNonQuery:@"DROP TABLE dbversion;"];
+            [db executeNonQuery:@"CREATE TABLE 'flags' ( \
+                    'name' VARCHAR(32) NOT NULL PRIMARY KEY, \
+                    'value' TEXT DEFAULT NULL \
+            );"];
+            [db executeNonQuery:@"INSERT INTO flags (name, value) VALUES('dbversion', ?);" andArguments:@[unmigratedDBVersion]];
+        }
+        else
+            DDLogVerbose(@"dbversion table already migrated");
+    }];
+    
     __block NSNumber* dbversion = nil;
     [db voidWriteTransaction:^{
-        dbversion = (NSNumber*)[db executeScalar:@"SELECT dbversion FROM dbversion;"];
+        dbversion = [self readDBVersion:db];
         DDLogInfo(@"Got db version %@", dbversion);
 
         [self updateDB:db withDataLayer:dataLayer toVersion:2.0 withBlock:^{
@@ -994,11 +1016,10 @@
         }];
     }];
     NSNumber* newdbversion = [db idReadTransaction:^{
-        return [db executeScalar:@"SELECT dbversion FROM dbversion;"];
+        return [self readDBVersion:db];
     }];
     DDLogInfo(@"Database migrated from old version %@ to version %@", dbversion, newdbversion);
     return ![newdbversion isEqual:dbversion];
 }
 
 @end
-

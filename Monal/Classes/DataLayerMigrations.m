@@ -10,6 +10,7 @@
 #import "DataLayerMigrations.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
+#import "MLImageManager.h"
 
 @implementation DataLayerMigrations
 
@@ -987,8 +988,9 @@
         //--> avatar images will be loaded on next non-smacks connect (because of the incoming metadata +notify on full reconnect)
         //and replace the already saved avatar files
         //NOTE: next reconnect is now(!) due to the upgraded db version
-        [self updateDB:db withDataLayer:dataLayer toVersion:5.108 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.111 withBlock:^{
             [db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
+            [[MLImageManager sharedInstance] removeAllIcons];
         }];
     }];
     NSNumber* newdbversion = [db idReadTransaction:^{

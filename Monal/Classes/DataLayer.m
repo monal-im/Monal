@@ -2349,4 +2349,19 @@ static NSDateFormatter* dbFormatter;
         return [self messagesForHistoryIDs:results];
     }];
 }
+
+-(BOOL) getAppexCleanShutdownStatus
+{
+    return [self.db boolReadTransaction:^{
+        return [[self.db executeScalar:@"SELECT value FROM flags WHERE name='clean_appex_shutdown';"] boolValue];
+    }];
+}
+
+-(void) setAppexCleanShutdownStatus:(BOOL) shutdownStatus
+{
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"UPDATE flags SET value=? WHERE name='clean_appex_shutdown';" andArguments:@[[NSNumber numberWithBool:shutdownStatus]]];
+    }];
+}
+
 @end

@@ -290,6 +290,9 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSArray*) getShareSheetPayloadForAccountNo:(NSString*) accountNo;
 -(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId;
 
+-(BOOL) getAppexCleanShutdownStatus;
+-(void) setAppexCleanShutdownStatus:(BOOL) shutdownStatus;
+
 @end
 
 NS_ASSUME_NONNULL_END

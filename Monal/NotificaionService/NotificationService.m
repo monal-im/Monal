@@ -56,6 +56,7 @@
 -(void) killAppex
 {
     @synchronized(self) {
+        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
         DDLogInfo(@"Now killing appex process, goodbye...");
         [DDLog flushLog];
         exit(0);
@@ -399,6 +400,8 @@
 }
 @end
 
+static BOOL warnUnclean = NO;
+
 @implementation NotificationService
 
 +(void) initialize
@@ -429,6 +432,16 @@
     DDLogInfo(@"Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
     [DDLog flushLog];
     usleep(100000);     //wait for initial connectivity check (100ms)
+    
+#ifdef DEBUG
+    BOOL shutdownStatus = [[DataLayer sharedInstance] getAppexCleanShutdownStatus];
+    warnUnclean = shutdownStatus;
+    if(shutdownStatus)
+        DDLogError(@"detected unclean appex shutdown!");
+#endif
+    
+    //mark this appex as unclean (will be cleared directly before calling exit(0))
+    [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
 }
 
 -(id) init
@@ -448,6 +461,21 @@
 {
     DDLogInfo(@"Notification handler called (request id: %@)", request.identifier);
     [_handlers addObject:contentHandler];
+    
+    if(warnUnclean)
+    {
+        UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
+        errorContent.title = @"Unclean appex shutown";
+        errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
+        errorContent.sound = [UNNotificationSound defaultSound];
+        UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:errorContent trigger:nil];
+        [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:errorRequest withCompletionHandler:^(NSError * _Nullable error) {
+            if(error)
+                DDLogError(@"Error posting local appex unclean shutdown error notification: %@", error);
+            else
+                warnUnclean = NO;       //try again on error
+        }];
+    }
     
     //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)
     if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
@@ -470,6 +498,7 @@
 -(void) serviceExtensionTimeWillExpire
 {
     DDLogError(@"notification handler expired, that should never happen!");
+    
 #ifdef IS_ALPHA
     if([_handlers count] > 0)
     {
@@ -479,6 +508,7 @@
             UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
             errorContent.title = @"Unexpected error";
             errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
+            errorContent.sound = [UNNotificationSound defaultSound];
             _handler(errorContent);
         }
     }
@@ -493,7 +523,8 @@
         }
     }
 #endif
-    usleep(500000);            //wait some time for notifications to be handled by the system (500ms)
+
+    [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
     DDLogInfo(@"Committing suicide...");
     [DDLog flushLog];
     exit(0);

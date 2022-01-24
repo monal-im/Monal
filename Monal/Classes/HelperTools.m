@@ -95,21 +95,17 @@ void logException(NSException* exception)
         [image drawInRect:dimensions];
     }];
     
-    //try with 100% quality first, before downsizing it beginning with 80% quality
-    NSData* data = UIImagePNGRepresentation(resizedImage);
-    DDLogDebug(@"Avatar size without resize (e.g. png format): %lu", (unsigned long)data.length);
-    
     //now reduce quality until image data is smaller than provided size
-    CGFloat quality = 0.8;               //start here
-    while((data.length*1.5) > length && quality > 0.001)    //base64 encoded data is 1.5 times bigger than the raw binary data (take that into account)
+    NSData* data = nil;
+    int i = 0;
+    double qualityList[] = {0.96, 0.80, 0.64, 0.48, 0.32, 0.24, 0.16, 0.10, 0.09, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02, 0.01};
+    for(i = 0; (data == nil || (data.length * 1.5) > length) && i < sizeof(qualityList) / sizeof(qualityList[0]); i++)
     {
-        DDLogDebug(@"Resizing new avatar to quality %f", (double)quality);
-        data = UIImageJPEGRepresentation(resizedImage, quality);
+        DDLogDebug(@"Resizing new avatar to quality %f", qualityList[i]);
+        data = UIImageJPEGRepresentation(resizedImage, qualityList[i]);
         DDLogDebug(@"New avatar size after changing quality: %lu", (unsigned long)data.length);
-        quality /= 1.3;
     }
-    
-    DDLogInfo(@"Returning new avatar jpeg data with size %lu and quality %f", (unsigned long)data.length, (double)quality*1.3);
+    DDLogInfo(@"Returning new avatar jpeg data with size %lu and quality %f", (unsigned long)data.length, qualityList[i-1]);
     return data;
 }
 

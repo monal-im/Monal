@@ -109,7 +109,7 @@ void logException(NSException* exception)
     return data;
 }
 
-+(void) report_memory
++(double) report_memory
 {
     struct task_basic_info info;
     mach_msg_type_number_t size = TASK_BASIC_INFO_COUNT;
@@ -118,9 +118,10 @@ void logException(NSException* exception)
                                     (task_info_t)&info,
                                     &size);
     if(kerr == KERN_SUCCESS)
-        DDLogDebug(@"Memory in use (in MiB): %f", ((CGFloat)info.resident_size / 1048576));
+        return ((CGFloat)info.resident_size / 1048576);
     else
         DDLogDebug(@"Error with task_info(): %s", mach_error_string(kerr));
+    return 1.0;     //dummy value
 }
 
 +(UIColor*) generateColorFromJid:(NSString*) jid
@@ -370,8 +371,7 @@ void logException(NSException* exception)
         unsigned long counter = 1;
         while(counter++)
         {
-            DDLogInfo(@"activity(%@): %lu", appex ? @"APPEX" : @"MAINAPP", counter);
-            [self report_memory];
+            DDLogInfo(@"activity(%@): %lu, memory used: %fMiB", appex ? @"APPEX" : @"MAINAPP", counter, [self report_memory]);
             //trigger iq invalidations from this background thread because timeouts aren't time critical
             //we use this to decrement the timeout value of an iq handler every second until it reaches zero
             for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)

@@ -33,7 +33,7 @@ void logException(NSException* exception);
 +(NSString*) pushServer;
 
 +(NSData*) resizeAvatarImage:(UIImage*) image toMaxBase64Size:(unsigned long) length;
-+(void) report_memory;
++(double) report_memory;
 +(UIColor*) generateColorFromJid:(NSString*) jid;
 +(NSString*) bytesToHuman:(int64_t) bytes;
 +(NSString*) stringFromToken:(NSData*) tokenIn;

@@ -998,6 +998,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) startXMPPStream:(BOOL) clearReceiveQueue
 {
+    BOOL appex = [HelperTools isAppExtension];
     if(_xmlParser!=nil)
     {
         DDLogInfo(@"resetting old xml parser");
@@ -1009,20 +1010,42 @@ NSString* const kStanza = @"stanza";
     {
         DDLogInfo(@"creating parser delegate");
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
+            DDLogVerbose(@"Parse finished for new <%@> stanza...", parsedStanza.element);
+            
             if(self.accountState<kStateReconnecting)
             {
                 DDLogWarn(@"Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateReconnecting");
                 return;
             }
             
-            //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
-            //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
-            //should create a backpressure ino the tcp stream, too
-            while([self->_parseQueue operationCount] > 50)
+            if(!appex)
             {
-                DDLogInfo(@"Sleeping 0.5 seconds because parse queue has > 50 entries...");
-                [NSThread sleepForTimeInterval:0.5];
+                //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
+                //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
+                //should create a backpressure ino the tcp stream, too
+                //the calculated sleep time gives every stanza in the queue ~10ms to be handled
+                while([self->_parseQueue operationCount] > 50)
+                {
+                    double waittime = (double)[self->_parseQueue operationCount] / 100.0;
+                    DDLogInfo(@"Sleeping %f seconds because parse queue has > %lu entries...", waittime, (unsigned long)[self->_parseQueue operationCount]);
+                    [NSThread sleepForTimeInterval:waittime];
+                }
             }
+            else
+                while(YES)
+                {
+                    //use a much smaller limit while in appex because memory there is limited to ~32MiB
+                    //like in the mainapp the calculated sleep time gives every stanza in the queue ~10ms to be handled
+                    unsigned long operationCount = [self->_parseQueue operationCount];
+                    double usedMemory = [HelperTools report_memory];
+                    if(!(operationCount > 50 || (appex && usedMemory > 16 && operationCount > MAX(2, 24 - usedMemory))))
+                        break;
+                    
+                    double waittime = (double)[self->_parseQueue operationCount] / 100.0;
+                    DDLogInfo(@"Sleeping %f seconds because parse queue has > %lu entries...", waittime, (unsigned long)[self->_parseQueue operationCount]);
+                    [NSThread sleepForTimeInterval:waittime];
+                }
+            
 #ifndef QueryStatistics
             //prime query cache by doing the most used queries in this thread ahead of the receiveQueue processing
             //only preprocess MLXMLNode queries to prime the cache if enough xml nodes are already queued
@@ -1055,13 +1078,13 @@ NSString* const kStanza = @"stanza";
                 [parsedStanza find:@"{urn:xmpp:carbons:2}*"];
             }
 #endif
+            
             //queue up new stanzas onto the parseQueue which will dispatch them synchronously to the receiveQueue
             //this makes it possible to discard all not already processed but parsed stanzas on disconnect or stream restart etc.
             [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                 //always process stanzas in the receiveQueue
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
-                DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount]);
-                [HelperTools report_memory];
+                DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue, %fMiB memory used)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount], [HelperTools report_memory]);
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     if(self.accountState<kStateReconnecting)
                     {

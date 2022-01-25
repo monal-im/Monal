@@ -1027,7 +1027,7 @@ NSString* const kStanza = @"stanza";
                 while([self->_parseQueue operationCount] > 50)
                 {
                     double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                    DDLogInfo(@"Sleeping %f seconds because parse queue has > %lu entries...", waittime, (unsigned long)[self->_parseQueue operationCount]);
+                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries (used memory: %fMiB)...", waittime, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
                     [NSThread sleepForTimeInterval:waittime];
                 }
             }
@@ -1042,7 +1042,7 @@ NSString* const kStanza = @"stanza";
                         break;
                     
                     double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                    DDLogInfo(@"Sleeping %f seconds because parse queue has > %lu entries...", waittime, (unsigned long)[self->_parseQueue operationCount]);
+                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries and usedMemory is %fMiB...", waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory);
                     [NSThread sleepForTimeInterval:waittime];
                 }
             

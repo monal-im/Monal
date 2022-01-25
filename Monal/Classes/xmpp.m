@@ -1030,8 +1030,10 @@ NSString* const kStanza = @"stanza";
                     DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries (used memory: %fMiB)...", waittime, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
                     [NSThread sleepForTimeInterval:waittime];
                 }
+                DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and usedMemory is %fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
             }
             else
+            {
                 while(YES)
                 {
                     //use a much smaller limit while in appex because memory there is limited to ~32MiB
@@ -1045,6 +1047,8 @@ NSString* const kStanza = @"stanza";
                     DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries and usedMemory is %fMiB...", waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory);
                     [NSThread sleepForTimeInterval:waittime];
                 }
+                DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and usedMemory is %fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
+            }
             
 #ifndef QueryStatistics
             //prime query cache by doing the most used queries in this thread ahead of the receiveQueue processing

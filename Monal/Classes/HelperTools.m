@@ -87,8 +87,8 @@ void logException(NSException* exception)
 {
     //see this for different resizing techniques: https://nshipster.com/image-resizing/
     // resize image to a maximum of 600x600 pixel
-    //CGRect dimensions = AVMakeRectWithAspectRatioInsideRect(image.size, CGRectMake(0, 0, 600, 600));
-    CGRect dimensions = CGRectMake(0, 0, 600, 600);
+    //CGRect dimensions = AVMakeRectWithAspectRatioInsideRect(image.size, CGRectMake(0, 0, 480, 480));
+    CGRect dimensions = CGRectMake(0, 0, 480, 480);
     DDLogInfo(@"Downsizing avatar image to %lux%lu pixel", (unsigned long)dimensions.size.width, (unsigned long)dimensions.size.height);
     UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:dimensions.size];
     UIImage* resizedImage = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull context) {

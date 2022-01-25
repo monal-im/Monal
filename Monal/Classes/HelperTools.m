@@ -253,7 +253,7 @@ void logException(NSException* exception)
 
 +(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly andWaitForCompletion:(BOOL) waitForCompletion
 {
-    __block monal_void_block_t updateSyncErrors = ^{
+    monal_void_block_t updateSyncErrors = ^{
         @synchronized(self) {
             NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
             DDLogInfo(@"Updating syncError notifications: %@", syncErrorsDisplayed);
@@ -263,12 +263,8 @@ void logException(NSException* exception)
                 if(account.accountState < kStateReconnecting && !account.reconnectInProgress)
                     continue;
                 NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
-                //dispatch this to the receive queue to make sure this account *really* is idle when testing (and not in the midde of handling one single stanza)
-                __block BOOL idle = NO;
-                [account dispatchOnReceiveQueue:^{
-                    idle = account.idle;
-                }];
-                if(idle)
+                //dispatching this to the receive queue isn'T neccessary anymore, see comments in account.idle
+                if(account.idle)
                 {
                     DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
                     [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];

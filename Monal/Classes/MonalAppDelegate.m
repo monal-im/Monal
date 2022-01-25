@@ -336,17 +336,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [self updateUnread];
         if(NSProcessInfo.processInfo.isLowPowerModeEnabled)
         {
-            DDLogInfo(@"LowPoderMode is active: nowBackgrounded to reduce power consumption");
-            [self addBackgroundTask];
-            [[MLXMPPManager sharedInstance] nowBackgrounded];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self checkIfBackgroundTaskIsStillNeeded];
-            });
+            DDLogInfo(@"LowPowerMode is active: nowReallyBackgrounded to reduce power consumption");
+            [self nowReallyBackgrounded];
         }
         else
-        {
             [[MLXMPPManager sharedInstance] nowNoLongerInFocus];
-        }
     }
     else if([notification.name isEqualToString:@"NSWindowDidBecomeKeyNotification"])
     {
@@ -734,6 +728,16 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
 }
 
+-(void) nowReallyBackgrounded
+{
+    [self addBackgroundTask];
+    [[MLXMPPManager sharedInstance] nowBackgrounded];
+    [self startBackgroundTimer];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self checkIfBackgroundTaskIsStillNeeded];
+    });
+}
+
 -(void) applicationDidEnterBackground:(UIApplication*) application
 {
     UIApplicationState state = [application applicationState];
@@ -743,13 +747,17 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogInfo(@"Entering BG");
     
     [self updateUnread];
-    [self addBackgroundTask];
-    [[MLXMPPManager sharedInstance] nowBackgrounded];
-    
-    [self startBackgroundTimer];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self checkIfBackgroundTaskIsStillNeeded];
-    });
+#if TARGET_OS_MACCATALYST
+    if(NSProcessInfo.processInfo.isLowPowerModeEnabled)
+    {
+        DDLogInfo(@"LowPowerMode is active: nowReallyBackgrounded to reduce power consumption");
+        [self nowReallyBackgrounded];
+    }
+    else
+        [[MLXMPPManager sharedInstance] nowNoLongerInFocus];
+#else
+    [self nowReallyBackgrounded];
+#endif
 }
 
 -(void) applicationWillTerminate:(UIApplication *)application

@@ -457,9 +457,9 @@ enum msgSentState {
 -(void) displayEncryptionStateInUI
 {
     if(self.contact.isEncrypted)
-        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"]];
+        [self.navBarEncryptToggleButton setImage:[UIImage systemImageNamed:@"lock.fill"]];
     else
-        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"]];
+        [self.navBarEncryptToggleButton setImage:[UIImage systemImageNamed:@"lock.open"]];
 }
 
 -(void) refreshContact:(NSNotification*) notification

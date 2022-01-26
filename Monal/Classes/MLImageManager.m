@@ -37,6 +37,7 @@
 -(id) init
 {
     self = [super init];
+    self.iconCache = [[NSCache alloc] init];
     
     NSFileManager* fileManager = [NSFileManager defaultManager];
     
@@ -46,20 +47,27 @@
     [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:nil];
     [HelperTools configureFileProtectionFor:writablePath];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMemoryPressureNotification) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+    
     return self;
+}
+
+-(void) deinit
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void) handleMemoryPressureNotification
+{
+    DDLogVerbose(@"Removing all objects in avatar cache due to memory pressure...");
+    [self purgeCache];
 }
 
 #pragma mark cache
 
--(NSCache*) iconCache
-{
-    if(!_iconCache) _iconCache=[[NSCache alloc] init];
-    return _iconCache;
-}
-
 -(void) purgeCache
 {
-    _iconCache=nil;
+    [self.iconCache removeAllObjects];
 }
 
 -(void) purgeCacheForContact:(NSString*) contact andAccount:(NSString*) accountNo

@@ -92,6 +92,7 @@ static NSRegularExpression* attributeFilterRegex;
     _data = nil;
     _element = @"";
     self.cache = [[NSCache alloc] init];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMemoryPressureNotification) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 }
 
 -(id) init
@@ -144,6 +145,7 @@ static NSRegularExpression* attributeFilterRegex;
 -(void) deinit
 {
     DDLogVerbose(@"Deinit of MLXMLNode: %@", self);
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(id) initWithCoder:(NSCoder*) decoder
@@ -184,6 +186,13 @@ static NSRegularExpression* attributeFilterRegex;
         [copy addChildNode:child];
     copy.data = _data ? [_data copy] : nil;
     return copy;
+}
+
+-(void) handleMemoryPressureNotification
+{
+    //we won't remove objects in our local cache of parseQueryEntry:arguments: because this shouldn't consume that much memory at all
+    [self.cache removeAllObjects];
+    DDLogVerbose(@"Removed all objects in this MLXMLNode due to memory pressure: %@", self);
 }
 
 -(void) setXMLNS:(NSString*) xmlns

@@ -33,6 +33,7 @@
     return sharedInstance;
 }
 
+//this mehod should *only* be used in the mainapp due to memory requirements for large images
 +(UIImage*) circularImage:(UIImage*) image
 {
     UIImage* composedImage;

@@ -97,8 +97,10 @@ void logException(NSException* exception)
     format.scale = 1.0;
     if(ABS(image.size.width - image.size.height) > epsilon)
     {
-        //see this for different resizing techniques: https://nshipster.com/image-resizing/
-        //and this: https://www.advancedswift.com/crop-image/
+        //see this for different resizing techniques, memory consumption and other caveats:
+        // - https://nshipster.com/image-resizing/
+        // - https://www.advancedswift.com/crop-image/
+        // - https://www.swiftjectivec.com/optimizing-images/
         CGFloat minSize = MIN(image.size.width, image.size.height);
         CGRect drawImageRect = CGRectMake(
             (image.size.width - minSize) / -2.0,

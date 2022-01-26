@@ -280,7 +280,15 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         }
     });
     nw_path_monitor_start(_path_monitor);
-
+    
+    //trigger iq invalidations from a background thread because timeouts aren't time critical
+    //we use this to decrement the timeout value of an iq handler every second until it reaches zero
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
+                [account updateIqHandlerTimeouts];
+        [NSThread sleepForTimeInterval:1];
+    });
+    
     return self;
 }
 

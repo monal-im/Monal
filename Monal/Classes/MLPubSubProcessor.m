@@ -40,7 +40,7 @@ $$class_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(
             NSString* avatarHash = [data[entry] findFirst:@"{urn:xmpp:avatar:metadata}metadata/info@id"];
             if(!avatarHash)     //the user disabled his avatar
             {
-                DDLogInfo(@"User %@ disabled his avatar", jid);
+                DDLogInfo(@"User '%@' disabled his avatar", jid);
                 [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:nil];
                 [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
                 //delete cache to make sure the image will be regenerated
@@ -54,17 +54,17 @@ $$class_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(
                 NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:jid andAccount:account.accountNo];
                 if(currentHash && [avatarHash isEqualToString:currentHash])
                 {
-                    DDLogInfo(@"Avatar hash is the same, we don't need to update our avatar image data");
+                    DDLogInfo(@"Avatar hash of '%@' is the same, we don't need to update our avatar image data", jid);
                     break;
                 }
-                //only allow a maximum of 2MiB of image data when in appex due to appex memory limits
+                //only allow a maximum of 72KiB of image data when in appex due to appex memory limits
                 //--> ignore metadata elements bigger than this size and only hande them once not in appex anymore
                 NSUInteger avatarByteSize = [[data[entry] findFirst:@"{urn:xmpp:avatar:metadata}metadata/info@bytes|int"] unsignedIntegerValue];
-                if(![HelperTools isAppExtension] || avatarByteSize < 96 * 1024)
+                if(![HelperTools isAppExtension] || avatarByteSize < 128 * 1024)
                     [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:$newHandler(self, handleAvatarFetchResult)];
                 else
                 {
-                    DDLogWarn(@"Not loading avatar image of %@ because it is too big to be handled in appex (%lu bytes), rescheduling it to be fetched in mainapp", jid, (unsigned long)avatarByteSize);
+                    DDLogWarn(@"Not loading avatar image of '%@' because it is too big to be handled in appex (%lu bytes), rescheduling it to be fetched in mainapp", jid, (unsigned long)avatarByteSize);
                     [account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid), $ID(avatarHash))];
                 }
             }
@@ -90,7 +90,7 @@ $$
 $$class_handler(fetchAvatarAgain, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, avatarHash))
     if([HelperTools isAppExtension])
     {
-        DDLogWarn(@"Not loading avatar image of %@ because we are still in appex, rescheduling it again!", jid);
+        DDLogWarn(@"Not loading avatar image of '%@' because we are still in appex, rescheduling it again!", jid);
         [account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid), $ID(avatarHash))];
     }
     else
@@ -109,15 +109,25 @@ $$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), 
     for(NSString* avatarHash in data)
     {
         //this should be small enough to not crash the appex when loading the image from file later on but large enough to have excellent quality
-        NSData* imageData = [HelperTools resizeAvatarImage:[UIImage imageWithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]] withCircularMask:YES toMaxBase64Size:256000];
-        [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:imageData];
-        [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
-        //delete cache to make sure the image will be regenerated
-        [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-            @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
-        }];
-        DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
+        UIImage* image = [UIImage imageWithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
+        //this upper limit is roughly 1.4MiB memory (600x600 with 4 byte per pixel)
+        if(![HelperTools isAppExtension] || image.size.width * image.size.height < 600 * 600)
+        {
+            NSData* imageData = [HelperTools resizeAvatarImage:image withCircularMask:YES toMaxBase64Size:256000];
+            [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:imageData];
+            [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
+            //delete cache to make sure the image will be regenerated
+            [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
+            }];
+            DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
+        }
+        else
+        {
+            DDLogWarn(@"Not loading avatar image of '%@' because it is too big to be processed in appex (%lux%lu pixels), rescheduling it to be fetched in mainapp", jid, (unsigned long)image.size.width, (unsigned long)image.size.height);
+            [account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid), $ID(avatarHash))];
+        }
     }
 $$
 

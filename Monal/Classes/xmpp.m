@@ -6,6 +6,8 @@
 //
 //
 
+#include <os/proc.h>
+
 #import <CommonCrypto/CommonCrypto.h>
 #import <CFNetwork/CFSocketStream.h>
 #import <Security/SecureTransport.h>
@@ -1028,12 +1030,12 @@ NSString* const kStanza = @"stanza";
                 while([self->_parseQueue operationCount] > 50)
                 {
                     double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries (used memory: %fMiB)...", waittime, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
+                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries (used/vailable memory: %.3fMiB / %.3fMiB)...", waittime, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
                     [NSThread sleepForTimeInterval:waittime];
                     wasSleeping = YES;
                 }
                 if(wasSleeping)
-                    DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and usedMemory is %fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
+                    DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
             }
             else
             {
@@ -1048,12 +1050,12 @@ NSString* const kStanza = @"stanza";
                         break;
                     
                     double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries and usedMemory is %fMiB...", waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory);
+                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
                     [NSThread sleepForTimeInterval:waittime];
                     wasSleeping = YES;
                 }
                 if(wasSleeping)
-                    DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and usedMemory is %fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
+                    DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
             }
             
 #ifndef QueryStatistics
@@ -1094,7 +1096,7 @@ NSString* const kStanza = @"stanza";
             [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                 //always process stanzas in the receiveQueue
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
-                DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue, %fMiB memory used)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount], [HelperTools report_memory]);
+                DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue, %.3fMiB / %.3fMiB memory used / available)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     if(self.accountState<kStateReconnecting)
                     {

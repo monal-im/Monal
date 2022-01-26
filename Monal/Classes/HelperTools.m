@@ -83,29 +83,104 @@ void logException(NSException* exception)
 }
 
 
-+(NSData*) resizeAvatarImage:(UIImage*) image toMaxBase64Size:(unsigned long) length
++(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length
 {
-    //see this for different resizing techniques: https://nshipster.com/image-resizing/
-    // resize image to a maximum of 600x600 pixel
-    //CGRect dimensions = AVMakeRectWithAspectRatioInsideRect(image.size, CGRectMake(0, 0, 480, 480));
-    CGRect dimensions = CGRectMake(0, 0, 480, 480);
-    DDLogInfo(@"Downsizing avatar image to %lux%lu pixel", (unsigned long)dimensions.size.width, (unsigned long)dimensions.size.height);
-    UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:dimensions.size];
-    UIImage* resizedImage = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull context) {
-        [image drawInRect:dimensions];
-    }];
+    if(!image)
+        return [[NSData alloc] init];
     
-    //now reduce quality until image data is smaller than provided size
-    NSData* data = nil;
-    int i = 0;
-    double qualityList[] = {0.96, 0.80, 0.64, 0.48, 0.32, 0.24, 0.16, 0.10, 0.09, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02, 0.01};
-    for(i = 0; (data == nil || (data.length * 1.5) > length) && i < sizeof(qualityList) / sizeof(qualityList[0]); i++)
+    int destinationSize = 480;
+    int epsilon = 8;
+    UIImage* clippedImage = image;
+    UIGraphicsImageRendererFormat* format = [[UIGraphicsImageRendererFormat alloc] init];
+    format.opaque = NO;
+    format.preferredRange = UIGraphicsImageRendererFormatRangeStandard;
+    format.scale = 1.0;
+    if(ABS(image.size.width - image.size.height) > epsilon)
     {
-        DDLogDebug(@"Resizing new avatar to quality %f", qualityList[i]);
-        data = UIImageJPEGRepresentation(resizedImage, qualityList[i]);
-        DDLogDebug(@"New avatar size after changing quality: %lu", (unsigned long)data.length);
+        //see this for different resizing techniques: https://nshipster.com/image-resizing/
+        //and this: https://www.advancedswift.com/crop-image/
+        CGFloat minSize = MIN(image.size.width, image.size.height);
+        CGRect drawImageRect = CGRectMake(
+            (image.size.width - minSize) / -2.0,
+            (image.size.height - minSize) / -2.0,
+            image.size.width,
+            image.size.height
+        );
+        CGRect drawRect = CGRectMake(
+            0,
+            0,
+            minSize,
+            minSize
+        );
+        DDLogInfo(@"Clipping avatar image %@ to %lux%lu pixels", image, (unsigned long)drawImageRect.size.width, (unsigned long)drawImageRect.size.height);
+        DDLogDebug(@"minSize: %.2f, drawImageRect: (%.2f, %.2f, %.2f, %.2f)", minSize,
+            drawImageRect.origin.x,
+            drawImageRect.origin.y,
+            drawImageRect.size.width,
+            drawImageRect.size.height
+        );
+        clippedImage = [[[UIGraphicsImageRenderer alloc] initWithSize:drawRect.size format:format] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull context) {
+            //not needed here, already done below
+            //if(circularMask)
+            //    [[UIBezierPath bezierPathWithOvalInRect:drawRect] addClip];
+            [image drawInRect:drawImageRect];
+        }];
+        image = nil;     //make sure we free our memory as soon as possible
+        DDLogInfo(@"Clipped image is now: %@", clippedImage);
     }
-    DDLogInfo(@"Returning new avatar jpeg data with size %lu and quality %f", (unsigned long)data.length, qualityList[i-1]);
+    
+    //shrink image to a maximum of 480x480 pixel (AVMakeRectWithAspectRatioInsideRect() keeps the aspect ratio)
+    //CGRect dimensions = AVMakeRectWithAspectRatioInsideRect(image.size, CGRectMake(0, 0, 480, 480));
+    CGRect dimensions;
+    if(clippedImage.size.width > destinationSize + epsilon)
+    {
+        dimensions = CGRectMake(0, 0, destinationSize, destinationSize);
+        DDLogInfo(@"Now shrinking image to %lux%lu pixels", (unsigned long)dimensions.size.width, (unsigned long)dimensions.size.height);
+    }
+    else if(circularMask)
+    {
+        dimensions = CGRectMake(0, 0, clippedImage.size.width, clippedImage.size.height);
+        DDLogInfo(@"Only masking image to a %lux%lu pixels circle", (unsigned long)dimensions.size.width, (unsigned long)dimensions.size.height);
+    }
+    else
+    {
+        dimensions = CGRectMake(0, 0, 0, 0);
+        DDLogInfo(@"Not doing anything to image, everything is already perfect: %@", clippedImage);
+    }
+    
+    //only shink/mask image if needed and requested (indicated by a dimension size > 0
+    UIImage* resizedImage = clippedImage;
+    if(dimensions.size.width > 0)
+    {
+        resizedImage = [[[UIGraphicsImageRenderer alloc] initWithSize:dimensions.size format:format] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull context) {
+            if(circularMask)
+                [[UIBezierPath bezierPathWithOvalInRect:dimensions] addClip];
+            [clippedImage drawInRect:dimensions];
+        }];
+        DDLogInfo(@"Shrinked/masked image is now: %@", resizedImage);
+    }
+    clippedImage = nil;     //make sure we free our memory as soon as possible
+    
+    //masked immages MUST be of png type because jpeg does no carry any transparency information
+    NSData* data = nil;
+    if(circularMask)
+    {
+        data = UIImagePNGRepresentation(resizedImage);
+        DDLogInfo(@"Returning new avatar png data with size %lu for image: %@", (unsigned long)data.length, resizedImage);
+    }
+    else
+    {
+        //now reduce quality until image data is smaller than provided size
+        int i = 0;
+        double qualityList[] = {0.96, 0.80, 0.64, 0.48, 0.32, 0.24, 0.16, 0.10, 0.09, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02, 0.01};
+        for(i = 0; (data == nil || (data.length * 1.5) > length) && i < sizeof(qualityList) / sizeof(qualityList[0]); i++)
+        {
+            DDLogDebug(@"Resizing new avatar to quality %f", qualityList[i]);
+            data = UIImageJPEGRepresentation(resizedImage, qualityList[i]);
+            DDLogDebug(@"New avatar size after changing quality: %lu", (unsigned long)data.length);
+        }
+        DDLogInfo(@"Returning new avatar jpeg data with size %lu and quality %f for image: %@", (unsigned long)data.length, qualityList[i-1], resizedImage);
+    }
     return data;
 }
 
@@ -368,10 +443,6 @@ void logException(NSException* exception)
         while(counter++)
         {
             DDLogInfo(@"activity(%@): %lu, memory used: %fMiB", appex ? @"APPEX" : @"MAINAPP", counter, [self report_memory]);
-            //trigger iq invalidations from this background thread because timeouts aren't time critical
-            //we use this to decrement the timeout value of an iq handler every second until it reaches zero
-            for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
-                [account updateIqHandlerTimeouts];
             [NSThread sleepForTimeInterval:1];
         }
     });

@@ -894,8 +894,10 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         NSString* hash = [self.db executeScalar:@"SELECT iconhash FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
-        if(!hash)       //try to get the hash of our own account
+        if(!hash)           //try to get the hash of our own account
             hash = [self.db executeScalar:@"SELECT iconhash FROM account WHERE account_id=? AND printf('%s@%s', username, domain)=?;" andArguments:@[accountNo, buddy]];
+        if(!hash)
+            hash = @"";     //hashes should never be nil
         return hash;
     }];
 }

@@ -32,7 +32,7 @@ void logException(NSException* exception);
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 +(NSString*) pushServer;
 
-+(NSData*) resizeAvatarImage:(UIImage*) image toMaxBase64Size:(unsigned long) length;
++(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length;
 +(double) report_memory;
 +(UIColor*) generateColorFromJid:(NSString*) jid;
 +(NSString*) bytesToHuman:(int64_t) bytes;

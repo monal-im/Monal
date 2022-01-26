@@ -4039,7 +4039,7 @@ NSString* const kStanza = @"stanza";
         else
         {
             //should work for ejabberd >= 19.02 and prosody >= 0.11
-            NSData* imageData = [HelperTools resizeAvatarImage:image toMaxBase64Size:60000];
+            NSData* imageData = [HelperTools resizeAvatarImage:image withCircularMask:NO toMaxBase64Size:60000];
             NSString* imageHash = [HelperTools hexadecimalString:[HelperTools sha1:imageData]];
             
             DDLogInfo(@"Publishing own avatar image with hash %@", imageHash);

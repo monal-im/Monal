@@ -129,7 +129,7 @@
     NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
     [fileManager removeItemAtPath:writablePath error:&error];
     if(error)
-        DDLogError(@"Got error when removing buddyicons: %@", error);
+        DDLogError(@"Got error while trying to delete all avatar files: %@", error);
 }
 
 #pragma mark chat bubbles
@@ -155,22 +155,27 @@
 
 -(UIImage*) generateDummyIconForContact:(MLContact*) contact
 {
+    NSString* contactLetter = [[[contact contactDisplayName] substringToIndex:1] uppercaseString];
     UIColor* background = [HelperTools generateColorFromJid:contact.contactJid];
     UIColor* foreground = [UIColor blackColor];
     if(![background isLightColor])
         foreground = [UIColor whiteColor];
     
-    UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(200, 200)];
+    CGRect drawRect = CGRectMake(0, 0, 200, 200);
+    UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:drawRect.size];
     return [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull context) {
+        //make sure our image is circular
+        [[UIBezierPath bezierPathWithOvalInRect:drawRect] addClip];
+        
+        //fill the background of our image
         [background setFill];
         [context fillRect:renderer.format.bounds];
         
-        NSString* contactLetter = [[[contact contactDisplayName] substringToIndex:1] uppercaseString];
-        
+        //draw letter in the middleof our image
         NSMutableParagraphStyle* paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
         paragraphStyle.alignment = NSTextAlignmentCenter;
         NSDictionary* attributes = @{
-            NSFontAttributeName: [[UIFont preferredFontForTextStyle:UIFontTextStyleLargeTitle] fontWithSize:120],
+            NSFontAttributeName: [[UIFont preferredFontForTextStyle:UIFontTextStyleLargeTitle] fontWithSize:(unsigned int)(drawRect.size.height / 1.666)],
             NSForegroundColorAttributeName: foreground,
             NSParagraphStyleAttributeName: paragraphStyle
         };
@@ -229,56 +234,41 @@
 
 -(UIImage*) getIconForContact:(MLContact*) contact withCompletion:(void (^)(UIImage *))completion
 {
-    DDLogVerbose(@"getIconForContact: %@", contact);
     NSString* filename = [self fileNameforContact:contact.contactJid];
-    DDLogVerbose(@"filename: %@", filename);
     
     __block UIImage* toreturn = nil;
     //get filname from DB
     NSString* cacheKey = [NSString stringWithFormat:@"%@_%@", contact.accountId, contact.contactJid];
-    DDLogVerbose(@"cache key: %@", cacheKey);
     
     //check cache
     toreturn = [self.iconCache objectForKey:cacheKey];
-    DDLogVerbose(@"after cache try: %@", toreturn);
     if(!toreturn)
     {
         if(contact.isGroup)
-            toreturn = [@"channel" isEqualToString:contact.mucType] ? [UIImage imageNamed:@"noicon_channel"] : [UIImage imageNamed:@"noicon_muc"];
+            toreturn = [MLImageManager circularImage:([@"channel" isEqualToString:contact.mucType] ? [UIImage imageNamed:@"noicon_channel"] : [UIImage imageNamed:@"noicon_muc"])];
         else
         {
             NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
             writablePath = [writablePath stringByAppendingPathComponent:contact.accountId];
             writablePath = [writablePath stringByAppendingPathComponent:filename];
 
-            DDLogVerbose(@"loading avatar image at %@", writablePath);
-            NSFileManager* fileManager = [NSFileManager defaultManager];
-            NSError* error;
-            NSDictionary* fileAttributes = [fileManager attributesOfItemAtPath:writablePath error:&error];
-            if(error)
-                DDLogError(@"Error while getting file attributes: %@", error);
-            else
-                DDLogVerbose(@"image file size: %@", fileAttributes[NSFileSize]);
-            [DDLog flushLog];
+            DDLogVerbose(@"Loading avatar image at: %@", writablePath);
             UIImage* savedImage = [UIImage imageWithContentsOfFile:writablePath];
             if(savedImage)
                 toreturn = savedImage;
-            DDLogVerbose(@"after file load: %@", toreturn);
+            DDLogVerbose(@"Loaded image: %@", toreturn);
 
             if(toreturn == nil)
             {
-                DDLogVerbose(@"Generating dummy icon...");
+                DDLogVerbose(@"Generating dummy icon for contact: %@", contact);
                 toreturn = [self generateDummyIconForContact:contact];
             }
         }
         
         //uiimage image named is cached if avaialable, but onlyif not in appex due to memory limits therein
         if(toreturn && ![HelperTools isAppExtension])
-        {
-            DDLogVerbose(@"Caching image under key %@", cacheKey);
-            [DDLog flushLog];
             [self.iconCache setObject:toreturn forKey:cacheKey];
-        }
+        
         if(completion)
             dispatch_async(dispatch_get_main_queue(), ^{
                 completion(toreturn);
@@ -288,39 +278,34 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             completion(toreturn);
         });
-    DDLogVerbose(@"returning %@", toreturn);
-    [DDLog flushLog];
     return toreturn;
 }
 
 
--(BOOL) saveBackgroundImageData:(NSData *) data {
+-(BOOL) saveBackgroundImageData:(NSData*) data
+{
     NSFileManager* fileManager = [NSFileManager defaultManager];
-
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
-
+    
+    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString* documentsDirectory = [paths objectAtIndex:0];
+    NSString* writablePath = [documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
+    
     if([fileManager fileExistsAtPath:writablePath])
-    {
         [fileManager removeItemAtPath:writablePath error:nil];
-    }
-
+    
     return [data writeToFile:writablePath atomically:YES];
 }
 
 -(UIImage*) getBackground:(BOOL) forceReload
 {
-    // use cached image
+    //use cached image if possible
     if(self.chatBackground && forceReload == NO)
         return self.chatBackground;
+    
     NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString* documentsDirectory = [paths objectAtIndex:0];
     NSString* writablePath = [documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
-
-    self.chatBackground = [UIImage imageWithContentsOfFile:writablePath];
-
-    return self.chatBackground;
+    return self.chatBackground = [UIImage imageWithContentsOfFile:writablePath];
 }
 
 -(void) resetBackgroundImage
@@ -328,13 +313,4 @@
     self.chatBackground = nil;
 }
 
-/*
-- (void)URLSession:(NSURLSession *)session
-      downloadTask:(NSURLSessionDownloadTask *)downloadTask
-      didWriteData:(int64_t)bytesWritten
- totalBytesWritten:(int64_t)totalBytesWritten
-totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite{
-    
-}
-*/
 @end

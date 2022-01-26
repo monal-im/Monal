@@ -1006,18 +1006,20 @@
             [db executeNonQuery:@"DROP TABLE signalContactKey;"];
         }];
         
-        //remove all cached hashes
-        //--> avatar images will be loaded on next non-smacks connect (because of the incoming metadata +notify on full reconnect)
-        //and replace the already saved avatar files
-        //NOTE: next reconnect is now(!) due to the upgraded db version
-        [self updateDB:db withDataLayer:dataLayer toVersion:5.111 withBlock:^{
-            [db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
-            [[MLImageManager sharedInstance] removeAllIcons];
-        }];
+        /* this gap between 5.106 and 5.112 is intentional and should not be filled */
         
         //this flag remains on for unclean appex shutdowns and can be used to warn (alpha) users about this
         [self updateDB:db withDataLayer:dataLayer toVersion:5.112 withBlock:^{
             [db executeNonQuery:@"INSERT INTO flags (name, value) VALUES('clean_appex_shutdown', '1');"];
+        }];
+        
+        //remove all cached hashes and saved avatar images
+        //--> avatar images will be loaded on next non-smacks connect (because of the incoming metadata +notify on full reconnect)
+        //and replace the already saved avatar files
+        //NOTE: next reconnect is now(!) due to the upgraded db version
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.113 withBlock:^{
+            [db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
+            [[MLImageManager sharedInstance] removeAllIcons];
         }];
     }];
     NSNumber* newdbversion = [db idReadTransaction:^{

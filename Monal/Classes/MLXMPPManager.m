@@ -178,7 +178,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     }
 }
 
-+ (MLXMPPManager*) sharedInstance
++(MLXMPPManager*) sharedInstance
 {
     static dispatch_once_t once;
     static MLXMPPManager* sharedInstance;

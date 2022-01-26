@@ -33,6 +33,23 @@
     return sharedInstance;
 }
 
++(UIImage*) circularImage:(UIImage*) image
+{
+    UIImage* composedImage;
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
+    
+    UIBezierPath* clipPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    [clipPath addClip];
+    
+    // Flip coordinates before drawing image as UIKit and CoreGraphics have inverted coordinate system
+    CGContextTranslateCTM(UIGraphicsGetCurrentContext(), 0, image.size.height);
+    CGContextScaleCTM(UIGraphicsGetCurrentContext(), 1, -1);
+    
+    CGContextDrawImage(UIGraphicsGetCurrentContext(), CGRectMake(0, 0, image.size.width, image.size.height), image.CGImage);
+    composedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return composedImage;
+}
 
 -(id) init
 {
@@ -107,31 +124,20 @@
 
 #pragma mark chat bubbles
 
--(UIImage *) inboundImage
+-(UIImage*) inboundImage
 {
- if (_inboundImage)
- {
-     return _inboundImage;
- }
- 
-    _inboundImage=[[UIImage imageNamed:@"incoming"]
-                   resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
-    
+    if(_inboundImage)
+        return _inboundImage;
+    _inboundImage = [[UIImage imageNamed:@"incoming"] resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
     return _inboundImage;
     
 }
 
-
 -(UIImage*) outboundImage
 {
     if (_outboundImage)
-    {
         return _outboundImage;
-    }
-    
-    _outboundImage=[[UIImage imageNamed:@"outgoing"]
-                   resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
-    
+    _outboundImage = [[UIImage imageNamed:@"outgoing"] resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
     return _outboundImage;
 }
 
@@ -206,25 +212,6 @@
     
 }
 
-
-+(UIImage*) circularImage:(UIImage*) image
-{
-    UIImage* composedImage;
-    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
-    
-    UIBezierPath* clipPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-    [clipPath addClip];
-    
-    // Flip coordinates before drawing image as UIKit and CoreGraphics have inverted coordinate system
-    CGContextTranslateCTM(UIGraphicsGetCurrentContext(), 0, image.size.height);
-    CGContextScaleCTM(UIGraphicsGetCurrentContext(), 1, -1);
-    
-    CGContextDrawImage(UIGraphicsGetCurrentContext(), CGRectMake(0, 0, image.size.width, image.size.height), image.CGImage);
-    composedImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return composedImage;
-}
-
 -(UIImage*) getIconForContact:(MLContact*) contact
 {
     return [self getIconForContact:contact withCompletion:nil];
@@ -275,13 +262,6 @@
             }
         }
         
-        DDLogVerbose(@"Making image circular...");
-        [HelperTools report_memory];
-        [DDLog flushLog];
-        toreturn = [MLImageManager circularImage:toreturn];
-        DDLogVerbose(@"Image is now: %@", toreturn);
-        [DDLog flushLog];
-
         //uiimage image named is cached if avaialable, but onlyif not in appex due to memory limits therein
         if(toreturn && ![HelperTools isAppExtension])
         {

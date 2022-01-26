@@ -6,6 +6,8 @@
 //  Copyright © 2019 Monal.im. All rights reserved.
 //
 
+#import <BackgroundTasks/BackgroundTasks.h>
+
 #import "NotificationService.h"
 #import "MLConstants.h"
 #import "HelperTools.h"
@@ -15,6 +17,8 @@
 #import "MLNotificationManager.h"
 #import "MLFiletransfer.h"
 #import "xmpp.h"
+
+static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 @interface Push : NSObject
 @property (atomic, strong) NSMutableArray* handlerList;
@@ -183,6 +187,10 @@
                         //post sync errors for all accounts still not idle now
                         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                         
+                        //check idle state and schedule a background task (handled in the main app) if not idle
+                        if(![[MLXMPPManager sharedInstance] allAccountsIdle] /*&& [MLFiletransfer isIdle]*/)
+                            [self scheduleBackgroundFetchingTask];
+                        
                         //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
                         //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
                         //use feedAllWaitingHandlersWithCompletion:nil instead of feedAllWaitingHandlers, because feedAllWaitingHandlers
@@ -223,6 +231,30 @@
         //(re)connect all accounts
         //[[MLXMPPManager sharedInstance] connectIfNecessary];
     }
+}
+
+-(void) scheduleBackgroundFetchingTask
+{
+    [HelperTools dispatchSyncReentrant:^{
+        NSError *error = NULL;
+        // cancel existing task (if any)
+        [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
+        // new task
+        //BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+        BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+        //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+        request.requiresNetworkConnectivity = YES;
+        request.requiresExternalPower = NO;
+        request.earliestBeginDate = nil;
+        //request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+        BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
+        if(!success) {
+            // Errorcodes https://stackoverflow.com/a/58224050/872051
+            DDLogError(@"Failed to submit BGTask request: %@", error);
+        } else {
+            DDLogVerbose(@"Success submitting BGTask request %@", request);
+        }
+    } onQueue:dispatch_get_main_queue()];
 }
 
 -(UNMutableNotificationContent*) generateNotificationForHandler:(void (^)(UNNotificationContent*)) handler

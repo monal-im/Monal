@@ -271,7 +271,7 @@ void logException(NSException* exception)
                     syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
                     [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
                 }
-                else if(!removeOnly)
+                else if(!removeOnly && [self isNotInFocus])
                 {
                     if([syncErrorsDisplayed[account.connectionProperties.identity.jid] boolValue])
                     {

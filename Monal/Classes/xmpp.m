@@ -1024,16 +1024,20 @@ NSString* const kStanza = @"stanza";
                 //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
                 //should create a backpressure ino the tcp stream, too
                 //the calculated sleep time gives every stanza in the queue ~10ms to be handled
+                BOOL wasSleeping = NO;
                 while([self->_parseQueue operationCount] > 50)
                 {
                     double waittime = (double)[self->_parseQueue operationCount] / 100.0;
                     DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries (used memory: %fMiB)...", waittime, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
                     [NSThread sleepForTimeInterval:waittime];
+                    wasSleeping = YES;
                 }
-                DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and usedMemory is %fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
+                if(wasSleeping)
+                    DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and usedMemory is %fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
             }
             else
             {
+                BOOL wasSleeping = NO;
                 while(YES)
                 {
                     //use a much smaller limit while in appex because memory there is limited to ~32MiB
@@ -1046,8 +1050,10 @@ NSString* const kStanza = @"stanza";
                     double waittime = (double)[self->_parseQueue operationCount] / 100.0;
                     DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries and usedMemory is %fMiB...", waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory);
                     [NSThread sleepForTimeInterval:waittime];
+                    wasSleeping = YES;
                 }
-                DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and usedMemory is %fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
+                if(wasSleeping)
+                    DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and usedMemory is %fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory]);
             }
             
 #ifndef QueryStatistics

@@ -10,6 +10,7 @@
 #include <mach/mach.h>
 #include <mach/mach_error.h>
 #include <mach/mach_traps.h>
+#include <os/proc.h>
 
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
@@ -444,7 +445,7 @@ void logException(NSException* exception)
         unsigned long counter = 1;
         while(counter++)
         {
-            DDLogInfo(@"activity(%@): %lu, memory used: %fMiB", appex ? @"APPEX" : @"MAINAPP", counter, [self report_memory]);
+            DDLogInfo(@"activity(%@): %lu, memory used / available: %.3fMiB / %.3fMiB", appex ? @"APPEX" : @"MAINAPP", counter, [self report_memory], (CGFloat)os_proc_available_memory() / 1048576);
             [NSThread sleepForTimeInterval:1];
         }
     });

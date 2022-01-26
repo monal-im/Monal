@@ -103,18 +103,19 @@
         NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
         writablePath = [writablePath stringByAppendingPathComponent:contact.accountId];
         writablePath = [writablePath stringByAppendingPathComponent:[self fileNameforContact:contact.contactJid]];
-        BOOL hasHash = [@"" isEqualToString:[[DataLayer sharedInstance] getAvatarHashForContact:contact.contactJid andAccount:contact.accountId]];
+        NSString* hash = [[DataLayer sharedInstance] getAvatarHashForContact:contact.contactJid andAccount:contact.accountId];
+        BOOL hasHash = ![@"" isEqualToString:hash];
         
         if(hasHash && ![fileManager isReadableFileAtPath:writablePath])
         {
-            DDLogDebug(@"Deleting orphan hash of contact: %@", contact);
+            DDLogDebug(@"Deleting orphan hash '%@' of contact: %@", hash, contact);
             //delete avatar hash from db if the file containing our image data vanished
             [[DataLayer sharedInstance] setAvatarHash:@"" forContact:contact.contactJid andAccount:contact.accountId];
         }
         
         if(!hasHash && [fileManager isReadableFileAtPath:writablePath])
         {
-            DDLogDebug(@"Deleting orphan avatar file of contact: %@", contact);
+            DDLogDebug(@"Deleting orphan avatar file '%@' of contact: %@", writablePath, contact);
             NSError* error;
             [fileManager removeItemAtPath:writablePath error:&error];
             if(error)

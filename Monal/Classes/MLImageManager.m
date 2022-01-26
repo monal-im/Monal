@@ -282,8 +282,8 @@
         DDLogVerbose(@"Image is now: %@", toreturn);
         [DDLog flushLog];
 
-        //uiimage image named is cached if avaialable
-        if(toreturn)
+        //uiimage image named is cached if avaialable, but onlyif not in appex due to memory limits therein
+        if(toreturn && ![HelperTools isAppExtension])
         {
             DDLogVerbose(@"Caching image under key %@", cacheKey);
             [DDLog flushLog];

@@ -17,6 +17,8 @@ int main(int argc, char *argv[]) {
         NSSetUncaughtExceptionHandler(&logException);
 
         [HelperTools configureLogging];
+        
+        [HelperTools activityLog];
 
         // check start arguments
         // reset sworim and ipc database for UI Tests

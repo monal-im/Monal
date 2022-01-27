@@ -188,7 +188,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                         
                         //check idle state and schedule a background task (handled in the main app) if not idle
-                        if(![[MLXMPPManager sharedInstance] allAccountsIdle] /*&& [MLFiletransfer isIdle]*/)
+                        //if(![[MLXMPPManager sharedInstance] allAccountsIdle] /*&& [MLFiletransfer isIdle]*/)
                             [self scheduleBackgroundFetchingTask];
                         
                         //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
@@ -245,14 +245,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
         request.requiresNetworkConnectivity = YES;
         request.requiresExternalPower = NO;
-        request.earliestBeginDate = nil;
-        //request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+        //assume there will be one next push incoming shortly and add an extra of 10 seconds on top of its handling time
+        request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];
         BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
         if(!success) {
             // Errorcodes https://stackoverflow.com/a/58224050/872051
-            DDLogError(@"Failed to submit BGTask request: %@", error);
+            DDLogError(@"Failed to submit BGTask request %@, error: %@", request, error);
         } else {
-            DDLogVerbose(@"Success submitting BGTask request %@", request);
+            DDLogVerbose(@"Success submitting BGTask request %@, error: %@", request, error);
         }
     } onQueue:dispatch_get_main_queue()];
 }

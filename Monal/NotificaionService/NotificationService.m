@@ -182,25 +182,28 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                     //(e.g. [MLFiletransfer isIdle] is not YES)
                     if([self.handlerList count] <= 1 && !self.incomingPushWaiting)
                     {
+                        DDLogInfo(@"Trying to extend runtime or shutdown instead...");
+                        [self extendRuntime];
+                        
+                        /*
                         DDLogInfo(@"Shutting down appex now");
                         
                         //post sync errors for all accounts still not idle now
                         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                         
                         //check idle state and schedule a background task (handled in the main app) if not idle
-                        //if(![[MLXMPPManager sharedInstance] allAccountsIdle] /*&& [MLFiletransfer isIdle]*/)
+                        //if(![[MLXMPPManager sharedInstance] allAccountsIdle])
                             [self scheduleBackgroundFetchingTask];
                         
                         //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
                         //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
-                        //use feedAllWaitingHandlersWithCompletion:nil instead of feedAllWaitingHandlers, because feedAllWaitingHandlers
-                        //would sync-dispatch to a new thread and use @synchronized there --> that would create a deadlock with this thread
                         //NOTICE: this call will disconnect and feed the handler afterwards
                         [self feedAllWaitingHandlersWithCompletion:^{
                             //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                             [self killAppex];
                         }];
+                        */
                     }
                     else
                         DDLogInfo(@"NOT shutting down appex: got new pipelined incomng push");
@@ -231,6 +234,41 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //(re)connect all accounts
         //[[MLXMPPManager sharedInstance] connectIfNecessary];
     }
+}
+
+-(void) extendRuntime
+{
+    __block BOOL running = YES;
+    [[NSProcessInfo processInfo] performExpiringActivityWithReason:@"could not synchronize" usingBlock:^(BOOL expired) {
+        if(expired)
+        {
+            DDLogWarn(@"Could not request more execution timeor time elapsed, terminating!");
+            
+            //post sync errors for all accounts still not idle now
+            [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+            
+            //check idle state and schedule a background task (handled in the main app) if not idle
+            if(![[MLXMPPManager sharedInstance] allAccountsIdle])
+                [self scheduleBackgroundFetchingTask];
+            
+            //use feedAllWaitingHandlersWithCompletion: instead of feedAllWaitingHandlers, because feedAllWaitingHandlers
+            //would async-dispatch to a new thread --> that would not block this thread and therefore freeze the appex
+            //NOTICE: this call will disconnect and feed the handler afterwards
+            [self feedAllWaitingHandlersWithCompletion:^{
+                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                [self killAppex];
+            }];
+            
+            running = NO;
+        }
+        else
+        {
+            while(running)
+                usleep(1000000);
+            DDLogError(@"This should be never reached, because we commit suicide before!");
+        }
+    }];
 }
 
 -(void) scheduleBackgroundFetchingTask

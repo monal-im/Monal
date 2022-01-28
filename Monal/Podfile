@@ -1,5 +1,5 @@
 project 'Monal.xcodeproj'
-source 'https://cdn.cocoapods.org/'
+#source 'https://cdn.cocoapods.org/'
  
 # Uncomment the next line to define a global platform for your project
 platform :ios, '14.0'
@@ -8,8 +8,8 @@ platform :ios, '14.0'
 inhibit_all_warnings!
 
 def signalDeps
-  pod 'SignalProtocolObjC'
-  pod 'SignalProtocolC'
+  pod 'SignalProtocolC', git: 'https://github.com/monal-im/libsignal-protocol-c', branch: 'master'
+  pod 'SignalProtocolObjC', git: 'https://github.com/monal-im/SignalProtocol-ObjC.git', branch: 'master'
 end
 
 def monal

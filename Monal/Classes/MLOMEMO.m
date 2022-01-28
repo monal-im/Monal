@@ -232,7 +232,7 @@ $$
     return NO;
 }
 
--(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
+-(void) queryOMEMOBundleFrom:(NSString*) jid andDevice:(NSString*) deviceid
 {
     NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
 
@@ -305,7 +305,7 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $_ID(xmpp*, account),
     }
 $$
 
--(void) queryOMEMODevices:(NSString *) jid
+-(void) queryOMEMODevices:(NSString*) jid
 {
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
 }
@@ -338,7 +338,7 @@ $$instance_handler(handleManualDevices, account.omemo, $_ID(xmpp*, account), $_I
     }
 $$
 
--(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source
+-(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString*) source
 {
     if(receivedDevices)
     {
@@ -383,7 +383,7 @@ $$
             }
             [self.brokenSessions setObject:brokenContactRids forKey:source];
         }
-        
+
         // Send our own device id when it is missing on the server
         if(!source || [source caseInsensitiveCompare:self.accountJid] == NSOrderedSame)
         {
@@ -431,7 +431,7 @@ $$
     [self.monalSignalStore untrustAllDevicesFrom:jid];
 }
 
--(NSData *) getIdentityForAddress:(SignalAddress*)address
+-(NSData*) getIdentityForAddress:(SignalAddress*)address
 {
     return [self.monalSignalStore getIdentityForAddress:address];
 }
@@ -471,7 +471,7 @@ $$
         NSString* signedPreKeyPublicId = [bundle findFirst:@"signedPreKeyPublic@signedPreKeyId"];
         NSData* signedPreKeySignature = [bundle findFirst:@"signedPreKeySignature#|base64"];
         NSData* identityKey = [bundle findFirst:@"identityKey#|base64"];
-        
+
         if(!signedPreKeyPublic || !signedPreKeyPublicId || !signedPreKeySignature || !identityKey)
             return;
 
@@ -678,7 +678,7 @@ $$
         }
         // add encryption fro all of our own device
         [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self.accountJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
-        
+
         [encrypted addChildNode:header];
         [messageNode addChildNode:encrypted];
     }
@@ -710,7 +710,7 @@ $$
         return;
     }
     [self sendOMEMOBundle];
-    
+
     for(NSString* contactJid in self.brokenSessions) {
         NSSet* rids = [self.brokenSessions objectForKey:contactJid];
         for(NSNumber* rid in rids) {
@@ -719,15 +719,15 @@ $$
                 // We should not generate a new session to our own device
                 continue;
             }
-            
+
             SignalAddress* address = [[SignalAddress alloc] initWithName:contactJid deviceId:(uint32_t)rid.intValue];
-            
+
             // mark session as broken
             [self.monalSignalStore markSessionAsBroken:address];
         }
         // query omemo devices of broken contact
         [self queryOMEMODevices:contactJid];
-        
+
         // request device bundle again -> check for new preKeys
         // use received preKeys to build new session
         // [self queryOMEMOBundleFrom:contact andDevice:deviceId.stringValue];
@@ -735,7 +735,7 @@ $$
     }
 }
 
--(NSString*) decryptMessage:(XMPPMessage *) messageNode
+-(NSString*) decryptMessage:(XMPPMessage*) messageNode
 {
     if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
     {
@@ -765,7 +765,7 @@ $$
         senderJid = messageNode.fromUser;
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:senderJid deviceId:(uint32_t)sid.intValue];
-    
+
     if(!self.signalContext)
     {
         DDLogError(@"Missing signal context");
@@ -777,7 +777,7 @@ $$
         // Nothing to do
         return nil;
     }
-    
+
     NSMutableSet<NSNumber*>* contactBrokenRids = [self.brokenSessions objectForKey:senderJid];
     if(contactBrokenRids && [contactBrokenRids containsObject:sid]) {
 #ifdef IS_ALPHA
@@ -789,11 +789,11 @@ $$
 
     NSString* deviceKeyPath = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
     NSString* deviceKeyPathPreKey = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid];
-    
+
     NSData* messageKey = [messageNode findFirst:deviceKeyPath];
     BOOL devicePreKey = [[messageNode findFirst:deviceKeyPathPreKey] boolValue];
     DDLogVerbose(@"Decrypting using:\n%@ --> %@\n%@ --> %@", deviceKeyPath, messageKey, deviceKeyPathPreKey, devicePreKey ? @"YES" : @"NO");
-    
+
     if(!messageKey && isKeyTransportElement)
     {
         DDLogVerbose(@"Received KeyTransportElement without our own rid included --> Ignore it");
@@ -874,7 +874,7 @@ $$
                 [contactBrokenRids removeObject:sid];
                 [self.brokenSessions setObject:contactBrokenRids forKey:senderJid];
             }
-            
+
             // if no payload is available -> KeyTransportElement
             if(isKeyTransportElement)
             {
@@ -886,7 +886,7 @@ $$
                 return nil;
 #endif
             }
-            
+
             if(decryptedKey.length == 16 * 2)
             {
                 key = [decryptedKey subdataWithRange:NSMakeRange(0, 16)];
@@ -894,7 +894,7 @@ $$
             }
             else
                 key = decryptedKey;
-            
+
             if(key)
             {
                 NSString* ivStr = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/iv#"];
@@ -948,7 +948,7 @@ $$
     MLXMLNode* listNode = [[MLXMLNode alloc] initWithElement:@"list" andNamespace:@"eu.siacs.conversations.axolotl"];
     for(NSNumber* deviceNum in devices)
         [listNode addChildNode:[[MLXMLNode alloc] initWithElement:@"device" withAttributes:@{kId: [deviceNum stringValue]} andChildren:@[] andData:nil]];
-    
+
     // publish devices via pubsub
     [self.account.pubsub publishItem:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{kId: @"current"} andChildren:@[
         listNode,
@@ -971,7 +971,7 @@ $$
         } andChildren:@[] andData:[HelperTools encodeBase64WithData:prekey.keyPair.publicKey]];
         [prekeyNode addChildNode:preKeyPublic];
     };
-    
+
     // send bundle via pubsub interface
     [self.account.pubsub publishItem:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{kId: @"current"} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"bundle" andNamespace:@"eu.siacs.conversations.axolotl" withAttributes:@{} andChildren:@[

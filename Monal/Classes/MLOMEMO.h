@@ -46,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) deleteDeviceForSource:(NSString*) source andRid:(int) rid;
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
--(NSData *) getIdentityForAddress:(SignalAddress*)address;
+-(NSData*) getIdentityForAddress:(SignalAddress*)address;
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 
 -(void) queryOMEMODevices:(NSString*) jid;

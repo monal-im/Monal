@@ -238,11 +238,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) extendRuntime
 {
-    __block BOOL running = YES;
+    __block BOOL running = NO;
     [[NSProcessInfo processInfo] performExpiringActivityWithReason:@"could not synchronize" usingBlock:^(BOOL expired) {
         if(expired)
         {
-            DDLogWarn(@"Could not request more execution timeor time elapsed, terminating!");
+            if(running)
+                DDLogDebug(@"Execution time elapsed, terminating!");
+            else
+                DDLogWarn(@"Could not request more execution time, terminating!");
             
             //post sync errors for all accounts still not idle now
             [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
@@ -260,10 +263,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 [self killAppex];
             }];
             
-            running = NO;
+            running = NO;       //only needed to log the warning below
         }
         else
         {
+            running = YES;
             while(running)
                 usleep(1000000);
             DDLogError(@"This should be never reached, because we commit suicide before!");

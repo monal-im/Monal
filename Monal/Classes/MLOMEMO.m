@@ -187,7 +187,7 @@ const int KEY_SIZE = 16;
 $$instance_handler(devicelistHandler, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
     //type will be "publish", "retract", "purge" or "delete", "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
-    assert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"]);
+    MLAssert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"], @"pep node must be 'eu.siacs.conversations.axolotl.devicelist'");
     if(type && [type isEqualToString:@"publish"]) {
         MLXMLNode* publishedDevices = [data objectForKey:@"current"];
         if(publishedDevices && jid) {
@@ -342,7 +342,7 @@ $$
 {
     if(receivedDevices)
     {
-        NSAssert([self.accountJid caseInsensitiveCompare:self.account.connectionProperties.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
+        MLAssert([self.accountJid caseInsensitiveCompare:self.account.connectionProperties.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
 
         NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesWithValidSessionEntryForName:source];
 
@@ -450,84 +450,82 @@ $$
 
 -(void) processOMEMOKeys:(MLXMLNode*) iqNode forJid:(NSString*) jid andRid:(NSString*) ridString
 {
-    assert(self.signalContext);
-    {
-        if(!ridString)
-            return;
-        NSNumber* rid = @([ridString intValue]);
-        if(rid == nil)
-            return;
+    MLAssert(self.signalContext != nil, @"self.signalContext must not be nil");
+    if(!ridString)
+        return;
+    NSNumber* rid = @([ridString intValue]);
+    if(rid == nil)
+        return;
 
-        NSArray* bundles = [iqNode find:@"/{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}bundle"];
+    NSArray* bundles = [iqNode find:@"/{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}bundle"];
 
-        // there should only be one bundle per device
-        if([bundles count] != 1) {
-            return;
-        }
-        MLXMLNode* bundle = [bundles firstObject];
-
-        // parse
-        NSData* signedPreKeyPublic = [bundle findFirst:@"signedPreKeyPublic#|base64"];
-        NSString* signedPreKeyPublicId = [bundle findFirst:@"signedPreKeyPublic@signedPreKeyId"];
-        NSData* signedPreKeySignature = [bundle findFirst:@"signedPreKeySignature#|base64"];
-        NSData* identityKey = [bundle findFirst:@"identityKey#|base64"];
-
-        if(!signedPreKeyPublic || !signedPreKeyPublicId || !signedPreKeySignature || !identityKey)
-            return;
-
-        uint32_t device = (uint32_t)[rid intValue];
-        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:device];
-        SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
-        NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|int"];
-
-        if(preKeyIds == nil || preKeyIds.count == 0)
-        {
-            DDLogWarn(@"Could not create array of preKeyIds");
-            return;
-        }
-        // parse preKeys
-        const uint32_t preKeyIdsCnt = (uint32_t)preKeyIds.count;
-        unsigned long processedKeysIdx = 0;
-        do
-        {
-            // select random preKey and try to import it
-            const uint32_t preKeyIdxToTest = arc4random_uniform(preKeyIdsCnt);
-            // load preKey
-            NSNumber* preKeyId = preKeyIds[preKeyIdxToTest];
-            if(preKeyId == nil)
-                continue;;
-            NSData* key = [bundle findFirst:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKeyId];
-            if(!key)
-                continue;
-
-            DDLogDebug(@"Generating keyBundle for key id %@...", preKeyId);
-            NSError* error;
-            SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-                                                                        deviceId:device
-                                                                        preKeyId:[preKeyId intValue]
-                                                                        preKeyPublic:key
-                                                                        signedPreKeyId:signedPreKeyPublicId.intValue
-                                                                        signedPreKeyPublic:signedPreKeyPublic
-                                                                        signature:signedPreKeySignature
-                                                                        identityKey:identityKey
-                                                                        error:&error];
-            if(error || !keyBundle)
-            {
-                DDLogWarn(@"Error creating preKeyBundle: %@", error);
-                continue;
-            }
-            [builder processPreKeyBundle:keyBundle error:&error];
-            if(error)
-            {
-                DDLogWarn(@"Error adding preKeyBundle: %@", error);
-                continue;
-            }
-            // found a key
-            // Build new session when a device session is marked as broken
-            [self sendKeyTransportElement:jid removeBrokenSessionForRid:rid];
-            break;
-        } while (++processedKeysIdx <= preKeyIds.count);
+    // there should only be one bundle per device
+    if([bundles count] != 1) {
+        return;
     }
+    MLXMLNode* bundle = [bundles firstObject];
+
+    // parse
+    NSData* signedPreKeyPublic = [bundle findFirst:@"signedPreKeyPublic#|base64"];
+    NSString* signedPreKeyPublicId = [bundle findFirst:@"signedPreKeyPublic@signedPreKeyId"];
+    NSData* signedPreKeySignature = [bundle findFirst:@"signedPreKeySignature#|base64"];
+    NSData* identityKey = [bundle findFirst:@"identityKey#|base64"];
+
+    if(!signedPreKeyPublic || !signedPreKeyPublicId || !signedPreKeySignature || !identityKey)
+        return;
+
+    uint32_t device = (uint32_t)[rid intValue];
+    SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:device];
+    SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
+    NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|int"];
+
+    if(preKeyIds == nil || preKeyIds.count == 0)
+    {
+        DDLogWarn(@"Could not create array of preKeyIds");
+        return;
+    }
+    // parse preKeys
+    const uint32_t preKeyIdsCnt = (uint32_t)preKeyIds.count;
+    unsigned long processedKeysIdx = 0;
+    do
+    {
+        // select random preKey and try to import it
+        const uint32_t preKeyIdxToTest = arc4random_uniform(preKeyIdsCnt);
+        // load preKey
+        NSNumber* preKeyId = preKeyIds[preKeyIdxToTest];
+        if(preKeyId == nil)
+            continue;;
+        NSData* key = [bundle findFirst:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKeyId];
+        if(!key)
+            continue;
+
+        DDLogDebug(@"Generating keyBundle for key id %@...", preKeyId);
+        NSError* error;
+        SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
+                                                                    deviceId:device
+                                                                    preKeyId:[preKeyId intValue]
+                                                                    preKeyPublic:key
+                                                                    signedPreKeyId:signedPreKeyPublicId.intValue
+                                                                    signedPreKeyPublic:signedPreKeyPublic
+                                                                    signature:signedPreKeySignature
+                                                                    identityKey:identityKey
+                                                                    error:&error];
+        if(error || !keyBundle)
+        {
+            DDLogWarn(@"Error creating preKeyBundle: %@", error);
+            continue;
+        }
+        [builder processPreKeyBundle:keyBundle error:&error];
+        if(error)
+        {
+            DDLogWarn(@"Error adding preKeyBundle: %@", error);
+            continue;
+        }
+        // found a key
+        // Build new session when a device session is marked as broken
+        [self sendKeyTransportElement:jid removeBrokenSessionForRid:rid];
+        break;
+    } while(++processedKeysIdx <= preKeyIds.count);
 }
 
 -(void) sendKeyTransportElement:(NSString*) jid removeBrokenSessionForRid:(NSNumber* _Nullable) rid
@@ -594,7 +592,7 @@ $$
 
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact
 {
-    NSAssert(self.signalContext, @"signalContext should be inited.");
+    MLAssert(self.signalContext != nil, @"signalContext should be inited.");
 
     if(message)
         [messageNode setBody:@"[This message is OMEMO encrypted]"];

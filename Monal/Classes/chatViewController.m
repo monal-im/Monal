@@ -535,6 +535,22 @@ enum msgSentState {
     _cancelLastInteractionTimer = nil;
 }
 
+-(void) updateTypingTime:(NSDate*) lastInteractionDate
+{
+    DDLogVerbose(@"LastInteraction updateTime() called");
+    NSString* lastInteractionString = [HelperTools formatLastInteraction:lastInteractionDate];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.navBarLastInteraction.text = lastInteractionString;
+    });
+
+    [self stopLastInteractionTimer];
+    // this timer will be called only if needed
+    if(lastInteractionDate && lastInteractionDate.timeIntervalSince1970 > 0)
+        _cancelLastInteractionTimer = createTimer(60, ^{
+            [self updateTypingTime:lastInteractionDate];
+        });
+}
+
 -(void) updateNavBarLastInteractionLabel:(NSNotification*) notification
 {
     NSDate* lastInteractionDate = nil;
@@ -561,19 +577,7 @@ enum msgSentState {
         lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:jid forAccountNo:accountNo];
 
     // make timestamp human readable (lastInteractionDate will be captured by this block and automatically used by our timer)
-    monal_void_block_t __block updateTime = ^{
-        DDLogVerbose(@"LastInteraction updateTime() called");
-        NSString* lastInteractionString = [HelperTools formatLastInteraction:lastInteractionDate];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.navBarLastInteraction.text = lastInteractionString;
-        });
-
-        [self stopLastInteractionTimer];
-        // this timer will be called only if needed
-        if(lastInteractionDate && lastInteractionDate.timeIntervalSince1970 > 0)
-            _cancelLastInteractionTimer = createTimer(60, updateTime);
-    };
-    updateTime();
+    [self updateTypingTime:lastInteractionDate];
 }
 
 -(void) viewWillAppear:(BOOL)animated

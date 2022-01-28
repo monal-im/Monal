@@ -695,14 +695,14 @@ $$
     // add device to broken session contact set
     [contactBrokenRids addObject:deviceId];
 
-    if(self.omemoLoginState == LoggedIn) {
+    if(self.omemoLoginState == CatchupDone) {
         [self rebuildSessions];
     }
 }
 
 -(void) rebuildSessions
 {
-    if(self.omemoLoginState < LoggedIn) {
+    if(self.omemoLoginState < CatchupDone) {
         DDLogInfo(@"Ignoring rebuildSessionsstate %u", self.omemoLoginState);
         return;
     }
@@ -855,7 +855,7 @@ $$
             if(messagetype == SignalCiphertextTypePreKeyMessage)
             {
                 // check if we need to generate new preKeys
-                if(self.omemoLoginState == LoggedIn) {
+                if(self.omemoLoginState == CatchupDone) {
                     if([self generateNewKeysIfNeeded] == NO) {
                         // send new bundle without the used preKey if no new keys were generated
                         // nothing todo if generateNewKeysIfNeeded == YES as it sends out the new bundle if new keys were generated

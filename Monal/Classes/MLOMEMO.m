@@ -448,7 +448,7 @@ $$
     }
 }
 
--(void) processOMEMOKeys:(MLXMLNode*) iqNode forJid:(NSString*) jid andRid:(NSString*) ridString
+-(void) processOMEMOKeys:(MLXMLNode*) item forJid:(NSString*) jid andRid:(NSString*) ridString
 {
     MLAssert(self.signalContext != nil, @"self.signalContext must not be nil");
     if(!ridString)
@@ -457,7 +457,7 @@ $$
     if(rid == nil)
         return;
 
-    NSArray* bundles = [iqNode find:@"/{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}bundle"];
+    NSArray* bundles = [item find:@"{eu.siacs.conversations.axolotl}bundle"];
 
     // there should only be one bundle per device
     if([bundles count] != 1) {

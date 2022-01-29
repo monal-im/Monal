@@ -43,12 +43,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  disconnects the specified account
  */
--(void) disconnectAccount:(NSString*) accountNo;
+-(void) disconnectAccount:(NSNumber*) accountNo;
 
 /**
  connects the specified account
  */
--(void) connectAccount:(NSString*) accountNo;
+-(void) connectAccount:(NSNumber*) accountNo;
 
 #pragma mark XMPP commands
 /**
@@ -66,7 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
  Block  a jid
  */
 -(void) blocked:(BOOL) isBlocked Jid:(MLContact *) contact;
--(void) blocked:(BOOL) isBlocked Jid:(NSString *) contact Account:(NSString*) accountNo;
+-(void) blocked:(BOOL) isBlocked Jid:(NSString *) contact Account:(NSNumber*) accountNo;
 
 /**
  Returns the user set name of the conencted account
@@ -76,23 +76,23 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  gets the connected account apecified by id. return nil otherwise
  */
--(xmpp* _Nullable) getConnectedAccountForID:(NSString*) accountNo;
+-(xmpp* _Nullable) getConnectedAccountForID:(NSNumber*) accountNo;
 
 /**
  Returns YES if account is connected
  */
--(BOOL) isAccountForIdConnected:(NSString*) accountNo;
+-(BOOL) isAccountForIdConnected:(NSNumber*) accountNo;
 
 /**
  When the account estblihsed its current connection. 
  */
--(NSDate *) connectedTimeFor:(NSString*) accountNo;
+-(NSDate *) connectedTimeFor:(NSNumber*) accountNo;
 
 /**
  update the password in the keychan and update memory cache
  */
--(BOOL) isValidPassword:(NSString*) password forAccount:(NSString*) accountNo;
--(void) updatePassword:(NSString*) password forAccount:(NSString*) accountNo;
+-(BOOL) isValidPassword:(NSString*) password forAccount:(NSNumber*) accountNo;
+-(void) updatePassword:(NSString*) password forAccount:(NSNumber*) accountNo;
 
 -(void) approveContact:(MLContact*) contact;
 -(void) rejectContact:(MLContact*) contact;
@@ -102,7 +102,7 @@ Sends a message to a specified contact in account. Calls completion handler on s
  */
 -(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
 -(void)sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
--(void) sendChatState:(BOOL) isTyping fromAccount:(NSString*) accountNo toJid:(NSString*) jid;
+-(void) sendChatState:(BOOL) isTyping fromAccount:(NSNumber*) accountNo toJid:(NSString*) jid;
 
 #pragma mark XMPP settings
 

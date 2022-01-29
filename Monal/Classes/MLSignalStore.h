@@ -25,10 +25,10 @@
 @property (nonatomic, strong) SignalSignedPreKey* signedPreKey;
 @property (nonatomic, strong) NSArray<SignalPreKey*>* preKeys;
 
--(MLSignalStore*) initWithAccountId:(NSString *) accountId;
+-(MLSignalStore*) initWithAccountId:(NSNumber*) accountId;
 -(void) saveValues;
 
--(NSData*) getIdentityForAddress:(SignalAddress*) ddress;
+-(NSData*) getIdentityForAddress:(SignalAddress*) address;
 /**
  all devices even those without sessions
  */

@@ -16,7 +16,7 @@
 	IBOutlet UILabel *JIDLabel;
 }
 
-@property (nonatomic, strong) NSString* accountno;
+@property (nonatomic, strong) NSNumber* accountNo;
 @property (nonatomic, strong) NSIndexPath* originIndex;
 
 -(IBAction) save:(id) sender;

@@ -26,7 +26,7 @@
 
 @property (nonatomic, strong) MBProgressHUD* loginHUD;
 @property (nonatomic, weak) UITextField* activeField;
-@property (nonatomic, strong) NSString* accountNo;
+@property (nonatomic, strong) NSNumber* accountNo;
 @property (nonatomic, strong) monal_void_block_t cancelFirstLoginTimer;
 
 @end
@@ -134,15 +134,15 @@
     [dic setObject:@YES forKey:kEnabled];
     [dic setObject:@NO forKey:kDirectTLS];
     
-    NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
-    if(accountID)
+    NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
+    if(accountNo)
     {
         //make sure we observer new connection errors (the observer will be removed in connected: to make sure we don't catch
         //non-fatal errors like muc join failures etc. (or any other errors after we successfully connected and logged in for that matter)
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(error:) name:kXMPPError object:nil];
-        self.accountNo = [NSString stringWithFormat:@"%@", accountID];
+        self.accountNo = accountNo;
         [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-        [SAMKeychain setPassword:password forService:kMonalKeychainName account:self.accountNo];
+        [SAMKeychain setPassword:password forService:kMonalKeychainName account:self.accountNo.stringValue];
         [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
         
         self.cancelFirstLoginTimer = createQueuedTimer(FIRST_LOGIN_TIMEOUT, dispatch_get_main_queue(), (^{
@@ -169,7 +169,7 @@
 -(void) connected:(NSNotification*) notification
 {
     xmpp* xmppAccount = notification.object;
-    if(xmppAccount != nil && [xmppAccount.accountNo isEqualToString:self.accountNo])
+    if(xmppAccount != nil && xmppAccount.accountNo.intValue == self.accountNo.intValue)
     {
         if(self.cancelFirstLoginTimer != nil)
         {
@@ -187,7 +187,7 @@
 -(void) catchedup:(NSNotification*) notification
 {
     xmpp* xmppAccount = notification.object;
-    if(xmppAccount != nil && [xmppAccount.accountNo isEqualToString:self.accountNo])
+    if(xmppAccount != nil && xmppAccount.accountNo.intValue == self.accountNo.intValue)
     {
 #ifndef DISABLE_OMEMO
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -203,7 +203,8 @@
 #ifndef DISABLE_OMEMO
 -(void) updateBundleFetchStatus:(NSNotification*) notification
 {
-    if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
+    NSNumber* notificationAccountNo = notification.userInfo[@"accountNo"];
+    if(notificationAccountNo.intValue == self.accountNo.intValue)
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.loginHUD.label.text = [NSString stringWithFormat:NSLocalizedString(@"Loading omemo bundles: %@ / %@", @""), notification.userInfo[@"completed"], notification.userInfo[@"all"]];
@@ -214,7 +215,14 @@
 
 -(void) omemoBundleFetchFinished:(NSNotification*) notification
 {
-    if(notification == nil || [notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
+    BOOL handleNotification;
+    if(notification == nil)
+        handleNotification = YES;
+    else{
+        NSNumber* notificationAccountNo = notification.userInfo[@"accountNo"];
+        handleNotification = (notificationAccountNo.intValue == self.accountNo.intValue);
+    }
+    if(handleNotification == YES)
     {
         [[NSNotificationCenter defaultCenter] removeObserver:self name:kMonalUpdateBundleFetchStatus object:nil];
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -231,7 +239,7 @@
 -(void) error:(NSNotification*) notification
 {
     xmpp* xmppAccount = notification.object;
-    if(xmppAccount != nil && [xmppAccount.accountNo isEqualToString:self.accountNo])
+    if(xmppAccount != nil && xmppAccount.accountNo.intValue == self.accountNo.intValue)
     {
         if(self.cancelFirstLoginTimer != nil)
         {

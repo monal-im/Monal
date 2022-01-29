@@ -162,13 +162,13 @@ enum DummySettingsRows {
 
         if(self.selected && self.selected.row >= [self getAccountNum])
         {
-            editor.accountno = @"-1";
+            editor.accountNo = [NSNumber numberWithInt:-1];
         }
         else
         {
             assert(self.selected);
             editor.originIndex = self.selected;
-            editor.accountno = [self getAccountNoByIndex:self.selected.row];
+            editor.accountNo = [self getAccountNoByIndex:self.selected.row];
         }
     }
 }

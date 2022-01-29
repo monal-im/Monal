@@ -323,7 +323,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     
     for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
     {
-        NSString* accountNo = [NSString stringWithFormat:@"%@", accountDict[kAccountID]];
+        NSNumber* accountNo = accountDict[kAccountID];
         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
         if(!account)
             @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];

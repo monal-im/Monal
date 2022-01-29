@@ -22,7 +22,7 @@
 
 
 @interface ContactDetails()
-@property (nonatomic, strong) NSString* accountNo;
+@property (nonatomic, strong) NSNumber* accountNo;
 @property (nonatomic, strong) xmpp* xmppAccount;
 @property (nonatomic, weak) UITextField* currentTextField;
 @property (nonatomic, strong) NSMutableArray * photos;
@@ -559,7 +559,9 @@ enum ContactDetailsAboutRows {
 
 -(void) refreshBlockState:(NSNotification*) notification
 {
-    if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo]) {
+    NSNumber* notificationAccountNo = notification.userInfo[@"accountNo"];
+    if(notificationAccountNo.intValue == self.accountNo.intValue)
+    {
         weakify(self);
         dispatch_async(dispatch_get_main_queue(), ^{
             strongify(self);

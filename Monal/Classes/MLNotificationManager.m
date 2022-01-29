@@ -444,7 +444,7 @@
                                                                           content:msgText
                                                                speakableGroupName:(groupDisplayName ? [[INSpeakableString alloc] initWithSpokenPhrase:groupDisplayName] : nil)
                                                            conversationIdentifier:[[NSString alloc] initWithData:[HelperTools serializeObject:contact] encoding:NSISOLatin1StringEncoding]
-                                                                      serviceName:message.accountId
+                                                                      serviceName:message.accountId.stringValue
                                                                            sender:sender
                                                                       attachments:(audioAttachment ? @[audioAttachment] : nil)];
     if(message.isMuc && contact.avatar != nil)
@@ -483,7 +483,7 @@
     DDLogDebug(@"Building INPerson for contact: %@ using display name: %@", contact, displayName);
     if(displayName == nil)
         displayName = contact.contactDisplayName;
-    INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeEmailAddress label:contact.accountId];
+    INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeEmailAddress label:contact.accountId.stringValue];
     NSPersonNameComponents* nameComponents = [[NSPersonNameComponents alloc] init];
     nameComponents.nickname = displayName;
     INImage* contactImage = nil;

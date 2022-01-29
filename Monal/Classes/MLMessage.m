@@ -14,7 +14,7 @@
 +(MLMessage*) messageFromDictionary:(NSDictionary*) dic
 {
     MLMessage* message = [[MLMessage alloc] init];
-    message.accountId = [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
+    message.accountId = [dic objectForKey:@"account_id"];
     
     message.buddyName = [dic objectForKey:@"buddy_name"];
     message.inbound = [(NSNumber*)[dic objectForKey:@"inbound"] boolValue];
@@ -96,13 +96,13 @@
 {
     return contact != nil &&
            [self.buddyName isEqualToString:contact.contactJid] &&
-           [self.accountId isEqualToString:contact.accountId];
+           self.accountId.intValue == contact.accountId.intValue;
 }
 
 -(BOOL) isEqualToMessage:(MLMessage*) message
 {
     return message != nil &&
-           [self.accountId isEqualToString:message.accountId] &&
+           self.accountId.intValue == message.accountId.intValue &&
            [self.buddyName isEqualToString:message.buddyName] &&
            self.inbound == message.inbound &&
            [self.actualFrom isEqualToString:message.actualFrom] &&

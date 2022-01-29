@@ -561,7 +561,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
     {
         DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
-        [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        
         //add our completion handler to handler queue
         [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result) {
             completionHandler();
@@ -1101,6 +1101,16 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     NSString* completionId = [[NSUUID UUID] UUIDString];
     DDLogInfo(@"got incomingWakeupWithCompletionHandler with ID %@", completionId);
+    
+    //only proceed with handling wakeup if the NotificationServiceExtension is not running
+    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+    {
+        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
+            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        }];
+    }
     
     //don't use *self* connectIfNecessary] because we already have a background task here
     //that gets stopped once we call the completionHandler

@@ -1094,7 +1094,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     if(![HelperTools isInBackground])
     {
-        DDLogError(@"Ignoring incomingWakeupWithCompletionHandler: because app is in FG!");
+        DDLogWarn(@"Ignoring incomingWakeupWithCompletionHandler: because app is in FG!");
         completionHandler(UIBackgroundFetchResultNoData);
         return;
     }

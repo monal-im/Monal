@@ -511,7 +511,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
         [[MLXMPPManager sharedInstance] addContact:contact];    //will handle group joins and normal contacts transparently
         //wait for join to finish before opening contact
-        NSString* accountNo = account.accountNo;        //needed because of retain cycle
+        NSNumber* accountNo = account.accountNo;        //needed because of retain cycle
         [account.mucProcessor addUIHandler:^(id _data) {
             [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:accountNo];
             [self openChatOfContact:contact];

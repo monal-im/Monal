@@ -100,7 +100,7 @@
 {
     MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"nothing@%@", self.registerServer] password:@"nothing" andResource:@"MonalReg"];
     MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:@"" andPort:[NSNumber numberWithInt:5222] andDirectTLS:NO];
-    self.xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:@"-1"];
+    self.xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSNumber numberWithInt:-1]];
 }
 
 -(IBAction)registerAccount:(id) sender
@@ -158,12 +158,11 @@
                 
                 NSString* passwordText = [self.password.text copy];
                 
-                NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
-                if(accountID) {
-                    NSString* accountno = [NSString stringWithFormat:@"%@", accountID];
+                NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
+                if(accountNo != nil) {
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-                    [SAMKeychain setPassword:passwordText forService:kMonalKeychainName account:accountno];
-                    [[MLXMPPManager sharedInstance] connectAccount:accountno];
+                    [SAMKeychain setPassword:passwordText forService:kMonalKeychainName account:accountNo.stringValue];
+                    [[MLXMPPManager sharedInstance] connectAccount:accountNo];
                 }
                 [self performSegueWithIdentifier:@"showSuccess" sender:nil];
             }

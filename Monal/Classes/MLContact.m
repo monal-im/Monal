@@ -151,7 +151,7 @@ NSString *const kAskSubscribe=@"subscribe";
     return nilDefault(displayName, @"");
 }
 
-+(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo
++(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
 {
     assert(jid != nil);
     assert(accountNo != nil && accountNo.intValue >= 0);
@@ -205,7 +205,9 @@ NSString *const kAskSubscribe=@"subscribe";
 -(void) handleLastInteractionTimeUpdate:(NSNotification*) notification
 {
     NSDictionary* data = notification.userInfo;
-    if(![self.contactJid isEqualToString:data[@"jid"]] || ![self.accountId isEqualToString:data[@"accountNo"]])
+    NSNumber* notificationAccountNo = data[@"accountNo"];
+    
+    if(![self.contactJid isEqualToString:data[@"jid"]] || self.accountId.intValue != notificationAccountNo.intValue)
         return;     // ignore other accounts or contacts
     if(data[@"lastInteraction"] == nil)
         return;     // ignore typing notifications
@@ -216,7 +218,8 @@ NSString *const kAskSubscribe=@"subscribe";
 -(void) handleBlockListRefresh:(NSNotification*) notification
 {
     NSDictionary* data = notification.userInfo;
-    if(![self.accountId isEqualToString:data[@"accountNo"]])
+    NSNumber* notificationAccountNo = data[@"accountNo"];
+    if(self.accountId.intValue != notificationAccountNo.intValue)
         return;         // ignore other accounts
     self.isBlocked = [[DataLayer sharedInstance] isBlockedJid:self.contactJid withAccountNo:self.accountId] == kBlockingMatchedNodeHost;
 }
@@ -225,7 +228,7 @@ NSString *const kAskSubscribe=@"subscribe";
 {
     NSDictionary* data = notification.userInfo;
     MLContact* contact = data[@"contact"];
-    if(![self.contactJid isEqualToString:contact.contactJid] || ![self.accountId isEqualToString:contact.accountId])
+    if(![self.contactJid isEqualToString:contact.contactJid] || self.accountId.intValue != contact.accountId.intValue)
         return;     // ignore other accounts or contacts
     [self updateWithContact:contact];
     //only handle avatar updates if the property was already used and the old avatar is cached in this contact
@@ -542,14 +545,14 @@ NSString *const kAskSubscribe=@"subscribe";
 {
     return message != nil &&
            [self.contactJid isEqualToString:message.buddyName] &&
-           [self.accountId isEqualToString:message.accountId];
+           self.accountId.intValue == message.accountId.intValue;
 }
 
 -(BOOL) isEqualToContact:(MLContact*) contact
 {
     return contact != nil &&
            [self.contactJid isEqualToString:contact.contactJid] &&
-           [self.accountId isEqualToString:contact.accountId];
+           self.accountId.intValue == contact.accountId.intValue;
 }
 
 -(BOOL) isEqual:(id _Nullable) object
@@ -582,7 +585,7 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.fullName = nilDefault([dic objectForKey:@"full_name"], @"");
     contact.subscription = nilDefault([dic objectForKey:@"subscription"], kSubNone);
     contact.ask = nilDefault([dic objectForKey:@"ask"], @"");
-    contact.accountId = [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
+    contact.accountId = [dic objectForKey:@"account_id"];
     contact.groupSubject = nilDefault([dic objectForKey:@"muc_subject"], @"");
     contact.accountNickInGroup = nilDefault([dic objectForKey:@"muc_nick"], @"");
     contact.mucType = [dic objectForKey:@"muc_type"];

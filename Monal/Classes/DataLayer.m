@@ -172,7 +172,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) isAccountEnabled:(NSString*) accountNo
+-(BOOL) isAccountEnabled:(NSNumber*) accountNo
 {
     return [self.db boolReadTransaction:^{
         return [[self.db executeScalar:@"SELECT enabled FROM account WHERE account_id=?;" andArguments:@[accountNo]] boolValue];
@@ -211,9 +211,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSMutableDictionary*) detailsForAccount:(NSString*) accountNo
+-(NSMutableDictionary*) detailsForAccount:(NSNumber*) accountNo
 {
-    if(!accountNo)
+    if(accountNo == nil)
         return nil;
     return [self.db idReadTransaction:^{
         NSArray* result = [self.db executeReader:@"SELECT * FROM account WHERE account_id=?;" andArguments:@[accountNo]];
@@ -228,7 +228,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSString*) jidOfAccount:(NSString*) accountNo
+-(NSString*) jidOfAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT username, domain FROM account WHERE account_id=?;";
@@ -306,7 +306,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) removeAccount:(NSString*) accountNo
+-(BOOL) removeAccount:(NSNumber*) accountNo
 {
     // remove all other traces of the account_id in one transaction
     return [self.db boolWriteTransaction:^{
@@ -328,16 +328,16 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) disableEnabledAccount:(NSString*) accountNo
+-(BOOL) disableEnabledAccount:(NSNumber*) accountNo
 {
     return [self.db boolWriteTransaction:^{
         return [self.db executeNonQuery:@"UPDATE account SET enabled=0 WHERE account_id=?;" andArguments:@[accountNo]];
     }];
 }
 
--(NSMutableDictionary*) readStateForAccount:(NSString*) accountNo
+-(NSMutableDictionary*) readStateForAccount:(NSNumber*) accountNo
 {
-    if(!accountNo)
+    if(accountNo == nil)
         return nil;
     NSString* query = @"SELECT state from account where account_id=?";
     NSArray* params = @[accountNo];
@@ -349,9 +349,9 @@ static NSDateFormatter* dbFormatter;
     return nil;
 }
 
--(void) persistState:(NSDictionary*) state forAccount:(NSString*) accountNo
+-(void) persistState:(NSDictionary*) state forAccount:(NSNumber*) accountNo
 {
-    if(!accountNo || !state)
+    if(accountNo == nil || !state)
         return;
     NSData* data = [HelperTools serializeObject:state];
     [self.db voidWriteTransaction:^{
@@ -363,9 +363,9 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark contact Commands
 
--(BOOL) addContact:(NSString*) contact forAccount:(NSString*) accountNo nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick
+-(BOOL) addContact:(NSString*) contact forAccount:(NSNumber*) accountNo nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick
 {
-    if(!accountNo || !contact)
+    if(accountNo == nil || !contact)
         return NO;
     
     return [self.db boolWriteTransaction:^{
@@ -397,7 +397,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
+-(void) removeBuddy:(NSString*) buddy forAccount:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
         //clean up logs...
@@ -416,9 +416,9 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark Buddy Property commands
 
--(BOOL) resetContactsForAccount:(NSString*) accountNo
+-(BOOL) resetContactsForAccount:(NSNumber*) accountNo
 {
-    if(!accountNo)
+    if(accountNo == nil)
         return NO;
     return [self.db boolWriteTransaction:^{
         NSString* query2 = @"DELETE FROM buddy_resources WHERE buddy_id IN (SELECT buddy_id FROM buddylist WHERE account_id=?);";
@@ -429,9 +429,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSDictionary* _Nullable) contactDictionaryForUsername:(NSString*) username forAccount:(NSString*) accountNo
+-(NSDictionary* _Nullable) contactDictionaryForUsername:(NSString*) username forAccount:(NSNumber*) accountNo
 {
-    if(!username || !accountNo)
+    if(!username || accountNo == nil)
         return nil;
 
     return [self.db idReadTransaction:^{
@@ -497,11 +497,11 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark entity capabilities
 
--(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andAccountNo:(NSString*) acctNo
+-(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andAccountNo:(NSNumber*) accountNo
 {
     return [self.db boolReadTransaction:^{
         NSString* query = @"SELECT COUNT(*) FROM buddylist AS a INNER JOIN buddy_resources AS b ON a.buddy_id=b.buddy_id INNER JOIN ver_info AS c ON b.ver=c.ver WHERE buddy_name=? AND account_id=? AND cap=?;";
-        NSArray *params = @[user, acctNo, cap];
+        NSArray *params = @[user, accountNo, cap];
         NSNumber* count = (NSNumber*) [self.db executeScalar:query andArguments:params];
         return (BOOL)([count integerValue]>0);
     }];
@@ -596,7 +596,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark presence functions
 
--(void) setResourceOnline:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
+-(void) setResourceOnline:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo
 {
     if(!presenceObj.fromResource)
         return;
@@ -621,12 +621,12 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account
+-(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSNumber*)accountNo
 {
-    if(!account)
+    if(accountNo == nil)
         return nil;
     NSArray<NSDictionary*>* versionInfoArr = [self.db idReadTransaction:^{
-        NSArray<NSDictionary*>* resources = [self.db executeReader:@"SELECT platform_App_Name, platform_App_Version, platform_OS FROM buddy_resources WHERE buddy_id IN (SELECT buddy_id FROM buddylist WHERE account_id=? AND buddy_name=?) AND resource=?" andArguments:@[account, contact, resource]];
+        NSArray<NSDictionary*>* resources = [self.db executeReader:@"SELECT platform_App_Name, platform_App_Version, platform_OS FROM buddy_resources WHERE buddy_id IN (SELECT buddy_id FROM buddylist WHERE account_id=? AND buddy_name=?) AND resource=?" andArguments:@[accountNo, contact, resource]];
         return resources;
     }];
     if(versionInfoArr == nil || versionInfoArr.count == 0) {
@@ -639,7 +639,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setSoftwareVersionInfoForContact:(NSString*)contact
                                 resource:(NSString*)resource
-                              andAccount:(NSString*)account
+                              andAccount:(NSNumber*)account
                         withSoftwareInfo:(MLContactSoftwareVersionInfo*) newSoftwareInfo
 {
     [self.db voidWriteTransaction:^{
@@ -649,7 +649,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setOnlineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
+-(void) setOnlineBuddy:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
         [self setResourceOnline:presenceObj forAccount:accountNo];
@@ -688,7 +688,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
+-(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
 {
     NSString* toPass = @"";
     if([presenceObj check:@"show#"])
@@ -716,7 +716,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) hasContactRequestForAccount:(NSString*) accountNo andBuddyName:(NSString*) buddy
+-(BOOL) hasContactRequestForAccount:(NSNumber*) accountNo andBuddyName:(NSString*) buddy
 {
     return [self.db boolReadTransaction:^{
         NSString* query = @"SELECT COUNT(*) FROM subscriptionRequests WHERE account_id=? AND buddy_name=?";
@@ -736,7 +736,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) addContactRequest:(MLContact *) requestor;
+-(void) addContactRequest:(MLContact*) requestor;
 {
     [self.db voidWriteTransaction:^{
         NSString* query2 = @"INSERT OR IGNORE INTO subscriptionRequests (buddy_name, account_id) VALUES (?,?)";
@@ -744,7 +744,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) deleteContactRequest:(MLContact *) requestor
+-(void) deleteContactRequest:(MLContact*) requestor
 {
     [self.db voidWriteTransaction:^{
         NSString* query2 = @"delete from subscriptionRequests where buddy_name=? and account_id=? ";
@@ -789,9 +789,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setRosterVersion:(NSString *) version forAccount: (NSString*) accountNo
+-(void) setRosterVersion:(NSString*) version forAccount:(NSNumber*) accountNo
 {
-    if(!accountNo || !version)
+    if(accountNo == nil || !version)
         return;
     [self.db voidWriteTransaction:^{
         NSString* query = @"update account set rosterVersion=? where account_id=?";
@@ -800,9 +800,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSDictionary*) getSubscriptionForContact:(NSString*) contact andAccount:(NSString*) accountNo
+-(NSDictionary*) getSubscriptionForContact:(NSString*) contact andAccount:(NSNumber*) accountNo
 {
-    if(!contact || !accountNo)
+    if(!contact || accountNo == nil)
         return nil;
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT subscription, ask from buddylist where buddy_name=? and account_id=?";
@@ -812,9 +812,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSString*) accountNo
+-(void) setSubscription:(NSString*)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSNumber*) accountNo
 {
-    if(!contact || !accountNo || !sub)
+    if(!contact || accountNo == nil || !sub)
         return;
     [self.db voidWriteTransaction:^{
         NSString* query = @"update buddylist set subscription=?, ask=? where account_id=? and buddy_name=?";
@@ -827,7 +827,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark Contact info
 
--(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo
+-(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSNumber*) accountNo
 {
     //data length check
     NSString* toPass;
@@ -847,7 +847,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSString*) accountNo
+-(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"UPDATE account SET iconhash=? WHERE account_id=? AND printf('%s@%s', username, domain)=?;" andArguments:@[hash, accountNo, contact]];
@@ -855,7 +855,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSString*) accountNo
+-(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         NSString* hash = [self.db executeScalar:@"SELECT iconhash FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
@@ -867,7 +867,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo
+-(BOOL) isContactInList:(NSString*) buddy forAccount:(NSNumber*) accountNo
 {
     return [self.db boolReadTransaction:^{
         NSString* query = @"select count(buddy_id) from buddylist where account_id=? and buddy_name=? ";
@@ -888,14 +888,14 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment
+-(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountNo withComment:(NSString*) comment
 {
     return [self.db boolWriteTransaction:^{
         return [self.db executeNonQuery:@"UPDATE buddylist SET messageDraft=? WHERE account_id=? AND buddy_name=?;" andArguments:@[comment, accountNo, buddy]];
     }];
 }
 
--(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT messageDraft FROM buddylist WHERE account_id=? AND buddy_name=?;";
@@ -906,7 +906,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark MUC
 
--(BOOL) initMuc:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick
+-(BOOL) initMuc:(NSString*) room forAccountId:(NSNumber*) accountNo andMucNick:(NSString* _Nullable) mucNick
 {
     return [self.db boolWriteTransaction:^{
         BOOL isMuc = [self isBuddyMuc:room forAccount:accountNo];
@@ -927,16 +927,16 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) cleanupMembersAndParticipantsListFor:(NSString*) room forAccountId:(NSString*) accountNo
+-(void) cleanupMembersAndParticipantsListFor:(NSString*) room forAccountId:(NSNumber*) accountNo
 {
     //clean up old muc data (will be refilled by incoming presences and/or disco queries)
     [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
     [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
 }
 
--(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSString*) accountNo
+-(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSNumber*) accountNo
 {
-    if(!participant || !participant[@"nick"] || !room || !accountNo)
+    if(!participant || !participant[@"nick"] || !room || accountNo == nil)
         return;
     
     [self.db voidWriteTransaction:^{
@@ -953,9 +953,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) removeParticipant:(NSDictionary*) participant fromMuc:(NSString*) room forAccountId:(NSString*) accountNo
+-(void) removeParticipant:(NSDictionary*) participant fromMuc:(NSString*) room forAccountId:(NSNumber*) accountNo
 {
-    if(!participant || !participant[@"nick"] || !room || !accountNo)
+    if(!participant || !participant[@"nick"] || !room || accountNo == nil)
         return;
     
     [self.db voidWriteTransaction:^{
@@ -978,9 +978,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSString*) accountNo
+-(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSNumber*) accountNo
 {
-    if(!member || !member[@"jid"] || !room || !accountNo)
+    if(!member || !member[@"jid"] || !room || accountNo == nil)
         return;
     
     [self.db voidWriteTransaction:^{
@@ -990,7 +990,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSDictionary* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSString*) accountNo
 {
-    if(!nick || !room || !accountNo)
+    if(!nick || !room || accountNo == nil)
         return nil;
     return [self.db idReadTransaction:^{
         NSArray* result = [self.db executeReader:@"SELECT * FROM muc_participants WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[accountNo, room, nick]];
@@ -998,9 +998,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSArray<NSDictionary<NSString*, id>*>*) getMembersAndParticipantsOfMuc:(NSString*) room forAccountId:(NSString*) accountNo
+-(NSArray<NSDictionary<NSString*, id>*>*) getMembersAndParticipantsOfMuc:(NSString*) room forAccountId:(NSNumber*) accountNo
 {
-    if(!room || !accountNo)
+    if(!room || accountNo == nil)
         return [[NSMutableArray<NSDictionary<NSString*, id>*> alloc] init];
     return [self.db idReadTransaction:^{
         NSMutableArray<NSDictionary<NSString*, id>*>* toReturn = [[NSMutableArray<NSDictionary<NSString*, id>*> alloc] init];
@@ -1012,7 +1012,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) addMucFavorite:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick
+-(void) addMucFavorite:(NSString*) room forAccountId:(NSNumber*) accountNo andMucNick:(NSString* _Nullable) mucNick
 {
     [self.db voidWriteTransaction:^{
         NSString* nick = mucNick;
@@ -1040,7 +1040,7 @@ static NSDateFormatter* dbFormatter;
 }
 
 
--(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
+-(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSNumber*) accountNo
 {
     return [self.db boolReadTransaction:^{
         NSNumber* status = (NSNumber*)[self.db executeScalar:@"SELECT Muc FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
@@ -1051,7 +1051,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo
+-(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         NSString* nick = (NSString*)[self.db executeScalar:@"SELECT muc_nick FROM buddylist WHERE account_id=? AND buddy_name=? and muc=1;" andArguments:@[accountNo, room]];
@@ -1064,7 +1064,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) updateOwnNickName:(NSString*) nick forMuc:(NSString*) room forAccount:(NSString*) accountNo
+-(BOOL) updateOwnNickName:(NSString*) nick forMuc:(NSString*) room forAccount:(NSNumber*) accountNo
 {
     return [self.db boolWriteTransaction:^{
         NSString* query = @"UPDATE buddylist SET muc_nick=? WHERE account_id=? AND buddy_name=? AND muc=1;";
@@ -1075,7 +1075,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) deleteMuc:(NSString*) room forAccountId:(NSString*) accountNo
+-(BOOL) deleteMuc:(NSString*) room forAccountId:(NSNumber*) accountNo
 {
     return [self.db boolWriteTransaction:^{
         NSString* query = @"DELETE FROM muc_favorites WHERE room=? AND account_id=?;";
@@ -1086,14 +1086,14 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSMutableArray*) listMucsForAccount:(NSString*) accountNo
+-(NSMutableArray*) listMucsForAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         return [self.db executeReader:@"SELECT * FROM muc_favorites WHERE account_id=?;" andArguments:@[accountNo]];
     }];
 }
 
--(BOOL) updateMucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room
+-(BOOL) updateMucSubject:(NSString *) subject forAccount:(NSNumber*) accountNo andRoom:(NSString *) room
 {
     return [self.db boolWriteTransaction:^{
         NSString* query = @"UPDATE buddylist SET muc_subject=? WHERE account_id=? AND buddy_name=?;";
@@ -1103,7 +1103,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSString*) mucSubjectforAccount:(NSString*) accountNo andRoom:(NSString*) room
+-(NSString*) mucSubjectforAccount:(NSNumber*) accountNo andRoom:(NSString*) room
 {
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT muc_subject FROM buddylist WHERE account_id=? AND buddy_name=?;";
@@ -1115,14 +1115,14 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) updateMucTypeTo:(NSString*) type forRoom:(NSString*) room andAccount:(NSString*) accountNo
+-(void) updateMucTypeTo:(NSString*) type forRoom:(NSString*) room andAccount:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"UPDATE buddylist SET muc_type=? WHERE account_id=? AND buddy_name=?;" andArguments:@[type, accountNo, room]];
     }];
 }
 
--(NSString*) getMucTypeOfRoom:(NSString*) room andAccount:(NSString*) accountNo
+-(NSString*) getMucTypeOfRoom:(NSString*) room andAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         return [self.db executeScalar:@"SELECT muc_type FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, room]];
@@ -1177,7 +1177,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates
+-(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSNumber*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates
 {
     if(!buddyName || !message)
         return nil;
@@ -1240,9 +1240,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId onChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound onAccount:(NSString*) accountNo
+-(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId onChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound onAccount:(NSNumber*) accountNo
 {
-    if(!accountNo)
+    if(accountNo == nil)
         return NO;
     
     return [self.db boolWriteTransaction:^{
@@ -1298,7 +1298,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setMessageId:( NSString* _Nonnull ) messageid received:(BOOL) received
+-(void) setMessageId:(NSString* _Nonnull ) messageid received:(BOOL) received
 {
     [self.db voidWriteTransaction:^{
         NSString* query = @"UPDATE message_history SET received=?, sent=? WHERE messageid=?;";
@@ -1307,7 +1307,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setMessageId:( NSString* _Nonnull ) messageid errorType:( NSString* _Nonnull ) errorType errorReason:( NSString* _Nonnull ) errorReason
+-(void) setMessageId:(NSString* _Nonnull) messageid errorType:(NSString* _Nonnull) errorType errorReason:(NSString* _Nonnull) errorReason
 {
     [self.db voidWriteTransaction:^{
         //ignore error if the message was already received by *some* client
@@ -1364,7 +1364,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) clearMessages:(NSString*) accountNo
+-(void) clearMessages:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=?;" andArguments:@[kMessageTypeFiletransfer, accountNo]];
@@ -1376,7 +1376,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSString*) accountNo
+-(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=?;" andArguments:@[kMessageTypeFiletransfer, accountNo, buddy]];
@@ -1423,7 +1423,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSString*) accountNo
+-(NSNumber*) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE messageid=? AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0)) AND M.account_id=?;" andArguments:@[messageid, from, from, accountNo]];
@@ -1497,9 +1497,9 @@ static NSDateFormatter* dbFormatter;
 }
 
 //message history
--(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSNumber*) accountNo
 {
-    if(!accountNo || !buddy)
+    if(accountNo == nil || !buddy)
         return nil;
     return [self.db idReadTransaction:^{
         NSNumber* lastMsgHistID = [self lastMessageHistoryIdForContact:buddy forAccount:accountNo];
@@ -1510,9 +1510,9 @@ static NSDateFormatter* dbFormatter;
 }
 
 //message history
--(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber* _Nullable) msgHistoryID
+-(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSNumber*) accountNo beforeMsgHistoryID:(NSNumber* _Nullable) msgHistoryID
 {
-    if(!accountNo || !buddy)
+    if(accountNo == nil || !buddy)
         return nil;
     return [self.db idReadTransaction:^{
         NSNumber* historyIdToUse = msgHistoryID;
@@ -1624,7 +1624,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString*) mimeType size:(NSNumber*) size
+-(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSNumber*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString*) mimeType size:(NSNumber*) size
 {
     //Message_history going out, from is always the local user. always read and not sent
     NSArray* parts = [[[NSDate date] description] componentsSeparatedByString:@" "];
@@ -1726,9 +1726,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo
+-(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSNumber*) accountNo
 {
-    if(!buddyname || !accountNo)
+    if(!buddyname || accountNo == nil)
         return;
     
     [self.db voidWriteTransaction:^{
@@ -1778,7 +1778,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) updateActiveBuddy:(NSString*) buddyname setTime:(NSString*) timestamp forAccount:(NSString*) accountNo
+-(BOOL) updateActiveBuddy:(NSString*) buddyname setTime:(NSString*) timestamp forAccount:(NSNumber*) accountNo
 {
     return [self.db boolWriteTransaction:^{
         NSString* query = @"SELECT lastMessageTime FROM activechats WHERE account_id=? AND buddy_name=?;";
@@ -1801,9 +1801,9 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark chat properties
 
--(NSNumber*) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSNumber*) countUserUnreadMessages:(NSString*) buddy forAccount:(NSNumber*) accountNo
 {
-    if(!buddy || !accountNo)
+    if(!buddy || accountNo == nil)
         return @0;
     return [self.db idReadTransaction:^{
         // count # messages from a specific user in messages table
@@ -1867,9 +1867,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) addDelayedMessageStanza:(MLXMLNode*) stanza forArchiveJid:(NSString*) archiveJid andAccountNo:(NSString*) accountNo
+-(void) addDelayedMessageStanza:(MLXMLNode*) stanza forArchiveJid:(NSString*) archiveJid andAccountNo:(NSNumber*) accountNo
 {
-    if(!accountNo || !archiveJid || !stanza)
+    if(accountNo == nil || !archiveJid || !stanza)
         return;
     NSError* error;
     NSData* data = [NSKeyedArchiver archivedDataWithRootObject:stanza requiringSecureCoding:YES error:&error];
@@ -1880,9 +1880,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(MLXMLNode* _Nullable) getNextDelayedMessageStanzaForArchiveJid:(NSString*) archiveJid andAccountNo:(NSString*) accountNo
+-(MLXMLNode* _Nullable) getNextDelayedMessageStanzaForArchiveJid:(NSString*) archiveJid andAccountNo:(NSNumber*) accountNo
 {
-    if(!accountNo || !archiveJid)
+    if(accountNo == nil|| !archiveJid)
         return nil;
     NSData* data = (NSData*)[self.db idWriteTransaction:^{
         NSArray* entries = [self.db executeReader:@"SELECT id, stanza FROM delayed_message_stanzas WHERE account_id=? AND archive_jid=? ORDER BY id ASC LIMIT 1;" andArguments:@[accountNo, archiveJid]];
@@ -1942,7 +1942,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSArray*) getShareSheetPayloadForAccountNo:(NSString*) accountNo
+-(NSArray*) getShareSheetPayloadForAccountNo:(NSNumber*) accountNo
 {
     return [self.db idWriteTransaction:^{
         return [self.db executeReader:@"SELECT * FROM sharesheet_outbox WHERE account_id=? ORDER BY id ASC;" andArguments:@[accountNo]];
@@ -2032,9 +2032,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) blockJid:(NSString*) jid withAccountNo:(NSString*) accountNo
+-(void) blockJid:(NSString*) jid withAccountNo:(NSNumber*) accountNo
 {
-    if(!jid || !accountNo)
+    if(!jid || accountNo == nil)
         return;
     NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:jid];
     [self.db voidWriteTransaction:^{
@@ -2046,7 +2046,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids forAccountNo:(NSString*) accountNo
+-(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids forAccountNo:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
         // remove blocked state for all buddies of account
@@ -2057,7 +2057,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) unBlockJid:(NSString*) jid withAccountNo:(NSString*) accountNo
+-(void) unBlockJid:(NSString*) jid withAccountNo:(NSNumber*) accountNo
 {
     NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:jid];
     [self.db voidWriteTransaction:^{
@@ -2079,9 +2079,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(u_int8_t) isBlockedJid:(NSString*) jid withAccountNo:(NSString*) accountNo
+-(u_int8_t) isBlockedJid:(NSString*) jid withAccountNo:(NSNumber*) accountNo
 {
-    if(!jid || !accountNo)
+    if(!jid || accountNo == nil)
         return NO;
 
     return [[self.db idReadTransaction:^{
@@ -2221,7 +2221,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark - last interaction
 
--(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSString* _Nonnull) accountNo
+-(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSNumber* _Nonnull) accountNo
 {
     NSAssert(jid, @"jid should not be null");
     NSAssert(accountNo != NULL, @"accountNo should not be null");
@@ -2238,7 +2238,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSString* _Nonnull) accountNo
+-(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSNumber* _Nonnull) accountNo
 {
     NSAssert(jid, @"jid should not be null");
     NSAssert(accountNo != NULL, @"accountNo should not be null");
@@ -2256,9 +2256,9 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark - encryption
 
--(BOOL) shouldEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
+-(BOOL) shouldEncryptForJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
 {
-    if(!jid || !accountNo)
+    if(!jid || accountNo == nil)
         return NO;
     return [self.db boolReadTransaction:^{
         NSString* query = @"SELECT encrypt from buddylist where account_id=? and buddy_name=?";
@@ -2269,9 +2269,9 @@ static NSDateFormatter* dbFormatter;
 }
 
 
--(void) encryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
+-(void) encryptForJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
 {
-    if(!jid || !accountNo)
+    if(!jid || accountNo == nil)
         return;
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"UPDATE buddylist SET encrypt=1 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, jid]];
@@ -2279,9 +2279,9 @@ static NSDateFormatter* dbFormatter;
     return;
 }
 
--(void) disableEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
+-(void) disableEncryptForJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
 {
-    if(!jid || !accountNo)
+    if(!jid || accountNo == nil)
         return;
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"UPDATE buddylist SET encrypt=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, jid]];
@@ -2291,9 +2291,9 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark History Message Search (search keyword in message, buddy_name, messageType)
 
--(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword accountNo:(NSString*) accountNo
+-(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword accountNo:(NSNumber*) accountNo
 {
-    if(!keyword || !accountNo)
+    if(!keyword || accountNo == nil)
         return nil;
     return [self.db idReadTransaction:^{
         NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
@@ -2304,9 +2304,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword accountNo:(NSString*) accountNo betweenBuddy:(NSString* _Nonnull) contactJid
+-(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword accountNo:(NSNumber*) accountNo betweenBuddy:(NSString* _Nonnull) contactJid
 {
-    if(!keyword || !accountNo)
+    if(!keyword || accountNo == nil)
         return nil;
     return [self.db idReadTransaction:^{
         NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];

@@ -127,7 +127,7 @@
             else if([type isEqualToString:@"muc"])
             {
                 [self displayJoinHUD];
-                NSString* accountNo = account.accountNo;            //needed to not retain 'account' in the block below
+                NSNumber* accountNo = account.accountNo;            //needed to not retain 'account' in the block below
                 [account.mucProcessor addUIHandler:^(id _data) {
                     NSDictionary* data = (NSDictionary*)_data;
                     [self hideJoinHUD];

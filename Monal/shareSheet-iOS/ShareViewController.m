@@ -73,12 +73,15 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     {
         //check if intentContact is in enabled account list
         for(NSDictionary* accountToCheck in self.accounts)
-            if([[NSString stringWithFormat:@"%@", [accountToCheck objectForKey:@"account_id"]] isEqualToString:self.intentContact.accountId] == YES)
+        {
+            NSNumber* accountNo = [accountToCheck objectForKey:@"account_id"];
+            if(accountNo.intValue == self.intentContact.accountId.intValue)
             {
                 self.recipient = self.intentContact;
                 self.account = accountToCheck;
                 break;
             }
+        }
     }
     
     //no intent given or intent contact not found --> select initial recipient (contact with most recent interaction)
@@ -88,24 +91,27 @@ const u_int32_t MagicMapKitItem = 1 << 2;
         for(MLContact* recipient in self.recipients)
         {
             for(NSDictionary* accountToCheck in self.accounts)
-                if([[NSString stringWithFormat:@"%@", [accountToCheck objectForKey:@"account_id"]] isEqualToString:recipient.accountId] == YES)
+            {
+                NSNumber* accountNo = [accountToCheck objectForKey:@"account_id"];
+                if(accountNo.intValue == recipient.accountId.intValue)
                 {
                     self.recipient = recipient;
                     self.account = accountToCheck;
                     recipientFound = YES;
                     break;
                 }
-            if(recipientFound == YES)
-                break;
+                if(recipientFound == YES)
+                    break;
+            }
         }
     }
     [self reloadConfigurationItems];
 }
 
--(MLContact* _Nullable) getLastContactForAccount:(NSString*) accountNo
+-(MLContact* _Nullable) getLastContactForAccount:(NSNumber*) accountNo
 {
     for(MLContact* recipient in self.recipients) {
-        if([recipient.accountId isEqualToString:accountNo] == YES) {
+        if(recipient.accountId.intValue == accountNo.intValue) {
             return recipient;
         }
     }
@@ -236,7 +242,8 @@ const u_int32_t MagicMapKitItem = 1 << 2;
         for (MLContact* contact in self.recipients)
         {
             // only show contacts from the selected account
-            if([contact.accountId isEqualToString:[NSString stringWithFormat:@"%@", [self.account objectForKey:@"account_id"]]])
+            NSNumber* accountNo = [self.account objectForKey:@"account_id"];
+            if(contact.accountId.intValue == accountNo.intValue)
                 [recipientsToShow addObject:@{@"contact": contact}];
         }
 

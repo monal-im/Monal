@@ -516,7 +516,7 @@ enum msgSentState {
         NSNumber* accountState = [userInfo objectForKey:kAccountState];
 
         // Only parse account changes for our current opened account
-        if(![accountNo isEqualToString:self.xmppAccount.accountNo])
+        if(accountNo.intValue != self.xmppAccount.accountNo.intValue)
             return;
 
         if(accountNo && accountState)
@@ -555,12 +555,12 @@ enum msgSentState {
 {
     NSDate* lastInteractionDate = nil;
     NSString* jid = self.contact.contactJid;
-    NSString* accountNo = self.contact.accountId;
     // use supplied data from notification...
     if(notification)
     {
         NSDictionary* data = notification.userInfo;
-        if(![jid isEqualToString:data[@"jid"]] || ![accountNo isEqualToString:data[@"accountNo"]])
+        NSString* notifcationAccountNo = data[@"accountNo"];
+        if(![jid isEqualToString:data[@"jid"]] || self.contact.accountId.intValue != notifcationAccountNo.intValue)
             return;     // ignore other accounts or contacts
         if([data[@"isTyping"] boolValue] == YES)
         {
@@ -574,7 +574,7 @@ enum msgSentState {
     }
     // ...or load the latest interaction timestamp from db
     else
-        lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:jid forAccountNo:accountNo];
+        lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:jid forAccountNo:self.contact.accountId];
 
     // make timestamp human readable (lastInteractionDate will be captured by this block and automatically used by our timer)
     [self updateTypingTime:lastInteractionDate];
@@ -2115,7 +2115,7 @@ enum msgSentState {
     return cell;
 }
 
--(MLContact*) getMLContactForJid:(NSString*) jid andAccount:(NSString*) accountNo
+-(MLContact*) getMLContactForJid:(NSString*) jid andAccount:(NSNumber*) accountNo
 {
     NSString* cacheKey = [NSString stringWithFormat:@"%@|%@", jid, accountNo];
     @synchronized(_localMLContactCache) {

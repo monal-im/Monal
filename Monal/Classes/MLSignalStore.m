@@ -15,7 +15,7 @@
 {
     NSString* _dbPath;
 }
-@property (nonatomic, strong) NSString* accountId;
+@property (nonatomic, strong) NSNumber* accountId;
 @property (readonly, strong) MLSQLite* sqliteDatabase;
 @end
 
@@ -36,7 +36,7 @@
     return [MLSQLite sharedInstanceForFile:_dbPath];
 }
 
--(MLSignalStore*) initWithAccountId:(NSString*) accountId
+-(MLSignalStore*) initWithAccountId:(NSNumber*) accountId
 {
     self = [super init];
     NSFileManager* fileManager = [NSFileManager defaultManager];

@@ -49,7 +49,9 @@
 
 -(void) refreshBlockState:(NSNotification*) notification
 {
-    if([notification.userInfo[@"accountNo"] isEqualToString:self.xmppAccount.accountNo]) {
+    NSNumber* notificationAccountNo = notification.userInfo[@"accountNo"];
+    if(notificationAccountNo.intValue == self.xmppAccount.accountNo.intValue)
+    {
         weakify(self);
         dispatch_async(dispatch_get_main_queue(), ^{
             strongify(self);

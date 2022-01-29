@@ -164,7 +164,7 @@ NSString* const kStanza = @"stanza";
 
 @implementation xmpp
 
--(id) initWithServer:(nonnull MLXMPPServer *) server andIdentity:(nonnull MLXMPPIdentity *)identity andAccountNo:(NSString*) accountNo
+-(id) initWithServer:(nonnull MLXMPPServer *) server andIdentity:(nonnull MLXMPPIdentity *)identity andAccountNo:(NSNumber*) accountNo
 {
     //initialize ivars depending on provided arguments
     self = [super init];
@@ -713,7 +713,7 @@ NSString* const kStanza = @"stanza";
         }
         
         //make sure we are still enabled ("-1" is used for the account registration process and never saved to db)
-        if(![@"-1" isEqualToString:self.accountNo] && ![[DataLayer sharedInstance] isAccountEnabled:self.accountNo])
+        if(self.accountNo.intValue != -1 && ![[DataLayer sharedInstance] isAccountEnabled:self.accountNo])
         {
             DDLogError(@"Account '%@' not enabled anymore, ignoring login", self.accountNo);
             return;

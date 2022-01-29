@@ -60,11 +60,11 @@ enum kSettingsAdvancedRows {
     SettingsPortRow,
     SettingsDirectTLSRow,
     SettingsResourceRow,
-    SettingsClearOmemoSessionRow,
     SettingsAdvancedRowsCnt
 };
 
 enum kSettingsEditRows {
+    SettingsClearOmemoSessionRow,
     SettingsClearHistoryRow,
     SettingsDeleteAccountRow,
     SettingsEditRowsCnt
@@ -154,12 +154,22 @@ enum DummySettingsRows {
     for(int entry = 0; entry < kSettingSectionCount; entry++)
         switch(entry)
         {
-            case kSettingSectionAvatar: self.sectionDictionary[@(entry)] = @""; break;
-            case kSettingSectionAccount: self.sectionDictionary[@(entry)] = @""; break;
-            case kSettingSectionGeneral: self.sectionDictionary[@(entry)] = NSLocalizedString(@"General", @""); break;
-            case kSettingSectionAdvanced: self.sectionDictionary[@(entry)] = NSLocalizedString(@"Advanced Settings", @""); break;
-            case kSettingSectionEdit: self.sectionDictionary[@(entry)] = @""; break;
-            default: self.sectionDictionary[@(entry)] = @""; break;
+            case kSettingSectionAvatar:
+                self.sectionDictionary[@(entry)] = @""; break;
+            case kSettingSectionAccount:
+                self.sectionDictionary[@(entry)] = @""; break;
+            case kSettingSectionGeneral:
+                self.sectionDictionary[@(entry)] = NSLocalizedString(@"General", @"");
+                break;
+            case kSettingSectionAdvanced:
+                self.sectionDictionary[@(entry)] = NSLocalizedString(@"Advanced Settings", @"");
+                break;
+            case kSettingSectionEdit:
+                self.sectionDictionary[@(entry)] = @"";
+                break;
+            default:
+                self.sectionDictionary[@(entry)] = @"";
+                break;
         }
     
     if(self.originIndex && self.originIndex.section == 0)
@@ -427,6 +437,28 @@ enum DummySettingsRows {
     [self presentViewController:questionAlert animated:YES completion:nil];
 }
 
+- (IBAction) clearOmemoSessionClicked: (id) sender
+{
+    DDLogVerbose(@"Clearing own omemo session as request by account settings");
+
+    UIAlertController* questionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Clear OMEMO session", @"") message:NSLocalizedString(@"This will clear the your own omemo session for debugging purposes", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        //do nothing when "no" was pressed
+    }];
+    UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+
+        [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+        MLContact* contact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountno];
+        [contact resetOmemoSession];
+    }];
+
+    [questionAlert addAction:noAction];
+    [questionAlert addAction:yesAction];
+    questionAlert.popoverPresentationController.sourceView = sender;
+
+    [self presentViewController:questionAlert animated:YES completion:nil];
+}
+
 - (IBAction) clearHistoryClicked: (id) sender
 {
     DDLogVerbose(@"Deleting History");
@@ -570,22 +602,26 @@ enum DummySettingsRows {
                 [thecell initCell:NSLocalizedString(@"Resource", @"") withLabel:self.resource];
                 break;
             }
-            case SettingsClearOmemoSessionRow: {
-                [thecell initCell:NSLocalizedString(@"Clear own omemo session", @"DEBUG - XMPPEdit") withLabel:nil];
-                break;
-            }
         }
     }
     else if (indexPath.section == kSettingSectionEdit && self.editMode == YES)
     {
         switch (indexPath.row) {
+            case SettingsClearOmemoSessionRow: {
+                MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+                buttonCell.buttonText.text = NSLocalizedString(@"Clear own omemo session", @"DEBUG - XMPPEdit");
+                buttonCell.buttonText.textColor = [UIColor redColor];
+                buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
+                buttonCell.tag = SettingsClearOmemoSessionRow;
+                return buttonCell;
+            }
             case SettingsClearHistoryRow:
             {
                 MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
                 buttonCell.buttonText.text = NSLocalizedString(@"Clear Chat History", @"");
                 buttonCell.buttonText.textColor = [UIColor redColor];
                 buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
-                buttonCell.tag = 0;
+                buttonCell.tag = SettingsClearHistoryRow;
                 return buttonCell;
             }
             case SettingsDeleteAccountRow:
@@ -594,7 +630,7 @@ enum DummySettingsRows {
                 buttonCell.buttonText.text = NSLocalizedString(@"Delete Account", @"");
                 buttonCell.buttonText.textColor = [UIColor redColor];
                 buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
-                buttonCell.tag = 1;
+                buttonCell.tag = SettingsDeleteAccountRow;
                 return buttonCell;
             }
         }
@@ -658,7 +694,7 @@ enum DummySettingsRows {
         return SettingsAvatarRowsCnt;
     else if(section == kSettingSectionAccount)
         return SettingsAccountRowsCnt;
-    else if(section == kSettingSectionGeneral)
+    else if(section == kSettingSectionGeneral && self.editMode)
         return SettingsGeneralRowsCnt;
     else if(section == kSettingSectionAdvanced)
         return SettingsAdvancedRowsCnt;
@@ -702,19 +738,17 @@ enum DummySettingsRows {
     }
     else if(newIndexPath.section == kSettingSectionAdvanced)
     {
-        switch(newIndexPath.row)
-        {
-            case SettingsClearOmemoSessionRow:
-                [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-                MLContact* contact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountno];
-                [contact resetOmemoSession];
-                break;
-        }
+        // nothing to do here
     }
     else if(newIndexPath.section == kSettingSectionEdit)
     {
         switch(newIndexPath.row)
         {
+            case SettingsClearOmemoSessionRow:
+            {
+                [self clearOmemoSessionClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
+                break;
+            }
             case SettingsClearHistoryRow:
                 [self clearHistoryClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
                 break;

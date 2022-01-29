@@ -74,7 +74,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [self pushExpired];
     }));
     
-    //make sure the rest of this class knows that we got onemore push to be handled, even if it isn't added to self.handlerList yet because we want to ping the mainapp first
+    //make sure the rest of this class knows that we got one more push to be handled, even if it isn't added to self.handlerList yet because we want to ping the mainapp first
     @synchronized(self) {
         self.incomingPushWaiting = YES;
     }
@@ -182,17 +182,13 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                     //(e.g. [MLFiletransfer isIdle] is not YES)
                     if([self.handlerList count] <= 1 && !self.incomingPushWaiting)
                     {
-                        DDLogInfo(@"Trying to extend runtime or shutdown instead...");
-                        [self extendRuntime];
-                        
-                        /*
                         DDLogInfo(@"Shutting down appex now");
                         
                         //post sync errors for all accounts still not idle now
                         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                         
                         //check idle state and schedule a background task (handled in the main app) if not idle
-                        //if(![[MLXMPPManager sharedInstance] allAccountsIdle])
+                        if(![[MLXMPPManager sharedInstance] allAccountsIdle])
                             [self scheduleBackgroundFetchingTask];
                         
                         //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
@@ -203,7 +199,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                             [self killAppex];
                         }];
-                        */
                     }
                     else
                         DDLogInfo(@"NOT shutting down appex: got new pipelined incomng push");
@@ -236,6 +231,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }
 }
 
+//sadly we are not allowed to post notifications while our runtime gets extended --> useless for our purposes 
 -(void) extendRuntime
 {
     __block BOOL running = NO;

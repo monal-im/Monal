@@ -66,9 +66,9 @@
         [self.muteButton setImage:[UIImage systemImageNamed:@"moon"] forState:UIControlStateNormal];
 
     if(contact.isEncrypted)
-        [self.lockButton setImage:[UIImage systemImageNamed:@"lock.fill"] forState:UIControlStateNormal];
+        [self.lockButton setImage:[UIImage imageNamed:@"744-locked-selected"] forState:UIControlStateNormal];
     else
-        [self.lockButton setImage:[UIImage systemImageNamed:@"lock.open"] forState:UIControlStateNormal];
+        [self.lockButton setImage:[UIImage imageNamed:@"745-unlocked"] forState:UIControlStateNormal];
 
     [self updateSubscriptionLabel:contact];
 

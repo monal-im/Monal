@@ -2235,15 +2235,15 @@ enum msgSentState {
 
                 //update active chats if necessary
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
-                return completionHandler(YES);
             }
             else
             {
                 self.placeHolderText.hidden = NO;
                 [self.chatInput setText:@""];
             }
-            return completionHandler(NO);
         };
+        // We don't know yet if the editingCallback will complete successful. Pretend anyway
+        return completionHandler(YES);
     }];
     LMCEditAction.backgroundColor = UIColor.systemYellowColor;
     LMCEditAction.image = [[[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];

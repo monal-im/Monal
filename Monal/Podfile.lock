@@ -78,7 +78,7 @@ CHECKOUT OPTIONS:
     :commit: 560504888d9c0ba4be860275d206dcef07e0761e
     :git: https://github.com/monal-im/libsignal-protocol-c
   SignalProtocolObjC:
-    :commit: d34c14c9a00052f4ea3804c02b7c1ccca7c0ed04
+    :commit: e153e868c6737881a196da17612367ab9ecaae13
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
 
 SPEC CHECKSUMS:

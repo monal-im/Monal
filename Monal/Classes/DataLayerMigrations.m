@@ -1021,6 +1021,31 @@
             [db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
             [[MLImageManager sharedInstance] removeAllIcons];
         }];
+
+        // migrate account_id column in blocklistCache to integer
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.114 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE blocklistCache RENAME TO _blocklistCacheTMP;"];
+            [db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
+                'account_id' INTEGER NOT NULL, \
+                'node' TEXT, \
+                'host' TEXT, \
+                'resource' TEXT, \
+                UNIQUE('account_id','node','host','resource'), \
+                CHECK( \
+                (LENGTH('node') > 0 AND LENGTH('host') > 0 AND LENGTH('resource') > 0) \
+                OR \
+                (LENGTH('node') > 0 AND LENGTH('host') > 0) \
+                OR \
+                (LENGTH('host') > 0 AND LENGTH('resource') > 0) \
+                OR \
+                (LENGTH('host') > 0) \
+                ), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+            );"];
+            [db executeNonQuery:@"DELETE FROM _blocklistCacheTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
+            [db executeNonQuery:@"INSERT INTO blocklistCache SELECT * FROM _blocklistCacheTMP;"];
+            [db executeNonQuery:@"DROP TABLE _blocklistCacheTMP;"];
+        }];
     }];
     NSNumber* newdbversion = [db idReadTransaction:^{
         return [self readDBVersion:db];

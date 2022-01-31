@@ -22,6 +22,7 @@
 
 @interface MLNotificationManager ()
 @property (nonatomic, assign) NotificationPrivacySettingOption notificationPrivacySetting;
+@property (nonatomic) NSMutableSet* pendingDonations;
 @end
 
 @implementation MLNotificationManager
@@ -46,6 +47,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
 
     self.notificationPrivacySetting = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
+    self.pendingDonations = [[NSMutableSet alloc] init];
     return self;
 }
 
@@ -68,6 +70,19 @@
                 DDLogError(@"Error posting xmppError notification: %@", error);
         }]; 
     }
+}
+
+-(void) waitForDonations
+{
+    BOOL notEmpty;
+    do
+    {
+        @synchronized(self.pendingDonations) {
+            notEmpty = self.pendingDonations.count > 0;
+        }
+        if(notEmpty)
+            usleep(10000);      //sleep for 10 ms before trying again
+    } while(notEmpty);
 }
 
 #pragma mark message signals
@@ -172,6 +187,9 @@
             NSString* idval = [self identifierWithMessage:msg];
             
             DDLogVerbose(@"Removing pending/deliverd notification for message '%@' with identifier '%@'...", msg.messageId, idval);
+            @synchronized(self.pendingDonations) {
+                [self.pendingDonations removeObject:idval];
+            }
             [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
             [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
         }
@@ -189,9 +207,12 @@
     if([message.messageType isEqualToString:kMessageTypeStatus])
         return;
     
-    DDLogVerbose(@"notification manager got deleted message notice: %@", message.messageId);
     NSString* idval = [self identifierWithMessage:message];
     
+    DDLogVerbose(@"notification manager got deleted message notice: %@", message.messageId);
+    @synchronized(self.pendingDonations) {
+        [self.pendingDonations removeObject:idval];
+    }
     [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
     [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
     
@@ -268,7 +289,7 @@
         else
             msgText = message.messageText;
         
-        // notification settings (TODO: is this reallyneeded for communication notifications?)
+        // notification settings (TODO: is this really needed for communication notifications?)
         content.threadIdentifier = [self threadIdentifierWithMessage:message];
         content.categoryIdentifier = @"message";
         
@@ -459,19 +480,32 @@
     */
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionIncoming;
+    
+    @synchronized(self.pendingDonations) {
+        [self.pendingDonations addObject:idval];
+    }
     [interaction donateInteractionWithCompletion:^(NSError *error) {
         if(error)
             DDLogError(@"Could not donate interaction: %@", error);
         else
         {
-            NSError* error = nil;
-            UNNotificationContent* updatedContent = [content contentByUpdatingWithProvider:intent error:&error];
-            if(error)
-                DDLogError(@"Could not update notification content: %@", error);
-            else
-            {
-                DDLogDebug(@"Publishing communication notification with id %@", idval);
-                [self publishNotificationContent:updatedContent withID:idval];
+            //make sure the idval gets removed from pending notifications *after* we published the notification to make waitForDonations work
+            @synchronized(self.pendingDonations) {
+                if(![self.pendingDonations containsObject:idval])
+                {
+                    DDLogDebug(@"Not publishing donated notification with id %@, got displayed notice in he meantime", idval);
+                    return;
+                }
+                NSError* error = nil;
+                UNNotificationContent* updatedContent = [content contentByUpdatingWithProvider:intent error:&error];
+                if(error)
+                    DDLogError(@"Could not update notification content: %@", error);
+                else
+                {
+                    DDLogDebug(@"Publishing communication notification with id %@", idval);
+                    [self publishNotificationContent:updatedContent withID:idval];
+                }
+                [self.pendingDonations removeObject:idval];
             }
         }
     }];

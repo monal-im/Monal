@@ -119,6 +119,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
     
+    //wait for all pending intent donations of incoming messages to makeure those get a proper notification displayed
+    //(pending donations will never be honored with a notification otherwise)
+    [[MLNotificationManager sharedInstance] waitForDonations];
+    
     DDLogInfo(@"Now killing appex process, goodbye...");
     [DDLog flushLog];
     exit(0);

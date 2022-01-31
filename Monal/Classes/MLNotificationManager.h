@@ -18,16 +18,7 @@
 
 +(MLNotificationManager*) sharedInstance;
 
-/**
- if in chat with this user then dont push messages for this user when not locked
- */
 @property (nonatomic, strong) MLContact* currentContact;
-
-/**
- handles the notification. 
- 1. background will show alert
- 2. foreground will show slider
- */
--(void) handleNewMessage:(NSNotification*) notification;
+-(void) waitForDonations;
 
 @end

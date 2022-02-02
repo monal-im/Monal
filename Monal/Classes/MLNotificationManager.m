@@ -15,6 +15,7 @@
 #import "xmpp.h"
 #import "MLFiletransfer.h"
 #import "MLNotificationQueue.h"
+#import "MLXMPPManager.h"
 
 @import UserNotifications;
 @import CoreServices;
@@ -76,18 +77,19 @@
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     NSString* idval = [self identifierWithMessage:message];
     
-    //check if we already show any notifications and update them if necessary (e.g. publish a second notification having the same id)
     [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
         for(UNNotificationRequest* request in requests)
             if([request.identifier isEqualToString:idval])
             {
+                DDLogDebug(@"Already pending notification '%@', updating it...", idval);
                 [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:YES];
             }
     }];
     [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
         for(UNNotification* notification in notifications)
-             if([notification.request.identifier isEqualToString:idval])
+            if([notification.request.identifier isEqualToString:idval])
             {
+                DDLogDebug(@"Already displayed notification '%@', updating it...", idval);
                 [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:NO];
             }
     }];
@@ -307,57 +309,21 @@
             NSDictionary* info = [MLFiletransfer getFileInfoForMessage:message];
             if(info)
             {
-                UNNotificationAttachment* attachment = nil;
                 NSString* mimeType = info[@"mimeType"];
-                if(![info[@"needsDownloading"] boolValue])
+                if(![info[@"needsDownloading"] boolValue] && [mimeType hasPrefix:@"audio/"])
                 {
-                    NSString* typeHint = nil;
-                    if([mimeType hasPrefix:@"image/"])
-                    {
-                        if([mimeType isEqualToString:@"image/jpeg"])
-                            typeHint = (NSString*)kUTTypeJPEG;
-                        if([mimeType isEqualToString:@"image/png"])
-                            typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/gif"])
-                            typeHint = (NSString*)kUTTypeGIF;
-                    }
-                    else if([mimeType hasPrefix:@"audio/"])
-                    {
-                        if([mimeType isEqualToString:@"audio/mpeg"])
-                            typeHint = (NSString*)kUTTypeMP3;
-                        if([mimeType isEqualToString:@"audio/mp4"])
-                            typeHint = (NSString*)kUTTypeMPEG4Audio;
-                        if([mimeType isEqualToString:@"audio/wav"])
-                            typeHint = (NSString*)kUTTypeWaveformAudio;
-                        if([mimeType isEqualToString:@"audio/x-aiff"])
-                            typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
-                        
-                        if(typeHint != nil)
-                            audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
-                    }
-                    else if([mimeType hasPrefix:@"video/"])
-                    {
-                        if([mimeType isEqualToString:@"video/mpeg"])
-                            typeHint = (NSString*)kUTTypeMPEG;
-                        if([mimeType isEqualToString:@"video/mp4"])
-                            typeHint = (NSString*)kUTTypeMPEG4;
-                        if([mimeType isEqualToString:@"video/x-msvideo"])
-                            typeHint = (NSString*)kUTTypeAVIMovie;
-                        if([mimeType isEqualToString:@"video/mpeg2"])
-                            typeHint = (NSString*)kUTTypeMPEG2Video;
-                    }
-                    else if([mimeType isEqualToString:@"application/pdf"])
-                        msgText = NSLocalizedString(@"📄 A Document", @"");
-                    else
-                        msgText = NSLocalizedString(@"Sent a File 📁", @"");
+                    NSString* typeHint = (NSString*)kUTTypeMPEG4Audio;
+                    if([mimeType isEqualToString:@"audio/mpeg"])
+                        typeHint = (NSString*)kUTTypeMP3;
+                    if([mimeType isEqualToString:@"audio/mp4"])
+                        typeHint = (NSString*)kUTTypeMPEG4Audio;
+                    if([mimeType isEqualToString:@"audio/wav"])
+                        typeHint = (NSString*)kUTTypeWaveformAudio;
+                    if([mimeType isEqualToString:@"audio/x-aiff"])
+                        typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
                     
                     if(typeHint != nil)
-                    {
-                        NSError *error;
-                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
-                        if(error)
-                            DDLogError(@"Error adding UNNotificationAttachment to notification: %@", error);
-                    }
+                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
                 }
                 else
                 {
@@ -372,16 +338,11 @@
                     else
                         msgText = NSLocalizedString(@"Sent a File 📁", @"");
                 }
-                
-                if(attachment)
-                {
-                    content.attachments = @[attachment];
-                    msgText = @"";
-                }
             }
             else
             {
                 // empty info dict default to "Sent a file"
+                DDLogWarn(@"Got filetransfer with unknown type");
                 msgText = NSLocalizedString(@"Sent a File 📁", @"");
             }
         }
@@ -412,7 +373,7 @@
     // update badge value prior to donating the interaction to sirikit
     [self updateBadgeForContent:content];
     
-    INSendMessageIntent* intent = [self makeIntentForMessage:message usingText:msgText];
+    INSendMessageIntent* intent = [self makeIntentForMessage:message usingText:msgText andAudioAttachment:audioAttachment];
     
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionIncoming;
@@ -436,7 +397,7 @@
 
 -(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
-    INSendMessageIntent* intent = [self makeIntentForMessage:[[DataLayer sharedInstance] messageForHistoryID:messageDBId] usingText:@""];
+    INSendMessageIntent* intent = [self makeIntentForMessage:[[DataLayer sharedInstance] messageForHistoryID:messageDBId] usingText:@"" andAudioAttachment:nil];
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionOutgoing;
     [interaction donateInteractionWithCompletion:^(NSError *error) {
@@ -445,7 +406,7 @@
     }];
 }
 
--(INSendMessageIntent*) makeIntentForMessage:(MLMessage*) message usingText:(NSString*) msgText    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+-(INSendMessageIntent*) makeIntentForMessage:(MLMessage*) message usingText:(NSString*) msgText andAudioAttachment:(INSendMessageAttachment*) audioAttachment    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
     // some docu:
     // - https://developer.apple.com/documentation/usernotifications/implementing_communication_notifications?language=objc
@@ -464,7 +425,6 @@
             MLContact* contactInGroup = [MLContact createContactFromJid:message.participantJid andAccountNo:message.accountId];
             //use MLMessage's capability to calculate the fallback name using actualFrom
             sender = [self makeINPersonWithContact:contactInGroup andDisplayName:message.contactDisplayName andAccount:account];
-            content.subtitle = [NSString stringWithFormat:NSLocalizedString(@"%@ says:", @""), sender.displayName];
             
             //add other group members
             for(NSDictionary* member in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountId:message.accountId])
@@ -474,16 +434,13 @@
             }
         }
         else
-        {
             sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
-            content.subtitle = [NSString stringWithFormat:NSLocalizedString(@"%@ says:", @""), message.contactDisplayName];
-        }
     }
     else
         sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
     
     INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:(recipients.count > 0 ? recipients : nil)
-                                                              outgoingMessageType:INOutgoingMessageTypeOutgoingMessageText
+                                                              outgoingMessageType:(audioAttachment ? INOutgoingMessageTypeOutgoingMessageAudio : INOutgoingMessageTypeOutgoingMessageText)
                                                                           content:msgText
                                                                speakableGroupName:(groupDisplayName ? [[INSpeakableString alloc] initWithSpokenPhrase:groupDisplayName] : nil)
                                                            conversationIdentifier:[self threadIdentifierWithMessage:message]

@@ -218,7 +218,8 @@
     BOOL handleNotification;
     if(notification == nil)
         handleNotification = YES;
-    else{
+    else
+    {
         NSNumber* notificationAccountNo = notification.userInfo[@"accountNo"];
         handleNotification = (notificationAccountNo.intValue == self.accountNo.intValue);
     }

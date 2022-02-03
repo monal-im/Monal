@@ -741,10 +741,20 @@ NSString* const kStanza = @"stanza";
 
 -(void) disconnect
 {
-    [self disconnect:NO];
+    [self disconnectWithStreamError:nil andExplicitLogout:NO];
 }
 
 -(void) disconnect:(BOOL) explicitLogout
+{
+    [self disconnectWithStreamError:nil andExplicitLogout:explicitLogout];
+}
+
+-(void) disconnectWithStreamError:(MLXMLNode* _Nullable) streamError
+{
+    [self disconnectWithStreamError:streamError andExplicitLogout:NO];
+}
+
+-(void) disconnectWithStreamError:(MLXMLNode* _Nullable) streamError andExplicitLogout:(BOOL) explicitLogout 
 {
     //this has to be synchronous because we want to wait for the disconnect to complete before continuingand unlocking the process in the NSE
     [self dispatchOnReceiveQueue: ^{
@@ -840,7 +850,9 @@ NSString* const kStanza = @"stanza";
                     [self sendLastAck];
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the xmpp stream directly afterwards
             [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
-                //close stream
+                //close stream (either with error or normally)
+                if(streamError != nil)
+                    [self writeToStream:[streamError XMLString]];    // dont even bother queueing
                 MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"/stream:stream"];  //hack to close stream
                 [self writeToStream:[stream XMLString]];    // dont even bother queueing
             }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
@@ -881,13 +893,27 @@ NSString* const kStanza = @"stanza";
         }
         else
         {
-            //send one last ack before closing the stream (xep version 1.5.2)
-            if(self.accountState>=kStateBound)
+            if(streamError != nil)
             {
-                [self->_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                    [self sendLastAck];
+                [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
+                    //close stream with error
+                    [self writeToStream:[streamError XMLString]];    // dont even bother queueing
+                    MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"/stream:stream"];  //hack to close stream
+                    [self writeToStream:[stream XMLString]];    // dont even bother queueing
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
             }
+            else
+            {
+                //send one last ack before closing the stream (xep version 1.5.2)
+                if(self.accountState>=kStateBound)
+                {
+                    [self->_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                        [self sendLastAck];
+                    }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
+                }
+            }
+            
+            //persist these changes
             [self persistState];
         }
         
@@ -946,6 +972,11 @@ NSString* const kStanza = @"stanza";
 
 -(void) reconnect
 {
+    [self reconnectWithStreamError:nil];
+}
+
+-(void) reconnectWithStreamError:(MLXMLNode* _Nullable) streamError
+{
     if(_reconnectInProgress)
     {
         DDLogInfo(@"Ignoring reconnect while one already in progress");
@@ -953,11 +984,17 @@ NSString* const kStanza = @"stanza";
     }
     if(!_exponentialBackoff)
         _exponentialBackoff = 1.0;
-    [self reconnect:_exponentialBackoff];
+    [self reconnectWithStreamError:streamError andWaitingTime:_exponentialBackoff];
     _exponentialBackoff = MIN(_exponentialBackoff * 2, 10.0);
 }
 
 -(void) reconnect:(double) wait
+{
+    [self reconnectWithStreamError:nil andWaitingTime:wait];
+}
+
+-(void) reconnectWithStreamError:(MLXMLNode* _Nullable) streamError andWaitingTime:(double) wait
+
 {
     //we never want to reconnect while registering
     if(_registration || _registrationSubmission)
@@ -977,7 +1014,7 @@ NSString* const kStanza = @"stanza";
         }
         
         self->_reconnectInProgress = YES;
-        [self disconnect:NO];
+        [self disconnectWithStreamError:streamError andExplicitLogout:NO];
 
         DDLogInfo(@"Trying to connect again in %G seconds...", wait);
         self->_cancelReconnectTimer = createTimer(wait, (^{
@@ -1321,12 +1358,13 @@ NSString* const kStanza = @"stanza";
         {
             //stanza counting bugs on the server are fatal
             NSString* message = @"Server acknowledged more stanzas than sent by client";
-            [self send:[[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+            DDLogError(@"Stream error: %@", message);
+            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
+            MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
                 [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
-            ] andData:nil]];
-            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
-            [self reconnect];
+            ] andData:nil];
+            [self reconnectWithStreamError:streamError];
         }
         
         self.lastHandledOutboundStanza = hvalue;

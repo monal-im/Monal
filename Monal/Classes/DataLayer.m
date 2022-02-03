@@ -320,7 +320,6 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=?;" andArguments:@[accountNo]];
         // delete omemo related entries
         [self.db executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=?;" andArguments:@[accountNo]];
-        [self.db executeNonQuery:@"DELETE FROM signalContactKey WHERE account_id=?;" andArguments:@[accountNo]];
         [self.db executeNonQuery:@"DELETE FROM signalIdentity WHERE account_id=?;" andArguments:@[accountNo]];
         [self.db executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=?;" andArguments:@[accountNo]];
         [self.db executeNonQuery:@"DELETE FROM signalSignedPreKey WHERE account_id=?;" andArguments:@[accountNo]];

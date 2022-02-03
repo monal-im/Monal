@@ -310,21 +310,20 @@ static NSDateFormatter* dbFormatter;
 {
     // remove all other traces of the account_id in one transaction
     return [self.db boolWriteTransaction:^{
-        [self.db executeNonQuery:@"DELETE FROM buddylist WHERE account_id=?;" andArguments:@[accountNo]];
-        
+        // enable secure delete
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
+
+        // delete transfered files from local device
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=?;" andArguments:@[kMessageTypeFiletransfer, accountNo]];
         for(NSNumber* historyId in messageHistoryIDs)
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
-        [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=?;" andArguments:@[accountNo]];
-        
-        [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=?;" andArguments:@[accountNo]];
-        // delete omemo related entries
-        [self.db executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=?;" andArguments:@[accountNo]];
-        [self.db executeNonQuery:@"DELETE FROM signalIdentity WHERE account_id=?;" andArguments:@[accountNo]];
-        [self.db executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=?;" andArguments:@[accountNo]];
-        [self.db executeNonQuery:@"DELETE FROM signalSignedPreKey WHERE account_id=?;" andArguments:@[accountNo]];
 
-        return [self.db executeNonQuery:@"DELETE FROM account WHERE account_id=?;" andArguments:@[accountNo]];
+        // delete account and all entries with the same account_id (CASCADE DELETE)
+        BOOL accountDeleted = [self.db executeNonQuery:@"DELETE FROM account WHERE account_id=?;" andArguments:@[accountNo]];
+
+        // disable secure delete again
+        [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
+        return accountDeleted;
     }];
 }
 

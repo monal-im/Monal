@@ -75,6 +75,7 @@ key = m.digest()
 sock = socket.socket(socket.AF_INET6 if ipaddress.ip_address(args.listen).version==6 else socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((args.listen, args.port))
 last_counter = None
+last_processID = None
 
 logfd = None
 if args.file:
@@ -99,8 +100,14 @@ while True:
     decoded = json.loads(str(payload, "UTF-8"))
     
     # check if _counter jumped over some lines
+    logline = ""
+    if "_processID" in decoded and last_processID != None and decoded["_processID"] != last_processID:
+        logline += "PROCESS SWITCH FROM %s TO %s" % (last_processID, decoded["_processID"])
     if "_counter" in decoded and last_counter != None and decoded["_counter"] != last_counter + 1:
-        logline = "counter jumped from %d to %d leaving out %d lines" % (last_counter, decoded["_counter"], decoded["_counter"] - last_counter - 1)
+        if len(logline) != 0:
+            logline += ": "
+        logline += "counter jumped from %d to %d leaving out %d lines" % (last_counter, decoded["_counter"], decoded["_counter"] - last_counter - 1)
+    if len(logline) != 0:
         print(logline, file=logfd)
         print(colorize(logline, ansi=15, ansi_bg=0), flush=True)
     
@@ -111,5 +118,9 @@ while True:
     logline = ("%s" % str(decoded["formattedMessage"])).rstrip()
     print(logline, file=logfd)
     print(colorize(logline, **kwargs), flush=True)
+    
+    # update state
+    if "_processID" in decoded:
+        last_processID = decoded["_processID"]
     if "_counter" in decoded:
         last_counter = decoded["_counter"]

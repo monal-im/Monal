@@ -73,7 +73,7 @@ jobs:
         run: |
           curl -X POST -F "macbeta=@Monal/build/app/$APP_NAME.zip" -H "X-Secret: $(cat /Users/build/beta_upload_secret.txt)" https://monal.im/upload-macos-beta.php
       - name: Publish catalyst to appstore connect
-        run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider AnurodhPokharel17643632 -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)" --type macos --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
+        run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider AnurodhPokharel17643632 -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)" --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
       - uses: actions/upload-artifact@v2
         with:
           name: monal-catalyst

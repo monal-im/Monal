@@ -2464,7 +2464,15 @@ NSString* const kStanza = @"stanza";
 
 -(void) persistState
 {
+    DDLogVerbose(@"%@ --> persistState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    [self realPersistState];
+    DDLogVerbose(@"%@ --> persistState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+}
+
+-(void) realPersistState
+{
     @synchronized(_stateLockObject) {
+        DDLogVerbose(@"%@ --> realPersistState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         //state dictionary
         NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
 
@@ -2544,12 +2552,21 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.supportsClientState,
             _inCatchup
         );
+        DDLogVerbose(@"%@ --> realPersistState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
     }
 }
 
 -(void) readSmacksStateOnly
 {
+    DDLogVerbose(@"%@ --> readSmacksStateOnly before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    [self realReadSmacksStateOnly];
+    DDLogVerbose(@"%@ --> readSmacksStateOnly after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+}
+
+-(void) realReadSmacksStateOnly
+{
     @synchronized(_stateLockObject) {
+        DDLogVerbose(@"%@ --> realReadSmacksStateOnly before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
         if(dic)
         {
@@ -2603,12 +2620,22 @@ NSString* const kStanza = @"stanza";
         //always reset handler and smacksRequestInFlight when loading smacks state
         _smacksAckHandler = [[NSMutableArray alloc] init];
         self.smacksRequestInFlight = NO;
+        
+        DDLogVerbose(@"%@ --> realReadSmacksStateOnly after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
     }
 }
 
 -(void) readState
 {
+    DDLogVerbose(@"%@ --> readState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    [self realReadState];
+    DDLogVerbose(@"%@ --> readState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+}
+
+-(void) realReadState
+{
     @synchronized(_stateLockObject) {
+        DDLogVerbose(@"%@ --> realReadState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
         if(dic)
         {
@@ -2786,6 +2813,8 @@ NSString* const kStanza = @"stanza";
         //always reset handler and smacksRequestInFlight when loading smacks state
         _smacksAckHandler = [[NSMutableArray alloc] init];
         self.smacksRequestInFlight = NO;
+        
+        DDLogVerbose(@"%@ --> realReadState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
     }
 }
 

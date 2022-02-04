@@ -345,6 +345,7 @@ void logException(NSException* exception)
                 if(account.idle)
                 {
                     DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
+                    [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[syncErrorIdentifier]];
                     [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
                     syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
                     [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
@@ -364,7 +365,11 @@ void logException(NSException* exception)
                     content.sound = [UNNotificationSound defaultSound];
                     content.categoryIdentifier = @"simple";
                     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-                    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:syncErrorIdentifier content:content trigger:nil];
+                    //we don't know if and when apple will start the background process or when the next push will come in
+                    //--> we need a sync error notification to make the user aware of possible issues
+                    //BUT: we can delay it for some time and hope a background process/push is started in the meantime and removes the notification
+                    //     before it gets displayed at all (we use 60 seconds here)
+                    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:syncErrorIdentifier content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:60 repeats: NO]];
                     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
                         if(error)
                             DDLogError(@"Error posting syncError notification: %@", error);

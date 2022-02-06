@@ -18,7 +18,8 @@
 {
     NSMutableArray* _children;
 }
-@property (atomic, strong) NSCache* cache;
+@property (nonatomic, strong) NSCache* cache;
+@property (nonatomic, strong) NSCache* queryEntryCache;
 
 @property (atomic, strong, readwrite) NSString* element;
 @property (atomic, readwrite) NSMutableDictionary* attributes;
@@ -92,6 +93,7 @@ static NSRegularExpression* attributeFilterRegex;
     _data = nil;
     _element = @"";
     self.cache = [[NSCache alloc] init];
+    self.queryEntryCache = [[NSCache alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMemoryPressureNotification) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 }
 
@@ -146,6 +148,8 @@ static NSRegularExpression* attributeFilterRegex;
 {
     DDLogVerbose(@"Deinit of MLXMLNode: %@", self);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self.cache removeAllObjects];
+    [self.queryEntryCache removeAllObjects];
 }
 
 -(id) initWithCoder:(NSCoder*) decoder
@@ -190,9 +194,10 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(void) handleMemoryPressureNotification
 {
-    //we won't remove objects in our local cache of parseQueryEntry:arguments: because this shouldn't consume that much memory at all
     [self.cache removeAllObjects];
-    DDLogVerbose(@"Removed all objects in this MLXMLNode due to memory pressure: %@", self);
+    [self.queryEntryCache removeAllObjects];
+    DDLogVerbose(@"Removed all cached objects in this MLXMLNode due to memory pressure");
+    DDLogVerbose(@"Node: %@", self);
 }
 
 -(void) setXMLNS:(NSString*) xmlns
@@ -579,16 +584,11 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(NSMutableDictionary*) parseQueryEntry:(NSString* _Nonnull) entry arguments:(va_list) args
 {
-    static NSCache* localCache;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        localCache = [[NSCache alloc] init];
-    });
     va_list cacheKeyArgs;
     va_copy(cacheKeyArgs, args);
     NSString* cacheKey = [NSString stringWithFormat:@"%@§§%@", entry, [[NSString alloc] initWithFormat:entry arguments:cacheKeyArgs]];
     va_end(cacheKeyArgs);
-    NSDictionary* cacheEntry = [localCache objectForKey:cacheKey];
+    NSDictionary* cacheEntry = [self.queryEntryCache objectForKey:cacheKey];
     if(cacheEntry != nil)
         return [cacheEntry mutableCopy];
     NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
@@ -676,7 +676,7 @@ static NSRegularExpression* attributeFilterRegex;
     }
     if(conversionCommandRange.location != NSNotFound)
         retval[@"conversionCommand"] = [entry substringWithRange:conversionCommandRange];
-    [localCache setObject:[retval copy] forKey:cacheKey];
+    [self.queryEntryCache setObject:[retval copy] forKey:cacheKey];
     return retval;
 }
 

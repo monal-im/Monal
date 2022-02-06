@@ -1086,8 +1086,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
         request.requiresNetworkConnectivity = YES;
         request.requiresExternalPower = NO;
-        request.earliestBeginDate = nil;
-        //request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+        //this is needed because nil will start a new bg task before the old one did terminate
+        //this triggers a bug in ios which will not give bg time to the new task despite already started and leave monal
+        //freezed after being through half of the connection process
+        request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:30];
         BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
         if(!success) {
             // Errorcodes https://stackoverflow.com/a/58224050/872051

@@ -165,7 +165,10 @@
             [self showNotificaionForMessage:message withSound:sound andAccount:xmppAccount];
         }
         else
-            DDLogDebug(@"not showing notification: chat is open");
+        {
+            DDLogDebug(@"not showing notification and only playing sound: chat is open");
+            [self playNotificationSoundForMessage:message withSound:sound andAccount:xmppAccount];
+        }
     }
 }
 
@@ -249,6 +252,32 @@
     NSError* error = [HelperTools postUserNotificationRequest:request];
     if(error)
         DDLogError(@"Error posting local notification: %@", error);
+}
+
+-(void) playNotificationSoundForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
+{
+    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    NSString* idval = [self identifierWithMessage:message];
+    
+    if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
+    {
+        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
+        if(filename)
+        {
+            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
+            DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+        }
+        else
+        {
+            content.sound = [UNNotificationSound defaultSound];
+            DDLogDebug(@"Using default alert sound: %@", content.sound);
+        }
+    }
+    else
+        DDLogDebug(@"Using no alert sound");
+    
+    DDLogDebug(@"Publishing sound-but-no-body notification with id %@", idval);
+    [self publishNotificationContent:[self updateBadgeForContent:content] withID:idval];
 }
 
 -(void) showNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account

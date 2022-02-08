@@ -148,7 +148,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }
     
     //cancel expiration timer if still running and feed our handler with empty content to silence it
+    //wait for donations before feeding handler because apple does not allow us to post notifications after the last handler was fed
+    //(until the next push comes in or the appex gets killed)
     DDLogDebug(@"Feeding next handler");
+    [[MLNotificationManager sharedInstance] waitForDonations];
     [entry feed];
     
     //return NO if this was the last handler and YES if not

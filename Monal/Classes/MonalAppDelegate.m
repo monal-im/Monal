@@ -214,6 +214,23 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         title:NSLocalizedString(@"Mark as read", @"")
         options:UNNotificationActionOptionNone
     ];
+    if(@available(iOS 15.0, macCatalyst 15.0, *))
+    {
+        replyAction = [UNTextInputNotificationAction
+            actionWithIdentifier:@"REPLY_ACTION"
+            title:NSLocalizedString(@"Reply", @"")
+            options:UNNotificationActionOptionNone
+            icon:[UNNotificationActionIcon iconWithSystemImageName:@"arrowshape.turn.up.left"] 
+            textInputButtonTitle:NSLocalizedString(@"Send", @"")
+            textInputPlaceholder:NSLocalizedString(@"Your answer", @"")
+        ];
+        markAsReadAction = [UNNotificationAction
+            actionWithIdentifier:@"MARK_AS_READ_ACTION"
+            title:NSLocalizedString(@"Mark as read", @"")
+            options:UNNotificationActionOptionNone
+            icon:[UNNotificationActionIcon iconWithSystemImageName:@"message"]
+        ];
+    }
     UNNotificationCategory* messageCategory;
     UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement;
     messageCategory = [UNNotificationCategory

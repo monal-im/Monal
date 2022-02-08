@@ -341,7 +341,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) updateUnread
 {
     DDLogVerbose(@"updating app badge via updateUnread");
-    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
@@ -353,10 +352,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     content.badge = [NSNumber numberWithInteger:unread];
     
     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"badge_update" content:content trigger:nil];
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        if(error)
-            DDLogError(@"Error posting local badge_update notification: %@", error);
-    }];
+    NSError* error = [HelperTools postUserNotificationRequest:request];
+    if(error)
+        DDLogError(@"Error posting local badge_update notification: %@", error);
 }
 
 -(void) scheduleBackgroundFetchingTask
@@ -461,12 +459,11 @@ static BOOL warnUnclean = NO;
         errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
         errorContent.sound = [UNNotificationSound defaultSound];
         UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:errorContent trigger:nil];
-        [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:errorRequest withCompletionHandler:^(NSError * _Nullable error) {
-            if(error)
-                DDLogError(@"Error posting local appex unclean shutdown error notification: %@", error);
-            else
-                warnUnclean = NO;       //try again on error
-        }];
+        NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
+        if(error)
+            DDLogError(@"Error posting local appex unclean shutdown error notification: %@", error);
+        else
+            warnUnclean = NO;       //try again on error
     }
     
     //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)

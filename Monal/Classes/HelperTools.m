@@ -84,6 +84,24 @@ void logException(NSException* exception)
 }
 
 
++(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request
+{
+    __block NSError* retval = nil;
+    NSCondition* condition = [[NSCondition alloc] init];
+    [condition lock];
+    [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if(error)
+            DDLogError(@"Error posting notification: %@", error);
+        retval = error;
+        [condition lock];
+        [condition signal];
+        [condition unlock];
+    }];
+    [condition wait];
+    [condition unlock];
+    return retval;
+}
+
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length
 {
     if(!image)
@@ -323,7 +341,7 @@ void logException(NSException* exception)
 +(void) clearSyncErrorsOnAppForeground
 {
     NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
-    DDLogInfo(@"Clearing syncError notifications: %@", syncErrorsDisplayed);
+    DDLogInfo(@"Clearing syncError notification states: %@", syncErrorsDisplayed);
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
     [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
@@ -364,21 +382,19 @@ void logException(NSException* exception)
                     content.body = NSLocalizedString(@"Please open the app to retry", @"");
                     content.sound = [UNNotificationSound defaultSound];
                     content.categoryIdentifier = @"simple";
-                    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
                     //we don't know if and when apple will start the background process or when the next push will come in
                     //--> we need a sync error notification to make the user aware of possible issues
                     //BUT: we can delay it for some time and hope a background process/push is started in the meantime and removes the notification
                     //     before it gets displayed at all (we use 60 seconds here)
                     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:syncErrorIdentifier content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:60 repeats: NO]];
-                    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-                        if(error)
-                            DDLogError(@"Error posting syncError notification: %@", error);
-                        else
-                        {
-                            syncErrorsDisplayed[account.connectionProperties.identity.jid] = @YES;
-                            [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
-                        }
-                    }];
+                    NSError* error = [self postUserNotificationRequest:request];
+                    if(error)
+                        DDLogError(@"Error posting syncError notification: %@", error);
+                    else
+                    {
+                        syncErrorsDisplayed[account.connectionProperties.identity.jid] = @YES;
+                        [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+                    }
                 }
             }
         }

@@ -63,12 +63,10 @@
         content.title = xmppAccount.connectionProperties.identity.jid;
         content.body = notification.userInfo[@"message"];
         content.sound = [UNNotificationSound defaultSound];
-        UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
         UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
-        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-            if(error)
-                DDLogError(@"Error posting xmppError notification: %@", error);
-        }]; 
+        NSError* error = [HelperTools postUserNotificationRequest:request];
+        if(error)
+            DDLogError(@"Error posting xmppError notification: %@", error);
     }
 }
 
@@ -244,16 +242,13 @@
 
 -(void) publishNotificationContent:(UNNotificationContent*) content withID:(NSString*) idval
 {
-    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    
     //scheduling the notification in 2 seconds will make it possible to be deleted by XEP-0333 chat-markers received directly after the message
     //this is useful in catchup scenarios
     DDLogVerbose(@"notification manager: publishing notification in 2 seconds: %@", content);
     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:2 repeats: NO]];
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        if(error)
-            DDLogError(@"Error posting local notification: %@", error);
-    }];
+    NSError* error = [HelperTools postUserNotificationRequest:request];
+    if(error)
+        DDLogError(@"Error posting local notification: %@", error);
 }
 
 -(void) showNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account

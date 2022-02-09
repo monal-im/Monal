@@ -17,12 +17,15 @@
 
 #import <MapKit/MapKit.h>
 
+@import Intents;
+
 @interface ShareViewController ()
 
 @property (nonatomic, strong) NSArray<NSDictionary*>* accounts;
 @property (nonatomic, strong) NSArray<MLContact*>* recipients;
 @property (nonatomic, strong) MLContact* recipient;
 @property (nonatomic, strong) NSDictionary* account;
+@property (nonatomic, strong) MLContact* intentContact;
 
 @end
 
@@ -47,6 +50,12 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
     [self.navigationController.navigationBar setBackgroundColor:[UIColor monaldarkGreen]];
     self.navigationController.navigationItem.title = NSLocalizedString(@"Monal", @"");
+    
+    if(self.extensionContext.intent != nil && [self.extensionContext.intent isKindOfClass:[INSendMessageIntent class]])
+    {
+        INSendMessageIntent* intent = (INSendMessageIntent*)self.extensionContext.intent;
+        self.intentContact = [HelperTools unserializeData:[intent.conversationIdentifier dataUsingEncoding:NSISOLatin1StringEncoding]];
+    }
 }
 
 - (void) presentationAnimationDidFinish
@@ -60,19 +69,35 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     self.recipients = recipients;
     self.accounts = [[DataLayer sharedInstance] enabledAccountList];
 
-    BOOL recipientFound = NO;
-    for(MLContact* recipient in self.recipients)
+    if(self.intentContact != nil)
     {
+        //check if intentContact is in enabled account list
         for(NSDictionary* accountToCheck in self.accounts)
-            if([[NSString stringWithFormat:@"%@", [accountToCheck objectForKey:@"account_id"]] isEqualToString:recipient.accountId] == YES)
+            if([[NSString stringWithFormat:@"%@", [accountToCheck objectForKey:@"account_id"]] isEqualToString:self.intentContact.accountId] == YES)
             {
-                self.recipient = recipient;
+                self.recipient = self.intentContact;
                 self.account = accountToCheck;
-                recipientFound = YES;
                 break;
             }
-        if(recipientFound == YES)
-            break;
+    }
+    
+    //no intent given or intent contact not found --> select initial recipient (contact with most recent interaction)
+    if(!self.account || !self.recipient)
+    {
+        BOOL recipientFound = NO;
+        for(MLContact* recipient in self.recipients)
+        {
+            for(NSDictionary* accountToCheck in self.accounts)
+                if([[NSString stringWithFormat:@"%@", [accountToCheck objectForKey:@"account_id"]] isEqualToString:recipient.accountId] == YES)
+                {
+                    self.recipient = recipient;
+                    self.account = accountToCheck;
+                    recipientFound = YES;
+                    break;
+                }
+            if(recipientFound == YES)
+                break;
+        }
     }
     [self reloadConfigurationItems];
 }
@@ -197,12 +222,11 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     }
     
     if(!self.account && self.accounts.count > 0)
-    {
         self.account = [self.accounts objectAtIndex:0];
-    }
+
     SLComposeSheetConfigurationItem* recipient = [[SLComposeSheetConfigurationItem alloc] init];
     recipient.title = NSLocalizedString(@"Recipient", @"shareViewController: recipient");
-    recipient.value = self.recipient.contactJid;
+    recipient.value = [NSString stringWithFormat:@"%@ (%@)", self.recipient.contactDisplayName, self.recipient.contactJid];
     recipient.tapHandler = ^{
         UIStoryboard* iosShareStoryboard = [UIStoryboard storyboardWithName:@"iosShare" bundle:nil];
         MLSelectionController* controller = (MLSelectionController *)[iosShareStoryboard instantiateViewControllerWithIdentifier:@"contacts"];
@@ -217,15 +241,12 @@ const u_int32_t MagicMapKitItem = 1 << 2;
         }
 
         controller.options = recipientsToShow;
-        controller.completion = ^(NSDictionary* selectedRecipient)
-        {
+        controller.completion = ^(NSDictionary* selectedRecipient) {
             MLContact* contact = [selectedRecipient objectForKey:@"contact"];
-            if(contact) {
+            if(contact)
                 self.recipient = contact;
-            }
-            else {
+            else
                 self.recipient = nil;
-            }
             [self reloadConfigurationItems];
         };
         

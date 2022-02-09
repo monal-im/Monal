@@ -35,6 +35,10 @@
 				<key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
 				<integer>1</integer>
 			</dict>
+			<key>IntentsSupported</key>
+			<array>
+				<string>INSendMessageIntent</string>
+			</array>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.share-services</string>

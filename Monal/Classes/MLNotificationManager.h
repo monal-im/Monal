@@ -19,6 +19,6 @@
 +(MLNotificationManager*) sharedInstance;
 
 @property (nonatomic, strong) MLContact* currentContact;
-+(INSendMessageIntent*) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId    API_AVAILABLE(ios(15.0), macosx(12.0));  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+-(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId    API_AVAILABLE(ios(15.0), macosx(12.0));  //means: API_AVAILABLE(ios(15.0),
 
 @end

@@ -278,7 +278,6 @@
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     NSString* idval = [self identifierWithMessage:message];
-    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     
     INSendMessageAttachment* audioAttachment = nil;
     NSString* msgText = NSLocalizedString(@"Open app to see more", @"");
@@ -413,10 +412,47 @@
     // update badge value prior to donating the interaction to sirikit
     [self updateBadgeForContent:content];
     
+    INSendMessageIntent* intent = [self makeIntentForMessage:message usingText:msgText];
+    
+    INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
+    interaction.direction = INInteractionDirectionIncoming;
+    
+    NSError* error = nil;
+    UNNotificationContent* updatedContent = [content contentByUpdatingWithProvider:intent error:&error];
+    if(error)
+        DDLogError(@"Could not update notification content: %@", error);
+    else
+    {
+        DDLogDebug(@"Publishing communication notification with id %@", idval);
+        [self publishNotificationContent:updatedContent withID:idval];
+    }
+    
+    //we can donate interactions after posting their notification (see signal source code)
+    [interaction donateInteractionWithCompletion:^(NSError *error) {
+        if(error)
+            DDLogError(@"Could not donate interaction: %@", error);
+    }];
+}
+
+-(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+{
+    INSendMessageIntent* intent = [self makeIntentForMessage:[[DataLayer sharedInstance] messageForHistoryID:messageDBId] usingText:@""];
+    INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
+    interaction.direction = INInteractionDirectionOutgoing;
+    [interaction donateInteractionWithCompletion:^(NSError *error) {
+        if(error)
+            DDLogError(@"Could not donate outgoing interaction: %@", error);
+    }];
+}
+
+-(INSendMessageIntent*) makeIntentForMessage:(MLMessage*) message usingText:(NSString*) msgText    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+{
     // some docu:
     // - https://developer.apple.com/documentation/usernotifications/implementing_communication_notifications?language=objc
     // - https://gist.github.com/Dexwell/dedef7389eae26c5b9db927dc5588905
     // - https://stackoverflow.com/a/68705169/3528174
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:message.accountId];
+    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     INPerson* sender = nil;
     NSString* groupDisplayName = nil;
     NSMutableArray* recipients = [[NSMutableArray alloc] init];
@@ -447,15 +483,17 @@
         sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
     
     INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:(recipients.count > 0 ? recipients : nil)
-                                                                outgoingMessageType:INOutgoingMessageTypeOutgoingMessageText
-                                                                            content:msgText
-                                                                speakableGroupName:(groupDisplayName ? [[INSpeakableString alloc] initWithSpokenPhrase:groupDisplayName] : nil)
-                                                            conversationIdentifier:[self threadIdentifierWithMessage:message]
-                                                                        serviceName:message.accountId
-                                                                            sender:sender
-                                                                        attachments:(audioAttachment ? @[audioAttachment] : nil)];
+                                                              outgoingMessageType:INOutgoingMessageTypeOutgoingMessageText
+                                                                          content:msgText
+                                                               speakableGroupName:(groupDisplayName ? [[INSpeakableString alloc] initWithSpokenPhrase:groupDisplayName] : nil)
+                                                           conversationIdentifier:[self threadIdentifierWithMessage:message]
+                                                                      serviceName:message.accountId
+                                                                           sender:sender
+                                                                      attachments:(audioAttachment ? @[audioAttachment] : nil)];
     if(message.isMuc && contact.avatar != nil)
         [intent setImage:[INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)] forParameterNamed:@"speakableGroupName"];
+    
+    return intent;
     
     /*
     if(message.isMuc)
@@ -481,24 +519,6 @@
                                                                            contacts:@[sender]
                                                                      callCapability:INCallCapabilityAudioCall];
     */
-    INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
-    interaction.direction = INInteractionDirectionIncoming;
-    
-    NSError* error = nil;
-    UNNotificationContent* updatedContent = [content contentByUpdatingWithProvider:intent error:&error];
-    if(error)
-        DDLogError(@"Could not update notification content: %@", error);
-    else
-    {
-        DDLogDebug(@"Publishing communication notification with id %@", idval);
-        [self publishNotificationContent:updatedContent withID:idval];
-    }
-    
-    //we can donate interactions after posting their notification (see signal source code)
-    [interaction donateInteractionWithCompletion:^(NSError *error) {
-        if(error)
-            DDLogError(@"Could not donate interaction: %@", error);
-    }];
 }
 
 -(INPerson*) makeINPersonWithContact:(MLContact*) contact andDisplayName:(NSString* _Nullable) displayName andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))

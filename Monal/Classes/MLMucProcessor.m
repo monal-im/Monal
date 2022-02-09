@@ -175,9 +175,14 @@
         [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
     else
     {
-        if(item[@"jid"] != nil)
-            [self handleMembersListUpdate:presenceNode];
-        [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+        if([[DataLayer sharedInstance] isContactInList:presenceNode.fromUser forAccount:_account.accountNo])
+        {
+            if(item[@"jid"] != nil)
+                [self handleMembersListUpdate:presenceNode];
+            [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+        }
+        else
+            DDLogInfo(@"Ignoring presence updates from %@, MUC not in buddylist", presenceNode.fromUser);
     }
 }
 
@@ -212,21 +217,26 @@
 
 -(void) handleMembersListUpdate:(XMPPStanza*) node
 {
-    for(NSDictionary* entry in [node find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
+    if([[DataLayer sharedInstance] isContactInList:node.fromUser forAccount:_account.accountNo])
     {
-        NSMutableDictionary* item = [entry mutableCopy];
-        if(!item)
-            continue;       //ignore empty items
-        
-        //update jid to be a bare jid
-        if(item[@"jid"])
-            item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
-        
-        if([@"none" isEqualToString:item[@"affiliation"]])
-            [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:_account.accountNo];
-        else
-            [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:_account.accountNo];
+        for(NSDictionary* entry in [node find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
+        {
+            NSMutableDictionary* item = [entry mutableCopy];
+            if(!item)
+                continue;       //ignore empty items
+
+            //update jid to be a bare jid
+            if(item[@"jid"])
+                item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
+
+            if([@"none" isEqualToString:item[@"affiliation"]])
+                [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:_account.accountNo];
+            else
+                [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:_account.accountNo];
+        }
     }
+    else
+        DDLogInfo(@"Ignoring handleMembersListUpdate for %@, MUC not in buddylist", node.fromUser);
 }
 
 -(void) handleStatusCodes:(XMPPStanza*) node

@@ -443,7 +443,7 @@
                                                               outgoingMessageType:(audioAttachment ? INOutgoingMessageTypeOutgoingMessageAudio : INOutgoingMessageTypeOutgoingMessageText)
                                                                           content:msgText
                                                                speakableGroupName:(groupDisplayName ? [[INSpeakableString alloc] initWithSpokenPhrase:groupDisplayName] : nil)
-                                                           conversationIdentifier:[self threadIdentifierWithMessage:message]
+                                                           conversationIdentifier:[[NSString alloc] initWithData:[HelperTools serializeObject:contact] encoding:NSISOLatin1StringEncoding]
                                                                       serviceName:message.accountId
                                                                            sender:sender
                                                                       attachments:(audioAttachment ? @[audioAttachment] : nil)];

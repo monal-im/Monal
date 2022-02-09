@@ -18,7 +18,12 @@
 #import "MLXMPPManager.h"
 #import "MLPubSub.h"
 #import "MLUDPLogger.h"
+#import "MLHandler.h"
+#import "MLXMLNode.h"
 #import "XMPPStanza.h"
+#import "XMPPIQ.h"
+#import "XMPPPresence.h"
+#import "XMPPMessage.h"
 #import "XMPPDataForm.h"
 #import "xmpp.h"
 #import "MLNotificationQueue.h"
@@ -83,6 +88,42 @@ void logException(NSException* exception)
 #endif
 }
 
+
++(NSData*) serializeObject:(id) obj
+{
+    NSError* error;
+    NSData* data = [NSKeyedArchiver archivedDataWithRootObject:obj requiringSecureCoding:YES error:&error];
+    if(error)
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    return data;
+}
+
++(id) unserializeData:(NSData*) data
+{
+    NSError* error;
+    id obj = [NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
+        [NSData class],
+        [NSMutableData class],
+        [NSMutableDictionary class],
+        [NSDictionary class],
+        [NSMutableSet class],
+        [NSSet class],
+        [NSMutableArray class],
+        [NSArray class],
+        [NSNumber class],
+        [NSString class],
+        [NSDate class],
+        [MLHandler class],
+        [MLXMLNode class],
+        [XMPPIQ class],
+        [XMPPPresence class],
+        [XMPPMessage class],
+        [XMPPDataForm class],
+    ]] fromData:data error:&error];
+    if(error)
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    return obj;
+}
 
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request
 {

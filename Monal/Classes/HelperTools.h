@@ -33,6 +33,8 @@ void logException(NSException* exception);
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 +(NSString*) pushServer;
 
++(NSData*) serializeObject:(id) obj;
++(id) unserializeData:(NSData*) data;
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request;
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length;
 +(double) report_memory;

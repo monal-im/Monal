@@ -33,6 +33,7 @@
 const u_int32_t MagicPublicUrl = 1 << 0;
 const u_int32_t MagicPlainTxt = 1 << 1;
 const u_int32_t MagicMapKitItem = 1 << 2;
+const u_int32_t MagicPublicFileUrl = 1 << 3;
 
 @implementation ShareViewController
 
@@ -131,20 +132,25 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     for(NSItemProvider* provider in item.attachments)
     {
         DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
+        if([provider hasItemConformingToTypeIdentifier:@"public.file-url"])
+        {
+            magicIdentifyer |= MagicPublicFileUrl;
+            [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicPublicFileUrl]];
+        }
         if([provider hasItemConformingToTypeIdentifier:@"public.url"])
         {
-           magicIdentifyer |= MagicPublicUrl;
-           [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicPublicUrl]];
+            magicIdentifyer |= MagicPublicUrl;
+            [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicPublicUrl]];
         }
         if([provider hasItemConformingToTypeIdentifier:@"public.plain-text"])
         {
-           magicIdentifyer |= MagicPlainTxt;
-           [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicPlainTxt]];
+            magicIdentifyer |= MagicPlainTxt;
+            [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicPlainTxt]];
         }
         if([provider hasItemConformingToTypeIdentifier:@"com.apple.mapkit.map-item"])
         {
-           magicIdentifyer |= MagicMapKitItem;
-           [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicMapKitItem]];
+            magicIdentifyer |= MagicMapKitItem;
+            [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicMapKitItem]];
         }
     }
     NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
@@ -153,7 +159,8 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     payload[@"comment"] = self.contentText;
 
     // use best matching providers
-    if((magicIdentifyer & MagicMapKitItem) > 0) {
+    if((magicIdentifyer & MagicMapKitItem) > 0)
+    {
         // convert map item to geo:
         NSItemProvider* provider = [magicIdentifyerDic objectForKey:[NSNumber numberWithUnsignedInt:MagicMapKitItem]];
         [provider loadItemForTypeIdentifier:@"com.apple.mapkit.map-item" options:NULL completionHandler:^(NSData*  _Nullable item, NSError * _Null_unspecified error) {
@@ -162,6 +169,16 @@ const u_int32_t MagicMapKitItem = 1 << 2;
             DDLogWarn(@"%@", err);
             payload[@"type"] = @"geo";
             payload[@"data"] = [NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude];
+            [self savePayloadMsgAndComplete:payload];
+        }];
+    }
+    else if((magicIdentifyer & MagicPublicFileUrl) > 0)
+    {
+        NSItemProvider* provider = [magicIdentifyerDic objectForKey:[NSNumber numberWithUnsignedInt:MagicPublicFileUrl]];
+        [provider loadItemForTypeIdentifier:@"public.file-url" options:NULL completionHandler:^(id  _Nullable item, NSError * _Null_unspecified error) {
+            DDLogError(@"got item: %@", item);
+            payload[@"type"] = @"file";
+            //payload[@"data"] = item;
             [self savePayloadMsgAndComplete:payload];
         }];
     }

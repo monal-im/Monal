@@ -377,17 +377,18 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 @end
 
 
-@interface NotificationService () {
-    NSMutableArray* _handlers;
-}
+@interface NotificationService ()
 @end
 
+static NSMutableArray* handlers;;
 static BOOL warnUnclean = NO;
 
 @implementation NotificationService
 
 +(void) initialize
 {
+    handlers = [[NSMutableArray alloc] init];
+    
     [HelperTools configureLogging];
     [DDLog flushLog];
     
@@ -443,7 +444,7 @@ static BOOL warnUnclean = NO;
 -(void) didReceiveNotificationRequest:(UNNotificationRequest*) request withContentHandler:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
     DDLogInfo(@"Notification handler called (request id: %@)", request.identifier);
-    [_handlers addObject:contentHandler];
+    [handlers addObject:contentHandler];
     
     if(warnUnclean)
     {
@@ -479,25 +480,33 @@ static BOOL warnUnclean = NO;
 {
     DDLogError(@"notification handler expired, that should never happen!");
     
-#ifdef IS_ALPHA
-    if([_handlers count] > 0)
+#ifdef DEBUG
+    if([handlers count] > 0)
     {
-        //we feed all handlers with an error message, even if already silenced by the normal system, just to make sure
-        for(void (^_handler)(UNNotificationContent* _Nonnull) in _handlers)
+        //we don't want two error notifications for the user
+        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
+        
+        //we feed all handlers, these shouldn't be silenced already, because we wouldn't see this expiration
+        for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
         {
+            DDLogError(@"Feeding handler with error notification: %@", _handler);
             UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
-            errorContent.title = @"Unexpected error";
+            errorContent.title = @"Unexpected appex expiration";
             errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
             errorContent.sound = [UNNotificationSound defaultSound];
             _handler(errorContent);
         }
     }
 #else
-    if([_handlers count] > 0)
+    if([handlers count] > 0)
     {
-        //we feed all handlers, even if already done by the normal system,just to make sure
-        for(void (^_handler)(UNNotificationContent* _Nonnull) in _handlers)
+        //we don't want two error notifications for the user
+        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
+        
+        //we feed all handlers, these shouldn't be silenced already, because we wouldn't see this expiration
+        for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
         {
+            DDLogError(@"Feeding handler with silent notification: %@", _handler);
             UNMutableNotificationContent* emptyContent = [[UNMutableNotificationContent alloc] init];
             _handler(emptyContent);
         }

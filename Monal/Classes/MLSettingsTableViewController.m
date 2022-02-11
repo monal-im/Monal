@@ -430,12 +430,12 @@ enum DummySettingsRows {
     if([MFMailComposeViewController canSendMail]) {
         MFMailComposeViewController* composeVC = [[MFMailComposeViewController alloc] init];
         composeVC.mailComposeDelegate = self;
-        [composeVC setToRecipients:@[@"info@monal.im"]];
+        [composeVC setToRecipients:@[@"info@monal-im.org"]];
         [self presentViewController:composeVC animated:YES completion:nil];
     }
     else
     {
-        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"There is no configured email account. Please email info@monal.im .", @"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"There is no configured email account. Please email info@monal-im.org .", @"") preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         }];
         [messageAlert addAction:closeAction];

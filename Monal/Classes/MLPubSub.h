@@ -29,6 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 //subscribe to node, handler: $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) subscribeToNode:(NSString*) node onJid:(NSString*) jid withHandler:(MLHandler*) handler;
+//unsubscribe from node, handler: $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+-(void) unsubscribeFromNode:(NSString*) node forJid:(NSString*) jid withHandler:(MLHandler*) handler;
 
 //configure node, handler: $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
 -(void) configureNode:(NSString*) node withConfigOptions:(NSDictionary*) configOptions andHandler:(MLHandler* _Nullable) handler;

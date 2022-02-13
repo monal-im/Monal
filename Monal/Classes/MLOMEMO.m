@@ -76,8 +76,10 @@ const int KEY_SIZE = 16;
     self.ownReceivedDeviceList = [[NSMutableSet alloc] initWithArray:ownCachedDevices];
     self.openPreKeySession = [[NSMutableSet alloc] init];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loggedIn:) name:kMLHasConnectedNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupDone:) name:kMonalFinishedCatchup object:nil];
+    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self selector:@selector(loggedIn:) name:kMLHasConnectedNotice object:nil];
+    [nc addObserver:self selector:@selector(catchupDone:) name:kMonalFinishedCatchup object:nil];
+    [nc addObserver:self selector:@selector(handleContactRemoved:) name:kMonalContactRemoved object:nil];
 
     return self;
 }
@@ -114,6 +116,15 @@ const int KEY_SIZE = 16;
             [self catchupAndOmemoDone];
         }
     }
+}
+
+-(void) handleContactRemoved:(NSNotification*) notification
+{
+    MLContact* removedContact = notification.userInfo[@"contact"];
+    if(removedContact == nil || removedContact.accountId.intValue != self.account.accountNo.intValue)
+       return;
+
+    [self checkIfSessionIsStillNeeded:removedContact.contactJid isMuc:removedContact.isGroup];
 }
 
 -(void) catchupAndOmemoDone
@@ -265,10 +276,6 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $_ID(xmpp*, account),
         if(!rid || !jid)
             return;
         // check that a corresponding buddy exists -> prevent foreign key errors
-        if([[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo] == NO) {
-            DDLogWarn(@"Skipping processOMEMOKeys: jid %@ not a known buddy. AccountNo: %@", jid, self.account.accountNo);
-            return;
-        }
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
         if(!receivedKeys && data.count == 1)
         {
@@ -309,16 +316,24 @@ $$
 {
     if([[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo] == NO)
     {
-        [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandler(self, handleDevicelistSubscribeError)];
+        [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandler(self, handleDevicelistSubscribe)];
     }
     // fetch newest devicelist
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
 }
 
-$$instance_handler(handleDevicelistSubscribeError, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
-    if(errorIq)
+$$instance_handler(handleDevicelistSubscribe, account.omemo, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(success == NO)
     {
         DDLogWarn(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorIq);
+    }
+    // TODO: improve error handling
+$$
+
+$$instance_handler(handleDevicelistUnsubscribe, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(success == NO)
+    {
+        DDLogWarn(@"Error while unsubscribing omemo deviceslist from: %@ - %@", jid, errorIq);
     }
     // TODO: improve error handling
 $$
@@ -512,7 +527,7 @@ $$
         if(!key)
             continue;
 
-        DDLogDebug(@"Generating keyBundle for key id %@...", preKeyId);
+        DDLogDebug(@"Generating keyBundle for jid: %@ rid: %@ and key id %@...", jid, ridString, preKeyId);
         NSError* error;
         SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
                                                                     deviceId:device
@@ -614,15 +629,15 @@ $$
         // KeyTransportElements should not contain a body
         [messageNode setStoreHint];
     }
-    NSMutableArray<NSString*>* recipients = [[NSMutableArray alloc] init];
+    NSMutableSet<NSString*>* recipients = [[NSMutableSet alloc] init];
     if([[DataLayer sharedInstance] isBuddyMuc:toContact forAccount:self.account.accountNo])
     {
         for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:toContact forAccountId:self.account.accountNo])
         {
             if(participant[@"participant_jid"])
-            {
                 [recipients addObject:participant[@"participant_jid"]];
-            }
+            else if(participant[@"member_jid"])
+                [recipients addObject:participant[@"member_jid"]];
         }
     }
     else
@@ -711,6 +726,8 @@ $$
     }
 }
 
+
+
 // called after a new MUC member was added
 -(void) checkIfMucMemberHasExistingSession:(NSString*) buddyJid
 {
@@ -721,10 +738,18 @@ $$
 }
 
 // called after a buddy was deleted from roster OR after a MUC member was removed
--(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid
+-(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid isMuc:(BOOL) isMuc
 {
-    [self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid];
-    // TODO: unsubscribe
+    NSArray<NSString*>* danglingJids = @[];
+    if(isMuc == YES)
+        danglingJids = [self.monalSignalStore removeDanglingMucSessions];
+    else if([self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid] == NO)
+        danglingJids = @[buddyJid];
+
+    for(NSString* jid in danglingJids)
+    {
+        [self.account.pubsub unsubscribeFromNode:@"eu.siacs.conversations.axolotl.devicelist" forJid:jid withHandler:$newHandler(self, handleDevicelistUnsubscribe)];
+    }
 }
 
 -(void) rebuildSessions

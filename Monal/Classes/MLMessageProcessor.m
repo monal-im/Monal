@@ -144,12 +144,20 @@ static NSMutableDictionary* _typingNotifications;
     }
     else
     {
-        //add contact if possible (ignore groupchats or already existing contacts)
         NSString* possibleUnkownContact;
         if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
             possibleUnkownContact = messageNode.toUser;
         else
             possibleUnkownContact = messageNode.fromUser;
+
+        // handle KeyTransportMessages directly without adding a 1:1 buddy
+        if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] == YES && [messageNode check:@"body#"] == NO)
+        {
+            DDLogInfo(@"Handling KeyTransportElement without trying to add a 1:1 buddy %@", possibleUnkownContact);
+            [account.omemo decryptMessage:messageNode];
+            return message;
+        }
+        //add contact if possible (ignore groupchats or already existing contacts, or KeyTransportElements)
         DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
         [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil andMucNick:nil];
     }

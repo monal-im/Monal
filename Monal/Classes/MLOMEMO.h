@@ -51,6 +51,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(void) queryOMEMODevices:(NSString*) jid;
 
+-(void) checkIfMucMemberHasExistingSession:(NSString*) buddyJid;
+-(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid;
+
 -(void) sendLocalDevicesIfNeeded;
 -(void) untrustAllDevicesFrom:(NSString*)jid;
 

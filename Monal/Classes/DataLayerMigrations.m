@@ -1048,6 +1048,39 @@
             [db executeNonQuery:@"INSERT INTO blocklistCache SELECT * FROM _blocklistCacheTMP;"];
             [db executeNonQuery:@"DROP TABLE _blocklistCacheTMP;"];
         }];
+
+        // relax foreign key constraints for omemo tables
+        // muc participants might not be a buddy
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.115 withBlock:^{
+            // migrate signalContactIdentity
+            [db executeNonQuery:@"ALTER TABLE signalContactIdentity RENAME TO _signalContactIdentityTMP;"];
+            [db executeNonQuery:@"CREATE TABLE 'signalContactIdentity' (\
+                'account_id' INTEGER NOT NULL,\
+                'contactName' TEXT NOT NULL,\
+                'contactDeviceId' INTEGER NOT NULL,\
+                'identity' BLOB,\
+                'lastReceivedMsg' INTEGER DEFAULT NULL,\
+                'removedFromDeviceList' INTEGER DEFAULT NULL,\
+                'trustLevel' INTEGER NOT NULL DEFAULT 1, brokenSession BOOL DEFAULT FALSE,\
+                PRIMARY KEY('account_id', 'contactName', 'contactDeviceId'),\
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE\
+            )"];
+            [db executeNonQuery:@"INSERT INTO signalContactIdentity SELECT * FROM _signalContactIdentityTMP;"];
+            [db executeNonQuery:@"DROP TABLE _signalContactIdentityTMP;"];
+
+            // migrate signalContactSession
+            [db executeNonQuery:@"ALTER TABLE signalContactSession RENAME TO _signalContactSessionTMP;"];
+            [db executeNonQuery:@"CREATE TABLE 'signalContactSession' ( \
+                'account_id' INTEGER NOT NULL, \
+                'contactName' text NOT NULL, \
+                'contactDeviceId' INTEGER NOT NULL, \
+                'recordData' BLOB, \
+                PRIMARY KEY('account_id','contactName','contactDeviceId'), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+            );"];
+            [db executeNonQuery:@"INSERT INTO signalContactSession SELECT * FROM _signalContactSessionTMP;"];
+            [db executeNonQuery:@"DROP TABLE _signalContactSessionTMP;"];
+        }];
     }];
     NSNumber* newdbversion = [db idReadTransaction:^{
         return [self readDBVersion:db];

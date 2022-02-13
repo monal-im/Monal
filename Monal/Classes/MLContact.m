@@ -389,14 +389,20 @@ NSString *const kAskSubscribe=@"subscribe";
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
     if(account == nil || account.omemo == nil)
         return NO;
-    NSArray* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
-    if(!self.isEncrypted && encrypt && knownDevices.count == 0)
+    if(self.isGroup == NO)
     {
-        // request devicelist again
-        [account.omemo queryOMEMODevices:self.contactJid];
+        NSArray* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
+        if(!self.isEncrypted && encrypt && knownDevices.count == 0)
+        {
+            // request devicelist again
+            [account.omemo queryOMEMODevices:self.contactJid];
+            return NO;
+        }
+    }
+    else if([self.mucType isEqualToString:@"group"] == NO)
+    {
         return NO;
     }
-    
     if(self.isEncrypted == encrypt)
         return YES;
     

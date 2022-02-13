@@ -666,6 +666,9 @@ $$
         }
         //remove from DB
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
+        // check if the remaining omemo session is still needed for muc groups
+        [account.omemo checkIfSessionIsStillNeeded:contact.contactJid];
+        // notify the UI
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contact}];
     }
 }

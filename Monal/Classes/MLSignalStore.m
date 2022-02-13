@@ -502,6 +502,41 @@
     }];
  }
 
+// MUC session management
+
+-(BOOL) sessionsExistForBuddy:(NSString*) buddyJid
+{
+    return [self.sqliteDatabase boolWriteTransaction:^{
+        BOOL contactDevicesExist = [self.sqliteDatabase executeScalarReader:@"SELECT COUNT(contactDeviceId) > 0 FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=?;" andArguments:@[self.accountId, buddyJid]];
+        return contactDevicesExist;
+    }];
+}
+
+-(BOOL) checkIfSessionIsStillNeeded:(NSString*) buddyJid
+{
+    return [self.sqliteDatabase boolWriteTransaction:^{
+        // delete fingerprints from contacts that are neither a buddy nor a group participant
+        BOOL buddyStillNeeded = [self.sqliteDatabase executeScalarReader:@"SELECT (buddyCnt + memberCnt) > 0 FROM (SELECT COUNT(buddy_name) FROM buddylist WHERE account_id=? AND buddy_name=?) AS buddyCnt, (SELECT COUNT(room) FROM muc_members WHERE account_id=? AND member_jid=?) AS memberCnt" andArguments:@[self.accountId, buddyJid, self.accountId, buddyJid]];
+        
+        if(buddyStillNeeded == NO)
+        {
+            [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity \
+                WHERE \
+                    account_id=? \
+                    AND buddyJid=? \
+             " andArguments:@[self.accountId, buddyJid]];
+            [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession \
+                WHERE \
+                    account_id=? \
+                    AND buddyJid=? \
+             " andArguments:@[self.accountId, buddyJid]];
+            
+            // TODO: unsubscribe pep
+        }
+        return buddyStillNeeded;
+    }];
+}
+
 /**
  * Store a serialized sender key record for a given
  * (groupId + senderId + deviceId) tuple.

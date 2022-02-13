@@ -44,6 +44,10 @@
 -(void) markSessionAsBroken:(SignalAddress*) address;
 -(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceId;
 
+// MUC session management
+-(BOOL) sessionsExistForBuddy:(NSString*) buddyJid;
+-(BOOL) checkIfSessionIsStillNeeded:(NSString*) buddyJid;
+
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*) address;
 -(int) getInternalTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey;
 -(void) untrustAllDevicesFrom:(NSString*) jid;

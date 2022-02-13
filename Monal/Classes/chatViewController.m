@@ -655,7 +655,7 @@ enum msgSentState {
     if(self.xmppAccount) {
         BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
         if(!omemoDeviceForContactFound) {
-            if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo]) {
+            if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo] && (!self.contact.isGroup || (self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"]))) {
                 UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
                 [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     // Disable encryption

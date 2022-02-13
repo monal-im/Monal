@@ -20,6 +20,7 @@
 #import "MLNotificationQueue.h"
 #import "MLPubSub.h"
 #import "MLPubSubProcessor.h"
+#import "MLOMEMO.h"
 
 #define CURRENT_MUC_STATE_VERSION @4
 
@@ -226,17 +227,22 @@
         for(NSDictionary* entry in [node find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
         {
             NSMutableDictionary* item = [entry mutableCopy];
-            if(!item)
-                continue;       //ignore empty items
+            if(!item || item[@"jid"] == nil)
+                continue;       //ignore empty items or items without a jid
 
             //update jid to be a bare jid
-            if(item[@"jid"])
-                item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
+            item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
 
             if([@"none" isEqualToString:item[@"affiliation"]])
+            {
                 [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:account.accountNo];
+                [_account.omemo checkIfSessionIsStillNeeded:item[@"jid"]];
+            }
             else
+            {
                 [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:account.accountNo];
+                [_account.omemo checkIfMucMemberHasExistingSession:item[@"jid"]];
+            }
         }
     }
     else

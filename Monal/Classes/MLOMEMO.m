@@ -307,8 +307,21 @@ $$
 
 -(void) queryOMEMODevices:(NSString*) jid
 {
+    if([[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo] == NO)
+    {
+        [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandler(self, handleDevicelistSubscribeError)];
+    }
+    // fetch newest devicelist
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
 }
+
+$$instance_handler(handleDevicelistSubscribeError, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(errorIq)
+    {
+        DDLogWarn(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorIq);
+    }
+    // TODO: improve error handling
+$$
 
 $$instance_handler(handleManualDevices, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data))
     if(errorIq)
@@ -696,6 +709,22 @@ $$
     if(self.omemoLoginState == CatchupDone) {
         [self rebuildSessions];
     }
+}
+
+// called after a new MUC member was added
+-(void) checkIfMucMemberHasExistingSession:(NSString*) buddyJid
+{
+    if([self.monalSignalStore sessionsExistForBuddy:buddyJid] == NO)
+    {
+        [self queryOMEMODevices:buddyJid];
+    }
+}
+
+// called after a buddy was deleted from roster OR after a MUC member was removed
+-(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid
+{
+    [self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid];
+    // TODO: unsubscribe
 }
 
 -(void) rebuildSessions

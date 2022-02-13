@@ -43,7 +43,6 @@ enum ContactDetailsSections {
 
 enum ContactDetailsConnDetailsRows {
     KeysRow,
-    ResourcesRow,
     SubscribedStateRow,
     BlockStateRow,
     PinStateRow,
@@ -216,14 +215,6 @@ enum ContactDetailsAboutRows {
         thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
         if(indexPath.row == KeysRow)
             thecell.textLabel.text = NSLocalizedString(@"Encryption Keys", @"");
-        else if(indexPath.row == ResourcesRow)
-        {
-            if(self.contact.isGroup) {
-                thecell.textLabel.text = NSLocalizedString(@"Participants", @"");
-            } else {
-                thecell.textLabel.text = NSLocalizedString(@"Resources", @"");
-            }
-        }
         else if(indexPath.row == SubscribedStateRow)
         {
             if(self.contact.isGroup == YES)
@@ -303,10 +294,6 @@ enum ContactDetailsAboutRows {
         {
             case KeysRow:  {
                 [self performSegueWithIdentifier:@"showKeys" sender:self];
-                break;
-            }
-            case ResourcesRow:  {
-                [self performSegueWithIdentifier:@"showResources" sender:self];
                 break;
             }
             case SubscribedStateRow:  {

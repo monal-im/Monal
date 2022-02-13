@@ -291,8 +291,6 @@ $$
             // we should never delete our own buddy -> prevent foreign key errors for omemo
             if([contact[@"jid"] isEqualToString:account.connectionProperties.identity.jid] == NO) {
                 [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
-                // check if the remaining omemo session is still needed for muc groups
-                [account.omemo checkIfSessionIsStillNeeded:contact[@"jid"]];
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
             }
         }

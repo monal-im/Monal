@@ -236,12 +236,16 @@
             if([@"none" isEqualToString:item[@"affiliation"]])
             {
                 [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:account.accountNo];
-                [_account.omemo checkIfSessionIsStillNeeded:item[@"jid"]];
+#ifndef DISABLE_OMEMO
+                [_account.omemo checkIfSessionIsStillNeeded:item[@"jid"] isMuc:NO];
+#endif// DISABLE_OMEMO
             }
             else
             {
                 [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:account.accountNo];
+#ifndef DISABLE_OMEMO
                 [_account.omemo checkIfMucMemberHasExistingSession:item[@"jid"]];
+#endif// DISABLE_OMEMO
             }
         }
     }

@@ -504,20 +504,22 @@
 
 // MUC session management
 
+// return true if we found at least one fingerprint for the given buddyJid
 -(BOOL) sessionsExistForBuddy:(NSString*) buddyJid
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
-        BOOL contactDevicesExist = [self.sqliteDatabase executeScalarReader:@"SELECT COUNT(contactDeviceId) > 0 FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=?;" andArguments:@[self.accountId, buddyJid]];
-        return contactDevicesExist;
+        NSNumber* contactDevicesExist = [self.sqliteDatabase executeScalar:@"SELECT COUNT(contactDeviceId) FROM signalContactIdentity WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, buddyJid]];
+        return (BOOL)(contactDevicesExist.intValue > 0);
     }];
 }
 
+// delete the fingerprints and session for the given buddyJid if the jid is neither a 1:1 buddy nor a group member
 -(BOOL) checkIfSessionIsStillNeeded:(NSString*) buddyJid
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
-        // delete fingerprints from contacts that are neither a buddy nor a group participant
-        BOOL buddyStillNeeded = [self.sqliteDatabase executeScalarReader:@"SELECT (buddyCnt + memberCnt) > 0 FROM (SELECT COUNT(buddy_name) FROM buddylist WHERE account_id=? AND buddy_name=?) AS buddyCnt, (SELECT COUNT(room) FROM muc_members WHERE account_id=? AND member_jid=?) AS memberCnt" andArguments:@[self.accountId, buddyJid, self.accountId, buddyJid]];
-        
+        // delete fingerprints from buddyJid if the buddyJid is neither a buddy nor a group member
+        NSNumber* buddyJidCnt = [self.sqliteDatabase executeScalar:@"SELECT (bCnt.buddyListCnt + mucCnt.roomCnt) FROM (SELECT COUNT(buddy_name) AS buddyListCnt FROM buddylist WHERE account_id=? AND buddy_name=?) AS bCnt, (SELECT COUNT(room) AS roomCnt FROM muc_members WHERE account_id=? AND member_jid=?) AS mucCnt" andArguments:@[self.accountId, buddyJid, self.accountId, buddyJid]];
+        BOOL buddyStillNeeded = buddyJidCnt.intValue > 0;
         if(buddyStillNeeded == NO)
         {
             [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity \
@@ -530,10 +532,43 @@
                     account_id=? \
                     AND buddyJid=? \
              " andArguments:@[self.accountId, buddyJid]];
-            
-            // TODO: unsubscribe pep
         }
         return buddyStillNeeded;
+    }];
+}
+
+// delete all fingerprints and sessions from contacts that are neither a buddy nor a group member
+// return jids of dangling sessions
+-(NSArray<NSString*>*) removeDanglingMucSessions
+{
+    return [self.sqliteDatabase idWriteTransaction:^{
+        NSArray<NSString*>* danglingJids = [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT buddyJid FROM signalContactIdentity \
+            WHERE \
+                account_id = ? \
+                AND buddyJid NOT IN \
+                    (SELECT buddy_name FROM buddylist WHERE account_id=?) \
+                AND buddyJid NOT IN \
+                    (SELECT member_jid FROM muc_members WHERE account_id=?)\
+        " andArguments:@[self.accountId, self.accountId, self.accountId]];
+
+        if(danglingJids == nil)
+            return (NSArray<NSString*>*)@[];
+
+        for(NSString* jid in danglingJids)
+        {
+            [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity \
+                WHERE \
+                    account_id = ? \
+                    AND buddyJid = ? \
+            " andArguments:@[self.accountId, jid]];
+
+            [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession \
+                WHERE \
+                    account_id = ? \
+                    AND buddyJid = ? \
+            " andArguments:@[self.accountId, jid]];
+        }
+        return danglingJids;
     }];
 }
 

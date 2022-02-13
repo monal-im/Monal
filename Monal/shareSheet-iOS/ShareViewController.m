@@ -259,8 +259,7 @@ const u_int32_t MagicPublicFileUrl = 1 << 3;
         for (MLContact* contact in self.recipients)
         {
             // only show contacts from the selected account
-            NSNumber* accountNo = [self.account objectForKey:@"account_id"];
-            if(contact.accountId.intValue == accountNo.intValue)
+            if(contact.accountId.intValue == self.account[@"account_id"].intValue)
                 [recipientsToShow addObject:@{@"contact": contact}];
         }
 

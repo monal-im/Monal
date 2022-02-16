@@ -22,10 +22,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLAudioRecoderManager : NSObject <AVAudioRecorderDelegate>
 
-@property (strong, nonatomic) AVAudioRecorder *audioRecorder;
-@property (weak, nonatomic) id <AudioRecoderManagerDelegate> recoderManagerDelegate;
+@property (strong, nonatomic) AVAudioRecorder* audioRecorder;
+@property (weak, nonatomic) id<AudioRecoderManagerDelegate> recoderManagerDelegate;
 
-+ (MLAudioRecoderManager* _Nonnull )sharedInstance;
++ (MLAudioRecoderManager* _Nonnull)sharedInstance;
 
 -(void)start;
 -(void)stop;

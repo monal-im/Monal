@@ -465,7 +465,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) disconnectAccount:(NSNumber*) accountNo
 {
     int index=0;
-    int pos=-1;
+    unsigned int pos=-1;
     xmpp* account;
     BOOL lastConnectedAccount = NO;
     @synchronized(_connectedXMPP) {
@@ -598,7 +598,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
     }
     else
+    {
         DDLogError(@"Could not add message to history!");
+        completion(false, nil);
+    }
 }
 
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
@@ -623,7 +626,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - getting details
 
--(NSString*) getAccountNameForConnectedRow:(NSInteger) row
+-(NSString*) getAccountNameForConnectedRow:(NSUInteger) row
 {
     xmpp* account;
     @synchronized(_connectedXMPP) {

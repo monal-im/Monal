@@ -1810,8 +1810,6 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
-#pragma db Commands
-
 -(void) invalidateAllAccountStates
 {
 #ifndef IS_ALPHA

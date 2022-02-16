@@ -705,10 +705,11 @@ static NSRegularExpression* attributeFilterRegex;
     [outputString appendString:[NSString stringWithFormat:@"<%@", _element]];
     
     //set attributes
+    MLXMLNode* parent = self.parent;
     for(NSString* key in [_attributes allKeys])
     {
         //handle xmlns inheritance (don't add namespace to childs if it should be the same like the parent's one)
-        if([key isEqualToString:@"xmlns"] && self.parent && [_attributes[@"xmlns"] isEqualToString:self.parent.attributes[@"xmlns"]])
+        if([key isEqualToString:@"xmlns"] && parent && [_attributes[@"xmlns"] isEqualToString:parent.attributes[@"xmlns"]])
             continue;
         [outputString appendString:[NSString stringWithFormat:@" %@='%@'", key, [MLXMLNode escapeForXMPP:(NSString*)_attributes[key]]]];
     }

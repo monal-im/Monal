@@ -162,7 +162,7 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     if((magicIdentifyer & MagicMapKitItem) > 0) {
         // convert map item to geo:
         NSItemProvider* provider = [magicIdentifyerDic objectForKey:[NSNumber numberWithUnsignedInt:MagicMapKitItem]];
-        [provider loadItemForTypeIdentifier:@"com.apple.mapkit.map-item" options:NULL completionHandler:^(NSData*  _Nullable item, NSError * _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:@"com.apple.mapkit.map-item" options:NULL completionHandler:^(NSData*  _Nullable item, NSError * _Null_unspecified error __unused) {
             NSError* err;
             MKMapItem* mapItem = [NSKeyedUnarchiver unarchivedObjectOfClass:[MKMapItem class] fromData:item error:&err];
             DDLogWarn(@"%@", err);
@@ -174,7 +174,7 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     else if((magicIdentifyer & MagicPublicUrl) > 0)
     {
         NSItemProvider* provider = [magicIdentifyerDic objectForKey:[NSNumber numberWithUnsignedInt:MagicPublicUrl]];
-        [provider loadItemForTypeIdentifier:@"public.url" options:NULL completionHandler:^(NSURL<NSSecureCoding>*  _Nullable item, NSError * _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:@"public.url" options:NULL completionHandler:^(NSURL<NSSecureCoding>*  _Nullable item, NSError * _Null_unspecified error __unused) {
             payload[@"type"] = @"url";
             payload[@"data"] = item.absoluteString;
             [self savePayloadMsgAndComplete:payload];
@@ -192,7 +192,7 @@ const u_int32_t MagicMapKitItem = 1 << 2;
 -(void) savePayloadMsgAndComplete:(NSDictionary*) payload
 {
     [[DataLayer sharedInstance] addShareSheetPayload:payload];
-    [self.extensionContext completeRequestReturningItems:@[] completionHandler:^(BOOL expired) {
+    [self.extensionContext completeRequestReturningItems:@[] completionHandler:^(BOOL expired __unused) {
         [self openMainApp:payload[@"recipient"]];
     }];
 }

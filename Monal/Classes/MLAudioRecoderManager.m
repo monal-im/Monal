@@ -23,8 +23,9 @@ NSURL *audioFileURL = nil;
     return sharedInstance;
 }
 
--(void)start{
-    
+-(void) start
+{
+    id<AudioRecoderManagerDelegate> recoderManagerDelegate = self.recoderManagerDelegate;
     NSError *audioSessionCategoryError = nil;
     NSError *audioRecodSetActiveError = nil;
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
@@ -32,18 +33,18 @@ NSURL *audioFileURL = nil;
     [audioSession setActive:YES error:&audioRecodSetActiveError];
     if (audioSessionCategoryError) {
         DDLogError(@"Audio Recoder set category error: %@", audioSessionCategoryError);
-        [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder set category error: %@", audioSessionCategoryError)];
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder set category error: %@", audioSessionCategoryError)];
         return;
     }
     
     if (audioRecodSetActiveError) {
         DDLogError(@"Audio Recoder set active error: %@", audioRecodSetActiveError);
-        [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder set active error: %@", audioRecodSetActiveError)];
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder set active error: %@", audioRecodSetActiveError)];
         return;
     }
     
-    NSError *recoderError = nil;
-    NSDictionary *recodSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+    NSError* recoderError = nil;
+    NSDictionary* recodSettings = [NSDictionary dictionaryWithObjectsAndKeys:
                                    [NSNumber numberWithInt:kAudioFormatMPEG4AAC] , AVFormatIDKey,
                                    [NSNumber numberWithInt:AVAudioQualityMin],AVEncoderAudioQualityKey,
                                    [NSNumber numberWithInt: 1], AVNumberOfChannelsKey,
@@ -53,27 +54,27 @@ NSURL *audioFileURL = nil;
     
     self.audioRecorder = [[AVAudioRecorder alloc] initWithURL:audioFileURL settings:recodSettings error:&recoderError];
     
-    if (recoderError) {
-        [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder init fail.", @"")];
+    if(recoderError)
+    {
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder init fail.", @"")];
         return;
     }
-    
     self.audioRecorder.delegate = self;
     BOOL isPrepare = [self.audioRecorder prepareToRecord];
     
-    if (!isPrepare) {
+    if(!isPrepare)
+    {
         [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder prepareToRecord fail.", @"")];
         return;
     }
-    
     BOOL isRecord = [self.audioRecorder record];
     
-    if (!isRecord) {
+    if(!isRecord)
+    {
         [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder record fail.", @"")];
         return;
     }
-    
-    [self.recoderManagerDelegate notifyStart];
+    [recoderManagerDelegate notifyStart];
     updateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(updateTimeInfo) userInfo:nil repeats:YES];
 }
 

@@ -123,13 +123,16 @@
 
 -(void) processPresence:(XMPPPresence*) presenceNode
 {
+    xmpp* account = _account;
+    
     //check for nickname conflict while joining and retry with underscore added to the end
     if([self isJoining:presenceNode.fromUser] && [presenceNode findFirst:@"/<type=error>/error/{urn:ietf:params:xml:ns:xmpp-stanzas}conflict"])
     {
         //load old nickname from db, add underscore and write it back to db so that it can be used by our next join
-        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:presenceNode.fromUser forAccount:_account.accountNo];
+        xmpp* account = _account;
+        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:presenceNode.fromUser forAccount:account.accountNo];
         nick = [NSString stringWithFormat:@"%@_", nick];
-        [[DataLayer sharedInstance] initMuc:presenceNode.fromUser forAccountId:_account.accountNo andMucNick:nick];
+        [[DataLayer sharedInstance] initMuc:presenceNode.fromUser forAccountId:account.accountNo andMucNick:nick];
         
         //try to join again
         DDLogInfo(@"Retrying muc join of %@ with new nick (appended underscore): %@", presenceNode.fromUser, nick);
@@ -172,14 +175,14 @@
     
     //handle presences
     if([presenceNode check:@"/<type=unavailable>"])
-        [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+        [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:account.accountNo];
     else
     {
-        if([[DataLayer sharedInstance] isContactInList:presenceNode.fromUser forAccount:_account.accountNo])
+        if([[DataLayer sharedInstance] isContactInList:presenceNode.fromUser forAccount:account.accountNo])
         {
             if(item[@"jid"] != nil)
                 [self handleMembersListUpdate:presenceNode];
-            [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+            [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:account.accountNo];
         }
         else
             DDLogInfo(@"Ignoring presence updates from %@, MUC not in buddylist", presenceNode.fromUser);
@@ -217,7 +220,8 @@
 
 -(void) handleMembersListUpdate:(XMPPStanza*) node
 {
-    if([[DataLayer sharedInstance] isContactInList:node.fromUser forAccount:_account.accountNo])
+    xmpp* account = _account;
+    if([[DataLayer sharedInstance] isContactInList:node.fromUser forAccount:account.accountNo])
     {
         for(NSDictionary* entry in [node find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
         {
@@ -230,9 +234,9 @@
                 item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
 
             if([@"none" isEqualToString:item[@"affiliation"]])
-                [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:_account.accountNo];
+                [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:account.accountNo];
             else
-                [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:_account.accountNo];
+                [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:account.accountNo];
         }
     }
     else
@@ -750,6 +754,7 @@ $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $_ID(xmp
 }
 
 $$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
+    xmpp* account = _account;
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam catchup query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
@@ -761,12 +766,12 @@ $$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_
             [mamQuery setiqTo:iqNode.fromUser];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
             [mamQuery setCompleteMAMQuery];
-            [_account sendIq:mamQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, YES))];
+            [account sendIq:mamQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, YES))];
         }
         else
         {
             [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for groupchat %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
-            [_account mamFinishedFor:iqNode.fromUser];
+            [account mamFinishedFor:iqNode.fromUser];
         }
         return;
     }

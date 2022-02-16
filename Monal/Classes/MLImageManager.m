@@ -182,8 +182,8 @@
             NSParagraphStyleAttributeName: paragraphStyle
         };
         CGSize textSize = [contactLetter sizeWithAttributes:attributes];
-        CGRect textRect = CGRectMake(floorf((renderer.format.bounds.size.width - textSize.width) / 2),
-                                    floorf((renderer.format.bounds.size.height - textSize.height) / 2),
+        CGRect textRect = CGRectMake(floorf((float)(renderer.format.bounds.size.width - textSize.width) / 2),
+                                    floorf((float)(renderer.format.bounds.size.height - textSize.height) / 2),
                                     textSize.width,
                                     textSize.height);
         [contactLetter drawInRect:textRect withAttributes:attributes];

@@ -116,7 +116,7 @@
 {
     _reading = YES;
     DDLogVerbose(@"calling nw_connection_receive");
-    nw_connection_receive(self.shared_state.connection, 1, BUFFER_SIZE, ^(dispatch_data_t content, nw_content_context_t context, bool is_complete, nw_error_t receive_error) {
+    nw_connection_receive(self.shared_state.connection, 1, BUFFER_SIZE, ^(dispatch_data_t content, nw_content_context_t context __unused, bool is_complete, nw_error_t receive_error) {
         DDLogVerbose(@"nw_connection_receive got callback");
         
         self->_reading = NO;

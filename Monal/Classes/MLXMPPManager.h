@@ -71,7 +71,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Returns the user set name of the conencted account
  */
--(NSString*) getAccountNameForConnectedRow:(NSInteger) row;
+-(NSString*) getAccountNameForConnectedRow:(NSUInteger) row;
 
 /*
  gets the connected account apecified by id. return nil otherwise

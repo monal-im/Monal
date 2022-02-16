@@ -165,8 +165,7 @@
     NSArray<MLMessage*>* messages = [notification.userInfo objectForKey:@"messagesArray"];
     DDLogVerbose(@"notification manager got displayed messages notice with %lu entries", [messages count]);
     
-    //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    monal_void_block_t block = ^{
         for(MLMessage* msg in messages)
         {
             if([msg.messageType isEqualToString:kMessageTypeStatus])
@@ -180,7 +179,14 @@
         }
         //update app badge
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
-    });
+    };
+    
+    //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
+    //but DON'T do this in the appex because this can try to mess with notifications after the parse queue was freezed (see appex code for explanation what this means)
+    if([HelperTools isAppExtension])
+        block();
+    else
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), block);
     
 }
 

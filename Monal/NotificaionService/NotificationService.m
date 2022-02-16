@@ -497,6 +497,8 @@ static BOOL warnUnclean = NO;
             _handler(errorContent);
         }
     }
+    else
+        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
 #else
     if([handlers count] > 0)
     {
@@ -511,9 +513,10 @@ static BOOL warnUnclean = NO;
             _handler(emptyContent);
         }
     }
+    else
+        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
 #endif
 
-    [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
     DDLogInfo(@"Committing suicide...");
     [DDLog flushLog];
     exit(0);

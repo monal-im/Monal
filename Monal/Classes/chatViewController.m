@@ -287,8 +287,8 @@ enum msgSentState {
 
 -(void) lastMsgButtonPositionConfigWithSize:(CGSize)size
 {
-    float buttonXPos = self.inputContainerView.frame.origin.x + self.inputContainerView.frame.size.width - lastMsgButtonSize - 5;
-    float buttonYPos = self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5;
+    float buttonXPos = (float)(self.inputContainerView.frame.origin.x + self.inputContainerView.frame.size.width - lastMsgButtonSize - 5);
+    float buttonYPos = (float)(self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5);
     self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
 }
 #pragma mark - ChatInputActionDelegage
@@ -364,7 +364,7 @@ enum msgSentState {
 
 - (void) doGetMsgData
 {
-    for (int idx = 0; idx<self.messageList.count; idx++)
+    for (unsigned int idx = 0; idx < self.messageList.count; idx++)
     {
         MLMessage* msg = [self.messageList objectAtIndex:idx];
         [self doSetMsgPathIdx:idx withDBId:msg.messageDBId];
@@ -828,7 +828,7 @@ enum msgSentState {
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
 
     if([unreadMsgCnt integerValue] == 0)
-        self->_firstmsg=YES;
+        self->_firstmsg = YES;
 
     if(!self.jid)
         return;
@@ -840,7 +840,7 @@ enum msgSentState {
     unreadStatus.actualFrom = self.jid;
     unreadStatus.isMuc = self.contact.isGroup;
 
-    NSInteger unreadPos = messages.count - 1;
+    NSInteger unreadPos = (NSInteger)messages.count - 1;
     while(unreadPos >= 0)
     {
         MLMessage* row = [messages objectAtIndex:unreadPos];
@@ -852,7 +852,7 @@ enum msgSentState {
         unreadPos--; //move up the list
     }
 
-    if(unreadPos <= messages.count - 1 && unreadPos > 0) {
+    if(unreadPos <= (NSInteger)messages.count - 1 && unreadPos > 0) {
         [messages insertObject:unreadStatus atIndex:unreadPos];
     }
 
@@ -1222,7 +1222,7 @@ enum msgSentState {
         UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
         mediaPicker.delegate = self;
 
-        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
+        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action __unused) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
             mediaPicker.mediaTypes = @[(NSString*)kUTTypeImage, (NSString*)kUTTypeMovie];
 
@@ -1260,7 +1260,7 @@ enum msgSentState {
             }
         }];
 
-        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action __unused) {
             if(@available(iOS 14, *)) {
                 [self presentViewController:[self generatePHPickerViewController] animated:YES completion:nil];
             } else {
@@ -1319,7 +1319,7 @@ enum msgSentState {
             UIAlertController *permissionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed",@ "")
                                                                                      message:NSLocalizedString(@"Monal does not have access to your location. Please update the location access in your device's Privacy Settings.",@ "") preferredStyle:UIAlertControllerStyleAlert];
             [self presentViewController:permissionAlert animated:YES completion:nil];
-            [permissionAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [permissionAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action __unused) {
                 [permissionAlert dismissViewControllerAnimated:YES completion:nil];
             }]];
         }
@@ -1848,7 +1848,7 @@ enum msgSentState {
     MLBaseCell* cell;
 
     MLMessage* row;
-    if(indexPath.row < self.messageList.count) {
+    if((NSUInteger)indexPath.row < self.messageList.count) {
         row = [self.messageList objectAtIndex:indexPath.row];
     } else {
         DDLogError(@"Attempt to access beyond bounds");
@@ -2207,7 +2207,7 @@ enum msgSentState {
 
     //do some sanity checks
     MLMessage* message;
-    if(indexPath.row < self.messageList.count)
+    if((NSUInteger)indexPath.row < self.messageList.count)
         message = [self.messageList objectAtIndex:indexPath.row];
     else
     {
@@ -2685,7 +2685,7 @@ enum msgSentState {
 -(void) loadPreviewWithUrlForRow:(NSIndexPath *) indexPath withCompletion:(void (^)(void))completion
 {
     MLMessage* row;
-    if(indexPath.row < self.messageList.count)
+    if((NSUInteger)indexPath.row < self.messageList.count)
     {
         row = [self.messageList objectAtIndex:indexPath.row];
     }
@@ -2697,6 +2697,7 @@ enum msgSentState {
     //prevent duplicated calls from cell animations
     if([self.previewedIds containsObject:row.messageDBId])
     {
+        completion();
         return;
     }
 
@@ -2712,11 +2713,21 @@ enum msgSentState {
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
             NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);
 
-            if(mimeType.length==0) {return;}
-            if(![mimeType hasPrefix:@"text"]) {return;}
-            if(contentLength.intValue>500*1024) {return;} //limit to half a meg of HTML
+            if(mimeType.length==0) {
+                completion();
+                return;
+            }
+            if(![mimeType hasPrefix:@"text"]) {
+                completion();
+                return;
+            }
+            if(contentLength.intValue > 500 * 1024) {
+                completion();
+                return;
+            } //limit to half a meg of HTML
 
             [self downloadPreviewWithRow:indexPath];
+            completion();
 
         }] resume];
 
@@ -2728,7 +2739,7 @@ enum msgSentState {
 -(void) downloadPreviewWithRow:(NSIndexPath*) indexPath
 {
     MLMessage* row;
-    if(indexPath.row < self.messageList.count) {
+    if((NSUInteger)indexPath.row < self.messageList.count) {
         row = [self.messageList objectAtIndex:indexPath.row];
     } else {
         DDLogError(@"Attempt to access beyond bounds");
@@ -3142,13 +3153,13 @@ enum msgSentState {
 
 - (nonnull __kindof UICollectionViewCell*) collectionView:(nonnull UICollectionView*) collectionView cellForItemAtIndexPath:(nonnull NSIndexPath*) indexPath
 {
-    if(indexPath.item == self.uploadQueue.count)
+    if((NSUInteger)indexPath.item == self.uploadQueue.count)
     { // the '+' tile
         return [self.uploadMenuView dequeueReusableCellWithReuseIdentifier:@"addToUploadQueueCell" forIndexPath:indexPath];
     }
     else
     { // some image in the queue
-        assert(self.uploadQueue.count >= indexPath.item);
+        assert(self.uploadQueue.count >= (NSUInteger)indexPath.item);
         MLUploadQueueItem* uploadItem = self.uploadQueue[indexPath.item];
         if([uploadItem getType] == UPLOAD_QUEUE_TYPE_RAW_IMAGE || [uploadItem getType] == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL)
         {

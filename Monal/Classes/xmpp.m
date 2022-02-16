@@ -640,21 +640,23 @@ NSString* const kStanza = @"stanza";
 
 -(void) freezeParseQueue
 {
+    _parseQueue.suspended = YES;
     //this has to be synchronous because we want to be sure no further stanzas are leaking from the parse queue
     //into the receive queue once we leave this method
-    _parseQueue.suspended = YES;
-    [self dispatchOnReceiveQueue: ^{
+    //NOTE: make sure we do a real async dispatch not using the shortcut in dispatchOnReceiveQueue: because that could cause races
+    [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
         DDLogWarn(@"Parse queue is freezed now!");
-    }];
+    }]] waitUntilFinished:YES];
 }
 
 -(void) unfreezeParseQueue
 {
     //this has to be synchronous because we want to be sure the parse queue is operating again once we leave this method
-    [self dispatchOnReceiveQueue: ^{
-        _parseQueue.suspended = NO;
+    //NOTE: make sure we do a real async dispatch not using the shortcut in dispatchOnReceiveQueue: because that could cause races
+    [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+        self->_parseQueue.suspended = NO;
         DDLogWarn(@"Parse queue is UNfreezed now!");
-    }];
+    }]] waitUntilFinished:YES];
 }
 
 -(void) unfreezed

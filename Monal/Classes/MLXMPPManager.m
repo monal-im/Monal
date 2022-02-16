@@ -14,6 +14,7 @@
 #import "HelperTools.h"
 #import "xmpp.h"
 #import "MLNotificationQueue.h"
+#import "MLNotificationManager.h"
 #import "MLOMEMO.h"
 
 @import Network;
@@ -591,6 +592,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         }];
         DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
         [[MLNotificationQueue currentQueue] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
+        
+        //create and donate interaction to allow for ios 15 suggestions
+        if(@available(iOS 15.0, macCatalyst 15.0, *))
+            [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
     }
     else
         DDLogError(@"Could not add message to history!");

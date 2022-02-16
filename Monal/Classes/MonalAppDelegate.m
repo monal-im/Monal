@@ -214,6 +214,23 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         title:NSLocalizedString(@"Mark as read", @"")
         options:UNNotificationActionOptionNone
     ];
+    if(@available(iOS 15.0, macCatalyst 15.0, *))
+    {
+        replyAction = [UNTextInputNotificationAction
+            actionWithIdentifier:@"REPLY_ACTION"
+            title:NSLocalizedString(@"Reply", @"")
+            options:UNNotificationActionOptionNone
+            icon:[UNNotificationActionIcon iconWithSystemImageName:@"arrowshape.turn.up.left"] 
+            textInputButtonTitle:NSLocalizedString(@"Send", @"")
+            textInputPlaceholder:NSLocalizedString(@"Your answer", @"")
+        ];
+        markAsReadAction = [UNNotificationAction
+            actionWithIdentifier:@"MARK_AS_READ_ACTION"
+            title:NSLocalizedString(@"Mark as read", @"")
+            options:UNNotificationActionOptionNone
+            icon:[UNNotificationActionIcon iconWithSystemImageName:@"message"]
+        ];
+    }
     UNNotificationCategory* messageCategory;
     UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement;
     messageCategory = [UNNotificationCategory
@@ -774,7 +791,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [[MLXMPPManager sharedInstance] disconnectAll];
     //wait for all pending intent donations of incoming messages to makeure those get a proper notification displayed
     //(pending donations will never be honored with a notification otherwise)
-    [[MLNotificationManager sharedInstance] waitForDonations];
     DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
     [DDLog flushLog];
 }
@@ -906,10 +922,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 [DDLog flushLog];
                 [[MLXMPPManager sharedInstance] disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
                 [HelperTools dispatchSyncReentrant:^{
-                    //wait for all pending intent donations of incoming messages to makeure those get a proper notification displayed
-                    //(pending donations will never be honored with a notification otherwise)
-                    [[MLNotificationManager sharedInstance] waitForDonations];
-                    
                     BOOL stopped = NO;
                     if(_bgTask != UIBackgroundTaskInvalid)
                     {
@@ -966,9 +978,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         [self scheduleBackgroundFetchingTask];
                         
                     }
-                    //wait for all pending intent donations of incoming messages to makeure those get a proper notification displayed
-                    //(pending donations will never be honored with a notification otherwise)
-                    [[MLNotificationManager sharedInstance] waitForDonations];
                     [DDLog flushLog];
                     [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
                     _bgTask = UIBackgroundTaskInvalid;
@@ -1009,10 +1018,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                 [self scheduleBackgroundFetchingTask];
             }
-            
-            //wait for all pending intent donations of incoming messages to makeure those get a proper notification displayed
-            //(pending donations will never be honored with a notification otherwise)
-            [[MLNotificationManager sharedInstance] waitForDonations];
             
             //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
             [DDLog flushLog];
@@ -1086,8 +1091,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
         request.requiresNetworkConnectivity = YES;
         request.requiresExternalPower = NO;
-        request.earliestBeginDate = nil;
-        //request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+        //this is needed because nil will start a new bg task before the old one did terminate
+        //this triggers a bug in ios which will not give bg time to the new task despite already started and leave monal
+        //freezed after being through half of the connection process
+        request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:30];
         BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
         if(!success) {
             // Errorcodes https://stackoverflow.com/a/58224050/872051
@@ -1157,13 +1164,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                                 //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                                 if(!wasIdle)
                                     [self scheduleBackgroundFetchingTask];
-                            }
-                            
-                            if(background)
-                            {
-                                //wait for all pending intent donations of incoming messages to makeure those get a proper notification displayed
-                                //(pending donations will never be honored with a notification otherwise)
-                                [[MLNotificationManager sharedInstance] waitForDonations];
                             }
                             
                             //call completion (should be done *after* the idle state check because it could freeze the app)

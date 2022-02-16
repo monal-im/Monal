@@ -19,6 +19,9 @@
 #import "AESGcm.h"
 
 
+static NSString* _processID;
+
+
 @interface MLUDPLogger ()
 {
     CFSocketRef _cfsocketout;
@@ -28,6 +31,12 @@
 
 
 @implementation MLUDPLogger
+
++(void) initialize
+{
+    u_int32_t i = arc4random();
+    _processID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
+}
 
 -(void) didAddLogger
 {
@@ -131,6 +140,7 @@
         @"queueLabel": logMessage.queueLabel,
         @"qos": [NSNumber numberWithInteger:logMessage.qos],
         @"_counter": [NSNumber numberWithUnsignedLongLong:_counter],
+        @"_processID": _processID,
     };
     NSError* writeError = nil; 
     NSData* rawData = [NSJSONSerialization dataWithJSONObject:msgDict options:NSJSONWritingPrettyPrinted error:&writeError];

@@ -870,7 +870,7 @@ enum msgSentState {
 -(void) sendMessage:(nonnull NSString*) messageText andMessageID:(NSString*) messageID withType:(NSString*) messageType
 {
     DDLogVerbose(@"Sending message");
-    NSString* newMessageID = messageID ? messageID:[[NSUUID UUID] UUIDString];
+    NSString* newMessageID = messageID ? messageID : [[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
     NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
     if(!accountDict)
@@ -1474,6 +1474,10 @@ enum msgSentState {
             [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountId];
             _firstmsg = NO;
         }
+        
+        //create and donate interaction to allow for ios 15 suggestions
+        if(@available(iOS 15.0, macCatalyst 15.0, *))
+            [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
     }
     else
         DDLogError(@"failed to add message to history db");

@@ -9,16 +9,10 @@
 /* Begin PBXBuildFile section */
 		1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* MonalAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
-		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
-		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
-		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
 		2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */; };
 		260773C4232FC4E800BFD50F /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 260773C3232FC4E800BFD50F /* NotificationService.m */; };
 		2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */; };
-		2613BECF1EA41C8600C9F4C5 /* PushKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2613BECE1EA41C8600C9F4C5 /* PushKit.framework */; };
-		2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2614B64E1C54095D004FF2FA /* libz.tbd */; };
-		261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 261528C41869CE5300BF62D6 /* AudioToolbox.framework */; };
 		26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26158AF11FFA6E4500E53BDC /* MLWebViewController.m */; };
 		26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */ = {isa = PBXBuildFile; fileRef = 26158AF31FFA8A6A00E53BDC /* opensource.html */; };
 		26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26189C8A238A526500EAD70C /* MLSubscriptionTableViewController.m */; };
@@ -28,7 +22,6 @@
 		261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		261E542623A0A1D300394F59 /* monalxmpp.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		262797AF178A577300B85D94 /* MLContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262797AE178A577300B85D94 /* MLContactCell.m */; };
-		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
 		262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */; };
 		262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262E51901AD8CAC600788351 /* MLButtonCell.m */; };
 		262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 262E51911AD8CAC600788351 /* MLButtonCell.xib */; };
@@ -40,8 +33,6 @@
 		263BC64F218BEE9F00FA0203 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		263DFAC02183D7160038E716 /* MLSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFABE2183A59B0038E716 /* MLSelectionController.m */; };
 		263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFAC22187D0E00038E716 /* MLLinkCell.m */; };
-		263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 263F568C121B5E970027D85D /* MediaPlayer.framework */; };
-		2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2642EBCF1869425D006A6C12 /* CoreAudio.framework */; };
 		2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */; };
 		2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4941FF046E800F46AB5 /* MLBaseCell.m */; };
 		2644D4991FF29E5600F46AB5 /* MLSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */; };
@@ -55,10 +46,8 @@
 		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
 		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
 		2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC521D9D3F700256507 /* MLKeyCell.m */; };
-		267C9921206DE23100AB876C /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267C9920206DE23100AB876C /* UserNotifications.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
-		268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */; };
 		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
@@ -71,7 +60,6 @@
 		26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */ = {isa = PBXBuildFile; fileRef = 26B0CA8A21AE410E0080B133 /* AlertSounds */; };
 		26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
-		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */; };
 		26CC579623A0867400ABB92A /* monalxmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CC579423A0867400ABB92A /* monalxmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		26CC57A223A086AA00ABB92A /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
@@ -112,11 +100,8 @@
 		26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D421968A4100EF5720 /* GLCapsuleView.m */; };
 		26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D821968A8600EF5720 /* GLRoundedView.m */; };
 		26F396DC2197507200EF5720 /* GLTintButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396DA2197506F00EF5720 /* GLTintButton.m */; };
-		26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F7BB441115F95000712672 /* SystemConfiguration.framework */; };
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
 		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
-		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
-		2BA392FE2644C7215E2A6EEE /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D6C5046292E68BB30C97B38 /* Pods_Monal.framework */; };
 		384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */; };
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
@@ -127,6 +112,7 @@
 		3D65B791272350F0005A30F4 /* ContactDetailsInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D65B790272350F0005A30F4 /* ContactDetailsInterface.swift */; };
 		3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */; };
 		3DBAD1E62627A2BC0078BD27 /* MLUploadQueueBaseCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DBAD1E52627A2BC0078BD27 /* MLUploadQueueBaseCell.m */; };
+		43A92B80C8CD5E04074B5A3E /* Pods_MonalXMPPUnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
 		540BD0D224D8D1F40087A743 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 540BD0D124D8D1F20087A743 /* IPC.h */; };
 		540BD0D424D8D2000087A743 /* IPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 540BD0D324D8D1FF0087A743 /* IPC.m */; };
@@ -164,11 +150,9 @@
 		54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15D504A24C727CC002F75BB /* MLLogFileManager.m */; };
 		54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */ = {isa = PBXBuildFile; fileRef = 54E594BA2523C34900E4172B /* MLPubSub.h */; };
 		54E594BE2523C34B00E4172B /* MLPubSub.m in Sources */ = {isa = PBXBuildFile; fileRef = 54E594BC2523C34A00E4172B /* MLPubSub.m */; };
-		92417E5783566741C7D44309 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A393BB8609C73BEFF20F241 /* Pods_MonalUITests.framework */; };
-		AA739B555DD9138B6DC252B4 /* Pods_MonalXMPPUnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5892D3335DDF763ED899C05 /* Pods_MonalXMPPUnitTests.framework */; };
-		B2F4C53CD9A8A4046C237072 /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E865A50FFD3C29AD8F3DFD0 /* Pods_NotificaionService.framework */; };
-		B6C2B2781C2EDD10E9341233 /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F17B168B23E046B18971F63 /* Pods_monalxmpp.framework */; };
-		BE24210F5A8DEA2D7DC913F1 /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12CB538E8FC0AAFD96856CDD /* Pods_shareSheet.framework */; };
+		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
+		A4CD17069281C209783314FD /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AF6D1CD4CB7FE955E330121 /* Pods_NotificaionService.framework */; };
+		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
 		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
 		C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490E22612F3D00054AC9E /* MLCrypto.swift */; };
 		C10490EB2612F3E00054AC9E /* EncryptedPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */; };
@@ -195,7 +179,6 @@
 		C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1943A4B25309A9D0036172F /* MLReloadCell.m */; };
 		C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */; };
 		C1B1982625AB31B800D5028E /* MLBlockedUsersTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */; };
-		C1B7DF6C2438883600C7F0C4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */; };
 		C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C1B940E926144AF500E9D290 /* AESGCMTest.m */; };
 		C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */ = {isa = PBXBuildFile; fileRef = C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */; };
 		C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */; };
@@ -204,12 +187,14 @@
 		C1F5C7AA2775DA000001F295 /* MLContactSoftwareVersionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */; };
 		C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7AB2777621B0001F295 /* ContactResources.swift */; };
 		C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C1F5C7AE2777638B0001F295 /* OrderedCollections */; };
+		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
 		E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */; };
 		E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */; };
 		E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32225C6626300925F62 /* MLFileTransferFileViewController.m */; };
 		E89DD32825C6626400925F62 /* MLFileTransferTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32425C6626400925F62 /* MLFileTransferTextCell.m */; };
 		E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */; };
 		E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8DED06125388BE8003167FF /* MLSearchViewController.m */; };
+		F9C277F46F5157194744C491 /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F1488206B764014DD7EC92A /* Pods_shareSheet.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -292,30 +277,21 @@
 
 /* Begin PBXFileReference section */
 		061EF1BEDEE7A71FDF9AB402 /* Pods-shareSheet.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore.xcconfig"; sourceTree = "<group>"; };
+		0AF6D1CD4CB7FE955E330121 /* Pods_NotificaionService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificaionService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D0362F6B26B9407BE313F36 /* Pods-NotificaionService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.debug.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.debug.xcconfig"; sourceTree = "<group>"; };
 		0EC0A5305E72C0F7F9E1CDEF /* Pods-shareSheet.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.adhoc.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.adhoc.xcconfig"; sourceTree = "<group>"; };
-		12CB538E8FC0AAFD96856CDD /* Pods_shareSheet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shareSheet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		190BE683A0C65E5A839F52BD /* Pods_Monal_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* MonalAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MonalAppDelegate.h; path = Classes/MonalAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* MonalAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MonalAppDelegate.m; path = Classes/MonalAppDelegate.m; sourceTree = "<group>"; };
 		1D46F251C198E3D8FA55692F /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
-		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		1F17B168B23E046B18971F63 /* Pods_monalxmpp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_monalxmpp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		21E99538324C14220843F325 /* Pods-shareSheet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.debug.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.debug.xcconfig"; sourceTree = "<group>"; };
 		2369191B3FCB2E941169A093 /* Pods-MonalXMPPUnitTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.appstore.xcconfig"; sourceTree = "<group>"; };
 		2601D9A70FBF255D004DB939 /* DataLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataLayer.m; sourceTree = "<group>"; };
 		2601D9A80FBF255D004DB939 /* DataLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataLayer.h; sourceTree = "<group>"; };
 		2601D9CA0FBF25EF004DB939 /* sworim.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = sworim.sqlite; sourceTree = "<group>"; };
-		2601D9D30FBF262E004DB939 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		26020B3521B957A0009A9735 /* MLMetaInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMetaInfo.h; sourceTree = "<group>"; };
 		26020B3621B957A0009A9735 /* MLMetaInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMetaInfo.m; sourceTree = "<group>"; };
-		2602837C1D8DD30E001DD6B8 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/QuickLook.framework; sourceTree = DEVELOPER_DIR; };
-		2602837E1D8DD56B001DD6B8 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Quartz.framework; sourceTree = DEVELOPER_DIR; };
 		2602A70722A5431A006D3E72 /* MLRegSuccessViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLRegSuccessViewController.h; sourceTree = "<group>"; };
 		2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLRegSuccessViewController.m; sourceTree = "<group>"; };
-		26049A5A1B73163300D11866 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
-		26049A5C1B73164500D11866 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVKit.framework; sourceTree = DEVELOPER_DIR; };
 		260773C0232FC4E800BFD50F /* NotificaionService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificaionService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		260773C2232FC4E800BFD50F /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
 		260773C3232FC4E800BFD50F /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
@@ -328,27 +304,19 @@
 		260C51D0177F08F50039634B /* xmpp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = xmpp.m; sourceTree = "<group>"; };
 		260C51D2177F44AD0039634B /* MLXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMLNode.h; sourceTree = "<group>"; };
 		260C51D3177F44AD0039634B /* MLXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXMLNode.m; sourceTree = "<group>"; };
-		2613BECE1EA41C8600C9F4C5 /* PushKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PushKit.framework; path = System/Library/Frameworks/PushKit.framework; sourceTree = SDKROOT; };
-		2614B64E1C54095D004FF2FA /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		261528C41869CE5300BF62D6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		26158AF01FFA6E4500E53BDC /* MLWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLWebViewController.h; sourceTree = "<group>"; };
 		26158AF11FFA6E4500E53BDC /* MLWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLWebViewController.m; sourceTree = "<group>"; };
 		26158AF31FFA8A6A00E53BDC /* opensource.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = opensource.html; sourceTree = "<group>"; };
 		26189C89238A526500EAD70C /* MLSubscriptionTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSubscriptionTableViewController.h; sourceTree = "<group>"; };
 		26189C8A238A526500EAD70C /* MLSubscriptionTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSubscriptionTableViewController.m; sourceTree = "<group>"; };
-		26189D04238B9E9F00EAD70C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261A6283176C156500059090 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
 		261A6284176C156500059090 /* ActiveChatsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActiveChatsViewController.m; sourceTree = "<group>"; };
 		261A6289176C159000059090 /* AccountListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccountListController.h; sourceTree = "<group>"; };
 		261A628A176C159000059090 /* AccountListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountListController.m; sourceTree = "<group>"; };
-		262265CF2144148A00B18F83 /* libapple_crypto.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libapple_crypto.tbd; path = usr/lib/libapple_crypto.tbd; sourceTree = SDKROOT; };
-		262265D12144156A00B18F83 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = "Pods/OpenSSL-Universal/lib-macos/libcrypto.a"; sourceTree = "<group>"; };
-		262265D521441FA300B18F83 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = "Pods/OpenSSL-Universal/lib-macos/libssl.a"; sourceTree = "<group>"; };
 		262797AD178A577300B85D94 /* MLContactCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLContactCell.h; sourceTree = "<group>"; };
 		262797AE178A577300B85D94 /* MLContactCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLContactCell.m; sourceTree = "<group>"; };
-		26292F4E1309CAE100097280 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		262AEFE620AE756800498F82 /* MLMAMPrefTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMAMPrefTableViewController.h; sourceTree = "<group>"; };
 		262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMAMPrefTableViewController.m; sourceTree = "<group>"; };
 		262D9EA817921E82009292B4 /* XMPPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPMessage.h; sourceTree = "<group>"; };
@@ -360,8 +328,6 @@
 		262E51941AD8CB7200788351 /* MLTextInputCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLTextInputCell.h; sourceTree = "<group>"; };
 		262E51951AD8CB7200788351 /* MLTextInputCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLTextInputCell.m; sourceTree = "<group>"; };
 		262E51961AD8CB7200788351 /* MLTextInputCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLTextInputCell.xib; sourceTree = "<group>"; };
-		262FE9351D821CD000A70506 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
-		2630FE321AD550C00079F5C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2633CB41231CB816006D0277 /* MLMessageProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMessageProcessor.h; sourceTree = "<group>"; };
 		2633CB42231CB816006D0277 /* MLMessageProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessageProcessor.m; sourceTree = "<group>"; };
 		2633CB4523215558006D0277 /* MLXMPPActivityItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLXMPPActivityItem.h; path = Classes/MLXMPPActivityItem.h; sourceTree = "<group>"; };
@@ -376,9 +342,6 @@
 		263DFABE2183A59B0038E716 /* MLSelectionController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSelectionController.m; sourceTree = "<group>"; };
 		263DFAC12187D0E00038E716 /* MLLinkCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLinkCell.h; sourceTree = "<group>"; };
 		263DFAC22187D0E00038E716 /* MLLinkCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLLinkCell.m; sourceTree = "<group>"; };
-		263F568C121B5E970027D85D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
-		2642EBCF1869425D006A6C12 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
-		2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		2644D4901FF0064C00F46AB5 /* MLChatImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatImageCell.h; sourceTree = "<group>"; };
 		2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatImageCell.m; sourceTree = "<group>"; };
 		2644D4931FF046E800F46AB5 /* MLBaseCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBaseCell.h; sourceTree = "<group>"; };
@@ -392,7 +355,6 @@
 		264DCF9B23E11483004105CE /* MLNewViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNewViewController.m; sourceTree = "<group>"; };
 		264E34591787BAB100BC7BD0 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		264E345A1787BAB100BC7BD0 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
-		264FF3E4158A855D00D97B86 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		265BD14E21A2D15600A59251 /* MLBackgroundSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBackgroundSettings.h; sourceTree = "<group>"; };
 		265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBackgroundSettings.m; sourceTree = "<group>"; };
 		2661100B238F08820030A4EE /* MLXMPPServer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPServer.h; sourceTree = "<group>"; };
@@ -426,16 +388,10 @@
 		267B671B226A200D003DB850 /* AESGcm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGcm.m; sourceTree = "<group>"; };
 		267B671F226A222E003DB850 /* MLEncryptedPayload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLEncryptedPayload.h; sourceTree = "<group>"; };
 		267B6720226A222E003DB850 /* MLEncryptedPayload.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLEncryptedPayload.m; sourceTree = "<group>"; };
-		267C9920206DE23100AB876C /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
-		267ECD6A1B746C340025337F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
-		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
 		268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDetailsTableViewCell.h; sourceTree = "<group>"; };
 		268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDetailsTableViewCell.m; sourceTree = "<group>"; };
 		268DD58417C4541000C673A9 /* MLChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatCell.h; sourceTree = "<group>"; };
 		268DD58517C4541000C673A9 /* MLChatCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatCell.m; sourceTree = "<group>"; };
-		269574DD1C372FD200544A60 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
-		269574DF1C37301600544A60 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
-		269574E11C37307300544A60 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/usr/lib/libsqlite3.tbd; sourceTree = DEVELOPER_DIR; };
 		2696EED01791245A00BC54B8 /* chatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chatViewController.h; sourceTree = "<group>"; };
 		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
 		26A78ED623C2B59400C7CF40 /* MLPlaceholderViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPlaceholderViewController.h; sourceTree = "<group>"; };
@@ -454,11 +410,8 @@
 		26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSoundsTableViewController.m; sourceTree = "<group>"; };
 		26B0CA8A21AE410E0080B133 /* AlertSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = AlertSounds; sourceTree = "<group>"; };
 		26B2A4BA1B73061400272E63 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		26B2A4C81B73084100272E63 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/usr/lib/libsqlite3.0.dylib; sourceTree = DEVELOPER_DIR; };
-		26B2A4CA1B73084800272E63 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AppKit.framework; sourceTree = DEVELOPER_DIR; };
 		26B51C4618654D98002134C3 /* LogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogViewController.h; sourceTree = "<group>"; };
 		26B51C4718654D98002134C3 /* LogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
-		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLNotificationSettingsViewController.h; sourceTree = "<group>"; };
 		26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNotificationSettingsViewController.m; sourceTree = "<group>"; };
 		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
@@ -478,7 +431,6 @@
 		26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatInputContainer.m; sourceTree = "<group>"; };
 		26D89F041A890672009B147C /* MLSwitchCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSwitchCell.h; sourceTree = "<group>"; };
 		26D89F051A890672009B147C /* MLSwitchCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSwitchCell.m; sourceTree = "<group>"; };
-		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
 		26E3ED851FEC0CB7008ABDA5 /* MLServerDetails.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLServerDetails.h; sourceTree = "<group>"; };
 		26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLServerDetails.m; sourceTree = "<group>"; };
 		26E8462024EABAB400ECE419 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/ContactDetails.storyboard; sourceTree = "<group>"; };
@@ -578,7 +530,6 @@
 		26F396D821968A8600EF5720 /* GLRoundedView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLRoundedView.m; sourceTree = "<group>"; };
 		26F396DA2197506F00EF5720 /* GLTintButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTintButton.m; sourceTree = "<group>"; };
 		26F396DB2197507100EF5720 /* GLTintButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTintButton.h; sourceTree = "<group>"; };
-		26F7BB441115F95000712672 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		26F9794C1ACAC73A0008E005 /* MLContactCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLContactCell.xib; sourceTree = "<group>"; };
 		26FC618B24EB2BEE0094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "external/zh-Hant.lproj/Main.strings"; sourceTree = "<group>"; };
 		26FC618D24EB2BEF0094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "external/zh-Hant.lproj/Login.strings"; sourceTree = "<group>"; };
@@ -593,9 +544,9 @@
 		26FDB4341DC16A9800A129E0 /* Monal.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Monal.entitlements; sourceTree = "<group>"; };
 		26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLResizingTextView.h; sourceTree = "<group>"; };
 		26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLResizingTextView.m; sourceTree = "<group>"; };
-		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		2A393BB8609C73BEFF20F241 /* Pods_MonalUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalXMPPUnitTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIM_Prefix.pch; sourceTree = "<group>"; };
 		384E4EA525F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAutoDownloadFiletransferSettingViewController.h; sourceTree = "<group>"; };
 		384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAutoDownloadFiletransferSettingViewController.m; sourceTree = "<group>"; };
@@ -649,21 +600,21 @@
 		54A22D2C26185E7E00B56EAD /* MLNotificationQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLNotificationQueue.h; sourceTree = "<group>"; };
 		54E594BA2523C34900E4172B /* MLPubSub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPubSub.h; sourceTree = "<group>"; };
 		54E594BC2523C34A00E4172B /* MLPubSub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPubSub.m; sourceTree = "<group>"; };
+		5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_monalxmpp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6142E73A9912F6E327A8CD14 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		6A6D58F695CDFAF204F3B3EB /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.appstore.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
 		6BCB9FB4EBEA3735D24A44DF /* Pods-shareSheet.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.beta.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.beta.xcconfig"; sourceTree = "<group>"; };
-		6D6C5046292E68BB30C97B38 /* Pods_Monal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D6715099247A9CCC180EE30 /* Pods-MonalUITests.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.beta.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.beta.xcconfig"; sourceTree = "<group>"; };
-		7E865A50FFD3C29AD8F3DFD0 /* Pods_NotificaionService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificaionService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FA9582E4CC566FE5466C557 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.debug.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
 		86CF04FDE084C646CA14B774 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D1107310486CEB800E47090 /* Monal-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Monal-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		8F1488206B764014DD7EC92A /* Pods_shareSheet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shareSheet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9705AFFB59AF72A9B79C1D7B /* Pods-MonalXMPPUnitTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		A4C686567AC126CDDFB1BE44 /* Pods-NotificaionService.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.beta.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.beta.xcconfig"; sourceTree = "<group>"; };
 		AAFC73E987D41BA8D91E9F95 /* Pods-monalxmpp.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.appstore.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.appstore.xcconfig"; sourceTree = "<group>"; };
 		AD0E234056402EE91A36D628 /* Pods-Monal.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.adhoc.xcconfig"; sourceTree = "<group>"; };
 		B55DCA2ABBDB6E635D46D69A /* Pods-monalxmpp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.debug.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.debug.xcconfig"; sourceTree = "<group>"; };
-		B5892D3335DDF763ED899C05 /* Pods_MonalXMPPUnitTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalXMPPUnitTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10490482612ED2F0054AC9E /* MLEmoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLEmoji.swift; sourceTree = "<group>"; };
 		C10490E22612F3D00054AC9E /* MLCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCrypto.swift; sourceTree = "<group>"; };
 		C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptedPayload.swift; sourceTree = "<group>"; };
@@ -725,7 +676,6 @@
 		C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelperTools.m; sourceTree = "<group>"; };
 		C1B1982425AB31B800D5028E /* MLBlockedUsersTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBlockedUsersTableViewController.h; sourceTree = "<group>"; };
 		C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBlockedUsersTableViewController.m; sourceTree = "<group>"; };
-		C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/CoreLocation.framework; sourceTree = DEVELOPER_DIR; };
 		C1B940E826144AF400E9D290 /* MonalXMPPUnitTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MonalXMPPUnitTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		C1B940E926144AF500E9D290 /* AESGCMTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGCMTest.m; sourceTree = "<group>"; };
 		C1C8394E24F0EDFD00BBCF17 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = external/ar.lproj/Main.strings; sourceTree = "<group>"; };
@@ -839,24 +789,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C1B7DF6C2438883600C7F0C4 /* CoreLocation.framework in Frameworks */,
-				267C9921206DE23100AB876C /* UserNotifications.framework in Frameworks */,
-				2613BECF1EA41C8600C9F4C5 /* PushKit.framework in Frameworks */,
-				2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */,
-				261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */,
-				2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */,
-				268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */,
-				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
-				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
-				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
-				2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */,
-				26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */,
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
-				263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
-				26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */,
-				26B69A75131C522F002FCBEB /* Security.framework in Frameworks */,
-				2BA392FE2644C7215E2A6EEE /* Pods_Monal.framework in Frameworks */,
+				7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -865,7 +800,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */,
-				B2F4C53CD9A8A4046C237072 /* Pods_NotificaionService.framework in Frameworks */,
+				A4CD17069281C209783314FD /* Pods_NotificaionService.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -874,7 +809,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */,
-				BE24210F5A8DEA2D7DC913F1 /* Pods_shareSheet.framework in Frameworks */,
+				F9C277F46F5157194744C491 /* Pods_shareSheet.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -882,7 +817,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B6C2B2781C2EDD10E9341233 /* Pods_monalxmpp.framework in Frameworks */,
+				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -891,7 +826,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C104918B261301530054AC9E /* monalxmpp.framework in Frameworks */,
-				AA739B555DD9138B6DC252B4 /* Pods_MonalXMPPUnitTests.framework in Frameworks */,
+				43A92B80C8CD5E04074B5A3E /* Pods_MonalXMPPUnitTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -899,7 +834,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				92417E5783566741C7D44309 /* Pods_MonalUITests.framework in Frameworks */,
+				D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1000,23 +935,6 @@
 				262E51961AD8CB7200788351 /* MLTextInputCell.xib */,
 			);
 			name = Tableviewcells;
-			sourceTree = "<group>";
-		};
-		2630FE301AD550C00079F5C0 /* Monal Tests */ = {
-			isa = PBXGroup;
-			children = (
-				26C836602396CB5700C9F21D /* XMPP Tests */,
-				2630FE311AD550C00079F5C0 /* Supporting Files */,
-			);
-			path = "Monal Tests";
-			sourceTree = "<group>";
-		};
-		2630FE311AD550C00079F5C0 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				2630FE321AD550C00079F5C0 /* Info.plist */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		2633CB40231CB7F5006D0277 /* Processors */ = {
@@ -1251,41 +1169,6 @@
 			name = Notifications;
 			sourceTree = "<group>";
 		};
-		26B2A4FF1B730A0900272E63 /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				261528C41869CE5300BF62D6 /* AudioToolbox.framework */,
-				2642EBCF1869425D006A6C12 /* CoreAudio.framework */,
-				264FF3E4158A855D00D97B86 /* AVFoundation.framework */,
-				26F7BB441115F95000712672 /* SystemConfiguration.framework */,
-				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
-				1D30AB110D05D00D00671497 /* Foundation.framework */,
-				288765A40DF7441C002DB57D /* CoreGraphics.framework */,
-				263F568C121B5E970027D85D /* MediaPlayer.framework */,
-				26292F4E1309CAE100097280 /* CFNetwork.framework */,
-				26B69A74131C522F002FCBEB /* Security.framework */,
-				2601D9D30FBF262E004DB939 /* libsqlite3.dylib */,
-			);
-			name = iOS;
-			sourceTree = "<group>";
-		};
-		26B2A5001B730A0D00272E63 /* OSX */ = {
-			isa = PBXGroup;
-			children = (
-				2614B64E1C54095D004FF2FA /* libz.tbd */,
-				269574E11C37307300544A60 /* libsqlite3.tbd */,
-				269574DF1C37301600544A60 /* libz.tbd */,
-				269574DD1C372FD200544A60 /* Security.framework */,
-				267ECD6C1B746C660025337F /* CFNetwork.framework */,
-				26049A5A1B73163300D11866 /* AVFoundation.framework */,
-				26049A5C1B73164500D11866 /* AVKit.framework */,
-				267ECD6A1B746C340025337F /* Security.framework */,
-				26B2A4CA1B73084800272E63 /* AppKit.framework */,
-				26B2A4C81B73084100272E63 /* libsqlite3.0.dylib */,
-			);
-			name = OSX;
-			sourceTree = "<group>";
-		};
 		26C3456B1C68F9D9007F4BEC /* HTTP */ = {
 			isa = PBXGroup;
 			children = (
@@ -1293,13 +1176,6 @@
 				26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */,
 			);
 			name = HTTP;
-			sourceTree = "<group>";
-		};
-		26C836602396CB5700C9F21D /* XMPP Tests */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = "XMPP Tests";
 			sourceTree = "<group>";
 		};
 		26CC579323A0867400ABB92A /* monalxmpp */ = {
@@ -1432,15 +1308,14 @@
 				080E96DDFE201D6D7F000001 /* Shared */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				26B2A4B41B73040000272E63 /* Monal-iOS */,
-				2630FE301AD550C00079F5C0 /* Monal Tests */,
 				26AA70122146BBB900598605 /* shareSheet-iOS */,
 				260773C1232FC4E800BFD50F /* NotificaionService */,
 				26CC579323A0867400ABB92A /* monalxmpp */,
 				C1850EB625F38A2D003D506A /* MonalUITests */,
 				C1049187261301530054AC9E /* MonalXMPPUnitTests */,
-				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				82B5509417C9F86AAC2B4FA1 /* Pods */,
+				D91581D0612C23AB5B3F867C /* Frameworks */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -1459,38 +1334,10 @@
 			children = (
 				26B0CA8A21AE410E0080B133 /* AlertSounds */,
 				26158AF31FFA8A6A00E53BDC /* opensource.html */,
-				2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */,
 				26470F511835C4080069E3E0 /* Media.xcassets */,
 				2601D9CA0FBF25EF004DB939 /* sworim.sqlite */,
-				26DE9C050FEEFD00000596F6 /* DB definitions */,
 			);
 			name = Resources;
-			sourceTree = "<group>";
-		};
-		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */,
-				26189D04238B9E9F00EAD70C /* CoreServices.framework */,
-				262265D521441FA300B18F83 /* libssl.a */,
-				262265D12144156A00B18F83 /* libcrypto.a */,
-				262265CF2144148A00B18F83 /* libapple_crypto.tbd */,
-				267C9920206DE23100AB876C /* UserNotifications.framework */,
-				2613BECE1EA41C8600C9F4C5 /* PushKit.framework */,
-				2602837E1D8DD56B001DD6B8 /* Quartz.framework */,
-				2602837C1D8DD30E001DD6B8 /* QuickLook.framework */,
-				262FE9351D821CD000A70506 /* WebKit.framework */,
-				26B2A5001B730A0D00272E63 /* OSX */,
-				26B2A4FF1B730A0900272E63 /* iOS */,
-				6D6C5046292E68BB30C97B38 /* Pods_Monal.framework */,
-				190BE683A0C65E5A839F52BD /* Pods_Monal_Tests.framework */,
-				7E865A50FFD3C29AD8F3DFD0 /* Pods_NotificaionService.framework */,
-				1F17B168B23E046B18971F63 /* Pods_monalxmpp.framework */,
-				12CB538E8FC0AAFD96856CDD /* Pods_shareSheet.framework */,
-				2A393BB8609C73BEFF20F241 /* Pods_MonalUITests.framework */,
-				B5892D3335DDF763ED899C05 /* Pods_MonalXMPPUnitTests.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		82B5509417C9F86AAC2B4FA1 /* Pods */ = {
@@ -1567,6 +1414,19 @@
 				26E8462124EABAB400ECE419 /* ContactDetails.storyboard */,
 			);
 			path = localization;
+			sourceTree = "<group>";
+		};
+		D91581D0612C23AB5B3F867C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */,
+				29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */,
+				2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */,
+				0AF6D1CD4CB7FE955E330121 /* Pods_NotificaionService.framework */,
+				5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */,
+				8F1488206B764014DD7EC92A /* Pods_shareSheet.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

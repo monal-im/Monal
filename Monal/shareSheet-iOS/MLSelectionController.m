@@ -40,7 +40,7 @@
     
     if(contact)
     {
-        cell.textLabel.text = contact.contactDisplayName;
+        cell.textLabel.text = [NSString stringWithFormat:@"%@ (%@)", contact.contactDisplayName, contact.contactJid];
         MLContact* selectedContact = (MLContact*)[self.selection objectForKey:@"contact"];
         if([selectedContact isEqualToContact:contact])
             cell.accessoryType = UITableViewCellAccessoryCheckmark;

@@ -18,7 +18,12 @@
 #import "MLXMPPManager.h"
 #import "MLPubSub.h"
 #import "MLUDPLogger.h"
+#import "MLHandler.h"
+#import "MLXMLNode.h"
 #import "XMPPStanza.h"
+#import "XMPPIQ.h"
+#import "XMPPPresence.h"
+#import "XMPPMessage.h"
 #import "XMPPDataForm.h"
 #import "xmpp.h"
 #import "MLNotificationQueue.h"
@@ -83,6 +88,60 @@ void logException(NSException* exception)
 #endif
 }
 
+
++(NSData*) serializeObject:(id) obj
+{
+    NSError* error;
+    NSData* data = [NSKeyedArchiver archivedDataWithRootObject:obj requiringSecureCoding:YES error:&error];
+    if(error)
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    return data;
+}
+
++(id) unserializeData:(NSData*) data
+{
+    NSError* error;
+    id obj = [NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
+        [NSData class],
+        [NSMutableData class],
+        [NSMutableDictionary class],
+        [NSDictionary class],
+        [NSMutableSet class],
+        [NSSet class],
+        [NSMutableArray class],
+        [NSArray class],
+        [NSNumber class],
+        [NSString class],
+        [NSDate class],
+        [MLHandler class],
+        [MLXMLNode class],
+        [XMPPIQ class],
+        [XMPPPresence class],
+        [XMPPMessage class],
+        [XMPPDataForm class],
+    ]] fromData:data error:&error];
+    if(error)
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    return obj;
+}
+
++(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request
+{
+    __block NSError* retval = nil;
+    NSCondition* condition = [[NSCondition alloc] init];
+    [condition lock];
+    [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if(error)
+            DDLogError(@"Error posting notification: %@", error);
+        retval = error;
+        [condition lock];
+        [condition signal];
+        [condition unlock];
+    }];
+    [condition wait];
+    [condition unlock];
+    return retval;
+}
 
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length
 {
@@ -323,7 +382,7 @@ void logException(NSException* exception)
 +(void) clearSyncErrorsOnAppForeground
 {
     NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
-    DDLogInfo(@"Clearing syncError notifications: %@", syncErrorsDisplayed);
+    DDLogInfo(@"Clearing syncError notification states: %@", syncErrorsDisplayed);
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
     [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
@@ -345,6 +404,7 @@ void logException(NSException* exception)
                 if(account.idle)
                 {
                     DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
+                    [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[syncErrorIdentifier]];
                     [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
                     syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
                     [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
@@ -363,17 +423,19 @@ void logException(NSException* exception)
                     content.body = NSLocalizedString(@"Please open the app to retry", @"");
                     content.sound = [UNNotificationSound defaultSound];
                     content.categoryIdentifier = @"simple";
-                    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-                    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:syncErrorIdentifier content:content trigger:nil];
-                    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-                        if(error)
-                            DDLogError(@"Error posting syncError notification: %@", error);
-                        else
-                        {
-                            syncErrorsDisplayed[account.connectionProperties.identity.jid] = @YES;
-                            [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
-                        }
-                    }];
+                    //we don't know if and when apple will start the background process or when the next push will come in
+                    //--> we need a sync error notification to make the user aware of possible issues
+                    //BUT: we can delay it for some time and hope a background process/push is started in the meantime and removes the notification
+                    //     before it gets displayed at all (we use 60 seconds here)
+                    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:syncErrorIdentifier content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:60 repeats: NO]];
+                    NSError* error = [self postUserNotificationRequest:request];
+                    if(error)
+                        DDLogError(@"Error posting syncError notification: %@", error);
+                    else
+                    {
+                        syncErrorsDisplayed[account.connectionProperties.identity.jid] = @YES;
+                        [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+                    }
                 }
             }
         }

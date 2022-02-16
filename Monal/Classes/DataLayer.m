@@ -345,38 +345,7 @@ static NSDateFormatter* dbFormatter;
         return [self.db executeScalar:query andArguments:params];
     }];
     if(data)
-    {
-        NSError* error;
-        NSMutableDictionary* dic = (NSMutableDictionary*)[NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
-            [NSData class],
-            [NSMutableData class],
-            [NSMutableDictionary class],
-            [NSDictionary class],
-            [NSMutableSet class],
-            [NSSet class],
-            [NSMutableArray class],
-            [NSArray class],
-            [NSNumber class],
-            [NSString class],
-            [NSDate class],
-            [MLHandler class],
-            [MLXMLNode class],
-            [XMPPIQ class],
-            [XMPPPresence class],
-            [XMPPMessage class],
-            [XMPPDataForm class],
-        ]] fromData:data error:&error];
-        if(error)
-        {
-#ifdef IS_ALPHA
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-#else
-            DDLogError(@"Error: %@", error);
-            return nil;
-#endif
-        }
-        return dic;
-    }
+        return [HelperTools unserializeData:data];
     return nil;
 }
 
@@ -384,10 +353,7 @@ static NSDateFormatter* dbFormatter;
 {
     if(!accountNo || !state)
         return;
-    NSError* error;
-    NSData* data = [NSKeyedArchiver archivedDataWithRootObject:state requiringSecureCoding:YES error:&error];
-    if(error)
-        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    NSData* data = [HelperTools serializeObject:state];
     [self.db voidWriteTransaction:^{
         NSString* query = @"UPDATE account SET state=? WHERE account_id=?;";
         NSArray* params = @[data, accountNo];

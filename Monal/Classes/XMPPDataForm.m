@@ -92,7 +92,7 @@ static NSRegularExpression* dataFormQueryRegex;
         return nil;
     NSMutableDictionary* options = [[NSMutableDictionary alloc] init];
     for(MLXMLNode* option in [fieldNode find:@"option"])
-        options[[NSString stringWithFormat:@"%@", [option findFirst:@"value#"]]] = [NSString stringWithFormat:@"%@", ([option check:@"@label"] ? [option findFirst:@"@label"] : [option findFirst:@"value#"])];
+        options[[NSString stringWithFormat:@"%@", [option findFirst:@"value#"]]] = [NSString stringWithFormat:@"%@", ([option check:@"/@label"] ? [option findFirst:@"/@label"] : [option findFirst:@"value#"])];
     NSMutableArray* allValues = [[NSMutableArray alloc] init];
     for(id value in [fieldNode find:@"value#"])
         if(value != nil)        //only safeguard, should never happen

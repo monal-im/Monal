@@ -112,16 +112,19 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }
 }
 
+-(BOOL) checkForLastHandler
+{
+    @synchronized(self.handlerList) {
+        return self.handlerList.count != 0;
+    }
+}
+
 -(void) killAppex
 {
     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
     
     [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
-    
-    //wait for all pending intent donations of incoming messages to makeure those get a proper notification displayed
-    //(pending donations will never be honored with a notification otherwise)
-    [[MLNotificationManager sharedInstance] waitForDonations];
     
     DDLogInfo(@"Now killing appex process, goodbye...");
     [DDLog flushLog];
@@ -145,9 +148,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [entry feed];
     
     //return NO if this was the last handler and YES if not
-    @synchronized(self.handlerList) {
-        return self.handlerList.count != 0;
-    }
+    return [self checkForLastHandler];
 }
 
 -(void) disconnectAndFeedAllWaitingHandlers
@@ -215,9 +216,24 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     DDLogInfo(@"Handling expired push: %lu", (unsigned long)[self.handlerList count]);
     
-    //check if this was the last handler (feedNextHandler returns NO in this case)
-    BOOL wasLastHandler = ![self feedNextHandler];
-    if(wasLastHandler)
+    BOOL isLastHandler = [self checkForLastHandler];
+    if(isLastHandler)
+    {
+        //we have to freeze all incoming streams until we know if this handler feeding leads to the termination of our appex or not
+        //we MUST do this before feeding the last handler because after feeding the last one apple does not allow us to
+        //post any new notifications --> not freezing would lead to lost notifications
+        [self freezeAllParseQueues];
+        
+        //post sync errors for all accounts still not idle now (e.g. have stanzas in our freezed pase queue or stanzas waiting for smacks acks etc.)
+        //we MUST do this here because apple des not allow us to post any new notifications after feeding the last handler
+        [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+    }
+    
+    //after this we (potentially) can not post any new notifications until the next push comes in (if it comes in at all)
+    [self feedNextHandler];
+    
+    //check if this was the last handler (ignore if we got a new one in between our call to checkForLastHandler and feedNextHandler, this case will be handled below anyways)
+    if(isLastHandler)
     {
         DDLogInfo(@"Last push expired shutting down in 1500ms if no new push comes in in the meantime");
         //wait 1500ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
@@ -233,8 +249,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         {
             DDLogInfo(@"Shutting down appex now");
             
-            //post sync errors for all accounts still not idle now
-            [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+            //don't post sync errors here, already did so above (see explanation there)
             
             //check idle state and schedule a background task (handled in the main app) if not idle
             if(![[MLXMPPManager sharedInstance] allAccountsIdle])
@@ -262,7 +277,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 [self killAppex];
         }
         else
+        {
             DDLogInfo(@"Got next push, not shutting down appex");
+            //we can unfreeze our incoming streams because we got another push
+            [self unfreezeAllParseQueues];
+        }
     }
 }
 
@@ -283,6 +302,21 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }
 }
 
+-(void) freezeAllParseQueues
+{
+    DDLogInfo(@"Freezing all incoming streams until we know if we are either terminating or got another push");
+    for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
+        [account freezeParseQueue];
+}
+
+-(void) unfreezeAllParseQueues
+{
+    DDLogInfo(@"Unfreezing all incoming streams again, we got another push");
+    for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
+        [account unfreezeParseQueue];
+}
+
+
 -(void) xmppError:(NSNotification*) notification
 {
     DDLogDebug(@"notification handler: got xmpp error");
@@ -300,7 +334,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) updateUnread
 {
     DDLogVerbose(@"updating app badge via updateUnread");
-    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
@@ -312,10 +345,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     content.badge = [NSNumber numberWithInteger:unread];
     
     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"badge_update" content:content trigger:nil];
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        if(error)
-            DDLogError(@"Error posting local badge_update notification: %@", error);
-    }];
+    NSError* error = [HelperTools postUserNotificationRequest:request];
+    if(error)
+        DDLogError(@"Error posting local badge_update notification: %@", error);
 }
 
 -(void) scheduleBackgroundFetchingTask
@@ -420,12 +452,11 @@ static BOOL warnUnclean = NO;
         errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
         errorContent.sound = [UNNotificationSound defaultSound];
         UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:errorContent trigger:nil];
-        [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:errorRequest withCompletionHandler:^(NSError * _Nullable error) {
-            if(error)
-                DDLogError(@"Error posting local appex unclean shutdown error notification: %@", error);
-            else
-                warnUnclean = NO;       //try again on error
-        }];
+        NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
+        if(error)
+            DDLogError(@"Error posting local appex unclean shutdown error notification: %@", error);
+        else
+            warnUnclean = NO;       //try again on error
     }
     
     //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)

@@ -15,6 +15,7 @@
 #import "xmpp.h"
 #import "MLFiletransfer.h"
 #import "MLNotificationQueue.h"
+#import "MLXMPPManager.h"
 
 @import UserNotifications;
 @import CoreServices;
@@ -22,7 +23,6 @@
 
 @interface MLNotificationManager ()
 @property (nonatomic, assign) NotificationPrivacySettingOption notificationPrivacySetting;
-@property (nonatomic) NSMutableSet* pendingDonations;
 @end
 
 @implementation MLNotificationManager
@@ -47,7 +47,6 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
 
     self.notificationPrivacySetting = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
-    self.pendingDonations = [[NSMutableSet alloc] init];
     return self;
 }
 
@@ -63,26 +62,11 @@
         content.title = xmppAccount.connectionProperties.identity.jid;
         content.body = notification.userInfo[@"message"];
         content.sound = [UNNotificationSound defaultSound];
-        UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
         UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
-        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-            if(error)
-                DDLogError(@"Error posting xmppError notification: %@", error);
-        }]; 
+        NSError* error = [HelperTools postUserNotificationRequest:request];
+        if(error)
+            DDLogError(@"Error posting xmppError notification: %@", error);
     }
-}
-
--(void) waitForDonations
-{
-    BOOL notEmpty;
-    do
-    {
-        @synchronized(self.pendingDonations) {
-            notEmpty = self.pendingDonations.count > 0;
-        }
-        if(notEmpty)
-            usleep(10000);      //sleep for 10 ms before trying again
-    } while(notEmpty);
 }
 
 #pragma mark message signals
@@ -93,18 +77,19 @@
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     NSString* idval = [self identifierWithMessage:message];
     
-    //check if we already show any notifications and update them if necessary (e.g. publish a second notification having the same id)
     [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
         for(UNNotificationRequest* request in requests)
             if([request.identifier isEqualToString:idval])
             {
+                DDLogDebug(@"Already pending notification '%@', updating it...", idval);
                 [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:YES];
             }
     }];
     [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
         for(UNNotification* notification in notifications)
-             if([notification.request.identifier isEqualToString:idval])
+            if([notification.request.identifier isEqualToString:idval])
             {
+                DDLogDebug(@"Already displayed notification '%@', updating it...", idval);
                 [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:NO];
             }
     }];
@@ -167,7 +152,10 @@
             [self showNotificaionForMessage:message withSound:sound andAccount:xmppAccount];
         }
         else
-            DDLogDebug(@"not showing notification: chat is open");
+        {
+            DDLogDebug(@"not showing notification and only playing sound: chat is open");
+            [self playNotificationSoundForMessage:message withSound:sound andAccount:xmppAccount];
+        }
     }
 }
 
@@ -187,9 +175,6 @@
             NSString* idval = [self identifierWithMessage:msg];
             
             DDLogVerbose(@"Removing pending/deliverd notification for message '%@' with identifier '%@'...", msg.messageId, idval);
-            @synchronized(self.pendingDonations) {
-                [self.pendingDonations removeObject:idval];
-            }
             [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
             [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
         }
@@ -210,9 +195,6 @@
     NSString* idval = [self identifierWithMessage:message];
     
     DDLogVerbose(@"notification manager got deleted message notice: %@", message.messageId);
-    @synchronized(self.pendingDonations) {
-        [self.pendingDonations removeObject:idval];
-    }
     [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
     [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
     
@@ -244,16 +226,39 @@
 
 -(void) publishNotificationContent:(UNNotificationContent*) content withID:(NSString*) idval
 {
-    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    
     //scheduling the notification in 2 seconds will make it possible to be deleted by XEP-0333 chat-markers received directly after the message
     //this is useful in catchup scenarios
     DDLogVerbose(@"notification manager: publishing notification in 2 seconds: %@", content);
     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:2 repeats: NO]];
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        if(error)
-            DDLogError(@"Error posting local notification: %@", error);
-    }];
+    NSError* error = [HelperTools postUserNotificationRequest:request];
+    if(error)
+        DDLogError(@"Error posting local notification: %@", error);
+}
+
+-(void) playNotificationSoundForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
+{
+    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    NSString* idval = [self identifierWithMessage:message];
+    
+    if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
+    {
+        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
+        if(filename)
+        {
+            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
+            DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+        }
+        else
+        {
+            content.sound = [UNNotificationSound defaultSound];
+            DDLogDebug(@"Using default alert sound: %@", content.sound);
+        }
+    }
+    else
+        DDLogDebug(@"Using no alert sound");
+    
+    DDLogDebug(@"Publishing sound-but-no-body notification with id %@", idval);
+    [self publishNotificationContent:[self updateBadgeForContent:content] withID:idval];
 }
 
 -(void) showNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
@@ -275,7 +280,6 @@
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     NSString* idval = [self identifierWithMessage:message];
-    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     
     INSendMessageAttachment* audioAttachment = nil;
     NSString* msgText = NSLocalizedString(@"Open app to see more", @"");
@@ -289,11 +293,11 @@
         else
             msgText = message.messageText;
         
-        // notification settings (TODO: is this really needed for communication notifications?)
+        // notification settings
         content.threadIdentifier = [self threadIdentifierWithMessage:message];
         content.categoryIdentifier = @"message";
         
-        // user info for answer etc. (TODO: is this really needed for communication notifications?)
+        // user info for answer etc.
         content.userInfo = @{
             @"fromContactJid": message.buddyName,
             @"fromContactAccountId": message.accountId,
@@ -305,57 +309,21 @@
             NSDictionary* info = [MLFiletransfer getFileInfoForMessage:message];
             if(info)
             {
-                UNNotificationAttachment* attachment = nil;
                 NSString* mimeType = info[@"mimeType"];
-                if(![info[@"needsDownloading"] boolValue])
+                if(![info[@"needsDownloading"] boolValue] && [mimeType hasPrefix:@"audio/"])
                 {
-                    NSString* typeHint = nil;
-                    if([mimeType hasPrefix:@"image/"])
-                    {
-                        if([mimeType isEqualToString:@"image/jpeg"])
-                            typeHint = (NSString*)kUTTypeJPEG;
-                        if([mimeType isEqualToString:@"image/png"])
-                            typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/gif"])
-                            typeHint = (NSString*)kUTTypeGIF;
-                    }
-                    else if([mimeType hasPrefix:@"audio/"])
-                    {
-                        if([mimeType isEqualToString:@"audio/mpeg"])
-                            typeHint = (NSString*)kUTTypeMP3;
-                        if([mimeType isEqualToString:@"audio/mp4"])
-                            typeHint = (NSString*)kUTTypeMPEG4Audio;
-                        if([mimeType isEqualToString:@"audio/wav"])
-                            typeHint = (NSString*)kUTTypeWaveformAudio;
-                        if([mimeType isEqualToString:@"audio/x-aiff"])
-                            typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
-                        
-                        if(typeHint != nil)
-                            audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
-                    }
-                    else if([mimeType hasPrefix:@"video/"])
-                    {
-                        if([mimeType isEqualToString:@"video/mpeg"])
-                            typeHint = (NSString*)kUTTypeMPEG;
-                        if([mimeType isEqualToString:@"video/mp4"])
-                            typeHint = (NSString*)kUTTypeMPEG4;
-                        if([mimeType isEqualToString:@"video/x-msvideo"])
-                            typeHint = (NSString*)kUTTypeAVIMovie;
-                        if([mimeType isEqualToString:@"video/mpeg2"])
-                            typeHint = (NSString*)kUTTypeMPEG2Video;
-                    }
-                    else if([mimeType isEqualToString:@"application/pdf"])
-                        msgText = NSLocalizedString(@"📄 A Document", @"");
-                    else
-                        msgText = NSLocalizedString(@"Sent a File 📁", @"");
+                    NSString* typeHint = (NSString*)kUTTypeMPEG4Audio;
+                    if([mimeType isEqualToString:@"audio/mpeg"])
+                        typeHint = (NSString*)kUTTypeMP3;
+                    if([mimeType isEqualToString:@"audio/mp4"])
+                        typeHint = (NSString*)kUTTypeMPEG4Audio;
+                    if([mimeType isEqualToString:@"audio/wav"])
+                        typeHint = (NSString*)kUTTypeWaveformAudio;
+                    if([mimeType isEqualToString:@"audio/x-aiff"])
+                        typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
                     
                     if(typeHint != nil)
-                    {
-                        NSError *error;
-                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
-                        if(error)
-                            DDLogError(@"Error adding UNNotificationAttachment to notification: %@", error);
-                    }
+                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
                 }
                 else
                 {
@@ -370,16 +338,11 @@
                     else
                         msgText = NSLocalizedString(@"Sent a File 📁", @"");
                 }
-                
-                if(attachment)
-                {
-                    content.attachments = @[attachment];
-                    msgText = @"";
-                }
             }
             else
             {
                 // empty info dict default to "Sent a file"
+                DDLogWarn(@"Got filetransfer with unknown type");
                 msgText = NSLocalizedString(@"Sent a File 📁", @"");
             }
         }
@@ -410,10 +373,47 @@
     // update badge value prior to donating the interaction to sirikit
     [self updateBadgeForContent:content];
     
+    INSendMessageIntent* intent = [self makeIntentForMessage:message usingText:msgText andAudioAttachment:audioAttachment];
+    
+    INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
+    interaction.direction = INInteractionDirectionIncoming;
+    
+    NSError* error = nil;
+    UNNotificationContent* updatedContent = [content contentByUpdatingWithProvider:intent error:&error];
+    if(error)
+        DDLogError(@"Could not update notification content: %@", error);
+    else
+    {
+        DDLogDebug(@"Publishing communication notification with id %@", idval);
+        [self publishNotificationContent:updatedContent withID:idval];
+    }
+    
+    //we can donate interactions after posting their notification (see signal source code)
+    [interaction donateInteractionWithCompletion:^(NSError *error) {
+        if(error)
+            DDLogError(@"Could not donate interaction: %@", error);
+    }];
+}
+
+-(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+{
+    INSendMessageIntent* intent = [self makeIntentForMessage:[[DataLayer sharedInstance] messageForHistoryID:messageDBId] usingText:@"" andAudioAttachment:nil];
+    INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
+    interaction.direction = INInteractionDirectionOutgoing;
+    [interaction donateInteractionWithCompletion:^(NSError *error) {
+        if(error)
+            DDLogError(@"Could not donate outgoing interaction: %@", error);
+    }];
+}
+
+-(INSendMessageIntent*) makeIntentForMessage:(MLMessage*) message usingText:(NSString*) msgText andAudioAttachment:(INSendMessageAttachment*) audioAttachment    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+{
     // some docu:
     // - https://developer.apple.com/documentation/usernotifications/implementing_communication_notifications?language=objc
     // - https://gist.github.com/Dexwell/dedef7389eae26c5b9db927dc5588905
     // - https://stackoverflow.com/a/68705169/3528174
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:message.accountId];
+    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     INPerson* sender = nil;
     NSString* groupDisplayName = nil;
     NSMutableArray* recipients = [[NSMutableArray alloc] init];
@@ -425,7 +425,6 @@
             MLContact* contactInGroup = [MLContact createContactFromJid:message.participantJid andAccountNo:message.accountId];
             //use MLMessage's capability to calculate the fallback name using actualFrom
             sender = [self makeINPersonWithContact:contactInGroup andDisplayName:message.contactDisplayName andAccount:account];
-            content.subtitle = [NSString stringWithFormat:NSLocalizedString(@"%@ says:", @""), sender.displayName];
             
             //add other group members
             for(NSDictionary* member in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountId:message.accountId])
@@ -435,24 +434,23 @@
             }
         }
         else
-        {
             sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
-            content.subtitle = [NSString stringWithFormat:NSLocalizedString(@"%@ says:", @""), message.contactDisplayName];
-        }
     }
     else
         sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
     
     INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:(recipients.count > 0 ? recipients : nil)
-                                                                outgoingMessageType:INOutgoingMessageTypeOutgoingMessageText
-                                                                            content:msgText
-                                                                speakableGroupName:(groupDisplayName ? [[INSpeakableString alloc] initWithSpokenPhrase:groupDisplayName] : nil)
-                                                            conversationIdentifier:[self threadIdentifierWithMessage:message]
-                                                                        serviceName:message.accountId
-                                                                            sender:sender
-                                                                        attachments:(audioAttachment ? @[audioAttachment] : nil)];
+                                                              outgoingMessageType:(audioAttachment ? INOutgoingMessageTypeOutgoingMessageAudio : INOutgoingMessageTypeOutgoingMessageText)
+                                                                          content:msgText
+                                                               speakableGroupName:(groupDisplayName ? [[INSpeakableString alloc] initWithSpokenPhrase:groupDisplayName] : nil)
+                                                           conversationIdentifier:[[NSString alloc] initWithData:[HelperTools serializeObject:contact] encoding:NSISOLatin1StringEncoding]
+                                                                      serviceName:message.accountId
+                                                                           sender:sender
+                                                                      attachments:(audioAttachment ? @[audioAttachment] : nil)];
     if(message.isMuc && contact.avatar != nil)
         [intent setImage:[INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)] forParameterNamed:@"speakableGroupName"];
+    
+    return intent;
     
     /*
     if(message.isMuc)
@@ -478,37 +476,6 @@
                                                                            contacts:@[sender]
                                                                      callCapability:INCallCapabilityAudioCall];
     */
-    INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
-    interaction.direction = INInteractionDirectionIncoming;
-    
-    @synchronized(self.pendingDonations) {
-        [self.pendingDonations addObject:idval];
-    }
-    [interaction donateInteractionWithCompletion:^(NSError *error) {
-        if(error)
-            DDLogError(@"Could not donate interaction: %@", error);
-        else
-        {
-            //make sure the idval gets removed from pending notifications *after* we published the notification to make waitForDonations work
-            @synchronized(self.pendingDonations) {
-                if(![self.pendingDonations containsObject:idval])
-                {
-                    DDLogDebug(@"Not publishing donated notification with id %@, got displayed notice in he meantime", idval);
-                    return;
-                }
-                NSError* error = nil;
-                UNNotificationContent* updatedContent = [content contentByUpdatingWithProvider:intent error:&error];
-                if(error)
-                    DDLogError(@"Could not update notification content: %@", error);
-                else
-                {
-                    DDLogDebug(@"Publishing communication notification with id %@", idval);
-                    [self publishNotificationContent:updatedContent withID:idval];
-                }
-                [self.pendingDonations removeObject:idval];
-            }
-        }
-    }];
 }
 
 -(INPerson*) makeINPersonWithContact:(MLContact*) contact andDisplayName:(NSString* _Nullable) displayName andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))

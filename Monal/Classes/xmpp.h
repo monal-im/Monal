@@ -91,6 +91,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo;
 
+-(void) freezeParseQueue;
+-(void) unfreezeParseQueue;
 -(void) unfreezed;
 -(void) connect;
 -(void) disconnect;

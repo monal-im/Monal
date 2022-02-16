@@ -38,6 +38,8 @@ CLLocationCoordinate2D geoLocation;
     // Init tap handling
     UITapGestureRecognizer *tapGestureRec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleMapViewGesture)];
     [self.map addGestureRecognizer:tapGestureRec];
+    
+    completion();
 }
 
 -(void) handleMapViewGesture {

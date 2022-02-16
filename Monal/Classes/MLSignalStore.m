@@ -122,12 +122,12 @@
     }
 }
 
--(int) getPreKeyCount
+-(unsigned int) getPreKeyCount
 {
     NSNumber* count = [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:@"SELECT COUNT(prekeyid) FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NULL AND keyUsed=0;" andArguments:@[self.accountId]];
     }];
-    return count.intValue;
+    return count.unsignedIntValue;
 }
 
 -(void) saveValues

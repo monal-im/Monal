@@ -29,7 +29,7 @@
     if(!self.xmppAccount)
     {
         UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts", @"") message:NSLocalizedString(@"Please make sure you are connected before changing your password.", @"") preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {}];
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {}];
         [messageAlert addAction:closeAction];
 
         [self presentViewController:messageAlert animated:YES completion:nil];
@@ -41,7 +41,7 @@
             if([[MLXMPPManager sharedInstance] isValidPassword:[self.passwordOld getText] forAccount:self.xmppAccount.accountNo] == NO)
             {
                 UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Password!", @"") message:NSLocalizedString(@"The current password is not correct.", @"") preferredStyle:UIAlertControllerStyleAlert];
-                UIAlertAction *closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {}];
+                UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {}];
                 [messageAlert addAction:closeAction];
 
                 [self presentViewController:messageAlert animated:YES completion:nil];
@@ -69,7 +69,7 @@
                     }
                     
                     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:title message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-                    UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                    UIAlertAction* closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                         
                     }];
                     [messageAlert addAction:closeAction];
@@ -80,8 +80,8 @@
         }
         else
         {
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "") message:NSLocalizedString(@"Password cannot be empty",@ "") preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"Password cannot be empty", @"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction* closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                 
             }];
             [messageAlert addAction:closeAction];

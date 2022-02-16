@@ -213,7 +213,7 @@ $$
 -(BOOL) generateNewKeysIfNeeded
 {
     // generate new keys if less than MIN_OMEMO_KEYS are available
-    int preKeyCount = [self.monalSignalStore getPreKeyCount];
+    unsigned int preKeyCount = [self.monalSignalStore getPreKeyCount];
     if(preKeyCount < MIN_OMEMO_KEYS)
     {
         SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
@@ -365,7 +365,7 @@ $$
             if(![receivedDevices containsObject:deviceId])
             {
                 // only delete other devices from signal store && keep our own entry
-                if(!([source isEqualToString:self.accountJid] && deviceId.intValue == self.monalSignalStore.deviceid))
+                if(!([source isEqualToString:self.accountJid] && deviceId.unsignedIntValue == self.monalSignalStore.deviceid))
                 {
                     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:deviceId.intValue];
                     [self.monalSignalStore markDeviceAsDeleted:address];
@@ -559,7 +559,7 @@ $$
     for(NSNumber* device in devices)
     {
         // Do not encrypt for our own device
-        if(device.intValue == self.monalSignalStore.deviceid && [encryptForJid isEqualToString:self.accountJid]) {
+        if(device.unsignedIntValue == self.monalSignalStore.deviceid && [encryptForJid isEqualToString:self.accountJid]) {
             continue;
         }
         SignalAddress* address = [[SignalAddress alloc] initWithName:encryptForJid deviceId:(uint32_t)device.intValue];
@@ -712,7 +712,7 @@ $$
     for(NSString* contactJid in self.brokenSessions) {
         NSSet* rids = [self.brokenSessions objectForKey:contactJid];
         for(NSNumber* rid in rids) {
-            if(rid.intValue == self.monalSignalStore.deviceid)
+            if(rid.unsignedIntValue == self.monalSignalStore.deviceid)
             {
                 // We should not generate a new session to our own device
                 continue;
@@ -770,7 +770,7 @@ $$
         return NSLocalizedString(@"Error decrypting message", @"");
     }
     // check if we received our own bundle
-    if([senderJid isEqualToString:self.accountJid] && sid.intValue == self.monalSignalStore.deviceid)
+    if([senderJid isEqualToString:self.accountJid] && sid.unsignedIntValue == self.monalSignalStore.deviceid)
     {
         // Nothing to do
         return nil;
@@ -986,7 +986,7 @@ $$
     }];
 }
 
--(void) deleteDeviceForSource:(NSString*) source andRid:(int) rid
+-(void) deleteDeviceForSource:(NSString*) source andRid:(unsigned int) rid
 {
     // We should not delete our own device
     if([source isEqualToString:self.accountJid] && rid == self.monalSignalStore.deviceid)

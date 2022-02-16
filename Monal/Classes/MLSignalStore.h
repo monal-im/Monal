@@ -50,7 +50,7 @@
 -(NSNumber*) getTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey;
 
 -(int) getHighestPreyKeyId;
--(int) getPreKeyCount;
+-(unsigned int) getPreKeyCount;
 
 
 @end

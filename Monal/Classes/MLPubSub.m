@@ -73,7 +73,8 @@ static NSDictionary* _defaultOptions;
 -(void) fetchNode:(NSString*) node from:(NSString*) jid withItemsList:(NSArray*) itemsList andHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Fetching node '%@' at jid '%@' using callback %@...", node, jid, handler);
-    if(!_account.connectionProperties.supportsPubSub)
+    xmpp* account = _account;
+    if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
         return;
@@ -92,7 +93,7 @@ static NSDictionary* _defaultOptions;
         [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil]
     ] andData:nil]];
 
-    [_account sendIq:query withHandler:$newHandler(self, handleFetch, 
+    [account sendIq:query withHandler:$newHandler(self, handleFetch, 
         $ID(node),
         $ID(queryItems),
         $ID(data, [[NSMutableDictionary alloc] init]),
@@ -104,7 +105,8 @@ static NSDictionary* _defaultOptions;
 -(void) subscribeToNode:(NSString*) node onJid:(NSString*) jid withHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Subscribing to node '%@' at jid '%@' using callback %@...", node, jid, handler);
-    if(!_account.connectionProperties.supportsPubSub)
+    xmpp* account = _account;
+    if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
         return;
@@ -115,11 +117,11 @@ static NSDictionary* _defaultOptions;
     [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"subscribe" withAttributes:@{
             @"node": node,
-            @"jid": _account.connectionProperties.identity.jid,
+            @"jid": account.connectionProperties.identity.jid,
         } andChildren:@[] andData:nil]
     ] andData:nil]];
 
-    [_account sendIq:query withHandler:$newHandler(self, handleSubscribe, 
+    [account sendIq:query withHandler:$newHandler(self, handleSubscribe, 
         $ID(node),
         $ID(jid),
         $ID(handler),
@@ -129,7 +131,8 @@ static NSDictionary* _defaultOptions;
 //handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) configureNode:(NSString*) node withConfigOptions:(NSDictionary*) configOptions andHandler:(MLHandler*) handler
 {
-    if(!_account.connectionProperties.supportsPubSub)
+    xmpp* account = _account;
+    if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@'!", node);
         return;
@@ -139,7 +142,7 @@ static NSDictionary* _defaultOptions;
     [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"configure" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
     ] andData:nil]];
-    [_account sendIq:query withHandler:$newHandler(self, handleConfigFormResult,
+    [account sendIq:query withHandler:$newHandler(self, handleConfigFormResult,
         $ID(node),
         $ID(configOptions),
         $ID(handler)
@@ -187,7 +190,8 @@ static NSDictionary* _defaultOptions;
 //handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) retractItemWithId:(NSString*) itemId onNode:(NSString*) node andHandler:(MLHandler*) handler
 {
-    if(!_account.connectionProperties.supportsPubSub)
+    xmpp* account = _account;
+    if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@'!", node);
         return;
@@ -198,7 +202,7 @@ static NSDictionary* _defaultOptions;
     [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"retract" withAttributes:@{@"node": node} andChildren:@[item] andData:nil]
     ] andData:nil]];
-    [_account sendIq:query withHandler:$newHandler(self, handleRetractResult,
+    [account sendIq:query withHandler:$newHandler(self, handleRetractResult,
         $ID(node),
         $ID(itemId),
         $ID(handler)
@@ -213,7 +217,8 @@ static NSDictionary* _defaultOptions;
 //handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) purgeNode:(NSString*) node andHandler:(MLHandler*) handler
 {
-    if(!_account.connectionProperties.supportsPubSub)
+    xmpp* account = _account;
+    if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@'!", node);
         return;
@@ -222,7 +227,7 @@ static NSDictionary* _defaultOptions;
     [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"purge" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
     ] andData:nil]];
-    [_account sendIq:query withHandler:$newHandler(self, handlePurgeOrDeleteResult,
+    [account sendIq:query withHandler:$newHandler(self, handlePurgeOrDeleteResult,
         $ID(node),
         $ID(handler)
     )];
@@ -236,7 +241,8 @@ static NSDictionary* _defaultOptions;
 //handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) deleteNode:(NSString*) node andHandler:(MLHandler*) handler
 {
-    if(!_account.connectionProperties.supportsPubSub)
+    xmpp* account = _account;
+    if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@'!", node);
         return;
@@ -245,7 +251,7 @@ static NSDictionary* _defaultOptions;
     [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"delete" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
     ] andData:nil]];
-    [_account sendIq:query withHandler:$newHandler(self, handlePurgeOrDeleteResult,
+    [account sendIq:query withHandler:$newHandler(self, handlePurgeOrDeleteResult,
         $ID(node),
         $ID(handler)
     )];
@@ -417,6 +423,7 @@ static NSDictionary* _defaultOptions;
 
 -(void) callHandlersForNode:(NSString*) node andJid:(NSString*) jid withType:(NSString*) type andData:(NSDictionary*) data
 {
+    xmpp* account = _account;
     DDLogInfo(@"Calling pubsub handlers for node '%@' (and jid '%@')", node, jid);
     NSDictionary* handlers;
     @synchronized(_registeredHandlers) {
@@ -424,7 +431,7 @@ static NSDictionary* _defaultOptions;
     }
     for(NSString* handlerId in handlers)
         $call(handlers[handlerId],
-            $ID(account, _account),
+            $ID(account, account),
             $ID(node),
             $ID(jid),
             $ID(type),
@@ -449,7 +456,7 @@ $$instance_handler(handleSubscribe, account.pubsub, $_ID(xmpp*, account), $_ID(X
         DDLogError(@"Got error iq for pubsub subscribe request: %@", iqNode);
         //call subscribe callback (if given) with error iq node
         $call(handler,
-            $ID(account, _account),
+            $ID(account, account),
             $BOOL(success, NO),
             $ID(jid, iqNode.fromUser),
             $ID(errorIq, iqNode)
@@ -463,7 +470,7 @@ $$instance_handler(handleSubscribe, account.pubsub, $_ID(xmpp*, account), $_ID(X
         
         //call subscribe callback (if given)
         $call(handler,
-            $ID(account, _account),
+            $ID(account, account),
             $BOOL(success, YES),
             $ID(jid, iqNode.fromUser)
         );
@@ -474,7 +481,7 @@ $$instance_handler(handleSubscribe, account.pubsub, $_ID(xmpp*, account), $_ID(X
         
         //call subscribe callback (if given) with error iq node
         $call(handler,
-            $ID(account, _account),
+            $ID(account, account),
             $BOOL(success, NO),
             $ID(jid, iqNode.fromUser),
             $ID(errorReason, @"Unexpected iq result (wrong node or jid)!")
@@ -488,7 +495,7 @@ $$instance_handler(handleFetch, account.pubsub, $_ID(xmpp*, account), $_ID(XMPPI
         DDLogError(@"Got error iq for pubsub fetch request: %@", iqNode);
         //call fetch callback (if given) with error iq node
         $call(handler,
-            $ID(account, _account),
+            $ID(account, account),
             $BOOL(success, NO),
             $ID(jid, iqNode.fromUser),
             $ID(errorIq, iqNode)
@@ -504,7 +511,7 @@ $$instance_handler(handleFetch, account.pubsub, $_ID(xmpp*, account), $_ID(XMPPI
         [self handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser withData:data];
         //call fetch callback (if given)
         $call(handler,
-            $ID(account, _account),
+            $ID(account, account),
             $BOOL(success, YES),
             $ID(jid, iqNode.fromUser),
             $ID(data)
@@ -541,7 +548,7 @@ $$instance_handler(handleConfigFormResult, account.pubsub, $_ID(xmpp*, account),
     {
         DDLogError(@"Got error iq for pubsub configure request 1: %@", iqNode);
         //signal error
-        $call(handler, $ID(account, _account), $BOOL(success, NO), $ID(errorIq, iqNode));
+        $call(handler, $ID(account, account), $BOOL(success, NO), $ID(errorIq, iqNode));
         return;
     }
     
@@ -558,7 +565,7 @@ $$instance_handler(handleConfigFormResult, account.pubsub, $_ID(xmpp*, account),
         ] andData:nil]];
         [account send:query];
         //signal error
-        $call(handler, $ID(account, _account), $BOOL(success, NO), $ID(errorReason, NSLocalizedString(@"Unexpected server response: invalid PEP config form", @"")));
+        $call(handler, $ID(account, account), $BOOL(success, NO), $ID(errorReason, NSLocalizedString(@"Unexpected server response: invalid PEP config form", @"")));
         return;
     }
     
@@ -579,7 +586,7 @@ $$instance_handler(handleConfigFormResult, account.pubsub, $_ID(xmpp*, account),
             ] andData:nil]];
             [account send:query];
             //signal error
-            $call(handler, $ID(account, _account), $BOOL(success, NO), $ID(errorReason, NSLocalizedString(@"Unexpected server response: missing required fields in PEP config form", @"")));
+            $call(handler, $ID(account, account), $BOOL(success, NO), $ID(errorReason, NSLocalizedString(@"Unexpected server response: missing required fields in PEP config form", @"")));
             return;
         }
         else
@@ -602,18 +609,18 @@ $$instance_handler(handleConfigureResult, account.pubsub, $_ID(xmpp*, account), 
     {
         DDLogError(@"Got error iq for pubsub configure request 2: %@", iqNode);
         //signal error
-        $call(handler, $ID(account, _account), $BOOL(success, NO), $ID(errorIq, iqNode));
+        $call(handler, $ID(account, account), $BOOL(success, NO), $ID(errorIq, iqNode));
         return;
     }
     //inform handler of successful completion of config request
-    $call(handler, $ID(account, _account), $BOOL(success, YES));
+    $call(handler, $ID(account, account), $BOOL(success, YES));
 $$
 
 $$instance_handler(handlePublishAgain, account.pubsub,$_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(MLXMLNode*, item), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
     if(!success)
     {
         DDLogError(@"Publish failed for node '%@' even after configuring it!", node);
-        $call(handler, $ID(account, _account), $BOOL(success, NO), $ID(errorIq), $ID(errorReason));
+        $call(handler, $ID(account, account), $BOOL(success, NO), $ID(errorIq), $ID(errorReason));
         return;
     }
     
@@ -625,7 +632,7 @@ $$instance_handler(handleConfigureAfterPublish, account.pubsub, $_ID(xmpp*, acco
     if(!success)
     {
         DDLogError(@"Second publish attempt failed again for node '%@', not configuring it!", node);
-        $call(handler, $ID(account, _account), $BOOL(success, NO), $ID(errorIq), $ID(errorReason));
+        $call(handler, $ID(account, account), $BOOL(success, NO), $ID(errorIq), $ID(errorReason));
         return;
     }
     
@@ -668,30 +675,30 @@ $$instance_handler(handlePublishResult, account.pubsub,$_ID(xmpp*, account), $_I
             )];
             return;
         }
-        $call(handler, $ID(account, _account), $BOOL(success, NO), $ID(errorIq, iqNode));
+        $call(handler, $ID(account, account), $BOOL(success, NO), $ID(errorIq, iqNode));
         return;
     }
-    $call(handler, $ID(account, _account), $BOOL(success, YES));
+    $call(handler, $ID(account, account), $BOOL(success, YES));
 $$
 
 $$instance_handler(handleRetractResult, account.pubsub, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSString*, itemId), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Retract for item '%@' of node '%@' failed: %@", itemId, node, iqNode);
-        $call(handler, $ID(account, _account), $BOOL(success, NO), $ID(errorIq, iqNode));
+        $call(handler, $ID(account, account), $BOOL(success, NO), $ID(errorIq, iqNode));
         return;
     }
-    $call(handler, $ID(account, _account), $BOOL(success, YES));
+    $call(handler, $ID(account, account), $BOOL(success, YES));
 $$
 
 $$instance_handler(handlePurgeOrDeleteResult, account.pubsub, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Purge/Delete of node '%@' failed: %@", node, iqNode);
-        $call(handler, $ID(account, _account), $BOOL(success, NO), $ID(errorIq, iqNode));
+        $call(handler, $ID(account, account), $BOOL(success, NO), $ID(errorIq, iqNode));
         return;
     }
-    $call(handler, $ID(account, _account), $BOOL(success, YES));
+    $call(handler, $ID(account, account), $BOOL(success, YES));
 $$
 
 @end

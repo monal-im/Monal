@@ -518,7 +518,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource
 {
-    NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
+    NSNumber* timestamp = [NSNumber numberWithDouble:[NSDate date].timeIntervalSince1970];
     [self.db voidWriteTransaction:^{
         //set ver for user and resource
         NSString* query = @"UPDATE buddy_resources SET ver=? WHERE EXISTS(SELECT * FROM buddylist WHERE buddy_resources.buddy_id=buddylist.buddy_id AND resource=? AND buddy_name=?)";
@@ -559,7 +559,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setCaps:(NSSet*) caps forVer:(NSString*) ver
 {
-    NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
+    NSNumber* timestamp = [NSNumber numberWithDouble:[NSDate date].timeIntervalSince1970];
     [self.db voidWriteTransaction:^{
         //remove old caps for this ver
         NSString* query0 = @"DELETE FROM ver_info WHERE ver=?;";
@@ -2081,7 +2081,7 @@ static NSDateFormatter* dbFormatter;
     if(!jid || accountNo == nil)
         return NO;
 
-    return [[self.db idReadTransaction:^{
+    return (u_int8_t)[[self.db idReadTransaction:^{
         NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:jid];
         NSNumber* blocked;
         u_int8_t ruleId = kBlockingNoMatch;
@@ -2242,7 +2242,7 @@ static NSDateFormatter* dbFormatter;
 
     NSNumber* timestamp = @0;       //default value for "online" or "unknown"
     if(lastInteractionTime)
-        timestamp = [NSNumber numberWithInt:lastInteractionTime.timeIntervalSince1970];
+        timestamp = [NSNumber numberWithDouble:lastInteractionTime.timeIntervalSince1970];
 
     [self.db voidWriteTransaction:^{
         NSString* query = @"UPDATE buddylist SET lastInteraction=? WHERE account_id=? AND buddy_name=?;";

@@ -110,7 +110,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         if(diff > 0)
         {
             // remove rows
-            for(size_t i = 0; i < diff; i++)
+            for(int i = 0; i < diff; i++)
             {
                 NSIndexPath* posInSection = [NSIndexPath indexPathForRow:i inSection:section];
                 [table deleteRowsAtIndexPaths:@[posInSection] withRowAnimation:UITableViewRowAnimationNone];

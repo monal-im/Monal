@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(BOOL) knownDevicesForAddressNameExist:(NSString*) addressName;
 -(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName;
--(void) deleteDeviceForSource:(NSString*) source andRid:(int) rid;
+-(void) deleteDeviceForSource:(NSString*) source andRid:(unsigned int) rid;
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSData*) getIdentityForAddress:(SignalAddress*)address;

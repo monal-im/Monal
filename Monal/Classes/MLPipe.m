@@ -146,10 +146,10 @@
     //DDLogVerbose(@"starting pipe processing");
     
     //try to send remaining buffered data first
-    if(_outputBufferByteCount>0)
+    if(_outputBufferByteCount > 0)
     {
-        NSInteger writtenLen=[_output write:_outputBuffer maxLength:_outputBufferByteCount];
-        if(writtenLen!=-1)
+        NSUInteger writtenLen = [_output write:_outputBuffer maxLength:_outputBufferByteCount];
+        if(writtenLen != (unsigned long) -1)
         {
             if(writtenLen!=_outputBufferByteCount)        //some bytes remaining to send
             {

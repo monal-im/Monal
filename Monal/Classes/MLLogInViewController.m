@@ -99,7 +99,7 @@
     {
         self.loginHUD.hidden = YES;
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Credentials", @"") message:NSLocalizedString(@"Your XMPP account should be in in the format user@domain. For special configurations, use manual setup.", @"") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -110,7 +110,7 @@
     {
         self.loginHUD.hidden = YES;
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Credentials", @"") message:NSLocalizedString(@"Please enter a password.", @"") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -120,7 +120,7 @@
     if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString]) {
         self.loginHUD.hidden = YES;
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Duplicate Account", @"") message:NSLocalizedString(@"This account already exists on this instance", @"") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -150,7 +150,7 @@
             self.cancelFirstLoginTimer = nil;
             self.loginHUD.hidden=YES;
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Timeout Error", @"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:alert animated:YES completion:nil];
@@ -229,7 +229,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             self.loginHUD.hidden = YES;
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Success!", @"") message:NSLocalizedString(@"You are set up and connected.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Start Using Monal", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Start Using Monal", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
                 [self dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:alert animated:YES completion:nil];
@@ -250,7 +250,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             self.loginHUD.hidden=YES;
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:alert animated:YES completion:nil];

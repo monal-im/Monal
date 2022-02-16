@@ -858,7 +858,7 @@ NSString* const kStanza = @"stanza";
         if(explicitLogout && self->_accountState>=kStateHasStream)
         {
             DDLogInfo(@"doing explicit logout (xmpp stream close)");
-            self->_exponentialBackoff = 0;
+            self->_exponentialBackoff = 0.0;
             if(self.accountState>=kStateBound)
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //disable push for this node
@@ -1005,7 +1005,7 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"Ignoring reconnect while one already in progress");
         return;
     }
-    if(!_exponentialBackoff)
+    if(_exponentialBackoff == 0.0)
         _exponentialBackoff = 1.0;
     [self reconnectWithStreamError:streamError andWaitingTime:_exponentialBackoff];
     _exponentialBackoff = MIN(_exponentialBackoff * 2, 10.0);
@@ -1297,7 +1297,7 @@ NSString* const kStanza = @"stanza";
                 XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType];
                 [ping setiqTo:self.connectionProperties.identity.domain];
                 [ping setPing];
-                [self sendIq:ping withResponseHandler:^(XMPPIQ* result) {
+                [self sendIq:ping withResponseHandler:^(XMPPIQ* result __unused) {
                     handler();
                 } andErrorHandler:^(XMPPIQ* error) {
                     if(error != nil)
@@ -1341,10 +1341,10 @@ NSString* const kStanza = @"stanza";
         //Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
         //It may also result in mutation on iteration
         [self.unAckedStanzas removeAllObjects];
-        [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSDictionary *dic= (NSDictionary *) obj;
+        for(NSDictionary* dic in sendCopy)
+        {
             [self send:(XMPPStanza*)[dic objectForKey:kStanza]];
-        }];
+        }
         [self persistState];
     }
 }
@@ -1358,14 +1358,14 @@ NSString* const kStanza = @"stanza";
             NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:stanzas];
             //clear queue because we don't want to repeat resending these stanzas later if the var stanzas points to self.unAckedStanzas here
             [stanzas removeAllObjects];
-            [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                NSDictionary* dic = (NSDictionary *) obj;
+            for(NSDictionary* dic in sendCopy)
+            {
                 XMPPStanza* stanza = [dic objectForKey:kStanza];
                 //only resend message stanzas because of the smacks error condition
                 //but don't add them to our outgoing smacks queue again, if smacks isn't supported
                 if([stanza.element isEqualToString:@"message"])
                     [self send:stanza withSmacks:self.connectionProperties.supportsSM3];
-            }];
+            }
             //persist these changes, the queue can now be empty (because smacks enable failed)
             //or contain all the resent stanzas (e.g. only resume failed)
             [self persistState];
@@ -1377,7 +1377,7 @@ NSString* const kStanza = @"stanza";
 {
     NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
     @synchronized(_stateLockObject) {
-        if(([hvalue integerValue] - [self.lastHandledOutboundStanza integerValue]) > [self.unAckedStanzas count])
+        if(([hvalue unsignedIntValue] - [self.lastHandledOutboundStanza unsignedIntValue]) > [self.unAckedStanzas count])
         {
             //stanza counting bugs on the server are fatal
             NSString* message = @"Server acknowledged more stanzas than sent by client";
@@ -2926,7 +2926,7 @@ NSString* const kStanza = @"stanza";
 {
     XMPPIQ* purgeIq = [[XMPPIQ alloc] initWithType:kiqSetType];
     [purgeIq setPurgeOfflineStorage];
-    [self sendIq:purgeIq withResponseHandler:^(XMPPIQ* response) {
+    [self sendIq:purgeIq withResponseHandler:^(XMPPIQ* response __unused) {
         DDLogInfo(@"Successfully purged offline storage...");
     } andErrorHandler:^(XMPPIQ* error) {
         DDLogWarn(@"Could not purge offline storage (using XEP-0013): %@", error);
@@ -3132,7 +3132,7 @@ NSString* const kStanza = @"stanza";
                 headers:headers
                 withArguments:nil
                 data:params[@"data"]
-                andCompletionHandler:^(NSError* error, id result) {
+                andCompletionHandler:^(NSError* error, id result __unused) {
                     if(!error)
                     {
                         DDLogInfo(@"Upload succeded, get url: %@", [response findFirst:@"{urn:xmpp:http:upload:0}slot/get@url"]);
@@ -3483,7 +3483,7 @@ NSString* const kStanza = @"stanza";
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setiqTo:self.connectionProperties.identity.domain];
     [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
-    [self sendIq:iq withResponseHandler:^(XMPPIQ* response) {
+    [self sendIq:iq withResponseHandler:^(XMPPIQ* response __unused) {
         //dispatch completion handler outside of the receiveQueue
         if(completion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -3533,7 +3533,7 @@ NSString* const kStanza = @"stanza";
     [iq setiqTo:self.connectionProperties.identity.domain];
     [iq submitRegToken:token];
     
-    [self sendIq:iq withResponseHandler:^(XMPPIQ* result) {
+    [self sendIq:iq withResponseHandler:^(XMPPIQ* result __unused) {
         DDLogInfo(@"Registration: Calling requestRegForm from submitRegToken handler");
         [self requestRegForm];
     } andErrorHandler:^(XMPPIQ* error) {
@@ -3574,7 +3574,7 @@ NSString* const kStanza = @"stanza";
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iq registerUser:self.regUser withPassword:self.regPass captcha:self.regCode andHiddenFields:self.regHidden];
 
-    [self sendIq:iq withResponseHandler:^(XMPPIQ* result) {
+    [self sendIq:iq withResponseHandler:^(XMPPIQ* result __unused) {
         //dispatch completion handler outside of the receiveQueue
         if(self->_regFormSubmitCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -3779,13 +3779,13 @@ NSString* const kStanza = @"stanza";
     }
 
     //try to send remaining buffered data first
-    if(_outputBufferByteCount>0)
+    if(_outputBufferByteCount > 0)
     {
         DDLogVerbose(@"sending remaining bytes in outputBuffer: %lu", (unsigned long)_outputBufferByteCount);
-        NSInteger sentLen=[_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
-        if(sentLen!=-1)
+        NSUInteger sentLen = [_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
+        if(sentLen != (unsigned long) -1)
         {
-            if(sentLen!=_outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
+            if(sentLen != _outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
             {
                 DDLogVerbose(@"could not send all bytes in outputBuffer: %lu of %lu sent, %lu remaining", (unsigned long)sentLen, (unsigned long)_outputBufferByteCount, (unsigned long)(_outputBufferByteCount-sentLen));
                 memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteCount-(size_t)sentLen);

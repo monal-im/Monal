@@ -443,25 +443,26 @@
 
 -(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks
 {
+    xmpp* account = _account;
     room = [room lowercaseString];
-    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:_account.accountNo];
+    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
     if(nick == nil)
     {
-        DDLogError(@"Cannot leave room '%@' on account %@ because nick is nil!", room, _account);
+        DDLogError(@"Cannot leave room '%@' on account %@ because nick is nil!", room, account);
         return;
     }
     @synchronized(_stateLockObject) {
         if([_joining containsObject:room])
         {
-            DDLogInfo(@"Aborting join of room '%@' on account %@", room, _account);
+            DDLogInfo(@"Aborting join of room '%@' on account %@", room, account);
             [_joining removeObject:room];
         }
     }
-    DDLogInfo(@"Leaving room '%@' on account %@ using nick '%@'...", room, _account, nick);
+    DDLogInfo(@"Leaving room '%@' on account %@ using nick '%@'...", room, account, nick);
     //send unsubscribe even if we are not fully joined (join aborted), just to make sure we *really* leave ths muc
     XMPPPresence* presence = [[XMPPPresence alloc] init];
     [presence leaveRoom:room withNick:nick];
-    [_account send:presence];
+    [account send:presence];
     
     //delete muc from favorites table and update bookmarks if requested
     [self deleteMuc:room withBookmarksUpdate:updateBookmarks keepBuddylistEntry:NO];
@@ -469,7 +470,8 @@
 
 -(void) sendDiscoQueryFor:(NSString*) roomJid withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks
 {
-    if(roomJid == nil || _account == nil)
+    xmpp* account = _account;
+    if(roomJid == nil || account == nil)
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Room jid or account must not be nil!" userInfo:nil];
     roomJid = [roomJid lowercaseString];
     DDLogInfo(@"Querying disco for muc %@...", roomJid);
@@ -491,7 +493,7 @@
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:roomJid];
     [discoInfo setDiscoInfoNode];
-    [_account sendIq:discoInfo withHandler:$newHandlerWithInvalidation([self class], handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
+    [account sendIq:discoInfo withHandler:$newHandlerWithInvalidation([self class], handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
 }
 
 -(void) pingAllMucs
@@ -525,7 +527,7 @@
     [ping setPing];
     //we don't need to handle this across smacks resumes or reconnects, because a new ping will be issued on the next smacks resume
     //(and full reconnets will rejoin all mucs anyways)
-    [_account sendIq:ping withResponseHandler:^(XMPPIQ* result) {
+    [_account sendIq:ping withResponseHandler:^(XMPPIQ* result __unused) {
         DDLogInfo(@"Muc ping returned: we are still connected to %@, everything is fine", roomJid);
     } andErrorHandler:^(XMPPIQ* error) {
         if(error == nil)
@@ -754,7 +756,6 @@ $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $_ID(xmp
 }
 
 $$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
-    xmpp* account = _account;
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam catchup query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);

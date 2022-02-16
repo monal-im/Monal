@@ -64,14 +64,14 @@ NSURL *audioFileURL = nil;
     
     if(!isPrepare)
     {
-        [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder prepareToRecord fail.", @"")];
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder prepareToRecord fail.", @"")];
         return;
     }
     BOOL isRecord = [self.audioRecorder record];
     
     if(!isRecord)
     {
-        [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder record fail.", @"")];
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder record fail.", @"")];
         return;
     }
     [recoderManagerDelegate notifyStart];
@@ -86,25 +86,33 @@ NSURL *audioFileURL = nil;
     [self.recoderManagerDelegate notifyStop:audioFileURL];
 }
 
--(void)updateTimeInfo{
+-(void) updateTimeInfo
+{
     [self.recoderManagerDelegate updateCurrentTime:self.audioRecorder.currentTime];
 }
 
-- (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag{
-    if (flag) {
-        [self.recoderManagerDelegate notifyResult:YES error:nil];
-    } else {
-        [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder recode fail", @"")];
+- (void) audioRecorderDidFinishRecording:(AVAudioRecorder*) recorder successfully:(BOOL) flag
+{
+    id<AudioRecoderManagerDelegate> recoderManagerDelegate = self.recoderManagerDelegate;
+    if(flag)
+    {
+        [recoderManagerDelegate notifyResult:YES error:nil];
+    }
+    else
+    {
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder recode fail", @"")];
         DDLogError(@"Audio Recoder recode fail");
     }
 }
 
--(void)audioRecorderEncodeErrorDidOccur:(AVAudioRecorder *)recorder error:(NSError *)error{
+-(void) audioRecorderEncodeErrorDidOccur:(AVAudioRecorder*) recorder error:(NSError*) error
+{
     DDLogError(@"Audio Recoder EncodeError: %@", [error description]);
     [self.recoderManagerDelegate notifyResult:NO error:[error description]];
 }
 
--(NSString *)getAudioPath{
+-(NSString*) getAudioPath
+{
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSString *documentsDirectory = [[fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path];
 

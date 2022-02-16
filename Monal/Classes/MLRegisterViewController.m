@@ -63,7 +63,7 @@
     self.loginHUD.hidden = NO;
     
     weakify(self);
-    [self.xmppAccount requestRegFormWithToken:self.registerToken andCompletion:^(NSData* captchaImage, NSDictionary* hiddenFields) {
+    [self.xmppAccount requestRegFormWithToken:self.registerToken andCompletion:^(NSData* captchaImage __unused, NSDictionary* hiddenFields __unused) {
         dispatch_async(dispatch_get_main_queue(), ^{
             strongify(self);
             self.loginHUD.hidden = YES;
@@ -79,7 +79,7 @@
             }
             */
         });
-    } andErrorCompletion:^(BOOL success, NSString* error) {
+    } andErrorCompletion:^(BOOL success __unused, NSString* error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             strongify(self);
             self.loginHUD.hidden = YES;
@@ -87,7 +87,7 @@
             if(!displayMessage || !displayMessage.length)
                 displayMessage = NSLocalizedString(@"Could not request registration form. Please check your internet connection and try again.", @ "");
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @ "") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action __unused) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
                 [self dismissViewControllerAnimated:YES completion:nil];
             }]];
@@ -108,7 +108,7 @@
     if(self.jid.text.length == 0 || self.password.text.length == 0)
         {
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No Empty Values", @"") message:NSLocalizedString(@"Please make sure you have entered a username, password.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action __unused) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:alert animated:YES completion:nil];
@@ -118,7 +118,7 @@
     if([self.jid.text rangeOfString:@"@"].location != NSNotFound)
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid username", @"") message:NSLocalizedString(@"The username does not need to have an @ symbol. Please try again.", @"") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action __unused) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -142,7 +142,7 @@
                 NSString* displayMessage = message;
                 if(displayMessage.length == 0) displayMessage = NSLocalizedString(@"Could not register your username. Please check your code or change the username and try again.", @"");
                 UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action __unused) {
                     [alert dismissViewControllerAnimated:YES completion:nil];
                 }]];
                 [self presentViewController:alert animated:YES completion:nil];

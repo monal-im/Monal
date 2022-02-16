@@ -113,8 +113,8 @@
 
             //iterate current active and set their times
             NSArray* active = [db executeReader:@"select distinct buddy_name, account_id from activeChats"];
-            [active enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                NSDictionary* row = (NSDictionary*)obj;
+            for(NSDictionary* row in active)
+            {
                 //get max
                 NSNumber* max = (NSNumber *)[db executeScalar:@"select max(TIMESTAMP) from message_history where (message_to=? or message_from=?) and account_id=?" andArguments:@[[row objectForKey:@"buddy_name"],[row objectForKey:@"buddy_name"], [row objectForKey:@"account_id"]]];
                 if(max != nil) {
@@ -122,7 +122,7 @@
                 } else  {
 
                 }
-            }];
+            }
         }];
 
         [self updateDB:db withDataLayer:dataLayer toVersion:3.5 withBlock:^{
@@ -160,26 +160,28 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:4.2 withBlock:^{
             NSArray* contacts = [db executeReader:@"select distinct account_id, buddy_name, lastMessageTime from activechats;"];
             [db executeNonQuery:@"delete from activechats;"];
-            [contacts enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            for(NSDictionary* obj in contacts)
+            {
                 [db executeNonQuery:@"insert into activechats (account_id, buddy_name, lastMessageTime) values (?,?,?);"
                         andArguments:@[
                         [obj objectForKey:@"account_id"],
                         [obj objectForKey:@"buddy_name"],
                         [obj objectForKey:@"lastMessageTime"]
                         ]];
-            }];
+            }
             NSArray *dupeMessageids= [db executeReader:@"select * from (select messageid, count(messageid) as c from message_history   group by messageid) where c>1"];
 
-            [dupeMessageids enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            for(NSDictionary* obj in dupeMessageids)
+            {
                     NSArray* dupeMessages = [db executeReader:@"select * from message_history where messageid=? order by message_history_id asc " andArguments:@[[obj objectForKey:@"messageid"]]];
                 //hopefully this is quick and doesnt grow..
-                [dupeMessages enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull message, NSUInteger idx, BOOL * _Nonnull stop) {
+                [dupeMessages enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull message, NSUInteger idx, BOOL * _Nonnull stop __unused) {
                     //keep first one
                     if(idx > 0) {
                         [db executeNonQuery:@"delete from message_history where message_history_id=?" andArguments:@[[message objectForKey:@"message_history_id"]]];
                     }
                 }];
-            }];
+            }
             [db executeNonQuery:@"CREATE UNIQUE INDEX ux_account_messageid ON message_history(account_id, messageid)"];
 
             [db executeNonQuery:@"alter table activechats add column lastMesssage blob;"];

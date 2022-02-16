@@ -127,7 +127,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
                 }
                 case 2:
                 {
-                    [cell initCell:NSLocalizedString(@"Image Quality", @"") withSliderDefaultsKey:@"ImageUploadQuality" minValue:0.33 maxValue:1.0  withLoadFunc:^(UILabel* labelToUpdate, float sliderValue) {
+                    [cell initCell:NSLocalizedString(@"Image Quality", @"") withSliderDefaultsKey:@"ImageUploadQuality" minValue:0.33f maxValue:1.0  withLoadFunc:^(UILabel* labelToUpdate, float sliderValue) {
                         float rate = roundf(sliderValue * 100) / 100;
                         labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Image Quality: %.2f", @""), rate];
                         return rate;

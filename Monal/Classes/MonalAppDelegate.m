@@ -513,7 +513,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [[MLXMPPManager sharedInstance] addContact:contact];    //will handle group joins and normal contacts transparently
         //wait for join to finish before opening contact
         NSNumber* accountNo = account.accountNo;        //needed because of retain cycle
-        [account.mucProcessor addUIHandler:^(id _data) {
+        [account.mucProcessor addUIHandler:^(id _data __unused) {
             [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:accountNo];
             [self openChatOfContact:contact];
         } forMuc:jid];
@@ -581,7 +581,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
         
         //add our completion handler to handler queue
-        [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result) {
+        [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
             completionHandler();
         }];
         
@@ -668,15 +668,15 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     {
         // the timer makes sure the view is properly initialized when opning the chat
         createQueuedTimer(0.5, dispatch_get_main_queue(), (^{
-            if(_contactToOpen != nil)
+            if(self->_contactToOpen != nil)
             {
                 DDLogDebug(@"Opening chat for contact %@", [contact contactJid]);
                 // open new chat
-                [(ActiveChatsViewController*)self.activeChats presentChatWithContact:_contactToOpen];
+                [(ActiveChatsViewController*)self.activeChats presentChatWithContact:self->_contactToOpen];
             }
             else
                 DDLogDebug(@"_contactToOpen changed to nil, not opening chat for contact %@", [contact contactJid]);
-            _contactToOpen = nil;
+            self->_contactToOpen = nil;
         }));
     }
     else
@@ -699,7 +699,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         _backgroundTimer();
     _backgroundTimer = createTimer(GRACEFUL_TIMEOUT, ^{
         //mark timer as *not* running
-        _backgroundTimer = nil;
+        self->_backgroundTimer = nil;
         //retry background check (now handling idle state because no running background timer is blocking it)
         dispatch_async(dispatch_get_main_queue(), ^{
             [self checkIfBackgroundTaskIsStillNeeded];
@@ -936,7 +936,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 [[MLXMPPManager sharedInstance] disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
                 [HelperTools dispatchSyncReentrant:^{
                     BOOL stopped = NO;
-                    if(_bgTask != UIBackgroundTaskInvalid)
+                    if(self->_bgTask != UIBackgroundTaskInvalid)
                     {
                         DDLogDebug(@"stopping UIKit _bgTask");
                         
@@ -944,12 +944,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                         
                         [DDLog flushLog];
-                        UIBackgroundTaskIdentifier task = _bgTask;
-                        _bgTask = UIBackgroundTaskInvalid;
+                        UIBackgroundTaskIdentifier task = self->_bgTask;
+                        self->_bgTask = UIBackgroundTaskInvalid;
                         [[UIApplication sharedApplication] endBackgroundTask:task];
                         stopped = YES;
                     }
-                    if(_bgFetch)
+                    if(self->_bgFetch)
                     {
                         DDLogDebug(@"stopping backgroundFetchingTask");
                         
@@ -957,8 +957,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                         
                         [DDLog flushLog];
-                        BGTask* task = _bgFetch;
-                        _bgFetch = nil;
+                        BGTask* task = self->_bgFetch;
+                        self->_bgFetch = nil;
                         [task setTaskCompletedWithSuccess:YES];
                         stopped = YES;
                     }
@@ -974,19 +974,19 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) addBackgroundTask
 {
     [HelperTools dispatchSyncReentrant:^{
-        if(_bgTask == UIBackgroundTaskInvalid)
+        if(self->_bgTask == UIBackgroundTaskInvalid)
         {
             //indicate we want to do work even if the app is put into background
-            _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+            self->_bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
                 DDLogWarn(@"BG WAKE EXPIRING");
                 [DDLog flushLog];
                 
                 @synchronized(self) {
                     //ui background tasks expire at the same time as background fetching tasks
                     //--> we have to check if a background fetching task is running and don't disconnect, if so
-                    if(_bgFetch == nil)
+                    if(self->_bgFetch == nil)
                     {
-                        _shutdownPending = YES;
+                        self->_shutdownPending = YES;
                         DDLogDebug(@"_bgFetch == nil --> disconnecting and ending background task");
                         
                         //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
@@ -1007,8 +1007,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         DDLogDebug(@"_bgFetch != nil --> not disconnecting");
                     DDLogDebug(@"stopping UIKit _bgTask");
                     [DDLog flushLog];
-                    UIBackgroundTaskIdentifier task = _bgTask;
-                    _bgTask = UIBackgroundTaskInvalid;
+                    UIBackgroundTaskIdentifier task = self->_bgTask;
+                    self->_bgTask = UIBackgroundTaskInvalid;
                     [[UIApplication sharedApplication] endBackgroundTask:task];
                 }
             }];
@@ -1032,9 +1032,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         @synchronized(self) {
             //ui background tasks expire at the same time as background fetching tasks
             //--> we have to check if an ui bg task is running and don't disconnect, if so
-            if(background && _bgTask == UIBackgroundTaskInvalid)
+            if(background && self->_bgTask == UIBackgroundTaskInvalid)
             {
-                _shutdownPending = YES;
+                self->_shutdownPending = YES;
                 DDLogDebug(@"_bgTask == UIBackgroundTaskInvalid --> disconnecting and ending background task");
                 
                 //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
@@ -1056,7 +1056,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
             DDLogDebug(@"stopping backgroundFetchingTask");
             [DDLog flushLog];
-            _bgFetch = nil;
+            self->_bgFetch = nil;
             [task setTaskCompletedWithSuccess:!background];
         }
     };
@@ -1094,7 +1094,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         if(![HelperTools isInBackground])
         {
             DDLogDebug(@"Already in foreground, stopping bgtask");
-            [_bgFetch setTaskCompletedWithSuccess:YES];
+            [self->_bgFetch setTaskCompletedWithSuccess:YES];
         }
         else
             [self handleBackgroundFetchingTask:task];
@@ -1170,15 +1170,15 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 DDLogWarn(@"### Wakeup timer triggered for ID %@ ###", completionId);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     @synchronized(self) {
-                        if([_wakeupCompletions objectForKey:completionId] != nil)
+                        if([self->_wakeupCompletions objectForKey:completionId] != nil)
                         {
                             DDLogInfo(@"Handling wakeup completion %@", completionId);
                             
                             //we have to check if an ui bg task or background fetching task is running and don't disconnect, if so
                             BOOL background = [HelperTools isInBackground];
-                            if(background && (_bgTask == UIBackgroundTaskInvalid || _bgFetch == nil))
+                            if(background && (self->_bgTask == UIBackgroundTaskInvalid || self->_bgFetch == nil))
                             {
-                                _shutdownPending = YES;
+                                self->_shutdownPending = YES;
                                 DDLogDebug(@"background && (_bgTask == UIBackgroundTaskInvalid || _bgFetch == nil) --> disconnecting and feeding wakeup completion");
                                 
                                 //this has to be before account disconnects, to detect which accounts are/are not idle (e.g. don't have/have a sync error)
@@ -1203,7 +1203,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                             DDLogInfo(@"Calling wakeup completion handler...");
                             [DDLog flushLog];
                             completionHandler(UIBackgroundFetchResultFailed);
-                            [_wakeupCompletions removeObjectForKey:completionId];
+                            [self->_wakeupCompletions removeObjectForKey:completionId];
                         }
                         else
                             DDLogWarn(@"Wakeup completion %@ got already handled and was removed from list!", completionId);

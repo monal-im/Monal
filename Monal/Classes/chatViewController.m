@@ -935,9 +935,9 @@ enum msgSentState {
     if(isTyping)
         _cancelTypingNotification = createTimer(5.0, (^{
             //no typing interaction in 5 seconds? --> send out active chatstate (e.g. typing ended)
-            if(_isTyping)
+            if(self->_isTyping)
             {
-                _isTyping = NO;
+                self->_isTyping = NO;
                 DDLogVerbose(@"Sending chatstate isTyping=NO");
                 [[MLXMPPManager sharedInstance] sendChatState:NO fromAccount:self.contact.accountId toJid:self.contact.contactJid];
             }

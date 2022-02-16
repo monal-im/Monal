@@ -1206,7 +1206,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                             [self->_wakeupCompletions removeObjectForKey:completionId];
                         }
                         else
+                        {
                             DDLogWarn(@"Wakeup completion %@ got already handled and was removed from list!", completionId);
+                            // TODO: thilo check
+                            completionHandler(UIBackgroundFetchResultNoData);
+                        }
                     }
                 });
             }))

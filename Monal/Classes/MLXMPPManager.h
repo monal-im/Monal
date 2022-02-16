@@ -122,7 +122,7 @@ Sends a message to a specified contact in account. Calls completion handler on s
  */
 -(void) handleSentMessage:(NSNotification*) notification;
 
--(void) nowNoLongerInFocus;
+-(void) noLongerInFocus;
 
 /**
  updates client state on server as inactive

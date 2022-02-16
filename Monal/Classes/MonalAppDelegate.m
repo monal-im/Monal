@@ -355,7 +355,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             [self nowReallyBackgrounded];
         }
         else
-            [[MLXMPPManager sharedInstance] nowNoLongerInFocus];
+            [[MLXMPPManager sharedInstance] noLongerInFocus];
     }
     else if([notification.name isEqualToString:@"NSWindowDidBecomeKeyNotification"])
     {
@@ -769,7 +769,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [self nowReallyBackgrounded];
     }
     else
-        [[MLXMPPManager sharedInstance] nowNoLongerInFocus];
+        [[MLXMPPManager sharedInstance] noLongerInFocus];
 #else
     [self nowReallyBackgrounded];
 #endif

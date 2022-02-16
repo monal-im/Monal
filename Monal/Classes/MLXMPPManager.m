@@ -324,7 +324,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - app state
 
--(void) nowNoLongerInFocus
+-(void) noLongerInFocus
 {
     _isBackgrounded = NO;
     _isNotInFocus = YES;

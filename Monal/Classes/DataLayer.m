@@ -518,7 +518,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource
 {
-    NSNumber* timestamp = [NSNumber numberWithDouble:[NSDate date].timeIntervalSince1970];
+    NSNumber* timestamp = [HelperTools currentTimestampInSeconds];
     [self.db voidWriteTransaction:^{
         //set ver for user and resource
         NSString* query = @"UPDATE buddy_resources SET ver=? WHERE EXISTS(SELECT * FROM buddylist WHERE buddy_resources.buddy_id=buddylist.buddy_id AND resource=? AND buddy_name=?)";
@@ -559,7 +559,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setCaps:(NSSet*) caps forVer:(NSString*) ver
 {
-    NSNumber* timestamp = [NSNumber numberWithDouble:[NSDate date].timeIntervalSince1970];
+    NSNumber* timestamp = [HelperTools currentTimestampInSeconds];
     [self.db voidWriteTransaction:^{
         //remove old caps for this ver
         NSString* query0 = @"DELETE FROM ver_info WHERE ver=?;";
@@ -1787,7 +1787,7 @@ static NSDateFormatter* dbFormatter;
         NSDate* lastDate = [dbFormatter dateFromString:lastTime];
         NSDate* newDate = [dbFormatter dateFromString:timestamp];
 
-        if(lastDate.timeIntervalSince1970<newDate.timeIntervalSince1970)
+        if(lastDate.timeIntervalSince1970 < newDate.timeIntervalSince1970)
         {
             NSString* query = @"UPDATE activechats SET lastMessageTime=? WHERE account_id=? AND buddy_name=?;";
             BOOL success = [self.db executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname]];
@@ -2242,7 +2242,7 @@ static NSDateFormatter* dbFormatter;
 
     NSNumber* timestamp = @0;       //default value for "online" or "unknown"
     if(lastInteractionTime)
-        timestamp = [NSNumber numberWithDouble:lastInteractionTime.timeIntervalSince1970];
+        timestamp = [HelperTools dateToNSNumberSeconds:lastInteractionTime];
 
     [self.db voidWriteTransaction:^{
         NSString* query = @"UPDATE buddylist SET lastInteraction=? WHERE account_id=? AND buddy_name=?;";

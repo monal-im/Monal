@@ -242,7 +242,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
         NSDictionary* retval = nil;
         
         //delete old entries that timed out
-        NSNumber* timestamp = [NSNumber numberWithDouble:[NSDate date].timeIntervalSince1970];
+        NSNumber* timestamp = [HelperTools currentTimestampInSeconds];
         [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
         
         //load a *single* message from table and delete it afterwards
@@ -267,7 +267,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
     
     NSNumber* id = [self.db idWriteTransaction:^{
         //delete old entries that timed out
-        NSNumber* timestamp = [NSNumber numberWithDouble:[NSDate date].timeIntervalSince1970];
+        NSNumber* timestamp = [HelperTools currentTimestampInSeconds];
         [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
         
         //save message to table

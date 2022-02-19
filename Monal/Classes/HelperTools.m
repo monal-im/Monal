@@ -679,35 +679,36 @@ void logException(NSException* exception)
 +(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction
 {
     // get current timestamp
-    NSTimeInterval currentTimestamp = [[NSDate date] timeIntervalSince1970];
+    NSNumber* currentTimestamp = [HelperTools currentTimestampInSeconds];
 
-    NSTimeInterval lastInteractionTime = 0;      //default is zero which corresponds to "online"
+    NSNumber* lastInteractionTime = 0;      //default is zero which corresponds to "online"
 
     // calculate timestamp and clamp it to be not in the future (but only if given)
     if(lastInteraction && [lastInteraction timeIntervalSince1970] != 0)       //NSDictionary does not support nil, so we're using timeSince1970 + 0 sometimes
-        lastInteractionTime = MIN([lastInteraction timeIntervalSince1970], currentTimestamp);
+        lastInteractionTime = MIN([HelperTools
+                                   dateToNSNumberSeconds:lastInteraction], currentTimestamp);
 
-    if(lastInteractionTime > 0) {
+    if(lastInteractionTime.intValue > 0) {
         NSString* timeString;
 
-        NSTimeInterval diff = currentTimestamp - lastInteractionTime;
-        if(diff < 60.0)
+        long long diff = currentTimestamp.intValue - lastInteractionTime.intValue;
+        if(diff < 60)
         {
             // less than one minute
             timeString = NSLocalizedString(@"Just seen", @"");
         }
-        else if(diff < 120.0)
+        else if(diff < 120)
         {
             // less than two minutes
             timeString = NSLocalizedString(@"Last seen: 1 minute ago", @"");
         }
-        else if(diff < 3600.0)
+        else if(diff < 3600)
         {
             // less than one hour
             timeString = NSLocalizedString(@"Last seen: %d minutes ago", @"");
             diff /= 60.0;
         }
-        else if(diff < 7200.0)
+        else if(diff < 7200)
         {
             // less than 2 hours
             timeString = NSLocalizedString(@"Last seen: 1 hour ago", @"");
@@ -716,9 +717,9 @@ void logException(NSException* exception)
         {
             // less than 24 hours
             timeString = NSLocalizedString(@"Last seen: %d hours ago", @"");
-            diff /= 3600.0;
+            diff /= 3600;
         }
-        else if(diff < 86400.0 * 2.0)
+        else if(diff < 86400 * 2)
         {
             // less than 2 days
             timeString = NSLocalizedString(@"Last seen: 1 day ago", @"");
@@ -727,7 +728,7 @@ void logException(NSException* exception)
         {
             // more than 2 days
             timeString = NSLocalizedString(@"Last seen: %d days ago", @"");
-            diff /= 86400.0;
+            diff /= 86400;
         }
 
         NSString* lastSeen = [NSString stringWithFormat:timeString, diff];
@@ -1046,6 +1047,16 @@ void logException(NSException* exception)
             return NO;
     }
 #endif
+}
+
++(NSNumber*) currentTimestampInSeconds
+{
+    return [HelperTools dateToNSNumberSeconds:[NSDate date]];
+}
+
++(NSNumber*) dateToNSNumberSeconds:(NSDate*) date
+{
+    return [NSNumber numberWithLong:(long)[NSDate date].timeIntervalSince1970];
 }
 
 @end

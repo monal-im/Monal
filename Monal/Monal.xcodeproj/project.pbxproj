@@ -2463,7 +2463,7 @@
 				MARKETING_VERSION = 5.1.0;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -2528,7 +2528,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
@@ -2612,7 +2612,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
@@ -2698,7 +2698,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
@@ -2819,7 +2819,7 @@
 				MARKETING_VERSION = 5.1.0;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -2880,7 +2880,7 @@
 				MARKETING_VERSION = 5.1.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.shareSheet;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal Share Sheet";
@@ -2956,7 +2956,7 @@
 				MARKETING_VERSION = 5.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.shareSheet;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal Share Sheet";
@@ -3035,7 +3035,7 @@
 				MARKETING_VERSION = 5.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.shareSheet;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal Share Sheet";
@@ -3414,7 +3414,7 @@
 				MARKETING_VERSION = 5.1.0;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -3781,7 +3781,7 @@
 				MARKETING_VERSION = 5.1.0;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -3862,7 +3862,7 @@
 				MARKETING_VERSION = 5.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.shareSheet;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal Share Sheet";
@@ -3948,7 +3948,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
@@ -4117,7 +4117,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.MonalUITests;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.MonalUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -4186,7 +4186,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalXMPPUnitTests;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.MonalXMPPUnitTests;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.MonalXMPPUnitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -4235,7 +4235,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.MonalUITests;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.MonalUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -4306,7 +4306,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.MonalUITests;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.MonalUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -4379,7 +4379,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
-				PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*] = maccatalyst.G7YU7X7KRJ.SworIM.MonalUITests;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.MonalUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;

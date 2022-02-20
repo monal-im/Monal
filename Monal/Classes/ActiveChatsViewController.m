@@ -379,8 +379,28 @@ static NSMutableSet* _smacksWarningDisplayed;
     // Dispose of any resources that can be recreated.
 }
 
+-(void) openConversationPlaceholder:(MLContact*) contact
+{
+    // only show placeholder if we use a split view
+    if([HelperTools deviceUsesSplitView] == YES)
+        [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
+}
+
 -(void) presentChatWithContact:(MLContact*) contact
 {
+    // show placeholder if contact is nil, open chat otherwise
+    if(contact == nil)
+    {
+        [self openConversationPlaceholder:contact];
+        return;
+    }
+    // check if the contact is a buddy
+    if([[DataLayer sharedInstance] isContactInList:contact.contactJid forAccount:contact.accountId] == NO)
+    {
+        DDLogError(@"Contact %@ unkown", contact.contactJid);
+        [self openConversationPlaceholder:contact];
+        return;
+    }
     // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
     if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
     {
@@ -388,20 +408,12 @@ static NSMutableSet* _smacksWarningDisplayed;
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
         return;
     }
-    
+
     // clear old chat before opening a new one (but not for splitView == YES)
     if([HelperTools deviceUsesSplitView] == NO)
         [self.navigationController popViewControllerAnimated:NO];
-    
-    // show placeholder if contact is nil, open chat otherwise
-    if(contact == nil)
-    {
-        // only show placeholder if we use a split view
-        if([HelperTools deviceUsesSplitView] == YES)
-            [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
-    }
-    else
-        [self performSegueWithIdentifier:@"showConversation" sender:contact];
+    // open chat
+    [self performSegueWithIdentifier:@"showConversation" sender:contact];
 }
 
 /*

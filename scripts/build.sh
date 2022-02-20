@@ -21,9 +21,10 @@ set -e
 
 cd Monal
 
-if [ -z ${CI+x} ]; then
+if [ ! -z ${CI+x} ]; then
     :
 else
+    echo "Unlocking keychain..."
     security default-keychain -s ios-build.keychain
     # Unlock the keychain
     security unlock-keychain -p travis ios-build.keychain

@@ -22,7 +22,7 @@ jobs:
       GCC_PREPROCESSOR_DEFINITIONS: "DEBUG=1"
       BUILD_TYPE: "Beta"
       EXPORT_OPTIONS_CATALYST_APPSTORE: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
-      EXPORT_OPTIONS_CATALYST_APP_EXPORT: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
+      EXPORT_OPTIONS_CATALYST_APP_EXPORT: "../scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
       EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Beta_iOS_ExportOptions.plist"
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

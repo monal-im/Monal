@@ -679,19 +679,21 @@ void logException(NSException* exception)
 +(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction
 {
     // get current timestamp
-    NSNumber* currentTimestamp = [HelperTools currentTimestampInSeconds];
+    unsigned long currentTimestamp = [HelperTools currentTimestampInSeconds].unsignedLongValue;
 
-    NSNumber* lastInteractionTime = 0;      //default is zero which corresponds to "online"
+    unsigned long lastInteractionTime = 0;      //default is zero which corresponds to "online"
 
     // calculate timestamp and clamp it to be not in the future (but only if given)
-    if(lastInteraction && [lastInteraction timeIntervalSince1970] != 0)       //NSDictionary does not support nil, so we're using timeSince1970 + 0 sometimes
-        lastInteractionTime = MIN([HelperTools
-                                   dateToNSNumberSeconds:lastInteraction], currentTimestamp);
+    if(lastInteraction && [lastInteraction timeIntervalSince1970] != 0)
+    {
+        //NSDictionary does not support nil, so we're using timeSince1970 + 0 sometimes
+        lastInteractionTime = MIN([HelperTools dateToNSNumberSeconds:lastInteraction].unsignedLongValue, currentTimestamp);
+    }
 
-    if(lastInteractionTime.intValue > 0) {
+    if(lastInteractionTime > 0) {
         NSString* timeString;
 
-        long long diff = currentTimestamp.intValue - lastInteractionTime.intValue;
+        long long diff = currentTimestamp - lastInteractionTime;
         if(diff < 60)
         {
             // less than one minute
@@ -1056,7 +1058,7 @@ void logException(NSException* exception)
 
 +(NSNumber*) dateToNSNumberSeconds:(NSDate*) date
 {
-    return [NSNumber numberWithLong:(long)[NSDate date].timeIntervalSince1970];
+    return [NSNumber numberWithUnsignedLong:(unsigned long)date.timeIntervalSince1970];
 }
 
 @end

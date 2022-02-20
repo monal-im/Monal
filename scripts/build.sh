@@ -56,7 +56,7 @@ if [ ! -z ${EXPORT_OPTIONS_CATALYST_APPSTORE} ]; then
     echo "***************************************"
     echo "*    Exporting AppStore macOS         *"
     echo "***************************************"
-    buildAndExportMacOS "$APP_DEVELOPER_NAME_APPSTORE" "$EXPORT_OPTIONS_CATALYST_APPSTORE" "Stable"
+    buildAndExportMacOS "$APP_DEVELOPER_NAME_APPSTORE" "$EXPORT_OPTIONS_CATALYST_APPSTORE" "AppStore"
 fi
 
 if [ ! -z ${EXPORT_OPTIONS_CATALYST_APP_EXPORT} ]; then

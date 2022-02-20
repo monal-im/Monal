@@ -51,9 +51,6 @@
 @property (nonatomic, weak) IBOutlet UIView* transparentLayer;
 @property (weak, nonatomic) IBOutlet UIButton* audioRecordButton;
 
-
-@property (nonatomic, strong) MLContact* contact;
-
 /**
  full own username with domain e.g. user@example.org
  */

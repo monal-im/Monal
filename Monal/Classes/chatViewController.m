@@ -59,6 +59,8 @@
     NSMutableDictionary<NSString*, MLContact*>* _localMLContactCache;
 }
 
+@property (nonatomic, strong) MLContact* contact;
+
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSCalendar* gregorian;
 @property (nonatomic, assign)  NSInteger thisyear;
@@ -130,6 +132,12 @@ enum msgSentState {
     msgDisplayed
 };
 
+-(void) setupWithContact:(MLContact*) contact
+{
+    self.contact = contact;
+    [self setup];
+}
+
 -(void) setup
 {
     self.hidesBottomBarWhenPushed = YES;
@@ -146,17 +154,19 @@ enum msgSentState {
     _localMLContactCache = [[NSMutableDictionary<NSString*, MLContact*> alloc] init];
 }
 
--(void) setupWithContact:(MLContact*) contact
-{
-    self.contact = contact;
-    [self setup];
-}
-
 #pragma mark -  view lifecycle
 
 -(void) viewDidLoad
 {
     [super viewDidLoad];
+
+    if([[DataLayer sharedInstance] isContactInList:self.contact.contactJid forAccount:self.contact.accountId] == NO)
+    {
+        DDLogWarn(@"ChatView: Contact %@ is unkown", self.contact.contactJid);
+#ifdef IS_ALPHA
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Contact is unkown - GUI error" userInfo:nil];
+#endif
+    }
 
     [self initNavigationBarItems];
 

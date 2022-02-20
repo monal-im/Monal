@@ -3,6 +3,7 @@
 function buildAndExportMacOS {
     local APP_DEVELOPER_NAME="$1"
     local EXPORT_OPTIONS_CATALYST="$2"
+    local BUILD_TYPE="$3"
 
     echo ""
     echo "***************************"
@@ -55,14 +56,14 @@ if [ ! -z ${EXPORT_OPTIONS_CATALYST_APPSTORE} ]; then
     echo "***************************************"
     echo "*    Exporting AppStore macOS         *"
     echo "***************************************"
-    buildAndExportMacOS "$APP_DEVELOPER_NAME_APPSTORE" "$EXPORT_OPTIONS_CATALYST_APPSTORE"
+    buildAndExportMacOS "$APP_DEVELOPER_NAME_APPSTORE" "$EXPORT_OPTIONS_CATALYST_APPSTORE" "Stable"
 fi
 
 if [ ! -z ${EXPORT_OPTIONS_CATALYST_APP_EXPORT} ]; then
     echo "***********************************"
     echo "*    Exporting app macOS          *"
     echo "***********************************"
-    buildAndExportMacOS "$APP_DEVELOPER_NAME_APP_EXPORT" "$EXPORT_OPTIONS_CATALYST_APP_EXPORT"
+    buildAndExportMacOS "$APP_DEVELOPER_NAME_APP_EXPORT" "$EXPORT_OPTIONS_CATALYST_APP_EXPORT" "$BUILD_TYPE"
 
     echo ""
     echo "**************************"

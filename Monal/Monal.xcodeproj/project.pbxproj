@@ -2528,7 +2528,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = G7YU7X7KRJ.SworIM.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
@@ -2612,7 +2612,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = G7YU7X7KRJ.SworIM.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
@@ -2698,7 +2698,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = G7YU7X7KRJ.SworIM.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
@@ -3948,7 +3948,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = G7YU7X7KRJ.SworIM.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";

@@ -146,7 +146,7 @@
     NSString *currentBackground = [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
     self.selectedIndex = -1;
     // Add photos
-    [self.imageList enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL* _Nonnull stop) {
+    [self.imageList enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL* _Nonnull stop __unused) {
         NSString* name = (NSString*) obj;
         IDMPhoto* photo = [IDMPhoto photoWithImage:[UIImage imageNamed:name]];
         photo.caption = [name stringByReplacingOccurrencesOfString:@"_" withString:@" "];

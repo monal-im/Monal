@@ -99,13 +99,14 @@
     //only call completion for stanzas and stream start, not for inner elements inside stanzas
     if(depth <= 2)
         _completion(currentNode);
-    if(currentNode.parent)
+    MLXMLNode* parent = currentNode.parent;
+    if(parent)
     {
-        DebugParser(@"Ascending from child %@ to parent %@", currentNode.element, currentNode.parent.element);
+        DebugParser(@"Ascending from child %@ to parent %@", currentNode.element, parent.element);
         if(depth > 2)      //don't add all received stanzas/nonzas as childs to our stream header (that would create a memory leak!)
         {
-            DebugParser(@"Adding %@ to parent %@", currentNode.element, currentNode.parent.element);
-            [currentNode.parent addChildNode:currentNode];
+            DebugParser(@"Adding %@ to parent %@", currentNode.element, parent.element);
+            [parent addChildNode:currentNode];
         }
     }
     [_currentStack removeLastObject];

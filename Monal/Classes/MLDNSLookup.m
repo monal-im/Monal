@@ -64,7 +64,7 @@ static NSMutableDictionary* _RRCache;
 
             struct timeval tv;
             tv.tv_sec  = (time_t)remainingTime;
-            tv.tv_usec = (remainingTime - tv.tv_sec) * 1000000;
+            tv.tv_usec = (int32_t)((remainingTime - tv.tv_sec) * 1000000);
 
             int result = select(FD_SETSIZE, &set, NULL, NULL, &tv);
             DDLogVerbose(@"DNS select() returned %d", result);
@@ -236,7 +236,7 @@ char* ConvertDomainNameToCString_withescape(const domainName* name, int len, cha
     return(ptr);                                                // and return
 }
 
-void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, const u_int32_t interfaceIndex, const DNSServiceErrorType errorCode, const char* name, const u_int16_t rrtype, const u_int16_t rrclass, const u_int16_t rdlen, const void* rdata, const u_int32_t ttl, void* _context)
+void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, const u_int32_t interfaceIndex, const DNSServiceErrorType errorCode, const char* name __unused, const u_int16_t rrtype, const u_int16_t rrclass, const u_int16_t rdlen, const void* rdata, const u_int32_t ttl, void* _context)
 {
     //make sure the compiler doesn't cry because of unused arguments
     (void)DNSServiceRef;

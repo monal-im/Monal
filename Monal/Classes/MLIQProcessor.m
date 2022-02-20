@@ -14,6 +14,7 @@
 #import "HelperTools.h"
 #import "MLNotificationQueue.h"
 #import "MLContactSoftwareVersionInfo.h"
+#import "MLOMEMO.h"
 
 @interface MLIQProcessor()
 

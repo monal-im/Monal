@@ -64,7 +64,7 @@
 -(void) loadImageWithCompletion:(void (^)(void))completion
 {
     if(self.imageUrl) {
-        [self.previewImage sd_setImageWithURL:self.imageUrl completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        [self.previewImage sd_setImageWithURL:self.imageUrl completed:^(UIImage *image __unused, NSError *error, SDImageCacheType cacheType __unused, NSURL *imageURL __unused) {
             if(error) {
                 self.previewImage.image=nil;
             }

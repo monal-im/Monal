@@ -160,15 +160,15 @@ enum DummySettingsRows {
     {
         XMPPEdit* editor = (XMPPEdit*) segue.destinationViewController.childViewControllers.firstObject; // segue.destinationViewController;
 
-        if(self.selected && self.selected.row >= [self getAccountNum])
+        if(self.selected && self.selected.row >= (int) [self getAccountNum])
         {
-            editor.accountno = @"-1";
+            editor.accountNo = [NSNumber numberWithInt:-1];
         }
         else
         {
             assert(self.selected);
             editor.originIndex = self.selected;
-            editor.accountno = [self getAccountNoByIndex:self.selected.row];
+            editor.accountNo = [self getAccountNoByIndex:self.selected.row];
         }
     }
 }
@@ -179,7 +179,7 @@ enum DummySettingsRows {
     switch((int)indexPath.section)
     {
         case kSettingSectionAccounts: {
-            if(indexPath.row < [self getAccountNum])
+            if(indexPath.row < (int) [self getAccountNum])
             {
                 // User selected an account
                 [self initContactCell:cell forAccNo:indexPath.row];
@@ -298,7 +298,7 @@ enum DummySettingsRows {
     {
         case kSettingSectionAccounts: {
             self.selected = indexPath;
-            if(indexPath.row < [self getAccountNum])
+            if(indexPath.row < (int) [self getAccountNum])
                 [self performSegueWithIdentifier:@"editXMPP" sender:self];
             else
             {
@@ -430,13 +430,13 @@ enum DummySettingsRows {
     if([MFMailComposeViewController canSendMail]) {
         MFMailComposeViewController* composeVC = [[MFMailComposeViewController alloc] init];
         composeVC.mailComposeDelegate = self;
-        [composeVC setToRecipients:@[@"info@monal.im"]];
+        [composeVC setToRecipients:@[@"info@monal-im.org"]];
         [self presentViewController:composeVC animated:YES completion:nil];
     }
     else
     {
-        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"There is no configured email account. Please email info@monal.im .", @"") preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"There is no configured email account. Please email info@monal-im.org .", @"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         }];
         [messageAlert addAction:closeAction];
         

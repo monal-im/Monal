@@ -32,7 +32,7 @@
 /**
  Takes the string from the xmpp icon vcard info and stores it in an appropropriate place. 
  */
--(void) setIconForContact:(NSString* _Nonnull) contact andAccount:(NSString* _Nonnull) accountNo WithData:(NSData* _Nullable) data ;
+-(void) setIconForContact:(NSString* _Nonnull) contact andAccount:(NSNumber* _Nonnull) accountNo WithData:(NSData* _Nullable) data ;
 
 -(BOOL) saveBackgroundImageData:(NSData* _Nonnull) data;
 
@@ -51,6 +51,6 @@
  Purge cache in the event of  a memory warning
  */
 -(void) purgeCache;
--(void) purgeCacheForContact:(NSString* _Nonnull) contact andAccount:(NSString* _Nonnull) accountNo;
+-(void) purgeCacheForContact:(NSString* _Nonnull) contact andAccount:(NSNumber* _Nonnull) accountNo;
 
 @end

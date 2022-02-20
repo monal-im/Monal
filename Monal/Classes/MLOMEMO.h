@@ -43,13 +43,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(BOOL) knownDevicesForAddressNameExist:(NSString*) addressName;
 -(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName;
--(void) deleteDeviceForSource:(NSString*) source andRid:(int) rid;
+-(void) deleteDeviceForSource:(NSString*) source andRid:(unsigned int) rid;
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSData*) getIdentityForAddress:(SignalAddress*)address;
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 
 -(void) queryOMEMODevices:(NSString*) jid;
+
+-(void) checkIfMucMemberHasExistingSession:(NSString*) buddyJid;
+-(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid isMuc:(BOOL) isMuc;
 
 -(void) sendLocalDevicesIfNeeded;
 -(void) untrustAllDevicesFrom:(NSString*)jid;

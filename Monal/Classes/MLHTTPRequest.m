@@ -18,7 +18,7 @@
 
 +(NSData  *) httpBodyForDictionary:(NSDictionary *) arguments
 {
-    int keyCounter=0;
+    unsigned int keyCounter=0;
     if(arguments) {
         NSMutableString *postString =[[ NSMutableString alloc] init];
         for (NSString *key in arguments) {
@@ -52,7 +52,7 @@
     
     NSData *dataToSubmit=postedData;
     
-    [headers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+    [headers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop __unused) {
         [theRequest addValue:obj forHTTPHeaderField:key];
     }];
     

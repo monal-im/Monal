@@ -136,10 +136,10 @@ enum DummySettingsRows {
     
     _db = [DataLayer sharedInstance];
     
-    if(![_accountno isEqualToString:@"-1"])
+    if(self.accountNo.intValue != -1)
         self.editMode = YES;
     
-    DDLogVerbose(@"got account number %@", _accountno);
+    DDLogVerbose(@"got account number %@", self.accountNo);
     
     UITapGestureRecognizer* gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
     gestureRecognizer.cancelsTouchesInView = false; //this prevents it from blocking the button
@@ -175,8 +175,8 @@ enum DummySettingsRows {
     if(self.originIndex && self.originIndex.section == 0)
     {
         //edit
-        DDLogVerbose(@"reading account number %@", _accountno);
-        NSDictionary* settings = [_db detailsForAccount:_accountno];
+        DDLogVerbose(@"reading account number %@", self.accountNo);
+        NSDictionary* settings = [_db detailsForAccount:self.accountNo];
         if(!settings)
         {
             //present another UI here.
@@ -185,7 +185,7 @@ enum DummySettingsRows {
 
         self.jid = [NSString stringWithFormat:@"%@@%@", [settings objectForKey:@"username"], [settings objectForKey:@"domain"]];
         self.sectionDictionary[@(kSettingSectionAccount)] = [NSString stringWithFormat:NSLocalizedString(@"Account (%@)", @""), self.jid];
-        NSString* pass = [SAMKeychain passwordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@", self.accountno]];
+        NSString* pass = [SAMKeychain passwordForService:kMonalKeychainName account:self.accountNo.stringValue];
 
         if(pass)
             self.password = pass;
@@ -245,7 +245,7 @@ enum DummySettingsRows {
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:title message:msg preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -307,7 +307,7 @@ enum DummySettingsRows {
     [dic setObject:self.resource forKey:kResource];
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
     [dic setObject:[NSNumber numberWithBool:self.directTLS] forKey:kDirectTLS];
-    [dic setObject:self.accountno forKey:kAccountID];
+    [dic setObject:self.accountNo forKey:kAccountID];
     if(self.rosterName)
         [dic setObject:self.rosterName forKey:kRosterName];
     if(self.statusMessage)
@@ -328,20 +328,20 @@ enum DummySettingsRows {
             if(!accountExists) {
                 NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
                 if(accountID) {
-                    self.accountno = [NSString stringWithFormat:@"%@", accountID];
+                    self.accountNo = accountID;
                     self.editMode = YES;
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-                    [SAMKeychain setPassword:self.password forService:kMonalKeychainName account:self.accountno];
+                    [SAMKeychain setPassword:self.password forService:kMonalKeychainName account:self.accountNo.stringValue];
                     if(self.enabled)
                     {
-                        [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-                        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+                        [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
+                        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
                         [account publishStatusMessage:self.statusMessage];
                         [account publishRosterName:self.rosterName];
                         [account publishAvatar:self.selectedAvatarImage];
                     }
                     else
-                        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
+                        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
                     [self showSuccessHUD];
                 }
             } else {
@@ -353,11 +353,11 @@ enum DummySettingsRows {
     {
         BOOL updatedAccount = [[DataLayer sharedInstance] updateAccounWithDictionary:dic];
         if(updatedAccount) {
-            [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountno];
+            [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountNo];
             if(self.enabled)
             {
-                [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-                xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+                [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
+                xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
                 //it is okay to only update the server settings here:
                 //1) if the account was not yet connected, the settings from our db (which got updated with our dict prior
                 //      to connecting) will be used upon connecting 
@@ -377,7 +377,7 @@ enum DummySettingsRows {
                     [account publishAvatar:self.selectedAvatarImage];
             }
             else
-                [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
+                [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
             [self showSuccessHUD];
         }
     }
@@ -404,15 +404,15 @@ enum DummySettingsRows {
 - (IBAction) deleteAccountClicked: (id) sender
 {
     UIAlertController* questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account", @"") message:NSLocalizedString(@"This will remove this account and the associated data from this device.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertAction* noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    UIAlertAction* noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         //do nothing when "no" was pressed
     }];
-    UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action) {
-        DDLogVerbose(@"Deleting accountNo %@", self.accountno);
-        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
+    UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
+        DDLogVerbose(@"Deleting accountNo %@", self.accountNo);
+        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-        [self.db removeAccount:self.accountno];
-        [SAMKeychain deletePasswordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@", self.accountno]];
+        [self.db removeAccount:self.accountNo];
+        [SAMKeychain deletePasswordForService:kMonalKeychainName account:self.accountNo.stringValue];
 
         MBProgressHUD* hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;
@@ -442,13 +442,13 @@ enum DummySettingsRows {
     DDLogVerbose(@"Clearing own omemo session as request by account settings");
 
     UIAlertController* questionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Clear OMEMO session", @"") message:NSLocalizedString(@"This will clear the your own omemo session for debugging purposes", @"") preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         //do nothing when "no" was pressed
     }];
-    UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
 
-        [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-        MLContact* contact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountno];
+        [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
+        MLContact* contact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountNo];
         [contact resetOmemoSession];
     }];
 
@@ -464,12 +464,12 @@ enum DummySettingsRows {
     DDLogVerbose(@"Deleting History");
 
     UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Clear Chat History", @"") message:NSLocalizedString(@"This will clear the whole chat history of this account from this device.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         //do nothing when "no" was pressed
     }];
-    UIAlertAction *yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    UIAlertAction *yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
 
-        [self.db clearMessages:self.accountno];
+        [self.db clearMessages:self.accountNo];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -668,7 +668,7 @@ enum DummySettingsRows {
         if(!self.jid)
             [self.userAvatarImageView setImage:[MLImageManager circularImage:[UIImage imageNamed:@"noicon"]]];
         else
-            [[MLImageManager sharedInstance] getIconForContact:[MLContact createContactFromJid:self.jid andAccountNo:self.accountno] withCompletion:^(UIImage *image) {
+            [[MLImageManager sharedInstance] getIconForContact:[MLContact createContactFromJid:self.jid andAccountNo:self.accountNo] withCompletion:^(UIImage *image) {
                 [self.userAvatarImageView setImage:image];
             }];
         
@@ -780,16 +780,16 @@ enum DummySettingsRows {
     if([segue.identifier isEqualToString:@"showServerDetails"])
     {
         MLServerDetails* server= (MLServerDetails*)segue.destinationViewController;
-        server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+        server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     }
     else if([segue.identifier isEqualToString:@"showMAMPref"])
     {
         MLMAMPrefTableViewController* mam = (MLMAMPrefTableViewController*)segue.destinationViewController;
-        mam.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+        mam.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     }
     else if([segue.identifier isEqualToString:@"showBlockedUsers"])
     {
-        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
         // force blocklist update
         [xmppAccount fetchBlocklist];
         MLBlockedUsersTableViewController* blockedUsers = (MLBlockedUsersTableViewController*)segue.destinationViewController;
@@ -797,20 +797,20 @@ enum DummySettingsRows {
     }
     else if([segue.identifier isEqualToString:@"showKeyTrust"])
     {
-        if(self.jid && self.accountno)
+        if(self.jid && self.accountNo)
         {
             MLKeysTableViewController* keys = (MLKeysTableViewController*)segue.destinationViewController;
             keys.ownKeys = YES;
-            MLContact* contact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountno];
+            MLContact* contact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountNo];
             keys.contact = contact;
         }
     }
     else if([segue.identifier isEqualToString:@"showPassChange"])
     {
-        if(self.jid && self.accountno)
+        if(self.jid && self.accountNo)
         {
             MLPasswordChangeTableViewController* pwchange = (MLPasswordChangeTableViewController*)segue.destinationViewController;
-            pwchange.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+            pwchange.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
         }
     }
 }
@@ -920,7 +920,7 @@ enum DummySettingsRows {
 
 -(void) getPhotoAction:(UIGestureRecognizer*) recognizer
 {
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     if (!account)
         return;
     UIAlertController* actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
@@ -932,12 +932,12 @@ enum DummySettingsRows {
     UIImagePickerController* imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate = self;
 
-    UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
+    UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
         imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
         [self presentViewController:imagePicker animated:YES completion:nil];
     }];
 
-    UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
+    UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
         imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
         [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
             if(granted)
@@ -957,7 +957,7 @@ enum DummySettingsRows {
 #endif
     
     // Set image
-    [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         [actionControll dismissViewControllerAnimated:YES completion:nil];
     }]];
 
@@ -1018,7 +1018,7 @@ enum DummySettingsRows {
     {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
                                                                        message:NSLocalizedString(@"Can't convert the image to jpeg format.", @"") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];

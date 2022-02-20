@@ -110,7 +110,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         if(diff > 0)
         {
             // remove rows
-            for(size_t i = 0; i < diff; i++)
+            for(int i = 0; i < diff; i++)
             {
                 NSIndexPath* posInSection = [NSIndexPath indexPathForRow:i inSection:section];
                 [table deleteRowsAtIndexPaths:@[posInSection] withRowAnimation:UITableViewRowAnimationNone];
@@ -323,7 +323,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     
     for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
     {
-        NSString* accountNo = [NSString stringWithFormat:@"%@", accountDict[kAccountID]];
+        NSNumber* accountNo = accountDict[kAccountID];
         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
         if(!account)
             @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];
@@ -332,7 +332,7 @@ static NSMutableSet* _smacksWarningDisplayed;
             if(!account.connectionProperties.supportsMam2)
             {
                 UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support MAM (XEP-0313). That means you could frequently miss incoming messages!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
-                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                     [_mamWarningDisplayed addObject:accountNo];
                 }]];
                 [self presentViewController:messageAlert animated:YES completion:nil];
@@ -345,7 +345,7 @@ static NSMutableSet* _smacksWarningDisplayed;
             if(!account.connectionProperties.supportsSM3)
             {
                 UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support Stream Management (XEP-0198). That means your outgoing messages can get lost frequently!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
-                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                     [_smacksWarningDisplayed addObject:accountNo];
                 }]];
                 [self presentViewController:messageAlert animated:YES completion:nil];
@@ -379,8 +379,28 @@ static NSMutableSet* _smacksWarningDisplayed;
     // Dispose of any resources that can be recreated.
 }
 
+-(void) openConversationPlaceholder:(MLContact*) contact
+{
+    // only show placeholder if we use a split view
+    if([HelperTools deviceUsesSplitView] == YES)
+        [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
+}
+
 -(void) presentChatWithContact:(MLContact*) contact
 {
+    // show placeholder if contact is nil, open chat otherwise
+    if(contact == nil)
+    {
+        [self openConversationPlaceholder:contact];
+        return;
+    }
+    // check if the contact is a buddy
+    if([[DataLayer sharedInstance] isContactInList:contact.contactJid forAccount:contact.accountId] == NO)
+    {
+        DDLogError(@"Contact %@ unkown", contact.contactJid);
+        [self openConversationPlaceholder:contact];
+        return;
+    }
     // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
     if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
     {
@@ -388,20 +408,12 @@ static NSMutableSet* _smacksWarningDisplayed;
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
         return;
     }
-    
+
     // clear old chat before opening a new one (but not for splitView == YES)
     if([HelperTools deviceUsesSplitView] == NO)
         [self.navigationController popViewControllerAnimated:NO];
-    
-    // show placeholder if contact is nil, open chat otherwise
-    if(contact == nil)
-    {
-        // only show placeholder if we use a split view
-        if([HelperTools deviceUsesSplitView] == YES)
-            [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
-    }
-    else
-        [self performSegueWithIdentifier:@"showConversation" sender:contact];
+    // open chat
+    [self performSegueWithIdentifier:@"showConversation" sender:contact];
 }
 
 /*
@@ -413,7 +425,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
         // Show warning
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No enabled account found", @"") message:NSLocalizedString(@"Please add a new account under settings first. If you already added your account you may need to enable it under settings", @"") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -443,7 +455,7 @@ static NSMutableSet* _smacksWarningDisplayed;
             // Display warning
             UIAlertController* groupDetailsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Groupchat/channel details", @"")
                                                                                 message:NSLocalizedString(@"Groupchat/channel details are currently not implemented in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [groupDetailsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [groupDetailsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                 [groupDetailsWarning dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:groupDetailsWarning animated:YES completion:nil];
@@ -508,7 +520,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         contacts.selectContact = ^(MLContact* selectedContact) {
             [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId];
             //no success may mean its already there
-            [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
+            [self insertOrMoveContact:selectedContact completion:^(BOOL finished __unused) {
                 size_t sectionToUse = unpinnedChats; // Default is not pinned
                 if(selectedContact.isPinned) {
                     sectionToUse = pinnedChats; // Insert in pinned section
@@ -698,6 +710,7 @@ static NSMutableSet* _smacksWarningDisplayed;
             @"token": nilWrapper(token),
             @"completion": nilDefault(completion, ^{}),
         }];
+        completion();
     }];
 }
 
@@ -713,7 +726,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     {
         NSMutableArray* curContactArray = [self getChatArrayForSection:section];
         // check if contact is already displayed -> get coresponding indexPath
-        [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop __unused) {
             MLContact* rowContact = (MLContact*)obj;
             if([rowContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
             {

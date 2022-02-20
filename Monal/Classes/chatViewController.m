@@ -59,6 +59,8 @@
     NSMutableDictionary<NSString*, MLContact*>* _localMLContactCache;
 }
 
+@property (nonatomic, strong) MLContact* contact;
+
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSCalendar* gregorian;
 @property (nonatomic, assign)  NSInteger thisyear;
@@ -130,6 +132,12 @@ enum msgSentState {
     msgDisplayed
 };
 
+-(void) setupWithContact:(MLContact*) contact
+{
+    self.contact = contact;
+    [self setup];
+}
+
 -(void) setup
 {
     self.hidesBottomBarWhenPushed = YES;
@@ -146,17 +154,19 @@ enum msgSentState {
     _localMLContactCache = [[NSMutableDictionary<NSString*, MLContact*> alloc] init];
 }
 
--(void) setupWithContact:(MLContact*) contact
-{
-    self.contact = contact;
-    [self setup];
-}
-
 #pragma mark -  view lifecycle
 
 -(void) viewDidLoad
 {
     [super viewDidLoad];
+
+    if([[DataLayer sharedInstance] isContactInList:self.contact.contactJid forAccount:self.contact.accountId] == NO)
+    {
+        DDLogWarn(@"ChatView: Contact %@ is unkown", self.contact.contactJid);
+#ifdef IS_ALPHA
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Contact is unkown - GUI error" userInfo:nil];
+#endif
+    }
 
     [self initNavigationBarItems];
 
@@ -287,8 +297,8 @@ enum msgSentState {
 
 -(void) lastMsgButtonPositionConfigWithSize:(CGSize)size
 {
-    float buttonXPos = self.inputContainerView.frame.origin.x + self.inputContainerView.frame.size.width - lastMsgButtonSize - 5;
-    float buttonYPos = self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5;
+    float buttonXPos = (float)(self.inputContainerView.frame.origin.x + self.inputContainerView.frame.size.width - lastMsgButtonSize - 5);
+    float buttonYPos = (float)(self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5);
     self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
 }
 #pragma mark - ChatInputActionDelegage
@@ -364,7 +374,7 @@ enum msgSentState {
 
 - (void) doGetMsgData
 {
-    for (int idx = 0; idx<self.messageList.count; idx++)
+    for (unsigned int idx = 0; idx < self.messageList.count; idx++)
     {
         MLMessage* msg = [self.messageList objectAtIndex:idx];
         [self doSetMsgPathIdx:idx withDBId:msg.messageDBId];
@@ -516,7 +526,7 @@ enum msgSentState {
         NSNumber* accountState = [userInfo objectForKey:kAccountState];
 
         // Only parse account changes for our current opened account
-        if(![accountNo isEqualToString:self.xmppAccount.accountNo])
+        if(accountNo.intValue != self.xmppAccount.accountNo.intValue)
             return;
 
         if(accountNo && accountState)
@@ -555,12 +565,12 @@ enum msgSentState {
 {
     NSDate* lastInteractionDate = nil;
     NSString* jid = self.contact.contactJid;
-    NSString* accountNo = self.contact.accountId;
     // use supplied data from notification...
     if(notification)
     {
         NSDictionary* data = notification.userInfo;
-        if(![jid isEqualToString:data[@"jid"]] || ![accountNo isEqualToString:data[@"accountNo"]])
+        NSString* notifcationAccountNo = data[@"accountNo"];
+        if(![jid isEqualToString:data[@"jid"]] || self.contact.accountId.intValue != notifcationAccountNo.intValue)
             return;     // ignore other accounts or contacts
         if([data[@"isTyping"] boolValue] == YES)
         {
@@ -574,7 +584,7 @@ enum msgSentState {
     }
     // ...or load the latest interaction timestamp from db
     else
-        lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:jid forAccountNo:accountNo];
+        lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:jid forAccountNo:self.contact.accountId];
 
     // make timestamp human readable (lastInteractionDate will be captured by this block and automatically used by our timer)
     [self updateTypingTime:lastInteractionDate];
@@ -655,7 +665,7 @@ enum msgSentState {
     if(self.xmppAccount) {
         BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
         if(!omemoDeviceForContactFound) {
-            if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo]) {
+            if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo] && (!self.contact.isGroup || (self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"]))) {
                 UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
                 [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     // Disable encryption
@@ -828,7 +838,7 @@ enum msgSentState {
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
 
     if([unreadMsgCnt integerValue] == 0)
-        self->_firstmsg=YES;
+        self->_firstmsg = YES;
 
     if(!self.jid)
         return;
@@ -840,7 +850,7 @@ enum msgSentState {
     unreadStatus.actualFrom = self.jid;
     unreadStatus.isMuc = self.contact.isGroup;
 
-    NSInteger unreadPos = messages.count - 1;
+    NSInteger unreadPos = (NSInteger)messages.count - 1;
     while(unreadPos >= 0)
     {
         MLMessage* row = [messages objectAtIndex:unreadPos];
@@ -852,7 +862,7 @@ enum msgSentState {
         unreadPos--; //move up the list
     }
 
-    if(unreadPos <= messages.count - 1 && unreadPos > 0) {
+    if(unreadPos <= (NSInteger)messages.count - 1 && unreadPos > 0) {
         [messages insertObject:unreadStatus atIndex:unreadPos];
     }
 
@@ -873,12 +883,16 @@ enum msgSentState {
     NSString* newMessageID = messageID ? messageID : [[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
     NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
-    if(!accountDict)
+    if(accountDict == nil)
     {
-        DDLogError(@"Account not found!");
+        DDLogError(@"AccountNo %@ not found!", self.contact.accountId);
         return;
     }
-
+    if(self.contact.contactJid == nil || [[DataLayer sharedInstance] isContactInList:self.contact.contactJid forAccount:self.contact.accountId] == NO)
+    {
+        DDLogError(@"Can not send message to unkown contact %@ on accountNo %@ - GUI Error", self.contact.contactJid, self.contact.accountId);
+        return;
+    }
     if(!messageID && !messageType) {
         DDLogError(@"message id and type both cant be empty");
         return;
@@ -935,9 +949,9 @@ enum msgSentState {
     if(isTyping)
         _cancelTypingNotification = createTimer(5.0, (^{
             //no typing interaction in 5 seconds? --> send out active chatstate (e.g. typing ended)
-            if(_isTyping)
+            if(self->_isTyping)
             {
-                _isTyping = NO;
+                self->_isTyping = NO;
                 DDLogVerbose(@"Sending chatstate isTyping=NO");
                 [[MLXMPPManager sharedInstance] sendChatState:NO fromAccount:self.contact.accountId toJid:self.contact.contactJid];
             }
@@ -1222,7 +1236,7 @@ enum msgSentState {
         UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
         mediaPicker.delegate = self;
 
-        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
+        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action __unused) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
             mediaPicker.mediaTypes = @[(NSString*)kUTTypeImage, (NSString*)kUTTypeMovie];
 
@@ -1260,7 +1274,7 @@ enum msgSentState {
             }
         }];
 
-        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action __unused) {
             if(@available(iOS 14, *)) {
                 [self presentViewController:[self generatePHPickerViewController] animated:YES completion:nil];
             } else {
@@ -1319,7 +1333,7 @@ enum msgSentState {
             UIAlertController *permissionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed",@ "")
                                                                                      message:NSLocalizedString(@"Monal does not have access to your location. Please update the location access in your device's Privacy Settings.",@ "") preferredStyle:UIAlertControllerStyleAlert];
             [self presentViewController:permissionAlert animated:YES completion:nil];
-            [permissionAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [permissionAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action __unused) {
                 [permissionAlert dismissViewControllerAnimated:YES completion:nil];
             }]];
         }
@@ -1848,7 +1862,7 @@ enum msgSentState {
     MLBaseCell* cell;
 
     MLMessage* row;
-    if(indexPath.row < self.messageList.count) {
+    if((NSUInteger)indexPath.row < self.messageList.count) {
         row = [self.messageList objectAtIndex:indexPath.row];
     } else {
         DDLogError(@"Attempt to access beyond bounds");
@@ -2115,7 +2129,7 @@ enum msgSentState {
     return cell;
 }
 
--(MLContact*) getMLContactForJid:(NSString*) jid andAccount:(NSString*) accountNo
+-(MLContact*) getMLContactForJid:(NSString*) jid andAccount:(NSNumber*) accountNo
 {
     NSString* cacheKey = [NSString stringWithFormat:@"%@|%@", jid, accountNo];
     @synchronized(_localMLContactCache) {
@@ -2207,7 +2221,7 @@ enum msgSentState {
 
     //do some sanity checks
     MLMessage* message;
-    if(indexPath.row < self.messageList.count)
+    if((NSUInteger)indexPath.row < self.messageList.count)
         message = [self.messageList objectAtIndex:indexPath.row];
     else
     {
@@ -2318,7 +2332,7 @@ enum msgSentState {
     copyAction.image = [[[UIImage systemImageNamed:@"doc.on.doc.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     //only allow editing for the 3 newest message && only on outgoing messages
-    if(!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted | self.contact.isEncrypted) historyBaseID:nil])
+    if(!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted || self.contact.isEncrypted) historyBaseID:nil])
         return [UISwipeActionsConfiguration configurationWithActions:@[
             LMCEditAction,
             LMCDeleteAction,
@@ -2685,7 +2699,7 @@ enum msgSentState {
 -(void) loadPreviewWithUrlForRow:(NSIndexPath *) indexPath withCompletion:(void (^)(void))completion
 {
     MLMessage* row;
-    if(indexPath.row < self.messageList.count)
+    if((NSUInteger)indexPath.row < self.messageList.count)
     {
         row = [self.messageList objectAtIndex:indexPath.row];
     }
@@ -2697,6 +2711,7 @@ enum msgSentState {
     //prevent duplicated calls from cell animations
     if([self.previewedIds containsObject:row.messageDBId])
     {
+        completion();
         return;
     }
 
@@ -2712,11 +2727,21 @@ enum msgSentState {
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
             NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);
 
-            if(mimeType.length==0) {return;}
-            if(![mimeType hasPrefix:@"text"]) {return;}
-            if(contentLength.intValue>500*1024) {return;} //limit to half a meg of HTML
+            if(mimeType.length==0) {
+                completion();
+                return;
+            }
+            if(![mimeType hasPrefix:@"text"]) {
+                completion();
+                return;
+            }
+            if(contentLength.intValue > 500 * 1024) {
+                completion();
+                return;
+            } //limit to half a meg of HTML
 
             [self downloadPreviewWithRow:indexPath];
+            completion();
 
         }] resume];
 
@@ -2728,7 +2753,7 @@ enum msgSentState {
 -(void) downloadPreviewWithRow:(NSIndexPath*) indexPath
 {
     MLMessage* row;
-    if(indexPath.row < self.messageList.count) {
+    if((NSUInteger)indexPath.row < self.messageList.count) {
         row = [self.messageList objectAtIndex:indexPath.row];
     } else {
         DDLogError(@"Attempt to access beyond bounds");
@@ -3142,13 +3167,13 @@ enum msgSentState {
 
 - (nonnull __kindof UICollectionViewCell*) collectionView:(nonnull UICollectionView*) collectionView cellForItemAtIndexPath:(nonnull NSIndexPath*) indexPath
 {
-    if(indexPath.item == self.uploadQueue.count)
+    if((NSUInteger)indexPath.item == self.uploadQueue.count)
     { // the '+' tile
         return [self.uploadMenuView dequeueReusableCellWithReuseIdentifier:@"addToUploadQueueCell" forIndexPath:indexPath];
     }
     else
     { // some image in the queue
-        assert(self.uploadQueue.count >= indexPath.item);
+        assert(self.uploadQueue.count >= (NSUInteger)indexPath.item);
         MLUploadQueueItem* uploadItem = self.uploadQueue[indexPath.item];
         if([uploadItem getType] == UPLOAD_QUEUE_TYPE_RAW_IMAGE || [uploadItem getType] == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL)
         {

@@ -19,7 +19,7 @@
 @property (nonatomic, strong) UIBarButtonItem* nextItem;
 @property (nonatomic, strong) UIBarButtonItem* epmtyItem;
 
-@property (nonatomic) int curIdxHistory;
+@property (nonatomic) unsigned int curIdxHistory;
 @end
 
 @implementation MLSearchViewController

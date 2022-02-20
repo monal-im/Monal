@@ -57,9 +57,9 @@
     return self.accountList.count;
 }
 
--(NSString*) getAccountNoByIndex:(NSUInteger) index
+-(NSNumber*) getAccountNoByIndex:(NSUInteger) index
 {
-    NSString* result = [NSString stringWithFormat:@"%@", [[self.accountList objectAtIndex: index] objectForKey:@"account_id"]];
+    NSNumber* result = [[self.accountList objectAtIndex: index] objectForKey:@"account_id"];
     assert(result != nil);
     return result;
 }
@@ -94,12 +94,12 @@
     if([[account objectForKey:@"enabled"] boolValue] == YES)
     {
         cell.imageView.image = [UIImage systemImageNamed:@"checkmark.circle"];
-        if([[MLXMPPManager sharedInstance] isAccountForIdConnected:[NSString stringWithFormat:@"%@", [[self.accountList objectAtIndex:accNo] objectForKey:@"account_id"]]])
+        if([[MLXMPPManager sharedInstance] isAccountForIdConnected:[[self.accountList objectAtIndex:accNo] objectForKey:@"account_id"]])
         {
             accessory.image = [UIImage imageNamed:@"Connected"];
             cell.accessoryView = accessory;
             
-            NSDate* connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@", [[self.accountList objectAtIndex:accNo] objectForKey:@"account_id"]]];
+            NSDate* connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:[[self.accountList objectAtIndex:accNo] objectForKey:@"account_id"]];
             if(connectedTime) {
                 cell.detailTextLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Connected since: %@", @""), [self.uptimeFormatter stringFromDate:connectedTime]];
             }

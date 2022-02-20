@@ -49,7 +49,9 @@
 
 -(void) refreshBlockState:(NSNotification*) notification
 {
-    if([notification.userInfo[@"accountNo"] isEqualToString:self.xmppAccount.accountNo]) {
+    NSNumber* notificationAccountNo = notification.userInfo[@"accountNo"];
+    if(notificationAccountNo.intValue == self.xmppAccount.accountNo.intValue)
+    {
         weakify(self);
         dispatch_async(dispatch_get_main_queue(), ^{
             strongify(self);
@@ -101,7 +103,7 @@
         // show blocking is not supported alert
         UIAlertController* blockUnsuported = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Blocking is not supported by the server", @"") message:nil preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"") style:UIAlertActionStyleDefault
-                                       handler:^(UIAlertAction * action) {}];
+                                       handler:^(UIAlertAction* action __unused) {}];
         [blockUnsuported addAction:defaultAction];
         [self presentViewController:blockUnsuported animated:YES completion:nil];
     }
@@ -114,7 +116,7 @@
     }];
 
     UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Block", @"") style:UIAlertActionStyleDefault
-       handler:^(UIAlertAction * action) {
+       handler:^(UIAlertAction* action __unused) {
         NSString* jidToBlock = [blockJidForm textFields][0].text;
         // try to split the jid
         NSDictionary* splittedJid = [HelperTools splitJid: jidToBlock];
@@ -132,7 +134,7 @@
         {
             UIAlertController* invalidJid = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Input is not a valid jid", @"") message:nil preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"") style:UIAlertActionStyleDefault
-                                           handler:^(UIAlertAction * action) {}];
+                                           handler:^(UIAlertAction* action __unused) {}];
             [invalidJid addAction:defaultAction];
             [self presentViewController:invalidJid animated:YES completion:nil];
         }

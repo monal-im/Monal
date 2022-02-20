@@ -42,120 +42,120 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) createTransaction:(monal_void_block_t) block;
 
 //Roster
--(NSString *) getRosterVersionForAccount:(NSString*) accountNo;
--(void) setRosterVersion:(NSString *) version forAccount: (NSString*) accountNo;
+-(NSString *) getRosterVersionForAccount:(NSNumber*) accountNo;
+-(void) setRosterVersion:(NSString *) version forAccount: (NSNumber*) accountNo;
 
 // Buddy Commands
--(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo nickname:(NSString* _Nullable) nickName andMucNick:(NSString* _Nullable) mucNick;
--(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
--(BOOL) clearBuddies:(NSString*) accountNo;
--(NSDictionary* _Nullable) contactDictionaryForUsername:(NSString*) username forAccount: (NSString*) accountNo;
+-(BOOL) addContact:(NSString*) contact  forAccount:(NSNumber*) accountNo nickname:(NSString* _Nullable) nickName andMucNick:(NSString* _Nullable) mucNick;
+-(void) removeBuddy:(NSString*) buddy forAccount:(NSNumber*) accountNo;
+-(BOOL) clearBuddies:(NSNumber*) accountNo;
+-(NSDictionary* _Nullable) contactDictionaryForUsername:(NSString*) username forAccount: (NSNumber*) accountNo;
 
 /**
  should be called when a new session needs to be established
  */
--(BOOL) resetContactsForAccount:(NSString*) accountNo;
+-(BOOL) resetContactsForAccount:(NSNumber*) accountNo;
 
 -(NSMutableArray<MLContact*>*) searchContactsWithString:(NSString*) search;
 
 -(NSMutableArray<MLContact*>*) contactList;
 -(NSArray<NSString*>*) resourcesForContact:(MLContact* _Nonnull)contact ;
--(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account;
+-(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSNumber*)account;
 -(void) setSoftwareVersionInfoForContact:(NSString*)contact
                                 resource:(NSString*)resource
-                              andAccount:(NSString*)account
+                              andAccount:(NSNumber*)account
                                 withSoftwareInfo:(MLContactSoftwareVersionInfo*) newSoftwareInfo;
 
 #pragma mark Ver string and Capabilities
 
--(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andAccountNo:(NSString*) acctNo;
+-(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andAccountNo:(NSNumber*) acctNo;
 -(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource;
 -(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource;
 -(NSSet* _Nullable) getCapsforVer:(NSString*) ver;
 -(void) setCaps:(NSSet*) caps forVer:(NSString*) ver;
 
 #pragma mark  presence functions
--(void) setResourceOnline:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
--(void) setOnlineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
--(BOOL) setOfflineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
+-(void) setResourceOnline:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
+-(void) setOnlineBuddy:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
+-(BOOL) setOfflineBuddy:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
 
--(void) setBuddyStatus:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
--(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(void) setBuddyStatus:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
+-(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
--(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
--(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
+-(NSString*) buddyState:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
--(BOOL) hasContactRequestForAccount:(NSString*) accountNo andBuddyName:(NSString*) buddy;
+-(BOOL) hasContactRequestForAccount:(NSNumber*) accountNo andBuddyName:(NSString*) buddy;
 -(NSMutableArray*) contactRequestsForAccount;
 -(void) addContactRequest:(MLContact *) requestor;
 -(void) deleteContactRequest:(MLContact *) requestor; 
 
 #pragma mark Contact info
 
--(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo;
+-(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSNumber*) accountNo;
 
--(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSString*) accountNo;
--(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSString*) accountNo;
+-(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSNumber*) accountNo;
+-(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSNumber*) accountNo;
 
--(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment;
--(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountNo withComment:(NSString*) comment;
+-(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
 #pragma mark - MUC
 
--(BOOL) initMuc:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick;
--(void) cleanupMembersAndParticipantsListFor:(NSString*) room forAccountId:(NSString*) accountNo;
--(void) addMember:(NSDictionary*) member toMuc:(NSString*) room forAccountId:(NSString*) accountNo;
--(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSString*) accountNo;
--(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSString*) accountNo;
--(void) removeParticipant:(NSDictionary*) participant fromMuc:(NSString*) room forAccountId:(NSString*) accountNo;
--(NSDictionary* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSString*) accountNo;
--(NSArray<NSDictionary<NSString*, id>*>*) getMembersAndParticipantsOfMuc:(NSString*) room forAccountId:(NSString*) accountNo;
--(void) addMucFavorite:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick;
--(NSString*) lastStanzaIdForMuc:(NSString* _Nonnull) room andAccount:(NSString* _Nonnull) accountNo;
--(void) setLastStanzaId:(NSString*) lastStanzaId forMuc:(NSString* _Nonnull) room andAccount:(NSString* _Nonnull) accountNo;
--(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(BOOL) initMuc:(NSString*) room forAccountId:(NSNumber*) accountNo andMucNick:(NSString* _Nullable) mucNick;
+-(void) cleanupMembersAndParticipantsListFor:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(void) addMember:(NSDictionary*) member toMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(void) removeParticipant:(NSDictionary*) participant fromMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(NSDictionary* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(NSArray<NSDictionary<NSString*, id>*>*) getMembersAndParticipantsOfMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(void) addMucFavorite:(NSString*) room forAccountId:(NSNumber*) accountNo andMucNick:(NSString* _Nullable) mucNick;
+-(NSString*) lastStanzaIdForMuc:(NSString* _Nonnull) room andAccount:(NSNumber* _Nonnull) accountNo;
+-(void) setLastStanzaId:(NSString*) lastStanzaId forMuc:(NSString* _Nonnull) room andAccount:(NSNumber* _Nonnull) accountNo;
+-(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
--(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo;
--(BOOL) updateOwnNickName:(NSString*) nick forMuc:(NSString*) room forAccount:(NSString*) accountNo;
+-(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSNumber*) accountNo;
+-(BOOL) updateOwnNickName:(NSString*) nick forMuc:(NSString*) room forAccount:(NSNumber*) accountNo;
 
--(BOOL) updateMucSubject:(NSString*) subject forAccount:(NSString*) accountNo andRoom:(NSString*) room;
--(NSString*) mucSubjectforAccount:(NSString*) accountNo andRoom:(NSString*) room;
+-(BOOL) updateMucSubject:(NSString*) subject forAccount:(NSNumber*) accountNo andRoom:(NSString*) room;
+-(NSString*) mucSubjectforAccount:(NSNumber*) accountNo andRoom:(NSString*) room;
 
--(NSMutableArray*) listMucsForAccount:(NSString*) accountNo;
--(BOOL) deleteMuc:(NSString*) room forAccountId:(NSString*) accountNo;
+-(NSMutableArray*) listMucsForAccount:(NSNumber*) accountNo;
+-(BOOL) deleteMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 
--(void) updateMucTypeTo:(NSString*) type forRoom:(NSString*) room andAccount:(NSString*) accountNo;
--(NSString*) getMucTypeOfRoom:(NSString*) room andAccount:(NSString*) accountNo;
+-(void) updateMucTypeTo:(NSString*) type forRoom:(NSString*) room andAccount:(NSNumber*) accountNo;
+-(NSString*) getMucTypeOfRoom:(NSString*) room andAccount:(NSNumber*) accountNo;
 
 /**
  Calls with YES if contact  has already been added to the database for this account
  */
--(BOOL) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(BOOL) isContactInList:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
 #pragma mark - account commands
 -(NSArray*) accountList;
 -(NSNumber*) enabledAccountCnts;
 -(NSArray*) enabledAccountList;
--(BOOL) isAccountEnabled:(NSString*) accountNo;
+-(BOOL) isAccountEnabled:(NSNumber*) accountNo;
 -(BOOL) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain;
 -(NSNumber* _Nullable) accountIDForUser:(NSString*) user andDomain:(NSString *) domain;
 
--(NSMutableDictionary* _Nullable) detailsForAccount:(NSString*) accountNo;
--(NSString* _Nullable) jidOfAccount:(NSString*) accountNo;
+-(NSMutableDictionary* _Nullable) detailsForAccount:(NSNumber*) accountNo;
+-(NSString* _Nullable) jidOfAccount:(NSNumber*) accountNo;
 
 -(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary;
 -(NSNumber* _Nullable) addAccountWithDictionary:(NSDictionary *) dictionary;
 
 
--(BOOL) removeAccount:(NSString*) accountNo;
+-(BOOL) removeAccount:(NSNumber*) accountNo;
 
 /**
  disables account
  */
--(BOOL) disableEnabledAccount:(NSString*) accountNo;
+-(BOOL) disableEnabledAccount:(NSNumber*) accountNo;
 
--(NSMutableDictionary* _Nullable) readStateForAccount:(NSString*) accountNo;
--(void) persistState:(NSDictionary*) state forAccount:(NSString*) accountNo;
+-(NSMutableDictionary* _Nullable) readStateForAccount:(NSNumber*) accountNo;
+-(void) persistState:(NSDictionary*) state forAccount:(NSNumber*) accountNo;
 
 #pragma mark - message Commands
 /**
@@ -168,7 +168,7 @@ extern NSString* const kMessageTypeFiletransfer;
 /*
  adds a specified message to the database
  */
--(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*_Nullable) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates;
+-(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSNumber*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*_Nullable) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates;
 
 /*
  Marks a message as sent. When the server acked it
@@ -193,87 +193,87 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) setMessageHistoryId:(NSNumber*) historyId filetransferMimeType:(NSString*) mimeType filetransferSize:(NSNumber*) size;
 -(void) setMessageHistoryId:(NSNumber*) historyId messageType:(NSString*) messageType;
 
--(void) clearMessages:(NSString *) accountNo;
--(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSString*) accountNo;
+-(void) clearMessages:(NSNumber*) accountNo;
+-(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSNumber*) accountNo;
 -(void) autodeleteAllMessagesAfter3Days;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
--(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSString*) accountNo;
+-(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSNumber*) accountNo;
 
 -(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted historyBaseID:(NSNumber* _Nullable) historyBaseID;
 
 #pragma mark - message history
 
--(NSNumber*) lastMessageHistoryIdForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
--(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber* _Nullable) msgHistoryID;
--(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(NSNumber*) lastMessageHistoryIdForContact:(NSString*) buddy forAccount:(NSNumber*) accountNo;
+-(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSNumber*) accountNo beforeMsgHistoryID:(NSNumber* _Nullable) msgHistoryID;
+-(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
 
--(MLMessage*) lastMessageForContact:(NSString *) contact forAccount:(NSString *) accountNo;
--(NSString*) lastStanzaIdForAccount:(NSString*) accountNo;
--(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSString*) accountNo;
+-(MLMessage*) lastMessageForContact:(NSString*) contact forAccount:(NSNumber*) accountNo;
+-(NSString*) lastStanzaIdForAccount:(NSNumber*) accountNo;
+-(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSNumber*) accountNo;
 
--(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
--(NSArray<MLMessage*>*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
+-(NSArray<MLMessage*>*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSNumber*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
--(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;
+-(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSNumber*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;
 
 #pragma mark active contacts
 -(NSMutableArray<MLContact*>*) activeContactsWithPinned:(BOOL) pinned;
 -(NSArray<MLContact*>*) activeContactDict;
--(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
--(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
--(BOOL) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
--(BOOL) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo;
+-(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSNumber*) accountNo;
+-(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSNumber*) accountNo;
+-(BOOL) isActiveBuddy:(NSString*) buddyname forAccount:(NSNumber*) accountNo;
+-(BOOL) updateActiveBuddy:(NSString*) buddyname setTime:(NSString*)timestamp forAccount:(NSNumber*) accountNo;
 
 
 
 #pragma mark count unread
--(NSNumber*) countUserUnreadMessages:(NSString* _Nullable) buddy forAccount:(NSString* _Nullable) accountNo;
+-(NSNumber*) countUserUnreadMessages:(NSString* _Nullable) buddy forAccount:(NSNumber* _Nullable) accountNo;
 -(NSNumber*) countUnreadMessages;
 
--(void) muteJid:(NSString*) jid onAccount:(NSString*) accountNo;
--(void) unMuteJid:(NSString*) jid onAccount:(NSString*) accountNo;
--(BOOL) isMutedJid:(NSString*) jid onAccount:(NSString*) accountNo;
+-(void) muteJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
+-(void) unMuteJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
+-(BOOL) isMutedJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
 
--(void) setMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSString*) accountNo;
--(void) setMucAlertOnAll:(NSString*) jid onAccount:(NSString*) accountNo;
--(BOOL) isMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSString*) accountNo;
+-(void) setMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSNumber*) accountNo;
+-(void) setMucAlertOnAll:(NSString*) jid onAccount:(NSNumber*) accountNo;
+-(BOOL) isMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSNumber*) accountNo;
 
--(void) blockJid:(NSString *) jid withAccountNo:(NSString*) accountNo;
--(void) unBlockJid:(NSString *) jid withAccountNo:(NSString*) accountNo;
--(u_int8_t) isBlockedJid:(NSString *) jid withAccountNo:(NSString*) accountNo;
--(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids forAccountNo:(NSString*) accountNo;
--(NSArray<NSDictionary<NSString*, NSString*>*>*) blockedJidsForAccount:(NSString*) accountNo;
+-(void) blockJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
+-(void) unBlockJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
+-(u_int8_t) isBlockedJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
+-(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids forAccountNo:(NSNumber*) accountNo;
+-(NSArray<NSDictionary<NSString*, NSString*>*>*) blockedJidsForAccount:(NSNumber*) accountNo;
 
--(BOOL) isPinnedChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid;
--(void) pinChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid;
--(void) unPinChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid;
+-(BOOL) isPinnedChat:(NSNumber*) accountNo andBuddyJid:(NSString*) buddyJid;
+-(void) pinChat:(NSNumber*) accountNo andBuddyJid:(NSString*) buddyJid;
+-(void) unPinChat:(NSNumber*) accountNo andBuddyJid:(NSString*) buddyJid;
 
--(BOOL) shouldEncryptForJid:(NSString *) jid andAccountNo:(NSString*) account;
--(void) encryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
--(void) disableEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
+-(BOOL) shouldEncryptForJid:(NSString *) jid andAccountNo:(NSNumber*) account;
+-(void) encryptForJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo;
+-(void) disableEncryptForJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo;
 
--(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSString*) accountNo;
--(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSString* _Nonnull) accountNo;
--(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSString* _Nonnull) accountNo;
+-(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSNumber*) accountNo;
+-(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSNumber* _Nonnull) accountNo;
+-(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSNumber* _Nonnull) accountNo;
 
--(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSString*) accountNo;
--(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSString*) accountNo;
+-(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSNumber*) accountNo;
+-(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSNumber*) accountNo;
 
 #pragma mark History Message Search
 /*
  search message by keyword in message, buddy_name, messageType.
  */
 -(NSArray* _Nullable) searchResultOfHistoryMessageWithKeyWords:(NSString* _Nonnull) keyword
-                                             accountNo:(NSString*  _Nonnull) accountNo;
+                                             accountNo:(NSNumber*  _Nonnull) accountNo;
 
 /*
  search message by keyword in message, buddy_name, messageType.
  */
 -(NSArray* _Nullable) searchResultOfHistoryMessageWithKeyWords:(NSString* _Nonnull) keyword
-                                             accountNo:(NSString*  _Nonnull) accountNo
+                                             accountNo:(NSNumber*  _Nonnull) accountNo
                                              betweenBuddy:(NSString* _Nonnull) contactJid;
 
 -(NSArray*) getAllCachedImages;
@@ -282,12 +282,12 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) upgradeImageMessagesToFiletransferMessages;
 
 -(void) invalidateAllAccountStates;
--(void) deleteDelayedMessageStanzasForAccount:(NSString*) accountNo;
--(void) addDelayedMessageStanza:(MLXMLNode*) stanza forArchiveJid:(NSString*) archiveJid andAccountNo:(NSString*) accountNo;
--(MLXMLNode* _Nullable) getNextDelayedMessageStanzaForArchiveJid:(NSString*) archiveJid andAccountNo:(NSString*) accountNo;
+-(void) deleteDelayedMessageStanzasForAccount:(NSNumber*) accountNo;
+-(void) addDelayedMessageStanza:(MLXMLNode*) stanza forArchiveJid:(NSString*) archiveJid andAccountNo:(NSNumber*) accountNo;
+-(MLXMLNode* _Nullable) getNextDelayedMessageStanzaForArchiveJid:(NSString*) archiveJid andAccountNo:(NSNumber*) accountNo;
 
 -(void) addShareSheetPayload:(NSDictionary*) payload;
--(NSArray*) getShareSheetPayloadForAccountNo:(NSString*) accountNo;
+-(NSArray*) getShareSheetPayloadForAccountNo:(NSNumber*) accountNo;
 -(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId;
 
 -(BOOL) getAppexCleanShutdownStatus;

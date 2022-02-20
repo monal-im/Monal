@@ -388,14 +388,15 @@ static NSRegularExpression* attributeFilterRegex;
     //check if the parent element was selected and ask our parent to check the rest of our query path if needed
     if([pathComponent isEqualToString:@".."])
     {
-        if(!self.parent)
+        MLXMLNode* parent = self.parent;
+        if(!parent)
             @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML query tries to ascend to non-existent parent element!" userInfo:@{
                 @"self": self,
                 @"queryString": queryString,
                 @"pathComponent": pathComponent,
                 @"parsedEntry": parsedEntry
             }];
-        return [self.parent find:rest arguments:args];
+        return [parent find:rest arguments:args];
     }
     
     //shortcut for dataform subqueries: allow empty element names and namespaces, they get autofilled with {jabber:x:data}x
@@ -704,10 +705,11 @@ static NSRegularExpression* attributeFilterRegex;
     [outputString appendString:[NSString stringWithFormat:@"<%@", _element]];
     
     //set attributes
+    MLXMLNode* parent = self.parent;
     for(NSString* key in [_attributes allKeys])
     {
         //handle xmlns inheritance (don't add namespace to childs if it should be the same like the parent's one)
-        if([key isEqualToString:@"xmlns"] && self.parent && [_attributes[@"xmlns"] isEqualToString:self.parent.attributes[@"xmlns"]])
+        if([key isEqualToString:@"xmlns"] && parent && [_attributes[@"xmlns"] isEqualToString:parent.attributes[@"xmlns"]])
             continue;
         [outputString appendString:[NSString stringWithFormat:@" %@='%@'", key, [MLXMLNode escapeForXMPP:(NSString*)_attributes[key]]]];
     }

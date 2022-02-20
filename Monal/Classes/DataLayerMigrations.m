@@ -113,8 +113,8 @@
 
             //iterate current active and set their times
             NSArray* active = [db executeReader:@"select distinct buddy_name, account_id from activeChats"];
-            [active enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                NSDictionary* row = (NSDictionary*)obj;
+            for(NSDictionary* row in active)
+            {
                 //get max
                 NSNumber* max = (NSNumber *)[db executeScalar:@"select max(TIMESTAMP) from message_history where (message_to=? or message_from=?) and account_id=?" andArguments:@[[row objectForKey:@"buddy_name"],[row objectForKey:@"buddy_name"], [row objectForKey:@"account_id"]]];
                 if(max != nil) {
@@ -122,7 +122,7 @@
                 } else  {
 
                 }
-            }];
+            }
         }];
 
         [self updateDB:db withDataLayer:dataLayer toVersion:3.5 withBlock:^{
@@ -160,26 +160,28 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:4.2 withBlock:^{
             NSArray* contacts = [db executeReader:@"select distinct account_id, buddy_name, lastMessageTime from activechats;"];
             [db executeNonQuery:@"delete from activechats;"];
-            [contacts enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            for(NSDictionary* obj in contacts)
+            {
                 [db executeNonQuery:@"insert into activechats (account_id, buddy_name, lastMessageTime) values (?,?,?);"
                         andArguments:@[
                         [obj objectForKey:@"account_id"],
                         [obj objectForKey:@"buddy_name"],
                         [obj objectForKey:@"lastMessageTime"]
                         ]];
-            }];
+            }
             NSArray *dupeMessageids= [db executeReader:@"select * from (select messageid, count(messageid) as c from message_history   group by messageid) where c>1"];
 
-            [dupeMessageids enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            for(NSDictionary* obj in dupeMessageids)
+            {
                     NSArray* dupeMessages = [db executeReader:@"select * from message_history where messageid=? order by message_history_id asc " andArguments:@[[obj objectForKey:@"messageid"]]];
                 //hopefully this is quick and doesnt grow..
-                [dupeMessages enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull message, NSUInteger idx, BOOL * _Nonnull stop) {
+                [dupeMessages enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull message, NSUInteger idx, BOOL * _Nonnull stop __unused) {
                     //keep first one
                     if(idx > 0) {
                         [db executeNonQuery:@"delete from message_history where message_history_id=?" andArguments:@[[message objectForKey:@"message_history_id"]]];
                     }
                 }];
-            }];
+            }
             [db executeNonQuery:@"CREATE UNIQUE INDEX ux_account_messageid ON message_history(account_id, messageid)"];
 
             [db executeNonQuery:@"alter table activechats add column lastMesssage blob;"];
@@ -1020,6 +1022,64 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:5.113 withBlock:^{
             [db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
             [[MLImageManager sharedInstance] removeAllIcons];
+        }];
+
+        // migrate account_id column in blocklistCache to integer
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.114 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE blocklistCache RENAME TO _blocklistCacheTMP;"];
+            [db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
+                'account_id' INTEGER NOT NULL, \
+                'node' TEXT, \
+                'host' TEXT, \
+                'resource' TEXT, \
+                UNIQUE('account_id','node','host','resource'), \
+                CHECK( \
+                (LENGTH('node') > 0 AND LENGTH('host') > 0 AND LENGTH('resource') > 0) \
+                OR \
+                (LENGTH('node') > 0 AND LENGTH('host') > 0) \
+                OR \
+                (LENGTH('host') > 0 AND LENGTH('resource') > 0) \
+                OR \
+                (LENGTH('host') > 0) \
+                ), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+            );"];
+            [db executeNonQuery:@"DELETE FROM _blocklistCacheTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
+            [db executeNonQuery:@"INSERT INTO blocklistCache SELECT * FROM _blocklistCacheTMP;"];
+            [db executeNonQuery:@"DROP TABLE _blocklistCacheTMP;"];
+        }];
+
+        // relax foreign key constraints for omemo tables
+        // muc participants might not be a buddy
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.115 withBlock:^{
+            // migrate signalContactIdentity
+            [db executeNonQuery:@"ALTER TABLE signalContactIdentity RENAME TO _signalContactIdentityTMP;"];
+            [db executeNonQuery:@"CREATE TABLE 'signalContactIdentity' (\
+                'account_id' INTEGER NOT NULL,\
+                'contactName' TEXT NOT NULL,\
+                'contactDeviceId' INTEGER NOT NULL,\
+                'identity' BLOB,\
+                'lastReceivedMsg' INTEGER DEFAULT NULL,\
+                'removedFromDeviceList' INTEGER DEFAULT NULL,\
+                'trustLevel' INTEGER NOT NULL DEFAULT 1, brokenSession BOOL DEFAULT FALSE,\
+                PRIMARY KEY('account_id', 'contactName', 'contactDeviceId'),\
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE\
+            )"];
+            [db executeNonQuery:@"INSERT INTO signalContactIdentity SELECT * FROM _signalContactIdentityTMP;"];
+            [db executeNonQuery:@"DROP TABLE _signalContactIdentityTMP;"];
+
+            // migrate signalContactSession
+            [db executeNonQuery:@"ALTER TABLE signalContactSession RENAME TO _signalContactSessionTMP;"];
+            [db executeNonQuery:@"CREATE TABLE 'signalContactSession' ( \
+                'account_id' INTEGER NOT NULL, \
+                'contactName' text NOT NULL, \
+                'contactDeviceId' INTEGER NOT NULL, \
+                'recordData' BLOB, \
+                PRIMARY KEY('account_id','contactName','contactDeviceId'), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+            );"];
+            [db executeNonQuery:@"INSERT INTO signalContactSession SELECT * FROM _signalContactSessionTMP;"];
+            [db executeNonQuery:@"DROP TABLE _signalContactSessionTMP;"];
         }];
     }];
     NSNumber* newdbversion = [db idReadTransaction:^{

@@ -88,7 +88,7 @@
     [self.iconCache removeAllObjects];
 }
 
--(void) purgeCacheForContact:(NSString*) contact andAccount:(NSString*) accountNo
+-(void) purgeCacheForContact:(NSString*) contact andAccount:(NSNumber*) accountNo
 {
     [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@",accountNo,contact]];
 }
@@ -101,7 +101,7 @@
     for(MLContact* contact in contactList)
     {
         NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-        writablePath = [writablePath stringByAppendingPathComponent:contact.accountId];
+        writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
         writablePath = [writablePath stringByAppendingPathComponent:[self fileNameforContact:contact.contactJid]];
         NSString* hash = [[DataLayer sharedInstance] getAvatarHashForContact:contact.contactJid andAccount:contact.accountId];
         BOOL hasHash = ![@"" isEqualToString:hash];
@@ -182,8 +182,8 @@
             NSParagraphStyleAttributeName: paragraphStyle
         };
         CGSize textSize = [contactLetter sizeWithAttributes:attributes];
-        CGRect textRect = CGRectMake(floorf((renderer.format.bounds.size.width - textSize.width) / 2),
-                                    floorf((renderer.format.bounds.size.height - textSize.height) / 2),
+        CGRect textRect = CGRectMake(floorf((float)(renderer.format.bounds.size.width - textSize.width) / 2),
+                                    floorf((float)(renderer.format.bounds.size.height - textSize.height) / 2),
                                     textSize.width,
                                     textSize.height);
         [contactLetter drawInRect:textRect withAttributes:attributes];
@@ -195,7 +195,7 @@
     return [NSString stringWithFormat:@"%@.png", [contact lowercaseString]];;
 }
 
--(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSData* _Nullable) data
+-(void) setIconForContact:(NSString*) contact andAccount:(NSNumber*) accountNo WithData:(NSData* _Nullable) data
 {
     //documents directory/buddyicons/account no/contact
     
@@ -204,7 +204,7 @@
     NSFileManager* fileManager = [NSFileManager defaultManager];
     
     NSString *writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-    writablePath = [writablePath stringByAppendingPathComponent:accountNo];
+    writablePath = [writablePath stringByAppendingPathComponent:accountNo.stringValue];
     NSError* error;
     [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
     [HelperTools configureFileProtectionFor:writablePath];
@@ -251,7 +251,7 @@
         else
         {
             NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-            writablePath = [writablePath stringByAppendingPathComponent:contact.accountId];
+            writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
             writablePath = [writablePath stringByAppendingPathComponent:filename];
 
             DDLogVerbose(@"Loading avatar image at: %@", writablePath);

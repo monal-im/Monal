@@ -22,7 +22,7 @@
 
 
 @interface ContactDetails()
-@property (nonatomic, strong) NSString* accountNo;
+@property (nonatomic, strong) NSNumber* accountNo;
 @property (nonatomic, strong) xmpp* xmppAccount;
 @property (nonatomic, weak) UITextField* currentTextField;
 @property (nonatomic, strong) NSMutableArray * photos;
@@ -43,7 +43,6 @@ enum ContactDetailsSections {
 
 enum ContactDetailsConnDetailsRows {
     KeysRow,
-    ResourcesRow,
     SubscribedStateRow,
     BlockStateRow,
     PinStateRow,
@@ -216,14 +215,6 @@ enum ContactDetailsAboutRows {
         thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
         if(indexPath.row == KeysRow)
             thecell.textLabel.text = NSLocalizedString(@"Encryption Keys", @"");
-        else if(indexPath.row == ResourcesRow)
-        {
-            if(self.contact.isGroup) {
-                thecell.textLabel.text = NSLocalizedString(@"Participants", @"");
-            } else {
-                thecell.textLabel.text = NSLocalizedString(@"Resources", @"");
-            }
-        }
         else if(indexPath.row == SubscribedStateRow)
         {
             if(self.contact.isGroup == YES)
@@ -305,10 +296,6 @@ enum ContactDetailsAboutRows {
                 [self performSegueWithIdentifier:@"showKeys" sender:self];
                 break;
             }
-            case ResourcesRow:  {
-                [self performSegueWithIdentifier:@"showResources" sender:self];
-                break;
-            }
             case SubscribedStateRow:  {
                 if(self.contact.isGroup) {
                     [self removeContact]; // works for muc too
@@ -367,11 +354,11 @@ enum ContactDetailsAboutRows {
 
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
 
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action __unused) {
         [[MLXMPPManager sharedInstance] addContact:self.contact];
     }]];
 
@@ -394,11 +381,11 @@ enum ContactDetailsAboutRows {
 
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
 
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action __unused) {
         [[MLXMPPManager sharedInstance] removeContact:self.contact];
         // announce that the contact was removed
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:self userInfo:@{@"contact": self.contact}];
@@ -416,7 +403,7 @@ enum ContactDetailsAboutRows {
     {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Blocking not supported", @"") message:NSLocalizedString(@"The server does not support blocking", @"") preferredStyle:UIAlertControllerStyleAlert];
 
-        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         }];
 
         [alert addAction:closeAction];
@@ -475,7 +462,7 @@ enum ContactDetailsAboutRows {
             [self presentViewController:nav animated:YES completion:nil];
         } else  {
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Nothing to see", @"") message:NSLocalizedString(@"You have not received any images in this conversation.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:alert animated:YES completion:nil];
@@ -559,7 +546,9 @@ enum ContactDetailsAboutRows {
 
 -(void) refreshBlockState:(NSNotification*) notification
 {
-    if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo]) {
+    NSNumber* notificationAccountNo = notification.userInfo[@"accountNo"];
+    if(notificationAccountNo.intValue == self.accountNo.intValue)
+    {
         weakify(self);
         dispatch_async(dispatch_get_main_queue(), ^{
             strongify(self);

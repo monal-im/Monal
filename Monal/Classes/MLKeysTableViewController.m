@@ -184,11 +184,11 @@ enum MLKeysTableViewControllerSections {
     {
         // show warning
         UIAlertController* fingerprintAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"QR-Code: Fingerprints found", @"") message:[NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Do you want to trust the scanned fingerprints from", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* trustAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* trustAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
             [self resetTrustForJid:jid trustFingerprints:fingerprints];
             [fingerprintAlert dismissViewControllerAnimated:YES completion:nil];
         }];
-        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
             [fingerprintAlert dismissViewControllerAnimated:YES completion:nil];
         }];
         [fingerprintAlert addAction:trustAction];

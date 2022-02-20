@@ -77,7 +77,7 @@
     if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
     {
         UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts", @"") message:NSLocalizedString(@"Please make sure at least one account has connected before trying to add a contact or channel.", @"") preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         }];
         [messageAlert addAction:closeAction];
         
@@ -91,7 +91,7 @@
     if(!jidComponents[@"node"] || jidComponents[@"node"].length == 0 || jidComponents[@"host"].length == 0)
     {
         UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Jid Invalid", @"") message:NSLocalizedString(@"The jid has to be in the form 'user@domain.tld' to be correct.", @"") preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         }];
         [messageAlert addAction:closeAction];
         [self presentViewController:messageAlert animated:YES completion:nil];
@@ -116,7 +116,7 @@
                 [[MLXMPPManager sharedInstance] addContact:contactObj];
 
                 UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Permission Requested", @"") message:NSLocalizedString(@"The new contact will be added to your contacts list when the person you've added has approved your request.", @"") preferredStyle:UIAlertControllerStyleAlert];
-                UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                     if(self.completion)
                         self.completion(contactObj);
                     [self dismissViewControllerAnimated:YES completion:nil];
@@ -127,7 +127,7 @@
             else if([type isEqualToString:@"muc"])
             {
                 [self displayJoinHUD];
-                NSString* accountNo = account.accountNo;            //needed to not retain 'account' in the block below
+                NSNumber* accountNo = account.accountNo;            //needed to not retain 'account' in the block below
                 [account.mucProcessor addUIHandler:^(id _data) {
                     NSDictionary* data = (NSDictionary*)_data;
                     [self hideJoinHUD];
@@ -140,7 +140,7 @@
                     else
                     {
                         UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error entering groupchat", @"") message:data[@"errorMessage"] preferredStyle:UIAlertControllerStyleAlert];
-                        [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                        [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                         }]];
                         [self presentViewController:messageAlert animated:YES completion:nil];
                     }
@@ -150,7 +150,7 @@
             else
             {
                 UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:errorMessage preferredStyle:UIAlertControllerStyleAlert];
-                UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                 }];
                 [messageAlert addAction:closeAction];
                 [self presentViewController:messageAlert animated:YES completion:nil];
@@ -169,7 +169,7 @@
     }];
 
     UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"") style:UIAlertActionStyleDefault
-       handler:^(UIAlertAction * action) {
+       handler:^(UIAlertAction* action __unused) {
         [self displayJoinHUD];
         // TODO: thilo check password
         [passwordForm dismissViewControllerAnimated:YES completion:nil];

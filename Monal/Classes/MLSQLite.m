@@ -85,7 +85,7 @@ static NSMutableDictionary* currentTransactions;
     }
     
     //use this observer because dealloc will not be called in the same thread as the sqlite statements got prepared
-    [[NSNotificationCenter defaultCenter] addObserverForName:NSThreadWillExitNotification object:[NSThread currentThread] queue:nil usingBlock:^(NSNotification* notification) {
+    [[NSNotificationCenter defaultCenter] addObserverForName:NSThreadWillExitNotification object:[NSThread currentThread] queue:nil usingBlock:^(NSNotification* notification __unused) {
         @synchronized(self) {
             NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
             if([threadData[@"_sqliteTransactionsRunning"][self->_dbFile] intValue] > 1)
@@ -157,7 +157,7 @@ static NSMutableDictionary* currentTransactions;
     
     //bind args to statement
     sqlite3_reset(statement);
-    [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop __unused) {
         if([obj isKindOfClass:[NSNumber class]])
         {
             NSNumber* number = (NSNumber*)obj;

@@ -87,6 +87,9 @@ void logException(NSException* exception);
 
 +(BOOL) deviceUsesSplitView;
 
++(NSNumber*) currentTimestampInSeconds;
++(NSNumber*) dateToNSNumberSeconds:(NSDate*) date;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -33,7 +33,7 @@ static IPC* _sharedInstance;
 static CFNotificationCenterRef _darwinNotificationCenterRef;
 
 //forward notifications to the IPC instance that is waiting (the instance running the server thread)
-void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* observer, CFNotificationName name, const void* object, CFDictionaryRef userInfo)
+void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, void* observer, CFNotificationName name, const void* object __unused, CFDictionaryRef userInfo __unused)
 {
     [(__bridge IPC*)observer incomingDarwinNotification:(__bridge NSString*)name];
 }
@@ -242,7 +242,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
         NSDictionary* retval = nil;
         
         //delete old entries that timed out
-        NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
+        NSNumber* timestamp = [HelperTools currentTimestampInSeconds];
         [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
         
         //load a *single* message from table and delete it afterwards
@@ -267,7 +267,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     
     NSNumber* id = [self.db idWriteTransaction:^{
         //delete old entries that timed out
-        NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
+        NSNumber* timestamp = [HelperTools currentTimestampInSeconds];
         [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
         
         //save message to table

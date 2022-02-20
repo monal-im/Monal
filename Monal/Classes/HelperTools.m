@@ -181,7 +181,7 @@ void logException(NSException* exception)
             drawImageRect.size.width,
             drawImageRect.size.height
         );
-        clippedImage = [[[UIGraphicsImageRenderer alloc] initWithSize:drawRect.size format:format] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull context) {
+        clippedImage = [[[UIGraphicsImageRenderer alloc] initWithSize:drawRect.size format:format] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull context __unused) {
             //not needed here, already done below
             //if(circularMask)
             //    [[UIBezierPath bezierPathWithOvalInRect:drawRect] addClip];
@@ -214,7 +214,7 @@ void logException(NSException* exception)
     UIImage* resizedImage = clippedImage;
     if(dimensions.size.width > 0)
     {
-        resizedImage = [[[UIGraphicsImageRenderer alloc] initWithSize:dimensions.size format:format] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull context) {
+        resizedImage = [[[UIGraphicsImageRenderer alloc] initWithSize:dimensions.size format:format] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull context __unused) {
             if(circularMask)
                 [[UIBezierPath bezierPathWithOvalInRect:dimensions] addClip];
             [clippedImage drawInRect:dimensions];
@@ -233,7 +233,7 @@ void logException(NSException* exception)
     else
     {
         //now reduce quality until image data is smaller than provided size
-        int i = 0;
+        unsigned int i = 0;
         double qualityList[] = {0.96, 0.80, 0.64, 0.48, 0.32, 0.24, 0.16, 0.10, 0.09, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02, 0.01};
         for(i = 0; (data == nil || (data.length * 1.5) > length) && i < sizeof(qualityList) / sizeof(qualityList[0]); i++)
         {
@@ -306,7 +306,7 @@ void logException(NSException* exception)
 {
     unsigned char* tokenBytes = (unsigned char*)[tokenIn bytes];
     NSMutableString* token = [[NSMutableString alloc] init];
-    NSInteger counter = 0;
+    NSUInteger counter = 0;
     while(counter < tokenIn.length)
     {
         [token appendString:[NSString stringWithFormat:@"%02x", (unsigned char)tokenBytes[counter]]];
@@ -679,18 +679,21 @@ void logException(NSException* exception)
 +(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction
 {
     // get current timestamp
-    unsigned long currentTimestamp = [[NSDate date] timeIntervalSince1970];
+    unsigned long currentTimestamp = [HelperTools currentTimestampInSeconds].unsignedLongValue;
 
     unsigned long lastInteractionTime = 0;      //default is zero which corresponds to "online"
 
     // calculate timestamp and clamp it to be not in the future (but only if given)
-    if(lastInteraction && [lastInteraction timeIntervalSince1970] != 0)       //NSDictionary does not support nil, so we're using timeSince1970 + 0 sometimes
-        lastInteractionTime = MIN([lastInteraction timeIntervalSince1970], currentTimestamp);
+    if(lastInteraction && [lastInteraction timeIntervalSince1970] != 0)
+    {
+        //NSDictionary does not support nil, so we're using timeSince1970 + 0 sometimes
+        lastInteractionTime = MIN([HelperTools dateToNSNumberSeconds:lastInteraction].unsignedLongValue, currentTimestamp);
+    }
 
     if(lastInteractionTime > 0) {
         NSString* timeString;
 
-        unsigned long diff = currentTimestamp - lastInteractionTime;
+        long long diff = currentTimestamp - lastInteractionTime;
         if(diff < 60)
         {
             // less than one minute
@@ -705,7 +708,7 @@ void logException(NSException* exception)
         {
             // less than one hour
             timeString = NSLocalizedString(@"Last seen: %d minutes ago", @"");
-            diff /= 60;
+            diff /= 60.0;
         }
         else if(diff < 7200)
         {
@@ -808,7 +811,7 @@ void logException(NSException* exception)
     dispatch_source_set_timer(timer,
                               dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout*NSEC_PER_SEC)),
                               DISPATCH_TIME_FOREVER,
-                              0.1 * NSEC_PER_SEC);      //leeway of 100ms
+                              (uint64_t) (0.1 * NSEC_PER_SEC));      //leeway of 100ms
     
     dispatch_source_set_event_handler(timer, ^{
         DDLogDebug(@"timer %@ %@(%G) triggered (created at %@:%d in %@)", timer, uuid, timeout, fileName, line, funcStr);
@@ -927,7 +930,7 @@ void logException(NSException* exception)
     NSUInteger dataLength  = [data length];
     NSMutableString* hexString = [NSMutableString stringWithCapacity:(dataLength * 2)];
     
-    for (int i = 0; i < dataLength; ++i)
+    for (unsigned int i = 0; i < dataLength; ++i)
         [hexString appendString:[NSString stringWithFormat:@"%02x", (unsigned int)dataBuffer[i]]];
     
     return [NSString stringWithString:hexString];
@@ -945,11 +948,11 @@ void logException(NSException* exception)
     }
     unsigned char* bytes = malloc([hex length] / 2);
     unsigned char* bp = bytes;
-    for (CFIndex i = 0; i < [hex length]; i += 2) {
-        buf[0] = [hex characterAtIndex:i];
-        buf[1] = [hex characterAtIndex:i+1];
+    for (unsigned int i = 0; i < [hex length]; i += 2) {
+        buf[0] = (unsigned char) [hex characterAtIndex:i];
+        buf[1] = (unsigned char) [hex characterAtIndex:i+1];
         char* b2 = NULL;
-        *bp++ = strtol(buf, &b2, 16);
+        *bp++ = (unsigned char) strtol(buf, &b2, 16);
         if(b2 != buf + 2) {
             DDLogError(@"String should be all hex digits");
             free(bytes);
@@ -974,7 +977,7 @@ void logException(NSException* exception)
 {
     NSMutableString* hex = [[self signalHexKeyWithData:data] mutableCopy];
    
-    int counter = 0;
+    unsigned int counter = 0;
     while(counter <= (hex.length - 2))
     {
         counter+=8;
@@ -1046,6 +1049,16 @@ void logException(NSException* exception)
             return NO;
     }
 #endif
+}
+
++(NSNumber*) currentTimestampInSeconds
+{
+    return [HelperTools dateToNSNumberSeconds:[NSDate date]];
+}
+
++(NSNumber*) dateToNSNumberSeconds:(NSDate*) date
+{
+    return [NSNumber numberWithUnsignedLong:(unsigned long)date.timeIntervalSince1970];
 }
 
 @end

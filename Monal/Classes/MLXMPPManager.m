@@ -324,7 +324,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - app state
 
--(void) nowNoLongerInFocus
+-(void) noLongerInFocus
 {
     _isBackgrounded = NO;
     _isNotInFocus = YES;
@@ -376,31 +376,31 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [account approveToRoster:contact.contactJid];
 }
 
--(BOOL) isAccountForIdConnected:(NSString*) accountNo
+-(BOOL) isAccountForIdConnected:(NSNumber*) accountNo
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
     if(account.accountState>=kStateBound) return YES;
     return NO;
 }
 
--(NSDate *) connectedTimeFor:(NSString*) accountNo
+-(NSDate *) connectedTimeFor:(NSNumber*) accountNo
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
     return account.connectedTime;
 }
 
--(xmpp* _Nullable) getConnectedAccountForID:(NSString*) accountNo
+-(xmpp* _Nullable) getConnectedAccountForID:(NSNumber*) accountNo
 {
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
         //using stringWithFormat: makes sure this REALLY is a string
-        if([xmppAccount.accountNo isEqualToString:[NSString stringWithFormat:@"%@", accountNo]])
+        if(xmppAccount.accountNo.intValue == accountNo.intValue)
             return xmppAccount;
     }
     return nil;
 }
 
--(void) connectAccount:(NSString*) accountNo
+-(void) connectAccount:(NSNumber*) accountNo
 {
     NSDictionary* account = [[DataLayer sharedInstance] detailsForAccount:accountNo];
     if(!account)
@@ -411,7 +411,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) connectAccountWithDictionary:(NSDictionary*) account
 {
-    xmpp* existing = [self getConnectedAccountForID:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
+    xmpp* existing = [self getConnectedAccountForID:[account objectForKey:kAccountID]];
     if(existing)
     {
         if(![account[@"enabled"] boolValue])
@@ -440,7 +440,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     }
     MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@", [account objectForKey:kUsername], [account objectForKey:kDomain]] password:password andResource:[account objectForKey:kResource]];
     MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
-    xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
+    xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[account objectForKey:kAccountID]];
     xmppAccount.statusMessage = [account objectForKey:@"statusMessage"];
 
     @synchronized(_connectedXMPP) {
@@ -462,16 +462,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 
--(void) disconnectAccount:(NSString*) accountNo
+-(void) disconnectAccount:(NSNumber*) accountNo
 {
-    int index=0;
-    int pos=-1;
+    int index = 0;
+    int pos = -1;
     xmpp* account;
     BOOL lastConnectedAccount = NO;
     @synchronized(_connectedXMPP) {
         for(xmpp* xmppAccount in _connectedXMPP)
         {
-            if([xmppAccount.accountNo isEqualToString:accountNo] )
+            if(xmppAccount.accountNo.intValue == accountNo.intValue)
             {
                 account = xmppAccount;
                 pos=index;
@@ -480,7 +480,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             index++;
         }
 
-        if((pos>=0) && (pos<[_connectedXMPP count]))
+        if((pos >= 0) && (pos < (int)[_connectedXMPP count]))
         {
             [_connectedXMPP removeObjectAtIndex:pos];
             DDLogVerbose(@"removed account at pos  %d", pos);
@@ -544,17 +544,17 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     DDLogVerbose(@"manager connectIfNecessary done");
 }
 
--(void) updatePassword:(NSString*) password forAccount:(NSString*) accountNo
+-(void) updatePassword:(NSString*) password forAccount:(NSNumber*) accountNo
 {
     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-    [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo];
+    [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo.stringValue];
     xmpp* xmpp = [self getConnectedAccountForID:accountNo];
     [xmpp.connectionProperties.identity updatPassword:password];
 }
 
--(BOOL) isValidPassword:(NSString*) password forAccount:(NSString*) accountNo
+-(BOOL) isValidPassword:(NSString*) password forAccount:(NSNumber*) accountNo
 {
-    return [password isEqualToString:[SAMKeychain passwordForService:kMonalKeychainName account:accountNo]];
+    return [password isEqualToString:[SAMKeychain passwordForService:kMonalKeychainName account:accountNo.stringValue]];
 }
 
 #pragma mark -  XMPP commands
@@ -598,7 +598,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
     }
     else
+    {
         DDLogError(@"Could not add message to history!");
+        completion(false, nil);
+    }
 }
 
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
@@ -614,7 +617,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         completion(success, messageId);
 }
 
--(void) sendChatState:(BOOL) isTyping fromAccount:(NSString*) accountNo toJid:(NSString*) jid
+-(void) sendChatState:(BOOL) isTyping fromAccount:(NSNumber*) accountNo toJid:(NSString*) jid
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
     if(account)
@@ -623,7 +626,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - getting details
 
--(NSString*) getAccountNameForConnectedRow:(NSInteger) row
+-(NSString*) getAccountNameForConnectedRow:(NSUInteger) row
 {
     xmpp* account;
     @synchronized(_connectedXMPP) {
@@ -663,6 +666,7 @@ $$
         }
         //remove from DB
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
+        // notify the UI
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contact}];
     }
 }
@@ -740,7 +744,7 @@ $$
     [account setBlocked:isBlocked forJid:contact.contactJid];
 }
 
--(void) blocked:(BOOL) isBlocked Jid:(NSString *) contact Account:(NSString*) accountNo
+-(void) blocked:(BOOL) isBlocked Jid:(NSString *) contact Account:(NSNumber*) accountNo
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
     [account setBlocked:isBlocked forJid:contact];

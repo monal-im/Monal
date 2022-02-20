@@ -25,10 +25,10 @@
 @property (nonatomic, strong) SignalSignedPreKey* signedPreKey;
 @property (nonatomic, strong) NSArray<SignalPreKey*>* preKeys;
 
--(MLSignalStore*) initWithAccountId:(NSString *) accountId;
+-(MLSignalStore*) initWithAccountId:(NSNumber*) accountId;
 -(void) saveValues;
 
--(NSData*) getIdentityForAddress:(SignalAddress*) ddress;
+-(NSData*) getIdentityForAddress:(SignalAddress*) address;
 /**
  all devices even those without sessions
  */
@@ -44,13 +44,18 @@
 -(void) markSessionAsBroken:(SignalAddress*) address;
 -(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceId;
 
+// MUC session management
+-(BOOL) sessionsExistForBuddy:(NSString*) buddyJid;
+-(BOOL) checkIfSessionIsStillNeeded:(NSString*) buddyJid;
+-(NSArray<NSString*>*) removeDanglingMucSessions;
+
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*) address;
 -(int) getInternalTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey;
 -(void) untrustAllDevicesFrom:(NSString*) jid;
 -(NSNumber*) getTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey;
 
 -(int) getHighestPreyKeyId;
--(int) getPreKeyCount;
+-(unsigned int) getPreKeyCount;
 
 
 @end

@@ -808,7 +808,7 @@ void logException(NSException* exception)
     dispatch_source_set_timer(timer,
                               dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout*NSEC_PER_SEC)),
                               DISPATCH_TIME_FOREVER,
-                              (uint64_t) 0.1 * NSEC_PER_SEC);      //leeway of 100ms
+                              (uint64_t) (0.1 * NSEC_PER_SEC));      //leeway of 100ms
     
     dispatch_source_set_event_handler(timer, ^{
         DDLogDebug(@"timer %@ %@(%G) triggered (created at %@:%d in %@)", timer, uuid, timeout, fileName, line, funcStr);

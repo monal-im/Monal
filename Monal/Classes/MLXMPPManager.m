@@ -464,8 +464,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) disconnectAccount:(NSNumber*) accountNo
 {
-    int index=0;
-    unsigned int pos=-1;
+    int index = 0;
+    int pos = -1;
     xmpp* account;
     BOOL lastConnectedAccount = NO;
     @synchronized(_connectedXMPP) {
@@ -480,7 +480,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             index++;
         }
 
-        if((pos>=0) && (pos<[_connectedXMPP count]))
+        if((pos >= 0) && (pos < (int)[_connectedXMPP count]))
         {
             [_connectedXMPP removeObjectAtIndex:pos];
             DDLogVerbose(@"removed account at pos  %d", pos);

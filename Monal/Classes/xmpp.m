@@ -3782,10 +3782,10 @@ NSString* const kStanza = @"stanza";
     if(_outputBufferByteCount > 0)
     {
         DDLogVerbose(@"sending remaining bytes in outputBuffer: %lu", (unsigned long)_outputBufferByteCount);
-        NSUInteger sentLen = [_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
-        if(sentLen != (unsigned long) -1)
+        NSInteger sentLen = [_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
+        if(sentLen > 0)
         {
-            if(sentLen != _outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
+            if((NSUInteger)sentLen != _outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
             {
                 DDLogVerbose(@"could not send all bytes in outputBuffer: %lu of %lu sent, %lu remaining", (unsigned long)sentLen, (unsigned long)_outputBufferByteCount, (unsigned long)(_outputBufferByteCount-sentLen));
                 memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteCount-(size_t)sentLen);

@@ -652,7 +652,7 @@ NSString* const kStanza = @"stanza";
 {
     //this has to be synchronous because we want to be sure the parse queue is operating again once we leave this method
     [self dispatchOnReceiveQueue: ^{
-        _parseQueue.suspended = NO;
+        self->_parseQueue.suspended = NO;
         DDLogWarn(@"Parse queue is UNfreezed now!");
     }];
 }

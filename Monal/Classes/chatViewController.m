@@ -873,12 +873,16 @@ enum msgSentState {
     NSString* newMessageID = messageID ? messageID : [[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
     NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
-    if(!accountDict)
+    if(accountDict == nil)
     {
-        DDLogError(@"Account not found!");
+        DDLogError(@"AccountNo %@ not found!", self.contact.accountId);
         return;
     }
-
+    if(self.contact.contactJid == nil || [[DataLayer sharedInstance] isContactInList:self.contact.contactJid forAccount:self.contact.accountId] == NO)
+    {
+        DDLogError(@"Can not send message to unkown contact %@ on accountNo %@ - GUI Error", self.contact.contactJid, self.contact.accountId);
+        return;
+    }
     if(!messageID && !messageType) {
         DDLogError(@"message id and type both cant be empty");
         return;

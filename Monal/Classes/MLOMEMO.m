@@ -179,18 +179,15 @@ const int KEY_SIZE = 16;
     DDLogInfo(@"sendLocalDevicesIfNeeded");
     if([self.ownReceivedDeviceList count] == 0) {
         // we need to publish a new devicelist if we did not receive our own list after a new connection
-        // Generate single use keys
-        if([self generateNewKeysIfNeeded] == NO)
-            DDLogInfo(@"Sending Bundle eventhough no new keys were generated");
-            [self sendOMEMOBundle];
-
+        DDLogInfo(@"Sending Bundle eventhough no new keys were generated");
+        // generate new keys if needed and send them out
         [self sendOMEMODeviceWithForce:YES];
     }
     else
     {
         DDLogInfo(@"Publishing first OMEMO device");
         // Generate single use keys
-        [self generateNewKeysIfNeeded];
+        [self generateNewKeysIfNeeded:NO];
         [self sendOMEMODeviceWithForce:NO];
     }
 }
@@ -221,7 +218,7 @@ $$
  * generates new omemo keys if we have less than MIN_OMEMO_KEYS left
  * returns YES if keys were generated and the new omemo bundle was send
  */
--(BOOL) generateNewKeysIfNeeded
+-(BOOL) generateNewKeysIfNeeded:(BOOL) force
 {
     // generate new keys if less than MIN_OMEMO_KEYS are available
     unsigned int preKeyCount = [self.monalSignalStore getPreKeyCount];
@@ -231,7 +228,17 @@ $$
 
         // Generate new keys so that we have a total of MAX_OMEMO_KEYS keys again
         int lastPreyKedId = [self.monalSignalStore getHighestPreyKeyId];
+        if(MAX_OMEMO_KEYS < preKeyCount)
+        {
+            DDLogWarn(@"OMEMO MAX_OMEMO_KEYs has changed: MAX: %zu current: %u", MAX_OMEMO_KEYS, preKeyCount);
+            return NO;
+        }
         size_t cntKeysNeeded = MAX_OMEMO_KEYS - preKeyCount;
+        if(cntKeysNeeded == 0)
+        {
+            DDLogWarn(@"No new pre keys needed: force: %@", force ? @"YES" : @"NO");
+            return NO;
+        }
         // Start generating with keyId > last send key id
         self.monalSignalStore.preKeys = [signalHelper generatePreKeysWithStartingPreKeyId:(lastPreyKedId + 1) count:cntKeysNeeded];
         [self.monalSignalStore saveValues];
@@ -325,7 +332,7 @@ $$
 $$instance_handler(handleDevicelistSubscribe, account.omemo, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(success == NO)
     {
-        DDLogWarn(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorIq);
+        DDLogError(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorIq);
     }
     // TODO: improve error handling
 $$
@@ -333,7 +340,7 @@ $$
 $$instance_handler(handleDevicelistUnsubscribe, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(success == NO)
     {
-        DDLogWarn(@"Error while unsubscribing omemo deviceslist from: %@ - %@", jid, errorIq);
+        DDLogError(@"Error while unsubscribing omemo deviceslist from: %@ - %@", jid, errorIq);
     }
     // TODO: improve error handling
 $$
@@ -341,7 +348,7 @@ $$
 $$instance_handler(handleManualDevices, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data))
     if(errorIq)
     {
-        DDLogWarn(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorIq);
+        DDLogError(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorIq);
     }
     else
     {
@@ -471,7 +478,11 @@ $$
     {
         DDLogInfo(@"Publishing OMEMO Devices with Force %u", force);
         [self.ownReceivedDeviceList addObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]];
-        [self sendOMEMOBundle];
+        // generate new keys if we are already publishing a new bundle
+        if([self generateNewKeysIfNeeded:YES] == NO)
+        {
+            [self sendOMEMOBundle];
+        }
         [self publishDevicesViaPubSub:self.ownReceivedDeviceList];
     }
 }
@@ -758,11 +769,9 @@ $$
         DDLogInfo(@"Ignoring rebuildSessionsstate %u", self.omemoLoginState);
         return;
     }
-    if([self.brokenSessions count] == 0 && [self generateNewKeysIfNeeded]) {
+    if([self.brokenSessions count] == 0 && [self generateNewKeysIfNeeded:NO] == YES) {
         return;
     }
-    [self sendOMEMOBundle];
-
     for(NSString* contactJid in self.brokenSessions) {
         NSSet* rids = [self.brokenSessions objectForKey:contactJid];
         for(NSNumber* rid in rids) {
@@ -908,7 +917,7 @@ $$
             {
                 // check if we need to generate new preKeys
                 if(self.omemoLoginState == CatchupDone) {
-                    if([self generateNewKeysIfNeeded] == NO) {
+                    if([self generateNewKeysIfNeeded:NO] == NO) {
                         // send new bundle without the used preKey if no new keys were generated
                         // nothing todo if generateNewKeysIfNeeded == YES as it sends out the new bundle if new keys were generated
                         [self sendOMEMOBundle];

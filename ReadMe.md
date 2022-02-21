@@ -5,10 +5,14 @@
 
 This is the Monal XMPP client as found in the app store.  If you want to  use the latest stable versions, search for Monal in the iOS or OSX app store. [Visit the blog to read about the development](https://monal.im)!
 
-Find the current stable releases here:
+## Releases
+|        | iOS                                                      | macOS                                                    | macOS (homebrew)                            |
+|--------|----------------------------------------------------------|----------------------------------------------------------|---------------------------------------------|
+| Stable | [App Store](https://apps.apple.com/app/id317711500)      | [App Store](https://apps.apple.com/app/id1499227291)     |                                             |
+| Beta   | [Testflight](https://testflight.apple.com/join/RjIlyvqa) | [Testflight](https://testflight.apple.com/join/nBWaZryI) | brew install --cask monal                   |
+| Alpha  |                                                          |                                                          | brew tap monal-im/homebrew-monal-alpha<br>brew install --cask monal-alpha |
 
-* [iOS App Store](https://apps.apple.com/app/id317711500)
-* [macOS App Store](https://apps.apple.com/app/id1499227291)
+
 
 ### iOS Screenshots
 <p float="left">

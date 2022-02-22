@@ -525,12 +525,12 @@
             [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity \
                 WHERE \
                     account_id=? \
-                    AND buddyJid=? \
+                    AND contactName=? \
              " andArguments:@[self.accountId, buddyJid]];
             [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession \
                 WHERE \
                     account_id=? \
-                    AND buddyJid=? \
+                    AND contactName=? \
              " andArguments:@[self.accountId, buddyJid]];
         }
         return buddyStillNeeded;

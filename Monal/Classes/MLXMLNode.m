@@ -14,6 +14,21 @@
 #import "XMPPPresence.h"
 #import "XMPPDataForm.h"
 
+
+//weak container holding an object as weak pointer (needed to not create retain circles in NSCache
+@interface WeakContainer : NSObject
+@property (nonatomic, weak) id obj;
+@end
+@implementation WeakContainer
+-(id) initWithObj:(id) obj
+{
+    self = [super init];
+    self.obj = obj;
+    return self;
+}
+@end
+
+
 @interface MLXMLNode()
 {
     NSMutableArray* _children;
@@ -317,9 +332,9 @@ static NSRegularExpression* attributeFilterRegex;
     va_end(cacheKeyArgs);
     
     //return results from cache if possible
-    NSArray* cacheEntry = [self.cache objectForKey:cacheKey];
-    if(cacheEntry)
-        return cacheEntry;
+    WeakContainer* cacheEntryContainer = [self.cache objectForKey:cacheKey];
+    if(cacheEntryContainer != nil && cacheEntryContainer.obj != nil)
+        return (NSArray*)cacheEntryContainer.obj;
     
 #ifdef QueryStatistics
     @synchronized(statistics) {
@@ -346,7 +361,7 @@ static NSRegularExpression* attributeFilterRegex;
         results = [self find:queryString inNodeList:_children arguments:args];                             //relative path (check childs first)
     
     //update cache and return results
-    [self.cache setObject:results forKey:cacheKey];
+    [self.cache setObject:[[WeakContainer alloc] initWithObj:results] forKey:cacheKey];                    //use weak container to break retain circle
     return results;
 }
 

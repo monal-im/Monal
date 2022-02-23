@@ -130,6 +130,12 @@ void logException(NSException* exception)
     __block NSError* retval = nil;
     NSCondition* condition = [[NSCondition alloc] init];
     [condition lock];
+    monal_void_block_t cancelTimeout = createTimer(1.0, (^{
+        DDLogError(@"Waiting for notification center took more than 1.0 second, continuing anyways");
+        [condition lock];
+        [condition signal];
+        [condition unlock];
+    }));
     [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
         if(error)
             DDLogError(@"Error posting notification: %@", error);
@@ -140,6 +146,7 @@ void logException(NSException* exception)
     }];
     [condition wait];
     [condition unlock];
+    cancelTimeout();
     return retval;
 }
 

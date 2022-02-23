@@ -348,6 +348,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     NSError* error = [HelperTools postUserNotificationRequest:request];
     if(error)
         DDLogError(@"Error posting local badge_update notification: %@", error);
+    else
+        DDLogVerbose(@"Unread badge updated successfully");
 }
 
 -(void) scheduleBackgroundFetchingTask

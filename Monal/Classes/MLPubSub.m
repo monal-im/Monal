@@ -489,7 +489,7 @@ $$instance_handler(handleSubscribe, account.pubsub, $_ID(xmpp*, account), $_ID(X
         return;
     }
     
-    if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/subscription<node=%@><jid=%@><subscription=subscribed>", jid, node, account.connectionProperties.identity.jid])
+    if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/subscription<node=%@><jid=%@><subscription=subscribed>", node, account.connectionProperties.identity.jid])
     {
         DDLogDebug(@"Successfully subscribed to node '%@' on jid '%@'...", node, iqNode.fromUser);
         

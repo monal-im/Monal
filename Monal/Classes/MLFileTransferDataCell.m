@@ -74,6 +74,11 @@
     [self.downloadImageView setHidden:NO];
 }
 
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 -(void)copy:(id)sender {
     UIPasteboard* pboard = [UIPasteboard generalPasteboard];
     pboard.string = self.messageBody.text;

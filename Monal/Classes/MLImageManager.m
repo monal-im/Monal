@@ -70,7 +70,7 @@
     return self;
 }
 
--(void) deinit
+-(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -90,7 +90,7 @@
 
 -(void) purgeCacheForContact:(NSString*) contact andAccount:(NSNumber*) accountNo
 {
-    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@",accountNo,contact]];
+    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@",accountNo, contact]];
 }
 
 -(void) cleanupHashes

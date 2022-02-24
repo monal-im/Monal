@@ -118,6 +118,7 @@ static NSMutableDictionary* currentTransactions;
 
 -(void) dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     @synchronized(self) {
         NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
         if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)

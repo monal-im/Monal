@@ -42,6 +42,11 @@
     self.blockingHUD.hidden = YES;
 }
 
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 -(void) reloadBlocksFromDB
 {
     self.blockedJids = [[NSMutableArray alloc] initWithArray:[[DataLayer sharedInstance] blockedJidsForAccount:self.xmppAccount.accountNo]];

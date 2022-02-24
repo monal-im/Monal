@@ -39,6 +39,11 @@
     [self.mamPref addObject:@{@"Title":NSLocalizedString(@"Only contacts", @""), @"Description":NSLocalizedString(@"Archive only if the contact is in contact list", @""), @"value":@"roster"}];
 }
 
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 
 -(void) updatePrefs:(NSNotification *) notification
 {

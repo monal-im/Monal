@@ -94,6 +94,11 @@ static NSMutableSet* _smacksWarningDisplayed;
     self.chatListTable.emptyDataSetDelegate = self;
 }
 
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 -(void) refreshDisplay
 {
     size_t unpinnedConCntBefore = self.unpinnedContacts.count;

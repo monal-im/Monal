@@ -11,12 +11,14 @@ body:
   - type: checkboxes
     id: bug-checkbox
     attributes:
+      label: Precondition
       options:
         - label: I understood that this template is only for feature requests and not for bug reports
           required: true
   - type: checkboxes
     id: cross-check-checkbox
     attributes:
+      label: Cross-checked related issues?
       options:
         - label: I have cross-checked this overview https://github.com/monal-im/Monal/issues/322 as well as filtered for related labels https://github.com/monal-im/Monal/labels
           required: true

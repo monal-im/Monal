@@ -38,6 +38,11 @@ static NSString* _processID;
     _processID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
 }
 
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 -(void) didAddLogger
 {
     _cfsocketout = CFSocketCreate(

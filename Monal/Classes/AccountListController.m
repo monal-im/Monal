@@ -48,8 +48,7 @@
 
 -(void) dealloc
 {
-    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
-    [nc removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(NSUInteger) getAccountNum

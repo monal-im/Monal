@@ -159,9 +159,9 @@ static NSRegularExpression* attributeFilterRegex;
     return self;
 }
 
--(void) deinit
+-(void) dealloc
 {
-    DDLogVerbose(@"Deinit of MLXMLNode: %@", self);
+    DDLogVerbose(@"Dealloc of MLXMLNode: %@", self);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self.cache removeAllObjects];
     [self.queryEntryCache removeAllObjects];

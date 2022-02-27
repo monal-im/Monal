@@ -745,6 +745,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) applicationWillResignActive:(UIApplication *)application
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void) nowReallyBackgrounded

@@ -917,11 +917,7 @@ $$
             {
                 // check if we need to generate new preKeys
                 if(self.omemoLoginState == CatchupDone) {
-                    if([self generateNewKeysIfNeeded:NO] == NO) {
-                        // send new bundle without the used preKey if no new keys were generated
-                        // nothing todo if generateNewKeysIfNeeded == YES as it sends out the new bundle if new keys were generated
-                        [self sendOMEMOBundle];
-                    }
+                    [self generateNewKeysIfNeeded:NO];
                     // build session
                     [self sendKeyTransportElement:senderJid removeBrokenSessionForRid:sid];
                 }

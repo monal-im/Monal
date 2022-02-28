@@ -664,14 +664,15 @@ enum DummySettingsRows {
         UITapGestureRecognizer* touchUserAvatarRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getPhotoAction:)];
         [self.userAvatarImageView addGestureRecognizer:touchUserAvatarRecognizer];
         
-        //use noicon image for account creation
-        if(!self.jid)
-            [self.userAvatarImageView setImage:[MLImageManager circularImage:[UIImage imageNamed:@"noicon"]]];
-        else
+        if(self.editMode == YES && self.jid != nil && self.accountNo.intValue >= 0)
             [[MLImageManager sharedInstance] getIconForContact:[MLContact createContactFromJid:self.jid andAccountNo:self.accountNo] withCompletion:^(UIImage *image) {
                 [self.userAvatarImageView setImage:image];
             }];
-        
+        else
+        {
+            //use noicon image for account creation
+            [self.userAvatarImageView setImage:[MLImageManager circularImage:[UIImage imageNamed:@"noicon"]]];
+        }
         [avatarView addSubview:self.userAvatarImageView];
         
         return avatarView;

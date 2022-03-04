@@ -1099,7 +1099,7 @@ enum msgSentState {
             [self.locationManager requestLocation];
         }
     }
-    else
+    else if(gpsStatus == kCLAuthorizationStatusDenied || gpsStatus == kCLAuthorizationStatusRestricted)
     {
         // Display warning
         UIAlertController* gpsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing permission", @"")
@@ -1107,7 +1107,7 @@ enum msgSentState {
         [gpsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action) {
             [gpsWarning dismissViewControllerAnimated:YES completion:nil];
         }]];
-        [gpsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Settings", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action) {
+        [gpsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Settings", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:@{} completionHandler:nil];
         }]];
         [self presentViewController:gpsWarning animated:YES completion:nil];
@@ -1298,19 +1298,21 @@ enum msgSentState {
 #endif
     }
 
-    UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
+    UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
         // GPS
-        CLLocationManager* gpsManager = [CLLocationManager init];
+        CLLocationManager* gpsManager = [[CLLocationManager alloc] init];
         CLAuthorizationStatus gpsStatus = [gpsManager authorizationStatus];
         if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
             [self displayGPSHUD];
             [self makeLocationManager];
             [self.locationManager startUpdatingLocation];
-        } else if(gpsStatus == kCLAuthorizationStatusNotDetermined) {
+        }
+        else if(gpsStatus == kCLAuthorizationStatusNotDetermined || gpsStatus == kCLAuthorizationStatusRestricted)
+        {
 #if TARGET_OS_MACCATALYST
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed", @"") message:NSLocalizedString(@"Monal uses your location when you send a location message in a conversation.", @"") preferredStyle:UIAlertControllerStyleAlert];
 
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action) {
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
 
@@ -1322,18 +1324,18 @@ enum msgSentState {
             [alert addAction:allow];
 
             [self presentViewController:alert animated:YES completion:nil];
-
 #else
             [self makeLocationManager];
             self.sendLocation = YES;
             [self.locationManager requestWhenInUseAuthorization];
 #endif
-
-        } else {
-            UIAlertController *permissionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed",@ "")
-                                                                                     message:NSLocalizedString(@"Monal does not have access to your location. Please update the location access in your device's Privacy Settings.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+        }
+        else
+        {
+            UIAlertController *permissionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed", @"")
+                                                                                     message:NSLocalizedString(@"Monal does not have access to your location. Please update the location access in your device's Privacy Settings.", @"") preferredStyle:UIAlertControllerStyleAlert];
             [self presentViewController:permissionAlert animated:YES completion:nil];
-            [permissionAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action __unused) {
+            [permissionAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action __unused) {
                 [permissionAlert dismissViewControllerAnimated:YES completion:nil];
             }]];
         }
@@ -1342,11 +1344,11 @@ enum msgSentState {
     // Set image
     [gpsAlert setValue:[[UIImage systemImageNamed:@"location"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
     [actionControll addAction:gpsAlert];
-    [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action) {
         [actionControll dismissViewControllerAnimated:YES completion:nil];
     }]];
 
-    actionControll.popoverPresentationController.sourceView=sender;
+    actionControll.popoverPresentationController.sourceView = sender;
     [self presentViewController:actionControll animated:YES completion:nil];
 }
 

@@ -55,18 +55,16 @@ jobs:
         run: xcrun altool --notarize-app -f ./Monal/build/app/Monal.zip --type macos --asc-provider AnurodhPokharel17643632 --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
       - name: Publish ios to appstore connect
         run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider AnurodhPokharel17643632 --team-id 33XS7DE5NZ -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
-      - name: wait a bit for noarize
-        run: sleep 60
       - name: staple
         run: |
           cd Monal/build/app/tar_release/
           stapleTries=0
           while :
           do
-            xcrun stapler staple "$APP_DIR" || sleep 60
+            xcrun stapler staple "$APP_DIR" || sleep 15
             stapleTries=$((stapleTries +1))
             if [ $? -eq 0 ]; then break; fi
-            if [ $stapleTries -gt 15]; then exit 1; fi
+            if [ $stapleTries -gt 60]; then exit 1; fi
           done
           stapler validate "$APP_DIR"
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"

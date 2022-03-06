@@ -224,7 +224,15 @@ static NSRegularExpression* attributeFilterRegex;
 {
     if(!child)
         return nil;
-    MLXMLNode* insertedChild = [child copy];
+    return [self addChildNodeWithoutCopy:[child copy]];
+}
+
+//only used by MLBaseParser to add new childs without deep-copying the object
+-(MLXMLNode*) addChildNodeWithoutCopy:(MLXMLNode*) child
+{
+    if(!child)
+        return nil;
+    MLXMLNode* insertedChild = child;
     insertedChild.parent = self;
     //namespace inheritance (will be stripped by XMLString later on)
     //we do this here to make sure manual created nodes always have a namespace like the nodes created by the xml parser do

@@ -796,8 +796,8 @@ enum msgSentState {
 
         if(![HelperTools isNotInFocus])
         {
-            //don't block the main thread while writing to the db (anoter thread could hold a write transaction already, slowing down the main thread)
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            //don't block the main thread while writing to the db (another thread could hold a write transaction already, slowing down the main thread)
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
                 //get list of unread messages
                 NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
 

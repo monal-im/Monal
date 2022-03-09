@@ -323,8 +323,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if([notification.userInfo[@"isSevere"] boolValue])
     {
         //dispatch in another thread to avoid blocking the thread posting this notification (most probably the receiveQueue)
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            //disconnect this account and wait until the rest of our account and the appex times out
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            //disconnect this account and wait until the rest of our accounts and the appex times out
             DDLogWarn(@"notification handler: severe account error --> disconnecting this account");
             [notification.object disconnect];
         });

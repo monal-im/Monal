@@ -62,7 +62,7 @@ static NSMutableSet* _currentlyTransfering;
         }
         [_currentlyTransfering addObject:historyId];
     }
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         DDLogInfo(@"Requesting mime-type and size for historyID %@ from http server", historyId);
         NSString* url = [self genCanonicalUrl:msg.messageText];
         NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
@@ -147,7 +147,7 @@ static NSMutableSet* _currentlyTransfering;
         }
         [_currentlyTransfering addObject:historyId];
     }
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         DDLogInfo(@"Downloading file for historyID %@", historyId);
         NSString* url = [self genCanonicalUrl:msg.messageText];
         NSURLComponents* urlComponents = [NSURLComponents componentsWithString:msg.messageText];

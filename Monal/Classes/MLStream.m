@@ -268,7 +268,7 @@
     
     //create and configure connectiojn object
     nw_connection_t connection = nw_connection_create(endpoint, parameters);
-    nw_connection_set_queue(connection, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+    nw_connection_set_queue(connection, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0));
     
     //create and configure public stream instances returned later
     MLSharedStreamState* shared_state = [[MLSharedStreamState alloc] initWithConnection:connection];

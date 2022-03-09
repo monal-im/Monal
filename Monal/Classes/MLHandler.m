@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 #import "MLHandler.h"
+#import "HelperTools.h"
 
 #define HANDLER_VERSION 1
 
@@ -73,60 +74,56 @@
 
 -(void) callWithArguments:(NSDictionary* _Nullable) args
 {
+    MLAssert(_internalData[@"delegate"] && _internalData[@"handlerName"], @"Tried to call MLHandler while delegate and/or handlerName was not set!", @{@"handler": _internalData});
     [self checkInvalidation];
-    if(_internalData[@"delegate"] && _internalData[@"handlerName"])
-    {
-        args = [self sanitizeArguments:args];
-        id delegate = NSClassFromString(_internalData[@"delegate"]);
-        SEL sel = [self handlerNameToSelector:_internalData[@"handlerName"]];
-        if(![delegate respondsToSelector:sel])
-            @throw [NSException exceptionWithName:@"RuntimeException" reason:[NSString stringWithFormat:@"Class '%@' does not provide handler implementation '%@'!", _internalData[@"delegate"], _internalData[@"handlerName"]] userInfo:@{
-                @"delegate": _internalData[@"delegate"],
-                @"handlerSelector": NSStringFromSelector(sel),
-            }];
-        DDLogVerbose(@"Calling handler %@...", self);
-        NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:sel]];
-        [inv setTarget:delegate];
-        [inv setSelector:sel];
-        //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
-        //default arguments of the caller
-        [inv setArgument:(void* _Nonnull)&args atIndex:2];
-        //bound arguments of the handler
-        //make sure we use a copy because we don't want to leak changes of our bound arguments dict into already running invocations
-        NSDictionary* boundArgs = [_internalData[@"boundArguments"] copy];
-        [inv setArgument:(void* _Nonnull)&boundArgs atIndex:3];
-        //now call it
-        [inv invoke];
-    }
+    args = [self sanitizeArguments:args];
+    id delegate = NSClassFromString(_internalData[@"delegate"]);
+    SEL sel = [self handlerNameToSelector:_internalData[@"handlerName"]];
+    if(![delegate respondsToSelector:sel])
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:[NSString stringWithFormat:@"Class '%@' does not provide handler implementation '%@'!", _internalData[@"delegate"], _internalData[@"handlerName"]] userInfo:@{
+            @"delegate": _internalData[@"delegate"],
+            @"handlerSelector": NSStringFromSelector(sel),
+        }];
+    DDLogVerbose(@"Calling handler %@...", self);
+    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:sel]];
+    [inv setTarget:delegate];
+    [inv setSelector:sel];
+    //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
+    //default arguments of the caller
+    [inv setArgument:(void* _Nonnull)&args atIndex:2];
+    //bound arguments of the handler
+    //make sure we use a copy because we don't want to leak changes of our bound arguments dict into already running invocations
+    NSDictionary* boundArgs = [_internalData[@"boundArguments"] copy];
+    [inv setArgument:(void* _Nonnull)&boundArgs atIndex:3];
+    //now call it
+    [inv invoke];
 }
 
 -(void) invalidateWithArguments:(NSDictionary* _Nullable) args
 {
+    MLAssert(_internalData[@"delegate"] && _internalData[@"invalidationName"], @"Tried to call invalidation of MLHandler while delegate and/or invalidationName was not set!", @{@"handler": _internalData});
     [self checkInvalidation];
-    if(_internalData[@"delegate"] && _internalData[@"invalidationName"])
-    {
-        args = [self sanitizeArguments:args];
-        id delegate = NSClassFromString(_internalData[@"delegate"]);
-        SEL sel = [self handlerNameToSelector:_internalData[@"invalidationName"]];
-        if(![delegate respondsToSelector:sel])
-            @throw [NSException exceptionWithName:@"RuntimeException" reason:[NSString stringWithFormat:@"Class '%@' does not provide invalidation implementation '%@'!", _internalData[@"delegate"], _internalData[@"invalidationName"]] userInfo:@{
-                @"delegate": _internalData[@"delegate"],
-                @"handlerSelector": NSStringFromSelector([self handlerNameToSelector:_internalData[@"handlerName"]]),
-                @"invalidationSelector": NSStringFromSelector(sel),
-            }];
-        DDLogVerbose(@"Calling invalidation %@...", self);
-        NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:sel]];
-        [inv setTarget:delegate];
-        [inv setSelector:sel];
-        //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
-        //default arguments of the caller
-        [inv setArgument:(void* _Nonnull)&args atIndex:2];
-        //bound arguments of the handler
-        NSDictionary* boundArgs = _internalData[@"boundArguments"];
-        [inv setArgument:(void* _Nonnull)&boundArgs atIndex:3];
-        //now call it
-        [inv invoke];
-    }
+    args = [self sanitizeArguments:args];
+    id delegate = NSClassFromString(_internalData[@"delegate"]);
+    SEL sel = [self handlerNameToSelector:_internalData[@"invalidationName"]];
+    if(![delegate respondsToSelector:sel])
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:[NSString stringWithFormat:@"Class '%@' does not provide invalidation implementation '%@'!", _internalData[@"delegate"], _internalData[@"invalidationName"]] userInfo:@{
+            @"delegate": _internalData[@"delegate"],
+            @"handlerSelector": NSStringFromSelector([self handlerNameToSelector:_internalData[@"handlerName"]]),
+            @"invalidationSelector": NSStringFromSelector(sel),
+        }];
+    DDLogVerbose(@"Calling invalidation %@...", self);
+    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:sel]];
+    [inv setTarget:delegate];
+    [inv setSelector:sel];
+    //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
+    //default arguments of the caller
+    [inv setArgument:(void* _Nonnull)&args atIndex:2];
+    //bound arguments of the handler
+    NSDictionary* boundArgs = _internalData[@"boundArguments"];
+    [inv setArgument:(void* _Nonnull)&boundArgs atIndex:3];
+    //now call it
+    [inv invoke];
     _invalidated = YES;
 }
 
@@ -175,6 +172,7 @@
     return copy;
 }
 
+//this removes NSNull references from arguments altogether
 -(NSMutableDictionary*) sanitizeArguments:(NSDictionary* _Nullable) args
 {
     NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];

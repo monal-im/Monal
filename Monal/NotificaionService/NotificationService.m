@@ -483,6 +483,28 @@ static BOOL warnUnclean = NO;
     DDLogError(@"notification handler expired, that should never happen!");
     
 #ifdef DEBUG
+    UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
+    errorContent.title = @"Unexpected appex expiration";
+    errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
+    errorContent.sound = [UNNotificationSound defaultSound];
+    UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:errorContent trigger:nil];
+    NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
+    if(error)
+        DDLogError(@"Error posting local appex expiration error notification: %@", error);
+#endif
+    
+    //It seems the iOS induced deadlock unlocks itself after this expiration handler got called and even new pushes
+    //can come in while this handler is still running
+    //--> we just wait for 1.8 seconds to make sure the unlocking can happen
+    //    (this should be greater than the 1.5 seconds waiting time on last pushes and possibly smaller than 2 seconds,
+    //    cause that could be the time apple will kill us after)
+    //NOTE: the unlocking of our deadlock will feed this expired handler and no killing should occur
+    //WARNING: if it's a real deadlock not unlocking itself, apple will kill us nontheless,
+    //         but that's not different to us committing suicide like in the old code commented below
+    usleep(1800000);
+    
+/*
+#ifdef DEBUG
     if([handlers count] > 0)
     {
         //we don't want two error notifications for the user
@@ -522,15 +544,17 @@ static BOOL warnUnclean = NO;
     DDLogInfo(@"Committing suicide...");
     [DDLog flushLog];
     exit(0);
-    
-    /*
+*/
+
+/*
     //proxy to push singleton
     DDLogDebug(@"proxying to pushExpired");
     [DDLog flushLog];
     [[PushSingleton instance] pushExpired];
     DDLogDebug(@"pushExpired proxy completed");
     [DDLog flushLog];
-    */
+*/
+
 }
 
 @end

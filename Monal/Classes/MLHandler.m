@@ -101,7 +101,8 @@
 
 -(void) invalidateWithArguments:(NSDictionary* _Nullable) args
 {
-    MLAssert(_internalData[@"delegate"] && _internalData[@"invalidationName"], @"Tried to call invalidation of MLHandler while delegate and/or invalidationName was not set!", @{@"handler": _internalData});
+    if(!(_internalData[@"delegate"] && _internalData[@"invalidationName"]))
+        return;
     [self checkInvalidation];
     args = [self sanitizeArguments:args];
     id delegate = NSClassFromString(_internalData[@"delegate"]);

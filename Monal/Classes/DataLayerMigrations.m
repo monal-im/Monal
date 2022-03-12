@@ -975,13 +975,13 @@
 
         [self updateDB:db withDataLayer:dataLayer toVersion:5.103 withBlock:^{
             //make sure the latest_read_message_history_id is filled with correct initial values
-            [db executeNonQuery:@"UPDATE buddylist AS b SET latest_read_message_history_id=IFNULL((\
+            [db executeNonQuery:@"UPDATE buddylist AS b SET latest_read_message_history_id=COALESCE((\
                 SELECT message_history_id FROM message_history AS h\
                     WHERE h.account_id=b.account_id AND h.buddy_name=b.buddy_name AND unread=1 AND inbound=1\
                     ORDER BY h.message_history_id ASC LIMIT 1\
             )-1, (\
                 SELECT message_history_id FROM message_history ORDER BY message_history_id DESC LIMIT 1\
-            ));"];
+            ), 0);"];
         }];
 
         [self updateDB:db withDataLayer:dataLayer toVersion:5.104 withBlock:^{

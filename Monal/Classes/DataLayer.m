@@ -1401,7 +1401,7 @@ static NSDateFormatter* dbFormatter;
         //delete all messages in history old enough
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE timestamp<?;" andArguments:@[pastDate]];
         //delete all chats with empty history from active chats list
-        [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
+        [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
     }];
 }
 

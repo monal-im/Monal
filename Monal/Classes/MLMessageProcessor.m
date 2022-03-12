@@ -179,9 +179,9 @@ static NSMutableDictionary* _typingNotifications;
     if(messageId == nil || !messageId.length)
     {
         if([messageNode check:@"body#"])
-            DDLogWarn(@"Empty ID using random UUID");
+            DDLogInfo(@"Message containing body has an empty stanza ID, using random UUID instead");
         else
-            DDLogInfo(@"Empty ID using random UUID");
+            DDLogVerbose(@"Empty stanza ID, using random UUID instead");
         messageId = [[NSUUID UUID] UUIDString];
     }
     

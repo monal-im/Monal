@@ -17,10 +17,10 @@
     </description>
 
     <homepage rdf:resource="https://monal.im/" />
-    <bug-database rdf:resource="https://github.com/anurodhp/Monal/issues" />
-    <license rdf:resource="https://github.com/anurodhp/Monal/blob/develop/LICENSE" />
-    <schema:documentation rdf:resource="https://github.com/anurodhp/Monal/wiki"/>
-    <schema:logo rdf:resource="https://github.com/anurodhp/Monal/blob/develop/Art/monal.svg"/>
+    <bug-database rdf:resource="https://github.com/monal-im/Monal/issues" />
+    <license rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/develop/LICENSE" />
+    <schema:documentation rdf:resource="https://github.com/monal-im/Monal/wiki"/>
+    <schema:logo rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/develop/Art/monal.svg"/>
     
     <programming-language>Objective C</programming-language>
     <os>iOS</os>

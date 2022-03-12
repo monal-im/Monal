@@ -249,7 +249,7 @@ NSString* const kStanza = @"stanza";
     
     _parseQueue = [[NSOperationQueue alloc] init];
     _parseQueue.name = [NSString stringWithFormat:@"parseQueue[%@:%@]", self.accountNo, _internalID];
-    _parseQueue.qualityOfService = NSQualityOfServiceUserInitiated;
+    _parseQueue.qualityOfService = NSQualityOfServiceUtility;
     _parseQueue.maxConcurrentOperationCount = 1;
     [_parseQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
     

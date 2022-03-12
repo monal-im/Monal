@@ -21,14 +21,10 @@
 
 +(BOOL) updateDB:(MLSQLite*) db withDataLayer:(DataLayer*) dataLayer toVersion:(double) version withBlock:(monal_void_block_t) block
 {
-    static BOOL accountStateInvalidated = NO;
     if([(NSNumber*)[db executeScalar:@"SELECT value FROM flags WHERE name='dbversion';"] doubleValue] < version)
     {
         DDLogVerbose(@"Database version <%@ detected. Performing upgrade.", [NSNumber numberWithDouble:version]);
         block();
-        if(!accountStateInvalidated)
-            [dataLayer invalidateAllAccountStates];
-        accountStateInvalidated = YES;
         [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='dbversion';" andArguments:@[[NSNumber numberWithDouble:version]]];
         DDLogDebug(@"Upgrade to %@ success", [NSNumber numberWithDouble:version]);
         return YES;
@@ -1085,8 +1081,18 @@
     NSNumber* newdbversion = [db idReadTransaction:^{
         return [self readDBVersion:db];
     }];
-    DDLogInfo(@"Database migrated from old version %@ to version %@", dbversion, newdbversion);
-    return ![newdbversion isEqual:dbversion];
+    if([dbversion isEqualToNumber:newdbversion] == NO)
+    {
+        // invalidate account state if the database has changed
+        [dataLayer invalidateAllAccountStates];
+        DDLogInfo(@"Database migrated from old version %@ to version %@", dbversion, newdbversion);
+        return YES;
+    }
+    else
+    {
+        DDLogInfo(@"Database: no migration needed version %@", newdbversion);
+        return NO;
+    }
 }
 
 @end

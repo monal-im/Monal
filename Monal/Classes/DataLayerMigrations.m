@@ -51,10 +51,9 @@
         else
             DDLogVerbose(@"dbversion table already migrated");
     }];
-    
-    __block NSNumber* dbversion = nil;
-    [db voidWriteTransaction:^{
-        dbversion = [self readDBVersion:db];
+
+    return [db boolWriteTransaction:^{
+        NSNumber* dbversion = [self readDBVersion:db];
         DDLogInfo(@"Got db version %@", dbversion);
 
         [self updateDB:db withDataLayer:dataLayer toVersion:2.0 withBlock:^{
@@ -1077,22 +1076,23 @@
             [db executeNonQuery:@"INSERT INTO signalContactSession SELECT * FROM _signalContactSessionTMP;"];
             [db executeNonQuery:@"DROP TABLE _signalContactSessionTMP;"];
         }];
+
+        // check if db version changed
+        NSNumber* newdbversion = [self readDBVersion:db];
+
+        if([dbversion isEqualToNumber:newdbversion] == NO)
+        {
+            // invalidate account state if the database has changed
+            [dataLayer invalidateAllAccountStates];
+            DDLogInfo(@"Database migrated from old version %@ to version %@", dbversion, newdbversion);
+            return YES;
+        }
+        else
+        {
+            DDLogInfo(@"Database: no migration needed version %@", newdbversion);
+            return NO;
+        }
     }];
-    NSNumber* newdbversion = [db idReadTransaction:^{
-        return [self readDBVersion:db];
-    }];
-    if([dbversion isEqualToNumber:newdbversion] == NO)
-    {
-        // invalidate account state if the database has changed
-        [dataLayer invalidateAllAccountStates];
-        DDLogInfo(@"Database migrated from old version %@ to version %@", dbversion, newdbversion);
-        return YES;
-    }
-    else
-    {
-        DDLogInfo(@"Database: no migration needed version %@", newdbversion);
-        return NO;
-    }
 }
 
 @end

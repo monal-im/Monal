@@ -166,12 +166,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     //do MLFiletransfer cleanup tasks (do this in a new thread to parallelize it with our ping to the appex and don't slow down app startup)
     //this will also migrate our old image cache to new MLFiletransfer cache
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [MLFiletransfer doStartupCleanup];
     });
     
     //do image manager cleanup in a new thread to not slow down app startup
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [[MLImageManager sharedInstance] cleanupHashes];
     });
     
@@ -308,6 +308,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //register BGTask
     DDLogInfo(@"calling MonalAppDelegate configureBackgroundFetchingTask");
     [self configureBackgroundFetchingTask];
+    
     // Play audio even if phone is in silent mode
     NSError* audioSessionError;
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&audioSessionError];

@@ -21,14 +21,10 @@
 
 +(BOOL) updateDB:(MLSQLite*) db withDataLayer:(DataLayer*) dataLayer toVersion:(double) version withBlock:(monal_void_block_t) block
 {
-    static BOOL accountStateInvalidated = NO;
     if([(NSNumber*)[db executeScalar:@"SELECT value FROM flags WHERE name='dbversion';"] doubleValue] < version)
     {
         DDLogVerbose(@"Database version <%@ detected. Performing upgrade.", [NSNumber numberWithDouble:version]);
         block();
-        if(!accountStateInvalidated)
-            [dataLayer invalidateAllAccountStates];
-        accountStateInvalidated = YES;
         [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='dbversion';" andArguments:@[[NSNumber numberWithDouble:version]]];
         DDLogDebug(@"Upgrade to %@ success", [NSNumber numberWithDouble:version]);
         return YES;
@@ -55,10 +51,9 @@
         else
             DDLogVerbose(@"dbversion table already migrated");
     }];
-    
-    __block NSNumber* dbversion = nil;
-    [db voidWriteTransaction:^{
-        dbversion = [self readDBVersion:db];
+
+    return [db boolWriteTransaction:^{
+        NSNumber* dbversion = [self readDBVersion:db];
         DDLogInfo(@"Got db version %@", dbversion);
 
         [self updateDB:db withDataLayer:dataLayer toVersion:2.0 withBlock:^{
@@ -979,13 +974,13 @@
 
         [self updateDB:db withDataLayer:dataLayer toVersion:5.103 withBlock:^{
             //make sure the latest_read_message_history_id is filled with correct initial values
-            [db executeNonQuery:@"UPDATE buddylist AS b SET latest_read_message_history_id=IFNULL((\
+            [db executeNonQuery:@"UPDATE buddylist AS b SET latest_read_message_history_id=COALESCE((\
                 SELECT message_history_id FROM message_history AS h\
                     WHERE h.account_id=b.account_id AND h.buddy_name=b.buddy_name AND unread=1 AND inbound=1\
                     ORDER BY h.message_history_id ASC LIMIT 1\
             )-1, (\
                 SELECT message_history_id FROM message_history ORDER BY message_history_id DESC LIMIT 1\
-            ));"];
+            ), 0);"];
         }];
 
         [self updateDB:db withDataLayer:dataLayer toVersion:5.104 withBlock:^{
@@ -1081,12 +1076,23 @@
             [db executeNonQuery:@"INSERT INTO signalContactSession SELECT * FROM _signalContactSessionTMP;"];
             [db executeNonQuery:@"DROP TABLE _signalContactSessionTMP;"];
         }];
+
+        // check if db version changed
+        NSNumber* newdbversion = [self readDBVersion:db];
+
+        if([dbversion isEqualToNumber:newdbversion] == NO)
+        {
+            // invalidate account state if the database has changed
+            [dataLayer invalidateAllAccountStates];
+            DDLogInfo(@"Database migrated from old version %@ to version %@", dbversion, newdbversion);
+            return YES;
+        }
+        else
+        {
+            DDLogInfo(@"Database: no migration needed version %@", newdbversion);
+            return NO;
+        }
     }];
-    NSNumber* newdbversion = [db idReadTransaction:^{
-        return [self readDBVersion:db];
-    }];
-    DDLogInfo(@"Database migrated from old version %@ to version %@", dbversion, newdbversion);
-    return ![newdbversion isEqual:dbversion];
 }
 
 @end

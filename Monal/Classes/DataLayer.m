@@ -1401,7 +1401,7 @@ static NSDateFormatter* dbFormatter;
         //delete all messages in history old enough
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE timestamp<?;" andArguments:@[pastDate]];
         //delete all chats with empty history from active chats list
-        [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
+        [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
     }];
 }
 
@@ -1715,11 +1715,11 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"UPDATE message_history SET unread=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname]];
         //make sure the latest_read_message_history_id field in our buddylist is updated
         //(we use the newest history entry for this buddyname here)
-        [self.db executeNonQuery:@"UPDATE buddylist SET latest_read_message_history_id=IFNULL((\
+        [self.db executeNonQuery:@"UPDATE buddylist SET latest_read_message_history_id=COALESCE((\
             SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND inbound=1 ORDER BY message_history_id DESC LIMIT 1\
         ), (\
             SELECT message_history_id FROM message_history ORDER BY message_history_id DESC LIMIT 1\
-        )) WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname, accountNo, buddyname]];
+        ), 0) WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname, accountNo, buddyname]];
         //remove contact from active chats list
         [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddyname]];
     }];

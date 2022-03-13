@@ -9,7 +9,7 @@ function buildAndExportMacOS {
     echo "***************************"
     echo "*     Archiving macOS     *"
     echo "***************************"
-    xcrun xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk macosx -configuration $BUILD_TYPE -destination 'generic/platform=macOS,variant=Mac Catalyst,name=Any Mac' -archivePath "build/macos_$APP_NAME.xcarchive" clean archive CODE_SIGN_IDENTITY="$APP_DEVELOPER_NAME" CODE_SIGN_STYLE="Manual" GCC_PREPROCESSOR_DEFINITIONS="$GCC_PREPROCESSOR_DEFINITIONS" BUILD_LIBRARIES_FOR_DISTRIBUTION=YES SUPPORTS_MACCATALYST=YES
+    xcrun xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk macosx -configuration $BUILD_TYPE -destination 'generic/platform=macOS,variant=Mac Catalyst,name=Any Mac' -archivePath "build/macos_$APP_NAME.xcarchive" clean archive CODE_SIGN_IDENTITY="$APP_DEVELOPER_NAME" CODE_SIGN_STYLE="Manual" SWIFT_ACTIVE_COMPILATION_CONDITIONS="$SWIFT_ACTIVE_COMPILATION_CONDITIONS" GCC_PREPROCESSOR_DEFINITIONS="$GCC_PREPROCESSOR_DEFINITIONS" BUILD_LIBRARIES_FOR_DISTRIBUTION=YES SUPPORTS_MACCATALYST=YES
 
     xcodebuild -exportArchive -archivePath "build/macos_$APP_NAME.xcarchive" -exportPath "build/app" -exportOptionsPlist "$EXPORT_OPTIONS_CATALYST" CODE_SIGN_STYLE="Manual"
     echo "build dir:"
@@ -33,6 +33,13 @@ else
 fi
 
 ls -l ~/Library/MobileDevice/Provisioning\ Profiles/
+
+# update SWIFT_ACTIVE_COMPILATION_CONDITIONS from GCC_PREPROCESSOR_DEFINITIONS
+SWIFT_ACTIVE_COMPILATION_CONDITIONS=""
+for entry in $GCC_PREPROCESSOR_DEFINITIONS; do
+    SWIFT_ACTIVE_COMPILATION_CONDITIONS="$SWIFT_ACTIVE_COMPILATION_CONDITIONS $(echo "$entry" | awk -F= '{print $1}')"
+done
+export SWIFT_ACTIVE_COMPILATION_CONDITIONS
 
 echo ""
 echo "*******************************************"
@@ -83,7 +90,7 @@ echo ""
 echo "*************************"
 echo "*     Archiving iOS     *"
 echo "*************************"
-xcrun xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk iphoneos -configuration $BUILD_TYPE -archivePath "build/ios_$APP_NAME.xcarchive" clean archive CODE_SIGN_IDENTITY="$IOS_DEVELOPER_NAME" CODE_SIGN_STYLE="Manual" GCC_PREPROCESSOR_DEFINITIONS="$GCC_PREPROCESSOR_DEFINITIONS"
+xcrun xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk iphoneos -configuration $BUILD_TYPE -archivePath "build/ios_$APP_NAME.xcarchive" clean archive CODE_SIGN_IDENTITY="$IOS_DEVELOPER_NAME" CODE_SIGN_STYLE="Manual" SWIFT_ACTIVE_COMPILATION_CONDITIONS="$SWIFT_ACTIVE_COMPILATION_CONDITIONS" GCC_PREPROCESSOR_DEFINITIONS="$GCC_PREPROCESSOR_DEFINITIONS"
 
 echo ""
 echo "*************************"

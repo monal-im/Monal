@@ -14,6 +14,7 @@
 
 @interface MLXMLNode()
 @property (atomic, readwrite) MLXMLNode* parent;
+-(MLXMLNode*) addChildNodeWithoutCopy:(MLXMLNode*) child;
 @end
 
 @interface MLBasePaser ()
@@ -96,9 +97,6 @@
     
     DebugParser(@"Ended element: %@ :: %@ (%@) depth %ld", elementName, namespaceURI, qName, depth);
     
-    //only call completion for stanzas and stream start, not for inner elements inside stanzas
-    if(depth <= 2)
-        _completion(currentNode);
     MLXMLNode* parent = currentNode.parent;
     if(parent)
     {
@@ -106,10 +104,14 @@
         if(depth > 2)      //don't add all received stanzas/nonzas as childs to our stream header (that would create a memory leak!)
         {
             DebugParser(@"Adding %@ to parent %@", currentNode.element, parent.element);
-            [parent addChildNode:currentNode];
+            [parent addChildNodeWithoutCopy:currentNode];
         }
     }
     [_currentStack removeLastObject];
+    
+    //only call completion for stanzas and stream start, not for inner elements inside stanzas
+    if(depth <= 2)
+        _completion(currentNode);
 }
 
 -(void) parserDidEndDocument:(NSXMLParser*) parser

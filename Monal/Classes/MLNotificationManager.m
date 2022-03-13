@@ -173,7 +173,7 @@
             
             NSString* idval = [self identifierWithMessage:msg];
             
-            DDLogVerbose(@"Removing pending/deliverd notification for message '%@' with identifier '%@'...", msg.messageId, idval);
+            DDLogVerbose(@"Removing pending/delivered notification for message '%@' with identifier '%@'...", msg.messageId, idval);
             [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
             [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
         }
@@ -186,7 +186,7 @@
     if([HelperTools isAppExtension])
         block();
     else
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), block);
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), block);
     
 }
 

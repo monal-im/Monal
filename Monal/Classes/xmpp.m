@@ -255,13 +255,13 @@ NSString* const kStanza = @"stanza";
     
     _receiveQueue = [[NSOperationQueue alloc] init];
     _receiveQueue.name = [NSString stringWithFormat:@"receiveQueue[%@:%@]", self.accountNo, _internalID];
-    _receiveQueue.qualityOfService = NSQualityOfServiceUtility;
+    _receiveQueue.qualityOfService = NSQualityOfServiceUserInitiated;
     _receiveQueue.maxConcurrentOperationCount = 1;
     [_receiveQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
 
     _sendQueue = [[NSOperationQueue alloc] init];
     _sendQueue.name = [NSString stringWithFormat:@"sendQueue[%@:%@]", self.accountNo, _internalID];
-    _sendQueue.qualityOfService = NSQualityOfServiceUtility;
+    _sendQueue.qualityOfService = NSQualityOfServiceUserInitiated;
     _sendQueue.maxConcurrentOperationCount = 1;
     [_sendQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
     if(_outputBuffer)
@@ -1199,8 +1199,8 @@ NSString* const kStanza = @"stanza";
         [_receiveQueue cancelAllOperations];
     }
     
-    // do the stanza parsing in the default global queue
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    // do the stanza parsing in the low priority (=utility) global queue
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         DDLogInfo(@"calling parse");
         [self->_xmlParser parse];     //blocking operation
         DDLogInfo(@"parse ended");
@@ -3805,7 +3805,7 @@ NSString* const kStanza = @"stanza";
             NSError* error=[_oStream streamError];
             DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
             //reconnect from third party queue to not block send queue
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 [self reconnect];
             });
             return NO;
@@ -3847,7 +3847,7 @@ NSString* const kStanza = @"stanza";
         NSError* error=[_oStream streamError];
         DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
         //reconnect from third party queue to not block send queue
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
             [self reconnect];
         });
         return NO;
@@ -4110,7 +4110,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) publishAvatar:(UIImage*) image
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         if(!image)
         {
             DDLogInfo(@"Retracting own avatar image");

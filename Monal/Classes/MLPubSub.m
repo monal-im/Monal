@@ -57,7 +57,7 @@ static NSDictionary* _defaultOptions;
     }
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+//handler --> $$class_handler given to registerForNode:withHandler:
 -(void) unregisterHandler:(MLHandler*) handler forNode:(NSString*) node
 {
     DDLogInfo(@"Removing PEP handler %@ for node %@", handler, node);
@@ -69,7 +69,7 @@ static NSDictionary* _defaultOptions;
     }
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), , $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
 -(void) fetchNode:(NSString*) node from:(NSString*) jid withItemsList:(NSArray*) itemsList andHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Fetching node '%@' at jid '%@' using callback %@...", node, jid, handler);
@@ -97,11 +97,11 @@ static NSDictionary* _defaultOptions;
         $ID(node),
         $ID(queryItems),
         $ID(data, [[NSMutableDictionary alloc] init]),
-        $ID(handler),
+        $HANDLER(handler),
     )];
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) subscribeToNode:(NSString*) node onJid:(NSString*) jid withHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Subscribing to node '%@' at jid '%@' using callback %@...", node, jid, handler);
@@ -124,11 +124,11 @@ static NSDictionary* _defaultOptions;
     [account sendIq:query withHandler:$newHandler(self, handleSubscribe,
         $ID(node),
         $ID(jid),
-        $ID(handler),
+        $HANDLER(handler),
     )];
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), , $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) unsubscribeFromNode:(NSString*) node forJid:(NSString*) jid withHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Unsubscribing from node '%@' at jid '%@' using callback %@...", node, jid, handler);
@@ -149,7 +149,7 @@ static NSDictionary* _defaultOptions;
     [_account sendIq:query withHandler:$newHandler(self, handleUnsubscribe,
         $ID(node),
         $ID(jid),
-        $ID(handler),
+        $HANDLER(handler),
     )];
 }
 
@@ -170,7 +170,7 @@ static NSDictionary* _defaultOptions;
     [account sendIq:query withHandler:$newHandler(self, handleConfigFormResult,
         $ID(node),
         $ID(configOptions),
-        $ID(handler)
+        $HANDLER(handler)
     )];
 }
 
@@ -230,7 +230,7 @@ static NSDictionary* _defaultOptions;
     [account sendIq:query withHandler:$newHandler(self, handleRetractResult,
         $ID(node),
         $ID(itemId),
-        $ID(handler)
+        $HANDLER(handler)
     )];
 }
 
@@ -254,7 +254,7 @@ static NSDictionary* _defaultOptions;
     ] andData:nil]];
     [account sendIq:query withHandler:$newHandler(self, handlePurgeOrDeleteResult,
         $ID(node),
-        $ID(handler)
+        $HANDLER(handler)
     )];
 }
 
@@ -278,7 +278,7 @@ static NSDictionary* _defaultOptions;
     ] andData:nil]];
     [account sendIq:query withHandler:$newHandler(self, handlePurgeOrDeleteResult,
         $ID(node),
-        $ID(handler)
+        $HANDLER(handler)
     )];
 }
 
@@ -389,7 +389,7 @@ static NSDictionary* _defaultOptions;
         $ID(item),
         $ID(node),
         $ID(configOptions),
-        $ID(handler)
+        $HANDLER(handler)
     )];
 }
 
@@ -597,7 +597,7 @@ $$instance_handler(handleFetch, account.pubsub, $_ID(xmpp*, account), $_ID(XMPPI
             $ID(node),
             $ID(queryItems),
             $ID(data),
-            $ID(handler)
+            $HANDLER(handler)
         )];
     }
 $$
@@ -665,7 +665,7 @@ $$instance_handler(handleConfigFormResult, account.pubsub, $_ID(xmpp*, account),
         [[MLXMLNode alloc] initWithElement:@"configure" withAttributes:@{@"node": node} andChildren:@[dataForm] andData:nil]
     ] andData:nil]];
     [account sendIq:query withHandler:$newHandler(self, handleConfigureResult,
-        $ID(handler)
+        $HANDLER(handler)
     )];
 $$
 

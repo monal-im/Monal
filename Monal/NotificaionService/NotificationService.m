@@ -482,6 +482,7 @@ static BOOL warnUnclean = NO;
 {
     DDLogError(@"notification handler expired, that should never happen!");
     
+/*
 #ifdef DEBUG
     UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
     errorContent.title = @"Unexpected appex expiration";
@@ -502,8 +503,8 @@ static BOOL warnUnclean = NO;
     //WARNING: if it's a real deadlock not unlocking itself, apple will kill us nontheless,
     //         but that's not different to us committing suicide like in the old code commented below
     usleep(1800000);
-    
-/*
+*/
+
 #ifdef DEBUG
     if([handlers count] > 0)
     {
@@ -544,7 +545,6 @@ static BOOL warnUnclean = NO;
     DDLogInfo(@"Committing suicide...");
     [DDLog flushLog];
     exit(0);
-*/
 
 /*
     //proxy to push singleton

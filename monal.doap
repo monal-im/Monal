@@ -413,7 +413,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0384.html" />
-        <xmpp:status>partial</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>
         <xmpp:note>XEP-0384: OMEMO Encryption (currently only in 1:1 chats, not MUCs)</xmpp:note>
       </xmpp:SupportedXep>

@@ -1076,6 +1076,19 @@
             [db executeNonQuery:@"INSERT INTO signalContactSession SELECT * FROM _signalContactSessionTMP;"];
             [db executeNonQuery:@"DROP TABLE _signalContactSessionTMP;"];
         }];
+        
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.116 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE delayed_message_stanzas RENAME TO _delayed_message_stanzasTMP;"];
+            [db executeNonQuery:@"CREATE TABLE 'delayed_message_stanzas' ( \
+                    'id' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
+                    'account_id' INTEGER NOT NULL, \
+                    'archive_jid' BLOB NOT NULL, \
+                    'stanza' VARCHAR(32), \
+                    FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE\
+            );"];
+            [db executeNonQuery:@"INSERT INTO delayed_message_stanzas SELECT * FROM _delayed_message_stanzasTMP;"];
+            [db executeNonQuery:@"DROP TABLE _delayed_message_stanzasTMP;"];
+        }];
 
         // check if db version changed
         NSNumber* newdbversion = [self readDBVersion:db];

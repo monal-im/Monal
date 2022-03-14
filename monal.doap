@@ -250,6 +250,14 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0199.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>4.7</xmpp:since>
+        <xmpp:note>XEP-0199: XMPP Ping</xmpp:note>  
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0215.html" />
         <xmpp:status>planned</xmpp:status>
         <xmpp:note>XEP-0215: External Service Discovery</xmpp:note>  
@@ -311,6 +319,14 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0286.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>4.7</xmpp:since>
+        <xmpp:note>XEP-0286: Mobile Considerations on LTE Networks</xmpp:note> 
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0308.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>
@@ -355,6 +371,15 @@
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>
         <xmpp:note>XEP-0357: Push Notifications</xmpp:note> 
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0359.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>4.8</xmpp:since>
+        <xmpp:note>XEP-0359: Unique and Stable Stanza IDs</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -496,6 +521,14 @@
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>
         <xmpp:note>XEP-0441: Message Archive Management Preferences</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0454.html" />
+        <xmpp:status>partial</xmpp:status>
+        <xmpp:since>5.0</xmpp:since>
+        <xmpp:note>XEP-0454: OMEMO Media sharing</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
   </Project>

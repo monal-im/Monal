@@ -329,7 +329,7 @@ static NSMutableDictionary* _typingNotifications;
         {
             if([lowercaseBody hasPrefix:@"geo:"])
                 messageType = kMessageTypeGeo;
-            //encrypted messages having one single string prefixed with "aesgcm:" are filetransfers, too (tribal knowledge)
+            //encrypted messages having one single string prefixed with "aesgcm:" are filetransfers, too (xep-0454)
             else if(encrypted && [lowercaseBody hasPrefix:@"aesgcm://"])
                 messageType = kMessageTypeFiletransfer;
             else if([lowercaseBody hasPrefix:@"https://"])

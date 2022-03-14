@@ -404,9 +404,9 @@ static NSMutableDictionary* _typingNotifications;
                         receiptNode.attributes[@"type"] = [messageNode findFirst:@"/@type"];
                         receiptNode.attributes[@"to"] = messageNode.fromUser;
                         if([messageNode check:@"{urn:xmpp:receipts}request"])
-                            [receiptNode setReceipt:[messageNode findFirst:@"/@id"]];
+                            [receiptNode setReceipt:messageId];
                         if([messageNode check:@"{urn:xmpp:chat-markers:0}markable"])
-                            [receiptNode setChatmarkerReceipt:[messageNode findFirst:@"/@id"]];
+                            [receiptNode setChatmarkerReceipt:messageId];
                         [receiptNode setStoreHint];
                         [account send:receiptNode];
                     }

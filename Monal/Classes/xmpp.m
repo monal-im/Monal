@@ -1072,12 +1072,6 @@ NSString* const kStanza = @"stanza";
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
             DDLogVerbose(@"Parse finished for new <%@> stanza...", parsedStanza.element);
             
-            if(self.accountState<kStateReconnecting)
-            {
-                DDLogWarn(@"Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateReconnecting");
-                return;
-            }
-            
             if(!appex)
             {
                 //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
@@ -1085,7 +1079,7 @@ NSString* const kStanza = @"stanza";
                 //should create a backpressure ino the tcp stream, too
                 //the calculated sleep time gives every stanza in the queue ~10ms to be handled
                 BOOL wasSleeping = NO;
-                while([self->_parseQueue operationCount] > 50)
+                while([self->_parseQueue operationCount] > 50 && self.accountState >= kStateReconnecting)
                 {
                     double waittime = (double)[self->_parseQueue operationCount] / 100.0;
                     DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries (used/vailable memory: %.3fMiB / %.3fMiB)...", waittime, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
@@ -1098,7 +1092,7 @@ NSString* const kStanza = @"stanza";
             else
             {
                 BOOL wasSleeping = NO;
-                while(YES)
+                while(self.accountState >= kStateReconnecting)
                 {
                     //use a much smaller limit while in appex because memory there is limited to ~32MiB
                     //like in the mainapp the calculated sleep time gives every stanza in the queue ~10ms to be handled
@@ -1114,6 +1108,12 @@ NSString* const kStanza = @"stanza";
                 }
                 if(wasSleeping)
                     DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+            }
+            
+            if(self.accountState < kStateReconnecting)
+            {
+                DDLogWarn(@"Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateReconnecting");
+                return;
             }
             
 #ifndef QueryStatistics

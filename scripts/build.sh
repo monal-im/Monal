@@ -21,16 +21,12 @@ set -e
 
 cd Monal
 
-if [ ! -z ${CI+x} ]; then
-    :
-else
-    echo "Unlocking keychain..."
-    security default-keychain -s ios-build.keychain
-    # Unlock the keychain
-    security unlock-keychain -p travis ios-build.keychain
-    # Set keychain timeout to 1 hour for long builds
-    security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
-fi
+echo "Unlocking keychain..."
+security default-keychain -s ios-build.keychain
+# Unlock the keychain
+security unlock-keychain -p travis ios-build.keychain
+# Set keychain timeout to 1 hour for long builds
+security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
 
 ls -l ~/Library/MobileDevice/Provisioning\ Profiles/
 

@@ -517,7 +517,7 @@ $$class_handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Registering on appserver returned an error: %@", [iqNode findFirst:@"error"]);
-        [HelperTools postError:NSLocalizedString(@"Appserver error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"Appserver error", @"") withNode:iqNode andAccount:account andIsSevere:YES];
         account.connectionProperties.registeredOnPushAppserver = NO;
         return;
     }
@@ -542,7 +542,7 @@ $$class_handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Enabling push returned an error: %@", [iqNode findFirst:@"error"]);
-        [HelperTools postError:NSLocalizedString(@"Error registering push", @"") withNode:iqNode andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"Error registering push", @"") withNode:iqNode andAccount:account andIsSevere:YES];
         account.connectionProperties.pushEnabled = NO;
         return;
     }

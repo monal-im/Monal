@@ -374,7 +374,6 @@
       </xmpp:SupportedXep>
     </implements>
     <implements>
-    <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0359.html" />
         <xmpp:status>complete</xmpp:status>

@@ -391,6 +391,16 @@ static NSMutableSet* _smacksWarningDisplayed;
         [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
 }
 
+-(void) showPrivacySettings
+{
+    [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+}
+
+-(void) showSettings
+{
+   [self performSegueWithIdentifier:@"showSettings" sender:self];
+}
+
 -(void) presentChatWithContact:(MLContact*) contact
 {
     // show placeholder if contact is nil, open chat otherwise
@@ -740,11 +750,6 @@ static NSMutableSet* _smacksWarningDisplayed;
             }
         }];
     }
-}
-
--(void) showSettings
-{
-   [self performSegueWithIdentifier:@"showSettings" sender:self];
 }
 
 @end

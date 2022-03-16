@@ -234,7 +234,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         ];
     }
     UNNotificationCategory* messageCategory;
-    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings;
     messageCategory = [UNNotificationCategory
         categoryWithIdentifier:@"message"
         actions:@[replyAction, markAsReadAction]
@@ -658,6 +658,17 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         if(completionHandler)
             completionHandler();
     }
+}
+
+-(void) userNotificationCenter:(UNUserNotificationCenter*) center openSettingsForNotification:(UNNotification*) notification
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        while(self.activeChats == nil)
+            usleep(100000);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [(ActiveChatsViewController*)self.activeChats showPrivacySettings];
+        });
+    });
 }
 
 -(void) openChatOfContact:(MLContact* _Nullable) contact

@@ -180,7 +180,7 @@ static NSRegularExpression* attributeFilterRegex;
     _attributes = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableDictionary class], [NSDictionary class], [NSMutableString class], [NSString class]]] forKey:@"attributes"];
     NSArray* decodedChildren = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableArray class], [NSArray class], [MLXMLNode class], [XMPPIQ class], [XMPPMessage class], [XMPPPresence class], [XMPPDataForm class]]] forKey:@"children"];
     for(MLXMLNode* child in decodedChildren)
-        [self addChildNode:child];
+        [self addChildNodeWithoutCopy:child];
     _data = [decoder decodeObjectOfClass:[NSString class] forKey:@"data"];
 
     return self;

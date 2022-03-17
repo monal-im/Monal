@@ -22,6 +22,7 @@
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
 #import "MLMucProcessor.h"
+#import "MBProgressHUD.h"
 
 @import NotificationBannerSwift;
 
@@ -726,6 +727,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     _backgroundTimer = nil;
 }
 
+-(UIViewController*) getTopViewController
+{
+    UIViewController* topViewController = self.window.rootViewController;
+    while(topViewController.presentedViewController)
+        topViewController = topViewController.presentedViewController;
+    return topViewController;
+}
+
 -(void) applicationWillEnterForeground:(UIApplication *)application
 {
     DDLogInfo(@"Entering FG");
@@ -735,24 +744,38 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     //TODO: show "loading..." animation/modal
     
-    //only proceed with foregrounding if the NotificationServiceExtension is not running
-    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
-    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
-    {
-        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
-        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
-            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
-        }];
-    }
+    DDLogError(@"[self getTopViewController] = %@", [self getTopViewController]);
+    DDLogError(@"[self getTopViewController].view = %@", [self getTopViewController].view);
+    MBProgressHUD* loadingHUD = [MBProgressHUD showHUDAddedTo:[self getTopViewController].view animated:YES];
+    loadingHUD.label.text = NSLocalizedString(@"Initializing...", @"");
+    loadingHUD.mode = MBProgressHUDModeIndeterminate;
+    loadingHUD.removeFromSuperViewOnHide = YES;
     
-    //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
-    
-    //cancel already running background timer, we are now foregrounded again
-    [self stopBackgroundTimer];
-    
-    [self addBackgroundTask];
-    [[MLXMPPManager sharedInstance] nowForegrounded];
+    //don't use the main thread while waiting to make sure the HUD will be properly displayed
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        //only proceed with foregrounding if the NotificationServiceExtension is not running
+        [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+        {
+            DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+            [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
+                [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+            }];
+        }
+        loadingHUD.hidden = YES;
+        
+        //switch to the main thread again once the HUD has been hidden again
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
+            
+            //cancel already running background timer, we are now foregrounded again
+            [self stopBackgroundTimer];
+            
+            [self addBackgroundTask];
+            [[MLXMPPManager sharedInstance] nowForegrounded];
+        });
+    });
 }
 
 -(void) nowReallyBackgrounded

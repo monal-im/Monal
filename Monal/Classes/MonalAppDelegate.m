@@ -103,7 +103,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     return self;
 }
 
-#pragma mark -  APNS notificaion
+#pragma mark -  APNS notification
 
 -(void) application:(UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*) deviceToken
 {
@@ -755,11 +755,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [[MLXMPPManager sharedInstance] nowForegrounded];
 }
 
--(void) applicationWillResignActive:(UIApplication *)application
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
 -(void) nowReallyBackgrounded
 {
     [self addBackgroundTask];
@@ -820,6 +815,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) showConnectionStatus:(NSNotification*) notification
 {
     //this will show an error banner but only if our app is foregrounded
+    DDLogWarn(@"Got xmpp error %@", notification);
     if(![HelperTools isNotInFocus])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -832,6 +828,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             [banner showWithQueuePosition:QueuePositionBack bannerPosition:BannerPositionTop queue:queue on:nil];
         });
     }
+    else
+        DDLogWarn(@"Not showing error banner: app not in focus!");
 }
 
 #pragma mark - mac menu

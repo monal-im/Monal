@@ -10,6 +10,14 @@ import UIKit
 import SwiftUI
 import monalxmpp
 
+func deleteHistoryButtonText(contact: MLContact) -> String {
+    if(contact.isGroup) {
+        return NSLocalizedString("Clear chat history of this group", comment: "")
+    } else {
+        return NSLocalizedString("Clear chat history of this contact", comment: "")
+    }
+}
+
 struct ContactDetails: View {
     var delegate: SheetDismisserProtocol
     @StateObject var contact: ObservableKVOWrapper<MLContact>
@@ -143,7 +151,7 @@ struct ContactDetails: View {
                         Button(action: {
                             showingClearHistoryConfirmation = true
                         }) {
-                            Text(NSLocalizedString("Clear chat history for this contact", comment: ""))
+                            Text(deleteHistoryButtonText(contact: contact.obj))
                                 .foregroundColor(.red)
                         }
                         .actionSheet(isPresented: $showingClearHistoryConfirmation) {
@@ -174,28 +182,32 @@ struct ContactDetails: View {
                     //even more buttons
                     Group {
 #if !DISABLE_OMEMO
-                        Spacer()
-                            .frame(height: 30)
-                        Button(action: {
-                            showingResetOmemoSessionConfirmation = true
-                        }) {
-                            Text(NSLocalizedString("Reset OMEMO session", comment: ""))
-                                .foregroundColor(.red)
-                        }
-                        .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
-                            ActionSheet(
-                                title: Text(NSLocalizedString("Reset OMEMO session", comment: "")),
-                                message: Text(NSLocalizedString("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!", comment: "")),
-                                buttons: [
-                                    .cancel(),
-                                    .destructive(
-                                        Text("Yes"),
-                                        action: {
-                                            contact.obj.resetOmemoSession()
-                                        }
-                                    )
-                                ]
-                            )
+                        // only display omemo session reset button on 1:1 and private groups
+                        if(contact.obj.isGroup == false && (contact.obj.isGroup && contact.obj.mucType == "group"))
+                        {
+                            Spacer()
+                                .frame(height: 30)
+                            Button(action: {
+                                showingResetOmemoSessionConfirmation = true
+                            }) {
+                                Text(NSLocalizedString("Reset OMEMO session", comment: ""))
+                                    .foregroundColor(.red)
+                            }
+                            .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
+                                ActionSheet(
+                                    title: Text(NSLocalizedString("Reset OMEMO session", comment: "")),
+                                    message: Text(NSLocalizedString("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!", comment: "")),
+                                    buttons: [
+                                        .cancel(),
+                                        .destructive(
+                                            Text("Yes"),
+                                            action: {
+                                                contact.obj.resetOmemoSession()
+                                            }
+                                        )
+                                    ]
+                                )
+                            }
                         }
 #endif
                     }

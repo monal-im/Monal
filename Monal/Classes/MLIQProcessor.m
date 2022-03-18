@@ -288,11 +288,8 @@ $$
         MLContact* contactObj = [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo];
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
-            // we should never delete our own buddy -> prevent foreign key errors for omemo
-            if([contact[@"jid"] isEqualToString:account.connectionProperties.identity.jid] == NO) {
-                [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
-            }
+            [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
         }
         else
         {

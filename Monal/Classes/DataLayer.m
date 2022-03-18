@@ -249,9 +249,6 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) updateAccounWithDictionary:(NSDictionary*) dictionary
 {
     return [self.db boolWriteTransaction:^{
-//         // delete old self chat for omemo foreign key, if username or domain changed
-//         [self.db executeNonQuery:@"DELETE FROM buddylist WHERE account_id=? AND buddy_name=(SELECT (username || '@' || domain) FROM account WHERE account_id=? AND (username!=? OR domain!=?));" andArguments:@[[dictionary objectForKey:kAccountID], [dictionary objectForKey:kAccountID], [dictionary objectForKey:kUsername], [dictionary objectForKey:kDomain]]];
-        
         NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=? WHERE account_id=?;";
         NSString* server = (NSString*)[dictionary objectForKey:kServer];
         NSString* port = (NSString*)[dictionary objectForKey:kPort];
@@ -267,10 +264,7 @@ static NSDateFormatter* dbFormatter;
             [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
             [dictionary objectForKey:kAccountID]
         ];
-        BOOL result = [self.db executeNonQuery:query andArguments:params];
-//         // insert self chat for omemo foreign key
-//         [self.db executeNonQuery:@"INSERT OR IGNORE INTO buddylist ('account_id', 'buddy_name', 'muc') SELECT account_id, (username || '@' || domain), 0 FROM account WHERE account_id=?;" andArguments:@[[dictionary objectForKey:kAccountID]]];
-        return result;
+        return (BOOL)[self.db executeNonQuery:query andArguments:params];
     }];
 }
 
@@ -293,12 +287,9 @@ static NSDateFormatter* dbFormatter;
         ];
         BOOL result = [self.db executeNonQuery:query andArguments:params];
         // return the accountID
-        if(result) {
+        if(result == YES) {
             NSNumber* accountID = [self.db lastInsertId];
-
-            // insert self chat for omemo foreign key
-            [self.db executeNonQuery:@"INSERT OR IGNORE INTO buddylist ('account_id', 'buddy_name', 'muc') SELECT account_id, (username || '@' || domain), 0 FROM account WHERE account_id=?;" andArguments:@[accountID]];
-
+            DDLogInfo(@"Added account %@ to account table with accountNo %@", [dictionary objectForKey:kUsername], accountID);
             return accountID;
         } else {
             return (NSNumber*)nil;
@@ -473,7 +464,7 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         NSString* likeString = [NSString stringWithFormat:@"%%%@%%", search];
-        NSString* query = @"SELECT buddy_name, A.account_id FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 AND (A.username || '@' || A.domain)!=buddy_name AND buddy_name LIKE ? OR full_name LIKE ? OR nick_name LIKE ? ORDER BY full_name, nick_name, buddy_name COLLATE NOCASE ASC;";
+        NSString* query = @"SELECT buddy_name, A.account_id FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 AND buddy_name LIKE ? OR full_name LIKE ? OR nick_name LIKE ? ORDER BY full_name, nick_name, buddy_name COLLATE NOCASE ASC;";
         NSArray* params = @[likeString, likeString, likeString];
         NSMutableArray<MLContact*>* toReturn = [[NSMutableArray alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
@@ -486,7 +477,7 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         //list all contacts and group chats
-        NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) AS 'sortkey' FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 AND (A.username || '@' || A.domain)!=buddy_name ORDER BY sortkey COLLATE NOCASE ASC;";
+        NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) AS 'sortkey' FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 ORDER BY sortkey COLLATE NOCASE ASC;";
         NSMutableArray* toReturn = [[NSMutableArray alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query])
             [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
@@ -1691,7 +1682,7 @@ static NSDateFormatter* dbFormatter;
 -(NSMutableArray<MLContact*>*) activeContactsWithPinned:(BOOL) pinned
 {
     return [self.db idReadTransaction:^{
-        NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b ON (a.buddy_name = b.buddy_name AND a.account_id = b.account_id) JOIN account ON a.account_id = account.account_id WHERE (account.username || '@' || account.domain) != a.buddy_name AND a.pinned=? ORDER BY lastMessageTime DESC;";
+        NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b ON (a.buddy_name = b.buddy_name AND a.account_id = b.account_id) JOIN account ON a.account_id = account.account_id WHERE a.pinned=? ORDER BY lastMessageTime DESC;";
         NSMutableArray<MLContact*>* toReturn = [[NSMutableArray<MLContact*> alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]])
             [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
@@ -1734,29 +1725,13 @@ static NSDateFormatter* dbFormatter;
         NSString* accountJid = [self jidOfAccount:accountNo];
         if(!accountJid)
             return;
-#ifdef DEBUG
-        MLAssert(![accountJid isEqualToString:buddyname], @"We should never try to create a chat with our own jid", (@{
-            @"buddyname": buddyname,
-            @"accountNo": accountNo,
-            @"accountJid": accountJid
-        }));
-#endif
-        if([accountJid isEqualToString:buddyname])
-        {
-            // Something is broken
-            DDLogWarn(@"We should never try to create a chat with our own jid");
-            return;
-        }
-        else
-        {
-            //add contact if possible (ignore already existing contacts)
-            [self addContact:buddyname forAccount:accountNo nickname:nil andMucNick:nil];
-            
-            // insert or update
-            NSString* query = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp) ON CONFLICT(buddy_name, account_id) DO UPDATE SET lastMessageTime=current_timestamp;";
-            [self.db executeNonQuery:query andArguments:@[buddyname, accountNo]];
-            return;
-        }
+
+        //add contact if possible (ignore already existing contacts)
+        [self addContact:buddyname forAccount:accountNo nickname:nil andMucNick:nil];
+
+        // insert or update active chat
+        NSString* query = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp) ON CONFLICT(buddy_name, account_id) DO UPDATE SET lastMessageTime=current_timestamp;";
+        [self.db executeNonQuery:query andArguments:@[buddyname, accountNo]];
     }];
     return;
 }

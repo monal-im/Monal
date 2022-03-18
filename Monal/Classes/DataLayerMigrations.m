@@ -1090,6 +1090,21 @@
             [db executeNonQuery:@"DROP TABLE _delayed_message_stanzasTMP;"];
         }];
 
+        // remove old self chat buddies needed for omemo
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.117 withBlock:^{
+            [db executeNonQuery:@"DELETE \
+                FROM buddylist \
+                WHERE \
+                    ROWID IN ( \
+                        SELECT b.ROWID \
+                        FROM buddylist AS b \
+                        INNER JOIN account AS a \
+                        ON a.account_id=b.account_id \
+                        WHERE b.buddy_name==(a.username || '@' || a.domain) \
+                    ) \
+            "];
+        }];
+
         // check if db version changed
         NSNumber* newdbversion = [self readDBVersion:db];
 

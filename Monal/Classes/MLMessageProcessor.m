@@ -106,10 +106,6 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     
-    //ignore self messages after this (only pubsub data is from self)
-    if([messageNode.fromUser isEqualToString:messageNode.toUser])
-        return message;
-    
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(
         ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
@@ -131,7 +127,7 @@ static NSMutableDictionary* _typingNotifications;
         [account send:errorReply];
         return message;
     }
-    
+
     if(([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
         // Ignore all group chat msgs from unkown groups
@@ -161,7 +157,11 @@ static NSMutableDictionary* _typingNotifications;
         DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
         [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil andMucNick:nil];
     }
-    
+
+    //ignore self messages after this (only pubsub data and self-chats are from self)
+    if([messageNode.fromUser isEqualToString:messageNode.toUser])
+        return message;
+
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
     //check stanza-id @by according to the rules outlined in XEP-0359
     if(!stanzaid)

@@ -470,6 +470,9 @@ enum msgSentState {
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"]];
     else
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"]];
+    // disable encryption button on unsupported muc types
+    if(self.contact.isGroup && [self.contact.mucType isEqualToString:@"group"] == NO)
+        [self.navBarEncryptToggleButton setEnabled:NO];
 }
 
 -(void) refreshContact:(NSNotification*) notification

@@ -60,6 +60,7 @@ jobs:
       - name: staple
         run: |
           cd Monal/build/app/tar_release/
+          sleep 30
           stapleTries=0
           while :
           do

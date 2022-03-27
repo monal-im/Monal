@@ -467,11 +467,16 @@ static NSMutableSet* _currentlyTransfering;
     NSURLComponents* urlComponents = [NSURLComponents componentsWithString:url];
     if(!urlComponents)
     {
-        DDLogWarn(@"Failed to get url components, returning url possibly still including an urlfragment!");
-        return url;
+        DDLogWarn(@"Failed to get url components, returning empty url!");
+        return @"";
     }
     if([[urlComponents.scheme lowercaseString] isEqualToString:@"aesgcm"])
         urlComponents.scheme = @"https";
+    if(![[urlComponents.scheme lowercaseString] isEqualToString:@"https"])
+    {
+        DDLogWarn(@"Failed to get url components, returning empty url!");
+        return @"";
+    }
     urlComponents.fragment = @"";       //make sure we don't leak urlfragments to upload server
     return urlComponents.string;
 }

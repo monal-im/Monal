@@ -532,8 +532,35 @@
 -(BOOL) checkIfSessionIsStillNeeded:(NSString*) buddyJid
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
-        // delete fingerprints from buddyJid if the buddyJid is neither a buddy nor a group member
-        NSNumber* buddyJidCnt = [self.sqliteDatabase executeScalar:@"SELECT (bCnt.buddyListCnt + mucCnt.roomCnt) FROM (SELECT COUNT(buddy_name) AS buddyListCnt FROM buddylist WHERE account_id=? AND buddy_name=?) AS bCnt, (SELECT COUNT(room) AS roomCnt FROM muc_members WHERE account_id=? AND member_jid=?) AS mucCnt" andArguments:@[self.accountId, buddyJid, self.accountId, buddyJid]];
+        // delete fingerprints from buddyJid if the buddyJid is neither a buddy, a self chat, nor a group member
+        NSNumber* buddyJidCnt = [self.sqliteDatabase executeScalar:@"SELECT \
+                (bCnt.buddyListCnt + mucCnt.roomCnt + accountCnt) \
+            FROM \
+                ( \
+                    SELECT \
+                        COUNT(buddy_name) AS buddyListCnt \
+                    FROM buddylist \
+                    WHERE \
+                        account_id=? \
+                        AND buddy_name=? \
+                ) AS bCnt, \
+                ( \
+                    SELECT \
+                        COUNT(room) AS roomCnt \
+                    FROM muc_members \
+                    WHERE \
+                        account_id=? \
+                        AND member_jid=? \
+                ) AS mucCnt, \
+                ( \
+                    SELECT \
+                        COUNT(account_id) AS accountCnt \
+                    FROM account \
+                    WHERE \
+                        (username || '@' || domain) = ? \
+                        AND account_id = ? \
+                ) AS accountCnt" andArguments:@[self.accountId, buddyJid, self.accountId, buddyJid, self.accountId, buddyJid]];
+
         BOOL buddyStillNeeded = buddyJidCnt.intValue > 0;
         if(buddyStillNeeded == NO)
         {
@@ -557,13 +584,18 @@
 -(NSArray<NSString*>*) removeDanglingMucSessions
 {
     return [self.sqliteDatabase idWriteTransaction:^{
-        NSArray<NSString*>* danglingJids = [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT buddyJid FROM signalContactIdentity \
+        // create list of all jids that don't have a 1:1 session and no group session
+        // ignore sessions for the account jid as not all users soliloquize
+        NSArray<NSString*>* danglingJids = [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT s.buddyJid FROM signalContactIdentity AS s \
+            INNER JOIN accounts AS a \
+            ON s.account_id = a.account_id \
             WHERE \
                 account_id = ? \
-                AND buddyJid NOT IN \
+                AND AND s.buddyJid NOT IN \
                     (SELECT buddy_name FROM buddylist WHERE account_id=?) \
-                AND buddyJid NOT IN \
-                    (SELECT member_jid FROM muc_members WHERE account_id=?)\
+                AND s.buddyJid NOT IN \
+                    (SELECT member_jid FROM muc_members WHERE account_id=?) \
+                AND s.buddyJid != (a.username || '@' || a.domain) \
         " andArguments:@[self.accountId, self.accountId, self.accountId]];
 
         if(danglingJids == nil)

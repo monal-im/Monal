@@ -62,14 +62,6 @@ const int KEY_SIZE = 16;
     self.openBundleFetchCnt = 0;
     self.closedBundleFetchCnt = 0;
 
-    // Make sure that our own jid is included in the buddylist
-    if([[DataLayer sharedInstance] isContactInList:self.accountJid forAccount:account.accountNo] == NO) {
-#ifdef DEBUG
-        MLAssert(NO, @"Own jid is missing in buddylist", (@{@"account": account.accountNo, @"jid": self.accountJid}));
-#endif
-        DDLogWarn(@"Own jid is missing in buddylist: jid: %@ accountNo: %@", self.accountJid, account.accountNo);
-        [[DataLayer sharedInstance] addContact:self.accountJid forAccount:account.accountNo nickname:nil andMucNick:nil];
-    }
     [self setupSignal];
     self.brokenSessions = [[NSMutableDictionary alloc] init];
     NSArray<NSNumber*>* ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];

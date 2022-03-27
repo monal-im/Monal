@@ -25,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) showContacts;
 -(void) deleteConversation;
 -(void) showSettings;
+-(void) showPrivacySettings;
 -(void) showDetails;
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString* _Nullable) token usingCompletion:(monal_void_block_t) completion;
 

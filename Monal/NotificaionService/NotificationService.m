@@ -84,7 +84,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     self.handlerList = [[NSMutableArray alloc] init];
     self.isFirstPush = YES;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
     return self;
 }
@@ -316,21 +315,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [account unfreezeParseQueue];
 }
 
-
--(void) xmppError:(NSNotification*) notification
-{
-    DDLogDebug(@"notification handler: got xmpp error");
-    if([notification.userInfo[@"isSevere"] boolValue])
-    {
-        //dispatch in another thread to avoid blocking the thread posting this notification (most probably the receiveQueue)
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-            //disconnect this account and wait until the rest of our accounts and the appex times out
-            DDLogWarn(@"notification handler: severe account error --> disconnecting this account");
-            [notification.object disconnect];
-        });
-    }
-}
-
 -(void) updateUnread
 {
     DDLogVerbose(@"updating app badge via updateUnread");
@@ -482,6 +466,7 @@ static BOOL warnUnclean = NO;
 {
     DDLogError(@"notification handler expired, that should never happen!");
     
+/*
 #ifdef DEBUG
     UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
     errorContent.title = @"Unexpected appex expiration";
@@ -502,8 +487,8 @@ static BOOL warnUnclean = NO;
     //WARNING: if it's a real deadlock not unlocking itself, apple will kill us nontheless,
     //         but that's not different to us committing suicide like in the old code commented below
     usleep(1800000);
-    
-/*
+*/
+
 #ifdef DEBUG
     if([handlers count] > 0)
     {
@@ -544,7 +529,6 @@ static BOOL warnUnclean = NO;
     DDLogInfo(@"Committing suicide...");
     [DDLog flushLog];
     exit(0);
-*/
 
 /*
     //proxy to push singleton

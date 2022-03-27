@@ -108,7 +108,7 @@ static NSString* _processID;
 -(void) prepareForFreeze:(NSNotification*) notification
 {
     //invalidate socket when getting freezed
-    if(_cfsocketout != NULL && !CFSocketIsValid(_cfsocketout))
+    if(_cfsocketout != NULL && CFSocketIsValid(_cfsocketout))
         CFSocketInvalidate(_cfsocketout);
     if(_cfsocketout != NULL)
         CFRelease(_cfsocketout);

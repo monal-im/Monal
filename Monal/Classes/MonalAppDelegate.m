@@ -22,6 +22,7 @@
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
 #import "MLMucProcessor.h"
+#import "MBProgressHUD.h"
 
 @import NotificationBannerSwift;
 
@@ -103,7 +104,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     return self;
 }
 
-#pragma mark -  APNS notificaion
+#pragma mark -  APNS notification
 
 -(void) application:(UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*) deviceToken
 {
@@ -234,7 +235,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         ];
     }
     UNNotificationCategory* messageCategory;
-    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings;
     messageCategory = [UNNotificationCategory
         categoryWithIdentifier:@"message"
         actions:@[replyAction, markAsReadAction]
@@ -660,6 +661,17 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }
 }
 
+-(void) userNotificationCenter:(UNUserNotificationCenter*) center openSettingsForNotification:(UNNotification*) notification
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        while(self.activeChats == nil)
+            usleep(100000);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [(ActiveChatsViewController*)self.activeChats showPrivacySettings];
+        });
+    });
+}
+
 -(void) openChatOfContact:(MLContact* _Nullable) contact
 {
     if(contact != nil)
@@ -715,6 +727,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     _backgroundTimer = nil;
 }
 
+-(UIViewController*) getTopViewController
+{
+    UIViewController* topViewController = self.window.rootViewController;
+    while(topViewController.presentedViewController)
+        topViewController = topViewController.presentedViewController;
+    return topViewController;
+}
+
 -(void) applicationWillEnterForeground:(UIApplication *)application
 {
     DDLogInfo(@"Entering FG");
@@ -724,29 +744,38 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     //TODO: show "loading..." animation/modal
     
-    //only proceed with foregrounding if the NotificationServiceExtension is not running
-    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
-    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
-    {
-        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
-        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
-            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
-        }];
-    }
+    DDLogError(@"[self getTopViewController] = %@", [self getTopViewController]);
+    DDLogError(@"[self getTopViewController].view = %@", [self getTopViewController].view);
+    MBProgressHUD* loadingHUD = [MBProgressHUD showHUDAddedTo:[self getTopViewController].view animated:YES];
+    loadingHUD.label.text = NSLocalizedString(@"Initializing...", @"");
+    loadingHUD.mode = MBProgressHUDModeIndeterminate;
+    loadingHUD.removeFromSuperViewOnHide = YES;
     
-    //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
-    
-    //cancel already running background timer, we are now foregrounded again
-    [self stopBackgroundTimer];
-    
-    [self addBackgroundTask];
-    [[MLXMPPManager sharedInstance] nowForegrounded];
-}
-
--(void) applicationWillResignActive:(UIApplication *)application
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    //don't use the main thread while waiting to make sure the HUD will be properly displayed
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        //only proceed with foregrounding if the NotificationServiceExtension is not running
+        [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+        {
+            DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+            [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
+                [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+            }];
+        }
+        loadingHUD.hidden = YES;
+        
+        //switch to the main thread again once the HUD has been hidden again
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
+            
+            //cancel already running background timer, we are now foregrounded again
+            [self stopBackgroundTimer];
+            
+            [self addBackgroundTask];
+            [[MLXMPPManager sharedInstance] nowForegrounded];
+        });
+    });
 }
 
 -(void) nowReallyBackgrounded
@@ -809,6 +838,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) showConnectionStatus:(NSNotification*) notification
 {
     //this will show an error banner but only if our app is foregrounded
+    DDLogWarn(@"Got xmpp error %@", notification);
     if(![HelperTools isNotInFocus])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -821,6 +851,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             [banner showWithQueuePosition:QueuePositionBack bannerPosition:BannerPositionTop queue:queue on:nil];
         });
     }
+    else
+        DDLogWarn(@"Not showing error banner: app not in focus!");
 }
 
 #pragma mark - mac menu
@@ -965,8 +997,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         stopped = YES;
                     }
                     if(!stopped)
+                    {
                         DDLogDebug(@"no background tasks running, nothing to stop");
-                    [DDLog flushLog];
+                        [DDLog flushLog];
+                    }
                 } onQueue:dispatch_get_main_queue()];
             }
         }
@@ -1020,7 +1054,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) handleBackgroundFetchingTask:(BGTask*) task
 {
-    DDLogInfo(@"RUNNING BGTASK");
+    DDLogInfo(@"RUNNING BGTASK SETUP HANDLER");
     
     _bgFetch = task;
     weakify(task);
@@ -1078,15 +1112,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     else
         DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
     
-    //log bgtask ticks (and stop when the task expires)
-    unsigned long tick = 0;
-    while(_bgFetch != nil)
-    {
-        DDLogVerbose(@"BGTASK TICK: %lu", tick++);
-        [DDLog flushLog];
-        [NSThread sleepForTimeInterval:1.000];
-    }
-    DDLogInfo(@"BGTASK terminated...");
+    DDLogInfo(@"BGTASK SETUP HANDLER COMPLETED SUCCESSFULLY...");
 }
 
 -(void) configureBackgroundFetchingTask
@@ -1115,10 +1141,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
         request.requiresNetworkConnectivity = YES;
         request.requiresExternalPower = NO;
-        //this is needed because nil will start a new bg task before the old one did terminate
-        //this triggers a bug in ios which will not give bg time to the new task despite already started and leave monal
-        //freezed after being through half of the connection process
-        request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:30];
+        request.earliestBeginDate = nil;
         BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
         if(!success) {
             // Errorcodes https://stackoverflow.com/a/58224050/872051

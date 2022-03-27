@@ -84,7 +84,7 @@ struct ContactDetailsHeader: View {
                 }
                 */
 #if !DISABLE_OMEMO
-                if(!contact.isGroup) {
+                if(!contact.isGroup || (contact.isGroup && contact.mucType == "group")) {
                     Spacer().frame(width: 20)
                     Button(action: {
                         showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)

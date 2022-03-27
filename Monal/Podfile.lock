@@ -18,15 +18,15 @@ PODS:
     - SnapKit (~> 5.0.1)
   - pop (1.0.12)
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.12.3):
-    - SDWebImage/Core (= 5.12.3)
-  - SDWebImage/Core (5.12.3)
+  - SDWebImage (5.12.5):
+    - SDWebImage/Core (= 5.12.5)
+  - SDWebImage/Core (5.12.5)
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
   - SnapKit (5.0.1)
-  - sqlite3/common (3.37.2)
-  - sqlite3/perf-threadsafe (3.37.2):
+  - sqlite3/common (3.38.1)
+  - sqlite3/perf-threadsafe (3.38.1):
     - sqlite3/common
   - TOCropViewController (2.6.1)
   - TPCircularBuffer (1.6.1)
@@ -93,14 +93,14 @@ SPEC CHECKSUMS:
   NotificationBannerSwift: 7021be2338f8f29cf424b0aca43da462bf9e2a1a
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: 53179a2dba77246efa8a9b85f5c5b21f8f43e38f
+  SDWebImage: 0905f1b7760fc8ac4198cae0036600d67478751e
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
-  sqlite3: c0ed2889f1853952214f34195c4a081a7a7a8015
+  sqlite3: cd8b3380fcf65663ed84d17aab294db7626a314e
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
 PODFILE CHECKSUM: 7c1d8fb340ca0d75a7e75d57043e597e8d9f55c1
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3

@@ -920,11 +920,15 @@ NSString* const kStanza = @"stanza";
                     //disable push for this node
                     if(self.connectionProperties.supportsPush)
                     {
+#ifdef IS_ALPHA
+                        XMPPIQ* disableNew = [[XMPPIQ alloc] initWithType:kiqSetType];
+                        [disableNew setPushDisable:[MLXMPPManager sharedInstance].pushToken];
+                        [self writeToStream:disableNew.XMLString];
+#endif
                         XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
-                        [disable setPushDisable];
+                        [disable setPushDisable:[[[UIDevice currentDevice] identifierForVendor] UUIDString]];
                         [self writeToStream:disable.XMLString];		// dont even bother queueing
                     }
-
                     [self sendLastAck];
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the xmpp stream directly afterwards
             [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
@@ -4077,6 +4081,14 @@ NSString* const kStanza = @"stanza";
         pushToken != nil && [pushToken length] > 0
     )
     {
+#ifdef IS_ALPHA
+        // enable push directly without appserver registration
+        self.connectionProperties.registeredOnPushAppserver = YES;
+        XMPPIQ* enablePushIq = [[XMPPIQ alloc] initWithType:kiqSetType];
+        [enablePushIq setPushEnableWithNode:pushToken onAppserver:[HelperTools pushServer]];
+        [self sendIq:enablePushIq withHandler:$newHandler(MLIQProcessor, handlePushEnabled)];
+#endif
+        // old style push
         DDLogInfo(@"registering (and enabling) push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         XMPPIQ* registerNode = [[XMPPIQ alloc] initWithType:kiqSetType];
         [registerNode setRegisterOnAppserverWithToken:pushToken];
@@ -4089,8 +4101,13 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"DISABLING push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         if(self.connectionProperties.supportsPush)
         {
+#ifdef IS_ALPHA
+            XMPPIQ* disableNew = [[XMPPIQ alloc] initWithType:kiqSetType];
+            [disableNew setPushDisable:pushToken];
+            [self send:disableNew];
+#endif
             XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
-            [disable setPushDisable];
+            [disable setPushDisable:[[[UIDevice currentDevice] identifierForVendor] UUIDString]];
             [self send:disable];
         }
     }

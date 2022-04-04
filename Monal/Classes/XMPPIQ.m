@@ -86,6 +86,16 @@ NSString* const kiqErrorType = @"error";
     ] andData:nil]];
 }
 
+// direct push registration at xmpp server without registration at appserver
+-(void) setPushEnableWithNode:(NSString*) node onAppserver:(NSString*) jid
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
+        @"jid": jid,
+        @"node": node
+    } andChildren:@[] andData:nil]];
+}
+
+// legacy push registration at appserver
 -(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
@@ -98,11 +108,11 @@ NSString* const kiqErrorType = @"error";
     ] andData:nil]];
 }
 
--(void) setPushDisable
+-(void) setPushDisable:(NSString*) node
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"disable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
         @"jid": [HelperTools pushServer],
-        @"node": [[[UIDevice currentDevice] identifierForVendor] UUIDString]
+        @"node": node
     } andChildren:@[] andData:nil]];
 }
 

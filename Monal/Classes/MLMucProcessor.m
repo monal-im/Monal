@@ -412,13 +412,13 @@
                 {
                     DDLogInfo(@"Querying muc mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
                     [mamQuery setMAMQueryAfter:lastStanzaId];
-                    [_account sendIq:mamQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, NO))];
+                    [_account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
                 }
                 else
                 {
                     DDLogInfo(@"Querying muc mam:2 archive for latest stanzaid to prime database");
                     [mamQuery setMAMQueryForLatestId];
-                    [_account sendIq:mamQuery withHandler:$newHandler([self class], handleMamResponseWithLatestId)];
+                    [_account sendIq:mamQuery withHandler:$newHandler(self, handleMamResponseWithLatestId)];
                 }
             }
             
@@ -503,7 +503,7 @@
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:roomJid];
     [discoInfo setDiscoInfoNode];
-    [account sendIq:discoInfo withHandler:$newHandlerWithInvalidation([self class], handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
+    [account sendIq:discoInfo withHandler:$newHandlerWithInvalidation(self, handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
 }
 
 -(void) pingAllMucs
@@ -598,7 +598,7 @@ $$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $_ID(x
     @synchronized(_stateLockObject) {
         [_joining removeObject:roomJid];
     }
-}
+$$
 
 $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $_BOOL(join), $_BOOL(updateBookmarks))
     MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!", (@{
@@ -718,7 +718,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
             XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
             [discoInfo setiqTo:iqNode.fromUser];
             [discoInfo setMucListQueryFor:type];
-            [_account sendIq:discoInfo withHandler:$newHandler([self class], handleMembersList, $ID(type))];
+            [_account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
         }
     
         //now try to join this room if requested
@@ -743,7 +743,7 @@ $$
 $$instance_handler(handleMembersList, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
     [self handleMembersListUpdate:iqNode];
-}
+$$
 
 $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
@@ -763,7 +763,7 @@ $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $_ID(xmp
     if([iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
         [[DataLayer sharedInstance] setLastStanzaId:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"] forMuc:iqNode.fromUser andAccount:_account.accountNo];
     [_account mamFinishedFor:iqNode.fromUser];
-}
+$$
 
 $$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
     if([iqNode check:@"/<type=error>"])
@@ -777,7 +777,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_
             [mamQuery setiqTo:iqNode.fromUser];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
             [mamQuery setCompleteMAMQuery];
-            [account sendIq:mamQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, YES))];
+            [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, YES))];
         }
         else
         {
@@ -793,14 +793,14 @@ $$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_
         XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
         [pageQuery setiqTo:iqNode.fromUser];
-        [_account sendIq:pageQuery withHandler:$newHandler([self class], handleCatchup, $BOOL(secondTry, NO))];
+        [_account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
     }
     else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
     {
         DDLogVerbose(@"Muc mam catchup finished");
         [_account mamFinishedFor:iqNode.fromUser];
     }
-}
+$$
 
 -(void) handleError:(NSString*) description forMuc:(NSString*) room withNode:(XMPPStanza*) node andIsSevere:(BOOL) isSevere
 {

@@ -17,11 +17,11 @@ def monal
   inhibit_all_warnings!
   pod 'MBProgressHUD', '~> 1.2.0'
   pod 'IDMPhotoBrowser'
-  pod 'SDWebImage', '~> 5.12.2'
+  pod 'SDWebImage', '~> 5.12.5'
   pod 'DZNEmptyDataSet'
   pod 'EAIntroView'
   pod 'TOCropViewController'
-  pod 'NotificationBannerSwift', '~> 3.0.6'
+  pod 'NotificationBannerSwift', '~> 3.1.0'
 end
 
 def monalxmpp

@@ -13,7 +13,7 @@ PODS:
     - SDWebImage
   - MarqueeLabel (4.0.5)
   - MBProgressHUD (1.2.0)
-  - NotificationBannerSwift (3.0.6):
+  - NotificationBannerSwift (3.1.0):
     - MarqueeLabel (~> 4.0.5)
     - SnapKit (~> 5.0.1)
   - pop (1.0.12)
@@ -25,8 +25,8 @@ PODS:
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
   - SnapKit (5.0.1)
-  - sqlite3/common (3.38.1)
-  - sqlite3/perf-threadsafe (3.38.1):
+  - sqlite3/common (3.38.2)
+  - sqlite3/perf-threadsafe (3.38.2):
     - sqlite3/common
   - TOCropViewController (2.6.1)
   - TPCircularBuffer (1.6.1)
@@ -37,9 +37,9 @@ DEPENDENCIES:
   - EAIntroView
   - IDMPhotoBrowser
   - MBProgressHUD (~> 1.2.0)
-  - NotificationBannerSwift (~> 3.0.6)
+  - NotificationBannerSwift (~> 3.1.0)
   - SAMKeychain
-  - SDWebImage (~> 5.12.2)
+  - SDWebImage (~> 5.12.5)
   - SignalProtocolC (from `https://github.com/monal-im/libsignal-protocol-c`, branch `master`)
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
   - sqlite3/perf-threadsafe
@@ -90,17 +90,17 @@ SPEC CHECKSUMS:
   IDMPhotoBrowser: 4bb459b1faffc228e92bccdf7c54ad6d6b7e8c37
   MarqueeLabel: 00cc0bcd087111dca575878b3531af980559707d
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  NotificationBannerSwift: 7021be2338f8f29cf424b0aca43da462bf9e2a1a
+  NotificationBannerSwift: 49912a48b37e2f55d1cef4e8a38f15394f66a70a
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: 0905f1b7760fc8ac4198cae0036600d67478751e
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
-  sqlite3: cd8b3380fcf65663ed84d17aab294db7626a314e
+  sqlite3: e26e8422c1f5780d0a3db283eb095a03a10e121c
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: 7c1d8fb340ca0d75a7e75d57043e597e8d9f55c1
+PODFILE CHECKSUM: e2e7e04d9812f0a6e5d8031ad9d99b505af58596
 
 COCOAPODS: 1.11.3

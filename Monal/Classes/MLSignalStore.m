@@ -591,7 +591,7 @@
             ON s.account_id = a.account_id \
             WHERE \
                 account_id = ? \
-                AND AND s.buddyJid NOT IN \
+                AND s.buddyJid NOT IN \
                     (SELECT buddy_name FROM buddylist WHERE account_id=?) \
                 AND s.buddyJid NOT IN \
                     (SELECT member_jid FROM muc_members WHERE account_id=?) \

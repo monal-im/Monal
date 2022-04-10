@@ -22,6 +22,7 @@
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
 #import "MLMucProcessor.h"
+#import "MBProgressHUD.h"
 
 @import NotificationBannerSwift;
 
@@ -51,6 +52,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     monal_void_block_t _backgroundTimer;
     MLContact* _contactToOpen;
     BOOL _shutdownPending;
+    BOOL _wasFreezed;
 }
 @property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @end
@@ -98,6 +100,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     _bgTask = UIBackgroundTaskInvalid;
     _wakeupCompletions = [[NSMutableDictionary alloc] init];
     _shutdownPending = NO;
+    _wasFreezed = NO;
     
     //[self runParserTests];
     return self;
@@ -199,6 +202,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(prepareForFreeze:) name:kMonalWillBeFreezed object:nil];
     
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     center.delegate = self;
@@ -726,14 +730,39 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     _backgroundTimer = nil;
 }
 
--(void) applicationWillEnterForeground:(UIApplication *)application
+-(UIViewController*) getTopViewController
+{
+    UIViewController* topViewController = self.window.rootViewController;
+    while(topViewController.presentedViewController)
+        topViewController = topViewController.presentedViewController;
+    return topViewController;
+}
+
+-(void) prepareForFreeze:(NSNotification*) notification
+{
+    _wasFreezed = YES;
+}
+
+-(void) applicationWillEnterForeground:(UIApplication*) application
 {
     DDLogInfo(@"Entering FG");
     @synchronized(self) {
         _shutdownPending = NO;
     }
     
-    //TODO: show "loading..." animation/modal
+    /*
+    //only show loading HUD if we really got freezed before
+    MBProgressHUD* loadingHUD;
+    if(_wasFreezed)
+    {
+        loadingHUD = [MBProgressHUD showHUDAddedTo:[self getTopViewController].view animated:YES];
+        loadingHUD.label.text = NSLocalizedString(@"Refreshing...", @"");
+        loadingHUD.mode = MBProgressHUDModeIndeterminate;
+        loadingHUD.removeFromSuperViewOnHide = YES;
+        
+        _wasFreezed = NO;
+    }
+    */
     
     //only proceed with foregrounding if the NotificationServiceExtension is not running
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
@@ -744,6 +773,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
         }];
     }
+    
+    /*
+    if(loadingHUD != nil)
+        loadingHUD.hidden = YES;
+    */
     
     //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];

@@ -60,16 +60,17 @@ jobs:
       - name: staple
         run: |
           cd Monal/build/app/tar_release/
-          sleep 60
+          sleep 40
           stapleTries=0
           while :
           do
             xcrun stapler staple "$APP_DIR" || {
-              if [ $? -eq 0 ]; then break; fi
               stapleTries=$((stapleTries +1))
-              if [ $stapleTries -gt 15 ]; then exit 1; fi
-              sleep 30
+              if [ $stapleTries -gt 10 ]; then exit 1; fi
+              sleep 20
+              continue
             }
+            if [ $? -eq 0 ]; then break; fi
           done
           stapler validate "$APP_DIR"
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"

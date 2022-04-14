@@ -20,11 +20,11 @@ jobs:
       APP_DIR: "Monal.app"
       IOS_DEVELOPER_NAME: "Apple Distribution: Anurodh Pokharel (33XS7DE5NZ)"
       APP_DEVELOPER_NAME_APPSTORE: "Apple Distribution: Anurodh Pokharel (33XS7DE5NZ)"
-      APP_DEVELOPER_NAME_APP_EXPORT: "Developer ID Application: Anurodh Pokharel (33XS7DE5NZ)"
+      #APP_DEVELOPER_NAME_APP_EXPORT: "Developer ID Application: Anurodh Pokharel (33XS7DE5NZ)"
       GCC_PREPROCESSOR_DEFINITIONS: ""
       BUILD_TYPE: "AppStore"
       EXPORT_OPTIONS_CATALYST_APPSTORE: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
-      EXPORT_OPTIONS_CATALYST_APP_EXPORT: "./scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
+      #EXPORT_OPTIONS_CATALYST_APP_EXPORT: "./scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
       EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Stable_iOS_ExportOptions.plist"
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

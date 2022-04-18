@@ -586,16 +586,16 @@
     return [self.sqliteDatabase idWriteTransaction:^{
         // create list of all jids that don't have a 1:1 session and no group session
         // ignore sessions for the account jid as not all users soliloquize
-        NSArray<NSString*>* danglingJids = [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT s.buddyJid FROM signalContactIdentity AS s \
-            INNER JOIN accounts AS a \
+        NSArray<NSString*>* danglingJids = [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT s.contactName FROM signalContactIdentity AS s \
+            INNER JOIN account AS a \
             ON s.account_id = a.account_id \
             WHERE \
-                account_id = ? \
-                AND s.buddyJid NOT IN \
+                s.account_id = ? \
+                AND s.contactName NOT IN \
                     (SELECT buddy_name FROM buddylist WHERE account_id=?) \
-                AND s.buddyJid NOT IN \
+                AND s.contactName NOT IN \
                     (SELECT member_jid FROM muc_members WHERE account_id=?) \
-                AND s.buddyJid != (a.username || '@' || a.domain) \
+                AND s.contactName != (a.username || '@' || a.domain) \
         " andArguments:@[self.accountId, self.accountId, self.accountId]];
 
         if(danglingJids == nil)
@@ -606,13 +606,13 @@
             [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity \
                 WHERE \
                     account_id = ? \
-                    AND buddyJid = ? \
+                    AND contactName = ? \
             " andArguments:@[self.accountId, jid]];
 
             [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession \
                 WHERE \
                     account_id = ? \
-                    AND buddyJid = ? \
+                    AND contactName = ? \
             " andArguments:@[self.accountId, jid]];
         }
         return danglingJids;

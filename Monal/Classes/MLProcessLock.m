@@ -87,6 +87,12 @@
     BOOL remote_running = response_received;
     [condition unlock];
     
+    //we got frozen while waiting for the timeout if we waited more than 100ms longer than the timeout
+    if((double)[timeout timeIntervalSinceNow] < -0.1)
+    {
+        DDLogWarn(@"We got frozen while waiting, retrying ping!");
+        return [self checkRemoteRunning:processName withTimeout:pingTimeout];
+    }
     DDLogDebug(@"checkRemoteRunning:%@ returning %@", processName, remote_running ? @"YES" : @"NO");
     return remote_running;
 }

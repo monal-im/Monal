@@ -39,7 +39,8 @@
 #import "XMPPPresence.h"
 #import "XMPPMessage.h"
 
-#define GRACEFUL_TIMEOUT 20.0
+#define GRACEFUL_TIMEOUT            20.0
+#define BGFETCH_GRACEFUL_TIMEOUT    60.0
 
 typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
@@ -741,6 +742,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) prepareForFreeze:(NSNotification*) notification
 {
     _wasFreezed = YES;
+    _shutdownPending = NO;
 }
 
 -(void) applicationWillEnterForeground:(UIApplication*) application
@@ -984,29 +986,25 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                     if(self->_bgTask != UIBackgroundTaskInvalid)
                     {
                         DDLogDebug(@"stopping UIKit _bgTask");
-                        
-                        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-                        
                         [DDLog flushLog];
                         UIBackgroundTaskIdentifier task = self->_bgTask;
                         self->_bgTask = UIBackgroundTaskInvalid;
                         [[UIApplication sharedApplication] endBackgroundTask:task];
-                        self->_shutdownPending = NO;
+                        
+                        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                         stopped = YES;
                     }
                     if(self->_bgFetch)
                     {
                         DDLogDebug(@"stopping backgroundFetchingTask");
-                        
-                        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-                        
                         [DDLog flushLog];
                         BGTask* task = self->_bgFetch;
                         self->_bgFetch = nil;
                         [task setTaskCompletedWithSuccess:YES];
-                        self->_shutdownPending = NO;
+                        
+                        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                         stopped = YES;
                     }
                     if(!stopped)
@@ -1033,6 +1031,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 @synchronized(self) {
                     //ui background tasks expire at the same time as background fetching tasks
                     //--> we have to check if a background fetching task is running and don't disconnect, if so
+                    BOOL shouldNotify = NO;
                     if(self->_bgFetch == nil)
                     {
                         self->_shutdownPending = YES;
@@ -1049,9 +1048,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         DDLogInfo(@"calling scheduleBackgroundFetchingTask");
                         [self scheduleBackgroundFetchingTask];
                         
-                        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-                        self->_shutdownPending = NO;
+                        shouldNotify = YES;
                     }
                     else
                         DDLogDebug(@"_bgFetch != nil --> not disconnecting");
@@ -1060,6 +1057,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                     UIBackgroundTaskIdentifier task = self->_bgTask;
                     self->_bgTask = UIBackgroundTaskInvalid;
                     [[UIApplication sharedApplication] endBackgroundTask:task];
+                    
+                    if(shouldNotify)
+                    {
+                        //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                    }
                 }
             }];
         }
@@ -1082,6 +1085,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         @synchronized(self) {
             //ui background tasks expire at the same time as background fetching tasks
             //--> we have to check if an ui bg task is running and don't disconnect, if so
+            BOOL shouldNotify = NO;
             if(background && self->_bgTask == UIBackgroundTaskInvalid)
             {
                 self->_shutdownPending = YES;
@@ -1096,10 +1100,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                 //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                 [self scheduleBackgroundFetchingTask];
-                
-                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-                self->_shutdownPending = NO;
             }
             else
                 DDLogDebug(@"_bgTask != UIBackgroundTaskInvalid --> not disconnecting");
@@ -1109,6 +1109,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             [DDLog flushLog];
             self->_bgFetch = nil;
             [task setTaskCompletedWithSuccess:!background];
+            
+            if(shouldNotify)
+            {
+                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+            }
         }
     };
     
@@ -1123,7 +1129,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }
     
     if([[MLXMPPManager sharedInstance] hasConnectivity])
+    {
+        [self startBackgroundTimer:BGFETCH_GRACEFUL_TIMEOUT];
         [[MLXMPPManager sharedInstance] connectIfNecessary];
+    }
     else
         DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
     
@@ -1210,47 +1219,41 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 DDLogWarn(@"### Wakeup timer triggered for ID %@ ###", completionId);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     @synchronized(self) {
-                        if([self->_wakeupCompletions objectForKey:completionId] != nil)
+                        DDLogInfo(@"Handling wakeup completion %@", completionId);
+                        
+                        //we have to check if an ui bg task or background fetching task is running and don't disconnect, if so
+                        BOOL background = [HelperTools isInBackground];
+                        BOOL shouldNotify = NO;
+                        if(background && (self->_bgTask == UIBackgroundTaskInvalid || self->_bgFetch == nil))
                         {
-                            DDLogInfo(@"Handling wakeup completion %@", completionId);
+                            self->_shutdownPending = YES;
+                            DDLogDebug(@"background && (_bgTask == UIBackgroundTaskInvalid || _bgFetch == nil) --> disconnecting and feeding wakeup completion");
                             
-                            //we have to check if an ui bg task or background fetching task is running and don't disconnect, if so
-                            BOOL background = [HelperTools isInBackground];
-                            if(background && (self->_bgTask == UIBackgroundTaskInvalid || self->_bgFetch == nil))
-                            {
-                                self->_shutdownPending = YES;
-                                DDLogDebug(@"background && (_bgTask == UIBackgroundTaskInvalid || _bgFetch == nil) --> disconnecting and feeding wakeup completion");
-                                
-                                //this has to be before account disconnects, to detect which accounts are/are not idle (e.g. don't have/have a sync error)
-                                BOOL wasIdle = [[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle];
-                                [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
-                                
-                                //disconnect all accounts to prevent TCP buffer leaking
-                                [[MLXMPPManager sharedInstance] disconnectAll];
-                                
-                                //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
-                                //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                                if(!wasIdle)
-                                    [self scheduleBackgroundFetchingTask];
-                                
-                                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-                                self->_shutdownPending = NO;
-                            }
-                            else
-                                DDLogDebug(@"NOT (background && (_bgTask == UIBackgroundTaskInvalid || _bgFetch == nil)) --> not disconnecting");
+                            //this has to be before account disconnects, to detect which accounts are/are not idle (e.g. don't have/have a sync error)
+                            BOOL wasIdle = [[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle];
+                            [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                             
-                            //call completion (should be done *after* the idle state check because it could freeze the app)
-                            DDLogInfo(@"Calling wakeup completion handler...");
-                            [DDLog flushLog];
-                            completionHandler(UIBackgroundFetchResultFailed);
-                            [self->_wakeupCompletions removeObjectForKey:completionId];
+                            //disconnect all accounts to prevent TCP buffer leaking
+                            [[MLXMPPManager sharedInstance] disconnectAll];
+                            
+                            //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
+                            //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
+                            if(!wasIdle)
+                                [self scheduleBackgroundFetchingTask];
                         }
                         else
+                            DDLogDebug(@"NOT (background && (_bgTask == UIBackgroundTaskInvalid || _bgFetch == nil)) --> not disconnecting");
+                        
+                        //call completion (should be done *after* the idle state check because it could freeze the app)
+                        DDLogInfo(@"Calling wakeup completion handler...");
+                        [DDLog flushLog];
+                        [self->_wakeupCompletions removeObjectForKey:completionId];
+                        completionHandler(UIBackgroundFetchResultFailed);
+                        
+                        if(shouldNotify)
                         {
-                            DDLogWarn(@"Wakeup completion %@ got already handled and was removed from list!", completionId);
-                            // TODO: thilo check
-                            completionHandler(UIBackgroundFetchResultNoData);
+                            //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                         }
                     }
                 });

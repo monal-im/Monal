@@ -615,6 +615,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         //make sure to update remote bookmarks, even if updateBookmarks == NO
+        //keep buddy list entry to allow users to read the last messages before the muc got deleted
         [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
         return;
@@ -626,6 +627,12 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
         @synchronized(_stateLockObject) {
             [_joining removeObject:iqNode.fromUser];
         }
+        
+        //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
+        //make sure to update remote bookmarks, even if updateBookmarks == NO
+        //keep buddy list entry to allow users to read the last messages before the muc got deleted/broken
+        [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+        
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:YES];
         return;
     }
@@ -640,7 +647,9 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         //make sure to update remote bookmarks, even if updateBookmarks == NO
-        [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:NO];
+        //keep buddy list entry to allow users to read the last messages before the muc got deleted/broken
+        //AND: to not auto-delete contact list entries via malicious xmpp:?join links
+        [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
     
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@: This is not a groupchat!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andIsSevere:YES];
         return;

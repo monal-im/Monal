@@ -436,7 +436,7 @@
             }
         }
         else
-            sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
+            sender = [self makeINPersonWithContact:contact andDisplayName:message.contactDisplayName andAccount:account];
     }
     else
         sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
@@ -491,9 +491,12 @@
     INImage* contactImage = nil;
     if(contact.avatar != nil)
     {
+        DDLogDebug(@"Using avatar image...");
         NSData* avatarData = UIImagePNGRepresentation(contact.avatar);
         contactImage = [INImage imageWithImageData:avatarData];
     }
+    else
+        DDLogDebug(@"NOT using avatar image...");
     INPerson* person = [[INPerson alloc] initWithPersonHandle:personHandle
                                                 nameComponents:nameComponents
                                                     displayName:nameComponents.nickname

@@ -508,11 +508,12 @@ NSString* const kStanza = @"stanza";
     
     if(self.connectionProperties.server.isDirectTLS == YES)
     {
-        DDLogInfo(@"starting directSSL");
+        DDLogInfo(@"creating directTLS streams");
         [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort inputStream:&localIStream outputStream:&localOStream];
     }
     else
     {
+        DDLogInfo(@"creating plaintext streams");
         [NSStream getStreamsToHostWithName:self.connectionProperties.server.connectServer port:self.connectionProperties.server.connectPort.integerValue inputStream:&localIStream outputStream:&localOStream];
     }
     

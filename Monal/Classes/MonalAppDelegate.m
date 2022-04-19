@@ -703,13 +703,13 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 #pragma mark - backgrounding
 
--(void) startBackgroundTimer
+-(void) startBackgroundTimer:(double) timeout
 {
     //cancel old background timer if still running and start a new one
-    //this timer will fire after GRACEFUL_TIMEOUT seconds in background and disconnect gracefully (e.g. when fully idle the next time)
+    //this timer will fire after timeout seconds in background and disconnect gracefully (e.g. when fully idle the next time)
     if(_backgroundTimer)
         _backgroundTimer();
-    _backgroundTimer = createTimer(GRACEFUL_TIMEOUT, ^{
+    _backgroundTimer = createTimer(timeout, ^{
         //mark timer as *not* running
         self->_backgroundTimer = nil;
         //retry background check (now handling idle state because no running background timer is blocking it)
@@ -759,7 +759,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     [self addBackgroundTask];
     [[MLXMPPManager sharedInstance] nowBackgrounded];
-    [self startBackgroundTimer];
+    [self startBackgroundTimer:GRACEFUL_TIMEOUT];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self checkIfBackgroundTaskIsStillNeeded];
     });
@@ -958,6 +958,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         UIBackgroundTaskIdentifier task = self->_bgTask;
                         self->_bgTask = UIBackgroundTaskInvalid;
                         [[UIApplication sharedApplication] endBackgroundTask:task];
+                        self->_shutdownPending = NO;
                         stopped = YES;
                     }
                     if(self->_bgFetch)
@@ -971,6 +972,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         BGTask* task = self->_bgFetch;
                         self->_bgFetch = nil;
                         [task setTaskCompletedWithSuccess:YES];
+                        self->_shutdownPending = NO;
                         stopped = YES;
                     }
                     if(!stopped)
@@ -1015,6 +1017,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         
                         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                        self->_shutdownPending = NO;
                     }
                     else
                         DDLogDebug(@"_bgFetch != nil --> not disconnecting");
@@ -1062,6 +1065,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 
                 //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                self->_shutdownPending = NO;
             }
             else
                 DDLogDebug(@"_bgTask != UIBackgroundTaskInvalid --> not disconnecting");
@@ -1197,6 +1201,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                                 
                                 //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                                self->_shutdownPending = NO;
                             }
                             else
                                 DDLogDebug(@"NOT (background && (_bgTask == UIBackgroundTaskInvalid || _bgFetch == nil)) --> not disconnecting");

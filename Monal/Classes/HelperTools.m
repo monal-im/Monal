@@ -50,10 +50,17 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
-+(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id) userInfo
++(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
     if(!check)
-        @throw [NSException exceptionWithName:@"MLAssert" reason:text userInfo:userInfo];
+    {
+        NSString* fileStr = [NSString stringWithFormat:@"%s", file];
+        NSArray* filePathComponents = [fileStr pathComponents];
+        if([filePathComponents count]>1)
+            fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+        DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
+        @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s", fileStr, line, func] reason:text userInfo:userInfo];
+    }
 }
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
@@ -795,11 +802,9 @@ void logException(NSException* exception)
         queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     
     NSString* fileStr = [NSString stringWithFormat:@"%s", file];
-    NSString* funcStr = [NSString stringWithFormat:@"%s", func];
     NSArray* filePathComponents = [fileStr pathComponents];
-    NSString* fileName = fileStr;
     if([filePathComponents count]>1)
-        fileName = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
     
     if(timeout<=0.001)
     {
@@ -821,7 +826,7 @@ void logException(NSException* exception)
                               (uint64_t) (0.1 * NSEC_PER_SEC));      //leeway of 100ms
     
     dispatch_source_set_event_handler(timer, ^{
-        DDLogDebug(@"timer %@ %@(%G) triggered (created at %@:%d in %@)", timer, uuid, timeout, fileName, line, funcStr);
+        DDLogDebug(@"timer %@ %@(%G) triggered (created at %@:%d in %s)", timer, uuid, timeout, fileStr, line, func);
         dispatch_source_cancel(timer);
         if(handler)
             handler();
@@ -834,12 +839,12 @@ void logException(NSException* exception)
     });
     
     //start timer
-    DDLogDebug(@"starting timer %@ %@(%G) (created at %@:%d in %@)", timer, uuid, timeout, fileName, line, funcStr);
+    DDLogDebug(@"starting timer %@ %@(%G) (created at %@:%d in %s)", timer, uuid, timeout, fileStr, line, func);
     dispatch_resume(timer);
     
     //return block that can be used to cancel the timer
     return ^{
-        DDLogDebug(@"cancel block for timer %@ %@(%G) called (created at %@:%d in %@)", timer, uuid, timeout, fileName, line, funcStr);
+        DDLogDebug(@"cancel block for timer %@ %@(%G) called (created at %@:%d in %s)", timer, uuid, timeout, fileStr, line, func);
         if(!dispatch_source_testcancel(timer))
             dispatch_source_cancel(timer);
     };

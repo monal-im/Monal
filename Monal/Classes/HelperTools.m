@@ -27,6 +27,8 @@
 #import "XMPPDataForm.h"
 #import "xmpp.h"
 #import "MLNotificationQueue.h"
+#import "MLContact.h"
+#import "MLMessage.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -126,6 +128,8 @@ void logException(NSException* exception)
         [XMPPPresence class],
         [XMPPMessage class],
         [XMPPDataForm class],
+        [MLContact class],
+        [MLMessage class],
     ]] fromData:data error:&error];
     if(error)
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];

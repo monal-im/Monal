@@ -247,7 +247,12 @@
     if(!toreturn)
     {
         if(contact.isGroup)
-            toreturn = [MLImageManager circularImage:([@"channel" isEqualToString:contact.mucType] ? [UIImage imageNamed:@"noicon_channel"] : [UIImage imageNamed:@"noicon_muc"])];
+        {
+            if([@"channel" isEqualToString:contact.mucType])
+                toreturn = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_channel" inBundle:nil compatibleWithTraitCollection:nil]];
+            else
+                toreturn = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_muc" inBundle:nil compatibleWithTraitCollection:nil]];
+        }
         else
         {
             NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];

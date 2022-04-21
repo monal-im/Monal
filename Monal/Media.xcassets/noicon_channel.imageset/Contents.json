@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "monaltag.png",
+      "filename" : "noicon_channel.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "monaltag_x2.png",
+      "filename" : "noicon_channelx2.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "monaltag_x3.png",
+      "filename" : "noicon_channelx3.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

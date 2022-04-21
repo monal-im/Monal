@@ -3637,9 +3637,18 @@ NSString* const kStanza = @"stanza";
         {
             NSError* st_error = [stream streamError];
             DDLogError(@"Stream %@ error code=%ld domain=%@ local desc:%@", stream, (long)st_error.code,st_error.domain, st_error.localizedDescription);
+            /*
             if(stream != _oStream)      //check for _oStream here, because we don't have any _iStream (the mlpipe input stream was directly handed over to the xml parser)
             {
                 DDLogInfo(@"Ignoring error in iStream (will already be handled in oStream error handler");
+                break;
+            }
+            */
+            
+            //check accountState to make sure we don't swallow any errors thrown while [self connect] was already called, but the _reconnectInProgress flag not reset yet
+            if(_reconnectInProgress && self.accountState<kStateReconnecting)
+            {
+                DDLogInfo(@"Ignoring error in %@: already waiting for reconnect...", stream);
                 break;
             }
             

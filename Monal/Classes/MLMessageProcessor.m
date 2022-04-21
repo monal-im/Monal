@@ -147,7 +147,7 @@ static NSMutableDictionary* _typingNotifications;
             possibleUnkownContact = messageNode.fromUser;
 
         // handle KeyTransportMessages directly without adding a 1:1 buddy
-        if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] == YES && [messageNode check:@"body#"] == NO)
+        if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] == YES && [messageNode check:@"payload#"] == NO)
         {
             DDLogInfo(@"Handling KeyTransportElement without trying to add a 1:1 buddy %@", possibleUnkownContact);
             [account.omemo decryptMessage:messageNode];

@@ -3647,22 +3647,22 @@ NSString* const kStanza = @"stanza";
             switch(st_error.code)
             {
                 case errSSLXCertChainInvalid: {
-                    message = NSLocalizedString(@"SSL Error: Certificate chain is invalid", @"");
+                    message = NSLocalizedString(@"TLS Error: Certificate chain is invalid", @"");
                     break;
                 }
 
                 case errSSLUnknownRootCert: {
-                    message = NSLocalizedString(@"SSL Error: Unknown root certificate", @"");
+                    message = NSLocalizedString(@"TLS Error: Unknown root certificate", @"");
                     break;
                 }
 
                 case errSSLCertExpired: {
-                    message = NSLocalizedString(@"SSL Error: Certificate expired", @"");
+                    message = NSLocalizedString(@"TLS Error: Certificate expired", @"");
                     break;
                 }
 
                 case errSSLHostNameMismatch: {
-                    message = NSLocalizedString(@"SSL Error: Host name mismatch", @"");
+                    message = NSLocalizedString(@"TLS Error: Host name mismatch", @"");
                     break;
                 }
 

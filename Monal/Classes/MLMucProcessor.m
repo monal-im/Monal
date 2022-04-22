@@ -257,6 +257,7 @@
 {
     NSSet* presenceCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
     NSSet* messageCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}message/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
+    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:node.fromUser forAccount:_account.accountNo];
     
     //handle presence stanzas
     if(presenceCodes && [presenceCodes count])
@@ -268,7 +269,7 @@
                 case 201:
                 {
                     //make instant room
-                    DDLogInfo(@"Creating instant muc room %@...", node.fromUser);
+                    DDLogInfo(@"Creating instant muc room using default config: %@", node.fromUser);
                     XMPPIQ* configNode = [[XMPPIQ alloc] initWithType:kiqSetType];
                     [configNode setiqTo:node.fromUser];
                     [configNode setInstantRoom];
@@ -305,48 +306,68 @@
                 //banned from room
                 case 301:
                 {
-                    DDLogDebug(@"got banned from room %@", node.fromUser);
-                    @synchronized(_stateLockObject) {
-                        [_joining removeObject:node.fromUser];
+                    DDLogDebug(@"user '%@' got banned from room %@", node.fromResource, node.fromUser);
+                    if([nick isEqualToString:node.fromResource])
+                    {
+                        DDLogDebug(@"got banned from room %@", node.fromUser);
+                        @synchronized(_stateLockObject) {
+                            [_joining removeObject:node.fromUser];
+                        }
+                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
-                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                 }
                 //kicked from room
                 case 307:
                 {
-                    DDLogDebug(@"got kicked from room %@", node.fromUser);
-                    @synchronized(_stateLockObject) {
-                        [_joining removeObject:node.fromUser];
+                    DDLogDebug(@"user '%@' got kicked from room %@", node.fromResource, node.fromUser);
+                    if([nick isEqualToString:node.fromResource])
+                    {
+                        DDLogDebug(@"got kicked from room %@", node.fromUser);
+                        @synchronized(_stateLockObject) {
+                            [_joining removeObject:node.fromUser];
+                        }
+                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
-                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                 }
                 //removed because of affiliation change --> reenter room
                 case 321:
                 {
-                    DDLogDebug(@"got affiliation change for room %@", node.fromUser);
-                    @synchronized(_stateLockObject) {
-                        [_joining removeObject:node.fromUser];
+                    DDLogDebug(@"user '%@' got affiliation changed for room %@", node.fromResource, node.fromUser);
+                    if([nick isEqualToString:node.fromResource])
+                    {
+                        DDLogDebug(@"got affiliation change for room %@", node.fromUser);
+                        @synchronized(_stateLockObject) {
+                            [_joining removeObject:node.fromUser];
+                        }
+                        [self sendDiscoQueryFor:node.fromUser withJoin:YES andBookmarksUpdate:YES];
                     }
-                    [self sendDiscoQueryFor:node.fromUser withJoin:YES andBookmarksUpdate:YES];
                 }
                 //removed because room is now members only (an we are not a member)
                 case 322:
                 {
-                    DDLogDebug(@"got removed from members-only room %@", node.fromUser);
-                    @synchronized(_stateLockObject) {
-                        [_joining removeObject:node.fromUser];
+                    DDLogDebug(@"user '%@' got removed from members-only room %@", node.fromResource, node.fromUser);
+                    if([nick isEqualToString:node.fromResource])
+                    {
+                        DDLogDebug(@"got removed from members-only room %@", node.fromUser);
+                        @synchronized(_stateLockObject) {
+                            [_joining removeObject:node.fromUser];
+                        }
+                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                     }
-                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
-                    [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                 }
                 //removed because of system shutdown
                 case 332:
                 {
-                    DDLogDebug(@"got removed from room %@ because of system shutdown", node.fromUser);
-                    @synchronized(_stateLockObject) {
-                        [_joining removeObject:node.fromUser];
+                    DDLogDebug(@"user '%@' got removed from room %@ because of system shutdown", node.fromResource, node.fromUser);
+                    if([nick isEqualToString:node.fromResource])
+                    {
+                        DDLogDebug(@"got removed from room %@ because of system shutdown", node.fromUser);
+                        @synchronized(_stateLockObject) {
+                            [_joining removeObject:node.fromUser];
+                        }
+                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
-                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                 }
                 default:
                     DDLogInfo(@"Got unhandled muc status code in presence from %@: %@", node.from, code);
@@ -373,6 +394,8 @@
                 [_firstJoin removeObject:node.fromUser];
                 [_noUpdateBookmarks removeObject:node.fromUser];
             }
+            
+            //TODO: load muc avatar from vcard
             
             monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
             if(uiHandler)
@@ -438,6 +461,7 @@
                 {
                     DDLogInfo(@"Muc config of %@ changed, sending new disco info query to reload muc config...", node.fromUser);
                     [self sendDiscoQueryFor:node.from withJoin:NO andBookmarksUpdate:NO];
+                    //TODO: reload muc avatar from vcard
                     break;
                 }
                 default:

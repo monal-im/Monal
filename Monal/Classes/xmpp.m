@@ -544,7 +544,14 @@ NSString* const kStanza = @"stanza";
         [self startXMPPStream:NO];     //send xmpp stream start (this is the first one for this connection --> we don't need to clear the receive queue)
     }
     else
+    {
         [self startXMPPStream:NO];     //send xmpp stream start (this is the first one for this connection --> we don't need to clear the receive queue)
+        
+        //ignore starttls stream feature presence and opportunistically try starttls even before receiving the stream features
+        //(this is in accordance to RFC 7590: https://tools.ietf.org/html/rfc7590#section-3.1 )
+        MLXMLNode* startTLS = [[MLXMLNode alloc] initWithElement:@"starttls" andNamespace:@"urn:ietf:params:xml:ns:xmpp-tls"];
+        [self send:startTLS];
+    }
     
     //open sockets and start connecting (including TLS handshake if isDirectTLS==YES)
     DDLogInfo(@"opening TCP streams");
@@ -2259,10 +2266,10 @@ NSString* const kStanza = @"stanza";
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
         {
-            //ignore starttls stream feature presence and opportunistically try starttls
+            //normally we would ignore starttls stream feature presence and opportunistically try starttls
             //(this is in accordance to RFC 7590: https://tools.ietf.org/html/rfc7590#section-3.1 )
-            MLXMLNode* startTLS = [[MLXMLNode alloc] initWithElement:@"starttls" andNamespace:@"urn:ietf:params:xml:ns:xmpp-tls"];
-            [self send:startTLS];
+            //BUT: we already pipelined the starttls command when starting the stream --> do nothing here
+            DDLogInfo(@"Ignoring non-encrypted stream features (we already pipelined the starttls command when opening the stream)");
             return;
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-tls}proceed"])

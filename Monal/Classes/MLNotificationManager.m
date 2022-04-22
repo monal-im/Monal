@@ -115,22 +115,19 @@
     }
     
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.buddyName onAccount:message.accountId];
-    if(message.isMuc == YES)
+    if(!muted && message.isMuc == YES && [[DataLayer sharedInstance] isMucAlertOnMentionOnly:message.buddyName onAccount:message.accountId])
     {
-        if(!muted && message.participantJid != nil)
-            muted |= [[DataLayer sharedInstance] isMutedJid:message.participantJid onAccount:message.accountId];
-        if(!muted && [[DataLayer sharedInstance] isMucAlertOnMentionOnly:message.buddyName onAccount:message.accountId])
-        {
-            NSString* displayName = [MLContact ownDisplayNameForAccount:xmppAccount];
-            NSString* ownJid = xmppAccount.connectionProperties.identity.jid;
-            NSString* userPart = [HelperTools splitJid:ownJid][@"user"];
-            if(!(
-                [message.messageText localizedCaseInsensitiveContainsString:displayName] ||
-                [message.messageText localizedCaseInsensitiveContainsString:ownJid] ||
-                [message.messageText localizedCaseInsensitiveContainsString:userPart]
-            ))
-                muted = YES;
-        }
+        NSString* displayName = [MLContact ownDisplayNameForAccount:xmppAccount];
+        NSString* ownJid = xmppAccount.connectionProperties.identity.jid;
+        NSString* userPart = [HelperTools splitJid:ownJid][@"user"];
+        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:message.buddyName forAccount:message.accountId];
+        if(!(
+            [message.messageText localizedCaseInsensitiveContainsString:nick] ||
+            [message.messageText localizedCaseInsensitiveContainsString:displayName] ||
+            [message.messageText localizedCaseInsensitiveContainsString:userPart] ||
+            [message.messageText localizedCaseInsensitiveContainsString:ownJid]
+        ))
+            muted = YES;
     }
     if(muted)
     {

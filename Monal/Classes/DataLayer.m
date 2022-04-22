@@ -1649,17 +1649,27 @@ static NSDateFormatter* dbFormatter;
 -(NSNumber*) countUnreadMessages
 {
     return [self.db idReadTransaction:^{
-        // count # of msgs in message table
+        // count # of unread msgs in message table and ignore muted buddies and mentionOnly buddies without mention
         return [self.db executeScalar:@"SELECT Count(M.message_history_id) \
                                         FROM   message_history AS M \
                                         LEFT JOIN buddylist AS B \
                                                     ON M.account_id = B.account_id \
                                                         AND M.buddy_name = B.buddy_name \
-                                        WHERE  M.message_history_id > (SELECT Min(latest_read_message_history_id) \
-                                                                    FROM   buddylist) \
+                                        LEFT JOIN account AS A \
+                                                    ON M.account_id = A.account_id \
+                                        WHERE   M.message_history_id > (SELECT Min(latest_read_message_history_id) FROM buddylist) \
+                                            AND B.muted = 0 \
                                             AND M.inbound = 1 \
                                             AND M.unread = 1 \
-                                            AND B.muted = 0;"];
+                                            AND ( \
+                                                B.mentionOnly = 0 OR ( \
+                                                       (B.muc_nick != '' AND M.message LIKE '%'||B.muc_nick||'%') \
+                                                    OR (A.rosterName != '' AND M.message LIKE '%'||A.rosterName||'%') \
+                                                    OR (A.username != '' AND M.message LIKE '%'||A.username||'%') \
+                                                    OR (A.username != '' AND A.domain != '' AND M.message LIKE '%'||A.username||'@'||A.domain||'%') \
+                                                ) \
+                                            ) \
+                                        ;"];
     }];
 }
 
@@ -2282,7 +2292,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     return [self.db idReadTransaction:^{
         NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
-        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND message LIKE ? AND buddy_name=? ORDER BY timestamp ASC;";
+        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND (message LIKE ? OR messageType LIKE ?) AND buddy_name=? ORDER BY timestamp ASC;";
         NSArray* params = @[accountNo, likeString, contactJid];
         NSArray* results = [self.db executeScalarReader:query andArguments:params];
         return [self messagesForHistoryIDs:results];

@@ -332,10 +332,17 @@ NSString* const kStanza = @"stanza";
         [self persistState];
 }
 
+-(void) postError:(NSString*) message withIsSevere:(BOOL) isSevere
+{
+    // Do not show "Connection refused" message and other errors occuring before we are in kStateHasStream, if we still have more SRV records to try
+    if([_usableServersList count] == 0 || _accountState >= kStateHasStream)
+        [HelperTools postError:message withNode:nil andAccount:self andIsSevere:isSevere];
+}
+
 -(void) invalidXMLError
 {
     DDLogError(@"Server returned invalid xml!");
-    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Server returned invalid xml!", @""), @"isSevere": @NO}];
+    [self postError:NSLocalizedString(@"Server returned invalid xml!", @"") withIsSevere:NO];
     [self reconnect];
     return;
 }
@@ -523,7 +530,7 @@ NSString* const kStanza = @"stanza";
     if((localIStream == nil) || (localOStream == nil))
     {
         DDLogError(@"failed to create streams");
-        [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Unable to connect to server!", @""), @"isSevere": @NO}];
+        [self postError:NSLocalizedString(@"Unable to connect to server!", @"") withIsSevere:NO];
         [self reconnect];
         return;
     }
@@ -593,10 +600,7 @@ NSString* const kStanza = @"stanza";
         if(![[row objectForKey:@"isEnabled"] boolValue])
         {
             DDLogInfo(@"SRV entry prohibits XMPP connection for server %@", self.connectionProperties.identity.domain);
-            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{
-                @"message": [NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for domain %@", @""), self.connectionProperties.identity.domain],
-                @"isSevere": @YES
-            }];
+            [self postError:[NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for domain %@", @""), self.connectionProperties.identity.domain] withIsSevere:YES];
             return YES;
         }
     }
@@ -1388,7 +1392,7 @@ NSString* const kStanza = @"stanza";
             //stanza counting bugs on the server are fatal
             NSString* message = @"Server acknowledged more stanzas than sent by client";
             DDLogError(@"Stream error: %@", message);
-            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
+            [self postError:message withIsSevere:NO];
             MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
                 [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
@@ -2082,7 +2086,7 @@ NSString* const kStanza = @"stanza";
                     message = NSLocalizedString(@"There was a SASL error on the server.", @"");
             }
 
-            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @YES}];
+            [self postError:message withIsSevere:YES];
             [self disconnect];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}challenge"])
@@ -2123,7 +2127,7 @@ NSString* const kStanza = @"stanza";
             NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
                 message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
-            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
+            [self postError:message withIsSevere:NO];
             [self reconnect];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -2184,7 +2188,7 @@ NSString* const kStanza = @"stanza";
                         //no supported auth mechanism
                         //TODO: implement SCRAM SHA1 and SHA256 based auth
                         DDLogInfo(@"no supported auth mechanism, disconnecting!");
-                        [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"no supported auth mechanism, disconnecting!", @""), @"isSevere": @YES}];
+                        [self postError:NSLocalizedString(@"no supported auth mechanism, disconnecting!", @"") withIsSevere:YES];
                         [self disconnect];
                     }
                 }
@@ -2258,10 +2262,13 @@ NSString* const kStanza = @"stanza";
             NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
             NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
             DDLogWarn(@"Got *INSECURE* XMPP stream error %@: %@", errorReason, errorText);
+//this error could be a mitm or some other network problem caused by an active attacker, just ignore it since we are not in a tls context here
+#ifdef IS_ALPHA
             NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
                 message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
-            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
+            [self postError:message withIsSevere:NO];
+#endif
             [self reconnect];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -3683,13 +3690,8 @@ NSString* const kStanza = @"stanza";
                 }
 
             }
-            if(!_registration)
-            {
-                // Do not show "Connection refused" message if there are more SRV records to try
-                if(!_SRVDiscoveryDone || (_SRVDiscoveryDone && [_usableServersList count] == 0) || st_error.code != 61)
-                    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
-            }
-
+            
+            [self postError:message withIsSevere:NO];
             DDLogInfo(@"stream error, calling reconnect");
             [self reconnect];
             

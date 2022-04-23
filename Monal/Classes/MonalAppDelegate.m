@@ -281,8 +281,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 if((oldToken != nil && oldToken.length != 0) || oldGranted)
                 {
                     DDLogWarn(@"Unregistering node from appserver!");
-
+#ifndef IS_ALPHA
                     [[MLXMPPManager sharedInstance] unregisterPush];
+#endif
                     //this is only needed for better UI (settings --> noifications should reflect the proper state)
                     //both invalidations are needed because we don't know the timing of this notification granting handler
                     DDLogInfo(@"Invalidating all account states...");

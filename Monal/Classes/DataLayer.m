@@ -1173,7 +1173,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     
     return [self.db idWriteTransaction:^{
-        if(!checkForDuplicates || ![self hasMessageForStanzaId:stanzaid orMessageID:messageid onChatBuddy:buddyName withInboundDir:inbound onAccount:accountNo])
+        if(!checkForDuplicates || ![self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound onAccount:accountNo])
         {
             //this is always from a contact
             NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
@@ -1230,12 +1230,13 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId onChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound onAccount:(NSNumber*) accountNo
+-(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound onAccount:(NSNumber*) accountNo
 {
     if(accountNo == nil)
         return NO;
     
     return [self.db boolWriteTransaction:^{
+        //if the stanzaid was given, this is conclusive for dedup, we don't need to check any other ids (EXCEPTION BELOW)
         if(stanzaId)
         {
             DDLogVerbose(@"stanzaid provided");
@@ -1247,24 +1248,25 @@ static NSDateFormatter* dbFormatter;
             }
         }
         
-        //we check message ids per contact to increase uniqueness and abort here if no contact was provided
-        if(!buddyName)
+        //EXCEPT: outbound messages coming from this very client (we don't know their stanzaids)
+        //NOTE: the MAM XEP does not mandate full jids in from-attribute of the wrapped message stanza
+        //      --> we can't use that to figure out if the message came from this very client or only from another client using this account
+        //=> if the stanzaid does not match and we process an outbound message, only dedup using origin-id (that should be unique and monal sets them)
+        //   the check, if an origin-id was given, lives in MLMessageProcessor.m (it only triggers a dedup for messages either having a stanzaid or an origin-id)
+        if(inbound == NO)
         {
-            DDLogVerbose(@"no contact given --> message not found");
-            return NO;
-        }
-        
-        NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND inbound=? AND messageid=?;" andArguments:@[accountNo, buddyName, [NSNumber numberWithBool:inbound], messageId]];
-        if(historyId != nil)
-        {
-            DDLogVerbose(@"found by origin-id or messageid");
-            if(stanzaId)
+            NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND inbound=1 AND messageid=?;" andArguments:@[accountNo, messageId]];
+            if(historyId != nil)
             {
-                DDLogDebug(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, contact=%@, inbound=%d)...", historyId, stanzaId, accountNo, messageId, buddyName, inbound);
-                //this entry needs an update of its stanzaid
-                [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
+                DDLogVerbose(@"found by origin-id or messageid");
+                if(stanzaId)
+                {
+                    DDLogDebug(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, inbound=%d)...", historyId, stanzaId, accountNo, messageId, inbound);
+                    //this entry needs an update of its stanzaid
+                    [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
+                }
+                return YES;
             }
-            return YES;
         }
         
         DDLogVerbose(@"nothing worked --> message not found");

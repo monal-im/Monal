@@ -518,7 +518,7 @@ $$class_handler(handleSetMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         return;
     }
 $$
-
+#ifndef IS_ALPHA
 $$class_handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
@@ -543,6 +543,7 @@ $$class_handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ
     [enable setPushEnableWithNode:dataForm[@"node"] andSecret:dataForm[@"secret"] onAppserver:dataForm[@"jid"]];
     [account sendIq:enable withHandler:$newHandler(MLIQProcessor, handlePushEnabled)];
 $$
+#endif
 
 $$class_handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])

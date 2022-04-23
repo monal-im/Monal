@@ -95,6 +95,7 @@ NSString* const kiqErrorType = @"error";
     } andChildren:@[] andData:nil]];
 }
 
+#ifndef IS_ALPHA
 // legacy push registration at appserver
 -(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid
 {
@@ -107,6 +108,7 @@ NSString* const kiqErrorType = @"error";
         }]
     ] andData:nil]];
 }
+#endif
 
 -(void) setPushDisable:(NSString*) node
 {

@@ -327,6 +327,14 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0305.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>5.1.1</xmpp:since>
+        <xmpp:note>XEP-0305: XMPP Quickstart</xmpp:note> 
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0308.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>

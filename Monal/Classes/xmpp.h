@@ -35,6 +35,13 @@ typedef NS_ENUM (NSInteger, xmppRegistrationState) {
     kStateRegistered
 };
 
+typedef NS_ENUM (NSInteger, xmppPipeliningState) {
+    kPipelinedNothing = -1,
+    kPipelinedAuth,
+    kPipelinedStreamRestart,
+    kPipelinedResumeOrBind
+};
+
 FOUNDATION_EXPORT NSString* const kFileName;
 FOUNDATION_EXPORT NSString* const kContentType;
 FOUNDATION_EXPORT NSString* const kData;

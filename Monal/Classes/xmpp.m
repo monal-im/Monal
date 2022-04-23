@@ -119,6 +119,11 @@ NSString* const kStanza = @"stanza";
     xmppDataCompletion _regFormCompletion;
     xmppCompletion _regFormErrorCompletion;
     xmppCompletion _regFormSubmitCompletion;
+    
+    //pipelining related stuff
+    MLXMLNode* _cachedStreamFeaturesBeforeAuth;
+    MLXMLNode* _cachedStreamFeaturesAfterAuth;
+    xmppPipeliningState _pipeliningState;
 }
 
 @property (nonatomic, assign) BOOL smacksRequestInFlight;
@@ -238,6 +243,9 @@ NSString* const kStanza = @"stanza";
     _mamPageArrays = [[NSMutableDictionary alloc] init];
     _runningMamQueries = [[NSMutableDictionary alloc] init];
     _inCatchup = [[NSMutableDictionary alloc] init];
+    _pipeliningState = kPipelinedNothing;
+    _cachedStreamFeaturesBeforeAuth = nil;
+    _cachedStreamFeaturesAfterAuth = nil;
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
@@ -340,6 +348,10 @@ NSString* const kStanza = @"stanza";
 -(void) invalidXMLError
 {
     DDLogError(@"Server returned invalid xml!");
+    DDLogDebug(@"Setting _pipeliningState to kPipelinedNothing and clearing _cachedStreamFeaturesBeforeAuth and _cachedStreamFeaturesAfterAuth...");
+    _pipeliningState = kPipelinedNothing;
+    _cachedStreamFeaturesBeforeAuth = nil;
+    _cachedStreamFeaturesAfterAuth = nil;
     [self postError:NSLocalizedString(@"Server returned invalid xml!", @"") withIsSevere:NO];
     [self reconnect];
     return;
@@ -535,34 +547,43 @@ NSString* const kStanza = @"stanza";
     else
         DDLogInfo(@"streams created ok");
     
-    if(localIStream)
-        _iPipe = [[MLPipe alloc] initWithInputStream:localIStream andOuterDelegate:self];
+    //open sockets and start connecting (including TLS handshake if isDirectTLS==YES)
+    DDLogInfo(@"opening TCP streams");
     [_oStream setDelegate:self];
     [_oStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    _iPipe = [[MLPipe alloc] initWithInputStream:localIStream andOuterDelegate:self];
+    [localIStream open];
+    [_oStream open];
+    DDLogInfo(@"TCP streams opened");
+    
+    _pipeliningState = kPipelinedNothing;
     
     //tcp fast open is only supperted when connecting through network framework which is only supported when using direct tls
     if(self.connectionProperties.server.isDirectTLS == YES)
     {
-        //make sure we really try to send this initial xmpp stream header as early data for tcp fast open even though the tcp stream did not yet trigger
-        //an NSStreamEventHasSpaceAvailable event because it was not even opened yet
-        //self->_streamHasSpace = YES;
-        [self startXMPPStream:NO];     //send xmpp stream start (this is the first one for this connection --> we don't need to clear the receive queue)
+        //prepare xmpp parser (this is the first time for this connection --> we don't need to clear the receive queue)
+        [self prepareXMPPParser:NO];
+        [self startXMPPStreamWithXMLOpening:YES];
+        
+        //pipeline auth request onto our stream header if we have cached stream features available
+        if(_cachedStreamFeaturesBeforeAuth != nil)
+        {
+            DDLogDebug(@"Pipelining auth using cached stream features: %@", _cachedStreamFeaturesBeforeAuth);
+            _pipeliningState = kPipelinedAuth;
+            [self handleFeaturesBeforeAuth:_cachedStreamFeaturesBeforeAuth];
+        }
     }
     else
     {
-        [self startXMPPStream:NO];     //send xmpp stream start (this is the first one for this connection --> we don't need to clear the receive queue)
+        //prepare xmpp parser (this is the first time for this connection --> we don't need to clear the receive queue)
+        [self prepareXMPPParser:NO];
+        [self startXMPPStreamWithXMLOpening:YES];
         
         //ignore starttls stream feature presence and opportunistically try starttls even before receiving the stream features
         //(this is in accordance to RFC 7590: https://tools.ietf.org/html/rfc7590#section-3.1 )
         MLXMLNode* startTLS = [[MLXMLNode alloc] initWithElement:@"starttls" andNamespace:@"urn:ietf:params:xml:ns:xmpp-tls"];
         [self send:startTLS];
     }
-    
-    //open sockets and start connecting (including TLS handshake if isDirectTLS==YES)
-    DDLogInfo(@"opening TCP streams");
-    [localIStream open];
-    [_oStream open];
-    DDLogInfo(@"TCP streams opened");
 }
 
 -(BOOL) connectionTask
@@ -828,6 +849,11 @@ NSString* const kStanza = @"stanza";
                         self->_iqHandlers = [[NSMutableDictionary alloc] init];
                     }
                     
+                    //clear pipeline cache
+                    self->_pipeliningState = kPipelinedNothing;
+                    self->_cachedStreamFeaturesBeforeAuth = nil;
+                    self->_cachedStreamFeaturesAfterAuth = nil;
+                    
                     //clear all reconnection handlers
                     @synchronized(self->_reconnectionHandlers) {
                         [self->_reconnectionHandlers removeAllObjects];
@@ -908,6 +934,11 @@ NSString* const kStanza = @"stanza";
                     }
                     self->_iqHandlers = [[NSMutableDictionary alloc] init];
                 }
+                
+                //clear pipeline cache
+                self->_pipeliningState = kPipelinedNothing;
+                self->_cachedStreamFeaturesBeforeAuth = nil;
+                self->_cachedStreamFeaturesAfterAuth = nil;
                 
                 //clear all reconnection handlers
                 @synchronized(self->_reconnectionHandlers) {
@@ -1065,7 +1096,7 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark XMPP
 
--(void) startXMPPStream:(BOOL) clearReceiveQueue
+-(void) prepareXMPPParser:(BOOL) clearReceiveQueue
 {
     BOOL appex = [HelperTools isAppExtension];
     if(_xmlParser!=nil)
@@ -1183,7 +1214,9 @@ NSString* const kStanza = @"stanza";
                     } onQueue:@"receiveQueue"];
                     DDLogVerbose(@"Flushed all queued notifications...");
                 }]] waitUntilFinished:YES];
-            }]] waitUntilFinished:NO];
+            //we have to wait for the stanza/nonza to be handled before parsing the next one to not introduce race conditions
+            //between the response to our pipelined stream restart and the parser reset in the sasl success handler
+            }]] waitUntilFinished:(self->_accountState < kStateBound ? YES : NO)];
         }];
     }
     else
@@ -1214,9 +1247,15 @@ NSString* const kStanza = @"stanza";
         [self->_xmlParser parse];     //blocking operation
         DDLogInfo(@"parse ended");
     });
+}
 
-    MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"__xml"];
-    [self send:xmlOpening];
+-(void) startXMPPStreamWithXMLOpening:(BOOL) withXMLOpening
+{
+    if(withXMLOpening)
+    {
+        MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"__xml"];
+        [self send:xmlOpening];
+    }
     MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"stream:stream" andNamespace:@"jabber:client"];
     [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
     [stream.attributes setObject:@"1.0" forKey:@"version"];
@@ -2093,10 +2132,30 @@ NSString* const kStanza = @"stanza";
             if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
             {
                 MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-
                 //TODO: implement SCRAM SHA1 and SHA256 based auth
-
                 [self send:responseXML];
+                
+                //pipeline stream restart
+                /*
+                 * WARNING: this can not be done, because pipelining a stream restart will break the local parser:
+                 *          1. the <?xml ...?> "tag" confuses the parser if its coming in an already established stream (e.g. if it sees it twice)
+                 *          2. the parser can not be reset after receiving the sasl <success/> because the old parser could have already swallowed everything
+                 *             coming after the <success/> (e.g. the new stream opening and stream features and possibly even the smacks resumption data)
+                 *          3. making the used parser (NSXMLParser) ignore subsequent <?xml ...?> headers does not seem possible
+                 *          4. switching to a new parser (maybe written in rust) can solve this and would save us 1 RTT more in every sasl scheme (even challenge-response ones)
+                DDLogDebug(@"Pipelining stream restart after response to auth challenge...");
+                _pipeliningState = kPipelinedStreamRestart;
+                [self startXMPPStreamWithXMLOpening:NO];
+                
+                //pipeline stream resume/bind after auth onto our stream header if we have cached stream features available
+                if(_cachedStreamFeaturesAfterAuth != nil)
+                {
+                    DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", _cachedStreamFeaturesAfterAuth);
+                    _pipeliningState = kPipelinedResumeOrBind;
+                    [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
+                }
+                */
+                
                 return;
             }
         }
@@ -2114,18 +2173,28 @@ NSString* const kStanza = @"stanza";
                 _cancelLoginTimer = nil;
             }
             self->_loggedInOnce = YES;
-            [self startXMPPStream:YES];
-        }
-        else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}error"])
-        {
-            NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
-            NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
-            DDLogWarn(@"Got secure XMPP stream error %@: %@", errorReason, errorText);
-            NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
-            if(errorText && ![errorText isEqualToString:@""])
-                message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
-            [self postError:message withIsSevere:NO];
-            [self reconnect];
+            
+            //after sasl success a new stream will be started --> reset parser to accommodate this
+            [self prepareXMPPParser:NO];
+            
+            //only send new stream header if not already done via pipelining
+            if(_pipeliningState < kPipelinedStreamRestart)
+            {
+                DDLogDebug(@"Sending NOT-pipelined stream restart...");
+                [self startXMPPStreamWithXMLOpening:YES];                   //could possibly be with or without XML opening (old behaviour was with opening, so keep that)
+            }
+            
+            //only pipeline stream resume/bind if not already done
+            if(_pipeliningState < kPipelinedResumeOrBind)
+            {
+                //pipeline stream resume/bind after auth onto our stream header if we have cached stream features available
+                if(_cachedStreamFeaturesAfterAuth != nil)
+                {
+                    DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", _cachedStreamFeaturesAfterAuth);
+                    _pipeliningState = kPipelinedResumeOrBind;
+                    [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
+                }
+            }
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
         {
@@ -2136,115 +2205,43 @@ NSString* const kStanza = @"stanza";
             //perform logic to handle stream
             if(self.accountState < kStateLoggedIn)
             {
-                if([parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
+                //handle features normally if we didn't have a cached copy for pipelining (but always refresh our cached copy)
+                if(_cachedStreamFeaturesBeforeAuth == nil)
                 {
-                    DDLogInfo(@"Server supports Pre-Authenticated IBR");
-                    self.connectionProperties.supportsPreauthIbr = YES;
-                }
-                
-                if(_registration)
-                {
-                    //make sure this does not time out while the user is filling out the registration form
-                    //but still have a timeout for the connection until this point
-                    if(self->_cancelLoginTimer)
-                        self->_cancelLoginTimer();
-                    self->_cancelLoginTimer = nil;
-                    if(_registrationToken && self.connectionProperties.supportsPreauthIbr)
-                    {
-                        DDLogInfo(@"Registration: Calling submitRegToken");
-                        [self submitRegToken:_registrationToken];
-                    }
-                    else
-                    {
-                        DDLogInfo(@"Registration: Directly calling requestRegForm");
-                        [self requestRegForm];
-                    }
-                }
-                else if(_registrationSubmission)
-                {
-                    DDLogInfo(@"Registration: Calling submitRegForm");
-                    [self submitRegForm];
+                    DDLogDebug(@"Handling NOT-pipelined stream features (before auth)...");
+                    [self handleFeaturesBeforeAuth:parsedStanza];
                 }
                 else
-                {
-                    //extract menchanisms presented
-                    NSSet* supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
-                    
-                    if([supportedSaslMechanisms containsObject:@"PLAIN"])
-                    {
-                        [self send:[[MLXMLNode alloc]
-                            initWithElement:@"auth"
-                            andNamespace:@"urn:ietf:params:xml:ns:xmpp-sasl"
-                            withAttributes:@{@"mechanism": @"PLAIN"}
-                            andChildren:@[]
-                            andData:[HelperTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@", self.connectionProperties.identity.user, self.connectionProperties.identity.password]]
-                        ]];
-                    }
-                    else
-                    {
-                        //no supported auth mechanism
-                        //TODO: implement SCRAM SHA1 and SHA256 based auth
-                        DDLogInfo(@"no supported auth mechanism, disconnecting!");
-                        [self postError:NSLocalizedString(@"no supported auth mechanism, disconnecting!", @"") withIsSevere:YES];
-                        [self disconnect];
-                    }
-                }
+                    DDLogDebug(@"Stream features (before auth) already read from cache, ignoring incoming stream features (but refreshing cache)...");
+                _cachedStreamFeaturesBeforeAuth = parsedStanza;
             }
             else
             {
-                if([parsedStanza check:@"{urn:xmpp:csi:0}csi"])
+                //handle features normally if we didn't have a cached copy for pipelining (but always refresh our cached copy)
+                if(_cachedStreamFeaturesAfterAuth == nil)
                 {
-                    DDLogInfo(@"Server supports CSI");
-                    self.connectionProperties.supportsClientState = YES;
+                    DDLogDebug(@"Handling NOT-pipelined stream features (after auth)...");
+                    [self handleFeaturesAfterAuth:parsedStanza];
                 }
-                if([parsedStanza check:@"{urn:xmpp:sm:3}sm"])
-                {
-                    DDLogInfo(@"Server supports SM3");
-                    self.connectionProperties.supportsSM3 = YES;
-                }
-                if([parsedStanza check:@"{urn:xmpp:features:rosterver}ver"])
-                {
-                    DDLogInfo(@"Server supports roster versioning");
-                    self.connectionProperties.supportsRosterVersion = YES;
-                }
-                if([parsedStanza check:@"{urn:xmpp:features:pre-approval}sub"])
-                {
-                    DDLogInfo(@"Server supports roster pre approval");
-                    self.connectionProperties.supportsRosterPreApproval = YES;
-                }
-                if([parsedStanza check:@"{http://jabber.org/protocol/caps}c@node"])
-                {
-                    DDLogInfo(@"Server identity: %@", [parsedStanza findFirst:@"{http://jabber.org/protocol/caps}c@node"]);
-                    self.connectionProperties.serverIdentity = [parsedStanza findFirst:@"{http://jabber.org/protocol/caps}c@node"];
-                }
-                
-                MLXMLNode* resumeNode = nil;
-                @synchronized(_stateLockObject) {
-                    //under rare circumstances/bugs the appex could have changed the smacks state *after* our connect method was called
-                    //--> load newest saved smacks state to be up to date even in this case
-                    [self readSmacksStateOnly];
-                    //test if smacks is supported and allows resume
-                    if(self.connectionProperties.supportsSM3 && self.streamID)
-                    {
-                        NSDictionary* dic = @{
-                            @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
-                            @"previd":self.streamID,
-                            
-                            @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
-                            @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
-                            @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
-                            @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long)[self.unAckedStanzas count]]
-                        };
-                        resumeNode = [[MLXMLNode alloc] initWithElement:@"resume" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
-                        self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
-                    }
-                }
-                if(resumeNode)
-                    [self send:resumeNode];
                 else
-                    [self bindResource:self.connectionProperties.identity.resource];
-                
+                    DDLogDebug(@"Stream features (after auth) already read from cache, ignoring incoming stream features (but refreshing cache)...");
+                _cachedStreamFeaturesAfterAuth = parsedStanza;
             }
+        }
+        else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}error"])
+        {
+            NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
+            NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
+            DDLogWarn(@"Got secure XMPP stream error %@: %@", errorReason, errorText);
+            DDLogDebug(@"Setting _pipeliningState to kPipelinedNothing and clearing _cachedStreamFeaturesBeforeAuth and _cachedStreamFeaturesAfterAuth...");
+            _pipeliningState = kPipelinedNothing;
+            _cachedStreamFeaturesBeforeAuth = nil;
+            _cachedStreamFeaturesAfterAuth = nil;
+            NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
+            if(errorText && ![errorText isEqualToString:@""])
+                message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
+            [self postError:message withIsSevere:NO];
+            [self reconnect];
         }
         else
         {
@@ -2283,7 +2280,7 @@ NSString* const kStanza = @"stanza";
             
             //this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
             DDLogInfo(@"configuring/starting tls handshake");
-            self->_streamHasSpace = NO;         //make sure we do not try to sed any data while the tls handshake is still performed
+            self->_streamHasSpace = NO;         //make sure we do not try to send any data while the tls handshake is still performed
             NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
             [settings setObject:(NSNumber*)kCFBooleanTrue forKey:(NSString*)kCFStreamSSLValidatesCertificateChain];
             [settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
@@ -2300,7 +2297,16 @@ NSString* const kStanza = @"stanza";
             //stop everything coming after this (we don't want to process stanzas that came in *before* a secure TLS context was established!)
             //if we do not do this we could be prone to mitm attacks injecting xml elements into the stream before it gets encrypted
             //such xml elements would then get processed as received *after* the TLS initialization
-            [self startXMPPStream:YES];
+            [self prepareXMPPParser:YES];
+            [self startXMPPStreamWithXMLOpening:YES];
+            
+            //pipeline auth request onto our stream header if we have cached stream features available
+            if(_cachedStreamFeaturesBeforeAuth != nil)
+            {
+                DDLogDebug(@"Pipelining auth using cached stream features: %@", _cachedStreamFeaturesBeforeAuth);
+                _pipeliningState = kPipelinedAuth;
+                [self handleFeaturesBeforeAuth:_cachedStreamFeaturesBeforeAuth];
+            }
         }
         else
         {
@@ -2308,6 +2314,139 @@ NSString* const kStanza = @"stanza";
             [self reconnect];
         }
     }
+}
+
+-(void) handleFeaturesBeforeAuth:(MLXMLNode*) parsedStanza
+{
+    if([parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
+    {
+        DDLogInfo(@"Server supports Pre-Authenticated IBR");
+        self.connectionProperties.supportsPreauthIbr = YES;
+    }
+    
+    if(_registration)
+    {
+        //make sure this does not time out while the user is filling out the registration form
+        //but still have a timeout for the connection until this point
+        if(self->_cancelLoginTimer)
+            self->_cancelLoginTimer();
+        self->_cancelLoginTimer = nil;
+        if(_registrationToken && self.connectionProperties.supportsPreauthIbr)
+        {
+            DDLogInfo(@"Registration: Calling submitRegToken");
+            [self submitRegToken:_registrationToken];
+        }
+        else
+        {
+            DDLogInfo(@"Registration: Directly calling requestRegForm");
+            [self requestRegForm];
+        }
+    }
+    else if(_registrationSubmission)
+    {
+        DDLogInfo(@"Registration: Calling submitRegForm");
+        [self submitRegForm];
+    }
+    else
+    {
+        //extract menchanisms presented
+        NSSet* supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
+        
+        if([supportedSaslMechanisms containsObject:@"PLAIN"])
+        {
+            [self send:[[MLXMLNode alloc]
+                initWithElement:@"auth"
+                andNamespace:@"urn:ietf:params:xml:ns:xmpp-sasl"
+                withAttributes:@{@"mechanism": @"PLAIN"}
+                andChildren:@[]
+                andData:[HelperTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@", self.connectionProperties.identity.user, self.connectionProperties.identity.password]]
+            ]];
+            
+            //even double pipelining (e.g. pipelining onto the already pipelined sasl plain auth) is possible when using auth=PLAIN
+            /*
+             * WARNING: this can not be done, because pipelining a stream restart will break the local parser:
+             *          1. the <?xml ...?> "tag" confuses the parser if its coming in an already established stream (e.g. if it sees it twice)
+             *          2. the parser can not be reset after receiving the sasl <success/> because the old parser could have already swallowed everything
+             *             coming after the <success/> (e.g. the new stream opening and stream features and possibly even the smacks resumption data)
+             *          3. making the used parser (NSXMLParser) ignore subsequent <?xml ...?> headers does not seem possible
+             *          4. switching to a new parser (maybe written in rust) can solve this and would save us 1 RTT more in every sasl scheme (even challenge-response ones)
+            DDLogDebug(@"Pipelining stream restart after auth...");
+            _pipeliningState = kPipelinedStreamRestart;
+            [self startXMPPStreamWithXMLOpening:NO];
+            
+            //pipeline stream resume/bind after auth onto our stream header if we have cached stream features available
+            if(_cachedStreamFeaturesAfterAuth != nil)
+            {
+                DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", _cachedStreamFeaturesAfterAuth);
+                _pipeliningState = kPipelinedResumeOrBind;
+                [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
+            }
+            */
+        }
+        else
+        {
+            //no supported auth mechanism
+            //TODO: implement SCRAM SHA1 and SHA256 based auth
+            DDLogInfo(@"no supported auth mechanism, disconnecting!");
+            [self postError:NSLocalizedString(@"no supported auth mechanism, disconnecting!", @"") withIsSevere:YES];
+            [self disconnect];
+        }
+    }
+}
+
+-(void) handleFeaturesAfterAuth:(MLXMLNode*) parsedStanza
+{
+    if([parsedStanza check:@"{urn:xmpp:csi:0}csi"])
+    {
+        DDLogInfo(@"Server supports CSI");
+        self.connectionProperties.supportsClientState = YES;
+    }
+    if([parsedStanza check:@"{urn:xmpp:sm:3}sm"])
+    {
+        DDLogInfo(@"Server supports SM3");
+        self.connectionProperties.supportsSM3 = YES;
+    }
+    if([parsedStanza check:@"{urn:xmpp:features:rosterver}ver"])
+    {
+        DDLogInfo(@"Server supports roster versioning");
+        self.connectionProperties.supportsRosterVersion = YES;
+    }
+    if([parsedStanza check:@"{urn:xmpp:features:pre-approval}sub"])
+    {
+        DDLogInfo(@"Server supports roster pre approval");
+        self.connectionProperties.supportsRosterPreApproval = YES;
+    }
+    if([parsedStanza check:@"{http://jabber.org/protocol/caps}c@node"])
+    {
+        DDLogInfo(@"Server identity: %@", [parsedStanza findFirst:@"{http://jabber.org/protocol/caps}c@node"]);
+        self.connectionProperties.serverIdentity = [parsedStanza findFirst:@"{http://jabber.org/protocol/caps}c@node"];
+    }
+    
+    MLXMLNode* resumeNode = nil;
+    @synchronized(_stateLockObject) {
+        //under rare circumstances/bugs the appex could have changed the smacks state *after* our connect method was called
+        //--> load newest saved smacks state to be up to date even in this case
+        [self readSmacksStateOnly];
+        //test if smacks is supported and allows resume
+        if(self.connectionProperties.supportsSM3 && self.streamID)
+        {
+            NSDictionary* dic = @{
+                @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
+                @"previd":self.streamID,
+                
+                @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+                @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+                @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+                @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long)[self.unAckedStanzas count]]
+            };
+            resumeNode = [[MLXMLNode alloc] initWithElement:@"resume" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
+            self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
+        }
+    }
+    if(resumeNode)
+        [self send:resumeNode];
+    else
+        [self bindResource:self.connectionProperties.identity.resource];
 }
 
 #pragma mark stanza handling
@@ -2555,6 +2694,10 @@ NSString* const kStanza = @"stanza";
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
         [values setObject:[_inCatchup copy] forKey:@"inCatchup"];
+        if(_cachedStreamFeaturesBeforeAuth != nil)
+            [values setObject:_cachedStreamFeaturesBeforeAuth forKey:@"cachedStreamFeaturesBeforeAuth"];
+        if(_cachedStreamFeaturesAfterAuth != nil)
+            [values setObject:_cachedStreamFeaturesAfterAuth forKey:@"cachedStreamFeaturesAfterAuth"];
         
         if(self.connectionProperties.discoveredServices)
             [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
@@ -2818,6 +2961,11 @@ NSString* const kStanza = @"stanza";
             
             if([dic objectForKey:@"inCatchup"])
                 _inCatchup = [[dic objectForKey:@"inCatchup"] mutableCopy];
+            
+            if([dic objectForKey:@"cachedStreamFeaturesBeforeAuth"])
+                _cachedStreamFeaturesBeforeAuth = [dic objectForKey:@"cachedStreamFeaturesBeforeAuth"];
+            if([dic objectForKey:@"cachedStreamFeaturesAfterAuth"])
+                _cachedStreamFeaturesAfterAuth = [dic objectForKey:@"cachedStreamFeaturesAfterAuth"];
             
             //debug output
             DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\t_inCatchup=%@",

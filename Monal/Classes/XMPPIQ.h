@@ -25,7 +25,9 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 -(void) setRegisterOnAppserverWithToken:(NSString*) token;
 -(void) setUnregisterOnAppserver;
 -(void) setPushEnableWithNode:(NSString*) node onAppserver:(NSString*) jid;
+#ifndef IS_ALPHA
 -(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid;
+#endif
 -(void) setPushDisable:(NSString*) node;
 
 /**

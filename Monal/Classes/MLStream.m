@@ -269,7 +269,8 @@
         nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
         nw_tcp_options_set_no_delay(tcp_options, YES);              //disable nagle's algorithm
     });
-    nw_parameters_set_fast_open_enabled(parameters, YES);
+    //not needed, will be done by apple's tls implementation automatically (only needed for plain tcp and manual sending of idempotent data)
+    //nw_parameters_set_fast_open_enabled(parameters, YES);
     
     //create and configure connection object
     nw_connection_t connection = nw_connection_create(endpoint, parameters);

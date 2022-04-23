@@ -109,7 +109,6 @@ NSString* const kStanza = @"stanza";
     NSObject* _stateLockObject;     //only used for @synchronized() blocks
     BOOL _lastIdleState;
     NSMutableDictionary* _mamPageArrays;
-    BOOL _firstLoginForThisInstance;
     NSString* _internalID;
     NSMutableDictionary* _inCatchup;
     
@@ -233,7 +232,6 @@ NSString* const kStanza = @"stanza";
     _reconnectInProgress = NO;
     _disconnectInProgres = NO;
     _lastIdleState = NO;
-    _firstLoginForThisInstance = YES;
     _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
     _reconnectionHandlers = [[NSMutableArray alloc] init];
@@ -608,8 +606,7 @@ NSString* const kStanza = @"stanza";
     // if all servers have been tried start over with the first one again
     if([_discoveredServersList count] > 0 && [_usableServersList count] == 0)
     {
-        if(!_firstLoginForThisInstance)
-            DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
+        DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
         for(NSDictionary* row in _discoveredServersList)
             DDLogInfo(@"SRV entry in _discoveredServersList: server=%@, port=%@, isSecure=%s, priority=%@, ttl=%@",
                 [row objectForKey:@"server"],

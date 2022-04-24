@@ -2125,8 +2125,14 @@ NSString* const kStanza = @"stanza";
                 if(!message)
                     message = NSLocalizedString(@"There was a SASL error on the server.", @"");
             }
-
-            [self postError:message withIsSevere:YES];
+            
+            //clear pipeline cache to make sure we have a fresh restart next time
+            _pipeliningState = kPipelinedNothing;
+            _cachedStreamFeaturesBeforeAuth = nil;
+            _cachedStreamFeaturesAfterAuth = nil;
+            
+            //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+            [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES];
             [self disconnect];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}challenge"])
@@ -2389,10 +2395,18 @@ NSString* const kStanza = @"stanza";
         }
         else
         {
-            //no supported auth mechanism
             //TODO: implement SCRAM SHA1 and SHA256 based auth
+            
+            //no supported auth mechanism
             DDLogInfo(@"no supported auth mechanism, disconnecting!");
-            [self postError:NSLocalizedString(@"No supported auth mechanism found, disconnecting!", @"") withIsSevere:YES];
+            
+            //clear pipeline cache to make sure we have a fresh restart next time
+            _pipeliningState = kPipelinedNothing;
+            _cachedStreamFeaturesBeforeAuth = nil;
+            _cachedStreamFeaturesAfterAuth = nil;
+            
+            //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+            [HelperTools postError:NSLocalizedString(@"No supported auth mechanism found, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
             [self disconnect];
         }
     }

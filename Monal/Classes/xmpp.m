@@ -704,6 +704,10 @@ NSString* const kStanza = @"stanza";
 
 -(void) reinitLoginTimer
 {
+    //check if we are still logging in and abort here, if not (we don't want a new timer when we decided to not disconnect)
+    if(self->_accountState < kStateReconnecting)
+        return;
+    
     //cancel old timer if existing and...
     if(self->_cancelLoginTimer != nil)
         self->_cancelLoginTimer();
@@ -2388,7 +2392,7 @@ NSString* const kStanza = @"stanza";
             //no supported auth mechanism
             //TODO: implement SCRAM SHA1 and SHA256 based auth
             DDLogInfo(@"no supported auth mechanism, disconnecting!");
-            [self postError:NSLocalizedString(@"no supported auth mechanism, disconnecting!", @"") withIsSevere:YES];
+            [self postError:NSLocalizedString(@"No supported auth mechanism found, disconnecting!", @"") withIsSevere:YES];
             [self disconnect];
         }
     }

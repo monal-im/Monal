@@ -249,7 +249,7 @@ static NSRegularExpression* attributeFilterRegex;
     return insertedChild;
 }
 
--(MLXMLNode*) removeChild:(MLXMLNode*) child
+-(MLXMLNode*) removeChildNode:(MLXMLNode*) child
 {
     MLXMLNode* foundChild = nil;
     if(!child)

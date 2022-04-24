@@ -241,7 +241,7 @@ void logException(NSException* exception)
     }
     clippedImage = nil;     //make sure we free our memory as soon as possible
     
-    //masked immages MUST be of png type because jpeg does no carry any transparency information
+    //masked images MUST be of type png because jpeg does no carry any transparency information
     NSData* data = nil;
     if(circularMask)
     {
@@ -418,7 +418,7 @@ void logException(NSException* exception)
                 if(account.accountState < kStateReconnecting && !account.reconnectInProgress)
                     continue;
                 NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
-                //dispatching this to the receive queue isn'T neccessary anymore, see comments in account.idle
+                //dispatching this to the receive queue isn't neccessary anymore, see comments in account.idle
                 if(account.idle)
                 {
                     DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);

@@ -57,7 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Removes child by reference
  */
--(MLXMLNode* _Nullable) removeChild:(MLXMLNode*) child;
+-(MLXMLNode* _Nullable) removeChildNode:(MLXMLNode*) child;
 
 /**
  The name of the element itself. 

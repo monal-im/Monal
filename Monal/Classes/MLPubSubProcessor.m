@@ -371,7 +371,7 @@ $$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success)
         for(NSString* room in toRemove)
         {
             DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountNo);
-            [[data[itemId] findFirst:@"{storage:bookmarks}storage"] removeChild:[data[itemId] findFirst:@"{storage:bookmarks}storage/conference<jid=%@>", room]];
+            [[data[itemId] findFirst:@"{storage:bookmarks}storage"] removeChildNode:[data[itemId] findFirst:@"{storage:bookmarks}storage/conference<jid=%@>", room]];
             changed = YES;
         }
         

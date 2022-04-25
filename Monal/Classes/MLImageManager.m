@@ -59,7 +59,7 @@
     format.preferredRange = UIGraphicsImageRendererFormatRangeStandard;
     format.scale = 1.0;
     CGRect drawRect = CGRectMake(0, 0, image.size.width, image.size.height);
-    CGFloat overlaySize = (float)(image.size.width / 4);
+    CGFloat overlaySize = (float)(image.size.width / 3);
     UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:drawRect.size format:format];
     return [renderer imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull context __unused) {
         [image drawInRect:drawRect];

@@ -116,6 +116,9 @@ removes a contact from the roster
  */
 -(void) setInstantRoom;
 
+-(void) setVcardAvatarWithData:(NSData*) imageData andType:(NSString*) imageType;
+-(void) setVcardQuery;
+
 #pragma mark - account
 
 -(void) submitRegToken:(NSString*) token;

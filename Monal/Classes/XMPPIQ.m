@@ -339,6 +339,21 @@ NSString* const kiqErrorType = @"error";
     ] andData:nil]];
 }
 
+-(void) setVcardAvatarWithData:(NSData*) imageData andType:(NSString*) imageType
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"vCard" andNamespace:@"vcard-temp" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"PHOTO" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"PHOTO" andData:imageType],
+            [[MLXMLNode alloc] initWithElement:@"BINVAL" andData:[HelperTools encodeBase64WithData:imageData]],
+        ] andData:nil]
+    ] andData:nil]];
+}
+
+-(void) setVcardQuery
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"vCard" andNamespace:@"vcard-temp"]];
+}
+
 #pragma mark - Account Management
 
 -(void) submitRegToken:(NSString*) token

@@ -21,6 +21,7 @@
 #import "MLPubSub.h"
 #import "MLPubSubProcessor.h"
 #import "MLOMEMO.h"
+#import "MLImageManager.h"
 
 #define CURRENT_MUC_STATE_VERSION @4
 
@@ -270,8 +271,7 @@
                 {
                     //make instant room
                     DDLogInfo(@"Creating instant muc room using default config: %@", node.fromUser);
-                    XMPPIQ* configNode = [[XMPPIQ alloc] initWithType:kiqSetType];
-                    [configNode setiqTo:node.fromUser];
+                    XMPPIQ* configNode = [[XMPPIQ alloc] initWithType:kiqSetType to:node.fromUser];
                     [configNode setInstantRoom];
                     [_account send:configNode];
                     break;
@@ -395,7 +395,8 @@
                 [_noUpdateBookmarks removeObject:node.fromUser];
             }
             
-            //TODO: load muc avatar from vcard
+            //load muc avatar
+            [self fetchAvatarForRoom:node.fromUser];
             
             monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
             if(uiHandler)
@@ -429,8 +430,7 @@
                 //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
                 NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:node.fromUser andAccount:_account.accountNo];
                 [_account delayIncomingMessageStanzasForArchiveJid:node.fromUser];
-                XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
-                [mamQuery setiqTo:node.fromUser];
+                XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType to:node.fromUser];
                 if(lastStanzaId)
                 {
                     DDLogInfo(@"Querying muc mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
@@ -461,7 +461,8 @@
                 {
                     DDLogInfo(@"Muc config of %@ changed, sending new disco info query to reload muc config...", node.fromUser);
                     [self sendDiscoQueryFor:node.from withJoin:NO andBookmarksUpdate:NO];
-                    //TODO: reload muc avatar from vcard
+                    //reload muc avatar
+                    [self fetchAvatarForRoom:node.fromUser];
                     break;
                 }
                 default:
@@ -524,8 +525,7 @@
             //we don't need to force saving of our new state because once this outgoing iq query gets handled by smacks the whole state will be saved
         }
     }
-    XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoInfo setiqTo:roomJid];
+    XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:roomJid];
     [discoInfo setDiscoInfoNode];
     [account sendIq:discoInfo withHandler:$newHandlerWithInvalidation(self, handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
 }
@@ -555,8 +555,7 @@
         return;
     }
     
-    XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [ping setiqTo:roomJid];
+    XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType to:roomJid];
     ping.toResource = [[DataLayer sharedInstance] ownNickNameforMuc:roomJid forAccount:_account.accountNo];
     [ping setPing];
     //we don't need to handle this across smacks resumes or reconnects, because a new ping will be issued on the next smacks resume
@@ -616,6 +615,28 @@
         }
     }];
 }
+
+-(void) publishAvatar:(UIImage*) image forMuc:(NSString*) room
+{
+    //should work for ejabberd >= 19.02 and prosody >= 0.11
+    NSData* imageData = [HelperTools resizeAvatarImage:image withCircularMask:NO toMaxBase64Size:60000];
+    NSString* imageHash = [HelperTools hexadecimalString:[HelperTools sha1:imageData]];
+    
+    DDLogInfo(@"Publishing avatar image for muc '%@' with hash %@", room, imageHash);
+    XMPPIQ* vcard = [[XMPPIQ alloc] initWithType:kiqSetType to:room];
+    [vcard setVcardAvatarWithData:imageData andType:@"image/jpeg"];
+    [_account sendIq:vcard withHandler:$newHandler(self, handleAvatarPublishResult)];
+}
+
+$$instance_handler(handleAvatarPublishResult, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Publishing avatar for muc '%@' returned error: %@", iqNode.fromUser, [iqNode findFirst:@"error"]);
+        [HelperTools postError:NSLocalizedString(@"Failed to publish avatar image for groupchat %@", @"") withNode:iqNode andAccount:_account andIsSevere:YES];
+        return;
+    }
+    DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);
+$$
 
 $$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $_ID(xmpp*, account), $_ID(NSString*, roomJid))
     DDLogInfo(@"Removing muc '%@' from _joining...", roomJid);
@@ -748,8 +769,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
         DDLogInfo(@"Querying members/admin/owner lists for muc %@...", iqNode.fromUser);
         for(NSString* type in @[@"member", @"admin", @"owner"])
         {
-            XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-            [discoInfo setiqTo:iqNode.fromUser];
+            XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:iqNode.fromUser];
             [discoInfo setMucListQueryFor:type];
             [_account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
         }
@@ -806,8 +826,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_
         //handle weird XEP-0313 monkey-patching XEP-0059 behaviour (WHY THE HELL??)
         if(!secondTry && [iqNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
         {
-            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
-            [mamQuery setiqTo:iqNode.fromUser];
+            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType to:iqNode.fromUser];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
             [mamQuery setCompleteMAMQuery];
             [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, YES))];
@@ -823,9 +842,8 @@ $$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_
     {
         DDLogVerbose(@"Paging through muc mam catchup results with after: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
         //do RSM forward paging
-        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
+        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType to:iqNode.fromUser];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
-        [pageQuery setiqTo:iqNode.fromUser];
         [_account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
     }
     else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
@@ -833,6 +851,79 @@ $$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_
         DDLogVerbose(@"Muc mam catchup finished");
         [_account mamFinishedFor:iqNode.fromUser];
     }
+$$
+
+-(void) fetchAvatarForRoom:(NSString*) room
+{
+    XMPPIQ* vcardQuery = [[XMPPIQ alloc] initWithType:kiqGetType to:room];
+    [vcardQuery setVcardQuery];
+    [_account sendIq:vcardQuery withHandler:$newHandler(self, handleVcardResponse)];
+}
+
+$$instance_handler(handleVcardResponse, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+    BOOL deleteAvatar = ![iqNode check:@"{vcard-temp}vCard/PHOTO/BINVAL"];
+    
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Failed to retrieve avatar of muc '%@', error: %@", iqNode.fromUser, [iqNode findFirst:@"error"]);
+        deleteAvatar = YES;
+    }
+    
+    if(deleteAvatar)
+    {
+        [[MLImageManager sharedInstance] setIconForContact:iqNode.fromUser andAccount:_account.accountNo WithData:nil];
+        [[DataLayer sharedInstance] setAvatarHash:@"" forContact:iqNode.fromUser andAccount:_account.accountNo];
+        //delete cache to make sure the image will be regenerated
+        [[MLImageManager sharedInstance] purgeCacheForContact:iqNode.fromUser andAccount:_account.accountNo];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+            @"contact": [MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo]
+        }];
+        DDLogInfo(@"Avatar of muc '%@' deleted successfully", iqNode.fromUser);
+    }
+    else
+    {
+        //this should be small enough to not crash the appex when loading the image from file later on but large enough to have excellent quality
+        NSData* imageData = [iqNode findFirst:@"{vcard-temp}vCard/PHOTO/BINVAL#|base64"];
+        if([HelperTools isAppExtension] && imageData.length > 128 * 1024)
+        {
+            DDLogWarn(@"Not processing avatar image data of muc '%@' because it is too big to be handled in appex (%lu bytes), rescheduling it to be fetched in mainapp", iqNode.fromUser, (unsigned long)imageData.length);
+            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(iqNode.fromUser))];
+            return;
+        }
+        
+        //this will consume a large portion of ram because it will be represented as uncomressed bitmap
+        UIImage* image = [UIImage imageWithData:imageData];
+        NSString* avatarHash = [HelperTools hexadecimalString:[HelperTools sha1:imageData]];
+        //this upper limit is roughly 1.4MiB memory (600x600 with 4 byte per pixel)
+        if(![HelperTools isAppExtension] || image.size.width * image.size.height < 600 * 600)
+        {
+            NSData* imageData = [HelperTools resizeAvatarImage:image withCircularMask:YES toMaxBase64Size:256000];
+            [[MLImageManager sharedInstance] setIconForContact:iqNode.fromUser andAccount:_account.accountNo WithData:imageData];
+            [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:iqNode.fromUser andAccount:_account.accountNo];
+            //delete cache to make sure the image will be regenerated
+            [[MLImageManager sharedInstance] purgeCacheForContact:iqNode.fromUser andAccount:_account.accountNo];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                @"contact": [MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo]
+            }];
+            DDLogInfo(@"Avatar of muc '%@' fetched and updated successfully", iqNode.fromUser);
+        }
+        else
+        {
+            DDLogWarn(@"Not loading avatar image of muc '%@' because it is too big to be processed in appex (%lux%lu pixels), rescheduling it to be fetched in mainapp", iqNode.fromUser, (unsigned long)image.size.width, (unsigned long)image.size.height);
+            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(iqNode.fromUser))];
+        }
+    }
+$$
+
+//this handler will simply retry the vcard fetch attempt if in mainapp
+$$instance_handler(fetchAvatarAgain, account.mucProcessor, $_ID(xmpp*, account), $_ID(NSString*, jid))
+    if([HelperTools isAppExtension])
+    {
+        DDLogWarn(@"Not loading avatar image of '%@' because we are still in appex, rescheduling it again!", jid);
+        [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid))];
+    }
+    else
+        [self fetchAvatarForRoom:jid];
 $$
 
 -(void) handleError:(NSString*) description forMuc:(NSString*) room withNode:(XMPPStanza*) node andIsSevere:(BOOL) isSevere
@@ -888,7 +979,7 @@ $$
     
     //update buddylist (e.g. contact list) if requested
     if(keepBuddylistEntry)
-        ;       //TODO: mark entry as destroyed
+        ;       //TODO: mark entry as destroyed to be displayed in the ui
     else
     {
         [[DataLayer sharedInstance] removeBuddy:room forAccount:_account.accountNo];

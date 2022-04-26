@@ -1250,7 +1250,7 @@ static NSDateFormatter* dbFormatter;
         //   the check, if an origin-id was given, lives in MLMessageProcessor.m (it only triggers a dedup for messages either having a stanzaid or an origin-id)
         if(inbound == NO)
         {
-            NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND inbound=1 AND messageid=?;" andArguments:@[accountNo, messageId]];
+            NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND inbound=0 AND messageid=?;" andArguments:@[accountNo, messageId]];
             if(historyId != nil)
             {
                 DDLogVerbose(@"found by origin-id or messageid");

@@ -518,6 +518,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if(isGroupJoin && account)
     {
         MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+        contact.isGroup = YES;                                  //this is a group --> tell addContact: to join this group
         [[MLXMPPManager sharedInstance] addContact:contact];    //will handle group joins and normal contacts transparently
         //wait for join to finish before opening contact
         NSNumber* accountNo = account.accountNo;        //needed because of retain cycle

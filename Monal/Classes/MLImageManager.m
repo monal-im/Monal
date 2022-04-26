@@ -63,8 +63,8 @@
     UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:drawRect.size format:format];
     return [renderer imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull context __unused) {
         [image drawInRect:drawRect];
-        CGRect overlayRect = CGRectMake(renderer.format.bounds.size.width - overlaySize,
-                                        0,
+        CGRect overlayRect = CGRectMake(0,                  //renderer.format.bounds.size.width - overlaySize
+                                        0,                  //renderer.format.bounds.size.height - overlaySize
                                         overlaySize,
                                         overlaySize);
         [overlay drawInRect:overlayRect];

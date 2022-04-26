@@ -3613,6 +3613,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) removeFromRoster:(NSString*) contact
 {
+    DDLogVerbose(@"Removing jid from roster: %@", contact);
     XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setRemoveFromRoster:contact];
     [self send:iq];
@@ -3624,6 +3625,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) rejectFromRoster:(NSString*) contact
 {
+    DDLogVerbose(@"Rejecting jid from roster: %@", contact);
     XMPPPresence* presence2 =[[XMPPPresence alloc] init];
     [presence2 unsubscribedContact:contact];
     [self send:presence2];
@@ -3632,6 +3634,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) addToRoster:(NSString*) contact withPreauthToken:(NSString* _Nullable) preauthToken
 {
+    DDLogVerbose(@"Adding jid to roster: %@", contact);
     XMPPPresence* presence =[[XMPPPresence alloc] init];
     [presence subscribeContact:contact withPreauthToken:preauthToken];
     [self send:presence];   //add them
@@ -3639,6 +3642,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) approveToRoster:(NSString*) contact
 {
+    DDLogVerbose(@"Approving jid to roster: %@", contact);
     XMPPPresence* presence2 =[[XMPPPresence alloc] init];
     [presence2 subscribedContact:contact];
     [self send:presence2];
@@ -3646,6 +3650,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) updateRosterItem:(NSString*) jid withName:(NSString*) name
 {
+    DDLogVerbose(@"Updating roster item of jid: %@", jid);
     XMPPIQ* roster = [[XMPPIQ alloc] initWithType:kiqSetType];
     [roster setUpdateRosterItem:jid withName:name];
     //this delegate will handle errors (result responses don't include any data that could be processed and will be ignored)

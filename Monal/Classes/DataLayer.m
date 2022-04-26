@@ -1309,6 +1309,13 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(void) clearErrorOfMessageId:(NSString* _Nonnull) messageid
+{
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"UPDATE message_history SET errorType='', errorReason='' WHERE messageid=?;" andArguments:@[messageid]];
+    }];
+}
+
 -(void) setMessageHistoryId:(NSNumber*) historyId filetransferMimeType:(NSString*) mimeType filetransferSize:(NSNumber*) size
 {
     if(historyId == nil)

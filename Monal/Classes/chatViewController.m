@@ -910,6 +910,18 @@ enum msgSentState {
     }
     else
     {
+        //clean error because this seems to be a retry (to be filled again, if error persists)
+        [[DataLayer sharedInstance] clearErrorOfMessageId:newMessageID];
+        for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+        {
+            // find msg that should be updated
+            MLMessage* msg = [self.messageList objectAtIndex:(msgIdx - 1)];
+            if([msg.messageId isEqualToString:newMessageID])
+            {
+                msg.errorType = @"";
+                msg.errorReason = @"";
+            }
+        }
         [[MLXMPPManager sharedInstance]
                       sendMessage:messageText
                         toContact:self.contact

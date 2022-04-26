@@ -183,6 +183,7 @@ extern NSString* const kMessageTypeFiletransfer;
  if the server replies with an error for a message, store it
  */
 -(void) setMessageId:(NSString* _Nonnull) messageid errorType:(NSString *_Nonnull) errorType errorReason:(NSString *_Nonnull)errorReason;
+-(void) clearErrorOfMessageId:(NSString* _Nonnull) messageid;
 
 /**
  sets a preview info for a specified message

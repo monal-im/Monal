@@ -212,6 +212,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     if([removedContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact] == NO)
         return;
     dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogInfo(@"Contact removed, closing chat view...");
         // remove contact from activechats table
         [self refreshDisplay];
         // open placeholder
@@ -398,6 +399,10 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact
 {
+    // clear old chat before opening a new one (but not for splitView == YES)
+    if([HelperTools deviceUsesSplitView] == NO)
+        [self.navigationController popViewControllerAnimated:NO];
+    
     // show placeholder if contact is nil, open chat otherwise
     if(contact == nil)
     {
@@ -419,9 +424,6 @@ static NSMutableSet* _smacksWarningDisplayed;
         return;
     }
 
-    // clear old chat before opening a new one (but not for splitView == YES)
-    if([HelperTools deviceUsesSplitView] == NO)
-        [self.navigationController popViewControllerAnimated:NO];
     // open chat
     [self performSegueWithIdentifier:@"showConversation" sender:contact];
 }

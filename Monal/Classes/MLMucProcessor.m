@@ -694,7 +694,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
         return;
     }
     
-    //force join if this isn't already recorded as muc in our database
+    //force join if this isn't already recorded as muc in our database but as normal user or not recorded at all
     if(!join && ![[DataLayer sharedInstance] isBuddyMuc:iqNode.fromUser forAccount:_account.accountNo])
         join = YES;
     
@@ -704,7 +704,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
         DDLogWarn(@"Ignoring muc disco result for '%@' on account %@: not joining anymore...", iqNode.fromUser, _account);
         return;
     }
-    
+        
     //extract further muc infos
     NSString* mucName = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\"];
     NSString* mucType = @"channel";
@@ -716,8 +716,11 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, accoun
     //update db with new infos
     if(![[DataLayer sharedInstance] isBuddyMuc:iqNode.fromUser forAccount:_account.accountNo])
     {
-        NSString* nick = [self calculateNickForMuc:iqNode.fromUser];
+        //remove old non-muc contact from contactlist (we don't want mucs as normal contacts on our (server) roster and shadowed in monal by the real muc contact)
+        if([[DataLayer sharedInstance] contactDictionaryForUsername:iqNode.fromUser forAccount:_account.accountNo] != nil)
+            [_account removeFromRoster:iqNode.fromUser];
         //add new muc buddy (potentially deleting a non-muc buddy having the same jid)
+        NSString* nick = [self calculateNickForMuc:iqNode.fromUser];
         DDLogInfo(@"Adding new muc %@ using nick '%@' to buddylist...", iqNode.fromUser, nick);
         [[DataLayer sharedInstance] initMuc:iqNode.fromUser forAccountId:_account.accountNo andMucNick:nick];
         //add this room to firstJoin list

@@ -353,7 +353,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark contact Commands
 
--(BOOL) addContact:(NSString*) contact forAccount:(NSNumber*) accountNo nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick
+-(BOOL) addContact:(NSString*) contact forAccount:(NSNumber*) accountNo nickname:(NSString*) nickName
 {
     if(accountNo == nil || !contact)
         return NO;
@@ -378,12 +378,7 @@ static NSDateFormatter* dbFormatter;
         else
             toPass = cleanNickName;
         
-        //make this a muc again if it existed as muc already (an reuse the nickname from the old buddylist entry or muc_favorites entry)
-        NSString* mucNickToUse = mucNick;
-        if(!mucNickToUse)
-            mucNickToUse = [self ownNickNameforMuc:contact forAccount:accountNo];
-        
-        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick') VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;" andArguments:@[accountNo, contact, @"", toPass, mucNickToUse ? @1 : @0, mucNickToUse ? mucNickToUse : @"", toPass]];
+        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick') VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;" andArguments:@[accountNo, contact, @"", toPass, @0, @"", toPass]];
     }];
 }
 
@@ -1739,7 +1734,7 @@ static NSDateFormatter* dbFormatter;
             return;
 
         //add contact if possible (ignore already existing contacts)
-        [self addContact:buddyname forAccount:accountNo nickname:nil andMucNick:nil];
+        [self addContact:buddyname forAccount:accountNo nickname:nil];
 
         // insert or update active chat
         NSString* query = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp) ON CONFLICT(buddy_name, account_id) DO UPDATE SET lastMessageTime=current_timestamp;";

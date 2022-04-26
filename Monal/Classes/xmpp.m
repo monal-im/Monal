@@ -1668,7 +1668,7 @@ NSString* const kStanza = @"stanza";
                         contact.statusMessage = [presenceNode findFirst:@"status#"];
 
                         //add contact if possible (ignore already existing contacts)
-                        [[DataLayer sharedInstance] addContact:presenceNode.fromUser forAccount:self.accountNo nickname:nil andMucNick:nil];
+                        [[DataLayer sharedInstance] addContact:presenceNode.fromUser forAccount:self.accountNo nickname:nil];
 
                         //update buddy state
                         [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self.accountNo];

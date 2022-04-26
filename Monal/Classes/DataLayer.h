@@ -46,7 +46,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) setRosterVersion:(NSString *) version forAccount: (NSNumber*) accountNo;
 
 // Buddy Commands
--(BOOL) addContact:(NSString*) contact  forAccount:(NSNumber*) accountNo nickname:(NSString* _Nullable) nickName andMucNick:(NSString* _Nullable) mucNick;
+-(BOOL) addContact:(NSString*) contact  forAccount:(NSNumber*) accountNo nickname:(NSString* _Nullable) nickName;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 -(BOOL) clearBuddies:(NSNumber*) accountNo;
 -(NSDictionary* _Nullable) contactDictionaryForUsername:(NSString*) username forAccount: (NSNumber*) accountNo;

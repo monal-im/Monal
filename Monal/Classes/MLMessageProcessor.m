@@ -155,7 +155,7 @@ static NSMutableDictionary* _typingNotifications;
         }
         //add contact if possible (ignore groupchats or already existing contacts, or KeyTransportElements)
         DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
-        [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil andMucNick:nil];
+        [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil];
     }
 
     //ignore self messages after this (only pubsub data and self-chats are from self)

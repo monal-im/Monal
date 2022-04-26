@@ -303,11 +303,18 @@ $$
                 [[DataLayer sharedInstance] deleteContactRequest:contactObj];
             }
             
+            if(contactObj.isGroup)
+            {
+                DDLogWarn(@"Removing muc '%@' from contactlist, got 'normal' roster entry!", contact[@"jid"]);
+                [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
+                contactObj = [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo];
+            }
+            
             DDLogVerbose(@"Adding contact %@ (%@) to database", contact[@"jid"], [contact objectForKey:@"name"]);
             [[DataLayer sharedInstance] addContact:contact[@"jid"]
                                         forAccount:account.accountNo
-                                          nickname:[contact objectForKey:@"name"] ? [contact objectForKey:@"name"] : @""
-                                        andMucNick:nil];
+                                          nickname:[contact objectForKey:@"name"] ? [contact objectForKey:@"name"] : @""];
             
             DDLogVerbose(@"Setting subscription status '%@' (ask=%@) for contact %@", contact[@"subscription"], contact[@"ask"], contact[@"jid"]);
             [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
@@ -318,6 +325,8 @@ $$
             //regenerate avatar if the nickame has changed
             if(![contactObj.nickName isEqualToString:[contact objectForKey:@"name"]])
                 [[MLImageManager sharedInstance] purgeCacheForContact:contact[@"jid"] andAccount:account.accountNo];
+            
+            //send out kMonalContactRefresh notification
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo]
             }];

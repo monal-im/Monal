@@ -274,7 +274,7 @@ NSString* const kiqErrorType = @"error";
 -(void) setRosterRequest:(NSString*) version
 {
     NSDictionary* attrs = @{};
-    if(version)
+    if(version && ![version isEqual:@""])
         attrs = @{@"ver": version};
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:attrs andChildren:@[] andData:nil]];
 }

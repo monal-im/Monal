@@ -1104,6 +1104,12 @@
                     ) \
             "];
         }];
+        
+        //clear roster version to remove all non-muc roster entries pointing to a muc jid
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.118 withBlock:^{
+            [db executeNonQuery:@"UPDATE account SET rosterVersion=NULL;"];
+        }];
+
 
         // check if db version changed
         NSNumber* newdbversion = [self readDBVersion:db];

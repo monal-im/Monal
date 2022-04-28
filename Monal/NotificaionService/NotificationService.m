@@ -234,14 +234,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //check if this was the last handler (ignore if we got a new one in between our call to checkForLastHandler and feedNextHandler, this case will be handled below anyways)
     if(isLastHandler)
     {
-        DDLogInfo(@"Last push expired shutting down in 1500ms if no new push comes in in the meantime");
-        //wait 1500ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
+        DDLogInfo(@"Last push expired shutting down in 500ms if no new push comes in in the meantime");
+        //wait 500ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
         //after the last push expired we have ~5 seconds run time left to do the clean disconnect
-        //--> waiting 1500ms before checking if this was the last push that expired (e.g. no new push came in) does not do any harm here
+        //--> waiting 500ms before checking if this was the last push that expired (e.g. no new push came in) does not do any harm here
         //WARNING: we have to closely watch apple...if they remove this 5 second gap between this call to the expiration handler and the actual
         //appex freeze, this sleep will no longer be harmless and could even cause smacks state corruption (by not diconnecting cleanly and having stanzas
         //still in the TCP queue delivered on next appex unfreeze even if they have been handled by the mainapp already)
-        usleep(1500000);
+        usleep(500000);
         
         //this returns YES if we got new pushes in the meantime --> do nothing if so
         if(![self checkForNewPushes])

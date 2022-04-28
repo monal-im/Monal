@@ -103,7 +103,7 @@ NSString* const kStanza = @"stanza";
     BOOL _SRVDiscoveryDone;
     BOOL _startTLSComplete;
     BOOL _catchupDone;
-    double _exponentialBackoff;
+    double _reconnectBackoffTime;
     BOOL _reconnectInProgress;
     BOOL _disconnectInProgres;
     NSObject* _stateLockObject;     //only used for @synchronized() blocks
@@ -251,7 +251,7 @@ NSString* const kStanza = @"stanza";
     _discoveredServersList = [[NSMutableArray alloc] init];
     if(!_usableServersList)
         _usableServersList = [[NSMutableArray alloc] init];
-    _exponentialBackoff = 0;
+    _reconnectBackoffTime = 0;
     
     _parseQueue = [[NSOperationQueue alloc] init];
     _parseQueue.name = [NSString stringWithFormat:@"parseQueue[%@:%@]", self.accountNo, _internalID];
@@ -895,7 +895,7 @@ NSString* const kStanza = @"stanza";
         if(explicitLogout && self->_accountState>=kStateHasStream)
         {
             DDLogInfo(@"doing explicit logout (xmpp stream close)");
-            self->_exponentialBackoff = 0.0;
+            self->_reconnectBackoffTime = 0.0;
             if(self.accountState>=kStateBound)
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //disable push for this node
@@ -1047,10 +1047,10 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"Ignoring reconnect while one already in progress");
         return;
     }
-    if(_exponentialBackoff == 0.0)
-        _exponentialBackoff = 1.0;
-    [self reconnectWithStreamError:streamError andWaitingTime:_exponentialBackoff];
-    _exponentialBackoff = MIN(_exponentialBackoff * 2, 10.0);
+    if(_reconnectBackoffTime == 0.0)
+        _reconnectBackoffTime = 0.5;
+    [self reconnectWithStreamError:streamError andWaitingTime:_reconnectBackoffTime];
+    _reconnectBackoffTime = MIN(_reconnectBackoffTime + 0.5, 2.0);
 }
 
 -(void) reconnect:(double) wait
@@ -2027,7 +2027,7 @@ NSString* const kStanza = @"stanza";
             //now we are bound again
             _accountState = kStateBound;
             _connectedTime = [NSDate date];
-            _exponentialBackoff = 0;
+            _reconnectBackoffTime = 0;
             [self accountStatusChanged];
 
             @synchronized(_stateLockObject) {
@@ -3146,7 +3146,7 @@ NSString* const kStanza = @"stanza";
     
     //we are now bound
     _connectedTime = [NSDate date];
-    _exponentialBackoff = 0;
+    _reconnectBackoffTime = 0;
     
     //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
     @synchronized(_iqHandlers) {

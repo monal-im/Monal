@@ -306,6 +306,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
     {
         DDLogInfo(@"Got disconnectAll IPC message");
+        usleep(4000000);
         [self disconnectAndFeedAllWaitingHandlers];
         [self killAppex];
     }

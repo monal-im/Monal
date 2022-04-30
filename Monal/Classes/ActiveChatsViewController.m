@@ -14,7 +14,6 @@
 #import "MonalAppDelegate.h"
 #import "ContactDetails.h"
 #import "MLImageManager.h"
-#import "MLWelcomeViewController.h"
 #import "MLRegisterViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
@@ -311,7 +310,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     [super viewWillAppear:animated];
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
         [self refreshDisplay];      // load contacts
-    // only check if the login screen has to be shown if there are no active chats
+    // only check if the login screens have been shown if there are no active chats
     [self segueToIntroScreensIfNeeded];
 }
 
@@ -363,10 +362,6 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) segueToIntroScreensIfNeeded
 {
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenIntro"]) {
-        [self performSegueWithIdentifier:@"showIntro" sender:self];
-        return;
-    }
     // display quick start if the user never seen it or if there are 0 enabled accounts
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"] || [[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
         [self performSegueWithIdentifier:@"showLogin" sender:self];
@@ -483,19 +478,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
-    if([segue.identifier isEqualToString:@"showIntro"])
-    {
-        MLWelcomeViewController* welcome = (MLWelcomeViewController*) segue.destinationViewController;
-        welcome.completion = ^{
-            if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
-            {
-                if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
-                    [self performSegueWithIdentifier:@"showLogin" sender:self];
-                }
-            }
-        };
-    }
-    else if([segue.identifier isEqualToString:@"showRegister"])
+    if([segue.identifier isEqualToString:@"showRegister"])
     {
         UINavigationController* navigationController = (UINavigationController*)segue.destinationViewController;
         MLRegisterViewController* reg = (MLRegisterViewController*)navigationController.visibleViewController;

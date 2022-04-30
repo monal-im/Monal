@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="6sv-dL-UsN">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="6sv-dL-UsN">
     <device id="retina4_0" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -265,7 +265,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="320" height="717"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nIY-Zh-Y3h" customClass="GLRoundedView">
-                                                <rect key="frame" x="16" y="165.5" width="288" height="200"/>
+                                                <rect key="frame" x="16" y="190.5" width="288" height="200"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9rn-gF-7f0" customClass="GLCapsuleView">
                                                         <rect key="frame" x="32" y="8" width="224" height="46"/>
@@ -358,14 +358,15 @@
                                                     <constraint firstAttribute="bottom" secondItem="dpn-up-7bR" secondAttribute="bottom" constant="44" id="pmf-vu-NPn"/>
                                                 </constraints>
                                             </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Like email, you can make your account on many sites and talk to anyone. You can use this form to make an account with the selected server." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EfQ-Vo-v2C">
-                                                <rect key="frame" x="32" y="8" width="256" height="125.5"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EfQ-Vo-v2C">
+                                                <rect key="frame" x="32" y="8" width="256" height="150.5"/>
+                                                <string key="text">Like email, you can make your account on many sites and talk to anyone. You can use this form to make an account with the selected server.</string>
                                                 <fontDescription key="fontDescription" type="system" pointSize="21"/>
                                                 <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="The server is public and not affiliated with Monal. This page is provided for convenience." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="arw-q8-u8I">
-                                                <rect key="frame" x="16" y="373.5" width="288" height="57.5"/>
+                                                <rect key="frame" x="16" y="398.5" width="288" height="57.5"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                 <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <nil key="highlightedColor"/>
@@ -417,12 +418,10 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="disclaimer" destination="arw-q8-u8I" id="ddd-ml-lvy"/>
                         <outlet property="jid" destination="Tjb-kj-Z5d" id="wG9-Sk-XbF"/>
                         <outlet property="password" destination="rHr-ew-oBM" id="AVY-to-hFy"/>
-                        <outlet property="captcha" destination="nRE-Ax-qd6" id="Yy3-0s-gtE"/>
                         <outlet property="scrollView" destination="tT2-oH-OMx" id="BXf-Ce-GoE"/>
-                        <outlet property="captchaImage" destination="vVj-Ir-R3d" id="oVd-ml-lvy"/>
-                        <outlet property="disclaimer" destination="arw-q8-u8I" id="ddd-ml-lvy"/>
                         <outlet property="tos" destination="hyG-BH-GJV" id="ttt-ml-lvy"/>
                         <segue destination="iOy-Fr-h6X" kind="show" identifier="showSuccess" id="2Ua-AK-nzQ"/>
                         <segue destination="cmS-oG-cv8" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot8"/>
@@ -517,22 +516,6 @@
             </objects>
             <point key="canvasLocation" x="-33.75" y="-2627.1126760563379"/>
         </scene>
-        <!--Welcome View Controller-->
-        <scene sceneID="uOB-o2-0a1">
-            <objects>
-                <viewController storyboardIdentifier="introScreen" id="Z6V-3f-iCK" customClass="MLWelcomeViewController" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="0mo-Eh-yZt">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <viewLayoutGuide key="safeArea" id="c0g-te-PPH"/>
-                        <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
-                    </view>
-                    <navigationItem key="navigationItem" id="Esl-Pl-T97"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="KlW-qz-Zp2" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-3392" y="-3202"/>
-        </scene>
         <!--Login Navigation Controller-->
         <scene sceneID="cjl-9t-O9K">
             <objects>
@@ -587,10 +570,10 @@
             <size key="intrinsicContentSize" width="60" height="42"/>
         </designable>
         <designable name="TZB-oT-VmG">
-            <size key="intrinsicContentSize" width="24" height="30"/>
+            <size key="intrinsicContentSize" width="25" height="30"/>
         </designable>
         <designable name="c04-pS-Uoi">
-            <size key="intrinsicContentSize" width="150" height="42"/>
+            <size key="intrinsicContentSize" width="151" height="42"/>
         </designable>
         <designable name="c9v-kP-ocC">
             <size key="intrinsicContentSize" width="89" height="42"/>
@@ -600,6 +583,7 @@
         </designable>
     </designables>
     <inferredMetricsTieBreakers>
+        <segue reference="aaa-ez-qjU"/>
         <segue reference="6jY-Zs-guy"/>
     </inferredMetricsTieBreakers>
     <resources>

@@ -95,7 +95,6 @@
 		26E8462224EABAD600ECE419 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462424EABAD600ECE419 /* Settings.storyboard */; };
 		26E8462524EABAE200ECE419 /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462724EABAE200ECE419 /* Login.storyboard */; };
 		26E8462824EABAED00ECE419 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462A24EABAED00ECE419 /* Main.storyboard */; };
-		26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */; };
 		26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D02196836700EF5720 /* MLLogInViewController.m */; };
 		26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D421968A4100EF5720 /* GLCapsuleView.m */; };
 		26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D821968A8600EF5720 /* GLRoundedView.m */; };
@@ -518,8 +517,6 @@
 		26EC40FE17BDD85F0031304D /* addContact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = addContact.m; sourceTree = "<group>"; };
 		26EC411117BDE39E0031304D /* MLImageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLImageManager.h; sourceTree = "<group>"; };
 		26EC411217BDE39E0031304D /* MLImageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLImageManager.m; sourceTree = "<group>"; };
-		26EE1B0A21A8F3CE00264B95 /* MLWelcomeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLWelcomeViewController.h; sourceTree = "<group>"; };
-		26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLWelcomeViewController.m; sourceTree = "<group>"; };
 		26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLNotificationManager.h; path = Classes/MLNotificationManager.h; sourceTree = "<group>"; };
 		26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLNotificationManager.m; path = Classes/MLNotificationManager.m; sourceTree = "<group>"; };
 		26F396CF2196836700EF5720 /* MLLogInViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLogInViewController.h; sourceTree = "<group>"; };
@@ -1257,8 +1254,6 @@
 				26F396D421968A4100EF5720 /* GLCapsuleView.m */,
 				26F396CF2196836700EF5720 /* MLLogInViewController.h */,
 				26F396D02196836700EF5720 /* MLLogInViewController.m */,
-				26EE1B0A21A8F3CE00264B95 /* MLWelcomeViewController.h */,
-				26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */,
 				2602A70722A5431A006D3E72 /* MLRegSuccessViewController.h */,
 				2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */,
 				C12436122434AB5D00B8F074 /* MLAttributedLabel.h */,
@@ -1991,7 +1986,6 @@
 				268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
-				26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */,
 				C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */,

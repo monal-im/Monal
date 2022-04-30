@@ -126,6 +126,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     // remove old settings from shareSheet outbox
     [self removeObjectUserSettingsIfSet:@"lastRecipient"];
     [self removeObjectUserSettingsIfSet:@"lastAccount"];
+    // remove HasSeenIntro bool
+    [self removeObjectUserSettingsIfSet:@"HasSeenIntro"];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

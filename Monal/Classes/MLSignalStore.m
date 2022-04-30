@@ -543,14 +543,20 @@
                     WHERE \
                         account_id=? \
                         AND buddy_name=? \
+                        AND Muc=0 \
                 ) AS bCnt, \
                 ( \
                     SELECT \
-                        COUNT(room) AS roomCnt \
-                    FROM muc_members \
+                        COUNT(m.room) AS roomCnt \
+                    FROM muc_members AS m \
+                    INNER JOIN buddylist AS b \
+                    ON m.account_id = b.account_id \
+                    AND b.buddy_name = m.member_jid \
                     WHERE \
-                        account_id=? \
-                        AND member_jid=? \
+                        b.account_id=? \
+                        AND m.member_jid=? \
+                        AND b.Muc=1 \
+                        AND b.muc_type='group' \
                 ) AS mucCnt, \
                 ( \
                     SELECT \
@@ -581,39 +587,32 @@
 
 // delete all fingerprints and sessions from contacts that are neither a buddy nor a group member
 // return jids of dangling sessions
--(NSArray<NSString*>*) removeDanglingMucSessions
+-(NSSet<NSString*>*) removeDanglingMucSessions
 {
     return [self.sqliteDatabase idWriteTransaction:^{
-        // create list of all jids that don't have a 1:1 session and no group session
-        // ignore sessions for the account jid as not all users soliloquize
-        NSArray<NSString*>* danglingJids = [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT s.contactName FROM signalContactIdentity AS s \
-            INNER JOIN account AS a \
-            ON s.account_id = a.account_id \
-            WHERE \
-                s.account_id = ? \
-                AND s.contactName NOT IN \
-                    (SELECT buddy_name FROM buddylist WHERE account_id=?) \
-                AND s.contactName NOT IN \
-                    (SELECT member_jid FROM muc_members WHERE account_id=?) \
-                AND s.contactName != (a.username || '@' || a.domain) \
-        " andArguments:@[self.accountId, self.accountId, self.accountId]];
-
-        if(danglingJids == nil)
-            return (NSArray<NSString*>*)@[];
-
-        for(NSString* jid in danglingJids)
-        {
-            [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity \
+        // create a list of all sessions
+        NSArray<NSString*>* jidsWithSession = [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactName \
+                FROM signalContactIdentity \
                 WHERE \
-                    account_id = ? \
-                    AND contactName = ? \
-            " andArguments:@[self.accountId, jid]];
-
-            [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession \
-                WHERE \
-                    account_id = ? \
-                    AND contactName = ? \
-            " andArguments:@[self.accountId, jid]];
+                account_id = ? \
+        " andArguments:@[self.accountId]];
+        NSMutableSet<NSString*>* danglingJids = [[NSMutableSet alloc] init];
+        for(NSString* jid in jidsWithSession) {
+            // check if the session is still needed
+            if([self checkIfSessionIsStillNeeded:jid] == NO) {
+                [danglingJids addObject:jid];
+                // delete old session
+                [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity \
+                    WHERE \
+                        account_id = ? \
+                        AND contactName = ? \
+                " andArguments:@[self.accountId, jid]];
+                [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession \
+                    WHERE \
+                        account_id = ? \
+                        AND contactName = ? \
+                " andArguments:@[self.accountId, jid]];
+            }
         }
         return danglingJids;
     }];

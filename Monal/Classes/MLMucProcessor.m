@@ -230,18 +230,26 @@
             //update jid to be a bare jid
             item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
 
+            BOOL isTypeGroup = [[[DataLayer sharedInstance] getMucTypeOfRoom:node.fromUser andAccount:_account.accountNo] isEqualToString:@"group"];
+
             if([@"none" isEqualToString:item[@"affiliation"]])
             {
                 [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:_account.accountNo];
 #ifndef DISABLE_OMEMO
-                [_account.omemo checkIfSessionIsStillNeeded:item[@"jid"] isMuc:NO];
+                if(isTypeGroup == YES)
+                {
+                    [_account.omemo checkIfSessionIsStillNeeded:item[@"jid"] isMuc:NO];
+                }
 #endif// DISABLE_OMEMO
             }
             else
             {
                 [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:_account.accountNo];
 #ifndef DISABLE_OMEMO
-                [_account.omemo checkIfMucMemberHasExistingSession:item[@"jid"]];
+                if(isTypeGroup == YES)
+                {
+                    [_account.omemo checkIfMucMemberHasExistingSession:item[@"jid"]];
+                }
 #endif// DISABLE_OMEMO
             }
         }

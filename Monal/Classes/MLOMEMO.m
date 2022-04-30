@@ -743,12 +743,17 @@ $$
 // called after a buddy was deleted from roster OR after a MUC member was removed
 -(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid isMuc:(BOOL) isMuc
 {
-    NSArray<NSString*>* danglingJids = @[];
+    NSMutableSet<NSString*>* danglingJids = [[NSMutableSet alloc] init];
     if(isMuc == YES)
-        danglingJids = [self.monalSignalStore removeDanglingMucSessions];
+        danglingJids = [[NSMutableSet alloc] initWithSet:[self.monalSignalStore removeDanglingMucSessions]];
     else if([self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid] == NO)
-        danglingJids = @[buddyJid];
+            [danglingJids addObject:buddyJid];
 
+    [self unsubscribeFromDanglingJids:danglingJids];
+}
+
+-(void) unsubscribeFromDanglingJids:(NSSet<NSString*>*) danglingJids
+{
     for(NSString* jid in danglingJids)
     {
         [self.account.pubsub unsubscribeFromNode:@"eu.siacs.conversations.axolotl.devicelist" forJid:jid withHandler:$newHandler(self, handleDevicelistUnsubscribe)];
@@ -1058,6 +1063,11 @@ $$
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.accountJid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
+}
+
+-(void) cleanup {
+    NSSet<NSString*>* danglingJids = [self.monalSignalStore removeDanglingMucSessions];
+    [self unsubscribeFromDanglingJids:danglingJids];
 }
 
 @end

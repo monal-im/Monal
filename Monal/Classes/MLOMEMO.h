@@ -58,6 +58,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) untrustAllDevicesFrom:(NSString*)jid;
 
 -(void) clearAllSessionsForJid:(NSString*) jid;
+-(void) unsubscribeFromDanglingJids:(NSSet<NSString*>*) danglingJids;
+-(void) cleanup;
 @end
 
 NS_ASSUME_NONNULL_END

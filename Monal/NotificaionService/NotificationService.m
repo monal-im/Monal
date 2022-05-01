@@ -213,6 +213,16 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogDebug(@"locking process and connecting accounts");
         [DDLog flushLog];
         [MLProcessLock lock];
+        
+        //handle message notifications by initializing the MLNotificationManager
+        [MLNotificationManager sharedInstance];
+        
+        //initialize the xmpp manager (used for connectivity checks etc.)
+        //we initialize it here to make sure the connectivity check is complete when using it later
+        [MLXMPPManager sharedInstance];
+        usleep(100000);     //wait for initial connectivity check (100ms)
+        
+        //now connect all enabled accounts
         [[MLXMPPManager sharedInstance] connectIfNecessary];
     }
 }
@@ -389,19 +399,11 @@ static BOOL warnUnclean = NO;
     //init IPC
     [IPC initializeForProcess:@"NotificationServiceExtension"];
     
-    //handle message notifications by initializing the MLNotificationManager
-    [MLNotificationManager sharedInstance];
-    
-    //initialize the xmppmanager (used later for connectivity checks etc.)
-    //we initialize it here to make sure the connectivity check is complete when using it later
-    [MLXMPPManager sharedInstance];
-    
     //log startup
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    usleep(100000);     //wait for initial connectivity check (100ms)
     
 #ifdef DEBUG
     BOOL shutdownStatus = [NotificationService getAppexCleanShutdownStatus];

@@ -350,7 +350,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
-        [xmppAccount unfreezed];
+        [xmppAccount unfreeze];
         if(_hasConnectivity)
             [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         [xmppAccount setClientActive];
@@ -421,8 +421,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             DDLogInfo(@"existing but disabled account, ignoring");
             return;
         }
-        DDLogInfo(@"existing account, calling unfreezed");
-        [existing unfreezed];
+        DDLogInfo(@"existing account, calling unfreeze");
+        [existing unfreeze];
         DDLogInfo(@"existing account, just pinging.");
         if(_hasConnectivity)
             [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay

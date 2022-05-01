@@ -687,18 +687,35 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
--(void) unfreezed
+-(void) freeze
 {
+    DDLogInfo(@"Freezing account: %@", self);
+    
+    [self freezeParseQueue];
+    self->_sendQueue.suspended = YES;
+    self->_receiveQueue.suspended = YES;
+}
+
+-(void) unfreeze
+{
+    DDLogInfo(@"Unfreezing account: %@", self);
+    
+    //unfreeze receive queue before dispatching onto it
+    self->_receiveQueue.suspended = NO;
+    self->_sendQueue.suspended = NO;
+    
     //make sure we don't have any race conditions by dispatching this to our receive queue
     [self dispatchAsyncOnReceiveQueue:^{
+        //this must be inside the dispatch async, because it will dispatch *SYNC* to the receive queue and potentially block or even deadlock the system
+        [self unfreezeParseQueue];
         if(self.accountState < kStateReconnecting)
         {
-            DDLogInfo(@"UNFREEZING account %@", self.accountNo);
+            DDLogInfo(@"Reloading UNFREEZED account %@", self.accountNo);
             //(re)read persisted state (could be changed by appex)
             [self readState];
         }
         else
-            DDLogInfo(@"Not UNFREEZING account %@, already connected", self.accountNo);
+            DDLogInfo(@"Not reloading UNFREEZED account %@, already connected", self.accountNo);
     }];
 }
 
@@ -1028,7 +1045,7 @@ NSString* const kStanza = @"stanza";
         self->_accountState = kStateDisconnected;
         
         [self->_parseQueue cancelAllOperations];    //throw away all parsed but not processed stanzas (we should have closed sockets then!)
-        [self unfreezeParseQueue];              //make sure the cancelled operations get handled and our next connect can use the parse queue again
+        [self unfreezeParseQueue];                  //make sure the cancelled operations get handled and our next connect can use the parse queue again
         //we don't throw away operations in the receive queue because they could be more than just stanzas
         //(for example outgoing messages that should be written to the smacks queue instead of just vanishing in a void)
         //all incoming stanzas in the receive queue will honor the _accountState being lower than kStateReconnecting and be dropped

@@ -744,6 +744,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) prepareForFreeze:(NSNotification*) notification
 {
+    for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
+        [account freeze];
     _wasFreezed = YES;
     @synchronized(self) {
         DDLogVerbose(@"Setting _shutdownPending to NO...");
@@ -759,7 +761,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         _shutdownPending = NO;
     }
     
-    /*
     //only show loading HUD if we really got freezed before
     MBProgressHUD* loadingHUD;
     if(_wasFreezed)
@@ -771,31 +772,33 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         
         _wasFreezed = NO;
     }
-    */
     
-    //only proceed with foregrounding if the NotificationServiceExtension is not running
-    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
-    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
-    {
-        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
-        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
-            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
-        }];
-    }
-    
-    /*
-    if(loadingHUD != nil)
-        loadingHUD.hidden = YES;
-    */
-    
-    //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
-    
-    //cancel already running background timer, we are now foregrounded again
-    [self stopBackgroundTimer];
-    
-    [self addBackgroundTask];
-    [[MLXMPPManager sharedInstance] nowForegrounded];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        //make sure the progress HUD is displayed before freezing the main thread
+        //only proceed with foregrounding if the NotificationServiceExtension is not running
+        [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+        {
+            DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+            [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
+                [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+            }];
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(loadingHUD != nil)
+                loadingHUD.hidden = YES;
+            
+            //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
+            
+            //cancel already running background timer, we are now foregrounded again
+            [self stopBackgroundTimer];
+            
+            [self addBackgroundTask];
+            [[MLXMPPManager sharedInstance] nowForegrounded];           //NOTE: this will unfreeze all queues in our accounts
+        });
+    });
 }
 
 -(void) nowReallyBackgrounded

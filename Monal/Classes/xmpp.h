@@ -100,7 +100,9 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 -(void) freezeParseQueue;
 -(void) unfreezeParseQueue;
--(void) unfreezed;
+-(void) freeze;
+-(void) unfreeze;
+
 -(void) connect;
 -(void) disconnect;
 -(void) disconnect:(BOOL) explicitLogout;

@@ -20,10 +20,21 @@
 
 static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
+@interface NotificationService ()
++(BOOL) getAppexCleanShutdownStatus;
++(void) setAppexCleanShutdownStatus:(BOOL) shutdownStatus;
+@end
+
+@interface PushSingleton : NSObject
+@property (atomic, strong) NSMutableArray* handlerList;
+@property (atomic) BOOL isFirstPush;
+@end
+
 @interface PushHandler : NSObject
 @property (atomic, strong) void (^handler)(UNNotificationContent* _Nonnull);
 @property (atomic, strong) monal_void_block_t _Nullable expirationTimer;
 @end
+
 
 @implementation PushHandler
 
@@ -59,11 +70,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 @end
 
-
-@interface PushSingleton : NSObject
-@property (atomic, strong) NSMutableArray* handlerList;
-@property (atomic) BOOL isFirstPush;
-@end
 
 @implementation PushSingleton
 
@@ -123,7 +129,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
     
-    [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
+    [NotificationService setAppexCleanShutdownStatus:YES];
     
     DDLogInfo(@"Now killing appex process, goodbye...");
     [DDLog flushLog];
@@ -363,9 +369,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 @end
 
 
-@interface NotificationService ()
-@end
-
 static NSMutableArray* handlers;;
 static BOOL warnUnclean = NO;
 
@@ -401,17 +404,33 @@ static BOOL warnUnclean = NO;
     usleep(100000);     //wait for initial connectivity check (100ms)
     
 #ifdef DEBUG
-    BOOL shutdownStatus = [[DataLayer sharedInstance] getAppexCleanShutdownStatus];
+    BOOL shutdownStatus = [NotificationService getAppexCleanShutdownStatus];
     warnUnclean = !shutdownStatus;
     if(warnUnclean)
         DDLogError(@"detected unclean appex shutdown!");
 #endif
     
     //mark this appex as unclean (will be cleared directly before calling exit(0))
-    [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
+    [NotificationService setAppexCleanShutdownStatus:NO];
     
     DDLogInfo(@"Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
     [DDLog flushLog];
+}
+
++(BOOL) getAppexCleanShutdownStatus
+{
+    //we use the defaultsDB to avoid write transaction to the main DB which would kill the main app while running in the background
+    //(use the standardUserDefaults of the appex instead of the shared one exposed by our HelperTools to reduce kills due to locking even further)
+    NSNumber* wasClean = [[NSUserDefaults standardUserDefaults] objectForKey:@"clean_appex_shutdown"];
+    return wasClean == nil || wasClean.boolValue;
+}
+
++(void) setAppexCleanShutdownStatus:(BOOL) shutdownStatus
+{
+    //we use the defaultsDB to avoid write transaction to the main DB which would kill the main app while running in the background
+    //(use the standardUserDefaults of the appex instead of the shared one exposed by our HelperTools to reduce kills due to locking even further)
+    [[NSUserDefaults standardUserDefaults] setBool:shutdownStatus forKey:@"clean_appex_shutdown"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(id) init
@@ -493,7 +512,7 @@ static BOOL warnUnclean = NO;
     if([handlers count] > 0)
     {
         //we don't want two error notifications for the user
-        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
+        [NotificationService setAppexCleanShutdownStatus:YES];
         
         //we feed all handlers, these shouldn't be silenced already, because we wouldn't see this expiration
         for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
@@ -507,12 +526,12 @@ static BOOL warnUnclean = NO;
         }
     }
     else
-        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
+        [NotificationService setAppexCleanShutdownStatus:NO];
 #else
     if([handlers count] > 0)
     {
         //we don't want two error notifications for the user
-        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
+        [NotificationService setAppexCleanShutdownStatus:YES];
         
         //we feed all handlers, these shouldn't be silenced already, because we wouldn't see this expiration
         for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
@@ -523,7 +542,7 @@ static BOOL warnUnclean = NO;
         }
     }
     else
-        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
+        [NotificationService setAppexCleanShutdownStatus:NO];
 #endif
 
     DDLogInfo(@"Committing suicide...");

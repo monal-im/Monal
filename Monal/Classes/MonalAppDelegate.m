@@ -1209,6 +1209,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         completionHandler(UIBackgroundFetchResultNoData);
         return;
     }
+    else if(self->_bgTask == UIBackgroundTaskInvalid || self->_bgFetch == nil)
+    {
+        DDLogWarn(@"Ignoring incomingWakeupWithCompletionHandler: because of (self->_bgTask == UIBackgroundTaskInvalid || self->_bgFetch == nil)");
+        completionHandler(UIBackgroundFetchResultNoData);
+        return;
+    }
     
     NSString* completionId = [[NSUUID UUID] UUIDString];
     DDLogInfo(@"got incomingWakeupWithCompletionHandler with ID %@", completionId);

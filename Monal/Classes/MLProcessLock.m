@@ -23,11 +23,11 @@
 +(BOOL) checkRemoteRunning:(NSString*) processName
 {
     //default timeout used by mainapp (appex uses a higher timeout)
-    //EXPLANATION: the mainapp uses the main thread for UI stuff, which sometimes can block the main thread for more than 250ms
+    //EXPLANATION: the mainapp uses the main thread for UI stuff, which sometimes can block the main thread for more than 500ms
     //             --> that would make the ping *NOT* succeed and in turn erroneously tell the appex that the mainapp was not running
     //             the appex on the other side does not use its main thread --> a ping coming from the mainapp will almost always
     //             be answered in only a few milliseconds
-    return [self checkRemoteRunning:processName withTimeout:0.250];
+    return [self checkRemoteRunning:processName withTimeout:0.500];
 }
 
 +(BOOL) checkRemoteRunning:(NSString*) processName withTimeout:(double) pingTimeout

@@ -580,7 +580,7 @@ NSString *const kAskSubscribe=@"subscribe";
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@", self.accountId, self.contactJid];
+    return [NSString stringWithFormat:@"%@: %@ (%@)", self.accountId, self.contactJid, self.isGroup ? self.mucType : @"1:1"];
 }
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic

@@ -286,7 +286,7 @@ $$
             continue;
         contact[@"jid"] = [[NSString stringWithFormat:@"%@", contact[@"jid"]] lowercaseString];
         MLContact* contactObj = [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo];
-        if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
+        if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove] && !contactObj.isGroup)
         {
             [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];

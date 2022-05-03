@@ -502,6 +502,7 @@ NSString* const kStanza = @"stanza";
 {
     DDLogVerbose(@"Cleaning up sendQueue");
     [_sendQueue cancelAllOperations];
+    self->_sendQueue.suspended = NO;      //make sure the queue is operational
     [_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
         DDLogVerbose(@"Cleaning up sendQueue [internal]");
         [self->_sendQueue cancelAllOperations];
@@ -913,6 +914,7 @@ NSString* const kStanza = @"stanza";
         {
             DDLogInfo(@"doing explicit logout (xmpp stream close)");
             self->_reconnectBackoffTime = 0.0;
+            self->_sendQueue.suspended = NO;      //make sure the queue is operational
             if(self.accountState>=kStateBound)
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //disable push for this node
@@ -974,6 +976,7 @@ NSString* const kStanza = @"stanza";
         }
         else
         {
+            self->_sendQueue.suspended = NO;      //make sure the queue is operational
             if(streamError != nil)
             {
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
@@ -1076,7 +1079,6 @@ NSString* const kStanza = @"stanza";
 }
 
 -(void) reconnectWithStreamError:(MLXMLNode* _Nullable) streamError andWaitingTime:(double) wait
-
 {
     //we never want to reconnect while registering
     if(_registration || _registrationSubmission)
@@ -1228,10 +1230,13 @@ NSString* const kStanza = @"stanza";
                         DDLogVerbose(@"Starting transaction for: %@", parsedStanza);
                         [[DataLayer sharedInstance] createTransaction:^{
                             DDLogVerbose(@"Started transaction for: %@", parsedStanza);
+                            //don't write data to our tcp stream while inside this db transaction (all effects to the outside world should be transactional, too)
+                            self->_sendQueue.suspended = YES;
                             [self processInput:parsedStanza withDelayedReplay:NO];
                             DDLogVerbose(@"Ending transaction for: %@", parsedStanza);
                         }];
                         DDLogVerbose(@"Ended transaction for: %@", parsedStanza);
+                        self->_sendQueue.suspended = NO;          //this will flush the send queue
                     } onQueue:@"receiveQueue"];
                     DDLogVerbose(@"Flushed all queued notifications...");
                 }]] waitUntilFinished:YES];
@@ -1680,7 +1685,7 @@ NSString* const kStanza = @"stanza";
 
                     if(presenceNode.from)
                     {
-                        MLContact *contact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo];
+                        MLContact* contact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo];
                         contact.state = [presenceNode findFirst:@"show#"];
                         contact.statusMessage = [presenceNode findFirst:@"status#"];
 
@@ -3468,6 +3473,8 @@ NSString* const kStanza = @"stanza";
         
         //process all queued mam stanzas in a dedicated db write transaction
         [[DataLayer sharedInstance] createTransaction:^{
+            //don't write data to our tcp stream while inside this db transaction (all effects to the outside world should be transactional, too)
+            self->_sendQueue.suspended = YES;
             //ignore all notifications generated while processing the queued stanzas
             [MLNotificationQueue queueNotificationsInBlock:^{
                 //iterate through all pages and their messages forward in time (pages have already been sorted forward in time internally)
@@ -3493,6 +3500,7 @@ NSString* const kStanza = @"stanza";
                 [(MLNotificationQueue*)[MLNotificationQueue currentQueue] clear];
             } onQueue:@"MLhistoryIgnoreQueue"];
         }];
+        self->_sendQueue.suspended = NO;          //this will flush the send queue
         
         DDLogDebug(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[historyIdList count]);
         MLAssert([historyIdList count] <= retrievedBodies, @"did add more messages to historydb table than bodies collected!", (@{
@@ -3877,7 +3885,7 @@ NSString* const kStanza = @"stanza";
             }
             
             [self postError:message withIsSevere:NO];
-            DDLogInfo(@"stream error, calling reconnect");
+            DDLogInfo(@"stream error, calling reconnect: %@", message);
             [self reconnect];
             
             break;
@@ -4187,6 +4195,8 @@ NSString* const kStanza = @"stanza";
     [MLNotificationQueue queueNotificationsInBlock:^{
         DDLogVerbose(@"Creating db transaction for delayed stanza handling of jid %@", archiveJid);
         [[DataLayer sharedInstance] createTransaction:^{
+            //don't write data to our tcp stream while inside this db transaction (all effects to the outside world should be transactional, too)
+            self->_sendQueue.suspended = YES;
             //pick the next delayed message stanza (will return nil if there isn't any left)
             MLXMLNode* delayedStanza = [[DataLayer sharedInstance] getNextDelayedMessageStanzaForArchiveJid:archiveJid andAccountNo:self.accountNo];
             DDLogDebug(@"Got delayed stanza: %@", delayedStanza);
@@ -4222,6 +4232,7 @@ NSString* const kStanza = @"stanza";
             }
         }];
         DDLogVerbose(@"Transaction for delayed stanza handling for jid %@ ended", archiveJid);
+        self->_sendQueue.suspended = NO;          //this will flush the send queue
     } onQueue:@"delayedStanzaReplay"];
 }
 

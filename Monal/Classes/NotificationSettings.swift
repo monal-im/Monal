@@ -39,32 +39,32 @@ struct NotificationSettings: View {
         NavigationView {
             Form {
                 Group {
-                    Section(header: localizedText("Status").font(.title3)) {
+                    Section(header: Text("Status").font(.title3)) {
                         VStack(alignment: .leading) {
-                            buildLabel(localizedText("Apple Push Service"), isWorking: self.applePushEnabled);
+                            buildLabel(Text("Apple Push Service"), isWorking: self.applePushEnabled);
                             Divider()
-                            localizedText("Apple push service should always be on. If it is off, your device can not talk to Apple's server.").font(.footnote)
+                            Text("Apple push service should always be on. If it is off, your device can not talk to Apple's server.").font(.footnote)
                         }.onTapGesture(count: 5, perform: {
                             showPushToken = true
                         }).alert(isPresented: $showPushToken) {
                             (self.applePushEnabled == true) ?
                             Alert(
-                                title: localizedText("Apple Push Token"),
+                                title: Text("Apple Push Token"),
                                 message: Text(self.applePushToken),
-                                primaryButton: .default(localizedText("Copy to clipboard"),
+                                primaryButton: .default(Text("Copy to clipboard"),
                                 action: {
                                     UIPasteboard.general.string = self.applePushToken;
                                 }),
-                                secondaryButton: .destructive(localizedText("Close")))
+                                secondaryButton: .destructive(Text("Close")))
                             :
-                                Alert(title: localizedText("Apple Push Token is not available!"))
+                                Alert(title: Text("Apple Push Token is not available!"))
                         }
                     }
                     Section {
                         VStack(alignment: .leading) {
-                            buildLabel(localizedText("Can Show Notifications"), isWorking: self.pushPermissionEnabled);
+                            buildLabel(Text("Can Show Notifications"), isWorking: self.pushPermissionEnabled);
                             Divider()
-                            localizedText("If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission. Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'.").font(.footnote)
+                            Text("If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission. Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'.").font(.footnote)
                         }
                     }
                     if(self.xmppAccountInfo.count > 0) {
@@ -74,16 +74,16 @@ struct NotificationSettings: View {
                                     buildLabel(Text(account.connectionProperties.identity.jid), isWorking: account.connectionProperties.pushEnabled)
                                 }
                                 Divider()
-                                localizedText("If this is off your device could not activate push on your xmpp server, make sure to have configured it to support XEP-0357.").font(.footnote)
+                                Text("If this is off your device could not activate push on your xmpp server, make sure to have configured it to support XEP-0357.").font(.footnote)
                             }
                         }
                     } else {
                         Section {
-                            localizedText("No accounts set up currently").font(.footnote)
+                            Text("No accounts set up currently").font(.footnote)
                         }.opacity(0.5)
                     }
                 }
-                Section(header: localizedText("Selected Region").font(.title3)) {
+                Section(header: Text("Selected Region").font(.title3)) {
                     Text("Not implemented yet...").font(.footnote)
                     Picker("Push Server", selection: $pushServer) {
                         Text("Europe 1").tag(0)
@@ -93,7 +93,7 @@ struct NotificationSettings: View {
             }
             .navigationBarHidden(true)
         }
-        .navigationTitle(localizedText("Notifications"))
+        .navigationTitle(Text("Notifications"))
         .navigationViewStyle(.stack)
         .onAppear(perform: {
             UNUserNotificationCenter.current().getNotificationSettings { (settings) -> Void in

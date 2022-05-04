@@ -128,10 +128,6 @@ struct NavigationLazyView<Content: View>: View {
     }
 }
 
-func localizedText(_ text: String, comment: String = "") -> Text {
-    return Text(NSLocalizedString(text, comment: comment));
-}
-
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {

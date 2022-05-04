@@ -39,7 +39,14 @@ struct NotificationSettings: View {
                             showPushToken = true
                         }).alert(isPresented: $showPushToken) {
                             (self.applePushEnabled == true) ?
-                                Alert(title: Text(NSLocalizedString("Apple Push Token", comment: "")), message: Text(self.applePushToken)) :
+                            Alert(
+                                title: Text(NSLocalizedString("Apple Push Token", comment: "")),
+                                message: Text(self.applePushToken),
+                                primaryButton: .default(Text(NSLocalizedString("Copy to clipboard", comment: "")), action: {
+                                    UIPasteboard.general.string = self.applePushToken;
+                                }),
+                                secondaryButton: .destructive(Text(NSLocalizedString("Close", comment: ""))))
+                            :
                                 Alert(title: Text(NSLocalizedString("Apple Push Token is not available!", comment: "")))
                         }
                     }

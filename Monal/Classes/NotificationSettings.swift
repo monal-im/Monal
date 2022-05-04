@@ -10,15 +10,16 @@ import SwiftUI
 import monalxmpp
 
 struct NotificationSettings: View {
+    @ViewBuilder
     func buildLabel(_ description: Text, isWorking: Bool) -> some View {
         if(isWorking == true) {
-            return Label(title: {
+            Label(title: {
                 description
             }, icon: {
                 Image(systemName: "checkmark.seal")
             }).accentColor(.green)
         } else {
-            return Label(title: {
+            Label(title: {
                 description
             }, icon: {
                 Image(systemName: "xmark.seal")

@@ -142,13 +142,17 @@ class SwiftuiInterface : NSObject {
 
     @objc
     func makeView(name: String) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
         case "NotificationSettings":
-            return UIHostingController(rootView:AnyView(NotificationSettings()));
+            host.rootView = AnyView(NotificationSettings(delegate:delegate))
         case "WelcomeLogIn":
-            return UIHostingController(rootView:AnyView(WelcomeLogIn()));
+            host.rootView = AnyView(WelcomeLogIn(delegate:delegate))
         default:
             assert(false, "unreachable"); // TODO port unreachable macro to swift
         }
+        return host
     }
 }

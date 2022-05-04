@@ -141,10 +141,12 @@ class SwiftuiInterface : NSObject {
     }
 
     @objc
-    func createSettingsView(name: String) -> UIViewController {
+    func makeView(name: String) -> UIViewController {
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
-        case "showNotification":
+        case "NotificationSettings":
             return UIHostingController(rootView:AnyView(NotificationSettings()));
+        case "WelcomeLogIn":
+            return UIHostingController(rootView:AnyView(WelcomeLogIn()));
         default:
             assert(false, "unreachable"); // TODO port unreachable macro to swift
         }

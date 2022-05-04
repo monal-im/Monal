@@ -27,6 +27,8 @@ struct NotificationSettings: View {
         }
     }
 
+    var delegate: SheetDismisserProtocol
+    
     private let applePushEnabled: Bool
     private let applePushToken: String
     private let xmppAccountInfo: [xmpp]
@@ -102,15 +104,17 @@ struct NotificationSettings: View {
         });
     }
 
-    init() {
+    init(delegate: SheetDismisserProtocol) {
         self.applePushEnabled = MLXMPPManager.sharedInstance().hasAPNSToken;
         self.applePushToken = MLXMPPManager.sharedInstance().pushToken;
         self.xmppAccountInfo = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
+        self.delegate = delegate
     }
 }
 
 struct PushSettings_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        NotificationSettings()
+        NotificationSettings(delegate:delegate)
     }
 }

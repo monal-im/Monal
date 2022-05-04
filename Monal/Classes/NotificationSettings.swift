@@ -91,9 +91,11 @@ struct NotificationSettings: View {
                     }.pickerStyle(.menu)//.menuStyle(.borderlessButton)
                 }
             }
-            .navigationBarHidden(true)
+            // TODO fix those workarounds as soon as settings are not a storyboard anymore
+            .navigationBarHidden(UIDevice.current.userInterfaceIdiom == .phone)
+            .navigationBarTitle(Text("Notifications"), displayMode: .inline)
         }
-        .navigationTitle(Text("Notifications"))
+        .navigationBarTitle(Text("Notifications"), displayMode: .inline)
         .navigationViewStyle(.stack)
         .onAppear(perform: {
             UNUserNotificationCenter.current().getNotificationSettings { (settings) -> Void in

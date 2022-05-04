@@ -9,8 +9,10 @@
 import SwiftUI
 
 struct WelcomeLogIn: View {
+    var delegate: SheetDismisserProtocol
+    
     static private let credFaultyPattern = ".+@.+\\..{2,}$"
-
+    
     @State private var account: String = ""
     @State private var password: String = ""
 
@@ -145,13 +147,22 @@ struct WelcomeLogIn: View {
             }
             
             .navigationTitle("Welcome")
+            
+            .navigationBarBackButtonHidden(true)                   // will not be shown because swiftui does not know we navigated here from UIKit
+            .navigationBarItems(leading: Button(action : {
+                self.delegate.dismiss()
+            }){
+                Image(systemName: "arrow.backward")
+            }
+            .keyboardShortcut(.escape, modifiers: []))
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
 struct WelcomeLogIn_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        WelcomeLogIn()
+        WelcomeLogIn(delegate:delegate)
     }
 }

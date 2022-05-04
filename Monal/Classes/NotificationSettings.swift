@@ -10,11 +10,19 @@ import SwiftUI
 import monalxmpp
 
 struct NotificationSettings: View {
-    func buildLabel(_ description: String, isWorking: Bool) -> some View {
+    func buildLabel(_ description: Text, isWorking: Bool) -> some View {
         if(isWorking == true) {
-            return Label(description, systemImage: "checkmark.seal").accentColor(.green);
+            return Label(title: {
+                description
+            }, icon: {
+                Image(systemName: "checkmark.seal")
+            }).accentColor(.green)
         } else {
-            return Label(description, systemImage: "xmark.seal").accentColor(.red);
+            return Label(title: {
+                description
+            }, icon: {
+                Image(systemName: "xmark.seal")
+            }).accentColor(.red)
         }
     }
 
@@ -30,50 +38,51 @@ struct NotificationSettings: View {
         NavigationView {
             Form {
                 Group {
-                    Section(header: Text(NSLocalizedString("Status", comment: "")).font(.title3)) {
+                    Section(header: localizedText("Status").font(.title3)) {
                         VStack(alignment: .leading) {
-                            buildLabel(NSLocalizedString("Apple Push Service", comment: ""), isWorking: self.applePushEnabled);
+                            buildLabel(localizedText("Apple Push Service"), isWorking: self.applePushEnabled);
                             Divider()
-                            Text(NSLocalizedString("Apple push service should always be on. If it is off, your device can not talk to Apple's server.", comment: "")).font(.footnote)
+                            localizedText("Apple push service should always be on. If it is off, your device can not talk to Apple's server.").font(.footnote)
                         }.onTapGesture(count: 5, perform: {
                             showPushToken = true
                         }).alert(isPresented: $showPushToken) {
                             (self.applePushEnabled == true) ?
                             Alert(
-                                title: Text(NSLocalizedString("Apple Push Token", comment: "")),
+                                title: localizedText("Apple Push Token"),
                                 message: Text(self.applePushToken),
-                                primaryButton: .default(Text(NSLocalizedString("Copy to clipboard", comment: "")), action: {
+                                primaryButton: .default(localizedText("Copy to clipboard"),
+                                action: {
                                     UIPasteboard.general.string = self.applePushToken;
                                 }),
-                                secondaryButton: .destructive(Text(NSLocalizedString("Close", comment: ""))))
+                                secondaryButton: .destructive(localizedText("Close")))
                             :
-                                Alert(title: Text(NSLocalizedString("Apple Push Token is not available!", comment: "")))
+                                Alert(title: localizedText("Apple Push Token is not available!"))
                         }
                     }
                     Section {
                         VStack(alignment: .leading) {
-                            buildLabel(NSLocalizedString("Can Show Notifications", comment: ""), isWorking: self.pushPermissionEnabled);
+                            buildLabel(localizedText("Can Show Notifications"), isWorking: self.pushPermissionEnabled);
                             Divider()
-                            Text(NSLocalizedString("If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission. Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'.", comment: "")).font(.footnote)
+                            localizedText("If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission. Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'.").font(.footnote)
                         }
                     }
                     if(self.xmppAccountInfo.count > 0) {
                         Section {
                             VStack(alignment: .leading) {
                                 ForEach(self.xmppAccountInfo, id: \.self) { account in
-                                    buildLabel(account.connectionProperties.identity.jid, isWorking: account.connectionProperties.pushEnabled)
+                                    buildLabel(Text(account.connectionProperties.identity.jid), isWorking: account.connectionProperties.pushEnabled)
                                 }
                                 Divider()
-                                Text(NSLocalizedString("If this is off your device could not activate push on your xmpp server, make sure to have configured it to support XEP-0357.", comment: "")).font(.footnote)
+                                localizedText("If this is off your device could not activate push on your xmpp server, make sure to have configured it to support XEP-0357.").font(.footnote)
                             }
                         }
                     } else {
                         Section {
-                            Text(NSLocalizedString("No accounts set up currently", comment: "")).font(.footnote)
+                            localizedText("No accounts set up currently").font(.footnote)
                         }.opacity(0.5)
                     }
                 }
-                Section(header: Text(NSLocalizedString("Selected Region", comment: "")).font(.title3)) {
+                Section(header: localizedText("Selected Region").font(.title3)) {
                     Text("Not implemented yet...").font(.footnote)
                     Picker("Push Server", selection: $pushServer) {
                         Text("Europe 1").tag(0)
@@ -83,7 +92,7 @@ struct NotificationSettings: View {
             }
             .navigationBarHidden(true)
         }
-        .navigationTitle(NSLocalizedString("Notifications", comment: ""))
+        .navigationTitle(localizedText("Notifications"))
         .navigationViewStyle(.stack)
         .onAppear(perform: {
             UNUserNotificationCenter.current().getNotificationSettings { (settings) -> Void in

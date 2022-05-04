@@ -50,7 +50,7 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
     init(_ obj: ObjType) {
         self.obj = obj
     }
-    
+
     private func addObserverForMember(_ member: String){
         if(!self.observedMembers.contains(member)) {
             DDLogDebug("Adding observer for member \(member)")
@@ -64,7 +64,7 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
             self.observedMembers.add(member)
         }
     }
-    
+
     subscript<T>(member: String) -> T {
         get {
             addObserverForMember(member)
@@ -128,8 +128,9 @@ struct NavigationLazyView<Content: View>: View {
     }
 }
 
+// Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
-class ContactDetailsInterface: NSObject {
+class SwiftuiInterface : NSObject {
     @objc
     func makeContactDetails(_ contact: MLContact) -> UIViewController {
         let delegate = SheetDismisserProtocol()
@@ -137,5 +138,15 @@ class ContactDetailsInterface: NSObject {
         let host = UIHostingController(rootView:AnyView(details))
         details.delegate.host = host
         return host
+    }
+
+    @objc
+    func createSettingsView(name: String) -> UIViewController {
+        switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
+        case "showNotification":
+            return UIHostingController(rootView:AnyView(NotificationSettings()));
+        default:
+            assert(false, "unreachable"); // TODO port unreachable macro to swift
+        }
     }
 }

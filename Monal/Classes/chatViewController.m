@@ -1066,7 +1066,7 @@ enum msgSentState {
     {
         if([identifier isEqualToString:@"showDetails"])
         {
-            UIViewController* detailsViewController = [[ContactDetailsInterface new] makeContactDetails: self.contact];
+            UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails: self.contact];
             [self presentViewController:detailsViewController animated:YES completion:^{}];
             return;
         }

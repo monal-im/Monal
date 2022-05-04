@@ -9,29 +9,22 @@
 import SwiftUI
 import monalxmpp
 
-private struct AccountPushInfo : Identifiable {
-    let accountName: String
-    let pushEnabled: Bool
-    var id: String { accountName }
-}
-
 struct NotificationSettings: View {
-    func buildLabel(_ description: String, isLocalized: Bool, isWorking: Bool) -> some View {
-        let labelText = (isLocalized == true) ? NSLocalizedString(description, comment: "") : description;
+    func buildLabel(_ description: String, isWorking: Bool) -> some View {
         if(isWorking == true) {
-            return Label(labelText, systemImage: "checkmark.seal").accentColor(.green);
+            return Label(description, systemImage: "checkmark.seal").accentColor(.green);
         } else {
-            return Label(labelText, systemImage: "xmark.seal").accentColor(.red);
+            return Label(description, systemImage: "xmark.seal").accentColor(.red);
         }
     }
 
-    private let xmppAccounts: [AccountPushInfo]
     private let applePushEnabled: Bool
     private let applePushToken: String
+    private let xmppAccountInfo: [xmpp]
 
-    @State var pushPermissionEnabled = false // state because we get this value through an async call
-    @State var showPushToken = false
-    @State var pushServer = 0
+    @State private var pushPermissionEnabled = false // state because we get this value through an async call
+    @State private var showPushToken = false
+    @State private var pushServer = 0
 
     var body: some View {
         NavigationView {
@@ -39,7 +32,7 @@ struct NotificationSettings: View {
                 Group {
                     Section(header: Text(NSLocalizedString("Status", comment: "")).font(.title3)) {
                         VStack(alignment: .leading) {
-                            buildLabel("Apple Push Service", isLocalized: true, isWorking: self.applePushEnabled);
+                            buildLabel(NSLocalizedString("Apple Push Service", comment: ""), isWorking: self.applePushEnabled);
                             Divider()
                             Text(NSLocalizedString("Apple push service should always be on. If it is off, your device can not talk to Apple's server.", comment: "")).font(.footnote)
                         }.onTapGesture(count: 5, perform: {
@@ -52,16 +45,16 @@ struct NotificationSettings: View {
                     }
                     Section {
                         VStack(alignment: .leading) {
-                            buildLabel("Can Show Notifications", isLocalized: true, isWorking: self.pushPermissionEnabled);
+                            buildLabel(NSLocalizedString("Can Show Notifications", comment: ""), isWorking: self.pushPermissionEnabled);
                             Divider()
                             Text(NSLocalizedString("If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission. Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'.", comment: "")).font(.footnote)
                         }
                     }
-                    if(self.xmppAccounts.count > 0) {
+                    if(self.xmppAccountInfo.count > 0) {
                         Section {
                             VStack(alignment: .leading) {
-                                ForEach(self.xmppAccounts) { account in
-                                    buildLabel(account.accountName, isLocalized: false, isWorking: account.pushEnabled)
+                                ForEach(self.xmppAccountInfo, id: \.self) { account in
+                                    buildLabel(account.connectionProperties.identity.jid, isWorking: account.connectionProperties.pushEnabled)
                                 }
                                 Divider()
                                 Text(NSLocalizedString("If this is off your device could not activate push on your xmpp server, make sure to have configured it to support XEP-0357.", comment: "")).font(.footnote)
@@ -83,7 +76,7 @@ struct NotificationSettings: View {
             }
             .navigationBarHidden(true)
         }
-        .navigationTitle(Text(NSLocalizedString("Notifications", comment: "")))
+        .navigationTitle(NSLocalizedString("Notifications", comment: ""))
         .navigationViewStyle(.stack)
         .onAppear(perform: {
             UNUserNotificationCenter.current().getNotificationSettings { (settings) -> Void in
@@ -95,14 +88,7 @@ struct NotificationSettings: View {
     init() {
         self.applePushEnabled = MLXMPPManager.sharedInstance().hasAPNSToken;
         self.applePushToken = MLXMPPManager.sharedInstance().pushToken;
-        var xmppAccounts: [AccountPushInfo] = [];
-        for entry in MLXMPPManager.sharedInstance().connectedXMPP {
-            let xmppAccount = entry as! xmpp
-            xmppAccounts.append(
-                AccountPushInfo(accountName: xmppAccount.connectionProperties.identity.jid, pushEnabled: xmppAccount.connectionProperties.pushEnabled)
-            )
-        }
-        self.xmppAccounts = xmppAccounts;
+        self.xmppAccountInfo = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
     }
 }
 

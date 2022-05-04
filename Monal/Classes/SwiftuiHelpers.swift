@@ -130,7 +130,7 @@ struct NavigationLazyView<Content: View>: View {
 
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
-class ContactDetailsInterface: NSObject {
+class SwiftuiInterface : NSObject {
     @objc
     func makeContactDetails(_ contact: MLContact) -> UIViewController {
         let delegate = SheetDismisserProtocol()
@@ -139,12 +139,9 @@ class ContactDetailsInterface: NSObject {
         details.delegate.host = host
         return host
     }
-}
 
-@objc
-class SettingsSwiftInterface : NSObject {
     @objc
-    func createView(name: String) -> UIViewController {
+    func createSettingsView(name: String) -> UIViewController {
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
         case "showNotification":
             return UIHostingController(rootView:AnyView(NotificationSettings()));

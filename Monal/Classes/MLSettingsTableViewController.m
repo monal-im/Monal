@@ -322,7 +322,7 @@ enum DummySettingsRows {
                     [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
                     break;
                 case NotificationsRow: {
-                    UIViewController* notificationSettingsController = [[SwiftuiInterface new] createSettingsViewWithName:@"showNotification"];
+                    UIViewController* notificationSettingsController = [[SwiftuiInterface new] makeViewWithName:@"NotificationSettings"];
                     [self showDetailViewController:notificationSettingsController sender:self];
                     break;
                 }

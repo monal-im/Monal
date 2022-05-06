@@ -277,7 +277,7 @@ extern NSString* const kMessageTypeFiletransfer;
                                              accountNo:(NSNumber*  _Nonnull) accountNo
                                              betweenBuddy:(NSString* _Nonnull) contactJid;
 
--(NSArray*) getAllCachedImages;
+-(NSArray<NSDictionary*>*) getAllCachedImages;
 -(void) removeImageCacheTables;
 -(NSArray*) getAllMessagesForFiletransferUrl:(NSString*) url;
 -(void) upgradeImageMessagesToFiletransferMessages;

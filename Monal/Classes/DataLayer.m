@@ -2174,10 +2174,15 @@ static NSDateFormatter* dbFormatter;
 }
 
 // (deprecated) should only be used to upgrade to new table format
--(NSArray*) getAllCachedImages
+-(NSArray<NSDictionary*>*) getAllCachedImages
 {
     return [self.db idReadTransaction:^{
-        return [self.db executeReader:@"SELECT DISTINCT * FROM imageCache;"];
+        NSNumber* tableFound = [self.db executeScalar:@"SELECT count(*) FROM sqlite_master WHERE type='table' AND name='imageCache';"];
+        if(tableFound.boolValue == NO)
+        {
+            return [[NSArray<NSDictionary*> alloc] init];
+        }
+        return (NSArray<NSDictionary*>*)[self.db executeReader:@"SELECT DISTINCT * FROM imageCache;"];
     }];
 }
 
@@ -2185,7 +2190,7 @@ static NSDateFormatter* dbFormatter;
 -(void) removeImageCacheTables
 {
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"DROP TABLE imageCache;"];
+        [self.db executeNonQuery:@"DROP TABLE IF EXISTS imageCache;"];
     }];
 }
 

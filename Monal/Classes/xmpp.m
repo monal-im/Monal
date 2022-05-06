@@ -1449,9 +1449,10 @@ NSString* const kStanza = @"stanza";
 {
     NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
     @synchronized(_stateLockObject) {
+        //stanza counting bugs on the server are fatal
         if(([hvalue unsignedIntValue] - [self.lastHandledOutboundStanza unsignedIntValue]) > [self.unAckedStanzas count])
         {
-            //stanza counting bugs on the server are fatal
+            self.streamID = nil;        //we don't ever want to resume this
             NSString* message = @"Server acknowledged more stanzas than sent by client";
             DDLogError(@"Stream error: %@", message);
             [self postError:message withIsSevere:NO];
@@ -1460,6 +1461,21 @@ NSString* const kStanza = @"stanza";
                 [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
             ] andData:nil];
             [self reconnectWithStreamError:streamError];
+            return;
+        }
+        //stanza counting bugs on the server are fatal
+        if([hvalue unsignedIntValue] < [self.lastHandledOutboundStanza unsignedIntValue])
+        {
+            self.streamID = nil;        //we don't ever want to resume this
+            NSString* message = @"Server acknowledged less stanzas than last time";
+            DDLogError(@"Stream error: %@", message);
+            [self postError:message withIsSevere:NO];
+            MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
+                [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
+            ] andData:nil];
+            [self reconnectWithStreamError:streamError];
+            return;
         }
         
         self.lastHandledOutboundStanza = hvalue;

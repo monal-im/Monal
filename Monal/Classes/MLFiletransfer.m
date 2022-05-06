@@ -22,6 +22,8 @@ static NSFileManager* _fileManager;
 static NSString* _documentCacheDir;
 static NSMutableSet* _currentlyTransfering;
 
+NSMutableDictionary<NSString*, NSNumber*>* expectedDownloadSizes;
+
 @implementation MLFiletransfer
 
 +(void) initialize
@@ -34,6 +36,8 @@ static NSMutableSet* _currentlyTransfering;
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     [HelperTools configureFileProtectionFor:_documentCacheDir];
     _currentlyTransfering = [[NSMutableSet alloc] init];
+
+    expectedDownloadSizes = [[NSMutableDictionary alloc] init];
 }
 
 +(BOOL) isIdle
@@ -46,11 +50,20 @@ static NSMutableSet* _currentlyTransfering;
 
 +(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId
 {
+    NSString* url;
     MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
     if(!msg)
     {
         DDLogError(@"historyId %@ does not yield an MLMessage object, aborting", historyId);
         return;
+    }
+    url = [self genCanonicalUrl:msg.messageText];
+    @synchronized(expectedDownloadSizes)
+    {
+        if(expectedDownloadSizes[url] == NULL)
+        {
+            expectedDownloadSizes[url] = msg.filetransferSize;
+        }
     }
     //make sure we don't check or download this twice
     @synchronized(_currentlyTransfering)
@@ -64,7 +77,6 @@ static NSMutableSet* _currentlyTransfering;
     }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         DDLogInfo(@"Requesting mime-type and size for historyID %@ from http server", historyId);
-        NSString* url = [self genCanonicalUrl:msg.messageText];
         NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
         request.HTTPMethod = @"HEAD";
         request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
@@ -94,7 +106,7 @@ static NSMutableSet* _currentlyTransfering;
             
             //update db with content type and size
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:contentLength];
-            
+
             //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = contentLength;
@@ -160,6 +172,8 @@ static NSMutableSet* _currentlyTransfering;
         }
         
         NSURLSession* session = [NSURLSession sharedSession];
+        // set app defined description for download size checks
+        [session setSessionDescription:url];
         NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
             if(error)
             {
@@ -256,6 +270,30 @@ static NSMutableSet* _currentlyTransfering;
         [task resume];
     });
 }
+
+-(void) URLSession:(NSURLSession*) session downloadTask:(NSURLSessionDownloadTask*) downloadTask didWriteData:(int64_t) bytesWritten totalBytesWritten:(int64_t) totalBytesWritten totalBytesExpectedToWrite:(int64_t) totalBytesExpectedToWrite
+{
+    @synchronized(expectedDownloadSizes)
+    {
+        NSNumber* expectedSize = expectedDownloadSizes[session.sessionDescription];
+        if(expectedSize == NULL) {
+            [downloadTask cancel];
+        } else if(totalBytesWritten >= expectedSize.intValue + 1024 * 1000 * 1000) {
+            [downloadTask cancel];
+        } else {
+            // everything is ok
+        }
+    }
+}
+
+-(void) URLSession:(nonnull NSURLSession*) session downloadTask:(nonnull NSURLSessionDownloadTask*) downloadTask didFinishDownloadingToURL:(nonnull NSURL*) location
+{
+    @synchronized(expectedDownloadSizes)
+    {
+        [expectedDownloadSizes removeObjectForKey:session.sessionDescription];
+    }
+}
+
 
 +(NSDictionary*) getFileInfoForMessage:(MLMessage*) msg
 {

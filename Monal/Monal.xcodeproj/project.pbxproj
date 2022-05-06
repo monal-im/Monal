@@ -298,7 +298,6 @@
 		260773C2232FC4E800BFD50F /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
 		260773C3232FC4E800BFD50F /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
 		260773C5232FC4E800BFD50F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		260773CD232FC5DF00BFD50F /* NotificaionService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificaionService.entitlements; sourceTree = "<group>"; };
 		26080210110ABA4E005E194D /* Monal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Monal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2609B5271FD5B26800F09FA1 /* MLSplitViewDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSplitViewDelegate.h; sourceTree = "<group>"; };
 		2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSplitViewDelegate.m; sourceTree = "<group>"; };
@@ -539,7 +538,6 @@
 		26FC619324EB6C250094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = external/en.lproj/Settings.strings; sourceTree = "<group>"; };
 		26FC619424EB6C260094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = external/en.lproj/ContactDetails.strings; sourceTree = "<group>"; };
 		26FC619524EB6C270094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = external/en.lproj/iosShare.strings; sourceTree = "<group>"; };
-		26FDB4341DC16A9800A129E0 /* Monal.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Monal.entitlements; sourceTree = "<group>"; };
 		26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLResizingTextView.h; sourceTree = "<group>"; };
 		26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLResizingTextView.m; sourceTree = "<group>"; };
 		29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -648,6 +646,10 @@
 		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
 		C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLQRCodeScanner.swift; sourceTree = "<group>"; };
+		C1567E3528255C64006E9637 /* Monal.macos.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Monal.macos.entitlements; sourceTree = "<group>"; };
+		C1567E3628255C64006E9637 /* Monal.ios.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Monal.ios.entitlements; sourceTree = "<group>"; };
+		C1567E3728255D02006E9637 /* NotificaionService.ios.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = NotificaionService.ios.entitlements; sourceTree = "<group>"; };
+		C1567E3828255D02006E9637 /* NotificaionService.macos.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = NotificaionService.macos.entitlements; sourceTree = "<group>"; };
 		C158D3FE25A0AB810005AA40 /* MLMucProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLMucProcessor.h; sourceTree = "<group>"; };
 		C158D41225A0AC630005AA40 /* MLMucProcessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLMucProcessor.m; sourceTree = "<group>"; };
 		C15A4E5B279D2AC60055CD11 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = external/ko.lproj/Main.strings; sourceTree = "<group>"; };
@@ -883,7 +885,8 @@
 		260773C1232FC4E800BFD50F /* NotificaionService */ = {
 			isa = PBXGroup;
 			children = (
-				260773CD232FC5DF00BFD50F /* NotificaionService.entitlements */,
+				C1567E3728255D02006E9637 /* NotificaionService.ios.entitlements */,
+				C1567E3828255D02006E9637 /* NotificaionService.macos.entitlements */,
 				260773C2232FC4E800BFD50F /* NotificationService.h */,
 				260773C3232FC4E800BFD50F /* NotificationService.m */,
 				260773C5232FC4E800BFD50F /* Info.plist */,
@@ -1304,8 +1307,9 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				C1567E3628255C64006E9637 /* Monal.ios.entitlements */,
+				C1567E3528255C64006E9637 /* Monal.macos.entitlements */,
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
-				26FDB4341DC16A9800A129E0 /* Monal.entitlements */,
 				29B97315FDCFA39411CA2CEA /* Root Sources */,
 				080E96DDFE201D6D7F000001 /* Shared */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -2428,7 +2432,9 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -2497,7 +2503,9 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = NotificaionService/NotificaionService.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = NotificaionService/NotificaionService.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -2576,7 +2584,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = NotificaionService/NotificaionService.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = NotificaionService/NotificaionService.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -2662,7 +2672,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = NotificaionService/NotificaionService.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = NotificaionService/NotificaionService.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -2787,7 +2799,9 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -3378,7 +3392,9 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -3744,7 +3760,9 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -3905,7 +3923,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = NotificaionService/NotificaionService.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = NotificaionService/NotificaionService.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";

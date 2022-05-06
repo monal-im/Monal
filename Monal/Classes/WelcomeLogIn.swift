@@ -42,7 +42,7 @@ struct WelcomeLogIn: View {
     
     var body: some View {
         NavigationView {
-            VStack(alignment: .leading) {
+            VStack(alignment: .center) {
                 Image("AppLogo")
                    .resizable()
                    .frame(width: CGFloat(150), height: CGFloat(150), alignment: .center)

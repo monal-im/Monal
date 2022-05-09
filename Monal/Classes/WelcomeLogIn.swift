@@ -119,7 +119,7 @@ struct WelcomeLogIn: View {
                             }
                             .sheet(isPresented: $showQRCodeScanner) {
                                 // Get existing credentials from QR and put values in account and password
-                                QRCodeScannerView($account, $password)
+                                QRCodeScannerLoginView($account, $password)
                             }
 
                         }

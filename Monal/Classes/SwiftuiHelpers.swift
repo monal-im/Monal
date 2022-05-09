@@ -139,6 +139,21 @@ class SwiftuiInterface : NSObject {
         details.delegate.host = host
         return host
     }
+    
+    @objc
+    func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        if(ownContact == nil) {
+            host.rootView = AnyView(OmemoKeys(contacts: [], account: nil))
+        } else {
+            let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID
+                                                                             : ownContact!.accountId)! as xmpp
+            host.rootView = AnyView(OmemoKeys(contacts: [ObservableKVOWrapper<MLContact>(ownContact!)], account: account))
+        }
+        return host
+    }
 
     @objc
     func createSettingsView(name: String) -> UIViewController {

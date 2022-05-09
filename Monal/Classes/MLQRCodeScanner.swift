@@ -10,12 +10,12 @@ import CocoaLumberjack
 import AVFoundation
 import UIKit
 
-@objc protocol MLLQRCodeScannerAccountLoginDeleagte : AnyObject
+@objc protocol MLLQRCodeScannerAccountLoginDelegate : AnyObject
 {
     func MLQRCodeAccountLoginScanned(jid: String, password: String)
 }
 
-@objc protocol MLLQRCodeScannerContactDeleagte : AnyObject
+@objc protocol MLLQRCodeScannerContactDelegate : AnyObject
 {
     func MLQRCodeContactScanned(jid: String, fingerprints: Dictionary<NSInteger, String>)
 }
@@ -36,8 +36,8 @@ struct XMPPLoginQRCode : Codable
 @available(iOS 14.0, *)
 @objc class MLQRCodeScanner: UIViewController, AVCaptureMetadataOutputObjectsDelegate
 {
-    @objc weak var loginDelegate : MLLQRCodeScannerAccountLoginDeleagte?
-    @objc weak var contactDelegate : MLLQRCodeScannerContactDeleagte?
+    @objc weak var loginDelegate : MLLQRCodeScannerAccountLoginDelegate?
+    @objc weak var contactDelegate : MLLQRCodeScannerContactDelegate?
 
     var videoPreviewLayer: AVCaptureVideoPreviewLayer!;
     var captureSession: AVCaptureSession!;

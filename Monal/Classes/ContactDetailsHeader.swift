@@ -35,6 +35,7 @@ struct ContactDetailsHeader: View {
                     Image(systemName: "doc.on.doc")
                         .foregroundColor(.primary)
                 }
+                .buttonStyle(BorderlessButtonStyle())
             }
             
             Spacer()
@@ -75,6 +76,7 @@ struct ContactDetailsHeader: View {
                         Image(systemName: "bell.fill")
                     }
                 }
+                .buttonStyle(BorderlessButtonStyle())
                 /*
                 Spacer().frame(width: 20)
                 Button(action: {
@@ -94,6 +96,7 @@ struct ContactDetailsHeader: View {
                     .alert(isPresented: $showingCannotEncryptAlert) {
                         Alert(title: Text("Encryption Not Supported"), message: Text("This contact does not appear to have any devices that support encryption."), dismissButton: .default(Text("Close")))
                     }
+                    .buttonStyle(BorderlessButtonStyle())
                 }
 #endif
                 Spacer()

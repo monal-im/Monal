@@ -12,7 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLKeysTableViewController : UITableViewController<MLLQRCodeScannerContactDeleagte>
+@interface MLKeysTableViewController : UITableViewController<MLLQRCodeScannerContactDelegate>
 @property (nonatomic, assign) BOOL ownKeys;
 @property (nonatomic, strong) MLContact *contact;
 

@@ -40,7 +40,6 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode;
 -(void) sendKeyTransportElement:(NSString*) jid removeBrokenSessionForRid:(NSNumber* _Nullable) rid;
 
-
 -(BOOL) knownDevicesForAddressNameExist:(NSString*) addressName;
 -(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName;
 -(void) deleteDeviceForSource:(NSString*) source andRid:(unsigned int) rid;

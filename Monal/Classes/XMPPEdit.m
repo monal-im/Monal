@@ -726,9 +726,19 @@ enum DummySettingsRows {
             case SettingsChangePasswordRow:
                 [self performSegueWithIdentifier:@"showPassChange" sender:self];
                 break;
-            case SettingsOmemoKeysRow:
-                [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
+            case SettingsOmemoKeysRow: {
+                UIViewController* ownOmemoKeysView;
+                if(self.jid == nil || self.accountNo == nil)
+                {
+                    ownOmemoKeysView = [[SwiftuiInterface new] makeOwnOmemoKeyView:nil];
+                } else {
+                    MLContact* ownContact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountNo];
+                    ownOmemoKeysView = [[SwiftuiInterface new] makeOwnOmemoKeyView:ownContact];
+                }
+                [self showDetailViewController:ownOmemoKeysView sender:self];
+                // [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
                 break;
+            }
             case SettingsMAMPreferencesRow:
                 [self performSegueWithIdentifier:@"showMAMPref" sender:self];
                 break;
@@ -798,13 +808,13 @@ enum DummySettingsRows {
     }
     else if([segue.identifier isEqualToString:@"showKeyTrust"])
     {
-        if(self.jid && self.accountNo)
+        /* if(self.jid && self.accountNo)
         {
             MLKeysTableViewController* keys = (MLKeysTableViewController*)segue.destinationViewController;
             keys.ownKeys = YES;
             MLContact* contact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountNo];
             keys.contact = contact;
-        }
+        } */
     }
     else if([segue.identifier isEqualToString:@"showPassChange"])
     {

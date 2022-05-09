@@ -10,7 +10,7 @@
 #import "MLConstants.h"
 #import <Monal-Swift.h>
 
-@interface addContact : UITableViewController <UITextFieldDelegate, MLLQRCodeScannerContactDeleagte>
+@interface addContact : UITableViewController <UITextFieldDelegate, MLLQRCodeScannerContactDelegate>
 {
     UITextField* _currentTextField;
     NSInteger _selectedRow;

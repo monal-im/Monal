@@ -8,17 +8,17 @@
 
 import SwiftUI
 
-struct QRCodeScannerView: UIViewControllerRepresentable {
+struct QRCodeScannerLoginView: UIViewControllerRepresentable {
     @Binding private var account : String
     @Binding private var password : String
 
-    class Coordinator: NSObject, MLLQRCodeScannerAccountLoginDeleagte {
-        var parent: QRCodeScannerView
-        
-        init(_ parent: QRCodeScannerView) {
+    class Coordinator: NSObject, MLLQRCodeScannerAccountLoginDelegate {
+        var parent: QRCodeScannerLoginView
+
+        init(_ parent: QRCodeScannerLoginView) {
             self.parent = parent
         }
-        
+
         func MLQRCodeAccountLoginScanned(jid: String, password: String) {
             parent.account = jid
             parent.password = password
@@ -29,17 +29,17 @@ struct QRCodeScannerView: UIViewControllerRepresentable {
         self._account = account
         self._password = password
     }
-    
-    func makeUIViewController(context: UIViewControllerRepresentableContext<QRCodeScannerView>) -> MLQRCodeScanner {
+
+    func makeUIViewController(context: UIViewControllerRepresentableContext<QRCodeScannerLoginView>) -> MLQRCodeScanner {
         let qrCodeScannerViewController = MLQRCodeScanner()
         qrCodeScannerViewController.loginDelegate = context.coordinator
         return qrCodeScannerViewController
     }
 
-    func updateUIViewController(_ uiViewController: MLQRCodeScanner, context: UIViewControllerRepresentableContext<QRCodeScannerView>) {
+    func updateUIViewController(_ uiViewController: MLQRCodeScanner, context: UIViewControllerRepresentableContext<QRCodeScannerLoginView>) {
     }
-    
-    func makeCoordinator() -> QRCodeScannerView.Coordinator {
+
+    func makeCoordinator() -> QRCodeScannerLoginView.Coordinator {
         Coordinator(self)
     }
 }

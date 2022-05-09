@@ -17,5 +17,7 @@ FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 #import "MLContact.h"
 #import "DataLayer.h"
 #import "xmpp.h"
+#import "MLOMEMO.h"
+#import "MLSignalStore.h"
 #import "MLXMPPManager.h"
 #import "MLImageManager.h"

@@ -17,7 +17,7 @@ struct WelcomeLogIn: View {
     @State private var password: String = ""
 
     @State private var showAlert = false
-    @State private var activateLinkNavigation = false
+    @State private var showQRCodeScanner = false
     
     @State private var alertTitle = ""
     @State private var alertMessage = ""
@@ -106,7 +106,7 @@ struct WelcomeLogIn: View {
 
                             Button(action: {
                                 showAlert = credentialsExistAlert
-                                activateLinkNavigation = !showAlert
+                                showQRCodeScanner = !showAlert
                             }){
                                 Image(systemName: "qrcode")
                                     .frame(width: CGFloat(35), height: CGFloat(35), alignment: .center)
@@ -118,7 +118,7 @@ struct WelcomeLogIn: View {
                             .alert(isPresented: $showAlert) {
                                 Alert(title: Text("\(alertTitle)"), message: Text("\(alertMessage)"), dismissButton: .default(Text("Close")))
                             }
-                            .sheet(isPresented: $activateLinkNavigation) {
+                            .sheet(isPresented: $showQRCodeScanner) {
                                 // Get existing credentials from QR and put values in account and password
                                 QRCodeScannerView($account, $password)
                             }

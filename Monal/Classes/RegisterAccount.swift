@@ -137,25 +137,19 @@ struct RegisterAccount: View {
                         Alert(title: Text("\(alertTitle)"), message: Text("\(alertMessage)"), dismissButton: .default(Text("Close")))
                     }
                     
-                    if(showTermsUrl) {
-                        Button {
-                            showWebView.toggle()
-                        } label: {
-                            Text("Terms of use")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 30.0)
-                        .padding(.bottom, 9.0)
-                        .sheet(isPresented: $showWebView) {
-                            WebView(url: URL(string: "\(actualTermsUrl)")!)
-                        }
-                        //Link("Terms of use",
-                        //    destination: URL(string: "\(actualTermsUrl)")!)
-                        //        .frame(maxWidth: .infinity)
-                        //        .padding(.top, 30.0)
-                        //        .padding(.bottom, 9.0)
+                    Button (action: {
+                        showWebView.toggle()
+                    }){
+                        Text("Terms of use")
                     }
-                    
+                    .disabled(!showTermsUrl)
+                    .opacity(showTermsUrl ? 1 : 0)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 30.0)
+                    .padding(.bottom, 9.0)
+                    .sheet(isPresented: $showWebView) {
+                        WebView(url: URL(string: "\(actualTermsUrl)")!)
+                    }
                 }
                 .frame(minHeight: 500)
                 
@@ -164,7 +158,7 @@ struct RegisterAccount: View {
             }
         }
         
-        .navigationTitle("Create Account")
+        .navigationTitle("Register Account")
     }
 }
 

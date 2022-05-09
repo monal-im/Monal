@@ -61,13 +61,13 @@ struct RegisterAccountSelectServer: View {
     }
 
     private var buttonColor: Color {
-        return !serverSelected && (!serverProvided || xmppServerFaulty) ? .gray : .blue
+        return !serverSelected && (!serverProvided || xmppServerFaulty) ? .gray : .black
     }
 
     var body: some View {
         ScrollView {
         VStack(alignment: .leading) {
-            Text("Like email, you can create your account on many sites and talk to anyone. You can use this page to create an account with your selected or provided XMPP server.")
+            Text("Like email, you can register your account on many sites and talk to anyone. You can use this page to register an account with a selected or provided XMPP server.")
                .padding()
 
                 Form {
@@ -103,11 +103,10 @@ struct RegisterAccountSelectServer: View {
                         activateLinkNavigation = !showAlert
                     }){
                         HStack {
-                            Text("Create Account")
+                            Text("Register Account")
                                 .foregroundColor(buttonColor)
                             
-                            // Dummy to get the NavigationLink arrow at the end
-                            NavigationLink(destination: DummyView()) {
+                            NavigationLink(destination: RegisterAccount($selectedServerIndex, $providedServer), isActive: $activateLinkNavigation) {
                             }
                             .disabled(true)
                         }
@@ -124,19 +123,10 @@ struct RegisterAccountSelectServer: View {
                 .textFieldStyle(.roundedBorder)
             
                 // Hidden NavigationLink, gets activated and executed by "Create Account" Button
-                NavigationLink(destination: RegisterAccount($selectedServerIndex, $providedServer), isActive: $activateLinkNavigation) {
-                }
-                .disabled(true).hidden()
             }
         }
         
         .navigationTitle("Register")
-    }
-}
-
-struct DummyView: View {
-    var body: some View {
-        EmptyView()
     }
 }
 

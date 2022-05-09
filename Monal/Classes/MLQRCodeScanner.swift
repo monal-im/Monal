@@ -214,7 +214,9 @@ struct XMPPLoginQRCode : Codable
             }
         }
         )
-        present(ac, animated: true)
+        DispatchQueue.main.async{
+            self.present(ac, animated: true)
+        }
     }
 
     func handleOmemoAccountLogin(loginData: XMPPLoginQRCode)

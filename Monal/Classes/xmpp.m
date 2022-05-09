@@ -4119,15 +4119,9 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"DISABLING push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         if(self.connectionProperties.supportsPush)
         {
-#ifdef IS_ALPHA
-            XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
-            [disable setPushDisable:pushToken];
-            [self send:disable];
-#else
             XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
             [disable setPushDisable:[[[UIDevice currentDevice] identifierForVendor] UUIDString]];
             [self send:disable];
-#endif
         }
     }
     else

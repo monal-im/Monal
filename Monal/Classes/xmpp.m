@@ -4091,12 +4091,13 @@ NSString* const kStanza = @"stanza";
 -(void) enablePush
 {
     NSString* pushToken = [MLXMPPManager sharedInstance].pushToken;
-    if(
-        [MLXMPPManager sharedInstance].hasAPNSToken &&
-        self.accountState >= kStateBound &&
-        pushToken != nil && [pushToken length] > 0
-    )
+    if(pushToken == nil || [pushToken length] == 0 || self.accountState < kStateBound)
     {
+        DDLogInfo(@"NOT registering and enabling push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        return;
+    }
+
+    if([MLXMPPManager sharedInstance].hasAPNSToken) {
 #ifdef IS_ALPHA
         // enable push directly without appserver registration
         self.connectionProperties.registeredOnPushAppserver = YES;
@@ -4111,7 +4112,7 @@ NSString* const kStanza = @"stanza";
         [registerNode setiqTo:[HelperTools pushServer]];
         [self sendIq:registerNode withHandler:$newHandler(MLIQProcessor, handleAppserverNodeRegistered)];
     }
-    else if(![MLXMPPManager sharedInstance].hasAPNSToken && self.accountState >= kStateBound)
+    else if([MLXMPPManager sharedInstance].hasAPNSToken == NO)
     {
         //disable push for this node
         DDLogInfo(@"DISABLING push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
@@ -4126,10 +4127,6 @@ NSString* const kStanza = @"stanza";
             [disable setPushDisable:[[[UIDevice currentDevice] identifierForVendor] UUIDString]];
             [self send:disable];
         }
-    }
-    else
-    {
-        DDLogInfo(@"NOT registering and enabling push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
     }
 }
 

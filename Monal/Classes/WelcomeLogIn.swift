@@ -65,7 +65,7 @@ struct WelcomeLogIn: View {
             ScrollView {
                 VStack(alignment: .leading) {
                     HStack (alignment: .center) {                    
-                        Image("AppLogo")
+                        Image(decorative: "AppLogo")
                             .resizable()
                             .frame(width: CGFloat(150), height: CGFloat(150), alignment: .center)
                             .padding()
@@ -109,7 +109,8 @@ struct WelcomeLogIn: View {
                                 showQRCodeScanner = !showAlert
                             }){
                                 Image(systemName: "qrcode")
-                                    .frame(width: CGFloat(35), height: CGFloat(35), alignment: .center)
+                                    .frame(maxHeight: .infinity)
+                                    .padding(9.0)
                                     .background(Color(red: 0.897, green: 0.878, blue: 0.878))
                                     .foregroundColor(.black)
                                     .clipShape(Circle())

@@ -72,8 +72,8 @@ struct NotificationSettings: View {
                             VStack(alignment: .leading) {
                                 ForEach(self.xmppAccountInfo, id: \.self) { account in
                                     buildLabel(Text(account.connectionProperties.identity.jid), isWorking: account.connectionProperties.pushEnabled)
+                                    Divider()
                                 }
-                                Divider()
                                 Text("If this is off your device could not activate push on your xmpp server, make sure to have configured it to support XEP-0357.").font(.footnote)
                             }
                         }

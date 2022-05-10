@@ -91,6 +91,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     self.isFirstPush = YES;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     return self;
 }
 
@@ -350,6 +351,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogError(@"Error posting local badge_update notification: %@", error);
     else
         DDLogVerbose(@"Unread badge updated successfully");
+}
+
+-(void) nowIdle:(NSNotification*) notification
+{
+    DDLogInfo(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
+    [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:NO];
 }
 
 -(void) scheduleBackgroundFetchingTask

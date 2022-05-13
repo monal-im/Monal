@@ -13,6 +13,7 @@ import UIKit
 @objc protocol MLLQRCodeScannerAccountLoginDelegate : AnyObject
 {
     func MLQRCodeAccountLoginScanned(jid: String, password: String)
+    func closeQRCodeScanner()
 }
 
 @objc protocol MLLQRCodeScannerContactDelegate : AnyObject
@@ -211,6 +212,9 @@ struct XMPPLoginQRCode : Codable
             if(startCaptureOnClose == true)
             {
                 self.captureSession.startRunning()
+            }
+            else if (self.loginDelegate != nil) {
+                self.loginDelegate?.closeQRCodeScanner()
             }
         }
         )

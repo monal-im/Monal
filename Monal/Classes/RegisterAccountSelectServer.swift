@@ -119,7 +119,7 @@ struct RegisterAccountSelectServer: View {
                         .font(.system(size: 13))
                         .padding(.vertical, 10)
                 }
-                .frame(height: 500)
+                .frame(height: 285)
                 .textFieldStyle(.roundedBorder)
             
                 // Hidden NavigationLink, gets activated and executed by "Create Account" Button

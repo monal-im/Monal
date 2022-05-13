@@ -149,6 +149,9 @@
 		54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15D504A24C727CC002F75BB /* MLLogFileManager.m */; };
 		54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */ = {isa = PBXBuildFile; fileRef = 54E594BA2523C34900E4172B /* MLPubSub.h */; };
 		54E594BE2523C34B00E4172B /* MLPubSub.m in Sources */ = {isa = PBXBuildFile; fileRef = 54E594BC2523C34A00E4172B /* MLPubSub.m */; };
+		54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81828231690003664BD /* WelcomeLogIn.swift */; };
+		54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81B282316F5003664BD /* RegisterAccount.swift */; };
+		54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81D2823170D003664BD /* RegisterAccountSelectServer.swift */; };
 		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
 		A4CD17069281C209783314FD /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AF6D1CD4CB7FE955E330121 /* Pods_NotificaionService.framework */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
@@ -186,6 +189,7 @@
 		C1F5C7AA2775DA000001F295 /* MLContactSoftwareVersionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */; };
 		C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7AB2777621B0001F295 /* ContactResources.swift */; };
 		C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C1F5C7AE2777638B0001F295 /* OrderedCollections */; };
+		C3CC65712826E5F900241C96 /* QRCodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3CC65702826E5F900241C96 /* QRCodeScannerView.swift */; };
 		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
 		E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */; };
 		E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */; };
@@ -594,6 +598,9 @@
 		54A22D2C26185E7E00B56EAD /* MLNotificationQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLNotificationQueue.h; sourceTree = "<group>"; };
 		54E594BA2523C34900E4172B /* MLPubSub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPubSub.h; sourceTree = "<group>"; };
 		54E594BC2523C34A00E4172B /* MLPubSub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPubSub.m; sourceTree = "<group>"; };
+		54F0B81828231690003664BD /* WelcomeLogIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeLogIn.swift; sourceTree = "<group>"; };
+		54F0B81B282316F5003664BD /* RegisterAccount.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterAccount.swift; sourceTree = "<group>"; };
+		54F0B81D2823170D003664BD /* RegisterAccountSelectServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterAccountSelectServer.swift; sourceTree = "<group>"; };
 		5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_monalxmpp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6142E73A9912F6E327A8CD14 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		6A6D58F695CDFAF204F3B3EB /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.appstore.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -762,6 +769,7 @@
 		C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactSoftwareVersionInfo.h; sourceTree = "<group>"; };
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
 		C1F5C7AB2777621B0001F295 /* ContactResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactResources.swift; sourceTree = "<group>"; };
+		C3CC65702826E5F900241C96 /* QRCodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeScannerView.swift; sourceTree = "<group>"; };
 		D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
 		D8D2595B2BE453296E59F1AF /* Pods-MonalUITests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.appstore.xcconfig"; sourceTree = "<group>"; };
 		DC5DA2C9782510B3433FD50D /* Pods-monalxmpp.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.beta.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.beta.xcconfig"; sourceTree = "<group>"; };
@@ -1245,6 +1253,10 @@
 		26F396CE2196830E00EF5720 /* OnBoard */ = {
 			isa = PBXGroup;
 			children = (
+				54F0B81D2823170D003664BD /* RegisterAccountSelectServer.swift */,
+				54F0B81B282316F5003664BD /* RegisterAccount.swift */,
+				54F0B81828231690003664BD /* WelcomeLogIn.swift */,
+				C3CC65702826E5F900241C96 /* QRCodeScannerView.swift */,
 				26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */,
 				26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */,
 				26F396DB2197507100EF5720 /* GLTintButton.h */,
@@ -1974,6 +1986,7 @@
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
+				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
 				2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */,
 				26F396DC2197507200EF5720 /* GLTintButton.m in Sources */,
 				384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */,
@@ -1982,6 +1995,7 @@
 				2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountListController.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
+				54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */,
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
 				264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */,
 				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
@@ -1991,12 +2005,14 @@
 				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */,
+				54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */,
 				C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				C104915D2612FFBC0054AC9E /* addContact.m in Sources */,
 				26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */,
+				C3CC65712826E5F900241C96 /* QRCodeScannerView.swift in Sources */,
 				26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */,
 				26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
@@ -2473,6 +2489,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -2797,7 +2814,6 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = NO;
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -2835,6 +2851,7 @@
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = AppStore;
 		};
@@ -3390,7 +3407,6 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = NO;
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -3428,6 +3444,7 @@
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Adhoc;
 		};
@@ -3758,7 +3775,6 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = NO;
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -3796,6 +3812,7 @@
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Beta;
 		};

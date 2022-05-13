@@ -63,16 +63,17 @@ struct WelcomeLogIn: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading) {
-                    HStack (alignment: .center) {                    
+                    HStack () {
                         Image(decorative: "AppLogo")
                             .resizable()
-                            .frame(width: CGFloat(150), height: CGFloat(150), alignment: .center)
+                            .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
                             .padding()
+                        
+                        Text("Log in to your existing account or register an account. If required you will find more advanced options in Monal settings.")
+                            .padding()
+                        
                     }
                     .frame(maxWidth: .infinity)
-                    
-                    Text("Log in to your existing account or register an account. If required you will find more advanced options in Monal settings via 'Add account (advanced)'")
-                        .padding()
                     
                     Form {
                         TextField("user@domain", text: Binding(
@@ -119,8 +120,9 @@ struct WelcomeLogIn: View {
                                 Alert(title: Text("\(alertTitle)"), message: Text("\(alertMessage)"), dismissButton: .default(Text("Close")))
                             }
                             .sheet(isPresented: $showQRCodeScanner) {
+                                Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
                                 // Get existing credentials from QR and put values in account and password
-                                QRCodeScannerLoginView($account, $password)
+                                QRCodeScannerView($account, $password, $showQRCodeScanner)
                             }
 
                         }
@@ -134,21 +136,16 @@ struct WelcomeLogIn: View {
                         }){
                            Text("Set up account later")
                                .frame(maxWidth: .infinity)
-                               .padding(.top, 30.0)
+                               .padding(.top, 10.0)
                                .padding(.bottom, 9.0)
-
                         }
                     }
-                    .frame(minHeight: 500)
+                    .frame(minHeight: 310)
                     .textFieldStyle(.roundedBorder)
                 }
             }
-            .navigationBarBackButtonHidden(true)                   // will not be shown because swiftui does not know we navigated here from UIKit
-            .navigationBarItems(leading: Button(action : {
-                self.delegate.dismiss()
-            }){
-                Image(systemName: "arrow.backward")
-            }.keyboardShortcut(.escape, modifiers: []))
+            
+            .navigationTitle("Welcome")
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }

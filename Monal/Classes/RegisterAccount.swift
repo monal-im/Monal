@@ -145,14 +145,14 @@ struct RegisterAccount: View {
                     .disabled(!showTermsUrl)
                     .opacity(showTermsUrl ? 1 : 0)
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 30.0)
+                    .padding(.top, 10.0)
                     .padding(.bottom, 9.0)
                     .sheet(isPresented: $showWebView) {
+                        Text("Terms of \(actualServer)").font(.largeTitle.weight(.bold))
                         WebView(url: URL(string: "\(actualTermsUrl)")!)
                     }
                 }
-                .frame(minHeight: 500)
-                
+                .frame(minHeight: 310)
                 .textFieldStyle(.roundedBorder)
                 
             }

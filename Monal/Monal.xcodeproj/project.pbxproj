@@ -187,6 +187,7 @@
 		C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7AB2777621B0001F295 /* ContactResources.swift */; };
 		C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C1F5C7AE2777638B0001F295 /* OrderedCollections */; };
 		C3CC65712826E5F900241C96 /* QRCodeScannerLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3CC65702826E5F900241C96 /* QRCodeScannerLoginView.swift */; };
+		C3CC65712826E5F900241C96 /* QRCodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3CC65702826E5F900241C96 /* QRCodeScannerView.swift */; };
 		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
 		E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */; };
 		E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */; };
@@ -756,6 +757,7 @@
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
 		C1F5C7AB2777621B0001F295 /* ContactResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactResources.swift; sourceTree = "<group>"; };
 		C3CC65702826E5F900241C96 /* QRCodeScannerLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeScannerLoginView.swift; sourceTree = "<group>"; };
+		C3CC65702826E5F900241C96 /* QRCodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeScannerView.swift; sourceTree = "<group>"; };
 		D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
 		D8D2595B2BE453296E59F1AF /* Pods-MonalUITests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.appstore.xcconfig"; sourceTree = "<group>"; };
 		DC5DA2C9782510B3433FD50D /* Pods-monalxmpp.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.beta.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.beta.xcconfig"; sourceTree = "<group>"; };
@@ -1232,6 +1234,7 @@
 				54F0B81828231690003664BD /* WelcomeLogIn.swift */,
 				C3CC65702826E5F900241C96 /* QRCodeScannerLoginView.swift */,
 				3D46565B2832EC7E0006BCBF /* QRCodeScannerContactView.swift */,
+				C3CC65702826E5F900241C96 /* QRCodeScannerView.swift */,
 				26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */,
 				26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */,
 				26F396DB2197507100EF5720 /* GLTintButton.h */,
@@ -1981,12 +1984,14 @@
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */,
 				3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */,
+				54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				C104915D2612FFBC0054AC9E /* addContact.m in Sources */,
 				26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */,
 				C3CC65712826E5F900241C96 /* QRCodeScannerLoginView.swift in Sources */,
+				C3CC65712826E5F900241C96 /* QRCodeScannerView.swift in Sources */,
 				26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */,
 				26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,

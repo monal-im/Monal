@@ -36,30 +36,29 @@ struct RegisterAccount: View {
     @State private var showAlert = false
     @State private var showWebView = false
     
-    @State private var alertTitle = ""
-    @State private var alertMessage = ""
+    @State private var alertPrompt = AlertPrompt(dismissLabel: "Close")
 
     private var actualServer: String
     private var actualTermsUrl: String
     private var showTermsUrl = false
-    
+
     private var credentialsEnteredAlert: Bool {
-        alertTitle = "No Empty Values!"
-        alertMessage = "Please make sure you have entered a username, password."
+        alertPrompt.title = "No Empty Values!"
+        alertPrompt.message = "Please make sure you have entered a username, password."
         
         return credentialsEntered
     }
 
     private var credentialsFaultyAlert: Bool {
-        alertTitle = "Invalid Username!"
-        alertMessage = "The username does not need to have an @ symbol. Please try again."
+        alertPrompt.title = "Invalid Username!"
+        alertPrompt.message = "The username does not need to have an @ symbol. Please try again."
 
         return credentialsFaulty
     }
 
     private var credentialsExistAlert: Bool {
-        alertTitle = "Duplicate Account!"
-        alertMessage = "This account already exists on this instance."
+        alertPrompt.title = "Duplicate Account!"
+        alertPrompt.message = "This account already exists on this instance."
         
         return credentialsExist
     }
@@ -73,7 +72,7 @@ struct RegisterAccount: View {
     }
 
     private var credentialsExist: Bool {
-        // To be replaced by actual test if user already exist on the monal instance
+        // TODO: To be replaced by actual test if user already exist on the monal instance
         return false
     }
 
@@ -95,12 +94,11 @@ struct RegisterAccount: View {
                 if (temp != "") {
                     actualServer = temp
  
-                    if let temp = RegisterAccountSelectServer.XMPPServer[selectedServerIndex.wrappedValue]["TermsSite"] {
+                    let temp = "\(RegisterAccountSelectServer.XMPPServer[selectedServerIndex.wrappedValue]["TermsSite_\(Locale.current.languageCode ?? "default")"] ?? RegisterAccountSelectServer.XMPPServer[selectedServerIndex.wrappedValue]["TermsSite_default"] ?? "")"
                         if (temp != "") {
                             actualTermsUrl = temp
                             showTermsUrl = true
                         }
-                    }
                 }
             }
         }
@@ -122,7 +120,7 @@ struct RegisterAccount: View {
                         showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
                         
                         if !showAlert {
-                            // Code/Action for registration ...
+                            // TODO: Code/Action for registration and jump to whatever view after successful registration
                         }
                     }){
                         Text("Register")
@@ -134,7 +132,7 @@ struct RegisterAccount: View {
                     }
                     .buttonStyle(BorderlessButtonStyle())
                     .alert(isPresented: $showAlert) {
-                        Alert(title: Text("\(alertTitle)"), message: Text("\(alertMessage)"), dismissButton: .default(Text("Close")))
+                        Alert(title: Text("\(alertPrompt.title)"), message: Text("\(alertPrompt.message)"), dismissButton: .default(Text("\(alertPrompt.dismissLabel)")))
                     }
                     
                     Button (action: {
@@ -148,8 +146,23 @@ struct RegisterAccount: View {
                     .padding(.top, 10.0)
                     .padding(.bottom, 9.0)
                     .sheet(isPresented: $showWebView) {
-                        Text("Terms of \(actualServer)").font(.largeTitle.weight(.bold))
+                        Text("Terms of\n\(actualServer)")
+                            .font(.largeTitle.weight(.bold))
+                            .multilineTextAlignment(.center)
                         WebView(url: URL(string: "\(actualTermsUrl)")!)
+                        if UIDevice.current.userInterfaceIdiom == .mac {
+                            Button (action: {
+                                showWebView.toggle()
+                            }){
+                                Text("Close")
+                                    .padding(9.0)
+                                    .background(Color(red: 0.897, green: 0.878, blue: 0.878))
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
+                            .buttonStyle(BorderlessButtonStyle())
+                            .padding(.top, 10.0)
+                            .padding(.bottom, 9.0)
+                        }
                     }
                 }
                 .frame(minHeight: 310)

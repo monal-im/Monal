@@ -128,6 +128,13 @@ struct NavigationLazyView<Content: View>: View {
     }
 }
 
+// Alert properties for use in Alert
+struct AlertPrompt {
+    var title: String = ""
+    var message: String = ""
+    var dismissLabel: String = "Close"
+}
+
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {

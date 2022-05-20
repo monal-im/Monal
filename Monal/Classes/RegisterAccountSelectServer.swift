@@ -10,10 +10,11 @@ import SwiftUI
     
 struct RegisterAccountSelectServer: View {
     static let XMPPServer: [Dictionary<String, String>] = [
-        ["XMPPServer": "", "TermsSite": ""],
-        ["XMPPServer": "yax.im", "TermsSite": "https://yaxim.org/yax.im/"],
-        ["XMPPServer": "jabber.de", "TermsSite": "https://www.jabber.de/impressum/datenschutz/"],
-        ["XMPPServer": "xabber.de", "TermsSite": "https://www.draugr.de"],
+        ["XMPPServer": "", "TermsSite_default": ""],
+        ["XMPPServer": "yax.im", "TermsSite_default": "https://yaxim.org/yax.im/"],
+        ["XMPPServer": "jabber.de", "TermsSite_default": "https://www.jabber.de/impressum/datenschutz/"],
+        ["XMPPServer": "xabber.de", "TermsSite_default": "https://www.draugr.de"],
+        ["XMPPServer": "trashserver.net", "TermsSite_default": "https://trashserver.net/en/privacy/", "TermsSite_de": "https://trashserver.net/datenschutz/"]
     ]
 
     static private let xmppFaultyPattern = ".+\\..{2,}$"
@@ -24,26 +25,25 @@ struct RegisterAccountSelectServer: View {
     @State private var showAlert = false
     @State private var activateLinkNavigation = false
 
-    @State private var alertTitle = ""
-    @State private var alertMessage = ""
+    @State private var alertPrompt = AlertPrompt(dismissLabel: "Close")
 
     private var serverSelectedAlert: Bool {
-        alertTitle = "No XMPP server!"
-        alertMessage = "Please select a XMPP server or provide one."
+        alertPrompt.title = "No XMPP server!"
+        alertPrompt.message = "Please select a XMPP server or provide one."
 
         return serverSelected
     }
 
     private var serverProvidedAlert: Bool {
-        alertTitle = "No XMPP server!"
-        alertMessage = "Please select a XMPP server or provide one."
+        alertPrompt.title = "No XMPP server!"
+        alertPrompt.message = "Please select a XMPP server or provide one."
 
         return serverProvided
     }
 
     private var xmppServerFaultyAlert: Bool {
-        alertTitle = "XMPP server domain not valid!"
-        alertMessage = "Please provide a valid XMPP server domain or select one."
+        alertPrompt.title = "XMPP server domain not valid!"
+        alertPrompt.message = "Please provide a valid XMPP server domain or select one."
 
         return xmppServerFaulty
     }
@@ -72,6 +72,7 @@ struct RegisterAccountSelectServer: View {
 
                 Form {
                     Picker("Select XMPP-Server", selection: $selectedServerIndex) {
+                        // TODO: Replace with actually relevant text ...
                         Text("Dummy Erklärungstext, obwohl hier eigentlich nicht sinnvoll/möglich, da dies ein gewöhnliches iPhone UI Select Element ist, und auf einem Mac wäre das eine ausklappbare Selectbox und da ist kein Text neben den auswählbaren Feldern vorgesehen und wird u. U. merkwürdig aussehen. Dieser 'Unterview' gehört zum Picker, ist also in dem Sinne kein eigenständiger, konfigurierbarer View. Das hier mit dem Text ist sozusagen ein Hack ;-), ein inaktives Select Element missbraucht. Wie gesagt, kann sein dass das auf dem Mac gar nicht gut kommt.")
                             .padding()
                             .onTapGesture {
@@ -112,7 +113,7 @@ struct RegisterAccountSelectServer: View {
                         }
                     }
                     .alert(isPresented: $showAlert) {
-                        Alert(title: Text("\(alertTitle)"), message: Text("\(alertMessage)"), dismissButton: .default(Text("Close")))
+                        Alert(title: Text("\(alertPrompt.title)"), message: Text("\(alertPrompt.message)"), dismissButton: .default(Text("\(alertPrompt.dismissLabel)")))
                     }
                                         
                     Text("The selectable XMPP servers are public servers which are not affiliated to Monal. This registration page is provided for convenience only.")
@@ -121,8 +122,6 @@ struct RegisterAccountSelectServer: View {
                 }
                 .frame(height: 285)
                 .textFieldStyle(.roundedBorder)
-            
-                // Hidden NavigationLink, gets activated and executed by "Create Account" Button
             }
         }
         

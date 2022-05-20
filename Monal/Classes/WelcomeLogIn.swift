@@ -19,26 +19,25 @@ struct WelcomeLogIn: View {
     @State private var showAlert = false
     @State private var showQRCodeScanner = false
     
-    @State private var alertTitle = ""
-    @State private var alertMessage = ""
-
+    @State private var alertPrompt = AlertPrompt(dismissLabel: "Close")
+    
     private var credentialsEnteredAlert: Bool {
-        alertTitle = "No Empty Values!"
-        alertMessage = "Please make sure you have entered a username, password."
+        alertPrompt.title = "No Empty Values!"
+        alertPrompt.message = "Please make sure you have entered a username, password."
 
         return credentialsEntered
     }
 
     private var credentialsFaultyAlert: Bool {
-        alertTitle = "Invalid Credentials!"
-        alertMessage = "Your XMPP account should be in in the format user@domain. For special configurations, use manual setup."
+        alertPrompt.title = "Invalid Credentials!"
+        alertPrompt.message = "Your XMPP account should be in in the format user@domain. For special configurations, use manual setup."
 
         return credentialsFaulty
     }
 
     private var credentialsExistAlert: Bool {
-        alertTitle = "Duplicate Account!"
-        alertMessage = "This account already exists on this instance."
+        alertPrompt.title = "Duplicate Account!"
+        alertPrompt.message = "This account already exists on this instance."
         
         return credentialsExist
     }
@@ -90,7 +89,7 @@ struct WelcomeLogIn: View {
                                 showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
                                 
                                 if !showAlert {
-                                    // Code/Action for actual login via account and password
+                                    // TODO: Code/Action for actual login via account and password and jump to whatever view after successful login
                                 }
                             }){
                                 Text("Login")
@@ -102,9 +101,11 @@ struct WelcomeLogIn: View {
                             }
                             .buttonStyle(BorderlessButtonStyle())
                             .alert(isPresented: $showAlert) {
-                                Alert(title: Text("\(alertTitle)"), message: Text("\(alertMessage)"), dismissButton: .default(Text("Close")))
+                                Alert(title: Text("\(alertPrompt.title)"), message: Text("\(alertPrompt.message)"), dismissButton: .default(Text("\(alertPrompt.dismissLabel)")))
                             }
 
+                            // Just sets the credential in account and password variables and shows them in the input fields
+                            // so user can control what they scanned and if o.k. login via the "Login" button.
                             Button(action: {
                                 showAlert = credentialsExistAlert
                                 showQRCodeScanner = !showAlert
@@ -118,7 +119,7 @@ struct WelcomeLogIn: View {
                             }
                             .buttonStyle(BorderlessButtonStyle())
                             .alert(isPresented: $showAlert) {
-                                Alert(title: Text("\(alertTitle)"), message: Text("\(alertMessage)"), dismissButton: .default(Text("Close")))
+                                Alert(title: Text("\(alertPrompt.title)"), message: Text("\(alertPrompt.message)"), dismissButton: .default(Text("\(alertPrompt.dismissLabel)")))
                             }
                             .sheet(isPresented: $showQRCodeScanner) {
                                 Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
@@ -133,7 +134,7 @@ struct WelcomeLogIn: View {
                         }
                         
                         Button(action: {
-                            // Code/Action for jump to whatever view after not setting up an account ...
+                            // TODO: Code/Action for jump to whatever view after not setting up an account ...
                         }){
                            Text("Set up account later")
                                .frame(maxWidth: .infinity)

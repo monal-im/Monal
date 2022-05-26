@@ -50,7 +50,7 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
     init(_ obj: ObjType) {
         self.obj = obj
     }
-    
+
     private func addObserverForMember(_ member: String){
         if(!self.observedMembers.contains(member)) {
             DDLogDebug("Adding observer for member \(member)")
@@ -64,7 +64,7 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
             self.observedMembers.add(member)
         }
     }
-    
+
     subscript<T>(member: String) -> T {
         get {
             addObserverForMember(member)
@@ -128,14 +128,53 @@ struct NavigationLazyView<Content: View>: View {
     }
 }
 
+// Alert properties for use in Alert
+struct AlertPrompt {
+    var title: String = ""
+    var message: String = ""
+    var dismissLabel: String = "Close"
+}
+
+// Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
-class ContactDetailsInterface: NSObject {
+class SwiftuiInterface : NSObject {
     @objc
     func makeContactDetails(_ contact: MLContact) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let details = ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact))
         let host = UIHostingController(rootView:AnyView(details))
         details.delegate.host = host
+        return host
+    }
+    
+    @objc
+    func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        if(ownContact == nil) {
+            host.rootView = AnyView(OmemoKeys(contacts: [], account: nil))
+        } else {
+            let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID
+                                                                             : ownContact!.accountId)! as xmpp
+            host.rootView = AnyView(OmemoKeys(contacts: [ObservableKVOWrapper<MLContact>(ownContact!)], account: account))
+        }
+        return host
+    }
+
+    @objc
+    func makeView(name: String) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
+        case "NotificationSettings":
+            host.rootView = AnyView(NotificationSettings(delegate:delegate))
+        case "WelcomeLogIn":
+            host.rootView = AnyView(WelcomeLogIn(delegate:delegate))
+        default:
+            assert(false, "unreachable"); // TODO port unreachable macro to swift
+        }
         return host
     }
 }

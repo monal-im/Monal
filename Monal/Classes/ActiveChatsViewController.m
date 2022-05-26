@@ -12,15 +12,14 @@
 #import "MLContactCell.h"
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
-#import "ContactDetails.h"
 #import "MLImageManager.h"
-#import "MLWelcomeViewController.h"
 #import "MLRegisterViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
 #import "MLXEPSlashMeHandler.h"
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
+#import <Monal-Swift.h>
 
 @import QuartzCore.CATransaction;
 
@@ -213,6 +212,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     if([removedContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact] == NO)
         return;
     dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogInfo(@"Contact removed, closing chat view...");
         // remove contact from activechats table
         [self refreshDisplay];
         // open placeholder
@@ -311,7 +311,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     [super viewWillAppear:animated];
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
         [self refreshDisplay];      // load contacts
-    // only check if the login screen has to be shown if there are no active chats
+    // only check if the login screens have been shown if there are no active chats
     [self segueToIntroScreensIfNeeded];
 }
 
@@ -363,13 +363,14 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) segueToIntroScreensIfNeeded
 {
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenIntro"]) {
-        [self performSegueWithIdentifier:@"showIntro" sender:self];
-        return;
-    }
     // display quick start if the user never seen it or if there are 0 enabled accounts
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"] || [[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
+#ifdef IS_ALPHA
+        UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
+        [self presentViewController:loginViewController animated:YES completion:^{}];
+#else
         [self performSegueWithIdentifier:@"showLogin" sender:self];
+#endif
         return;
     }
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
@@ -403,6 +404,10 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact
 {
+    // clear old chat before opening a new one (but not for splitView == YES)
+    if([HelperTools deviceUsesSplitView] == NO)
+        [self.navigationController popViewControllerAnimated:NO];
+    
     // show placeholder if contact is nil, open chat otherwise
     if(contact == nil)
     {
@@ -424,9 +429,6 @@ static NSMutableSet* _smacksWarningDisplayed;
         return;
     }
 
-    // clear old chat before opening a new one (but not for splitView == YES)
-    if([HelperTools deviceUsesSplitView] == NO)
-        [self.navigationController popViewControllerAnimated:NO];
     // open chat
     [self performSegueWithIdentifier:@"showConversation" sender:contact];
 }
@@ -483,19 +485,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
-    if([segue.identifier isEqualToString:@"showIntro"])
-    {
-        MLWelcomeViewController* welcome = (MLWelcomeViewController*) segue.destinationViewController;
-        welcome.completion = ^{
-            if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
-            {
-                if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
-                    [self performSegueWithIdentifier:@"showLogin" sender:self];
-                }
-            }
-        };
-    }
-    else if([segue.identifier isEqualToString:@"showRegister"])
+    if([segue.identifier isEqualToString:@"showRegister"])
     {
         UINavigationController* navigationController = (UINavigationController*)segue.destinationViewController;
         MLRegisterViewController* reg = (MLRegisterViewController*)navigationController.visibleViewController;
@@ -519,9 +509,8 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
     else if([segue.identifier isEqualToString:@"showDetails"])
     {
-        UINavigationController* nav = segue.destinationViewController;
-        ContactDetails* details = (ContactDetails*)nav.topViewController;
-        details.contact = sender;
+        UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];
+        [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
     else if([segue.identifier isEqualToString:@"showContacts"])
     {

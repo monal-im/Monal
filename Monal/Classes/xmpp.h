@@ -35,6 +35,13 @@ typedef NS_ENUM (NSInteger, xmppRegistrationState) {
     kStateRegistered
 };
 
+typedef NS_ENUM (NSInteger, xmppPipeliningState) {
+    kPipelinedNothing = -1,
+    kPipelinedAuth,
+    kPipelinedStreamRestart,
+    kPipelinedResumeOrBind
+};
+
 FOUNDATION_EXPORT NSString* const kFileName;
 FOUNDATION_EXPORT NSString* const kContentType;
 FOUNDATION_EXPORT NSString* const kData;
@@ -93,7 +100,9 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 -(void) freezeParseQueue;
 -(void) unfreezeParseQueue;
--(void) unfreezed;
+-(void) freeze;
+-(void) unfreeze;
+
 -(void) connect;
 -(void) disconnect;
 -(void) disconnect:(BOOL) explicitLogout;
@@ -185,7 +194,9 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
  enable APNS push with provided tokens
  */
 -(void) enablePush;
+#ifndef IS_ALPHA
 -(void) unregisterPush;
+#endif
 
 -(void) mamFinishedFor:(NSString*) archiveJid;
 

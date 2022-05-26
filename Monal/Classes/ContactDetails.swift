@@ -27,195 +27,210 @@ struct ContactDetails: View {
     @State private var showingAddContactConfirmation = false
     @State private var showingClearHistoryConfirmation = false
     @State private var showingResetOmemoSessionConfirmation = false
+    
+    func genContactsForMuc() -> [ObservableKVOWrapper<MLContact>] {
+        let xmppManager = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.obj.accountId)! as xmpp // FIXME probably not the correct way to get the accountNo of myself, this could cause bad/undefined behaviour when multiple accounts of the same monal instance are in the same group
+        let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.obj.contactJid, forAccountId: xmppManager.accountNo))
+        var contactList : [ObservableKVOWrapper<MLContact>]
+        contactList = []
+        for jidDict in jidList {
+            if let participantJid = jidDict["participant_jid"] {
+                let contact = MLContact.createContact(fromJid: participantJid as! String, andAccountNo: xmppManager.accountNo)
+                contactList.append(ObservableKVOWrapper<MLContact>(contact))
+            }
+        }
+        return contactList
+    }
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .leading) {
-                    //header
-                    ContactDetailsHeader(contact: contact)
-                    
-                    //editables
-                    Group {
-                        Spacer()
-                            .frame(height: 20)
-                        TextField("Nickname", text: $contact.nickNameView)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .modifier(ClearButton(text: $contact.nickNameView))
-                    }
-                    
-                    //buttons
-                    Group {
-                        Spacer()
-                            .frame(height: 20)
-                        Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {
-                            contact.obj.togglePinnedChat(!contact.isPinned);
-                        }
-                        
-                        Spacer()
-                            .frame(height: 20)
-                        Button(action: {
-                            if(!contact.isBlocked) {
-                                showingBlockContactConfirmation = true
-                            } else {
-                                showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
-                            }
-                        }) {
-                            if(!contact.isBlocked) {
-                                Text("Block Contact")
-                                    .foregroundColor(.red)
-                            } else {
-                                Text("Unblock Contact")
-                            }
-                        }
-                        .alert(isPresented: $showingCannotBlockAlert) {
-                            Alert(title: Text("Blocking/Unblocking Not Supported"), message: Text("The server does not support blocking (XEP-0191)."), dismissButton: .default(Text("Close")))
-                        }
-                        .actionSheet(isPresented: $showingBlockContactConfirmation) {
-                            ActionSheet(
-                                title: Text("Block Contact"),
-                                message: Text("Do you really want to block this contact? You won't receive any messages from this contact."),
-                                buttons: [
-                                    .cancel(),
-                                    .destructive(
-                                        Text("Yes"),
-                                        action: {
-                                            showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
-                                        }
-                                    )
-                                ]
-                            )
-                        }
-                        
-                        Spacer()
-                            .frame(height: 20)
+            Form {
+                Section {
+                    VStack(alignment: .leading) {
+                        //header
+                        ContactDetailsHeader(contact: contact)
+                        Spacer().frame(height: 20)
+
+                        //editables
                         Group {
-                            if(contact.isInRoster) {
-                                Button(action: {
-                                    showingRemoveContactConfirmation = true
-                                }) {
-                                    if(contact.isGroup) {
-                                        Text(contact.mucType == "group" ? NSLocalizedString("Leave Group", comment: "") : NSLocalizedString("Leave Channel", comment: ""))
-                                            .foregroundColor(.red)
-                                    } else {
-                                        Text("Remove from contacts")
-                                            .foregroundColor(.red)
-                                    }
-                                }
-                                .actionSheet(isPresented: $showingRemoveContactConfirmation) {
-                                    ActionSheet(
-                                        title: Text(contact.isGroup ? NSLocalizedString("Leave this conversation", comment: "") : String(format: NSLocalizedString("Remove %@ from contacts?", comment: ""), contact.contactJid)),
-                                        message: Text(contact.isGroup ? NSLocalizedString("You will no longer receive messages from this conversation", comment: "") : NSLocalizedString("They will no longer see when you are online. They may not be able to send you encrypted messages.", comment: "")),
-                                        buttons: [
-                                            .cancel(),
-                                            .destructive(
-                                                Text("Yes"),
-                                                action: {
-                                                    contact.obj.removeFromRoster()
-                                                    self.delegate.dismiss()
-                                                }
-                                            )
-                                        ]
-                                    )
-                                }
-                            } else {
-                                Button(action: {
-                                    showingAddContactConfirmation = true
-                                }) {
-                                    if(contact.isGroup) {
-                                        Text(contact.mucType == "group" ? NSLocalizedString("Add Group to Favorites", comment: "") : NSLocalizedString("Add Channel to Favorites", comment: ""))
-                                    } else {
-                                        Text("Add to contacts")
-                                    }
-                                }
-                                .actionSheet(isPresented: $showingAddContactConfirmation) {
-                                    ActionSheet(
-                                        title: Text(contact.isGroup ? (contact.mucType == "group" ? NSLocalizedString("Add Group to Favorites", comment: "") : NSLocalizedString("Add Channel to Favorites", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
-                                        message: Text(contact.isGroup ? NSLocalizedString("You will receive subsequent messages from this conversation", comment: "") : NSLocalizedString("They will see when you are online. They will be able to send you encrypted messages.", comment: "")),
-                                        buttons: [
-                                            .cancel(),
-                                            .default(
-                                                Text("Yes"),
-                                                action: {
-                                                    contact.obj.addToRoster()
-                                                }
-                                            ),
-                                        ]
-                                    )
-                                }
-                            }
-                        }
-                        
-                        Spacer()
-                            .frame(height: 20)
-                        Button(action: {
-                            showingClearHistoryConfirmation = true
-                        }) {
-                            Text(deleteHistoryButtonText(contact: contact.obj))
-                                .foregroundColor(.red)
-                        }
-                        .actionSheet(isPresented: $showingClearHistoryConfirmation) {
-                            ActionSheet(
-                                title: Text(NSLocalizedString("Clear History", comment: "")),
-                                message: Text(NSLocalizedString("Do you really want to clear all messages exchanged in this conversation? If using OMEMO you won't even be able to load them from your server again.", comment: "")),
-                                buttons: [
-                                    .cancel(),
-                                    .destructive(
-                                        Text("Yes"),
-                                        action: {
-                                            contact.obj.clearHistory()
-                                        }
-                                    )
-                                ]
-                            )
-                        }
-                        
-                        if(!contact.isGroup) {
-                            Spacer()
-                                .frame(height: 20)
-                            NavigationLink(destination: NavigationLazyView(ContactResources(contact: contact))) {
-                                Text("Resources")
-                            }
+                            TextField("Nickname", text: $contact.nickNameView)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .modifier(ClearButton(text: $contact.nickNameView))
                         }
                     }
+                }.padding()
                     
-                    //even more buttons
-                    Group {
+                // info/nondestructive buttons
+                Section {
+                    Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {
+                        contact.obj.togglePinnedChat(!contact.isPinned);
+                    }
+                    
+                    if(!contact.isGroup) {
+                        NavigationLink(destination: NavigationLazyView(ContactResources(contact: contact))) {
+                            Text("Resources")
+                        }
+                    }
 #if !DISABLE_OMEMO
-                        // only display omemo session reset button on 1:1 and private groups
-                        if(contact.obj.isGroup == false && (contact.obj.isGroup && contact.obj.mucType == "group"))
-                        {
-                            Spacer()
-                                .frame(height: 30)
+                    let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.obj.accountId)! as xmpp
+                    if(contact.obj.isGroup == false) {
+                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: [contact], account: account))) {
+                            Text("Encryption Keys")
+                        }
+                    } else if(contact.obj.isGroup && contact.obj.mucType == "group") {
+                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: genContactsForMuc(), account: account))) {
+                            Text("Encryption Keys")
+                        }
+                    }
+#endif
+                }
+
+                Section { // the destructive section...
+                    Button(action: {
+                        if(!contact.isBlocked) {
+                            showingBlockContactConfirmation = true
+                        } else {
+                            showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
+                        }
+                    }) {
+                        if(!contact.isBlocked) {
+                            Text("Block Contact")
+                                .foregroundColor(.red)
+                        } else {
+                            Text("Unblock Contact")
+                        }
+                    }
+                    .alert(isPresented: $showingCannotBlockAlert) {
+                        Alert(title: Text("Blocking/Unblocking Not Supported"), message: Text("The server does not support blocking (XEP-0191)."), dismissButton: .default(Text("Close")))
+                    }
+                    .actionSheet(isPresented: $showingBlockContactConfirmation) {
+                        ActionSheet(
+                            title: Text("Block Contact"),
+                            message: Text("Do you really want to block this contact? You won't receive any messages from this contact."),
+                            buttons: [
+                                .cancel(),
+                                .destructive(
+                                    Text("Yes"),
+                                    action: {
+                                        showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
+                                    }
+                                )
+                            ]
+                        )
+                    }
+
+                    Group {
+                        if(contact.isInRoster) {
                             Button(action: {
-                                showingResetOmemoSessionConfirmation = true
+                                showingRemoveContactConfirmation = true
                             }) {
-                                Text(NSLocalizedString("Reset OMEMO session", comment: ""))
-                                    .foregroundColor(.red)
+                            if(contact.isGroup) {
+                                Text(contact.mucType == "group" ? NSLocalizedString("Leave Group", comment: "") : NSLocalizedString("Leave Channel", comment: ""))
+                                        .foregroundColor(.red)
+                                } else {
+                                    Text("Remove from contacts")
+                                        .foregroundColor(.red)
+                                }
                             }
-                            .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
+                            .actionSheet(isPresented: $showingRemoveContactConfirmation) {
                                 ActionSheet(
-                                    title: Text(NSLocalizedString("Reset OMEMO session", comment: "")),
-                                    message: Text(NSLocalizedString("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!", comment: "")),
+                                    title: Text(contact.isGroup ? NSLocalizedString("Leave this conversation", comment: "") : String(format: NSLocalizedString("Remove %@ from contacts?", comment: ""), contact.contactJid)),
+                                        message: Text(contact.isGroup ? NSLocalizedString("You will no longer receive messages from this conversation", comment: "") : NSLocalizedString("They will no longer see when you are online. They may not be able to send you encrypted messages.", comment: "")),
                                     buttons: [
                                         .cancel(),
                                         .destructive(
                                             Text("Yes"),
                                             action: {
-                                                contact.obj.resetOmemoSession()
+                                                contact.obj.removeFromRoster()      //this will dismiss the chatview via kMonalContactRemoved notification
+                                                self.delegate.dismiss()
                                             }
                                         )
                                     ]
                                 )
                             }
+                        } else {
+                            Button(action: {
+                                showingAddContactConfirmation = true
+                            }) {
+                                if(contact.isGroup) {
+                                    Text(contact.mucType == "group" ? NSLocalizedString("Add Group to Favorites", comment: "") : NSLocalizedString("Add Channel to Favorites", comment: ""))
+                                } else {
+                                    Text("Add to contacts")
+                                }
+                            }
+                            .actionSheet(isPresented: $showingAddContactConfirmation) {
+                                ActionSheet(
+                                    title: Text(contact.isGroup ? (contact.mucType == "group" ? NSLocalizedString("Add Group to Favorites", comment: "") : NSLocalizedString("Add Channel to Favorites", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
+                                    message: Text(contact.isGroup ? NSLocalizedString("You will receive subsequent messages from this conversation", comment: "") : NSLocalizedString("They will see when you are online. They will be able to send you encrypted messages.", comment: "")),
+                                    buttons: [
+                                        .cancel(),
+                                        .default(
+                                            Text("Yes"),
+                                            action: {
+                                                contact.obj.addToRoster()
+                                            }
+                                        ),
+                                    ]
+                                )
+                            }
                         }
-#endif
                     }
-                    
-                    //make sure everything is aligned to the top of our view instead of vertically centered
-                    Spacer()
+
+                    Button(action: {
+                        showingClearHistoryConfirmation = true
+                    }) {
+                        Text(deleteHistoryButtonText(contact: contact.obj))
+                            .foregroundColor(.red)
+                    }
+                    .actionSheet(isPresented: $showingClearHistoryConfirmation) {
+                        ActionSheet(
+                            title: Text(NSLocalizedString("Clear History", comment: "")),
+                            message: Text(NSLocalizedString("Do you really want to clear all messagesexchanged in this conversation? If using OMEMO you won't even be able to load them from your server again.", comment: "")),
+                            buttons: [
+                                .cancel(),
+                                .destructive(
+                                    Text("Yes"),
+                                    action: {
+                                        contact.obj.clearHistory()
+                                    }
+                                )
+                            ]
+                        )
+                    }
                 }
-                .padding()
+
+                //even more buttons
+                Section {
+#if !DISABLE_OMEMO
+                    // only display omemo session reset button on 1:1 and private groups
+                    if(contact.obj.isGroup == false || (contact.obj.isGroup && contact.obj.mucType == "group"))
+                    {
+                        Button(action: {
+                            showingResetOmemoSessionConfirmation = true
+                        }) {
+                            Text(NSLocalizedString("Reset OMEMO session", comment: ""))
+                                .foregroundColor(.red)
+                        }
+                        .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
+                            ActionSheet(
+                                title: Text(NSLocalizedString("Reset OMEMO session", comment: "")),
+                                message: Text(NSLocalizedString("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!", comment: "")),
+                                buttons: [
+                                    .cancel(),
+                                    .destructive(
+                                        Text("Yes"),
+                                        action: {
+                                            contact.obj.resetOmemoSession()
+                                        }
+                                    )
+                                ]
+                            )
+                        }
+                    }
+#endif
+                }
+                    
+                //make sure everything is aligned to the top of our view instead of vertically centered
             }
             .navigationBarBackButtonHidden(true)                   // will not be shown because swiftui does not know we navigated here from UIKit
             .navigationBarItems(leading: Button(action : {

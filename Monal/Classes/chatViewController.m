@@ -17,7 +17,6 @@
 #import "MLUploadQueueItem.h"
 
 #import "AESGcm.h"
-#import "ContactDetails.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
 #import "MBProgressHUD.h"
@@ -475,6 +474,18 @@ enum msgSentState {
         [self.navBarEncryptToggleButton setEnabled:NO];
 }
 
+-(void) handleContactRemoved:(NSNotification*) notification
+{
+    MLContact* contact = [notification.userInfo objectForKey:@"contact"];
+    if(self.contact && [self.contact isEqualToContact:contact])
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            DDLogInfo(@"Closing chat view, contact was removed...");
+            [self.navigationController popToRootViewControllerAnimated:YES];
+        });
+    }
+}
+
 -(void) refreshContact:(NSNotification*) notification
 {
     @synchronized(_localMLContactCache) {
@@ -621,6 +632,7 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(handleFiletransferMessageUpdate:) name:kMonalMessageFiletransferUpdateNotice object:nil];
 
     [nc addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
+    [nc addObserver:self selector:@selector(handleContactRemoved:) name:kMonalContactRemoved object:nil];
     [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
     [nc addObserver:self selector:@selector(updateNavBarLastInteractionLabel:) name:kMonalLastInteractionUpdatedNotice object:nil];
 
@@ -910,6 +922,18 @@ enum msgSentState {
     }
     else
     {
+        //clean error because this seems to be a retry (to be filled again, if error persists)
+        [[DataLayer sharedInstance] clearErrorOfMessageId:newMessageID];
+        for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+        {
+            // find msg that should be updated
+            MLMessage* msg = [self.messageList objectAtIndex:(msgIdx - 1)];
+            if([msg.messageId isEqualToString:newMessageID])
+            {
+                msg.errorType = @"";
+                msg.errorReason = @"";
+            }
+        }
         [[MLXMPPManager sharedInstance]
                       sendMessage:messageText
                         toContact:self.contact
@@ -1041,7 +1065,7 @@ enum msgSentState {
     {
         if([identifier isEqualToString:@"showDetails"])
         {
-            UIViewController* detailsViewController = [[ContactDetailsInterface new] makeContactDetails: self.contact];
+            UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails: self.contact];
             [self presentViewController:detailsViewController animated:YES completion:^{}];
             return;
         }
@@ -1053,24 +1077,6 @@ enum msgSentState {
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     [self sendChatState:NO];
-
-    if([segue.identifier isEqualToString:@"showDetails"])
-    {
-        if(self.contact.isGroup)
-        {
-            //segue.destinationViewController = [[UINavigationController alloc] initWithRootViewController:[[ContactDetailsInterface new] makeContactDetails: self.contact]];
-            //segue.destinationViewController.toolbarHidden = NO;
-        }
-        else
-        {
-            UINavigationController* nav = segue.destinationViewController;
-            ContactDetails* details = (ContactDetails *)nav.topViewController;
-            details.contact = self.contact;
-            details.completion = ^{
-                [self viewWillAppear:YES];
-            };
-        }
-    }
 }
 
 

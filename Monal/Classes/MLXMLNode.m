@@ -161,9 +161,11 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(void) dealloc
 {
+/*
 #ifdef IS_ALPHA
     DDLogVerbose(@"Dealloc of MLXMLNode: %@", self);
 #endif
+*/
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self.cache removeAllObjects];
     [self.queryEntryCache removeAllObjects];
@@ -247,7 +249,7 @@ static NSRegularExpression* attributeFilterRegex;
     return insertedChild;
 }
 
--(MLXMLNode*) removeChild:(MLXMLNode*) child
+-(MLXMLNode*) removeChildNode:(MLXMLNode*) child
 {
     MLXMLNode* foundChild = nil;
     if(!child)

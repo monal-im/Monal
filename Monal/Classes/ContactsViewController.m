@@ -10,12 +10,12 @@
 #import "MLContactCell.h"
 #import "DataLayer.h"
 #import "chatViewController.h"
-#import "ContactDetails.h"
 #import "addContact.h"
 #import "MLNewViewController.h"
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
 #import "xmpp.h"
+#import <Monal-Swift.h>
 
 @interface ContactsViewController ()
 
@@ -164,9 +164,8 @@
 {
     if([segue.identifier isEqualToString:@"showDetails"])
     {
-        UINavigationController* nav = segue.destinationViewController;
-        ContactDetails* details = (ContactDetails*)nav.topViewController;
-        details.contact = sender;
+        UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];
+        [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
     else if([segue.identifier isEqualToString:@"showNewMenu"])
     {

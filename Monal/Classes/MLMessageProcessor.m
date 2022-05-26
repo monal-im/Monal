@@ -147,15 +147,20 @@ static NSMutableDictionary* _typingNotifications;
             possibleUnkownContact = messageNode.fromUser;
 
         // handle KeyTransportMessages directly without adding a 1:1 buddy
-        if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] == YES && [messageNode check:@"body#"] == NO)
+        if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] == YES && [messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload#"] == NO)
         {
             DDLogInfo(@"Handling KeyTransportElement without trying to add a 1:1 buddy %@", possibleUnkownContact);
             [account.omemo decryptMessage:messageNode];
             return message;
         }
+        
+        //handle muc invites and return early, before creating a dummy 1:1 contact for this muc
+        if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] && [account.mucProcessor processMessage:messageNode])
+            return message;     //the muc processor said we have stop processing (e.g. it detected the invite, will alwaye due to the first part of the if statement above)
+        
         //add contact if possible (ignore groupchats or already existing contacts, or KeyTransportElements)
         DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
-        [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil andMucNick:nil];
+        [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil];
     }
 
     //ignore self messages after this (only pubsub data and self-chats are from self)

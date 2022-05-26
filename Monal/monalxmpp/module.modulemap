@@ -10,6 +10,14 @@ module xmppPrivate {
     header "../Classes/xmpp.h"
     export *
 }
+module MLOMEMO {
+    header "../Classes/MLOMEMO.h"
+    export *
+}
+module MLSignalStore {
+    header "../Classes/MLSignalStore.h"
+    export *
+}
 module MLXMPPManagerPrivate {
     header "../Classes/MLXMPPManager.h"
     export *

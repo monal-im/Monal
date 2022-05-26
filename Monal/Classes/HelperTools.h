@@ -15,7 +15,7 @@
 #define createQueuedTimer(timeout, queue, handler, ...)						metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue])(_createQueuedTimer(timeout, queue, handler, __VA_ARGS__))
 #define _createQueuedTimer(timeout, queue, handler, cancelHandler, ...)		[HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue]
 
-#define MLAssert(check, text, ...)                                          metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools MLAssert:check withText:text andUserData:nil])([HelperTools MLAssert:check withText:text andUserData:metamacro_head(__VA_ARGS__)])
+#define MLAssert(check, text, ...)                                          metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools MLAssert:check withText:text andUserData:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])([HelperTools MLAssert:check withText:text andUserData:metamacro_head(__VA_ARGS__) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -28,7 +28,7 @@ void logException(NSException* exception);
 
 @interface HelperTools : NSObject
 
-+(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id _Nullable) additionalData;
++(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 +(NSString*) pushServer;

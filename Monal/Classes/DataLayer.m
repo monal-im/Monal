@@ -353,7 +353,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark contact Commands
 
--(BOOL) addContact:(NSString*) contact forAccount:(NSNumber*) accountNo nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick
+-(BOOL) addContact:(NSString*) contact forAccount:(NSNumber*) accountNo nickname:(NSString*) nickName
 {
     if(accountNo == nil || !contact)
         return NO;
@@ -378,12 +378,7 @@ static NSDateFormatter* dbFormatter;
         else
             toPass = cleanNickName;
         
-        //make this a muc again if it existed as muc already (an reuse the nickname from the old buddylist entry or muc_favorites entry)
-        NSString* mucNickToUse = mucNick;
-        if(!mucNickToUse)
-            mucNickToUse = [self ownNickNameforMuc:contact forAccount:accountNo];
-        
-        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick') VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;" andArguments:@[accountNo, contact, @"", toPass, mucNickToUse ? @1 : @0, mucNickToUse ? mucNickToUse : @"", toPass]];
+        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick') VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;" andArguments:@[accountNo, contact, @"", toPass, @0, @"", toPass]];
     }];
 }
 
@@ -1173,7 +1168,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     
     return [self.db idWriteTransaction:^{
-        if(!checkForDuplicates || ![self hasMessageForStanzaId:stanzaid orMessageID:messageid onChatBuddy:buddyName withInboundDir:inbound onAccount:accountNo])
+        if(!checkForDuplicates || ![self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound onAccount:accountNo])
         {
             //this is always from a contact
             NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
@@ -1230,12 +1225,13 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId onChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound onAccount:(NSNumber*) accountNo
+-(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound onAccount:(NSNumber*) accountNo
 {
     if(accountNo == nil)
         return NO;
     
     return [self.db boolWriteTransaction:^{
+        //if the stanzaid was given, this is conclusive for dedup, we don't need to check any other ids (EXCEPTION BELOW)
         if(stanzaId)
         {
             DDLogVerbose(@"stanzaid provided");
@@ -1247,24 +1243,25 @@ static NSDateFormatter* dbFormatter;
             }
         }
         
-        //we check message ids per contact to increase uniqueness and abort here if no contact was provided
-        if(!buddyName)
+        //EXCEPT: outbound messages coming from this very client (we don't know their stanzaids)
+        //NOTE: the MAM XEP does not mandate full jids in from-attribute of the wrapped message stanza
+        //      --> we can't use that to figure out if the message came from this very client or only from another client using this account
+        //=> if the stanzaid does not match and we process an outbound message, only dedup using origin-id (that should be unique and monal sets them)
+        //   the check, if an origin-id was given, lives in MLMessageProcessor.m (it only triggers a dedup for messages either having a stanzaid or an origin-id)
+        if(inbound == NO)
         {
-            DDLogVerbose(@"no contact given --> message not found");
-            return NO;
-        }
-        
-        NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND inbound=? AND messageid=?;" andArguments:@[accountNo, buddyName, [NSNumber numberWithBool:inbound], messageId]];
-        if(historyId != nil)
-        {
-            DDLogVerbose(@"found by origin-id or messageid");
-            if(stanzaId)
+            NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND inbound=0 AND messageid=?;" andArguments:@[accountNo, messageId]];
+            if(historyId != nil)
             {
-                DDLogDebug(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, contact=%@, inbound=%d)...", historyId, stanzaId, accountNo, messageId, buddyName, inbound);
-                //this entry needs an update of its stanzaid
-                [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
+                DDLogVerbose(@"found by origin-id or messageid");
+                if(stanzaId)
+                {
+                    DDLogDebug(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, inbound=%d)...", historyId, stanzaId, accountNo, messageId, inbound);
+                    //this entry needs an update of its stanzaid
+                    [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
+                }
+                return YES;
             }
-            return YES;
         }
         
         DDLogVerbose(@"nothing worked --> message not found");
@@ -1309,6 +1306,13 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"UPDATE message_history SET errorType=?, errorReason=? WHERE messageid=?;";
         DDLogVerbose(@"setting message error %@ [%@, %@]", messageid, errorType, errorReason);
         [self.db executeNonQuery:query andArguments:@[errorType, errorReason, messageid]];
+    }];
+}
+
+-(void) clearErrorOfMessageId:(NSString* _Nonnull) messageid
+{
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"UPDATE message_history SET errorType='', errorReason='' WHERE messageid=?;" andArguments:@[messageid]];
     }];
 }
 
@@ -1649,17 +1653,27 @@ static NSDateFormatter* dbFormatter;
 -(NSNumber*) countUnreadMessages
 {
     return [self.db idReadTransaction:^{
-        // count # of msgs in message table
+        // count # of unread msgs in message table and ignore muted buddies and mentionOnly buddies without mention
         return [self.db executeScalar:@"SELECT Count(M.message_history_id) \
                                         FROM   message_history AS M \
                                         LEFT JOIN buddylist AS B \
                                                     ON M.account_id = B.account_id \
                                                         AND M.buddy_name = B.buddy_name \
-                                        WHERE  M.message_history_id > (SELECT Min(latest_read_message_history_id) \
-                                                                    FROM   buddylist) \
+                                        LEFT JOIN account AS A \
+                                                    ON M.account_id = A.account_id \
+                                        WHERE   M.message_history_id > (SELECT Min(latest_read_message_history_id) FROM buddylist) \
+                                            AND B.muted = 0 \
                                             AND M.inbound = 1 \
                                             AND M.unread = 1 \
-                                            AND B.muted = 0;"];
+                                            AND ( \
+                                                B.mentionOnly = 0 OR ( \
+                                                       (B.muc_nick != '' AND M.message LIKE '%'||B.muc_nick||'%') \
+                                                    OR (A.rosterName != '' AND M.message LIKE '%'||A.rosterName||'%') \
+                                                    OR (A.username != '' AND M.message LIKE '%'||A.username||'%') \
+                                                    OR (A.username != '' AND A.domain != '' AND M.message LIKE '%'||A.username||'@'||A.domain||'%') \
+                                                ) \
+                                            ) \
+                                        ;"];
     }];
 }
 
@@ -1727,7 +1741,7 @@ static NSDateFormatter* dbFormatter;
             return;
 
         //add contact if possible (ignore already existing contacts)
-        [self addContact:buddyname forAccount:accountNo nickname:nil andMucNick:nil];
+        [self addContact:buddyname forAccount:accountNo nickname:nil];
 
         // insert or update active chat
         NSString* query = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp) ON CONFLICT(buddy_name, account_id) DO UPDATE SET lastMessageTime=current_timestamp;";
@@ -2160,10 +2174,15 @@ static NSDateFormatter* dbFormatter;
 }
 
 // (deprecated) should only be used to upgrade to new table format
--(NSArray*) getAllCachedImages
+-(NSArray<NSDictionary*>*) getAllCachedImages
 {
     return [self.db idReadTransaction:^{
-        return [self.db executeReader:@"SELECT DISTINCT * FROM imageCache;"];
+        NSNumber* tableFound = [self.db executeScalar:@"SELECT count(*) FROM sqlite_master WHERE type='table' AND name='imageCache';"];
+        if(tableFound.boolValue == NO)
+        {
+            return [[NSArray<NSDictionary*> alloc] init];
+        }
+        return (NSArray<NSDictionary*>*)[self.db executeReader:@"SELECT DISTINCT * FROM imageCache;"];
     }];
 }
 
@@ -2171,7 +2190,7 @@ static NSDateFormatter* dbFormatter;
 -(void) removeImageCacheTables
 {
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"DROP TABLE imageCache;"];
+        [self.db executeNonQuery:@"DROP TABLE IF EXISTS imageCache;"];
     }];
 }
 
@@ -2282,24 +2301,10 @@ static NSDateFormatter* dbFormatter;
         return nil;
     return [self.db idReadTransaction:^{
         NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
-        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND message LIKE ? AND buddy_name=? ORDER BY timestamp ASC;";
+        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND (message LIKE ? OR messageType LIKE ?) AND buddy_name=? ORDER BY timestamp ASC;";
         NSArray* params = @[accountNo, likeString, contactJid];
         NSArray* results = [self.db executeScalarReader:query andArguments:params];
         return [self messagesForHistoryIDs:results];
-    }];
-}
-
--(BOOL) getAppexCleanShutdownStatus
-{
-    return [self.db boolReadTransaction:^{
-        return [[self.db executeScalar:@"SELECT value FROM flags WHERE name='clean_appex_shutdown';"] boolValue];
-    }];
-}
-
--(void) setAppexCleanShutdownStatus:(BOOL) shutdownStatus
-{
-    [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"UPDATE flags SET value=? WHERE name='clean_appex_shutdown';" andArguments:@[[NSNumber numberWithBool:shutdownStatus]]];
     }];
 }
 

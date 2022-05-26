@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLMessage;
 @class xmpp;
 
-@interface MLFiletransfer : NSObject
+@interface MLFiletransfer : NSObject<NSURLSessionDownloadDelegate>
 @property (class, readonly) BOOL isIdle;
 
 +(BOOL) isIdle;
@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 +(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion;
 +(BOOL) isFileforHistoryIdInTransfer:(NSNumber*) historyId;
 +(NSString*) getMimeTypeOfOriginalFile:(NSString*) file;
+
 @end
 
 NS_ASSUME_NONNULL_END

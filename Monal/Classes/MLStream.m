@@ -9,6 +9,7 @@
 #include <Network/Network.h>
 #import "MLConstants.h"
 #import "MLStream.h"
+#import "HelperTools.h"
 
 #define BUFFER_SIZE 4096
 
@@ -114,11 +115,15 @@
 
 -(void) schedule_read
 {
+    if(self.closed || !self.open_called || !self.shared_state.open)
+    {
+        DDLogVerbose(@"ignoring nw_connection_receive call because connection is closed: %@", self);
+    }
+    
     _reading = YES;
     DDLogVerbose(@"calling nw_connection_receive");
     nw_connection_receive(self.shared_state.connection, 1, BUFFER_SIZE, ^(dispatch_data_t content, nw_content_context_t context __unused, bool is_complete, nw_error_t receive_error) {
-        DDLogVerbose(@"nw_connection_receive got callback");
-        
+        DDLogVerbose(@"nw_connection_receive got callback with is_complete:%@, receive_error=%@", is_complete ? @"YES" : @"NO", receive_error);
         self->_reading = NO;
         
         //handle content received
@@ -262,11 +267,12 @@
         sec_protocol_options_set_min_tls_protocol_version(options, tls_protocol_version_TLSv12);
     }, ^(nw_protocol_options_t tcp_options) {
         nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
-        nw_tcp_options_set_no_delay(tcp_options, YES);              //disable nagle's algorithm
+        //nw_tcp_options_set_no_delay(tcp_options, YES);              //disable nagle's algorithm
     });
-    nw_parameters_set_fast_open_enabled(parameters, YES);
+    //not needed, will be done by apple's tls implementation automatically (only needed for plain tcp and manual sending of idempotent data)
+    //nw_parameters_set_fast_open_enabled(parameters, YES);
     
-    //create and configure connectiojn object
+    //create and configure connection object
     nw_connection_t connection = nw_connection_create(endpoint, parameters);
     nw_connection_set_queue(connection, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0));
     
@@ -276,13 +282,23 @@
     MLOutputStream* output = [[MLOutputStream alloc] initWithSharedState:shared_state];
     
     //configure state change handler proxying state changes to our public stream instances
+    __block BOOL wasOpenOnce = NO;
     nw_connection_set_state_changed_handler(connection, ^(nw_connection_state_t state, nw_error_t error) {
+        @synchronized(shared_state) {
+            //connection was opened once (e.g. opening=YES) and closed later on (e.g. open=NO)
+            if(wasOpenOnce && !shared_state.open)
+            {
+                DDLogVerbose(@"ignoring call to nw_connection state_changed_handler, connection already closed: %@ --> %du, %@", self, state, error);
+                return;
+            }
+        }
         if(state == nw_connection_state_waiting)
         {
             //do nothing here, documentation says the connection will be automatically retried "when conditions are favourable"
             //which seems to mean: if the network path changed (for example connectivity regained)
             //if this happens inside the connection timeout all is ok
             //if not, the connection will be cancelled already and everything will be ok, too
+            DDLogVerbose(@"got nw_connection_state_waiting and ignoring it, see comments in code...");
         }
         else if(state == nw_connection_state_failed)
         {
@@ -297,6 +313,7 @@
         else if(state == nw_connection_state_ready)
         {
             DDLogInfo(@"Connection established");
+            wasOpenOnce = YES;
             @synchronized(shared_state) {
                 shared_state.open = YES;
             }
@@ -306,11 +323,20 @@
         else if(state == nw_connection_state_cancelled)
         {
             //ignore this (we use reference counting)
+            DDLogVerbose(@"ignoring call to nw_connection state_changed_handler with state nw_connection_state_cancelled: %@ (%@)", self, error);
         }
-        else
+        else if(state == nw_connection_state_invalid)
         {
             //ignore all other states (preparing, invalid)
+            DDLogVerbose(@"ignoring call to nw_connection state_changed_handler with state nw_connection_state_invalid: %@ (%@)", self, error);
         }
+        else if(state == nw_connection_state_preparing)
+        {
+            //ignore all other states (preparing, invalid)
+            DDLogVerbose(@"ignoring call to nw_connection state_changed_handler with state nw_connection_state_preparing: %@ (%@)", self, error);
+        }
+        else
+            unreachable();
     });
     
     *inputStream = (NSInputStream*)input;
@@ -349,7 +375,7 @@
                 else if(event == NSStreamEventEndEncountered && self.open_called && self.shared_state.open)
                     [self->_delegate stream:self handleEvent:event];
                 else
-                    DDLogDebug(@"Ignored event %ld", (long)event);
+                    DDLogVerbose(@"Ignored event %ld", (long)event);
             }
         });
         //trigger wakeup of runloop to execute the block as soon as possible
@@ -360,7 +386,7 @@
 -(void) open
 {
     @synchronized(self.shared_state) {
-        NSAssert(!self.closed, @"streams can not be reopened!");
+        MLAssert(!self.closed, @"streams can not be reopened!");
         self.open_called = YES;
         if(!self.shared_state.opening)
             nw_connection_start(self.shared_state.connection);
@@ -425,16 +451,16 @@
 -(NSStreamStatus) streamStatus
 {
     @synchronized(self.shared_state) {
-        if(!self.open_called || self.closed)
-            return NSStreamStatusNotOpen;
-        if(self.open_called)
-            return NSStreamStatusOpening;
-        if(self.open_called && self.shared_state.open)
-            return NSStreamStatusOpen;
-        if(self.closed)
-            return NSStreamStatusClosed;
         if(self.shared_state.error)
             return NSStreamStatusError;
+        else if(!self.open_called && self.closed)
+            return NSStreamStatusNotOpen;
+        else if(self.open_called && self.shared_state.open)
+            return NSStreamStatusOpen;
+        else if(self.open_called)
+            return NSStreamStatusOpening;
+        else if(self.closed)
+            return NSStreamStatusClosed;
     }
     unreachable();
     return 0;
@@ -449,9 +475,10 @@
     return error;
 }
 
--(void) stream:(NSStream*) sream handleEvent:(NSStreamEvent) event
+-(void) stream:(NSStream*) stream handleEvent:(NSStreamEvent) event
 {
     //ignore event in this dummy delegate
+    DDLogVerbose(@"ignoring event in dummy delegate: %@ --> %ld", stream, (long)event);
 }
 
 @end

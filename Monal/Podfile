@@ -19,7 +19,6 @@ def monal
   pod 'IDMPhotoBrowser'
   pod 'SDWebImage', '~> 5.12.5'
   pod 'DZNEmptyDataSet'
-  pod 'EAIntroView'
   pod 'TOCropViewController'
   pod 'NotificationBannerSwift', '~> 3.1.0'
 end
@@ -29,7 +28,6 @@ def monalxmpp
   use_frameworks!
   inhibit_all_warnings!
   pod 'SAMKeychain'
-  pod 'TPCircularBuffer'
   pod 'CocoaLumberjack/Swift'
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
   signalDeps
@@ -73,10 +71,7 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |configuration|
       configuration.build_settings.delete('ARCHS')
-#     configuration.build_settings['ONLY_ACTIVE_ARCH'] = 'NO'
-#     if target.name == "TPCircularBuffer"
-#       configuration.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
-#     end
+
       if target.name == "TOCropViewController-TOCropViewControllerBundle"
         configuration.build_settings['CODE_SIGN_IDENTITY[sdk=macosx*]'] = '-'
       end

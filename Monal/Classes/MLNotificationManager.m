@@ -115,22 +115,19 @@
     }
     
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.buddyName onAccount:message.accountId];
-    if(message.isMuc == YES)
+    if(!muted && message.isMuc == YES && [[DataLayer sharedInstance] isMucAlertOnMentionOnly:message.buddyName onAccount:message.accountId])
     {
-        if(!muted && message.participantJid != nil)
-            muted |= [[DataLayer sharedInstance] isMutedJid:message.participantJid onAccount:message.accountId];
-        if(!muted && [[DataLayer sharedInstance] isMucAlertOnMentionOnly:message.buddyName onAccount:message.accountId])
-        {
-            NSString* displayName = [MLContact ownDisplayNameForAccount:xmppAccount];
-            NSString* ownJid = xmppAccount.connectionProperties.identity.jid;
-            NSString* userPart = [HelperTools splitJid:ownJid][@"user"];
-            if(!(
-                [message.messageText localizedCaseInsensitiveContainsString:displayName] ||
-                [message.messageText localizedCaseInsensitiveContainsString:ownJid] ||
-                [message.messageText localizedCaseInsensitiveContainsString:userPart]
-            ))
-                muted = YES;
-        }
+        NSString* displayName = [MLContact ownDisplayNameForAccount:xmppAccount];
+        NSString* ownJid = xmppAccount.connectionProperties.identity.jid;
+        NSString* userPart = [HelperTools splitJid:ownJid][@"user"];
+        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:message.buddyName forAccount:message.accountId];
+        if(!(
+            [message.messageText localizedCaseInsensitiveContainsString:nick] ||
+            [message.messageText localizedCaseInsensitiveContainsString:displayName] ||
+            [message.messageText localizedCaseInsensitiveContainsString:userPart] ||
+            [message.messageText localizedCaseInsensitiveContainsString:ownJid]
+        ))
+            muted = YES;
     }
     if(muted)
     {
@@ -221,12 +218,8 @@
 -(UNMutableNotificationContent*) updateBadgeForContent:(UNMutableNotificationContent*) content
 {
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
-    NSInteger unread = 0;
-    if(unreadMsgCnt != nil)
-        unread = [unreadMsgCnt integerValue];
-    DDLogVerbose(@"Raw badge value: %lu", (long)unread);
-    DDLogDebug(@"Adding badge value: %lu", (long)unread);
-    content.badge = [NSNumber numberWithInteger:unread];
+    DDLogVerbose(@"Raw badge value: %@", unreadMsgCnt);
+    content.badge = unreadMsgCnt;
     return content;
 }
 
@@ -379,7 +372,7 @@
     // update badge value prior to donating the interaction to sirikit
     [self updateBadgeForContent:content];
     
-    INSendMessageIntent* intent = [self makeIntentForMessage:message usingText:msgText andAudioAttachment:audioAttachment];
+    INSendMessageIntent* intent = [self makeIntentForMessage:message usingText:msgText andAudioAttachment:audioAttachment direction:INInteractionDirectionIncoming];
     
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionIncoming;
@@ -403,7 +396,7 @@
 
 -(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
-    INSendMessageIntent* intent = [self makeIntentForMessage:[[DataLayer sharedInstance] messageForHistoryID:messageDBId] usingText:@"" andAudioAttachment:nil];
+    INSendMessageIntent* intent = [self makeIntentForMessage:[[DataLayer sharedInstance] messageForHistoryID:messageDBId] usingText:@"dummyText" andAudioAttachment:nil direction:INInteractionDirectionOutgoing];
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionOutgoing;
     [interaction donateInteractionWithCompletion:^(NSError *error) {
@@ -412,7 +405,7 @@
     }];
 }
 
--(INSendMessageIntent*) makeIntentForMessage:(MLMessage*) message usingText:(NSString*) msgText andAudioAttachment:(INSendMessageAttachment*) audioAttachment    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+-(INSendMessageIntent*) makeIntentForMessage:(MLMessage*) message usingText:(NSString*) msgText andAudioAttachment:(INSendMessageAttachment*) audioAttachment direction:(INInteractionDirection) direction   API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
     // some docu:
     // - https://developer.apple.com/documentation/usernotifications/implementing_communication_notifications?language=objc
@@ -426,6 +419,7 @@
     if(message.isMuc)
     {
         groupDisplayName = contact.contactDisplayName;
+        //we don't need different handling of incoming or outgoing messages for non-anon mucs because sender and receiver always contain the right contacts
         if([@"group" isEqualToString:message.mucType] && message.participantJid)
         {
             MLContact* contactInGroup = [MLContact createContactFromJid:message.participantJid andAccountNo:message.accountId];
@@ -440,12 +434,40 @@
             }
         }
         else
-            sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
+        {
+            //in anon mucs we have to flip sender and receiver to make sure iOS handles them correctly
+            if(direction == INInteractionDirectionIncoming)
+            {
+                //use MLMessage's capability to calculate the fallback name using actualFrom
+                sender = [self makeINPersonWithContact:contact andDisplayName:message.contactDisplayName andAccount:account];
+                //this is needed to make iOS show the group name in notifications
+                [recipients addObject:[self makeINPersonForOwnAccount:account]];
+            }
+            else
+            {
+                //use MLMessage's capability to calculate the fallback name using actualFrom
+                [recipients addObject:[self makeINPersonWithContact:contact andDisplayName:message.contactDisplayName andAccount:account]];
+                //we always need a sender (that's us in the outgoing case)
+                sender = [self makeINPersonForOwnAccount:account];
+            }
+        }
     }
     else
-        sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
+    {
+        //in 1:1 messages we have to flip sender and receiver to make sure iOS adds the correct share suggestions to its list
+        if(direction == INInteractionDirectionIncoming)
+        {
+            sender = [self makeINPersonWithContact:contact andDisplayName:nil andAccount:account];
+            [recipients addObject:[self makeINPersonForOwnAccount:account]];
+        }
+        else
+        {
+            sender = [self makeINPersonForOwnAccount:account];
+            [recipients addObject:[self makeINPersonWithContact:contact andDisplayName:nil andAccount:account]];
+        }
+    }
     
-    INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:(recipients.count > 0 ? recipients : nil)
+    INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:recipients
                                                               outgoingMessageType:(audioAttachment ? INOutgoingMessageTypeOutgoingMessageAudio : INOutgoingMessageTypeOutgoingMessageText)
                                                                           content:msgText
                                                                speakableGroupName:(groupDisplayName ? [[INSpeakableString alloc] initWithSpokenPhrase:groupDisplayName] : nil)
@@ -453,8 +475,16 @@
                                                                       serviceName:message.accountId.stringValue
                                                                            sender:sender
                                                                       attachments:(audioAttachment ? @[audioAttachment] : nil)];
-    if(message.isMuc && contact.avatar != nil)
-        [intent setImage:[INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)] forParameterNamed:@"speakableGroupName"];
+    if(message.isMuc)
+    {
+        if(contact.avatar != nil)
+        {
+            DDLogDebug(@"Using muc avatar image...");
+            [intent setImage:[INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)] forParameterNamed:@"speakableGroupName"];
+        }
+        else
+            DDLogDebug(@"NOT using avatar image...");
+    }
     
     return intent;
     
@@ -484,6 +514,33 @@
     */
 }
 
+-(INPerson*) makeINPersonForOwnAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+{
+    DDLogDebug(@"Building INPerson for self contact...");
+    INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:account.connectionProperties.identity.jid type:INPersonHandleTypeEmailAddress label:account.accountNo.stringValue];
+    NSPersonNameComponents* nameComponents = [[NSPersonNameComponents alloc] init];
+    nameComponents.nickname = [MLContact ownDisplayNameForAccount:account];
+    MLContact* ownContact = [MLContact createContactFromJid:account.connectionProperties.identity.jid andAccountNo:account.accountNo];
+    INImage* contactImage = nil;
+    if(ownContact.avatar != nil)
+    {
+        DDLogDebug(@"Using own avatar image...");
+        NSData* avatarData = UIImagePNGRepresentation(ownContact.avatar);
+        contactImage = [INImage imageWithImageData:avatarData];
+    }
+    else
+        DDLogDebug(@"NOT using own avatar image...");
+    INPerson* person = [[INPerson alloc] initWithPersonHandle:personHandle
+                                               nameComponents:nameComponents
+                                                  displayName:nameComponents.nickname
+                                                        image:contactImage
+                                            contactIdentifier:nil
+                                             customIdentifier:nil
+                                                         isMe:YES
+                                               suggestionType:INPersonSuggestionTypeInstantMessageAddress];
+    return person;
+}
+
 -(INPerson*) makeINPersonWithContact:(MLContact*) contact andDisplayName:(NSString* _Nullable) displayName andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
     DDLogDebug(@"Building INPerson for contact: %@ using display name: %@", contact, displayName);
@@ -495,17 +552,20 @@
     INImage* contactImage = nil;
     if(contact.avatar != nil)
     {
+        DDLogDebug(@"Using avatar image...");
         NSData* avatarData = UIImagePNGRepresentation(contact.avatar);
         contactImage = [INImage imageWithImageData:avatarData];
     }
+    else
+        DDLogDebug(@"NOT using avatar image...");
     INPerson* person = [[INPerson alloc] initWithPersonHandle:personHandle
-                                                nameComponents:nameComponents
-                                                    displayName:nameComponents.nickname
+                                               nameComponents:nameComponents
+                                                  displayName:nameComponents.nickname
                                                         image:contactImage
-                                                contactIdentifier:nil
-                                                customIdentifier:nil
-                                                            isMe:account.connectionProperties.identity.jid == contact.contactJid
-                                                  suggestionType:INPersonSuggestionTypeInstantMessageAddress];
+                                            contactIdentifier:nil
+                                             customIdentifier:nil
+                                                         isMe:account.connectionProperties.identity.jid == contact.contactJid
+                                               suggestionType:INPersonSuggestionTypeInstantMessageAddress];
     /*
     if(contact.isInRoster)	
         person.relationship = INPersonRelationshipFriend;

@@ -126,6 +126,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     // remove old settings from shareSheet outbox
     [self removeObjectUserSettingsIfSet:@"lastRecipient"];
     [self removeObjectUserSettingsIfSet:@"lastAccount"];
+    // remove HasSeenIntro bool
+    [self removeObjectUserSettingsIfSet:@"HasSeenIntro"];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -270,13 +272,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             {
                 BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
                 [self disconnectAll];
-                if(!wasIdle)
-                {
-                    DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored (will be ignored in appex)");
-                    //this will automatically start the app if connectivity gets restored
-                    //don't queue this notification because it should be handled immediately
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundFetchingTask object:nil];
-                }
+                DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored (will be ignored in appex)");
+                //this will automatically start the app if connectivity gets restored (force as soon as possible if !wasIdle)
+                //don't queue this notification because it should be handled immediately
+                [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundFetchingTask object:nil userInfo:@{@"force": @(!wasIdle)}];
             }
         }
     });
@@ -348,7 +347,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
-        [xmppAccount unfreezed];
+        [xmppAccount unfreeze];
         if(_hasConnectivity)
             [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         [xmppAccount setClientActive];
@@ -419,8 +418,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             DDLogInfo(@"existing but disabled account, ignoring");
             return;
         }
-        DDLogInfo(@"existing account, calling unfreezed");
-        [existing unfreezed];
+        DDLogInfo(@"existing account, calling unfreeze");
+        [existing unfreeze];
         DDLogInfo(@"existing account, just pinging.");
         if(_hasConnectivity)
             [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
@@ -492,8 +491,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(account)
     {
         DDLogVerbose(@"got account and cleaning up.. ");
+#ifndef IS_ALPHA
         if(lastConnectedAccount)
             [account unregisterPush];
+#endif
         [account disconnect:YES];
         account = nil;
         DDLogVerbose(@"done cleaning up account ");
@@ -793,6 +794,7 @@ $$
             [xmppAccount enablePush];
 }
 
+#ifndef IS_ALPHA
 //this handler will simply retry the unregisterPush call
 $$class_handler(unregisterPushHandler)
     [[MLXMPPManager sharedInstance] unregisterPush];
@@ -813,6 +815,7 @@ $$
             }
     }
 }
+#endif
 
 
 #pragma mark - share sheet added

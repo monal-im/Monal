@@ -10,13 +10,12 @@ import monalxmpp
 import SwiftUI
 import OrderedCollections
 
+@ViewBuilder
 func resourceRowElement(_ k: String, _ v: String, space: CGFloat = 5) -> some View {
     HStack {
-        Text(k)
+        Text(k).font(.headline)
         Spacer()
-            .frame(width: space)
-        Text(v)
-        Spacer()
+        Text(v).foregroundColor(.secondary)
     }
 }
 
@@ -46,30 +45,26 @@ struct ContactResources: View {
     }
 
     var body: some View {
-        VStack {
-            List {
-                ForEach(Array(self.contactVersionInfos.keys), id: \.self) { resourceKey in
-                    if let versionInfo = self.contactVersionInfos[resourceKey] {
-                        VStack {
-                            resourceRowElement("Resource:", versionInfo.resource)
-                            resourceRowElement("Client Name:", versionInfo.appName)
-                            resourceRowElement("Client Version:", versionInfo.appVersion)
-                            resourceRowElement("OS:", versionInfo.platformOs)
-                        }
-                    }
-                }
-                .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalXmppUserSoftWareVersionRefresh")).receive(on: RunLoop.main)) { notification in
-                    if let obj = notification.object as? xmpp, let softwareInfo = notification.userInfo?["versionInfo"] as? MLContactSoftwareVersionInfo {
-                        if softwareInfo.fromJid == contact.obj.contactJid && obj.accountNo == contact.obj.accountId {
-                            self.contactVersionInfos[softwareInfo.resource] = softwareInfo
-                        }
+        List {
+            ForEach(Array(self.contactVersionInfos.keys), id: \.self) { resourceKey in
+                if let versionInfo = self.contactVersionInfos[resourceKey] {
+                    Section {
+                        resourceRowElement("Resource:", versionInfo.resource)
+                        resourceRowElement("Client Name:", versionInfo.appName)
+                        resourceRowElement("Client Version:", versionInfo.appVersion)
+                        resourceRowElement("OS:", versionInfo.platformOs)
                     }
                 }
             }
-            Spacer()
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalXmppUserSoftWareVersionRefresh")).receive(on: RunLoop.main)) { notification in
+                if let obj = notification.object as? xmpp, let softwareInfo = notification.userInfo?["versionInfo"] as? MLContactSoftwareVersionInfo {
+                    if softwareInfo.fromJid == contact.obj.contactJid && obj.accountNo == contact.obj.accountId {
+                        self.contactVersionInfos[softwareInfo.resource] = softwareInfo
+                    }
+                }
+            }
         }
-        //.navigationBarTitle(String(format: NSLocalizedString("Devices of %@", comment: ""), contact.contactDisplayName))
-        .navigationBarTitle("Devices")
+        .navigationBarTitle("Devices", displayMode: .inline)
     }
 }
 

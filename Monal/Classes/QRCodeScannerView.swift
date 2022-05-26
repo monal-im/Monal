@@ -13,7 +13,7 @@ struct QRCodeScannerView: UIViewControllerRepresentable {
     @Binding private var password : String
     @Binding private var showQRCodeScanner: Bool
 
-    class Coordinator: NSObject, MLLQRCodeScannerAccountLoginDeleagte {
+    class Coordinator: NSObject, MLLQRCodeScannerAccountLoginDelegate {
         var parent: QRCodeScannerView
         
         init(_ parent: QRCodeScannerView) {

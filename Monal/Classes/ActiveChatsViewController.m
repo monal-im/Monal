@@ -19,6 +19,7 @@
 #import "MLXEPSlashMeHandler.h"
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
+#import <Monal-Swift.h>
 
 @import QuartzCore.CATransaction;
 

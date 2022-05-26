@@ -17,7 +17,6 @@
 #import "MLUploadQueueItem.h"
 
 #import "AESGcm.h"
-#import "ContactDetails.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
 #import "MBProgressHUD.h"
@@ -1078,24 +1077,6 @@ enum msgSentState {
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     [self sendChatState:NO];
-
-    if([segue.identifier isEqualToString:@"showDetails"])
-    {
-        if(self.contact.isGroup)
-        {
-            //segue.destinationViewController = [[UINavigationController alloc] initWithRootViewController:[[ContactDetailsInterface new] makeContactDetails: self.contact]];
-            //segue.destinationViewController.toolbarHidden = NO;
-        }
-        else
-        {
-            UINavigationController* nav = segue.destinationViewController;
-            ContactDetails* details = (ContactDetails *)nav.topViewController;
-            details.contact = self.contact;
-            details.completion = ^{
-                [self viewWillAppear:YES];
-            };
-        }
-    }
 }
 
 

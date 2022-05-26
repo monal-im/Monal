@@ -12,7 +12,6 @@
 #import "MLContactCell.h"
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
-#import "ContactDetails.h"
 #import "MLImageManager.h"
 #import "MLRegisterViewController.h"
 #import "ContactsViewController.h"
@@ -504,9 +503,8 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
     else if([segue.identifier isEqualToString:@"showDetails"])
     {
-        UINavigationController* nav = segue.destinationViewController;
-        ContactDetails* details = (ContactDetails*)nav.topViewController;
-        details.contact = sender;
+        UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];
+        [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
     else if([segue.identifier isEqualToString:@"showContacts"])
     {

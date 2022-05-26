@@ -160,7 +160,6 @@
                     <connections>
                         <segue destination="T2P-jI-4uD" kind="show" identifier="showServerDetails" id="i4b-wV-798"/>
                         <segue destination="srS-6q-JWF" kind="show" identifier="showMAMPref" id="IMn-Af-tuo"/>
-                        <segue destination="HEj-uf-d1q" kind="show" identifier="showKeyTrust" id="pEf-Bd-Qzb"/>
                         <segue destination="hjV-um-Y0a" kind="show" identifier="showPassChange" id="sL4-44-otR"/>
                         <segue destination="fEe-tH-nKA" kind="show" identifier="showBlockedUsers" id="gwQ-bc-6vX"/>
                     </connections>
@@ -743,16 +742,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ll7-UE-fuq" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-688" y="9307"/>
-        </scene>
-        <!--keyTrust-->
-        <scene sceneID="Qlg-kt-IX2">
-            <objects>
-                <viewControllerPlaceholder storyboardName="ContactDetails" referencedIdentifier="keyTrust" id="HEj-uf-d1q" sceneMemberID="viewController">
-                    <navigationItem key="navigationItem" id="VeK-3d-h0S"/>
-                </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="cwQ-b0-WaV" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="3825" y="4529"/>
         </scene>
         <!--Password Change Table View Controller-->
         <scene sceneID="t72-oR-BDU">

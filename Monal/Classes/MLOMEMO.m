@@ -1047,6 +1047,8 @@ $$
     // We should not delete our own device
     if([source isEqualToString:self.accountJid] && rid == self.monalSignalStore.deviceid)
         return;
+    else if([source isEqualToString:self.accountJid])
+        [self.ownReceivedDeviceList removeObject:[NSNumber numberWithUnsignedInt:rid]];
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid];
     [self.monalSignalStore deleteDeviceforAddress:address];

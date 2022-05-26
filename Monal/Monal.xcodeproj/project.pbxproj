@@ -43,14 +43,10 @@
 		265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */; };
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
 		2666F018249D380D00372E28 /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
-		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
-		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
-		2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC521D9D3F700256507 /* MLKeyCell.m */; };
 		268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */; };
-		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
 		26AA70152146BBB900598605 /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA70142146BBB900598605 /* ShareViewController.m */; };
 		26AA70182146BBB900598605 /* iosShare.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70162146BBB900598605 /* iosShare.storyboard */; };
 		26AA701C2146BBB900598605 /* shareSheet.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70112146BBB800598605 /* shareSheet.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -383,12 +379,6 @@
 		266A0B7B24EAC36100875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = external/uk.lproj/Login.strings; sourceTree = "<group>"; };
 		266A0B7C24EAC36600875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = external/uk.lproj/Settings.strings; sourceTree = "<group>"; };
 		266A0B7D24EAC36900875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = external/uk.lproj/ContactDetails.strings; sourceTree = "<group>"; };
-		2673CABB21D8617300256507 /* MLContactDetailHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactDetailHeader.h; sourceTree = "<group>"; };
-		2673CABC21D8617300256507 /* MLContactDetailHeader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactDetailHeader.m; sourceTree = "<group>"; };
-		2673CABE21D9242E00256507 /* MLKeysTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeysTableViewController.h; sourceTree = "<group>"; };
-		2673CABF21D9242E00256507 /* MLKeysTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLKeysTableViewController.m; sourceTree = "<group>"; };
-		2673CAC421D9D3F700256507 /* MLKeyCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeyCell.h; sourceTree = "<group>"; };
-		2673CAC521D9D3F700256507 /* MLKeyCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLKeyCell.m; sourceTree = "<group>"; };
 		267B671A226A200D003DB850 /* AESGcm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AESGcm.h; sourceTree = "<group>"; };
 		267B671B226A200D003DB850 /* AESGcm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGcm.m; sourceTree = "<group>"; };
 		267B671F226A222E003DB850 /* MLEncryptedPayload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLEncryptedPayload.h; sourceTree = "<group>"; };
@@ -515,8 +505,6 @@
 		26E8467824EAC1A200ECE419 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = external/vi.lproj/Settings.strings; sourceTree = "<group>"; };
 		26E8467924EAC1A800ECE419 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = external/vi.lproj/ContactDetails.strings; sourceTree = "<group>"; };
 		26E8467E24EAC1BB00ECE419 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = external/vi.lproj/iosShare.strings; sourceTree = "<group>"; };
-		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
-		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
 		26EC40FD17BDD85F0031304D /* addContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = addContact.h; sourceTree = "<group>"; };
 		26EC40FE17BDD85F0031304D /* addContact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = addContact.m; sourceTree = "<group>"; };
 		26EC411117BDE39E0031304D /* MLImageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLImageManager.h; sourceTree = "<group>"; };
@@ -1121,20 +1109,12 @@
 			isa = PBXGroup;
 			children = (
 				C1F5C7AB2777621B0001F295 /* ContactResources.swift */,
-				26EC40FA17BDD8560031304D /* ContactDetails.h */,
-				26EC40FB17BDD8560031304D /* ContactDetails.m */,
 				3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */,
 				268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */,
 				268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */,
 				3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */,
 				3D65B78C27234B74005A30F4 /* ContactDetails.swift */,
 				C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */,
-				2673CABB21D8617300256507 /* MLContactDetailHeader.h */,
-				2673CABC21D8617300256507 /* MLContactDetailHeader.m */,
-				2673CABE21D9242E00256507 /* MLKeysTableViewController.h */,
-				2673CABF21D9242E00256507 /* MLKeysTableViewController.m */,
-				2673CAC421D9D3F700256507 /* MLKeyCell.h */,
-				2673CAC521D9D3F700256507 /* MLKeyCell.m */,
 				C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */,
 				C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */,
 			);
@@ -2002,7 +1982,6 @@
 				384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */,
 				C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
-				2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountListController.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */,
@@ -2014,7 +1993,6 @@
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
-				2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */,
 				54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */,
 				3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */,
 				C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */,
@@ -2038,7 +2016,6 @@
 				2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */,
 				265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */,
 				26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */,
-				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */,
 				3D2B1870262A12A10092E181 /* MLUploadQueueItem.m in Sources */,
@@ -2047,7 +2024,6 @@
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */,
 				C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */,
-				2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */,
 				E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */,
 				C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */,
 				54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */,

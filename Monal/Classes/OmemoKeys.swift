@@ -8,6 +8,7 @@
 import monalxmpp
 
 import SwiftUI
+import OrderedCollections
 
 struct OmemoKeysEntry: View {
     private let contactJid: String
@@ -95,7 +96,7 @@ struct OmemoKeysEntry: View {
             .background(accentColor)
             .cornerRadius(30)
     }
-
+    
     var body: some View {
         let trustLevelBinding = Binding<Bool>.init(get: {
             return (self.trustLevel.int32Value != MLOmemoNotTrusted)
@@ -147,7 +148,8 @@ struct OmemoKeysEntry: View {
 }
 
 struct OmemoKeysForContact: View {
-    @State private var deviceIds: [NSNumber]
+    @State private var deviceId: NSNumber
+    @State private var deviceIds: OrderedSet<NSNumber>
     @State private var showDeleteKeyAlert = false
     @State private var selectedDeviceForDeletion : NSNumber
 
@@ -155,6 +157,32 @@ struct OmemoKeysForContact: View {
     private let account: xmpp
     private let ownKeys: Bool
 
+    func deleteButton(deviceId: NSNumber) -> some View {
+        Button(action: {
+            selectedDeviceForDeletion = deviceId // SwiftUI does not like to have deviceID nested in multiple functions, so safe this in the struct...
+            showDeleteKeyAlert = true
+        }, label: {
+            Image(systemName: "xmark.circle.fill").foregroundColor(.red)
+        })
+        .buttonStyle(.borderless)
+        .offset(x: -7, y: -7)
+        .alert(isPresented: $showDeleteKeyAlert) {
+            Alert(
+                title: Text("Do you really want to delete this key?"),
+                message: Text("DeviceID: " + self.selectedDeviceForDeletion.stringValue),
+                primaryButton: .destructive(Text("Delete Key")) {
+                    if(deviceId == -1) {
+                        return // should be unreachable
+                    }
+                    account.omemo.deleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion.uint32Value)
+                    account.omemo.sendDevice(withForce: true)
+                    self.deviceIds.remove(self.selectedDeviceForDeletion)
+                },
+                secondaryButton: .cancel(Text("Abort"))
+            )
+        }
+    }
+    
     var body: some View {
         ForEach(self.deviceIds, id: \.self) { deviceId in
             HStack {
@@ -162,28 +190,8 @@ struct OmemoKeysForContact: View {
                 ZStack(alignment: .topLeading) {
                     OmemoKeysEntry(account: self.account, contactJid: self.contactJid, deviceId: deviceId)
                     if(ownKeys == true) {
-                        Button(action: {
-                            selectedDeviceForDeletion = deviceId // SwiftUI does not like to have deviceID nested in multiple functions, so safe this in the struct...
-                            showDeleteKeyAlert = true
-                        }, label: {
-                            Image(systemName: "xmark.circle.fill").foregroundColor(.red)
-                        })
-                        .buttonStyle(.borderless)
-                        .offset(x: -7, y: -7)
-                        .alert(isPresented: $showDeleteKeyAlert) {
-                            Alert(
-                                title: Text("Do you really want to delete this key?"),
-                                message: Text("DeviceID: " + self.selectedDeviceForDeletion.stringValue),
-                                primaryButton: .destructive(Text("Delete Key")) {
-                                    if(deviceId == -1) {
-                                        return // should be unreachable
-                                    }
-                                    account.omemo.deleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion.uint32Value)
-                                    account.omemo.sendDevice(withForce: true)
-                                    self.deviceIds = Array(self.account.omemo.knownDevices(forAddressName: self.contactJid))
-                                },
-                                secondaryButton: .cancel(Text("Abort"))
-                            )
+                        if(deviceId != self.deviceId) {
+                            deleteButton(deviceId: deviceId)
                         }
                     }
                 }
@@ -196,7 +204,8 @@ struct OmemoKeysForContact: View {
         self.ownKeys = (account.connectionProperties.identity.jid == contact.obj.contactJid)
         self.contactJid = contact.obj.contactJid
         self.account = account
-        self.deviceIds = Array(self.account.omemo.knownDevices(forAddressName: self.contactJid))
+        self.deviceId = account.omemo.monalSignalStore.deviceid as NSNumber
+        self.deviceIds = OrderedSet(self.account.omemo.knownDevices(forAddressName: self.contactJid))
         self.selectedDeviceForDeletion = -1
     }
 }

@@ -20,6 +20,7 @@ struct OmemoKeysEntry: View {
     private let fingerprint: Data
     private let address: SignalAddress
     private let account: xmpp
+    private let isOwnDevice: Bool
     
     func setTrustLevel(_ enableTrust: Bool) {
         self.account.omemo.updateTrust(enableTrust, for: self.address)
@@ -69,7 +70,7 @@ struct OmemoKeysEntry: View {
                 dismissButton: nil)
         }
     }
-    
+
     // @ViewBuilder
     func getTrustLevelIcon() -> some View {
         var accentColor = Color.yellow
@@ -96,7 +97,22 @@ struct OmemoKeysEntry: View {
             .background(accentColor)
             .cornerRadius(30)
     }
-    
+
+    func getDeviceIconForOwnDevice() -> some View {
+        var deviceImage: String = "iphone.homebutton.circle"
+        if UIDevice.current.userInterfaceIdiom == .pad {
+#if targetEnvironment(macCatalyst)
+            deviceImage = "laptopcomputer"
+#else
+            deviceImage = "ipad"
+#endif
+        }
+        return Image(systemName: deviceImage)
+            .resizable()
+            .frame(width: 30, height: 30, alignment: .center)
+            .foregroundColor(Color.primary)
+    }
+
     var body: some View {
         let trustLevelBinding = Binding<Bool>.init(get: {
             return (self.trustLevel.int32Value != MLOmemoNotTrusted)
@@ -121,25 +137,30 @@ struct OmemoKeysEntry: View {
                             ))
                     }
                 }.frame(width: 240)
-                VStack(alignment:.center) {
-                    Button {
-                        showTrustLevelInfo = true
-                    } label: {
-                        getTrustLevelIcon()
+                // the trust level of our own device should not be displayed
+                if(!isOwnDevice) {
+                    VStack(alignment:.center) {
+                        Button {
+                            showTrustLevelInfo = true
+                        } label: {
+                            getTrustLevelIcon()
+                        }
+                        .alert(isPresented: $showTrustLevelInfo) {
+                            getTrustLevelInfoAlert()
+                        }
+                        Toggle("", isOn: trustLevelBinding).font(.footnote)
                     }
-                    .alert(isPresented: $showTrustLevelInfo) {
-                        getTrustLevelInfoAlert()
-                    }
-
-                    Toggle("", isOn: trustLevelBinding).font(.footnote)
+                } else {
+                    getDeviceIconForOwnDevice()
                 }
             }.frame(width: 300)
         }
     }
-    
-    init(account: xmpp, contactJid: String, deviceId: NSNumber) {
+
+    init(account: xmpp, contactJid: String, deviceId: NSNumber, isOwnDevice: Bool) {
         self.contactJid = contactJid
         self.deviceId = deviceId
+        self.isOwnDevice = isOwnDevice
         self.address = SignalAddress.init(name: contactJid, deviceId: deviceId.int32Value)
         self.fingerprint = account.omemo.getIdentityFor(self.address)
         self.trustLevel = account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
@@ -188,7 +209,7 @@ struct OmemoKeysForContact: View {
             HStack {
                 Spacer()
                 ZStack(alignment: .topLeading) {
-                    OmemoKeysEntry(account: self.account, contactJid: self.contactJid, deviceId: deviceId)
+                    OmemoKeysEntry(account: self.account, contactJid: self.contactJid, deviceId: deviceId, isOwnDevice: (ownKeys && deviceId == self.deviceId))
                     if(ownKeys == true) {
                         if(deviceId != self.deviceId) {
                             deleteButton(deviceId: deviceId)

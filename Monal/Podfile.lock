@@ -22,8 +22,8 @@ PODS:
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
   - SnapKit (5.0.1)
-  - sqlite3/common (3.38.3)
-  - sqlite3/perf-threadsafe (3.38.3):
+  - sqlite3/common (3.38.5)
+  - sqlite3/perf-threadsafe (3.38.5):
     - sqlite3/common
   - TOCropViewController (2.6.1)
 
@@ -86,7 +86,7 @@ SPEC CHECKSUMS:
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
-  sqlite3: 3315c18c19fd107a68bf466f9f0adce934b03eaa
+  sqlite3: 93442daab2ab1825bc9c05faa85814a1996f5b65
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
 
 PODFILE CHECKSUM: 6e8aa585b76d6893f9c47d20fcc1f44218cb6985

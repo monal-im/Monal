@@ -272,13 +272,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             {
                 BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
                 [self disconnectAll];
-                if(!wasIdle)
-                {
-                    DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored (will be ignored in appex)");
-                    //this will automatically start the app if connectivity gets restored
-                    //don't queue this notification because it should be handled immediately
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundFetchingTask object:nil];
-                }
+                DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored (will be ignored in appex)");
+                //this will automatically start the app if connectivity gets restored (force as soon as possible if !wasIdle)
+                //don't queue this notification because it should be handled immediately
+                [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundFetchingTask object:nil userInfo:@{@"force": @(!wasIdle)}];
             }
         }
     });

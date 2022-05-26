@@ -197,7 +197,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //this will use the cached values in defaultsDB, if possible
     [[MLXMPPManager sharedInstance] setPushToken:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scheduleBackgroundFetchingTask) name:kScheduleBackgroundFetchingTask object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleScheduleBackgroundFetchingTaskNotification:) name:kScheduleBackgroundFetchingTask object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
     
@@ -840,7 +840,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogVerbose(@"Setting _shutdownPending to YES...");
         _shutdownPending = YES;
         DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
-        [self scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
+        [self scheduleBackgroundFetchingTask:YES];        //make sure delivery will be attempted, if needed (force as soon as possible)
         DDLogInfo(@"|~~| 20%% |~~|");
         [self updateUnread];
         DDLogInfo(@"|~~| 40%% |~~|");
@@ -1058,7 +1058,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         //schedule a BGProcessingTaskRequest to process this further as soon as possible
                         //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                         DDLogInfo(@"calling scheduleBackgroundFetchingTask");
-                        [self scheduleBackgroundFetchingTask];
+                        [self scheduleBackgroundFetchingTask:YES];      //force as soon as possible
                         
                         shouldNotify = YES;
                     }
@@ -1115,7 +1115,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 
                 //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                 //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                [self scheduleBackgroundFetchingTask];
+                [self scheduleBackgroundFetchingTask:YES];      //force as soon as possible
             }
             else
                 DDLogDebug(@"_bgTask != UIBackgroundTaskInvalid --> not disconnecting");
@@ -1169,7 +1169,15 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }];
 }
 
--(void) scheduleBackgroundFetchingTask
+-(void) handleScheduleBackgroundFetchingTaskNotification:(NSNotification*) notification
+{
+    BOOL force = YES;
+    if(notification.userInfo)
+        force = [notification.userInfo[@"force"] boolValue];
+    [self scheduleBackgroundFetchingTask:force];
+}
+
+-(void) scheduleBackgroundFetchingTask:(BOOL) force
 {
     [HelperTools dispatchSyncReentrant:^{
         NSError *error = NULL;
@@ -1181,7 +1189,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
         request.requiresNetworkConnectivity = YES;
         request.requiresExternalPower = NO;
-        request.earliestBeginDate = nil;
+        if(force)
+            request.earliestBeginDate = nil;
+        else
+            request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:3600*3];
         BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
         if(!success) {
             // Errorcodes https://stackoverflow.com/a/58224050/872051
@@ -1262,8 +1273,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                             
                             //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
                             //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                            if(!wasIdle)
-                                [self scheduleBackgroundFetchingTask];
+                            [self scheduleBackgroundFetchingTask:!wasIdle];
                         }
                         else
                             DDLogDebug(@"NOT (background && (_bgTask == UIBackgroundTaskInvalid || _bgFetch == nil)) --> not disconnecting");

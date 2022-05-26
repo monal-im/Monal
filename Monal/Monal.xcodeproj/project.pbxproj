@@ -43,7 +43,6 @@
 		265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */; };
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
 		2666F018249D380D00372E28 /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
-		268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */; };
@@ -133,8 +132,6 @@
 		5427C94E276A6BE1003217D5 /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		542CF3FF2763314F002C3710 /* hsluv.c in Sources */ = {isa = PBXBuildFile; fileRef = 542CF3FD2763314E002C3710 /* hsluv.c */; };
 		542CF4002763314F002C3710 /* hsluv.h in Headers */ = {isa = PBXBuildFile; fileRef = 542CF3FE2763314F002C3710 /* hsluv.h */; };
-		542CF4252765DC44002C3710 /* MLContactOMEMOKeys.m in Sources */ = {isa = PBXBuildFile; fileRef = 542CF4242765DC44002C3710 /* MLContactOMEMOKeys.m */; };
-		542CF42C2765DC62002C3710 /* MLContactOMEMOKeys.h in Headers */ = {isa = PBXBuildFile; fileRef = 542CF42B2765DC62002C3710 /* MLContactOMEMOKeys.h */; };
 		54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 544656BA2534910D006B2953 /* XMPPDataForm.m */; };
 		544656BD25349133006B2953 /* XMPPDataForm.h in Headers */ = {isa = PBXBuildFile; fileRef = 544656BC25349133006B2953 /* XMPPDataForm.h */; };
@@ -162,7 +159,6 @@
 		C104918B261301530054AC9E /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049198261301710054AC9E /* MLCryptoTest.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
-		C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */ = {isa = PBXBuildFile; fileRef = C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */; };
 		C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */; };
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
@@ -383,8 +379,6 @@
 		267B671B226A200D003DB850 /* AESGcm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGcm.m; sourceTree = "<group>"; };
 		267B671F226A222E003DB850 /* MLEncryptedPayload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLEncryptedPayload.h; sourceTree = "<group>"; };
 		267B6720226A222E003DB850 /* MLEncryptedPayload.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLEncryptedPayload.m; sourceTree = "<group>"; };
-		268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDetailsTableViewCell.h; sourceTree = "<group>"; };
-		268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDetailsTableViewCell.m; sourceTree = "<group>"; };
 		268DD58417C4541000C673A9 /* MLChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatCell.h; sourceTree = "<group>"; };
 		268DD58517C4541000C673A9 /* MLChatCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatCell.m; sourceTree = "<group>"; };
 		2696EED01791245A00BC54B8 /* chatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chatViewController.h; sourceTree = "<group>"; };
@@ -578,8 +572,6 @@
 		541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPubSubProcessor.m; sourceTree = "<group>"; };
 		542CF3FD2763314E002C3710 /* hsluv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hsluv.c; sourceTree = "<group>"; };
 		542CF3FE2763314F002C3710 /* hsluv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hsluv.h; sourceTree = "<group>"; };
-		542CF4242765DC44002C3710 /* MLContactOMEMOKeys.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactOMEMOKeys.m; sourceTree = "<group>"; };
-		542CF42B2765DC62002C3710 /* MLContactOMEMOKeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactOMEMOKeys.h; sourceTree = "<group>"; };
 		54391BB9273499E80050DAFB /* UIColor+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIColor+Extension.h"; sourceTree = "<group>"; };
 		54391BBA273499E80050DAFB /* UIColor+Extension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Extension.m"; sourceTree = "<group>"; };
 		544656BA2534910D006B2953 /* XMPPDataForm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPDataForm.m; sourceTree = "<group>"; };
@@ -625,8 +617,6 @@
 		C132EA9726C92DDA00BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/ContactDetails.strings; sourceTree = "<group>"; };
 		C132EA9926C92DDA00BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C132EA9B26C92E9000BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/iosShare.strings; sourceTree = "<group>"; };
-		C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLOmemoQrCodeView.h; sourceTree = "<group>"; };
-		C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLOmemoQrCodeView.m; sourceTree = "<group>"; };
 		C13CF819261A00D0005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "external/zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
 		C13CF81A261A00FD005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "external/zh-Hans.lproj/Login.strings"; sourceTree = "<group>"; };
 		C13CF81B261A00FD005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "external/zh-Hans.lproj/Settings.strings"; sourceTree = "<group>"; };
@@ -1042,8 +1032,6 @@
 				2661102A238F17CB0030A4EE /* MLContact.m */,
 				26611024238F17B20030A4EE /* MLMessage.h */,
 				26611025238F17B20030A4EE /* MLMessage.m */,
-				542CF4242765DC44002C3710 /* MLContactOMEMOKeys.m */,
-				542CF42B2765DC62002C3710 /* MLContactOMEMOKeys.h */,
 				C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */,
 				C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */,
 			);
@@ -1110,13 +1098,9 @@
 			children = (
 				C1F5C7AB2777621B0001F295 /* ContactResources.swift */,
 				3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */,
-				268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */,
-				268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */,
 				3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */,
 				3D65B78C27234B74005A30F4 /* ContactDetails.swift */,
 				C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */,
-				C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */,
-				C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */,
 			);
 			name = "Contact Details";
 			sourceTree = "<group>";
@@ -1438,7 +1422,6 @@
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 				5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
-				542CF42C2765DC62002C3710 /* MLContactOMEMOKeys.h in Headers */,
 				54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */,
 				544656BD25349133006B2953 /* XMPPDataForm.h in Headers */,
 				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
@@ -1988,14 +1971,12 @@
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
 				264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */,
 				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
-				268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */,
 				3D06A515281FFCC000DDAE90 /* NotificationSettings.swift in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */,
 				3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */,
-				C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
@@ -2071,7 +2052,6 @@
 				26CC57D323A08D7100ABB92A /* DataLayer.m in Sources */,
 				26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */,
 				C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */,
-				542CF4252765DC44002C3710 /* MLContactOMEMOKeys.m in Sources */,
 				C1F5C7AA2775DA000001F295 /* MLContactSoftwareVersionInfo.m in Sources */,
 				26CC57D423A08D7100ABB92A /* MLImageManager.m in Sources */,
 				540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */,

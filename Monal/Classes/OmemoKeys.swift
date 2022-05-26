@@ -334,7 +334,8 @@ struct OmemoKeys: View {
         .alert(isPresented: $showScannedContactMissmatchAlert) {
             Alert(
                 title: Text("QR-Code: Fingerprints found"),
-                message: Text(NSLocalizedString("Do you want to trust the scanned fingerprints from" + self.scannedJid, comment: "Do you want to trust the scanned fingerprints from <jid>")),
+                message: Text(NSLocalizedString("Do you want to trust the scanned fingerprints from", comment: "Do you want to trust the scanned fingerprints from <jid>")
+                             + " " + self.scannedJid),
                 primaryButton: .cancel(Text("No")),
                 secondaryButton: .default(Text("Yes"), action: {
                     resetTrustFromQR(self.account!)

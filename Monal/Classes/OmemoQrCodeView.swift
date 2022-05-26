@@ -35,10 +35,11 @@ struct OmemoQrCodeView: View {
         let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.obj.accountId)! as xmpp
         let devices = Array(account.omemo.knownDevices(forAddressName: self.jid))
         var keyList = ""
+        var prefix = "?"
         for device in devices {
             let address = SignalAddress.init(name: self.jid, deviceId: device.int32Value)
             let identity = account.omemo.getIdentityFor(address)
-            var prefix = "?"
+
             if(account.omemo.isTrustedIdentity(address, identityKey: identity)) {
                 let hexIdentity = String(HelperTools.signalHexKey(with: identity))
                 let keyString = String(format: "%@omemo-sid-%@=%@", prefix, device, hexIdentity)

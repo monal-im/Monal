@@ -235,16 +235,16 @@ struct OmemoKeys: View {
     private let ownKeys: Bool
     private let contacts: [ObservableKVOWrapper<MLContact>]
     private let account: xmpp?
-    
+
     @State private var scannedJid : String = ""
     @State private var scannedFingerprints : Dictionary<NSInteger, String> = [:]
-    
+
     @State var selectedContact : ObservableKVOWrapper<MLContact>? // for reason why see start of body
     @State private var navigateToQRCodeView = false
     @State private var navigateToQRCodeScanner = false
 
     @State private var showScannedContactMissmatchAlert = false
-    
+
     func resetTrustFromQR(_ account: xmpp) {
         let knownDevices = Array(account.omemo.knownDevices(forAddressName: self.scannedJid))
         for (qrDeviceId, fingerprint) in self.scannedFingerprints {
@@ -297,7 +297,7 @@ struct OmemoKeys: View {
                 }
             }
         }
-        .listStyle(.inset)
+        .listStyle(.automatic)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack{

@@ -502,7 +502,7 @@ NSString* const kStanza = @"stanza";
 {
     DDLogVerbose(@"Cleaning up sendQueue");
     [_sendQueue cancelAllOperations];
-    self->_sendQueue.suspended = NO;      //make sure the queue is operational
+    [self unfreezeSendQueue];      //make sure the queue is operational again before dispatching to it
     [_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
         DDLogVerbose(@"Cleaning up sendQueue [internal]");
         [self->_sendQueue cancelAllOperations];
@@ -688,22 +688,44 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
+-(void) freezeSendQueue
+{
+    //wait for all queued operations to finish (this will NOT block if the tcp stream is not writable)
+    [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
+        self->_sendQueue.suspended = YES;
+    }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
+}
+
+-(void) unfreezeSendQueue
+{
+    //no need to dispatch anything here, just start processing jobs
+    self->_sendQueue.suspended = NO;
+}
+
 -(void) freeze
 {
     DDLogInfo(@"Freezing account: %@", self);
     
-    [self freezeParseQueue];
-    self->_sendQueue.suspended = YES;
-    self->_receiveQueue.suspended = YES;
+    //this does not have to be synchronized with the freezing of the parse queue and receive queue
+    [self freezeSendQueue];
+    
+    //freezing the parse queue will sync dispatch to the receive queue, let's do an async dispatch here
+    //to synchronize the parse queue freezing with the receive queue freezing
+    [self dispatchAsyncOnReceiveQueue:^{
+        [self freezeParseQueue];
+        //this is the last block running in the receive queue (it will be freezed once this block finishes execution)
+        self->_receiveQueue.suspended = YES;
+    }];
 }
 
 -(void) unfreeze
 {
     DDLogInfo(@"Unfreezing account: %@", self);
     
+    [self unfreezeSendQueue];
+    
     //unfreeze receive queue before dispatching onto it
     self->_receiveQueue.suspended = NO;
-    self->_sendQueue.suspended = NO;
     
     //make sure we don't have any race conditions by dispatching this to our receive queue
     [self dispatchAsyncOnReceiveQueue:^{
@@ -914,7 +936,7 @@ NSString* const kStanza = @"stanza";
         {
             DDLogInfo(@"doing explicit logout (xmpp stream close)");
             self->_reconnectBackoffTime = 0.0;
-            self->_sendQueue.suspended = NO;      //make sure the queue is operational
+            [self unfreezeSendQueue];      //make sure the queue is operational again
             if(self.accountState>=kStateBound)
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //disable push for this node
@@ -981,7 +1003,7 @@ NSString* const kStanza = @"stanza";
         }
         else
         {
-            self->_sendQueue.suspended = NO;      //make sure the queue is operational
+            [self unfreezeSendQueue];      //make sure the queue is operational again
             if(streamError != nil)
             {
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
@@ -1236,12 +1258,12 @@ NSString* const kStanza = @"stanza";
                         [[DataLayer sharedInstance] createTransaction:^{
                             DDLogVerbose(@"Started transaction for: %@", parsedStanza);
                             //don't write data to our tcp stream while inside this db transaction (all effects to the outside world should be transactional, too)
-                            self->_sendQueue.suspended = YES;
+                            [self freezeSendQueue];
                             [self processInput:parsedStanza withDelayedReplay:NO];
                             DDLogVerbose(@"Ending transaction for: %@", parsedStanza);
                         }];
                         DDLogVerbose(@"Ended transaction for: %@", parsedStanza);
-                        self->_sendQueue.suspended = NO;          //this will flush the send queue
+                        [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
                     } onQueue:@"receiveQueue"];
                     DDLogVerbose(@"Flushed all queued notifications...");
                 }]] waitUntilFinished:YES];
@@ -3495,7 +3517,7 @@ NSString* const kStanza = @"stanza";
         //process all queued mam stanzas in a dedicated db write transaction
         [[DataLayer sharedInstance] createTransaction:^{
             //don't write data to our tcp stream while inside this db transaction (all effects to the outside world should be transactional, too)
-            self->_sendQueue.suspended = YES;
+            [self freezeSendQueue];
             //ignore all notifications generated while processing the queued stanzas
             [MLNotificationQueue queueNotificationsInBlock:^{
                 //iterate through all pages and their messages forward in time (pages have already been sorted forward in time internally)
@@ -3521,7 +3543,7 @@ NSString* const kStanza = @"stanza";
                 [(MLNotificationQueue*)[MLNotificationQueue currentQueue] clear];
             } onQueue:@"MLhistoryIgnoreQueue"];
         }];
-        self->_sendQueue.suspended = NO;          //this will flush the send queue
+        [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
         
         DDLogDebug(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[historyIdList count]);
         MLAssert([historyIdList count] <= retrievedBodies, @"did add more messages to historydb table than bodies collected!", (@{
@@ -4231,7 +4253,7 @@ NSString* const kStanza = @"stanza";
         DDLogVerbose(@"Creating db transaction for delayed stanza handling of jid %@", archiveJid);
         [[DataLayer sharedInstance] createTransaction:^{
             //don't write data to our tcp stream while inside this db transaction (all effects to the outside world should be transactional, too)
-            self->_sendQueue.suspended = YES;
+            [self freezeSendQueue];
             //pick the next delayed message stanza (will return nil if there isn't any left)
             MLXMLNode* delayedStanza = [[DataLayer sharedInstance] getNextDelayedMessageStanzaForArchiveJid:archiveJid andAccountNo:self.accountNo];
             DDLogDebug(@"Got delayed stanza: %@", delayedStanza);
@@ -4267,7 +4289,7 @@ NSString* const kStanza = @"stanza";
             }
         }];
         DDLogVerbose(@"Transaction for delayed stanza handling for jid %@ ended", archiveJid);
-        self->_sendQueue.suspended = NO;          //this will flush the send queue
+        [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
     } onQueue:@"delayedStanzaReplay"];
 }
 

@@ -372,7 +372,7 @@
 {
     if([segue.identifier isEqualToString:@"scanQRCode"])
     {
-        MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
+        MLQRCodeScannerController* qrCodeScanner = (MLQRCodeScannerController*)segue.destinationViewController;
         qrCodeScanner.loginDelegate = self;
         return;     //do not remove observers
     }

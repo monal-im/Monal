@@ -72,13 +72,12 @@ struct ContactDetails: View {
                         }
                     }
 #if !DISABLE_OMEMO
-                    let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.obj.accountId)! as xmpp
                     if(contact.obj.isGroup == false) {
-                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: [contact], account: account))) {
+                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: [contact], accountId: contact.obj.accountId))) {
                             Text("Encryption Keys")
                         }
                     } else if(contact.obj.isGroup && contact.obj.mucType == "group") {
-                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: genContactsForMuc(), account: account))) {
+                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: genContactsForMuc(), accountId: contact.obj.accountId))) {
                             Text("Encryption Keys")
                         }
                     }

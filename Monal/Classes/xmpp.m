@@ -1725,20 +1725,26 @@ NSString* const kStanza = @"stanza";
                 if(![presenceNode check:@"/@type"])
                 {
                     DDLogVerbose(@"presence notice from %@", presenceNode.fromUser);
-
                     if(presenceNode.from)
                     {
                         MLContact* contact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo];
-                        contact.state = [presenceNode findFirst:@"show#"];
-                        contact.statusMessage = [presenceNode findFirst:@"status#"];
+                        if(contact.isGroup)
+                            [self.mucProcessor processPresence:presenceNode];
+                        else
+                        {
+                            contact.state = [presenceNode findFirst:@"show#"];
+                            contact.statusMessage = [presenceNode findFirst:@"status#"];
 
-                        //add contact if possible (ignore already existing contacts)
-                        [[DataLayer sharedInstance] addContact:presenceNode.fromUser forAccount:self.accountNo nickname:nil];
+                            //add contact if possible (ignore already existing contacts)
+                            [[DataLayer sharedInstance] addContact:presenceNode.fromUser forAccount:self.accountNo nickname:nil];
 
-                        //update buddy state
-                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self.accountNo];
-                        [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self.accountNo];
-                        [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self.accountNo];
+                            //clear the state field in db and reset the ver hash for this resource
+                            [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self.accountNo];
+                            
+                            //update buddy state
+                            [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self.accountNo];
+                            [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self.accountNo];
+                        }
                     }
                     else
                     {

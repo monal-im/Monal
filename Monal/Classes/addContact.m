@@ -297,7 +297,7 @@
     }
     else if([segue.identifier isEqualToString:@"qrContactScan"])
     {
-        MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner *) segue.destinationViewController;
+        MLQRCodeScannerController* qrCodeScanner = (MLQRCodeScannerController *) segue.destinationViewController;
         qrCodeScanner.contactDelegate = self;
     }
 }

@@ -14,7 +14,7 @@ struct OmemoKeysEntry: View {
     private let contactJid: String
     
     @State private var trustLevel: NSNumber
-    @State private var showTrustLevelInfo = false
+    @State private var showEntryInfo = false
 
     private let deviceId: NSNumber
     private let fingerprint: Data
@@ -27,7 +27,13 @@ struct OmemoKeysEntry: View {
         self.trustLevel = self.account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
     }
 
-    func getTrustLevelInfoAlert() -> Alert {
+    func getEntryInfoAlert() -> Alert {
+        if(self.isOwnDevice) {
+            return Alert(
+                title: Text("Own device key"),
+                message: Text("This key belongs to this device and cannot be removed or disabled!"),
+                dismissButton: nil);
+        }
         switch(self.trustLevel.int32Value) {
         case MLOmemoTrusted:
             return Alert(
@@ -141,19 +147,24 @@ struct OmemoKeysEntry: View {
                 if(!isOwnDevice) {
                     VStack(alignment:.center) {
                         Button {
-                            showTrustLevelInfo = true
+                            showEntryInfo = true
                         } label: {
                             getTrustLevelIcon()
-                        }
-                        .alert(isPresented: $showTrustLevelInfo) {
-                            getTrustLevelInfoAlert()
                         }
                         Toggle("", isOn: trustLevelBinding).font(.footnote)
                     }
                 } else {
-                    getDeviceIconForOwnDevice()
+                    Button {
+                        showEntryInfo = true
+                    } label: {
+                        getDeviceIconForOwnDevice()
+                    }
                 }
-            }.frame(width: 300)
+            }
+            .alert(isPresented: $showEntryInfo) {
+                getEntryInfoAlert()
+            }
+            .frame(width: 300)
         }
     }
 
@@ -236,6 +247,7 @@ struct OmemoKeys: View {
     private let contacts: [ObservableKVOWrapper<MLContact>]
     private let account: xmpp?
 
+    // Needed for the alert message that is displayed when the scanned contact is not in the group
     @State private var scannedJid : String = ""
     @State private var scannedFingerprints : Dictionary<NSInteger, String> = [:]
 
@@ -245,15 +257,15 @@ struct OmemoKeys: View {
 
     @State private var showScannedContactMissmatchAlert = false
 
-    func resetTrustFromQR(_ account: xmpp) {
-        let knownDevices = Array(account.omemo.knownDevices(forAddressName: self.scannedJid))
-        for (qrDeviceId, fingerprint) in self.scannedFingerprints {
+    func resetTrustFromQR(scannedJid : String, scannedFingerprints : Dictionary<NSInteger, String>) {
+        let knownDevices = Array(self.account!.omemo.knownDevices(forAddressName: scannedJid))
+        for (qrDeviceId, fingerprint) in scannedFingerprints {
             if(knownDevices.contains(NSNumber(integerLiteral: qrDeviceId))) {
-                let address = SignalAddress(name: self.scannedJid, deviceId: Int32(qrDeviceId))
-                let identity = account.omemo.getIdentityFor(address)
+                let address = SignalAddress(name: scannedJid, deviceId: Int32(qrDeviceId))
+                let identity = account!.omemo.getIdentityFor(address)
                 let knownIdentity = HelperTools.signalHexKey(with: identity)
                 if(knownIdentity.uppercased() == fingerprint.uppercased()) {
-                    account.omemo.updateTrust(true, for: address)
+                    account!.omemo.updateTrust(true, for: address)
                 }
             }
         }
@@ -263,7 +275,20 @@ struct OmemoKeys: View {
         // workaround for the fact that NavigationLink inside a form forces a formatting we don't want
         if(self.selectedContact != nil) { // selectedContact is set to a value either when the user presses a QR code button or if there is only a single contact to choose from (-> user views a single account)
             NavigationLink(destination:OmemoQrCodeView(contact: self.selectedContact!), isActive: $navigateToQRCodeView){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
-            NavigationLink(destination: QRCodeScannerContactView($scannedJid, $scannedFingerprints), isActive: $navigateToQRCodeScanner){}.hidden().disabled(true)
+            NavigationLink(destination: MLQRCodeScanner(
+                handleContact: { jid, fingerprints in
+                    for contact in self.contacts {
+                        if(contact.obj.contactJid == self.scannedJid) {
+                            resetTrustFromQR(scannedJid: jid, scannedFingerprints: fingerprints)
+                            return
+                        }
+                    }
+                    // we scanned a contact but it was not in the contact list, show the alert...
+                    self.scannedJid = jid
+                    self.scannedFingerprints = fingerprints
+                    showScannedContactMissmatchAlert = true
+                }, handleClose: {}
+            ), isActive: $navigateToQRCodeScanner){}.hidden().disabled(true)
         }
         List {
             let helpDescription = (self.ownKeys == true) ?
@@ -297,7 +322,7 @@ struct OmemoKeys: View {
                 }
             }
         }
-        .listStyle(.automatic)
+        .listStyle(.plain)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack{
@@ -319,17 +344,6 @@ struct OmemoKeys: View {
         .navigationBarTitle((self.ownKeys == true) ? "My Encryption Keys" : "Encryption Keys", displayMode: .inline)
         .onAppear(perform: {
             self.selectedContact = self.contacts.first // needs to be done here as first is nil in init
-            if(self.scannedJid.isEmpty == false) {
-                for contact in self.contacts {
-                    if(contact.obj.contactJid == self.scannedJid) {
-                        resetTrustFromQR(self.account!)
-                        scannedJid = ""
-                        scannedFingerprints = [:]
-                        return
-                    }
-                }
-                showScannedContactMissmatchAlert = true // we scanned a contact but it was not in the contact list...
-            }
         })
         .alert(isPresented: $showScannedContactMissmatchAlert) {
             Alert(
@@ -338,31 +352,32 @@ struct OmemoKeys: View {
                              + " " + self.scannedJid),
                 primaryButton: .cancel(Text("No")),
                 secondaryButton: .default(Text("Yes"), action: {
-                    resetTrustFromQR(self.account!)
+                    resetTrustFromQR(scannedJid: self.scannedJid, scannedFingerprints: self.scannedFingerprints)
                     self.scannedJid = ""
                     self.scannedFingerprints = [:]
             }))
         }
     }
 
-    init(contacts: [ObservableKVOWrapper<MLContact>], account: xmpp?) {
-        if(account == nil) {
+    init(contacts: [ObservableKVOWrapper<MLContact>], accountId: NSNumber?) {
+        if(accountId == nil) {
             self.ownKeys = false
+            self.account = nil
         } else {
+            self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: accountId!)! as xmpp
             self.ownKeys = (
                 contacts.count == 1 &&
-                account!.connectionProperties.identity.jid == contacts.first!.obj.contactJid
+                self.account!.connectionProperties.identity.jid == contacts.first!.obj.contactJid
             )
         }
         self.contacts = contacts
         self.selectedContact = nil
-        self.account = account
     }
 }
 
 struct OmemoKeys_Previews: PreviewProvider {
     static var previews: some View {
         // TODO some dummy views, requires a dummy xmpp obj
-        OmemoKeys(contacts:[], account: nil);
+        OmemoKeys(contacts:[], accountId: nil);
     }
 }

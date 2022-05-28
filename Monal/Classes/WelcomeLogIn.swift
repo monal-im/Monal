@@ -124,7 +124,14 @@ struct WelcomeLogIn: View {
                             .sheet(isPresented: $showQRCodeScanner) {
                                 Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
                                 // Get existing credentials from QR and put values in account and password
-                                QRCodeScannerView($account, $password, $showQRCodeScanner)
+                                MLQRCodeScanner(
+                                    handleLogin: { account, password in
+                                        self.account = account
+                                        self.password = password
+                                    }, handleClose: {
+                                        self.showQRCodeScanner = false
+                                    }
+                                )
                             }
 
                         }

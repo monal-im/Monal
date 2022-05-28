@@ -153,11 +153,9 @@ class SwiftuiInterface : NSObject {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
         if(ownContact == nil) {
-            host.rootView = AnyView(OmemoKeys(contacts: [], account: nil))
+            host.rootView = AnyView(OmemoKeys(contacts: [], accountId: nil))
         } else {
-            let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID
-                                                                             : ownContact!.accountId)! as xmpp
-            host.rootView = AnyView(OmemoKeys(contacts: [ObservableKVOWrapper<MLContact>(ownContact!)], account: account))
+            host.rootView = AnyView(OmemoKeys(contacts: [ObservableKVOWrapper<MLContact>(ownContact!)], accountId: ownContact!.accountId))
         }
         return host
     }

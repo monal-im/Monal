@@ -101,7 +101,7 @@ struct NotificationSettings: View {
         .navigationViewStyle(.stack)
         .onAppear(perform: {
             UNUserNotificationCenter.current().getNotificationSettings { (settings) -> Void in
-                self.pushPermissionEnabled = (settings.alertSetting == UNNotificationSetting.enabled);
+                self.pushPermissionEnabled = (settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional);
             }
         });
     }

@@ -323,6 +323,12 @@ struct MLQRCodeScanner : UIViewControllerRepresentable {
             }
         }
 
+        func MLQRCodeContactScanned(jid: String, fingerprints: Dictionary<NSInteger, String>) {
+            if(self.handleContact != nil) {
+                self.handleContact!(jid, fingerprints)
+            }
+        }
+
         func closeQRCodeScanner() {
             self.handleClose()
         }
@@ -331,12 +337,6 @@ struct MLQRCodeScanner : UIViewControllerRepresentable {
             self.handleLogin = handleLogin
             self.handleContact = handleContact
             self.handleClose = handleClose
-        }
-
-        func MLQRCodeContactScanned(jid: String, fingerprints: Dictionary<NSInteger, String>) {
-            if(self.handleContact != nil) {
-                self.handleContact!(jid, fingerprints)
-            }
         }
     }
 

@@ -262,10 +262,10 @@ struct OmemoKeys: View {
         for (qrDeviceId, fingerprint) in scannedFingerprints {
             if(knownDevices.contains(NSNumber(integerLiteral: qrDeviceId))) {
                 let address = SignalAddress(name: scannedJid, deviceId: Int32(qrDeviceId))
-                let identity = account!.omemo.getIdentityFor(address)
+                let identity = self.account!.omemo.getIdentityFor(address)
                 let knownIdentity = HelperTools.signalHexKey(with: identity)
                 if(knownIdentity.uppercased() == fingerprint.uppercased()) {
-                    account!.omemo.updateTrust(true, for: address)
+                    self.account!.omemo.updateTrust(true, for: address)
                 }
             }
         }
@@ -277,12 +277,6 @@ struct OmemoKeys: View {
             NavigationLink(destination:OmemoQrCodeView(contact: self.selectedContact!), isActive: $navigateToQRCodeView){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
             NavigationLink(destination: MLQRCodeScanner(
                 handleContact: { jid, fingerprints in
-                    for contact in self.contacts {
-                        if(contact.obj.contactJid == self.scannedJid) {
-                            resetTrustFromQR(scannedJid: jid, scannedFingerprints: fingerprints)
-                            return
-                        }
-                    }
                     // we scanned a contact but it was not in the contact list, show the alert...
                     self.scannedJid = jid
                     self.scannedFingerprints = fingerprints
@@ -347,9 +341,8 @@ struct OmemoKeys: View {
         })
         .alert(isPresented: $showScannedContactMissmatchAlert) {
             Alert(
-                title: Text("QR-Code: Fingerprints found"),
-                message: Text(NSLocalizedString("Do you want to trust the scanned fingerprints from", comment: "Do you want to trust the scanned fingerprints from <jid>")
-                             + " " + self.scannedJid),
+                title: Text("QR code: Fingerprints found"),
+                message: Text(String.localizedStringWithFormat("Do you want to trust the scanned fingerprints of contact %@ when using your account %@?", self.scannedJid, self.account!.connectionProperties.identity.jid)),
                 primaryButton: .cancel(Text("No")),
                 secondaryButton: .default(Text("Yes"), action: {
                     resetTrustFromQR(scannedJid: self.scannedJid, scannedFingerprints: self.scannedFingerprints)

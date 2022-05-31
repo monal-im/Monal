@@ -39,7 +39,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(!setDefaults)
     {
         [[HelperTools defaultsDB] setBool:YES forKey:@"Sound"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
+        [[HelperTools defaultsDB] setBool:NO forKey:@"ChatBackgrounds"];
 
         // Privacy Settings
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowImages"];
@@ -68,7 +68,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self upgradeBoolUserSettingsIfUnset:@"ShowImages" toDefault:YES];
 
     // upgrade ChatBackgrounds
-    [self upgradeBoolUserSettingsIfUnset:@"ChatBackgrounds" toDefault:YES];
+    [self upgradeBoolUserSettingsIfUnset:@"ChatBackgrounds" toDefault:NO];
 
     [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
 

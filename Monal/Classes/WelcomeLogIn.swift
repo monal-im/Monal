@@ -105,8 +105,7 @@ struct WelcomeLogIn: View {
                             // Just sets the credential in jid and password variables and shows them in the input fields
                             // so user can control what they scanned and if o.k. login via the "Login" button.
                             Button(action: {
-                                showAlert = credentialsExistAlert
-                                showQRCodeScanner = !showAlert
+                                showQRCodeScanner = true
                             }){
                                 Image(systemName: "qrcode")
                                     .frame(maxHeight: .infinity)
@@ -116,9 +115,6 @@ struct WelcomeLogIn: View {
                                     .clipShape(Circle())
                             }
                             .buttonStyle(BorderlessButtonStyle())
-                            .alert(isPresented: $showAlert) {
-                                Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
-                            }
                             .sheet(isPresented: $showQRCodeScanner) {
                                 Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
                                 // Get existing credentials from QR and put values in jid and password

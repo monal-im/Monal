@@ -12,7 +12,7 @@ import monalxmpp
 struct WelcomeLogIn: View {
     var delegate: SheetDismisserProtocol
     
-    static private let credFaultyPattern = ".+@.+\\..{2,}$"
+    static private let credFaultyPattern = "^.+@.+\\..{2,}$"
     
     @State private var jid: String = ""
     @State private var password: String = ""
@@ -20,26 +20,23 @@ struct WelcomeLogIn: View {
     @State private var showAlert = false
     @State private var showQRCodeScanner = false
     
-    @State private var alertPrompt = AlertPrompt(dismissLabel: "Close")
+    @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
     
     private var credentialsEnteredAlert: Bool {
-        alertPrompt.title = "No Empty Values!"
-        alertPrompt.message = "Please make sure you have entered a username and password."
-
+        alertPrompt.title = Text("No Empty Values!")
+        alertPrompt.message = Text("Please make sure you have entered a username and password.")
         return credentialsEntered
     }
 
     private var credentialsFaultyAlert: Bool {
-        alertPrompt.title = "Invalid Credentials!"
-        alertPrompt.message = "Your XMPP jid should be in in the format user@domain.tld. For special configurations, use manual setup."
-
+        alertPrompt.title = Text("Invalid Credentials!")
+        alertPrompt.message = Text("Your XMPP jid should be in in the format user@domain.tld. For special configurations, use manual setup.")
         return credentialsFaulty
     }
 
     private var credentialsExistAlert: Bool {
-        alertPrompt.title = "Duplicate jid!"
-        alertPrompt.message = "This jid already exists on this instance."
-        
+        alertPrompt.title = Text("Duplicate jid!")
+        alertPrompt.message = Text("This jid already exists on this instance.")
         return credentialsExist
     }
 
@@ -102,7 +99,7 @@ struct WelcomeLogIn: View {
                             }
                             .buttonStyle(BorderlessButtonStyle())
                             .alert(isPresented: $showAlert) {
-                                Alert(title: Text(NSLocalizedString(alertPrompt.title)), message: Text(NSLocalizedString(alertPrompt.message)), dismissButton: .default(Text(NSLocalizedString(alertPrompt.dismissLabel))))
+                                Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
                             }
 
                             // Just sets the credential in jid and password variables and shows them in the input fields
@@ -120,7 +117,7 @@ struct WelcomeLogIn: View {
                             }
                             .buttonStyle(BorderlessButtonStyle())
                             .alert(isPresented: $showAlert) {
-                                Alert(title: Text(NSLocalizedString(alertPrompt.title)), message: Text(NSLocalizedString(alertPrompt.message)), dismissButton: .default(Text(NSLocalizedString(alertPrompt.dismissLabel))))
+                                Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
                             }
                             .sheet(isPresented: $showQRCodeScanner) {
                                 Text("QR-Code Scanner").font(.largeTitle.weight(.bold))

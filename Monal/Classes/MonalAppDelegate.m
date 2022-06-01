@@ -851,8 +851,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
         DDLogInfo(@"|~~| 100%% |~~|");
         [[MLXMPPManager sharedInstance] disconnectAll];
-        //wait for all pending intent donations of incoming messages to makeure those get a proper notification displayed
-        //(pending donations will never be honored with a notification otherwise)
         DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
         [DDLog flushLog];
     }

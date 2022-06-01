@@ -22,7 +22,7 @@ func createQrCode(value: String) -> UIImage
         }
     }
 
-    return UIImage(systemName: "qrcode") ?? UIImage()
+    return UIImage()
 }
 
 struct OmemoQrCodeView: View {
@@ -32,22 +32,25 @@ struct OmemoQrCodeView: View {
     init(contact: ObservableKVOWrapper<MLContact>)
     {
         self.jid = contact.obj.contactJid
-        let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.obj.accountId)! as xmpp
-        let devices = Array(account.omemo.knownDevices(forAddressName: self.jid))
-        var keyList = ""
-        var prefix = "?"
-        for device in devices {
-            let address = SignalAddress.init(name: self.jid, deviceId: device.int32Value)
-            let identity = account.omemo.getIdentityFor(address)
+        if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.obj.accountId) {
+            let devices = Array(account.omemo.knownDevices(forAddressName: self.jid))
+            var keyList = ""
+            var prefix = "?"
+            for device in devices {
+                let address = SignalAddress.init(name: self.jid, deviceId: device.int32Value)
+                let identity = account.omemo.getIdentityFor(address)
 
-            if(account.omemo.isTrustedIdentity(address, identityKey: identity)) {
-                let hexIdentity = String(HelperTools.signalHexKey(with: identity))
-                let keyString = String(format: "%@omemo-sid-%@=%@", prefix, device, hexIdentity)
-                keyList += keyString
-                prefix = ";"
+                if(account.omemo.isTrustedIdentity(address, identityKey: identity)) {
+                    let hexIdentity = String(HelperTools.signalHexKey(with: identity))
+                    let keyString = String(format: "%@omemo-sid-%@=%@", prefix, device, hexIdentity)
+                    keyList += keyString
+                    prefix = ";"
+                }
             }
+            self.qrCodeImage = createQrCode(value: String(format:"xmpp:%@%@", jid, keyList))
+        } else {
+            self.qrCodeImage = UIImage()
         }
-        self.qrCodeImage = createQrCode(value: String(format:"xmpp:%@%@", jid, keyList))
     }
 
     var body: some View {

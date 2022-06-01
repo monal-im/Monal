@@ -274,7 +274,7 @@ struct OmemoKeys: View {
     var body: some View {
         // workaround for the fact that NavigationLink inside a form forces a formatting we don't want
         if(self.selectedContact != nil) { // selectedContact is set to a value either when the user presses a QR code button or if there is only a single contact to choose from (-> user views a single account)
-            NavigationLink(destination:OmemoQrCodeView(contact: self.selectedContact!), isActive: $navigateToQRCodeView){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
+            NavigationLink(destination:NavigationLazyView(OmemoQrCodeView(contact: self.selectedContact!)), isActive: $navigateToQRCodeView){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
             NavigationLink(destination: MLQRCodeScanner(
                 handleContact: { jid, fingerprints in
                     // we scanned a contact but it was not in the contact list, show the alert...
@@ -290,8 +290,10 @@ struct OmemoKeys: View {
             Text("You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen.")
 
             Section(header:helpDescription) {
-                if(self.contacts.count == 0 || self.account == nil) {
+                if(self.contacts.count == 0) {
                     Text("Error: No contacts to display keys for!").foregroundColor(.red).font(.headline)
+                } else if(self.account == nil) {
+                    Text("Error: Account disabled, can not display keys!").foregroundColor(.red).font(.headline)
                 } else if (self.contacts.count == 1) {
                     ForEach(self.contacts, id: \.self.obj) { contact in
                         OmemoKeysForContact(contact: contact, account: self.account!)
@@ -320,12 +322,14 @@ struct OmemoKeys: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack{
-                    Button(action: {
-                        self.navigateToQRCodeScanner = true
-                    }, label: {
-                        Image(systemName: "camera.fill")
-                    })
-                    if(self.contacts.count == 1) {
+                    if(self.account != nil) {
+                        Button(action: {
+                            self.navigateToQRCodeScanner = true
+                        }, label: {
+                            Image(systemName: "camera.fill")
+                        })
+                    }
+                    if(self.contacts.count == 1 && self.account != nil) {
                         Button(action: {
                             self.navigateToQRCodeView = true
                         }, label: {
@@ -357,11 +361,16 @@ struct OmemoKeys: View {
             self.ownKeys = false
             self.account = nil
         } else {
-            self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: accountId!)! as xmpp
-            self.ownKeys = (
-                contacts.count == 1 &&
-                self.account!.connectionProperties.identity.jid == contacts.first!.obj.contactJid
-            )
+            if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: accountId!) {
+                self.account = account
+                self.ownKeys = (
+                    contacts.count == 1 &&
+                    self.account!.connectionProperties.identity.jid == contacts.first!.obj.contactJid
+                )
+            } else {
+                self.ownKeys = false
+                self.account = nil
+            }
         }
         self.contacts = contacts
         self.selectedContact = nil

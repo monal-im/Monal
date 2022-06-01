@@ -690,6 +690,12 @@ NSString* const kStanza = @"stanza";
 
 -(void) freezeSendQueue
 {
+    if(_sendQueue.suspended)
+    {
+        DDLogWarn(@"Send queue of account %@ already freezed, doing nothing...", self);
+        return;
+    }
+    
     //wait for all queued operations to finish (this will NOT block if the tcp stream is not writable)
     [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
         self->_sendQueue.suspended = YES;
@@ -704,6 +710,14 @@ NSString* const kStanza = @"stanza";
 
 -(void) freeze
 {
+    //this can only be done if this method is the only one that freezes the receive queue,
+    //because this shortcut assumes that parse and send queues are always freezed, too, if the receive queue is freezed
+    if(_receiveQueue.suspended)
+    {
+        DDLogWarn(@"Account %@ already freezed, doing nothing...", self);
+        return;
+    }
+    
     DDLogInfo(@"Freezing account: %@", self);
     
     //this does not have to be synchronized with the freezing of the parse queue and receive queue

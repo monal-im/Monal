@@ -430,7 +430,8 @@ NSString* const kStanza = @"stanza";
             
             BOOL lastState = self->_lastIdleState;
             //only send out idle notifications if we changed from non-idle to idle state
-            if(self.idle && !lastState)
+            //but only do so if the receive queue is not currently suspended (e.g. account frozen)
+            if(!_receiveQueue.suspended && self.idle && !lastState)
             {
                 DDLogVerbose(@"Adding idle state notification to receive queue...");
                 [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{

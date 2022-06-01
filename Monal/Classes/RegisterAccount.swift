@@ -150,19 +150,17 @@ struct RegisterAccount: View {
                             .font(.largeTitle.weight(.bold))
                             .multilineTextAlignment(.center)
                         WebView(url: URL(string: actualTermsUrl)!)
-                        if UIDevice.current.userInterfaceIdiom == .mac {
-                            Button (action: {
-                                showWebView.toggle()
-                            }){
-                                Text("Close")
-                                    .padding(9.0)
-                                    .background(Color(red: 0.897, green: 0.878, blue: 0.878))
-                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                            .padding(.top, 10.0)
-                            .padding(.bottom, 9.0)
+                        Button (action: {
+                            showWebView.toggle()
+                        }){
+                            Text("Close")
+                                .padding(9.0)
+                                .background(Color(red: 0.897, green: 0.878, blue: 0.878))
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
+                        .buttonStyle(BorderlessButtonStyle())
+                        .padding(.top, 10.0)
+                        .padding(.bottom, 9.0)
                     }
                 }
                 .frame(minHeight: 310)

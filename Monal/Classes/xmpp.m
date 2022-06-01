@@ -675,7 +675,7 @@ NSString* const kStanza = @"stanza";
     //into the receive queue once we leave this method
     _parseQueue.suspended = YES;
     [self dispatchOnReceiveQueue: ^{
-        DDLogWarn(@"Parse queue is freezed now!");
+        DDLogWarn(@"Parse queue is frozen now!");
     }];
 }
 
@@ -684,7 +684,7 @@ NSString* const kStanza = @"stanza";
     //this has to be synchronous because we want to be sure the parse queue is operating again once we leave this method
     [self dispatchOnReceiveQueue: ^{
         self->_parseQueue.suspended = NO;
-        DDLogWarn(@"Parse queue is UNfreezed now!");
+        DDLogWarn(@"Parse queue is UNfrozen now!");
     }];
 }
 
@@ -692,7 +692,7 @@ NSString* const kStanza = @"stanza";
 {
     if(_sendQueue.suspended)
     {
-        DDLogWarn(@"Send queue of account %@ already freezed, doing nothing...", self);
+        DDLogWarn(@"Send queue of account %@ already frozen, doing nothing...", self);
         return;
     }
     
@@ -711,10 +711,10 @@ NSString* const kStanza = @"stanza";
 -(void) freeze
 {
     //this can only be done if this method is the only one that freezes the receive queue,
-    //because this shortcut assumes that parse and send queues are always freezed, too, if the receive queue is freezed
+    //because this shortcut assumes that parse and send queues are always frozen, too, if the receive queue is frozen
     if(_receiveQueue.suspended)
     {
-        DDLogWarn(@"Account %@ already freezed, doing nothing...", self);
+        DDLogWarn(@"Account %@ already frozen, doing nothing...", self);
         return;
     }
     
@@ -727,7 +727,8 @@ NSString* const kStanza = @"stanza";
     //to synchronize the parse queue freezing with the receive queue freezing
     [self dispatchAsyncOnReceiveQueue:^{
         [self freezeParseQueue];
-        //this is the last block running in the receive queue (it will be freezed once this block finishes execution)
+
+        //this is the last block running in the receive queue (it will be frozen once this block finishes execution)
         self->_receiveQueue.suspended = YES;
     }];
 }
@@ -738,22 +739,25 @@ NSString* const kStanza = @"stanza";
     
     [self unfreezeSendQueue];
     
-    //unfreeze receive queue before dispatching onto it
-    self->_receiveQueue.suspended = NO;
-    
     //make sure we don't have any race conditions by dispatching this to our receive queue
-    [self dispatchAsyncOnReceiveQueue:^{
+    //this operation has highest priority to make sure it will be executed first once unfrozen
+    NSBlockOperation* unfreezeOperation  = [NSBlockOperation blockOperationWithBlock:^{
         //this must be inside the dispatch async, because it will dispatch *SYNC* to the receive queue and potentially block or even deadlock the system
         [self unfreezeParseQueue];
         if(self.accountState < kStateReconnecting)
         {
-            DDLogInfo(@"Reloading UNFREEZED account %@", self.accountNo);
+            DDLogInfo(@"Reloading UNfrozen account %@", self.accountNo);
             //(re)read persisted state (could be changed by appex)
             [self readState];
         }
         else
-            DDLogInfo(@"Not reloading UNFREEZED account %@, already connected", self.accountNo);
+            DDLogInfo(@"Not reloading UNfrozen account %@, already connected", self.accountNo);
     }];
+    unfreezeOperation.queuePriority = NSOperationQueuePriorityVeryHigh;     //make sure this will become the first operation executed once unfreezed
+    [self->_receiveQueue addOperations: @[unfreezeOperation] waitUntilFinished:NO];
+    
+    //unfreeze receive queue and execute block added above
+    self->_receiveQueue.suspended = NO;
 }
 
 -(void) reinitLoginTimer

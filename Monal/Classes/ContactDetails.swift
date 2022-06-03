@@ -10,14 +10,6 @@ import UIKit
 import SwiftUI
 import monalxmpp
 
-func deleteHistoryButtonText(contact: MLContact) -> String {
-    if(contact.isGroup) {
-        return NSLocalizedString("Clear chat history of this group", comment: "")
-    } else {
-        return NSLocalizedString("Clear chat history of this contact", comment: "")
-    }
-}
-
 struct ContactDetails: View {
     var delegate: SheetDismisserProtocol
     @StateObject var contact: ObservableKVOWrapper<MLContact>
@@ -29,8 +21,8 @@ struct ContactDetails: View {
     @State private var showingResetOmemoSessionConfirmation = false
     
     func genContactsForMuc() -> [ObservableKVOWrapper<MLContact>] {
-        let xmppManager = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.obj.accountId)! as xmpp // FIXME probably not the correct way to get the accountNo of myself, this could cause bad/undefined behaviour when multiple accounts of the same monal instance are in the same group
-        let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.obj.contactJid, forAccountId: xmppManager.accountNo))
+        let xmppManager = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)! as xmpp // FIXME probably not the correct way to get the accountNo of myself, this could cause bad/undefined behaviour when multiple accounts of the same monal instance are in the same group
+        let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: xmppManager.accountNo))
         var contactList : [ObservableKVOWrapper<MLContact>]
         contactList = []
         for jidDict in jidList {
@@ -64,23 +56,23 @@ struct ContactDetails: View {
                     Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {
                         contact.obj.togglePinnedChat(!contact.isPinned);
                     }
+#if !DISABLE_OMEMO
+                    if(contact.isGroup == false) {
+                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: [contact], accountId: contact.accountId))) {
+                            Text("Encryption Keys")
+                        }
+                    } else if(contact.isGroup && contact.mucType == "group") {
+                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: genContactsForMuc(), accountId: contact.accountId))) {
+                            Text("Encryption Keys")
+                        }
+                    }
+#endif
                     
                     if(!contact.isGroup) {
                         NavigationLink(destination: NavigationLazyView(ContactResources(contact: contact))) {
                             Text("Resources")
                         }
                     }
-#if !DISABLE_OMEMO
-                    if(contact.obj.isGroup == false) {
-                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: [contact], accountId: contact.obj.accountId))) {
-                            Text("Encryption Keys")
-                        }
-                    } else if(contact.obj.isGroup && contact.obj.mucType == "group") {
-                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: genContactsForMuc(), accountId: contact.obj.accountId))) {
-                            Text("Encryption Keys")
-                        }
-                    }
-#endif
                 }
 
                 Section { // the destructive section...
@@ -177,9 +169,13 @@ struct ContactDetails: View {
                     Button(action: {
                         showingClearHistoryConfirmation = true
                     }) {
-                        Text(deleteHistoryButtonText(contact: contact.obj))
-                            .foregroundColor(.red)
+                        if(contact.isGroup) {
+                            Text("Clear chat history of this group")
+                        } else {
+                            Text("Clear chat history of this contact")
+                        }
                     }
+                    .foregroundColor(.red)
                     .actionSheet(isPresented: $showingClearHistoryConfirmation) {
                         ActionSheet(
                             title: Text(NSLocalizedString("Clear History", comment: "")),
@@ -197,11 +193,11 @@ struct ContactDetails: View {
                     }
                 }
 
+#if !DISABLE_OMEMO
                 //even more buttons
                 Section {
-#if !DISABLE_OMEMO
                     // only display omemo session reset button on 1:1 and private groups
-                    if(contact.obj.isGroup == false || (contact.obj.isGroup && contact.obj.mucType == "group"))
+                    if(contact.obj.isGroup == false || (contact.isGroup && contact.mucType == "group"))
                     {
                         Button(action: {
                             showingResetOmemoSessionConfirmation = true
@@ -225,11 +221,10 @@ struct ContactDetails: View {
                             )
                         }
                     }
-#endif
                 }
-                    
-                //make sure everything is aligned to the top of our view instead of vertically centered
+#endif
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationBarBackButtonHidden(true)                   // will not be shown because swiftui does not know we navigated here from UIKit
             .navigationBarItems(leading: Button(action : {
                 self.delegate.dismiss()

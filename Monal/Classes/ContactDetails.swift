@@ -50,18 +50,17 @@ struct ContactDetails: View {
                         //header
                         ContactDetailsHeader(contact: contact)
                         Spacer().frame(height: 20)
-
-                        //editables
-                        Group {
-                            TextField("Nickname", text: $contact.nickNameView)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .modifier(ClearButton(text: $contact.nickNameView))
-                        }
                     }
                 }.padding()
                     
                 // info/nondestructive buttons
                 Section {
+                    if(!contact.isGroup) {
+                        TextField("Nickname", text: $contact.nickNameView)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .modifier(ClearButton(text: $contact.nickNameView))
+                    }
+                    
                     Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {
                         contact.obj.togglePinnedChat(!contact.isPinned);
                     }

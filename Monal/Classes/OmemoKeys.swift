@@ -22,6 +22,16 @@ struct OmemoKeysEntry: View {
     private let account: xmpp
     private let isOwnDevice: Bool
     
+    init(account: xmpp, contactJid: String, deviceId: NSNumber, isOwnDevice: Bool) {
+        self.contactJid = contactJid
+        self.deviceId = deviceId
+        self.isOwnDevice = isOwnDevice
+        self.address = SignalAddress.init(name: contactJid, deviceId: deviceId.int32Value)
+        self.fingerprint = account.omemo.getIdentityFor(self.address)
+        self.trustLevel = account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
+        self.account = account
+    }
+    
     func setTrustLevel(_ enableTrust: Bool) {
         self.account.omemo.updateTrust(enableTrust, for: self.address)
         self.trustLevel = self.account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
@@ -167,16 +177,6 @@ struct OmemoKeysEntry: View {
             .frame(width: 300)
         }
     }
-
-    init(account: xmpp, contactJid: String, deviceId: NSNumber, isOwnDevice: Bool) {
-        self.contactJid = contactJid
-        self.deviceId = deviceId
-        self.isOwnDevice = isOwnDevice
-        self.address = SignalAddress.init(name: contactJid, deviceId: deviceId.int32Value)
-        self.fingerprint = account.omemo.getIdentityFor(self.address)
-        self.trustLevel = account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
-        self.account = account
-    }
 }
 
 struct OmemoKeysForContact: View {
@@ -189,6 +189,15 @@ struct OmemoKeysForContact: View {
     private let account: xmpp
     private let ownKeys: Bool
 
+    init(contact: ObservableKVOWrapper<MLContact>, account: xmpp) {
+        self.ownKeys = (account.connectionProperties.identity.jid == contact.obj.contactJid)
+        self.contactJid = contact.obj.contactJid
+        self.account = account
+        self.deviceId = account.omemo.monalSignalStore.deviceid as NSNumber
+        self.deviceIds = OrderedSet(self.account.omemo.knownDevices(forAddressName: self.contactJid))
+        self.selectedDeviceForDeletion = -1
+    }
+    
     func deleteButton(deviceId: NSNumber) -> some View {
         Button(action: {
             selectedDeviceForDeletion = deviceId // SwiftUI does not like to have deviceID nested in multiple functions, so safe this in the struct...
@@ -231,21 +240,12 @@ struct OmemoKeysForContact: View {
             }
         }
     }
-    
-    init(contact: ObservableKVOWrapper<MLContact>, account: xmpp) {
-        self.ownKeys = (account.connectionProperties.identity.jid == contact.obj.contactJid)
-        self.contactJid = contact.obj.contactJid
-        self.account = account
-        self.deviceId = account.omemo.monalSignalStore.deviceid as NSNumber
-        self.deviceIds = OrderedSet(self.account.omemo.knownDevices(forAddressName: self.contactJid))
-        self.selectedDeviceForDeletion = -1
-    }
 }
 
 struct OmemoKeys: View {
-    private let ownKeys: Bool
-    private let contacts: [ObservableKVOWrapper<MLContact>]
-    private let account: xmpp?
+    private var ownKeys: Bool
+    private var contacts: [ObservableKVOWrapper<MLContact>]
+    private var account: xmpp?
 
     // Needed for the alert message that is displayed when the scanned contact is not in the group
     @State private var scannedJid : String = ""
@@ -257,6 +257,33 @@ struct OmemoKeys: View {
 
     @State private var showScannedContactMissmatchAlert = false
 
+    init(contact: ObservableKVOWrapper<MLContact>?) {
+        self.account = nil
+        self.ownKeys = false
+        self.contacts = []
+        self.selectedContact = nil
+        if let contact = contact {
+            if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId) {
+                self.account = account
+                self.ownKeys = (!(contact.isGroup && contact.mucType == "group") && self.account!.connectionProperties.identity.jid == contact.contactJid)
+            }
+            if(contact.isGroup && contact.mucType == "group") {
+                // FIXME probably not the correct way to get the accountNo of myself, this could cause bad/undefined behaviour when multiple accounts of the same monal instance are in the same group
+                let xmppManager = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)! as xmpp
+                let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: xmppManager.accountNo))
+                self.contacts = []
+                for jidDict in jidList {
+                    if let participantJid = jidDict["participant_jid"] {
+                        let contact = MLContact.createContact(fromJid: participantJid as! String, andAccountNo: xmppManager.accountNo)
+                        self.contacts.append(ObservableKVOWrapper<MLContact>(contact))
+                    }
+                }
+            } else {
+                self.contacts = [contact]
+            }
+        }
+    }
+    
     func resetTrustFromQR(scannedJid : String, scannedFingerprints : Dictionary<NSInteger, String>) {
         let knownDevices = Array(self.account!.omemo.knownDevices(forAddressName: scannedJid))
         for (qrDeviceId, fingerprint) in scannedFingerprints {
@@ -355,31 +382,11 @@ struct OmemoKeys: View {
             }))
         }
     }
-
-    init(contacts: [ObservableKVOWrapper<MLContact>], accountId: NSNumber?) {
-        if(accountId == nil) {
-            self.ownKeys = false
-            self.account = nil
-        } else {
-            if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: accountId!) {
-                self.account = account
-                self.ownKeys = (
-                    contacts.count == 1 &&
-                    self.account!.connectionProperties.identity.jid == contacts.first!.obj.contactJid
-                )
-            } else {
-                self.ownKeys = false
-                self.account = nil
-            }
-        }
-        self.contacts = contacts
-        self.selectedContact = nil
-    }
 }
 
 struct OmemoKeys_Previews: PreviewProvider {
     static var previews: some View {
         // TODO some dummy views, requires a dummy xmpp obj
-        OmemoKeys(contacts:[], accountId: nil);
+        OmemoKeys(contact:nil);
     }
 }

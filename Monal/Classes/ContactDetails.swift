@@ -19,20 +19,6 @@ struct ContactDetails: View {
     @State private var showingAddContactConfirmation = false
     @State private var showingClearHistoryConfirmation = false
     @State private var showingResetOmemoSessionConfirmation = false
-    
-    func genContactsForMuc() -> [ObservableKVOWrapper<MLContact>] {
-        let xmppManager = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)! as xmpp // FIXME probably not the correct way to get the accountNo of myself, this could cause bad/undefined behaviour when multiple accounts of the same monal instance are in the same group
-        let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: xmppManager.accountNo))
-        var contactList : [ObservableKVOWrapper<MLContact>]
-        contactList = []
-        for jidDict in jidList {
-            if let participantJid = jidDict["participant_jid"] {
-                let contact = MLContact.createContact(fromJid: participantJid as! String, andAccountNo: xmppManager.accountNo)
-                contactList.append(ObservableKVOWrapper<MLContact>(contact))
-            }
-        }
-        return contactList
-    }
 
     var body: some View {
         NavigationView {
@@ -48,7 +34,7 @@ struct ContactDetails: View {
                 // info/nondestructive buttons
                 Section {
                     if(!contact.isGroup) {
-                        TextField("Nickname", text: $contact.nickNameView)
+                        TextField("Change Nickname", text: $contact.nickNameView)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .modifier(ClearButton(text: $contact.nickNameView))
                     }
@@ -58,11 +44,11 @@ struct ContactDetails: View {
                     }
 #if !DISABLE_OMEMO
                     if(contact.isGroup == false) {
-                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: [contact], accountId: contact.accountId))) {
+                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contact: contact))) {
                             Text("Encryption Keys")
                         }
                     } else if(contact.isGroup && contact.mucType == "group") {
-                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contacts: genContactsForMuc(), accountId: contact.accountId))) {
+                        NavigationLink(destination: NavigationLazyView(OmemoKeys(contact: contact))) {
                             Text("Encryption Keys")
                         }
                     }
@@ -143,14 +129,14 @@ struct ContactDetails: View {
                                 showingAddContactConfirmation = true
                             }) {
                                 if(contact.isGroup) {
-                                    Text(contact.mucType == "group" ? NSLocalizedString("Add Group to Favorites", comment: "") : NSLocalizedString("Add Channel to Favorites", comment: ""))
+                                    Text(contact.mucType == "group" ? NSLocalizedString("Join Group", comment: "") : NSLocalizedString("Join Channel", comment: ""))
                                 } else {
                                     Text("Add to contacts")
                                 }
                             }
                             .actionSheet(isPresented: $showingAddContactConfirmation) {
                                 ActionSheet(
-                                    title: Text(contact.isGroup ? (contact.mucType == "group" ? NSLocalizedString("Add Group to Favorites", comment: "") : NSLocalizedString("Add Channel to Favorites", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
+                                    title: Text(contact.isGroup ? (contact.mucType == "group" ? NSLocalizedString("Join Group", comment: "") : NSLocalizedString("Join Channel", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
                                     message: Text(contact.isGroup ? NSLocalizedString("You will receive subsequent messages from this conversation", comment: "") : NSLocalizedString("They will see when you are online. They will be able to send you encrypted messages.", comment: "")),
                                     buttons: [
                                         .cancel(),

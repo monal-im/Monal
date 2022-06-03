@@ -153,9 +153,9 @@ class SwiftuiInterface : NSObject {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
         if(ownContact == nil) {
-            host.rootView = AnyView(OmemoKeys(contacts: [], accountId: nil))
+            host.rootView = AnyView(OmemoKeys(contact: nil))
         } else {
-            host.rootView = AnyView(OmemoKeys(contacts: [ObservableKVOWrapper<MLContact>(ownContact!)], accountId: ownContact!.accountId))
+            host.rootView = AnyView(OmemoKeys(contact: ObservableKVOWrapper<MLContact>(ownContact!)))
         }
         return host
     }

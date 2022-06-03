@@ -152,7 +152,8 @@ struct OmemoKeysEntry: View {
                                 UIFont.monospacedSystemFont(ofSize: 11.0, weight: .regular)
                             ))
                     }
-                }.frame(width: 240)
+                }
+                Spacer()
                 // the trust level of our own device should not be displayed
                 if(!isOwnDevice) {
                     VStack(alignment:.center) {
@@ -162,6 +163,7 @@ struct OmemoKeysEntry: View {
                             getTrustLevelIcon()
                         }
                         Toggle("", isOn: trustLevelBinding).font(.footnote)
+                        .labelsHidden()     //make sure we do not need more space than the actual toggle needs
                     }
                 } else {
                     Button {
@@ -174,7 +176,6 @@ struct OmemoKeysEntry: View {
             .alert(isPresented: $showEntryInfo) {
                 getEntryInfoAlert()
             }
-            .frame(width: 300)
         }
     }
 }
@@ -227,7 +228,6 @@ struct OmemoKeysForContact: View {
     var body: some View {
         ForEach(self.deviceIds, id: \.self) { deviceId in
             HStack {
-                Spacer()
                 ZStack(alignment: .topLeading) {
                     OmemoKeysEntry(account: self.account, contactJid: self.contactJid, deviceId: deviceId, isOwnDevice: (ownKeys && deviceId == self.deviceId))
                     if(ownKeys == true) {
@@ -236,7 +236,6 @@ struct OmemoKeysForContact: View {
                         }
                     }
                 }
-                Spacer()
             }
         }
     }

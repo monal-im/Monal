@@ -268,13 +268,12 @@ struct OmemoKeys: View {
                 self.ownKeys = (!(contact.isGroup && contact.mucType == "group") && self.account!.connectionProperties.identity.jid == contact.contactJid)
             }
             if(contact.isGroup && contact.mucType == "group") {
-                // FIXME probably not the correct way to get the accountNo of myself, this could cause bad/undefined behaviour when multiple accounts of the same monal instance are in the same group
-                let xmppManager = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)! as xmpp
-                let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: xmppManager.accountNo))
+                //this uses the account the muc belongs to and treats every other account to be remote, even when multiple accounts of the same monal instance are in the same group
+                let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: contact.accountId))
                 self.contacts = []
                 for jidDict in jidList {
                     if let participantJid = jidDict["participant_jid"] {
-                        let contact = MLContact.createContact(fromJid: participantJid as! String, andAccountNo: xmppManager.accountNo)
+                        let contact = MLContact.createContact(fromJid: participantJid as! String, andAccountNo: contact.accountId)
                         self.contacts.append(ObservableKVOWrapper<MLContact>(contact))
                     }
                 }

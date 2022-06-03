@@ -724,9 +724,9 @@ NSString* const kStanza = @"stanza";
     //this does not have to be synchronized with the freezing of the parse queue and receive queue
     [self freezeSendQueue];
     
-    //freezing the parse queue will sync dispatch to the receive queue, let's do an async dispatch here
+    //freezing the parse queue will sync dispatch to the receive queue, let's do a sync dispatch here
     //to synchronize the parse queue freezing with the receive queue freezing
-    [self dispatchAsyncOnReceiveQueue:^{
+    [self dispatchOnReceiveQueue:^{
         [self freezeParseQueue];
 
         //this is the last block running in the receive queue (it will be frozen once this block finishes execution)

@@ -128,6 +128,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) killAppex
 {
     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+    DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
     
     [NotificationService setAppexCleanShutdownStatus:YES];

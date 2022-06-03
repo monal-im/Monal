@@ -25,10 +25,12 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 	#define SHORT_PING 16.0
 	#define LONG_PING 32.0
     #define MUC_PING 600
+    #define BGFETCH_DEFAULT_INTERVAL 3600*1
 #else
 	#define SHORT_PING 4.0
 	#define LONG_PING 16.0
     #define MUC_PING 3600
+    #define BGFETCH_DEFAULT_INTERVAL 3600*3
 #endif
 
 @class MLContact;

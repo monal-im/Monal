@@ -41,7 +41,6 @@
 
 #define GRACEFUL_TIMEOUT            20.0
 #define BGFETCH_GRACEFUL_TIMEOUT    60.0
-#define BGFETCH_DEFAULT_INTERVAL    3600*3
 
 typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 static NSString* kBackgroundFetchingTask = @"im.monal.fetch";

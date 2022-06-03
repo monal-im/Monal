@@ -268,9 +268,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             
             //don't post sync errors here, already did so above (see explanation there)
             
-            //check idle state and schedule a background task (handled in the main app) if not idle
-            if(![[MLXMPPManager sharedInstance] allAccountsIdle])
-                [self scheduleBackgroundFetchingTask];
+            //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
+            [self scheduleBackgroundFetchingTask:![[MLXMPPManager sharedInstance] allAccountsIdle]];
             
             //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
             //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
@@ -360,8 +359,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:NO];
 }
 
--(void) scheduleBackgroundFetchingTask
+-(void) scheduleBackgroundFetchingTask:(BOOL) force
 {
+    DDLogInfo(@"Scheduling new BackgroundFetchingTask with force=%s...", force ? "yes" : "no");
     [HelperTools dispatchSyncReentrant:^{
         NSError *error = NULL;
         // cancel existing task (if any)
@@ -372,14 +372,16 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
         request.requiresNetworkConnectivity = YES;
         request.requiresExternalPower = NO;
-        //assume there will be one next push incoming shortly and add an extra of 10 seconds on top of its handling time
-        request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];
+        if(force)
+            request.earliestBeginDate = nil;
+        else
+            request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
         BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
         if(!success) {
             // Errorcodes https://stackoverflow.com/a/58224050/872051
-            DDLogError(@"Failed to submit BGTask request %@, error: %@", request, error);
+            DDLogError(@"Failed to submit BGTask request: %@", error);
         } else {
-            DDLogVerbose(@"Success submitting BGTask request %@, error: %@", request, error);
+            DDLogVerbose(@"Success submitting BGTask request %@", request);
         }
     } onQueue:dispatch_get_main_queue()];
 }

@@ -1578,7 +1578,7 @@
 				CLASSPREFIX = ML;
 				DefaultBuildSystemTypeForWorkspace = Original;
 				LastSwiftUpdateCheck = 1240;
-				LastUpgradeCheck = 1220;
+				LastUpgradeCheck = 1330;
 				ORGANIZATIONNAME = Monal.im;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
@@ -1974,7 +1974,6 @@
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */,
 				3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */,
-				54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,

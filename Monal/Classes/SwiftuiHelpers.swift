@@ -12,6 +12,9 @@ import monalxmpp
 import Combine
 import CocoaLumberjack
 
+let monalGreen = Color(UIColor(red:128.0/255, green:203.0/255, blue:182.0/255, alpha:1.0));
+let monalDarkGreen = Color(UIColor(red:20.0/255, green:138.0/255, blue:103.0/255, alpha:1.0));
+
 class SheetDismisserProtocol: ObservableObject {
     weak var host: UIHostingController<AnyView>? = nil
     func dismiss() {
@@ -141,9 +144,9 @@ class SwiftuiInterface : NSObject {
     @objc
     func makeContactDetails(_ contact: MLContact) -> UIViewController {
         let delegate = SheetDismisserProtocol()
-        let details = ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact))
-        let host = UIHostingController(rootView:AnyView(details))
-        details.delegate.host = host
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        host.rootView = AnyView(ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact)))
         return host
     }
     

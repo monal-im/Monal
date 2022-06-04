@@ -9,6 +9,7 @@
 import CocoaLumberjack
 import AVFoundation
 import UIKit
+import SwiftUI
 
 @objc protocol MLLQRCodeScannerAccountLoginDelegate : AnyObject
 {
@@ -35,7 +36,7 @@ struct XMPPLoginQRCode : Codable
 
 @available(macCatalyst 14.0, *)
 @available(iOS 14.0, *)
-@objc class MLQRCodeScanner: UIViewController, AVCaptureMetadataOutputObjectsDelegate
+@objc class MLQRCodeScannerController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
 {
     @objc weak var loginDelegate : MLLQRCodeScannerAccountLoginDelegate?
     @objc weak var contactDelegate : MLLQRCodeScannerContactDelegate?
@@ -303,5 +304,69 @@ struct XMPPLoginQRCode : Codable
     func handleQRCodeError()
     {
         errorMsg(title: NSLocalizedString("Invalid format", comment: "QR-Code-Scanner: invalid format"), msg: NSLocalizedString("We could not find a xmpp related QR-Code", comment: "QR-Code-Scanner: invalid format"), startCaptureOnClose: true)
+    }
+}
+
+struct MLQRCodeScanner : UIViewControllerRepresentable {
+    let handleLogin: ((String, String) -> Void)?
+    let handleContact: ((String, Dictionary<NSInteger, String>) -> Void)?
+    let handleClose: (() -> Void)
+
+    class Coordinator: NSObject, MLLQRCodeScannerContactDelegate, MLLQRCodeScannerAccountLoginDelegate {
+        let handleLogin: ((String, String) -> Void)?
+        let handleContact: ((String, Dictionary<NSInteger, String>) -> Void)?
+        let handleClose: (() -> Void)
+
+        func MLQRCodeAccountLoginScanned(jid: String, password: String) {
+            if(self.handleLogin != nil) {
+                self.handleLogin!(jid, password)
+            }
+        }
+
+        func MLQRCodeContactScanned(jid: String, fingerprints: Dictionary<NSInteger, String>) {
+            if(self.handleContact != nil) {
+                self.handleContact!(jid, fingerprints)
+            }
+        }
+
+        func closeQRCodeScanner() {
+            self.handleClose()
+        }
+
+        init(handleLogin: ((String, String) -> Void)?, handleContact: ((String, Dictionary<NSInteger, String>) -> Void)?, handleClose: @escaping () -> Void) {
+            self.handleLogin = handleLogin
+            self.handleContact = handleContact
+            self.handleClose = handleClose
+        }
+    }
+
+    func makeUIViewController(context: UIViewControllerRepresentableContext<MLQRCodeScanner>) -> MLQRCodeScannerController {
+        let qrCodeScannerViewController = MLQRCodeScannerController()
+        if(self.handleLogin != nil) {
+            qrCodeScannerViewController.loginDelegate = context.coordinator
+        }
+        if(self.handleContact != nil) {
+            qrCodeScannerViewController.contactDelegate = context.coordinator
+        }
+        return qrCodeScannerViewController
+    }
+
+    func updateUIViewController(_ uiViewController: MLQRCodeScannerController, context: UIViewControllerRepresentableContext<MLQRCodeScanner>) {
+    }
+
+    func makeCoordinator() -> MLQRCodeScanner.Coordinator {
+        Coordinator(handleLogin: self.handleLogin, handleContact: self.handleContact, handleClose: self.handleClose);
+    }
+
+    init(handleContact: @escaping (String, Dictionary<NSInteger, String>) -> Void, handleClose: @escaping () -> Void) {
+        self.handleContact = handleContact
+        self.handleLogin = nil
+        self.handleClose = handleClose
+    }
+
+    init(handleLogin: @escaping (String, String) -> Void, handleClose: @escaping () -> Void) {
+        self.handleLogin = handleLogin
+        self.handleContact = nil
+        self.handleClose = handleClose
     }
 }

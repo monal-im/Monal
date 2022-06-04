@@ -130,6 +130,7 @@ void logException(NSException* exception)
         [XMPPDataForm class],
         [MLContact class],
         [MLMessage class],
+        [NSURL class],
     ]] fromData:data error:&error];
     if(error)
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];

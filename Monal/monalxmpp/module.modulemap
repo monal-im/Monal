@@ -10,11 +10,11 @@ module xmppPrivate {
     header "../Classes/xmpp.h"
     export *
 }
-module MLOMEMO {
+module MLOMEMOPrivate {
     header "../Classes/MLOMEMO.h"
     export *
 }
-module MLSignalStore {
+module MLSignalStorePrivate {
     header "../Classes/MLSignalStore.h"
     export *
 }
@@ -24,9 +24,5 @@ module MLXMPPManagerPrivate {
 }
 module MLImageManagerPrivate {
     header "../Classes/MLImageManager.h"
-    export *
-}
-module MLResourcesTableViewControllerPrivate {
-    header "../Classes/MLResourcesTableViewController.h"
     export *
 }

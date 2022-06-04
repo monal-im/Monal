@@ -1696,7 +1696,7 @@ static NSDateFormatter* dbFormatter;
 -(NSMutableArray<MLContact*>*) activeContactsWithPinned:(BOOL) pinned
 {
     return [self.db idReadTransaction:^{
-        NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b ON (a.buddy_name = b.buddy_name AND a.account_id = b.account_id) JOIN account ON a.account_id = account.account_id WHERE a.pinned=? ORDER BY lastMessageTime DESC;";
+        NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b ON (a.buddy_name = b.buddy_name AND a.account_id = b.account_id) JOIN account ON a.account_id = account.account_id WHERE a.pinned=? AND account.enabled ORDER BY lastMessageTime DESC;";
         NSMutableArray<MLContact*>* toReturn = [[NSMutableArray<MLContact*> alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]])
             [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
@@ -1922,7 +1922,7 @@ static NSDateFormatter* dbFormatter;
             payload[@"account_id"],
             payload[@"recipient"],
             payload[@"type"],
-            payload[@"data"],
+            [HelperTools serializeObject:payload[@"data"]],
             payload[@"comment"],
         ]];
     }];
@@ -1931,7 +1931,16 @@ static NSDateFormatter* dbFormatter;
 -(NSArray*) getShareSheetPayloadForAccountNo:(NSNumber*) accountNo
 {
     return [self.db idWriteTransaction:^{
-        return [self.db executeReader:@"SELECT * FROM sharesheet_outbox WHERE account_id=? ORDER BY id ASC;" andArguments:@[accountNo]];
+        NSArray* payloadList = [self.db executeReader:@"SELECT * FROM sharesheet_outbox WHERE account_id=? ORDER BY id ASC;" andArguments:@[accountNo]];
+        NSMutableArray* retval = [[NSMutableArray alloc] init];
+        for(NSDictionary* entry_ in payloadList)
+        {
+            NSMutableDictionary* entry = [[NSMutableDictionary alloc] initWithDictionary:entry_];
+            if(entry[@"data"])
+                entry[@"data"] = [HelperTools unserializeData:entry[@"data"]];
+            [retval addObject:entry];
+        }
+        return (NSArray*)retval;
     }];
 }
 

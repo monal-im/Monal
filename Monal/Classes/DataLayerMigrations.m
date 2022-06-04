@@ -1109,6 +1109,13 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:5.118 withBlock:^{
             [db executeNonQuery:@"UPDATE account SET rosterVersion=NULL;"];
         }];
+        
+        //change data column in sharesheet outbox table to TEXT instead of length-bound VARCHAR and truncate table to make sure we don't have NULL data entries
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.119 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE sharesheet_outbox DROP COLUMN data;"];
+            [db executeNonQuery:@"ALTER TABLE sharesheet_outbox ADD COLUMN data TEXT DEFAULT NULL;"];
+            [db executeNonQuery:@"DELETE FROM sharesheet_outbox;"];
+        }];
 
 
         // check if db version changed

@@ -158,33 +158,60 @@
         return;
     }
     
-    //handle muc status codes in self-presences
-    if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
-        [self handleStatusCodes:presenceNode];
-    
-    //extract info if present (use an empty dict if no info is present)
-    NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
-    if(!item)
-        item = [[NSMutableDictionary alloc] init];
-    
-    //update jid to be a bare jid and add muc nick to our dict
-    if(item[@"jid"])
-        item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
-    item[@"nick"] = presenceNode.fromResource;
-    
-    //handle presences
-    if([presenceNode check:@"/<type=unavailable>"])
-        [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
-    else
+    //handle presences from muc bare jid
+    if(presenceNode.fromResource == nil)
     {
+        DDLogVerbose(@"Got muc presence from bare jid: %@", presenceNode.from);
         if([[DataLayer sharedInstance] isContactInList:presenceNode.fromUser forAccount:_account.accountNo])
         {
-            if(item[@"jid"] != nil)
-                [self handleMembersListUpdate:presenceNode];
-            [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+            //check vcard hash
+            NSString* avatarHash = [presenceNode findFirst:@"{vcard-temp:x:update}x/photo#"];
+            NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:presenceNode.fromUser andAccount:_account.accountNo];
+            DDLogVerbose(@"Checking if avatar hash in presence '%@' equals stored hash '%@'...", avatarHash, currentHash);
+            if(!(currentHash && [avatarHash isEqualToString:currentHash]))
+            {
+                DDLogInfo(@"Got new muc avatar hash '%@' for muc %@, fetching new image via vcard-temp...", avatarHash, presenceNode.fromUser);
+                [self fetchAvatarForRoom:presenceNode.fromUser];
+            }
+            else
+                DDLogInfo(@"Avatar hash '%@' of muc %@ did not change, not updating avatar...", avatarHash, presenceNode.fromUser);
         }
         else
             DDLogInfo(@"Ignoring presence updates from %@, MUC not in buddylist", presenceNode.fromUser);
+    }
+    //handle reflected presences
+    else
+    {
+        DDLogVerbose(@"Got muc presence from full jid: %@", presenceNode.from);
+        
+        //handle muc status codes in self-presences
+        if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
+            [self handleStatusCodes:presenceNode];
+        
+        //extract info if present (use an empty dict if no info is present)
+        NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
+        if(!item)
+            item = [[NSMutableDictionary alloc] init];
+        
+        //update jid to be a bare jid and add muc nick to our dict
+        if(item[@"jid"])
+            item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
+        item[@"nick"] = presenceNode.fromResource;
+        
+        //handle presences
+        if([presenceNode check:@"/<type=unavailable>"])
+            [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+        else
+        {
+            if([[DataLayer sharedInstance] isContactInList:presenceNode.fromUser forAccount:_account.accountNo])
+            {
+                if(item[@"jid"] != nil)
+                    [self handleMembersListUpdate:presenceNode];
+                [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+            }
+            else
+                DDLogInfo(@"Ignoring presence updates from %@, MUC not in buddylist", presenceNode.fromUser);
+        }
     }
 }
 
@@ -399,9 +426,6 @@
                 [_noUpdateBookmarks removeObject:node.fromUser];
             }
             
-            //load muc avatar
-            [self fetchAvatarForRoom:node.fromUser];
-            
             monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
             if(uiHandler)
             {
@@ -465,8 +489,6 @@
                 {
                     DDLogInfo(@"Muc config of %@ changed, sending new disco info query to reload muc config...", node.fromUser);
                     [self sendDiscoQueryFor:node.from withJoin:NO andBookmarksUpdate:NO];
-                    //reload muc avatar
-                    [self fetchAvatarForRoom:node.fromUser];
                     break;
                 }
                 default:

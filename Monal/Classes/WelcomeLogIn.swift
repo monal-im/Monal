@@ -7,51 +7,50 @@
 //
 
 import SwiftUI
+import monalxmpp
 
 struct WelcomeLogIn: View {
-    static private let credFaultyPattern = ".+@.+\\..{2,}$"
     var delegate: SheetDismisserProtocol
     
-    @State private var account: String = ""
+    static private let credFaultyPattern = "^.+@.+\\..{2,}$"
+    
+    @State private var jid: String = ""
     @State private var password: String = ""
 
     @State private var showAlert = false
     @State private var showQRCodeScanner = false
     
-    @State private var alertPrompt = AlertPrompt(dismissLabel: "Close")
+    @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
     
     private var credentialsEnteredAlert: Bool {
-        alertPrompt.title = "No Empty Values!"
-        alertPrompt.message = "Please make sure you have entered a username, password."
-
+        alertPrompt.title = Text("No Empty Values!")
+        alertPrompt.message = Text("Please make sure you have entered a username and password.")
         return credentialsEntered
     }
 
     private var credentialsFaultyAlert: Bool {
-        alertPrompt.title = "Invalid Credentials!"
-        alertPrompt.message = "Your XMPP account should be in in the format user@domain. For special configurations, use manual setup."
-
+        alertPrompt.title = Text("Invalid Credentials!")
+        alertPrompt.message = Text("Your XMPP jid should be in in the format user@domain.tld. For special configurations, use manual setup.")
         return credentialsFaulty
     }
 
     private var credentialsExistAlert: Bool {
-        alertPrompt.title = "Duplicate Account!"
-        alertPrompt.message = "This account already exists on this instance."
-        
+        alertPrompt.title = Text("Duplicate jid!")
+        alertPrompt.message = Text("This jid already exists on this instance.")
         return credentialsExist
     }
 
     private var credentialsEntered: Bool {
-        return !account.isEmpty && !password.isEmpty
+        return !jid.isEmpty && !password.isEmpty
     }
     
     private var credentialsFaulty: Bool {
-        return account.range(of: WelcomeLogIn.credFaultyPattern, options:.regularExpression) == nil
+        return jid.range(of: WelcomeLogIn.credFaultyPattern, options:.regularExpression) == nil
     }
     
     private var credentialsExist: Bool {
-        // To be replaced by actual test if user already exist on the monal instance, based on entered account or qrcode account
-        return false
+        let components = jid.components(separatedBy: "@")
+        return DataLayer.sharedInstance().doesAccountExistUser(components[0], andDomain:components[1])
     }
 
     private var buttonColor: Color {
@@ -68,16 +67,16 @@ struct WelcomeLogIn: View {
                             .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
                             .padding()
                         
-                        Text("Log in to your existing account or register an account. If required you will find more advanced options in Monal settings.")
+                        Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
                             .padding()
                         
                     }
                     .frame(maxWidth: .infinity)
                     
                     Form {
-                        TextField("user@domain", text: Binding(
-                            get: { self.account },
-                            set: { string in self.account = string.lowercased() })
+                        TextField("user@domain.tld", text: Binding(
+                            get: { self.jid },
+                            set: { string in self.jid = string.lowercased() })
                         )
                         .disableAutocorrection(true)
                         
@@ -88,7 +87,7 @@ struct WelcomeLogIn: View {
                                 showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
                                 
                                 if !showAlert {
-                                    // TODO: Code/Action for actual login via account and password and jump to whatever view after successful login
+                                    // TODO: Code/Action for actual login via jid and password and jump to whatever view after successful login
                                 }
                             }){
                                 Text("Login")
@@ -100,14 +99,13 @@ struct WelcomeLogIn: View {
                             }
                             .buttonStyle(BorderlessButtonStyle())
                             .alert(isPresented: $showAlert) {
-                                Alert(title: Text("\(alertPrompt.title)"), message: Text("\(alertPrompt.message)"), dismissButton: .default(Text("\(alertPrompt.dismissLabel)")))
+                                Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
                             }
 
-                            // Just sets the credential in account and password variables and shows them in the input fields
+                            // Just sets the credential in jid and password variables and shows them in the input fields
                             // so user can control what they scanned and if o.k. login via the "Login" button.
                             Button(action: {
-                                showAlert = credentialsExistAlert
-                                showQRCodeScanner = !showAlert
+                                showQRCodeScanner = true
                             }){
                                 Image(systemName: "qrcode")
                                     .frame(maxHeight: .infinity)
@@ -117,13 +115,17 @@ struct WelcomeLogIn: View {
                                     .clipShape(Circle())
                             }
                             .buttonStyle(BorderlessButtonStyle())
-                            .alert(isPresented: $showAlert) {
-                                Alert(title: Text("\(alertPrompt.title)"), message: Text("\(alertPrompt.message)"), dismissButton: .default(Text("\(alertPrompt.dismissLabel)")))
-                            }
                             .sheet(isPresented: $showQRCodeScanner) {
                                 Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
-                                // Get existing credentials from QR and put values in account and password
-                                QRCodeScannerView($account, $password, $showQRCodeScanner)
+                                // Get existing credentials from QR and put values in jid and password
+                                MLQRCodeScanner(
+                                    handleLogin: { jid, password in
+                                        self.jid = jid
+                                        self.password = password
+                                    }, handleClose: {
+                                        self.showQRCodeScanner = false
+                                    }
+                                )
                             }
 
                         }
@@ -133,7 +135,7 @@ struct WelcomeLogIn: View {
                         }
                         
                         Button(action: {
-                            // TODO: Code/Action for jump to whatever view after not setting up an account ...
+                            self.delegate.dismiss()
                         }){
                            Text("Set up account later")
                                .frame(maxWidth: .infinity)
@@ -147,6 +149,14 @@ struct WelcomeLogIn: View {
             }
             
             .navigationTitle("Welcome")
+            
+            .navigationBarBackButtonHidden(true)                   // will not be shown because swiftui does not know we navigated here from UIKit
+            .navigationBarItems(leading: Button(action : {
+                self.delegate.dismiss()
+            }){
+                Image(systemName: "arrow.backward")
+            }
+            .keyboardShortcut(.escape, modifiers: []))
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }

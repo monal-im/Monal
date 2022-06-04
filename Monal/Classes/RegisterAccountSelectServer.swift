@@ -25,25 +25,25 @@ struct RegisterAccountSelectServer: View {
     @State private var showAlert = false
     @State private var activateLinkNavigation = false
 
-    @State private var alertPrompt = AlertPrompt(dismissLabel: "Close")
+    @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
 
     private var serverSelectedAlert: Bool {
-        alertPrompt.title = "No XMPP server!"
-        alertPrompt.message = "Please select a XMPP server or provide one."
+        alertPrompt.title = Text("No XMPP server!")
+        alertPrompt.message = Text("Please select a XMPP server or provide one.")
 
         return serverSelected
     }
 
     private var serverProvidedAlert: Bool {
-        alertPrompt.title = "No XMPP server!"
-        alertPrompt.message = "Please select a XMPP server or provide one."
+        alertPrompt.title = Text("No XMPP server!")
+        alertPrompt.message = Text("Please select a XMPP server or provide one.")
 
         return serverProvided
     }
 
     private var xmppServerFaultyAlert: Bool {
-        alertPrompt.title = "XMPP server domain not valid!"
-        alertPrompt.message = "Please provide a valid XMPP server domain or select one."
+        alertPrompt.title = Text("XMPP server domain not valid!")
+        alertPrompt.message = Text("Please provide a valid XMPP server domain or select one.")
 
         return xmppServerFaulty
     }
@@ -80,7 +80,7 @@ struct RegisterAccountSelectServer: View {
                             }
                         ForEach (RegisterAccountSelectServer.XMPPServer.indices, id: \.self) {
                             if $0 != 0 {
-                                Text("\(RegisterAccountSelectServer.XMPPServer[$0]["XMPPServer"] ?? "")").tag($0)
+                                Text(RegisterAccountSelectServer.XMPPServer[$0]["XMPPServer"] ?? "").tag($0)
                             }
                         }
                     }
@@ -113,7 +113,7 @@ struct RegisterAccountSelectServer: View {
                         }
                     }
                     .alert(isPresented: $showAlert) {
-                        Alert(title: Text("\(alertPrompt.title)"), message: Text("\(alertPrompt.message)"), dismissButton: .default(Text("\(alertPrompt.dismissLabel)")))
+                        Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
                     }
                                         
                     Text("The selectable XMPP servers are public servers which are not affiliated to Monal. This registration page is provided for convenience only.")

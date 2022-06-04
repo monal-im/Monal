@@ -522,13 +522,23 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     {
         MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
         contact.isGroup = YES;                                  //this is a group --> tell addContact: to join this group
-        [[MLXMPPManager sharedInstance] addContact:contact];    //will handle group joins and normal contacts transparently
         //wait for join to finish before opening contact
-        NSNumber* accountNo = account.accountNo;        //needed because of retain cycle
-        [account.mucProcessor addUIHandler:^(id _data __unused) {
+        NSNumber* accountNo = account.accountNo;                //needed because of retain cycle
+        [account.mucProcessor addUIHandler:^(id _data) {
+            NSDictionary* data = (NSDictionary*)_data;
+            if(![data[@"success"] boolValue])
+            {
+                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error entering groupchat", @"") message:data[@"errorMessage"] preferredStyle:UIAlertControllerStyleAlert];
+                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                }]];
+                [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
+                [[MLXMPPManager sharedInstance] removeContact:contact];
+                return;
+            }
             [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:accountNo];
             [self openChatOfContact:contact];
         } forMuc:jid];
+        [[MLXMPPManager sharedInstance] addContact:contact];    //will handle group joins and normal contacts transparently
         return;
     }
     

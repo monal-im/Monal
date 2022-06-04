@@ -25,8 +25,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(BOOL) allAccountsIdle;
 
--(MLContact* _Nullable) sendAllOutboxes;
-
 #pragma  mark connectivity
 /**
  Checks if there are any enabled acconts and connects them if necessary.  

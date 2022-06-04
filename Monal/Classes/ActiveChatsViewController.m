@@ -61,12 +61,12 @@ static NSMutableSet* _smacksWarningDisplayed;
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
-    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate setActiveChatsController:self];
+    MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
+    appDelegate.activeChats = self;
     
-     self.chatListTable = [[UITableView alloc] init];
-     self.chatListTable.delegate = self;
-     self.chatListTable.dataSource = self;
+    self.chatListTable = [[UITableView alloc] init];
+    self.chatListTable.delegate = self;
+    self.chatListTable.dataSource = self;
     
     self.view = self.chatListTable;
     
@@ -404,6 +404,11 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact
 {
+    return [self presentChatWithContact:contact andCompletion:nil];
+}
+
+-(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion
+{
     // clear old chat before opening a new one (but not for splitView == YES)
     if([HelperTools deviceUsesSplitView] == NO)
         [self.navigationController popViewControllerAnimated:NO];
@@ -411,14 +416,18 @@ static NSMutableSet* _smacksWarningDisplayed;
     // show placeholder if contact is nil, open chat otherwise
     if(contact == nil)
     {
-        [self openConversationPlaceholder:contact];
+        [self openConversationPlaceholder:nil];
+        if(completion != nil)
+            completion(@NO);
         return;
     }
     // check if the contact is a buddy
     if([[DataLayer sharedInstance] isContactInList:contact.contactJid forAccount:contact.accountId] == NO)
     {
         DDLogError(@"Contact %@ unkown", contact.contactJid);
-        [self openConversationPlaceholder:contact];
+        [self openConversationPlaceholder:nil];
+        if(completion != nil)
+            completion(@NO);
         return;
     }
     // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
@@ -426,11 +435,15 @@ static NSMutableSet* _smacksWarningDisplayed;
     {
         // make sure the already open chat is reloaded and return
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+        if(completion != nil)
+            completion(@YES);
         return;
     }
 
     // open chat
     [self performSegueWithIdentifier:@"showConversation" sender:contact];
+    if(completion != nil)
+        completion(@YES);
 }
 
 /*
@@ -506,6 +519,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         UIBarButtonItem* barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
         self.navigationItem.backBarButtonItem = barButtonItem;
         [chatVC setupWithContact:sender];
+        self.currentChatViewController = chatVC;
     }
     else if([segue.identifier isEqualToString:@"showDetails"])
     {

@@ -14,13 +14,17 @@
 
 @import UserNotifications;
 
+@class ActiveChatsViewController;
+
 @interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate>
 
-@property (nonatomic, strong) UIWindow* window;
+@property (nonatomic, strong) UIWindow* _Nullable window;
+@property (nonatomic, weak) ActiveChatsViewController* _Nullable activeChats;
 
 -(void) updateUnread;
--(void) handleXMPPURL:(NSURL*) url;
--(void) setActiveChatsController: (UIViewController*) activeChats;
+-(void) handleXMPPURL:(NSURL* _Nonnull) url;
+-(void) openChatOfContact:(MLContact* _Nullable) contact;
+-(void) openChatOfContact:(MLContact* _Nullable) contact withCompletion:(monal_id_block_t _Nullable) completion;
 
 @end
 

@@ -38,6 +38,7 @@
 #import "XMPPIQ.h"
 #import "XMPPPresence.h"
 #import "XMPPMessage.h"
+#import "chatViewController.h"
 
 #define GRACEFUL_TIMEOUT            20.0
 #define BGFETCH_GRACEFUL_TIMEOUT    60.0
@@ -52,10 +53,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     BGTask* _bgFetch;
     monal_void_block_t _backgroundTimer;
     MLContact* _contactToOpen;
+    monal_id_block_t _completionToCall;
     BOOL _shutdownPending;
     BOOL _wasFreezed;
 }
-@property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @end
 
 @implementation MonalAppDelegate
@@ -404,10 +405,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //[UIApplication sharedApplication].applicationIconBadgeNumber=0;
 }
 
--(void) setActiveChatsController: (UIViewController*) activeChats
+-(void) setActiveChats:(UIViewController*) activeChats
 {
-    self.activeChats = (ActiveChatsViewController*)activeChats;
-    [self openChatOfContact:_contactToOpen];
+    _activeChats = (ActiveChatsViewController*)activeChats;
+    [self openChatOfContact:_contactToOpen withCompletion:_completionToCall];
 }
 
 #pragma mark - handling urls
@@ -566,10 +567,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //make sure our outbox content is sent (if the mainapp is still connected and also was in foreground while the sharesheet was used)
         //and open the chat the newest outbox entry was sent to
         DDLogInfo(@"Got monalOpen:// url, trying to send all outboxes...");
-        MLContact* lastRecipientContact = [[MLXMPPManager sharedInstance] sendAllOutboxes];
-        [[DataLayer sharedInstance] addActiveBuddies:lastRecipientContact.contactJid forAccount:lastRecipientContact.accountId];
-        DDLogVerbose(@"Trying to open chat for %@", lastRecipientContact.contactJid);
-        [self openChatOfContact:lastRecipientContact];
+        [self sendAllOutboxes];
         return YES;
     }
     return NO;
@@ -695,8 +693,15 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) openChatOfContact:(MLContact* _Nullable) contact
 {
+    return [self openChatOfContact:contact withCompletion:nil];
+}
+
+-(void) openChatOfContact:(MLContact* _Nullable) contact withCompletion:(monal_id_block_t _Nullable) completion
+{
     if(contact != nil)
         _contactToOpen = contact;
+    if(completion != nil)
+        _completionToCall = completion;
     
     if(self.activeChats != nil && _contactToOpen != nil)
     {
@@ -706,11 +711,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             {
                 DDLogDebug(@"Opening chat for contact %@", [contact contactJid]);
                 // open new chat
-                [(ActiveChatsViewController*)self.activeChats presentChatWithContact:self->_contactToOpen];
+                [(ActiveChatsViewController*)self.activeChats presentChatWithContact:self->_contactToOpen andCompletion:self->_completionToCall];
             }
             else
                 DDLogDebug(@"_contactToOpen changed to nil, not opening chat for contact %@", [contact contactJid]);
             self->_contactToOpen = nil;
+            self->_completionToCall = nil;
         }));
     }
     else
@@ -1332,6 +1338,93 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         };
         DDLogInfo(@"Added timer %@ to wakeup completion list...", completionId);
     }
+}
+
+
+#pragma mark - share sheet added
+
+-(void) sendAllOutboxes
+{
+    //send all sharesheet outboxes (this method will be called by AppDelegate if opened via monalOpen:// url)
+    MLContact* lastRecipientContact = nil;
+    for(xmpp* xmppAccount in [MLXMPPManager sharedInstance].connectedXMPP)
+    {
+        DDLogVerbose(@"Trying to send outbox for account %@...", xmppAccount);
+        MLContact* recipientContact = [self sendOutboxForAccount:xmppAccount];
+        if(recipientContact != nil)
+            lastRecipientContact = recipientContact;
+    }
+    DDLogVerbose(@"Trying to open chat of outbox receiver: %@", lastRecipientContact);
+    MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
+    [appDelegate openChatOfContact:lastRecipientContact withCompletion:^(NSNumber* _Nonnull status){
+        if([status boolValue] && appDelegate.activeChats.currentChatViewController != nil)
+            [appDelegate.activeChats.currentChatViewController showUploadHUD];
+    }];
+}
+
+-(MLContact*) sendOutboxForAccount:(xmpp*) account
+{
+    MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
+    MLContact* recipientContact = nil;
+    monal_id_block_t sendCommentOrCleanup = ^(NSDictionary* payload) {
+        if([payload[@"comment"] length] > 0)
+        {
+            MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
+            BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"comment"] toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                DDLogInfo(@"SHARESHEET_SEND_COMMENT success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                    if(appDelegate.activeChats.currentChatViewController != nil)
+                        [appDelegate.activeChats.currentChatViewController hideUploadHUD];
+                });
+            }];
+        }
+        else
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                if(appDelegate.activeChats.currentChatViewController != nil)
+                    [appDelegate.activeChats.currentChatViewController hideUploadHUD];
+            });
+    };
+    for(NSDictionary* payload in [[DataLayer sharedInstance] getShareSheetPayloadForAccountNo:account.accountNo])
+    {
+        DDLogInfo(@"Sending outbox entry: %@", payload);
+        MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
+        recipientContact = contact;     //save last used contact
+        BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
+        if([payload[@"type"] isEqualToString:@"geo"] || [payload[@"type"] isEqualToString:@"url"] || [payload[@"type"] isEqualToString:@"text"])
+        {
+            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                sendCommentOrCleanup(payload);
+            }];
+        }
+        else if([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"contact"] || [payload[@"type"] isEqualToString:@"audiovisual"])
+        {
+            DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
+            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+            $call(payload[@"data"], $ID(account), $BOOL(encrypt, encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                if(error != nil)
+                {
+                    DDLogError(@"Failed to upload outbox file: %@", error);
+                    [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+                }
+                else
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                            DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                            sendCommentOrCleanup(payload);
+                        }];
+                    });
+            })));
+        }
+        else
+            MLAssert(NO, @"Outbox payload type unknown", payload);
+    }
+    return recipientContact;
 }
 
 @end

@@ -78,4 +78,7 @@
 
 -(void) reloadTable;
 
+-(void) showUploadHUD;
+-(void) hideUploadHUD;
+
 @end

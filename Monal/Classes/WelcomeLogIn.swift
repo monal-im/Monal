@@ -54,111 +54,120 @@ struct WelcomeLogIn: View {
     }
 
     private var buttonColor: Color {
-        return !credentialsEntered || credentialsFaulty ? .gray : .blue
+        return !credentialsEntered || credentialsFaulty ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
     }
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .leading) {
-                    HStack () {
-                        Image(decorative: "AppLogo")
-                            .resizable()
-                            .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
-                            .padding()
-                        
-                        Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
-                            .padding()
-                        
-                    }
-                    .frame(maxWidth: .infinity)
-                    
-                    Form {
-                        TextField("user@domain.tld", text: Binding(
-                            get: { self.jid },
-                            set: { string in self.jid = string.lowercased() })
-                        )
-                        .disableAutocorrection(true)
-                        
-                        SecureField("Password", text: $password)
-                        
-                        HStack() {
-                            Button(action: {
-                                showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
-                                
-                                if !showAlert {
-                                    // TODO: Code/Action for actual login via jid and password and jump to whatever view after successful login
-                                }
-                            }){
-                                Text("Login")
-                                    .frame(maxWidth: .infinity)
-                                    .padding(9.0)
-                                    .background(Color(red: 0.897, green: 0.878, blue: 0.878))
-                                    .foregroundColor(buttonColor)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                            .alert(isPresented: $showAlert) {
-                                Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
-                            }
+            ZStack {
+                Color(UIColor.systemGroupedBackground).ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(alignment: .leading) {
+                        HStack () {
+                            Image(decorative: "AppLogo")
+                                .resizable()
+                                .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
+                                .padding()
+                            
+                            Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
+                                .padding()
+                                .padding(.leading, -16.0)
+                            
+                        }
+                        .frame(maxWidth: .infinity)
+                        .background(Color(UIColor.systemBackground))
 
-                            // Just sets the credential in jid and password variables and shows them in the input fields
-                            // so user can control what they scanned and if o.k. login via the "Login" button.
-                            Button(action: {
-                                showQRCodeScanner = true
-                            }){
-                                Image(systemName: "qrcode")
-                                    .frame(maxHeight: .infinity)
-                                    .padding(9.0)
-                                    .background(Color(red: 0.897, green: 0.878, blue: 0.878))
-                                    .foregroundColor(.black)
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                            .sheet(isPresented: $showQRCodeScanner) {
-                                Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
-                                // Get existing credentials from QR and put values in jid and password
-                                MLQRCodeScanner(
-                                    handleLogin: { jid, password in
-                                        self.jid = jid
-                                        self.password = password
-                                    }, handleClose: {
-                                        self.showQRCodeScanner = false
+                        Form {
+                            TextField("user@domain.tld", text: Binding(
+                                get: { self.jid },
+                                set: { string in self.jid = string.lowercased() })
+                            )
+                            .disableAutocorrection(true)
+                            
+                            SecureField("Password", text: $password)
+                            
+                            HStack() {
+                                Button(action: {
+                                    showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
+                                    
+                                    if (!showAlert) {
+                                        // TODO: Code/Action for actual login via jid and password and jump to whatever view after successful login
                                     }
-                                )
-                            }
+                                }){
+                                    Text("Login")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(9.0)
+                                        .background(Color(UIColor.tertiarySystemFill))
+                                        .foregroundColor(buttonColor)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                                .alert(isPresented: $showAlert) {
+                                    Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
+                                }
 
+                                // Just sets the credential in jid and password variables and shows them in the input fields
+                                // so user can control what they scanned and if o.k. login via the "Login" button.
+                                Button(action: {
+                                    showQRCodeScanner = true
+                                }){
+                                    Image(systemName: "qrcode")
+                                        .frame(maxHeight: .infinity)
+                                        .padding(9.0)
+                                        .background(Color(UIColor.tertiarySystemFill))
+                                        .foregroundColor(.black)
+                                        .clipShape(Circle())
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                                .sheet(isPresented: $showQRCodeScanner) {
+                                    Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
+                                    // Get existing credentials from QR and put values in jid and password
+                                    MLQRCodeScanner(
+                                        handleLogin: { jid, password in
+                                            self.jid = jid
+                                            self.password = password
+                                        }, handleClose: {
+                                            self.showQRCodeScanner = false
+                                        }
+                                    )
+                                }
+
+                            }
+                            
+                            NavigationLink(destination: RegisterAccount()) {
+                                Text("Register")
+                            }
+                            
+                            Button(action: {
+                                self.delegate.dismiss()
+                            }){
+                               Text("Set up account later")
+                                   .frame(maxWidth: .infinity)
+                                   .padding(.top, 10.0)
+                                   .padding(.bottom, 9.0)
+                            }
                         }
-                        
-                        NavigationLink(destination: RegisterAccountSelectServer()) {
-                            Text("Register")
-                        }
-                        
-                        Button(action: {
-                            self.delegate.dismiss()
-                        }){
-                           Text("Set up account later")
-                               .frame(maxWidth: .infinity)
-                               .padding(.top, 10.0)
-                               .padding(.bottom, 9.0)
-                        }
+                        .frame(minHeight: 310)
+                        .textFieldStyle(.roundedBorder)
+                        .onAppear {UITableView.appearance().tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 30))}
                     }
-                    .frame(minHeight: 310)
-                    .textFieldStyle(.roundedBorder)
                 }
+
+                .navigationTitle("Welcome")
+
+                .navigationBarBackButtonHidden(true)                   // will not be shown because swiftui does not know we navigated here from UIKit
+                .navigationBarItems(leading: Button(action : {
+                    self.delegate.dismiss()
+                }){
+                    Image(systemName: "arrow.backward")
+                }
+                .keyboardShortcut(.escape, modifiers: []))
             }
-            
-            .navigationTitle("Welcome")
-            
-            .navigationBarBackButtonHidden(true)                   // will not be shown because swiftui does not know we navigated here from UIKit
-            .navigationBarItems(leading: Button(action : {
-                self.delegate.dismiss()
-            }){
-                Image(systemName: "arrow.backward")
-            }
-            .keyboardShortcut(.escape, modifiers: []))
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .onDisappear {UITableView.appearance().tableHeaderView = nil}
+
     }
 }
 

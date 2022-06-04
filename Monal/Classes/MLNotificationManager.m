@@ -474,7 +474,7 @@
                                                            conversationIdentifier:[[NSString alloc] initWithData:[HelperTools serializeObject:contact] encoding:NSISOLatin1StringEncoding]
                                                                       serviceName:message.accountId.stringValue
                                                                            sender:sender
-                                                                      attachments:(audioAttachment ? @[audioAttachment] : nil)];
+                                                                      attachments:(audioAttachment ? @[audioAttachment] : @[])];
     if(message.isMuc)
     {
         if(contact.avatar != nil)

@@ -2687,7 +2687,6 @@ NSString* const kStanza = @"stanza";
 #endif
 
 #ifndef DISABLE_OMEMO
-    //TODO: implement omemo for MUCs and remove this MUC check
     if(encrypt && (!contact.isGroup || (contact.isGroup && [contact.mucType isEqualToString:@"group"])))
     {
         [self.omemo encryptMessage:messageNode withMessage:message toContact:contact.contactJid];

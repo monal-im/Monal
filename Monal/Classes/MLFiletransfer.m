@@ -347,9 +347,9 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
     }
 }
 
-+(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion
++(MLHandler*) prepareFileUpload:(NSURL*) fileUrl
 {
-    DDLogInfo(@"Uploading file stored at %@", [fileUrl path]);
+    DDLogInfo(@"Preparing for upload of file stored at %@", [fileUrl path]);
     
     //copy file to our document cache (temporary filename because the upload url is unknown yet)
     NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
@@ -361,18 +361,21 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
     {
         [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
         DDLogError(@"File upload failed: %@", error);
-        return completion(nil, nil, nil, error);
+        return $newHandler(self, errorCompletion, $ID(error));
     }
     [HelperTools configureFileProtectionFor:file];
     
-    [self internalUploadHandlerForTmpFile:file userFacingFilename:[fileUrl lastPathComponent] mimeType:[self getMimeTypeOfOriginalFile:[fileUrl path]] onAccount:account withEncryption:encrypt andCompletion:completion];
+    return $newHandler(self, internalTmpFileUploadHandler,
+        $ID(file),
+        $ID(userFacingFilename, [fileUrl lastPathComponent]),
+        $ID(mimeType, [self getMimeTypeOfOriginalFile:[fileUrl path]])
+    );
 }
 
-+(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion
++(MLHandler*) prepareUIImageUpload:(UIImage*) image
 {
+    DDLogInfo(@"Preparing for upload of image from UIImage object");
     double imageQuality = [[HelperTools defaultsDB] doubleForKey:@"ImageUploadQuality"];
-    
-    DDLogInfo(@"Uploading image from UIImage object");
     
     //copy file to our document cache (temporary filename because the upload url is unknown yet)
     NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
@@ -385,11 +388,34 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
     {
         [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
         DDLogError(@"File upload failed: %@", error);
-        return completion(nil, nil, nil, error);
+        return $newHandler(self, errorCompletion, $ID(error));
     }
     [HelperTools configureFileProtectionFor:file];
     
-    [self internalUploadHandlerForTmpFile:file userFacingFilename:[NSString stringWithFormat:@"%@.jpg", [[NSUUID UUID] UUIDString]] mimeType:@"image/jpeg" onAccount:account withEncryption:encrypt andCompletion:completion];
+    return $newHandler(self, internalTmpFileUploadHandler,
+        $ID(file),
+        $ID(userFacingFilename, ([NSString stringWithFormat:@"%@.jpg", [[NSUUID UUID] UUIDString]])),
+        $ID(mimeType, @"image/jpeg")
+    );
+}
+
+//proxy to allow calling the completion with a (possibly) serialized error
+$$class_handler(errorCompletion, $_ID(NSError*, error), $_ID(monal_upload_completion_t, completion))
+    completion(nil, nil, nil, error);
+$$
+
++(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(monal_upload_completion_t) completion
+{
+    DDLogInfo(@"Uploading file stored at %@", [fileUrl path]);
+    //directly call internal file upload handler returned as MLHandler and bind our (non serializable) completion block to it
+    $call([self prepareFileUpload:fileUrl], $ID(account), $BOOL(encrypt), $ID(completion));
+}
+
++(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(monal_upload_completion_t) completion
+{
+    DDLogInfo(@"Uploading image from UIImage object");
+    //directly call internal file upload handler returned as MLHandler and bind our (non serializable) completion block to it
+    $call([self prepareUIImageUpload:image], $ID(account), $BOOL(encrypt), $ID(completion));
 }
 
 +(void) doStartupCleanup
@@ -550,8 +576,8 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
     }];
 }
 
-+(void) internalUploadHandlerForTmpFile:(NSString*) file userFacingFilename:(NSString*) userFacingFilename mimeType:(NSString*) mimeType onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable)) completion
-{
+//+(void) internal:(NSString*) file userFacingFilename:(NSString*) userFacingFilename mimeType:(NSString*) mimeType onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable)) completion
+$$class_handler(internalTmpFileUploadHandler, $_ID(NSString*, file), $_ID(NSString*, userFacingFilename), $_ID(NSString*, mimeType), $_ID(xmpp*, account), $_BOOL(encrypted), $_ID(monal_upload_completion_t, completion))
     NSError* error;
     
     //make sure we don't upload the same tmpfile twice (should never happen anyways)
@@ -660,7 +686,7 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
             return completion(nil, nil, nil, error);
         }
     }];
-}
+$$
 
 +(void) markAsComplete:(id) obj
 {

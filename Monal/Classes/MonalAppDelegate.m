@@ -171,9 +171,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     //do MLFiletransfer cleanup tasks (do this in a new thread to parallelize it with our ping to the appex and don't slow down app startup)
     //this will also migrate our old image cache to new MLFiletransfer cache
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [MLFiletransfer doStartupCleanup];
-    });
+    //BUT: don't do this if we are sending the sharesheet outbox
+    if(launchOptions[UIApplicationLaunchOptionsURLKey] == nil || ![launchOptions[UIApplicationLaunchOptionsURLKey] isEqual:[NSURL URLWithString:@"monalOpen://"]])
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            [MLFiletransfer doStartupCleanup];
+        });
     
     //do image manager cleanup in a new thread to not slow down app startup
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
@@ -553,6 +555,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     {
         //make sure our outbox content is sent (if the mainapp is still connected and also was in foreground while the sharesheet was used)
         //and open the chat the newest outbox entry was sent to
+        DDLogInfo(@"Got monalOpen:// url, trying to send all outboxes...");
         MLContact* lastRecipientContact = [[MLXMPPManager sharedInstance] sendAllOutboxes];
         [[DataLayer sharedInstance] addActiveBuddies:lastRecipientContact.contactJid forAccount:lastRecipientContact.accountId];
         DDLogVerbose(@"Trying to open chat for %@", lastRecipientContact.contactJid);
@@ -630,7 +633,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             }];
             
             BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:fromContact.contactJid andAccountNo:fromContact.accountId];
-            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText toContact:fromContact isEncrypted:encrypted isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText toContact:fromContact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
                 DDLogInfo(@"REPLY_ACTION success=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", messageIdSentObject);
             }];
         }
@@ -791,7 +794,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 loadingHUD.hidden = YES;
             
             //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             
             //cancel already running background timer, we are now foregrounded again
             [self stopBackgroundTimer];

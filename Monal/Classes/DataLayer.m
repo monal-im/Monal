@@ -1922,7 +1922,7 @@ static NSDateFormatter* dbFormatter;
             payload[@"account_id"],
             payload[@"recipient"],
             payload[@"type"],
-            payload[@"data"],
+            [HelperTools serializeObject:payload[@"data"]],
             payload[@"comment"],
         ]];
     }];
@@ -1931,7 +1931,16 @@ static NSDateFormatter* dbFormatter;
 -(NSArray*) getShareSheetPayloadForAccountNo:(NSNumber*) accountNo
 {
     return [self.db idWriteTransaction:^{
-        return [self.db executeReader:@"SELECT * FROM sharesheet_outbox WHERE account_id=? ORDER BY id ASC;" andArguments:@[accountNo]];
+        NSArray* payloadList = [self.db executeReader:@"SELECT * FROM sharesheet_outbox WHERE account_id=? ORDER BY id ASC;" andArguments:@[accountNo]];
+        NSMutableArray* retval = [[NSMutableArray alloc] init];
+        for(NSDictionary* entry_ in payloadList)
+        {
+            NSMutableDictionary* entry = [[NSMutableDictionary alloc] initWithDictionary:entry_];
+            if(entry[@"data"])
+                entry[@"data"] = [HelperTools unserializeData:entry[@"data"]];
+            [retval addObject:entry];
+        }
+        return (NSArray*)retval;
     }];
 }
 

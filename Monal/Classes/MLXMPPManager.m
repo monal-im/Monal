@@ -559,7 +559,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 #pragma mark -  XMPP commands
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString *messageId)) completion
+-(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {
     NSString* msgid = [[NSUUID UUID] UUIDString];
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
@@ -569,7 +569,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     NSAssert(contact, @"Contact should not be nil");
     
     NSString* messageType = kMessageTypeText;
-    if(isUpload)
+    if(uploadInfo != nil)
         messageType = kMessageTypeFiletransfer;
     
     // Save message to history
@@ -581,14 +581,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                        withId:msgid
                     encrypted:encrypted
                   messageType:messageType
-                     mimeType:nil
-                         size:nil
+                     mimeType:uploadInfo[@"mimeType"]
+                         size:uploadInfo[@"size"]
     ];
     // Send message
     if(messageDBId != nil)
     {
         DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
-        [self sendMessage:message toContact:contact isEncrypted:encrypted isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString* messageIdSend) {
+        [self sendMessage:message toContact:contact isEncrypted:encrypted isUpload:(uploadInfo != nil) messageId:msgid withCompletionHandler:^(BOOL successSend, NSString* messageIdSend) {
             completion(successSend, messageIdSend);
         }];
         DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
@@ -826,6 +826,7 @@ $$
     MLContact* lastRecipientContact = nil;
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
+        DDLogVerbose(@"Trying to send outbox for account %@...", xmppAccount);
         MLContact* recipientContact = [self sendOutboxForAccount:xmppAccount];
         if(recipientContact != nil)
             lastRecipientContact = recipientContact;
@@ -841,16 +842,44 @@ $$
         DDLogInfo(@"Sending outbox entry: %@", payload);
         recipientContact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
         BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:recipientContact.contactJid andAccountNo:recipientContact.accountId];
-        if([payload[@"comment"] length] > 0)
-            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"comment"] toContact:recipientContact isEncrypted:encrypted isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                DDLogInfo(@"SHARESHEET_SEND_COMMENT success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
-            }];
         if([payload[@"type"] isEqualToString:@"geo"] || [payload[@"type"] isEqualToString:@"url"] || [payload[@"type"] isEqualToString:@"text"])
         {
-            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] toContact:recipientContact isEncrypted:encrypted isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] toContact:recipientContact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
                 DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
-                [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+                if([payload[@"comment"] length] > 0)
+                    [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"comment"] toContact:recipientContact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                        DDLogInfo(@"SHARESHEET_SEND_COMMENT success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                        [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                    }];
+                else
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             }];
+        }
+        else if([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"contact"] || [payload[@"type"] isEqualToString:@"audiovisual"])
+        {
+            DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
+            $call(payload[@"data"], $ID(account), $BOOL(encrypt, encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                if(error != nil)
+                {
+                    DDLogError(@"Failed to upload outbox file: %@", error);
+                    [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+                }
+                else
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url toContact:recipientContact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                            DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                            if([payload[@"comment"] length] > 0)
+                                [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"comment"] toContact:recipientContact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                                    DDLogInfo(@"SHARESHEET_SEND_COMMENT success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                                    [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+                                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                                }];
+                            else
+                                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                        }];
+                    });
+            })));
         }
         else
             MLAssert(NO, @"Outbox payload type unknown", payload);

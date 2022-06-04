@@ -425,7 +425,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
     {
         // make sure the already open chat is reloaded and return
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
         return;
     }
 

@@ -36,10 +36,11 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 @class MLContact;
 
 //some typedefs used throughout the project
-typedef void (^contactCompletion)(MLContact *selectedContact);
+typedef void (^contactCompletion)(MLContact* _Nonnull selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
 typedef void (^monal_void_block_t)(void);
-typedef void (^monal_id_block_t)(id);
+typedef void (^monal_id_block_t)(id _Nonnull);
+typedef void (^monal_upload_completion_t)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error);
 
 typedef enum NotificationPrivacySettingOption {
     DisplayNameAndMessage,
@@ -79,7 +80,7 @@ typedef enum NotificationPrivacySettingOption {
 
 // https://clang-analyzer.llvm.org/faq.html#unlocalized_string
 __attribute__((annotate("returns_localized_nsstring")))
-static inline NSString* LocalizationNotNeeded(NSString* s)
+static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 {
   return s;
 }

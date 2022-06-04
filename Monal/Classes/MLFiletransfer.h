@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 +(void) downloadFileForHistoryID:(NSNumber*) historyId;
 +(NSDictionary* _Nullable) getFileInfoForMessage:(MLMessage* _Nullable) msg;
 +(void) deleteFileForMessage:(MLMessage* _Nullable) msg;
++(MLHandler*) prepareFileUpload:(NSURL*) fileUrl;
++(MLHandler*) prepareUIImageUpload:(UIImage*) image;
 +(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion;
 +(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion;
 +(BOOL) isFileforHistoryIdInTransfer:(NSNumber*) historyId;

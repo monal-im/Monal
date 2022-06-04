@@ -22,7 +22,7 @@ static NSFileManager* _fileManager;
 static NSString* _documentCacheDir;
 static NSMutableSet* _currentlyTransfering;
 
-NSMutableDictionary<NSString*, NSNumber*>* expectedDownloadSizes;
+NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 
 @implementation MLFiletransfer
 
@@ -36,8 +36,7 @@ NSMutableDictionary<NSString*, NSNumber*>* expectedDownloadSizes;
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     [HelperTools configureFileProtectionFor:_documentCacheDir];
     _currentlyTransfering = [[NSMutableSet alloc] init];
-
-    expectedDownloadSizes = [[NSMutableDictionary alloc] init];
+    _expectedDownloadSizes = [[NSMutableDictionary alloc] init];
 }
 
 +(BOOL) isIdle
@@ -58,11 +57,11 @@ NSMutableDictionary<NSString*, NSNumber*>* expectedDownloadSizes;
         return;
     }
     url = [self genCanonicalUrl:msg.messageText];
-    @synchronized(expectedDownloadSizes)
+    @synchronized(_expectedDownloadSizes)
     {
-        if(expectedDownloadSizes[url] == NULL)
+        if(_expectedDownloadSizes[url] == NULL)
         {
-            expectedDownloadSizes[url] = msg.filetransferSize;
+            _expectedDownloadSizes[url] = msg.filetransferSize;
         }
     }
     //make sure we don't check or download this twice
@@ -273,9 +272,9 @@ NSMutableDictionary<NSString*, NSNumber*>* expectedDownloadSizes;
 
 -(void) URLSession:(NSURLSession*) session downloadTask:(NSURLSessionDownloadTask*) downloadTask didWriteData:(int64_t) bytesWritten totalBytesWritten:(int64_t) totalBytesWritten totalBytesExpectedToWrite:(int64_t) totalBytesExpectedToWrite
 {
-    @synchronized(expectedDownloadSizes)
+    @synchronized(_expectedDownloadSizes)
     {
-        NSNumber* expectedSize = expectedDownloadSizes[session.sessionDescription];
+        NSNumber* expectedSize = _expectedDownloadSizes[session.sessionDescription];
         if(expectedSize == NULL) {
             [downloadTask cancel];
         } else if(totalBytesWritten >= expectedSize.intValue + 1024 * 1000 * 1000) {
@@ -288,9 +287,9 @@ NSMutableDictionary<NSString*, NSNumber*>* expectedDownloadSizes;
 
 -(void) URLSession:(nonnull NSURLSession*) session downloadTask:(nonnull NSURLSessionDownloadTask*) downloadTask didFinishDownloadingToURL:(nonnull NSURL*) location
 {
-    @synchronized(expectedDownloadSizes)
+    @synchronized(_expectedDownloadSizes)
     {
-        [expectedDownloadSizes removeObjectForKey:session.sessionDescription];
+        [_expectedDownloadSizes removeObjectForKey:session.sessionDescription];
     }
 }
 

@@ -80,5 +80,6 @@
 
 -(void) showUploadHUD;
 -(void) hideUploadHUD;
+-(void) scrollToBottom;
 
 @end

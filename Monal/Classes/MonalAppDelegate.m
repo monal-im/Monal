@@ -1377,7 +1377,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
                     if(appDelegate.activeChats.currentChatViewController != nil)
+                    {
+                        [appDelegate.activeChats.currentChatViewController scrollToBottom];
                         [appDelegate.activeChats.currentChatViewController hideUploadHUD];
+                    }
                 });
             }];
         }
@@ -1385,7 +1388,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
                 if(appDelegate.activeChats.currentChatViewController != nil)
+                {
+                    [appDelegate.activeChats.currentChatViewController scrollToBottom];
                     [appDelegate.activeChats.currentChatViewController hideUploadHUD];
+                }
             });
     };
     for(NSDictionary* payload in [[DataLayer sharedInstance] getShareSheetPayloadForAccountNo:account.accountNo])

@@ -146,7 +146,6 @@
 		54E594BE2523C34B00E4172B /* MLPubSub.m in Sources */ = {isa = PBXBuildFile; fileRef = 54E594BC2523C34A00E4172B /* MLPubSub.m */; };
 		54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81828231690003664BD /* WelcomeLogIn.swift */; };
 		54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81B282316F5003664BD /* RegisterAccount.swift */; };
-		54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81D2823170D003664BD /* RegisterAccountSelectServer.swift */; };
 		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
 		A4CD17069281C209783314FD /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AF6D1CD4CB7FE955E330121 /* Pods_NotificaionService.framework */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
@@ -585,7 +584,6 @@
 		54E594BC2523C34A00E4172B /* MLPubSub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPubSub.m; sourceTree = "<group>"; };
 		54F0B81828231690003664BD /* WelcomeLogIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeLogIn.swift; sourceTree = "<group>"; };
 		54F0B81B282316F5003664BD /* RegisterAccount.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterAccount.swift; sourceTree = "<group>"; };
-		54F0B81D2823170D003664BD /* RegisterAccountSelectServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterAccountSelectServer.swift; sourceTree = "<group>"; };
 		5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_monalxmpp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6142E73A9912F6E327A8CD14 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		6A6D58F695CDFAF204F3B3EB /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.appstore.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -1223,7 +1221,6 @@
 		26F396CE2196830E00EF5720 /* OnBoard */ = {
 			isa = PBXGroup;
 			children = (
-				54F0B81D2823170D003664BD /* RegisterAccountSelectServer.swift */,
 				54F0B81B282316F5003664BD /* RegisterAccount.swift */,
 				54F0B81828231690003664BD /* WelcomeLogIn.swift */,
 				26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */,
@@ -1972,7 +1969,6 @@
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
-				54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */,
 				3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,

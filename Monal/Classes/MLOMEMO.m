@@ -184,7 +184,7 @@ const int KEY_SIZE = 16;
     }
 }
 
-$$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $$ID(NSDictionary*, data))
+$$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $$ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     //type will be "publish", "retract", "purge" or "delete", "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
     MLAssert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"], @"pep node must be 'eu.siacs.conversations.axolotl.devicelist'");
@@ -255,7 +255,7 @@ $$
     [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:$newHandler(self, handleBundleFetchResult, $ID(rid, deviceid))];
 }
 
-$$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data), $$ID(NSString*, rid))
+$$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data), $$ID(NSString*, rid))
     if(!success)
     {
         if(errorIq)
@@ -353,7 +353,7 @@ $$instance_handler(handleDevicelistUnsubscribe, account.omemo, $$ID(xmpp*, accou
     // TODO: improve error handling
 $$
 
-$$instance_handler(handleManualDevices, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
+$$instance_handler(handleManualDevices, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(success == NO)
     {
         if(errorIq)

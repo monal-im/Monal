@@ -404,18 +404,18 @@ $$class_handler(errorCompletion, $_ID(NSError*, error), $_ID(monal_upload_comple
     completion(nil, nil, nil, error);
 $$
 
-+(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(monal_upload_completion_t) completion
++(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(monal_upload_completion_t) completion
 {
     DDLogInfo(@"Uploading file stored at %@", [fileUrl path]);
     //directly call internal file upload handler returned as MLHandler and bind our (non serializable) completion block to it
-    $call([self prepareFileUpload:fileUrl], $ID(account), $BOOL(encrypt), $ID(completion));
+    $call([self prepareFileUpload:fileUrl], $ID(account), $BOOL(encrypted), $ID(completion));
 }
 
-+(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(monal_upload_completion_t) completion
++(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(monal_upload_completion_t) completion
 {
     DDLogInfo(@"Uploading image from UIImage object");
     //directly call internal file upload handler returned as MLHandler and bind our (non serializable) completion block to it
-    $call([self prepareUIImageUpload:image], $ID(account), $BOOL(encrypt), $ID(completion));
+    $call([self prepareUIImageUpload:image], $ID(account), $BOOL(encrypted), $ID(completion));
 }
 
 +(void) doStartupCleanup

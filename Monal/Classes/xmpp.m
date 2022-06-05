@@ -869,6 +869,13 @@ NSString* const kStanza = @"stanza";
 
 -(void) disconnectWithStreamError:(MLXMLNode* _Nullable) streamError andExplicitLogout:(BOOL) explicitLogout 
 {
+    //short-circuit common case without dispatching to receive queue
+    //this allows calling a noop disconnect while the receive queue is frozen
+    if(self->_accountState<kStateReconnecting && !explicitLogout)
+        return;
+    
+    MLAssert(!_receiveQueue.suspended, @"receive queue suspended while trying to disconnect!");
+    
     //this has to be synchronous because we want to wait for the disconnect to complete before continuingand unlocking the process in the NSE
     [self dispatchOnReceiveQueue: ^{
         DDLogInfo(@"stopping running timers");

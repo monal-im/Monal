@@ -321,7 +321,7 @@ $$
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
 }
 
-$$instance_handler(handleDevicelistSubscribe, account.omemo, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$instance_handler(handleDevicelistSubscribe, account.omemo, $_ID(xmpp*, account), $$BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(success == NO)
     {
         DDLogError(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorIq);
@@ -329,7 +329,7 @@ $$instance_handler(handleDevicelistSubscribe, account.omemo, $_ID(xmpp*, account
     // TODO: improve error handling
 $$
 
-$$instance_handler(handleDevicelistUnsubscribe, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$instance_handler(handleDevicelistUnsubscribe, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(success == NO)
     {
         DDLogError(@"Error while unsubscribing omemo deviceslist from: %@ - %@", jid, errorIq);

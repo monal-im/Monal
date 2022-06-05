@@ -576,7 +576,7 @@ $$
     }];
 }
 
-$$class_handler(internalTmpFileUploadHandler, $_ID(NSString*, file), $_ID(NSString*, userFacingFilename), $_ID(NSString*, mimeType), $_ID(xmpp*, account), $_BOOL(encrypted), $_ID(monal_upload_completion_t, completion))
+$$class_handler(internalTmpFileUploadHandler, $_ID(NSString*, file), $_ID(NSString*, userFacingFilename), $_ID(NSString*, mimeType), $_ID(xmpp*, account), $$BOOL(encrypted), $_ID(monal_upload_completion_t, completion))
     NSError* error;
     
     //make sure we don't upload the same tmpfile twice (should never happen anyways)

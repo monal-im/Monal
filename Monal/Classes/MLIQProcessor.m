@@ -145,7 +145,7 @@
     DDLogWarn(@"Got unhandled error IQ: %@", iqNode);
 }
 
-$$class_handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
+$$class_handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $$BOOL(secondTry))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Mam catchup query returned error: %@", [iqNode findFirst:@"error"]);

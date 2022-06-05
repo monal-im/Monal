@@ -11,27 +11,28 @@
 - Define handler method (this will be a static class method and doesn't
 have to be declared in any interface to be usable). The argument number
 or order does not matter, feel free to reorder or even remove arguments
-you don't need. Syntax:
+you don't need. Arguments declared with $$-prefix are mandatory, arguments
+with $_-prefix are optional.
+Primitive datatypes like BOOL, int etc. can not be imported as optional.
+Syntax:
 ```
-$$class_handler(myHandlerName, $_ID(xmpp*, account), $_BOOL(success))
+$$class_handler(myHandlerName, $_ID(xmpp*, account), $$BOOL(success))
     // your code comes here
-    // variables defined/imported: account, success
-    // variables that could be defined/imported: var1, success, account
+    // variables defined/imported: account (optional), success (mandatory)
 $$
 ```
 
 Instance handlers are instance methods instead of static methods.
 You need to specify on which instance these handlers should operate.
-This instane extraxtion statement (the second argument to $$instance_handler() can be everything that
+The instance extraxtion statement (the second argument to $$instance_handler() can be everything that
 returns an objc object. For example: "account.omemo" or "[account getInstanceToUse]" or just "account".
 Synax:
 ```
-$$instance_handler(myHandlerName, instanceToUse, $_ID(xmpp*, account), $_BOOL(success))
+$$instance_handler(myHandlerName, instanceToUse, $$ID(xmpp*, account), $$BOOL(success))
     // your code comes here
     // 'self' is now the instance of the class extracted by the instanceToUse statement.
     // instead of the class instance as it would be if $$class_handler() was used instead of $$instance_handler()
-    // variables defined/imported: account, success
-    // variables that could be defined/imported: var1, success, account
+    // variables defined/imported: account, success (both mandatory)
 $$
 ```
 
@@ -58,8 +59,8 @@ $call(h, $ID(account), $ID(otherAccountVarWithSameValue, account))
 ```
 
 - Usable shortcuts to create MLHandler objects:
-  - $newHandler(delegateClassName, handlerName, boundArgs...)
-  - $newHandlerWithInvalidation(delegateClassName, handlerName, invalidationHandlerName, boundArgs...)
+  - $newHandler(ClassName, handlerName, boundArgs...)
+  - $newHandlerWithInvalidation(ClassName, handlerName, invalidationHandlerName, boundArgs...)
 
 - You can add an invalidation method to a handler when creating the
 MLHandler object (after invalidating a handler you can not call or
@@ -67,20 +68,20 @@ invalidate it again!). Invalidation handlers can be instance handlers or static 
 just like with "normal" handlers:
 ```
 // definition of normal handler method as instance_handler
-$$instance_handler(myHandlerName, [account getInstanceToUse], $_ID(xmpp*, account), $_BOOL(success))
+$$instance_handler(myHandlerName, [account getInstanceToUse], $_ID(xmpp*, account), $$BOOL(success))
         // your code comes here
         // 'self' is now the instance of the class extracted by [account getInstanceToUse]
         // instead of the class instance as it would be if $$class_handler() was used instead of $$instance_handler()
 $$
 
 // definition of invalidation method
-$$class_handler(myInvalidationName, $_BOOL(done), $_ID(NSString*, var1))
+$$class_handler(myInvalidationHandlerName, $$BOOL(done), $_ID(NSString*, var1))
         // your code comes here
         // variables imported: var1, done
-        // variables that could have been imported: var1, success, done
+        // variables that could have been imported according to $newHandler and $call below: var1, success, done
 $$
 
-MLHandler* h = $newHandlerWithInvalidation(delegateClassName, myHandlerName, myInvalidationHandlerName,
+MLHandler* h = $newHandlerWithInvalidation(ClassName, myHandlerName, myInvalidationHandlerName,
         $ID(var1, @"value"),
         $BOOL(success, YES)
 }));
@@ -108,11 +109,13 @@ $invalidate(h, $BOOL(done, YES))
 #define $$class_handler(name, ...)                                        +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
 #define $$instance_handler(name, instance, ...)                           +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) ); [instance MLInstanceHandler_##name##_withArguments:_callerArgs andBoundArguments:_boundArgs]; } -(void) MLInstanceHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
 #define $_ID(type, var)                                                   type var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
-#define $_BOOL(var)                                                       if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"BOOL" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; BOOL var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] boolValue] : [_boundArgs[@#var] boolValue]
-#define $_INT(var)                                                        if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"int" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; int var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] intValue] : [_boundArgs[@#var] intValue]
-#define $_DOUBLE(var)                                                     if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"double" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; double var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] doubleValue] : [_boundArgs[@#var] doubleValue]
-#define $_INTEGER(var)                                                    if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"NSInteger" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; NSInteger var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] integerValue]
+#define $$ID(type, var)                                                   if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@#type andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; $_ID(type, var)
 #define $_HANDLER(var)                                                    MLHandler* var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
+#define $$HANDLER(var)                                                    if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"MLHandler" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; $_HANDLER(var)
+#define $$BOOL(var)                                                       if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"BOOL" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; BOOL var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] boolValue] : [_boundArgs[@#var] boolValue]
+#define $$INT(var)                                                        if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"int" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; int var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] intValue] : [_boundArgs[@#var] intValue]
+#define $$DOUBLE(var)                                                     if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"double" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; double var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] doubleValue] : [_boundArgs[@#var] doubleValue]
+#define $$INTEGER(var)                                                    if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"NSInteger" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; NSInteger var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] integerValue]
 #define $$                                                                }
 
 //call handler/invalidation

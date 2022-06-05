@@ -69,7 +69,7 @@ static NSDictionary* _defaultOptions;
     }
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), , $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $$BOOL(success), , $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
 -(void) fetchNode:(NSString*) node from:(NSString*) jid withItemsList:(NSArray*) itemsList andHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Fetching node '%@' at jid '%@' using callback %@...", node, jid, handler);
@@ -101,7 +101,7 @@ static NSDictionary* _defaultOptions;
     )];
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) subscribeToNode:(NSString*) node onJid:(NSString*) jid withHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Subscribing to node '%@' at jid '%@' using callback %@...", node, jid, handler);
@@ -128,7 +128,7 @@ static NSDictionary* _defaultOptions;
     )];
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), , $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $$BOOL(success), , $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) unsubscribeFromNode:(NSString*) node forJid:(NSString*) jid withHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Unsubscribing from node '%@' at jid '%@' using callback %@...", node, jid, handler);
@@ -153,7 +153,7 @@ static NSDictionary* _defaultOptions;
     )];
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) configureNode:(NSString*) node withConfigOptions:(NSDictionary*) configOptions andHandler:(MLHandler*) handler
 {
     xmpp* account = _account;
@@ -179,7 +179,7 @@ static NSDictionary* _defaultOptions;
     [self publishItem:item onNode:node withConfigOptions:nil andHandler:nil];
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success))
 -(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node withHandler:(MLHandler* _Nullable) handler
 {
     [self publishItem:item onNode:node withConfigOptions:nil andHandler:handler];
@@ -190,7 +190,7 @@ static NSDictionary* _defaultOptions;
     [self publishItem:item onNode:node withConfigOptions:configOptions andHandler:nil];
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node withConfigOptions:(NSDictionary* _Nullable) configOptions andHandler:(MLHandler* _Nullable) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -212,7 +212,7 @@ static NSDictionary* _defaultOptions;
     [self retractItemWithId:itemId onNode:node andHandler:nil];
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) retractItemWithId:(NSString*) itemId onNode:(NSString*) node andHandler:(MLHandler*) handler
 {
     xmpp* account = _account;
@@ -239,7 +239,7 @@ static NSDictionary* _defaultOptions;
     [self purgeNode:node andHandler:nil];
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) purgeNode:(NSString*) node andHandler:(MLHandler*) handler
 {
     xmpp* account = _account;
@@ -263,7 +263,7 @@ static NSDictionary* _defaultOptions;
     [self deleteNode:node andHandler:nil];
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) deleteNode:(NSString*) node andHandler:(MLHandler*) handler
 {
     xmpp* account = _account;
@@ -474,7 +474,7 @@ static NSDictionary* _defaultOptions;
     return retval;
 }
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 $$instance_handler(handleSubscribe, account.pubsub, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSString*, jid), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])
     {
@@ -514,7 +514,7 @@ $$instance_handler(handleSubscribe, account.pubsub, $_ID(xmpp*, account), $_ID(X
     }
 $$
 
-//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+//handler --> $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 $$instance_handler(handleUnsubscribe, account.pubsub, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSString*, jid), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])
     {
@@ -681,7 +681,7 @@ $$instance_handler(handleConfigureResult, account.pubsub, $_ID(xmpp*, account), 
     $call(handler, $ID(account, account), $BOOL(success, YES));
 $$
 
-$$instance_handler(handlePublishAgain, account.pubsub,$_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(MLXMLNode*, item), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
+$$instance_handler(handlePublishAgain, account.pubsub,$_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(MLXMLNode*, item), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
     if(!success)
     {
         DDLogError(@"Publish failed for node '%@' even after configuring it!", node);
@@ -693,7 +693,7 @@ $$instance_handler(handlePublishAgain, account.pubsub,$_ID(xmpp*, account), $_BO
     [self internalPublishItem:item onNode:node withConfigOptions:configOptions andHandler:handler];
 $$
 
-$$instance_handler(handleConfigureAfterPublish, account.pubsub, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
+$$instance_handler(handleConfigureAfterPublish, account.pubsub, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
     if(!success)
     {
         DDLogError(@"Second publish attempt failed again for node '%@', not configuring it!", node);

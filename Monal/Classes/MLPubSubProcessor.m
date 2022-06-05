@@ -97,7 +97,7 @@ $$class_handler(fetchAvatarAgain, $_ID(xmpp*, account), $_ID(NSString*, jid), $_
         [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:$newHandler(self, handleAvatarFetchResult)];
 $$
 
-$$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $$BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     //ignore errors here (e.g. simply don't update the avatar image)
     //(this should never happen if other clients and servers behave properly)
     if(!success)
@@ -288,7 +288,7 @@ $$class_handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_
     }
 $$
 
-$$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(!success)
     {
         //item-not-found means: no bookmarks in storage --> use an empty data dict
@@ -416,7 +416,7 @@ $$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success)
     } andHandler:$newHandler(self, bookmarksPublished)];
 $$
 
-$$class_handler(bookmarksPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$class_handler(bookmarksPublished, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         DDLogWarn(@"Could not publish bookmarks to pep!");
@@ -426,7 +426,7 @@ $$class_handler(bookmarksPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(
     DDLogDebug(@"Published bookmarks to pep");
 $$
 
-$$class_handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$class_handler(rosterNamePublished, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         DDLogWarn(@"Could not publish roster name to pep!");
@@ -436,7 +436,7 @@ $$class_handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID
     DDLogDebug(@"Published roster name to pep");
 $$
 
-$$class_handler(rosterNameDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$class_handler(rosterNameDeleted, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         //item-not-found means: nick already deleted --> ignore this error
@@ -452,7 +452,7 @@ $$class_handler(rosterNameDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(X
     DDLogDebug(@"Removed roster name from pep");
 $$
 
-$$class_handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$class_handler(avatarDeleted, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         //item-not-found means: avatar already deleted --> ignore this error
@@ -468,7 +468,7 @@ $$class_handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPI
     DDLogDebug(@"Removed avatar from pep");
 $$
 
-$$class_handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$class_handler(avatarMetadataPublished, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar metadata to pep!");
@@ -478,7 +478,7 @@ $$class_handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), 
     DDLogDebug(@"Published avatar metadata to pep");
 $$
 
-$$class_handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSString*, imageHash), $_ID(NSData*, imageData))
+$$class_handler(avatarDataPublished, $_ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSString*, imageHash), $_ID(NSData*, imageData))
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar image data for hash %@!", imageHash);

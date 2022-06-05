@@ -669,7 +669,7 @@ $$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $_ID(x
     }
 $$
 
-$$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $_BOOL(join), $_BOOL(updateBookmarks))
+$$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $$BOOL(join), $$BOOL(updateBookmarks))
     MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!", (@{
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
@@ -845,7 +845,7 @@ $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $_ID(xmp
     [_account mamFinishedFor:iqNode.fromUser];
 $$
 
-$$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_BOOL(secondTry))
+$$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $$BOOL(secondTry))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam catchup query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);

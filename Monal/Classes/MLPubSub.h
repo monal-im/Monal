@@ -32,24 +32,24 @@ NS_ASSUME_NONNULL_BEGIN
 //unsubscribe from node, handler: $$class_handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) unsubscribeFromNode:(NSString*) node forJid:(NSString*) jid withHandler:(MLHandler*) handler;
 
-//configure node, handler: $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
+//configure node, handler: $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
 -(void) configureNode:(NSString*) node withConfigOptions:(NSDictionary*) configOptions andHandler:(MLHandler* _Nullable) handler;
 
-//publish, handler: $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
+//publish, handler: $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
 -(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node;
 -(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node withConfigOptions:(NSDictionary* _Nullable) configOptions;
 -(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node withHandler:(MLHandler* _Nullable) handler;
 -(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node withConfigOptions:(NSDictionary* _Nullable) configOptions andHandler:(MLHandler* _Nullable) handler;
 
-//retract, handler: $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
+//retract, handler: $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
 -(void) retractItemWithId:(NSString*) itemId onNode:(NSString*) node;
 -(void) retractItemWithId:(NSString*) itemId onNode:(NSString*) node andHandler:(MLHandler* _Nullable) handler;
 
-//purge whole node, handler: $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
+//purge whole node, handler: $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
 -(void) purgeNode:(NSString*) node;
 -(void) purgeNode:(NSString*) node andHandler:(MLHandler* _Nullable) handler;
 
-//delete whole node, handler: $$class_handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
+//delete whole node, handler: $$class_handler(xxx, $_ID(xmpp*, account), $$BOOL(success), $_ID(MLXMLNode*, errorIq), $_ID(NSString*, errorReason))
 -(void) deleteNode:(NSString*) node;
 -(void) deleteNode:(NSString*) node andHandler:(MLHandler* _Nullable) handler;
 

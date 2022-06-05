@@ -576,7 +576,6 @@ $$
     }];
 }
 
-//+(void) internal:(NSString*) file userFacingFilename:(NSString*) userFacingFilename mimeType:(NSString*) mimeType onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable)) completion
 $$class_handler(internalTmpFileUploadHandler, $_ID(NSString*, file), $_ID(NSString*, userFacingFilename), $_ID(NSString*, mimeType), $_ID(xmpp*, account), $_BOOL(encrypted), $_ID(monal_upload_completion_t, completion))
     NSError* error;
     

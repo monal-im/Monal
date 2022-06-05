@@ -108,10 +108,10 @@ $invalidate(h, $BOOL(done, YES))
 #define $$class_handler(name, ...)                                        +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
 #define $$instance_handler(name, instance, ...)                           +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) ); [instance MLInstanceHandler_##name##_withArguments:_callerArgs andBoundArguments:_boundArgs]; } -(void) MLInstanceHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
 #define $_ID(type, var)                                                   type var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
-#define $_BOOL(var)                                                       BOOL var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] boolValue] : [_boundArgs[@#var] boolValue]
-#define $_INT(var)                                                        int var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] intValue] : [_boundArgs[@#var] boolValue]
-#define $_DOUBLE(var)                                                     double var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] doubleValue] : [_boundArgs[@#var] boolValue]
-#define $_INTEGER(var)                                                    NSInteger var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] boolValue]
+#define $_BOOL(var)                                                       if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"BOOL" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; BOOL var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] boolValue] : [_boundArgs[@#var] boolValue]
+#define $_INT(var)                                                        if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"int" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; int var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] intValue] : [_boundArgs[@#var] intValue]
+#define $_DOUBLE(var)                                                     if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"double" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; double var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] doubleValue] : [_boundArgs[@#var] doubleValue]
+#define $_INTEGER(var)                                                    if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"NSInteger" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; NSInteger var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] integerValue]
 #define $_HANDLER(var)                                                    MLHandler* var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
 #define $$                                                                }
 
@@ -135,6 +135,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
 }
 +(BOOL) supportsSecureCoding;
++(void) throwDynamicExceptionForType:(NSString*) type andVar:(NSString*) var andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 
 //id of this handler (consisting of class name, method name and invalidation method name)
 @property (readonly, strong) NSString* id;

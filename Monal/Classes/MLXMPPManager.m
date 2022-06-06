@@ -642,7 +642,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #pragma mark - contact
 
 //this handler will simply retry the removeContact: call
-$$class_handler(handleRemoveContact, $_ID(MLContact*, contact))
+$$class_handler(handleRemoveContact, $$ID(MLContact*, contact))
     [[MLXMPPManager sharedInstance] removeContact:contact];
 $$
 
@@ -678,7 +678,7 @@ $$
 }
 
 //this handler will simply retry the addContact:withPreauthToken: call
-$$class_handler(handleAddContact, $_ID(MLContact*, contact), $_ID(NSString*, preauthToken))
+$$class_handler(handleAddContact, $$ID(MLContact*, contact), $_ID(NSString*, preauthToken))
     [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
 $$
 

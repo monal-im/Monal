@@ -329,7 +329,7 @@ struct OmemoKeys: View {
                             OmemoKeysForContact(contact: contact, account: self.account!)
                         }, label: {
                             HStack {
-                                Text(NSLocalizedString("Keys of ", comment: "Keys of <jid>") + contact.obj.contactJid)
+                                Text("Keys of \(contact.obj.contactJid)")
                                 Spacer()
                                 Button(action: {
                                     self.selectedContact = contact

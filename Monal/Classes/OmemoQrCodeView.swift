@@ -59,7 +59,7 @@ struct OmemoQrCodeView: View {
             .resizable()
             .scaledToFit()
             .aspectRatio(1, contentMode: .fit)
-            .navigationBarTitle(NSLocalizedString("Keys of ", comment: "Keys of <jid>") + self.jid, displayMode: .inline)
+            .navigationBarTitle("Keys of \(self.jid)", displayMode: .inline)
     }
 }
 

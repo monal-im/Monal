@@ -168,7 +168,7 @@
             NSString* avatarHash = [presenceNode findFirst:@"{vcard-temp:x:update}x/photo#"];
             NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:presenceNode.fromUser andAccount:_account.accountNo];
             DDLogVerbose(@"Checking if avatar hash in presence '%@' equals stored hash '%@'...", avatarHash, currentHash);
-            if(!(currentHash && [avatarHash isEqualToString:currentHash]))
+            if(avatarHash != nil && !(currentHash && [avatarHash isEqualToString:currentHash]))
             {
                 DDLogInfo(@"Got new muc avatar hash '%@' for muc %@, fetching new image via vcard-temp...", avatarHash, presenceNode.fromUser);
                 [self fetchAvatarForRoom:presenceNode.fromUser];

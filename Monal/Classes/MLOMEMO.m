@@ -185,12 +185,14 @@ const int KEY_SIZE = 16;
 }
 
 $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $$ID((NSDictionary<NSString*, MLXMLNode*>*), data))
-    //type will be "publish", "retract", "purge" or "delete", "publish" and "retract" will have the data dictionary filled with id --> data pairs
+    //type will be "publish", "retract", "purge" or "delete". "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
     MLAssert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"], @"pep node must be 'eu.siacs.conversations.axolotl.devicelist'");
-    if(type && [type isEqualToString:@"publish"]) {
+    if([type isEqualToString:@"publish"])
+    {
         MLXMLNode* publishedDevices = [data objectForKey:@"current"];
-        if(publishedDevices && jid) {
+        if(publishedDevices && jid)
+        {
             NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub#event}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
 
@@ -280,8 +282,6 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
     }
     else
     {
-        if(!rid || !jid)
-            return;
         // check that a corresponding buddy exists -> prevent foreign key errors
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
         if(!receivedKeys && data.count == 1)
@@ -364,8 +364,6 @@ $$instance_handler(handleManualDevices, account.omemo, $$ID(xmpp*, account), $$I
     }
     else
     {
-        if(!jid)
-            return;
         MLXMLNode* publishedDevices = [data objectForKey:@"current"];
         if(!publishedDevices && data.count == 1)
         {
@@ -376,7 +374,8 @@ $$instance_handler(handleManualDevices, account.omemo, $$ID(xmpp*, account), $$I
         {
             DDLogWarn(@"More than one devicelist item found from %@", jid);
         }
-        if(publishedDevices) {
+        if(publishedDevices)
+        {
             NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
 

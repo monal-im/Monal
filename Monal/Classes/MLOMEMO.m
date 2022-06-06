@@ -261,24 +261,12 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
     if(!success)
     {
         if(errorIq)
-        {
             DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);
-            NSString* bundleName = [errorIq findFirst:@"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node~eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node"];
-            if(bundleName)
-            {
-                NSString* ridFromIQ = [bundleName componentsSeparatedByString:@":"][1];
-                if(ridFromIQ)
-                {
-                    SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.intValue];
-                    [self.monalSignalStore markDeviceAsDeleted:address];
-                }
-            }
-        }
         else if(errorReason)
-        {
             DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorReason);
-            //TODO friedrich: can we do the above in this case, too? why the extraction from the errorIq in the first place if we don't use ridFromIQ but rid later on?
-        }
+        
+        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.intValue];
+        [self.monalSignalStore markDeviceAsDeleted:address];
     }
     else
     {

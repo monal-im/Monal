@@ -174,7 +174,7 @@ struct ContactDetails: View {
                     .actionSheet(isPresented: $showingClearHistoryConfirmation) {
                         ActionSheet(
                             title: Text("Clear History"),
-                            message: Text("Do you really want to clear all messagesexchanged in this conversation? If using OMEMO you won't even be able to load them from your server again."),
+                            message: Text("Do you really want to clear all messages exchanged in this conversation? If using OMEMO you won't even be able to load them from your server again."),
                             buttons: [
                                 .cancel(),
                                 .destructive(

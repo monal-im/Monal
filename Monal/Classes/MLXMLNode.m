@@ -59,7 +59,7 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
     
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
-    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=]+=[^>]+\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|float|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|float|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
     componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|float|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
     attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~]+)([=~])([^>]+)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
 

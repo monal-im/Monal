@@ -77,6 +77,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             DDLogInfo(@"Got new parsed stanza: %@", parsedStanza);
             for(NSString* query in @[
                 @"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\",
+                @"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node~eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node",
             ])
             {
                 id result = [parsedStanza find:query];

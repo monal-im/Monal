@@ -652,7 +652,7 @@
     [_account sendIq:vcard withHandler:$newHandler(self, handleAvatarPublishResult)];
 }
 
-$$instance_handler(handleAvatarPublishResult, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Publishing avatar for muc '%@' returned error: %@", iqNode.fromUser, [iqNode findFirst:@"error"]);
@@ -662,14 +662,14 @@ $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $_ID(xmpp*, 
     DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);
 $$
 
-$$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $_ID(xmpp*, account), $_ID(NSString*, roomJid))
+$$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid))
     DDLogInfo(@"Removing muc '%@' from _joining...", roomJid);
     @synchronized(_stateLockObject) {
         [_joining removeObject:roomJid];
     }
 $$
 
-$$instance_handler(handleDiscoResponse, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $$BOOL(join), $$BOOL(updateBookmarks))
+$$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$BOOL(join), $$BOOL(updateBookmarks))
     MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!", (@{
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
@@ -820,12 +820,12 @@ $$
     [_account send:presence];
 }
 
-$$instance_handler(handleMembersList, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, type))
+$$instance_handler(handleMembersList, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
     [self handleMembersListUpdate:iqNode];
 $$
 
-$$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
@@ -845,7 +845,7 @@ $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $_ID(xmp
     [_account mamFinishedFor:iqNode.fromUser];
 $$
 
-$$instance_handler(handleCatchup, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $$BOOL(secondTry))
+$$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$BOOL(secondTry))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam catchup query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
@@ -887,7 +887,7 @@ $$
     [_account sendIq:vcardQuery withHandler:$newHandler(self, handleVcardResponse)];
 }
 
-$$instance_handler(handleVcardResponse, account.mucProcessor, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+$$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     BOOL deleteAvatar = ![iqNode check:@"{vcard-temp}vCard/PHOTO/BINVAL"];
     
     if([iqNode check:@"/<type=error>"])
@@ -943,7 +943,7 @@ $$instance_handler(handleVcardResponse, account.mucProcessor, $_ID(xmpp*, accoun
 $$
 
 //this handler will simply retry the vcard fetch attempt if in mainapp
-$$instance_handler(fetchAvatarAgain, account.mucProcessor, $_ID(xmpp*, account), $_ID(NSString*, jid))
+$$instance_handler(fetchAvatarAgain, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, jid))
     if([HelperTools isAppExtension])
     {
         DDLogWarn(@"Not loading avatar image of '%@' because we are still in appex, rescheduling it again!", jid);

@@ -15,16 +15,6 @@ If you want to  use the latest stable versions, search for Monal in the iOS or O
 | Alpha  |                                                          |                                                          | brew tap monal-im/homebrew-monal-alpha<br>brew install --cask monal-alpha |
 
 
-### iOS Screenshots
-<p float="left">
-<img src ="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.58.26-1.png" width=250 >
-<img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.56.17-4.png" width="250">  <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.51-1.png" width="250">
-</p>
-
-### macOS Screenshot
-
-<img src="https://monal.im/wp-content/uploads/2020/02/Screen-Shot-2020-02-15-at-10.28.38-PM-1.png" width="500">
-
 ## Support Chat (MUC) and Wiki
 
 You can join this public chat (MUC) via XMPP: [monal@chat.yax.im](xmpp:monal@chat.yax.im?join)
@@ -56,6 +46,16 @@ Monal requires at least iOS 12 and macOS 10.15 (Catalina)
 ### Supported XEPs
 
 Take a look at this list to get information on [supported XEPs by Monal](https://github.com/monal-im/Monal/blob/develop/XEPsupport.md).
+
+### iOS Screenshots
+<p float="left">
+<img src ="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.58.26-1.png" width=250 >
+<img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.56.17-4.png" width="250">  <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.51-1.png" width="250">
+</p>
+
+### macOS Screenshot
+
+<img src="https://monal.im/wp-content/uploads/2020/02/Screen-Shot-2020-02-15-at-10.28.38-PM-1.png" width="500">
 
 ### License
 Monal is licensed under the BSD license. Any code contributions should be compatible with that license.  ** NO GPL ** .  By contributing to this project, you agree that your code is not GPL or any similarly restrictive license. You agree that your code can be used to publish in App stores such as Apple's that use DRM.

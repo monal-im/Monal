@@ -100,9 +100,14 @@ struct ContactDetails: View {
                             Button(action: {
                                 showingRemoveContactConfirmation = true
                             }) {
-                            if(contact.isGroup) {
-                                Text(contact.mucType == "group" ? NSLocalizedString("Leave Group", comment: "") : NSLocalizedString("Leave Channel", comment: ""))
-                                        .foregroundColor(.red)
+                                if(contact.isGroup) {
+                                    if(contact.mucType == "group") {
+                                        Text("Leave Group")
+                                            .foregroundColor(.red)
+                                    } else {
+                                        Text("Leave Channel")
+                                            .foregroundColor(.red)
+                                    }
                                 } else {
                                     Text("Remove from contacts")
                                         .foregroundColor(.red)
@@ -129,7 +134,11 @@ struct ContactDetails: View {
                                 showingAddContactConfirmation = true
                             }) {
                                 if(contact.isGroup) {
-                                    Text(contact.mucType == "group" ? NSLocalizedString("Join Group", comment: "") : NSLocalizedString("Join Channel", comment: ""))
+                                    if(contact.mucType == "group") {
+                                        Text("Join Group")
+                                    } else {
+                                        Text("Join Channel")
+                                    }
                                 } else {
                                     Text("Add to contacts")
                                 }
@@ -164,8 +173,8 @@ struct ContactDetails: View {
                     .foregroundColor(.red)
                     .actionSheet(isPresented: $showingClearHistoryConfirmation) {
                         ActionSheet(
-                            title: Text(NSLocalizedString("Clear History", comment: "")),
-                            message: Text(NSLocalizedString("Do you really want to clear all messagesexchanged in this conversation? If using OMEMO you won't even be able to load them from your server again.", comment: "")),
+                            title: Text("Clear History"),
+                            message: Text("Do you really want to clear all messages exchanged in this conversation? If using OMEMO you won't even be able to load them from your server again."),
                             buttons: [
                                 .cancel(),
                                 .destructive(
@@ -188,13 +197,13 @@ struct ContactDetails: View {
                         Button(action: {
                             showingResetOmemoSessionConfirmation = true
                         }) {
-                            Text(NSLocalizedString("Reset OMEMO session", comment: ""))
+                            Text("Reset OMEMO session")
                                 .foregroundColor(.red)
                         }
                         .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
                             ActionSheet(
-                                title: Text(NSLocalizedString("Reset OMEMO session", comment: "")),
-                                message: Text(NSLocalizedString("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!", comment: "")),
+                                title: Text("Reset OMEMO session"),
+                                message: Text("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!"),
                                 buttons: [
                                     .cancel(),
                                     .destructive(

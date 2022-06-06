@@ -60,12 +60,15 @@ typedef enum NotificationPrivacySettingOption {
 #define updateIfPrimitiveNotEqual(a, b)     if(a != b) a = b
 
 
-//see https://stackoverflow.com/a/62984543/3528174
-#define STRIP_PARENTHESES(X) __ESC(__ISH X)
-#define __ISH(...) __ISH __VA_ARGS__
-#define __ESC(...) __ESC_(__VA_ARGS__)
-#define __ESC_(...) __VAN ## __VA_ARGS__
-#define __VAN__ISH
+//make sure we don't define this twice
+#ifndef STRIP_PARENTHESES
+    //see https://stackoverflow.com/a/62984543/3528174
+    #define STRIP_PARENTHESES(X) __ESC(__ISH X)
+    #define __ISH(...) __ISH __VA_ARGS__
+    #define __ESC(...) __ESC_(__VA_ARGS__)
+    #define __ESC_(...) __VAN ## __VA_ARGS__
+    #define __VAN__ISH
+#endif
 
 #if defined(IS_ALPHA) || defined(DEBUG)
     #define unreachable() { \

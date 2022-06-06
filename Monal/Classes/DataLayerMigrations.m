@@ -34,7 +34,7 @@
 
 +(BOOL) migrateDB:(MLSQLite*) db withDataLayer:(DataLayer*) dataLayer
 {
-    //migrate dbversion ino flags table (the exception indicates we are already migrated)
+    //migrate dbversion into flags table if necessary
     [db voidWriteTransaction:^{
         NSNumber* alreadyMigrated = [db executeScalar:@"SELECT count(*) FROM sqlite_master WHERE type='table' AND name='dbversion';"];
         if([alreadyMigrated boolValue])
@@ -1116,7 +1116,10 @@
             [db executeNonQuery:@"ALTER TABLE sharesheet_outbox ADD COLUMN data TEXT DEFAULT NULL;"];
             [db executeNonQuery:@"DELETE FROM sharesheet_outbox;"];
         }];
-
+        
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.120 withBlock:^{
+            //dummy upgrade to make sure all state gets invalidatet because of new MLHandler behaviour (mandatory arguments)
+        }];
 
         // check if db version changed
         NSNumber* newdbversion = [self readDBVersion:db];

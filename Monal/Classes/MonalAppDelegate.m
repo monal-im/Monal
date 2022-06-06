@@ -1412,7 +1412,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         {
             DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
             [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
-            $call(payload[@"data"], $ID(account), $BOOL(encrypt, encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+            $call(payload[@"data"], $ID(account), $BOOL(encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
                 if(error != nil)
                 {
                     DDLogError(@"Failed to upload outbox file: %@", error);

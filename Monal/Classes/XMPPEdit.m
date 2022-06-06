@@ -342,6 +342,8 @@ enum DummySettingsRows {
                     }
                     else
                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+                    //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
                     [self showSuccessHUD];
                 }
             } else {
@@ -378,6 +380,8 @@ enum DummySettingsRows {
             }
             else
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+            //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             [self showSuccessHUD];
         }
     }

@@ -184,13 +184,15 @@ const int KEY_SIZE = 16;
     }
 }
 
-$$instance_handler(devicelistHandler, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
-    //type will be "publish", "retract", "purge" or "delete", "publish" and "retract" will have the data dictionary filled with id --> data pairs
+$$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $$ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    //type will be "publish", "retract", "purge" or "delete". "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
     MLAssert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"], @"pep node must be 'eu.siacs.conversations.axolotl.devicelist'");
-    if(type && [type isEqualToString:@"publish"]) {
+    if([type isEqualToString:@"publish"])
+    {
         MLXMLNode* publishedDevices = [data objectForKey:@"current"];
-        if(publishedDevices && jid) {
+        if(publishedDevices && jid)
+        {
             NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub#event}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
 
@@ -255,25 +257,31 @@ $$
     [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:$newHandler(self, handleBundleFetchResult, $ID(rid, deviceid))];
 }
 
-$$instance_handler(handleBundleFetchResult, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data), $_ID(NSString*, rid))
-    if(errorIq)
+$$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data), $$ID(NSString*, rid))
+    if(!success)
     {
-        DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);
-        NSString* bundleName = [errorIq findFirst:@"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node"];
-        if(bundleName)
+        if(errorIq)
         {
-            NSString* ridFromIQ = [bundleName componentsSeparatedByString:@":"][1];
-            if(ridFromIQ)
+            DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);
+            NSString* bundleName = [errorIq findFirst:@"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node~eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node"];
+            if(bundleName)
             {
-                SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.intValue];
-                [self.monalSignalStore markDeviceAsDeleted:address];
+                NSString* ridFromIQ = [bundleName componentsSeparatedByString:@":"][1];
+                if(ridFromIQ)
+                {
+                    SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.intValue];
+                    [self.monalSignalStore markDeviceAsDeleted:address];
+                }
             }
+        }
+        else if(errorReason)
+        {
+            DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorReason);
+            //TODO friedrich: can we do the above in this case, too? why the extraction from the errorIq in the first place if we don't use ridFromIQ but rid later on?
         }
     }
     else
     {
-        if(!rid || !jid)
-            return;
         // check that a corresponding buddy exists -> prevent foreign key errors
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
         if(!receivedKeys && data.count == 1)
@@ -290,6 +298,8 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $_ID(xmpp*, account),
             [self processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
         }
     }
+    
+    //this has to be done even in error cases!
     if(self.openBundleFetchCnt > 1 && self.omemoLoginState >= LoggedIn)
     {
         self.openBundleFetchCnt--;
@@ -321,31 +331,39 @@ $$
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
 }
 
-$$instance_handler(handleDevicelistSubscribe, account.omemo, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$instance_handler(handleDevicelistSubscribe, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(success == NO)
     {
-        DDLogError(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorIq);
+        if(errorIq)
+            DDLogError(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorIq);
+        else
+            DDLogError(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorReason);
     }
     // TODO: improve error handling
 $$
 
-$$instance_handler(handleDevicelistUnsubscribe, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$instance_handler(handleDevicelistUnsubscribe, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(success == NO)
     {
-        DDLogError(@"Error while unsubscribing omemo deviceslist from: %@ - %@", jid, errorIq);
+        if(errorIq)
+            DDLogError(@"Error while unsubscribing omemo deviceslist from: %@ - %@", jid, errorIq);
+        else
+            DDLogError(@"Error while unsubscribing omemo deviceslist from: %@ - %@", jid, errorReason);
     }
     // TODO: improve error handling
 $$
 
-$$instance_handler(handleManualDevices, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data))
-    if(errorIq)
+$$instance_handler(handleManualDevices, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    if(success == NO)
     {
-        DDLogError(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorIq);
+        if(errorIq)
+            DDLogError(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorIq);
+        else
+            DDLogError(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorReason);
+        // TODO: improve error handling
     }
     else
     {
-        if(!jid)
-            return;
         MLXMLNode* publishedDevices = [data objectForKey:@"current"];
         if(!publishedDevices && data.count == 1)
         {
@@ -356,7 +374,8 @@ $$instance_handler(handleManualDevices, account.omemo, $_ID(xmpp*, account), $_I
         {
             DDLogWarn(@"More than one devicelist item found from %@", jid);
         }
-        if(publishedDevices) {
+        if(publishedDevices)
+        {
             NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
 

@@ -109,11 +109,12 @@ $invalidate(h, $BOOL(done, YES))
 #define $newHandlerWithInvalidation(delegate, name, invalidation, ...)    _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wundeclared-selector\"") [[MLHandler alloc] initWithDelegate:[delegate class] handlerName:@#name invalidationHandlerName:@#invalidation andBoundArguments:@{ __VA_ARGS__ }] _Pragma("clang diagnostic pop")
 #define $bindArgs(handler, ...)                                           [handler bindArguments:@{ __VA_ARGS__ }]
 #define $ID(name, ...)                                                    metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : nilWrapper(name) )( _packID(name, __VA_ARGS__) )
+#define $HANDLER(name, ...)                                               metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : nilWrapper(name) )( _packID(name, __VA_ARGS__) )
 #define $BOOL(name, ...)                                                  metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : [NSNumber numberWithBool: name ] )( _packBOOL(name, __VA_ARGS__) )
 #define $INT(name, ...)                                                   metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : [NSNumber numberWithInt: name ] )( _packINT(name, __VA_ARGS__) )
-#define $DOUBLE(name, ...)                                                metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : [NSNumber numberWithDouble: name ] )( _packINT(name, __VA_ARGS__) )
-#define $INTEGER(name, ...)                                               metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : [NSNumber numberWithInteger: name ] )( _packINT(name, __VA_ARGS__) )
-#define $HANDLER(name, ...)                                               metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : nilWrapper(name) )( _packID(name, __VA_ARGS__) )
+#define $DOUBLE(name, ...)                                                metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : [NSNumber numberWithDouble: name ] )( _packDOUBLE(name, __VA_ARGS__) )
+#define $INTEGER(name, ...)                                               metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : [NSNumber numberWithInteger: name ] )( _packINTEGER(name, __VA_ARGS__) )
+#define $UINTEGER(name, ...)                                              metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : [NSNumber numberWithUnsignedInteger: name ] )( _packUINTEGER(name, __VA_ARGS__) )
 
 //declare handler, the order of provided arguments does not matter because we use named arguments
 #define $$class_handler(name, ...)                                        +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
@@ -127,6 +128,7 @@ $invalidate(h, $BOOL(done, YES))
 #define $$INT(var)                                                        (if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"int" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; int var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] intValue] : [_boundArgs[@#var] intValue])
 #define $$DOUBLE(var)                                                     (if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"double" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; double var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] doubleValue] : [_boundArgs[@#var] doubleValue])
 #define $$INTEGER(var)                                                    (if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"NSInteger" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; NSInteger var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] integerValue])
+#define $$UINTEGER(var)                                                   (if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"NSUInteger" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; NSInteger var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] unsignedIntegerValue])
 #define $$                                                                }
 
 //call handler/invalidation
@@ -139,11 +141,12 @@ $invalidate(h, $BOOL(done, YES))
 //These additional parentheses around the result have to be stripped again by this call to STRIP_PARENTHESES() here
 #define _expand_import(num, param)                                        STRIP_PARENTHESES(param)
 #define _packID(name, value, ...)                                         @#name : nilWrapper(value)
+#define _packHANDLER(name, value, ...)                                    @#name : nilWrapper(value)
 #define _packBOOL(name, value, ...)                                       @#name : [NSNumber numberWithBool: value ]
 #define _packINT(name, value, ...)                                        @#name : [NSNumber numberWithInt: value ]
 #define _packDOUBLE(name, value, ...)                                     @#name : [NSNumber numberWithDouble: value ]
 #define _packINTEGER(name, value, ...)                                    @#name : [NSNumber numberWithInteger: value ]
-#define _packHANDLER(name, value, ...)                                    @#name : nilWrapper(value)
+#define _packUINTEGER(name, value, ...)                                   @#name : [NSNumber numberWithUnsignedInteger: value ]
 
 NS_ASSUME_NONNULL_BEGIN
 

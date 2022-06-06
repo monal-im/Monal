@@ -400,7 +400,7 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 }
 
 //proxy to allow calling the completion with a (possibly) serialized error
-$$class_handler(errorCompletion, $_ID(NSError*, error), $_ID(monal_upload_completion_t, completion))
+$$class_handler(errorCompletion, $$ID(NSError*, error), $$ID(monal_upload_completion_t, completion))
     completion(nil, nil, nil, error);
 $$
 
@@ -576,7 +576,7 @@ $$
     }];
 }
 
-$$class_handler(internalTmpFileUploadHandler, $_ID(NSString*, file), $_ID(NSString*, userFacingFilename), $_ID(NSString*, mimeType), $_ID(xmpp*, account), $$BOOL(encrypted), $_ID(monal_upload_completion_t, completion))
+$$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSString*, userFacingFilename), $$ID(NSString*, mimeType), $$ID(xmpp*, account), $$BOOL(encrypted), $$ID(monal_upload_completion_t, completion))
     NSError* error;
     
     //make sure we don't upload the same tmpfile twice (should never happen anyways)

@@ -3,7 +3,9 @@
 [![Alpha build status](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml/badge.svg?branch=alpha.build)](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml)
 [![Translation status](https://hosted.weblate.org/widgets/monal/-/svg-badge.svg)](https://hosted.weblate.org/engage/monal/?utm_source=widget)
 
-This is the Monal XMPP client as found in the app store.  If you want to  use the latest stable versions, search for Monal in the iOS or OSX app store. [Visit the blog to read about the development](https://monal.im)!
+This is the Monal XMPP client as found in the app store. 
+If you want to  use the latest stable versions, search for Monal in the iOS or OSX app store.
+[Visit the blog to read about the development](https://monal.im)!
 
 ## Releases
 |        | iOS                                                      | macOS                                                    | macOS (homebrew)                            |
@@ -11,7 +13,6 @@ This is the Monal XMPP client as found in the app store.  If you want to  use th
 | Stable | [App Store](https://apps.apple.com/app/id317711500)      | [App Store](https://apps.apple.com/app/id1499227291)     |                                             |
 | Beta   | [Testflight](https://testflight.apple.com/join/RjIlyvqa) | [Testflight](https://testflight.apple.com/join/nBWaZryI) | brew install --cask monal                   |
 | Alpha  |                                                          |                                                          | brew tap monal-im/homebrew-monal-alpha<br>brew install --cask monal-alpha |
-
 
 
 ### iOS Screenshots
@@ -24,11 +25,13 @@ This is the Monal XMPP client as found in the app store.  If you want to  use th
 
 <img src="https://monal.im/wp-content/uploads/2020/02/Screen-Shot-2020-02-15-at-10.28.38-PM-1.png" width="500">
 
-## Support Chat (MUC)
+## Support Chat (MUC) and Wiki
 
-You can join this public chat (MUC) via XMPP:
+You can join this public chat (MUC) via XMPP: [monal@chat.yax.im](xmpp:monal@chat.yax.im?join)
 
-[monal@chat.yax.im](xmpp:monal@chat.yax.im?join)
+Find general information in the [Monal Wiki](https://github.com/monal-im/Monal/wiki).
+
+[Reporting security issues](SECURITY.md)
 
 ## Donations and Support
 
@@ -36,11 +39,9 @@ Monal is developed by volunteers and community collaboration. The work which has
 
 - Donate via [GitHub Sponsors](https://github.com/sponsors/tmolitor-stud-tu)
 - Donate via [Libera Pay](https://liberapay.com/tmolitor)
-- EU citizens can donate via SEPA, too. Just contact Thilo Molitor via mail to thilo+monal@eightysoft.de to get his IBAN.
+- EU citizens can donate via SEPA, too. Just contact Thilo Molitor via mail to thilo@monal-im.org to get his IBAN.
 
 Here you can read about further [support of the development](https://github.com/monal-im/Monal/issues/363)!
-
-Find general information in the [Monal Wiki](https://github.com/monal-im/Monal/wiki).
 
 ### Translations
 

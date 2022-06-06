@@ -4445,7 +4445,7 @@ NSString* const kStanza = @"stanza";
             [self.pubsub publishItem:item onNode:@"urn:xmpp:avatar:data" withConfigOptions:@{
                 @"pubsub#persist_items": @"true",
                 @"pubsub#access_model": @"presence"
-            } andHandler:$newHandler(MLPubSubProcessor, avatarDataPublished, $ID(imageHash), $ID(imageData))];
+            } andHandler:$newHandler(MLPubSubProcessor, avatarDataPublished, $ID(imageHash), $UINTEGER(imageBytesLen, imageData.length))];
         }
     });
 }

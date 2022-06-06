@@ -478,7 +478,7 @@ $$class_handler(avatarMetadataPublished, $$ID(xmpp*, account), $$BOOL(success), 
     DDLogDebug(@"Published avatar metadata to pep");
 $$
 
-$$class_handler(avatarDataPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $$ID(NSString*, imageHash), $$ID(NSData*, imageData))
+$$class_handler(avatarDataPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $$ID(NSString*, imageHash), $$UINTEGER(imageBytesLen))
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar image data for hash %@!", imageHash);
@@ -495,7 +495,7 @@ $$class_handler(avatarDataPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID
                 [[MLXMLNode alloc] initWithElement:@"info" withAttributes:@{
                     @"id": imageHash,
                     @"type": @"image/jpeg",
-                    @"bytes": [NSString stringWithFormat:@"%lu", (unsigned long)imageData.length]
+                    @"bytes": [NSString stringWithFormat:@"%lu", (unsigned long)imageBytesLen]
                 } andChildren:@[] andData:nil]
             ] andData:nil]
         ] andData:nil]

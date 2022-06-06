@@ -94,6 +94,16 @@ $invalidate(h, $BOOL(done, YES))
 
 #include "metamacros.h"
 
+//we need this in here, even if MLConstants.h was not included
+#ifndef STRIP_PARENTHESES
+    //see https://stackoverflow.com/a/62984543/3528174
+    #define STRIP_PARENTHESES(X) __ESC(__ISH X)
+    #define __ISH(...) __ISH __VA_ARGS__
+    #define __ESC(...) __ESC_(__VA_ARGS__)
+    #define __ESC_(...) __VAN ## __VA_ARGS__
+    #define __VAN__ISH
+#endif
+
 //create handler object or bind vars to existing handler
 #define $newHandler(delegate, name, ...)                                  _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wundeclared-selector\"") [[MLHandler alloc] initWithDelegate:[delegate class] handlerName:@#name andBoundArguments:@{ __VA_ARGS__ }] _Pragma("clang diagnostic pop")
 #define $newHandlerWithInvalidation(delegate, name, invalidation, ...)    _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wundeclared-selector\"") [[MLHandler alloc] initWithDelegate:[delegate class] handlerName:@#name invalidationHandlerName:@#invalidation andBoundArguments:@{ __VA_ARGS__ }] _Pragma("clang diagnostic pop")
@@ -108,14 +118,15 @@ $invalidate(h, $BOOL(done, YES))
 //declare handler, the order of provided arguments does not matter because we use named arguments
 #define $$class_handler(name, ...)                                        +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
 #define $$instance_handler(name, instance, ...)                           +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) ); [instance MLInstanceHandler_##name##_withArguments:_callerArgs andBoundArguments:_boundArgs]; } -(void) MLInstanceHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
-#define $_ID(type, var)                                                   type var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
-#define $$ID(type, var)                                                   if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@#type andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; $_ID(type, var)
-#define $_HANDLER(var)                                                    MLHandler* var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
-#define $$HANDLER(var)                                                    if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"MLHandler" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; $_HANDLER(var)
-#define $$BOOL(var)                                                       if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"BOOL" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; BOOL var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] boolValue] : [_boundArgs[@#var] boolValue]
-#define $$INT(var)                                                        if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"int" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; int var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] intValue] : [_boundArgs[@#var] intValue]
-#define $$DOUBLE(var)                                                     if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"double" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; double var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] doubleValue] : [_boundArgs[@#var] doubleValue]
-#define $$INTEGER(var)                                                    if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"NSInteger" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; NSInteger var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] integerValue]
+#define $_ID(type, var)                                                   (STRIP_PARENTHESES(type) var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var])
+//#define $$ID(type, var)                                                   (STRIP_PARENTHESES(type) var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var])
+#define $$ID(type, var)                                                   (if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@#type andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; STRIP_PARENTHESES(type) var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var])
+#define $_HANDLER(var)                                                    (MLHandler* var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var])
+#define $$HANDLER(var)                                                    (if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"MLHandler" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; MLHandler* var __unused = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var])
+#define $$BOOL(var)                                                       (if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"BOOL" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; BOOL var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] boolValue] : [_boundArgs[@#var] boolValue])
+#define $$INT(var)                                                        (if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"int" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; int var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] intValue] : [_boundArgs[@#var] intValue])
+#define $$DOUBLE(var)                                                     (if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"double" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; double var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] doubleValue] : [_boundArgs[@#var] doubleValue])
+#define $$INTEGER(var)                                                    (if(_callerArgs[@#var]==nil && _boundArgs[@#var]==nil) [MLHandler throwDynamicExceptionForType:@"NSInteger" andVar:@#var andUserData:(@{@"_boundArgs": _boundArgs, @"_callerArgs": _callerArgs}) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; NSInteger var __unused = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] integerValue])
 #define $$                                                                }
 
 //call handler/invalidation
@@ -123,8 +134,10 @@ $invalidate(h, $BOOL(done, YES))
 #define $invalidate(handler, ...)                                         [handler invalidateWithArguments:@{ __VA_ARGS__ }]
 
 //internal stuff
-#define _expand_import(num, param)                                        _expand_import_inner(param)
-#define _expand_import_inner(X)                                           STRIP_PARENTHESES(X)
+//$_*() and $$*() will add parentheses around its result to make sure all inner commas like those probably exposed by an inner STRIP_PARENTHESES() call get not
+//interpreted as multiple arguments by metamacro_foreach()
+//These additional parentheses around the result have to be stripped again by this call to STRIP_PARENTHESES() here
+#define _expand_import(num, param)                                        STRIP_PARENTHESES(param)
 #define _packID(name, value, ...)                                         @#name : nilWrapper(value)
 #define _packBOOL(name, value, ...)                                       @#name : [NSNumber numberWithBool: value ]
 #define _packINT(name, value, ...)                                        @#name : [NSNumber numberWithInt: value ]

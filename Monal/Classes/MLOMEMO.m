@@ -311,6 +311,9 @@ $$
 
 -(void) queryOMEMODevices:(NSString*) jid
 {
+    //TODO: I don't know if that ever gets triggered (new incoming message stanzas add the contact to our list before handing off the message to omemo for decryption)
+    //TODO: if it's the other way round and a new jid gets added by the monal user, the contact will be in our list, too
+    //TODO: if the monal user uses another device to write to a non-roster user, the non-roster contact is created before handing off the message to omemo for decryption, too
     if([[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo] == NO)
     {
         [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandler(self, handleDevicelistSubscribe)];

@@ -681,7 +681,7 @@ $$instance_handler(handleConfigureResult, account.pubsub, $$ID(xmpp*, account), 
     $call(handler, $ID(account, account), $BOOL(success, YES));
 $$
 
-$$instance_handler(handlePublishAgain, account.pubsub, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $$ID(MLXMLNode*, item), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $$HANDLER(handler))
+$$instance_handler(handlePublishAgain, account.pubsub, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $$ID(MLXMLNode*, item), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $_HANDLER(handler))
     if(!success)
     {
         DDLogError(@"Publish failed for node '%@' even after configuring it!", node);

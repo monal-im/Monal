@@ -693,7 +693,7 @@ $$instance_handler(handlePublishAgain, account.pubsub, $$ID(xmpp*, account), $$B
     [self internalPublishItem:item onNode:node withConfigOptions:configOptions andHandler:handler];
 $$
 
-$$instance_handler(handleConfigureAfterPublish, account.pubsub, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $$HANDLER(handler))
+$$instance_handler(handleConfigureAfterPublish, account.pubsub, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $_HANDLER(handler))
     if(!success)
     {
         DDLogError(@"Second publish attempt failed again for node '%@', not configuring it!", node);

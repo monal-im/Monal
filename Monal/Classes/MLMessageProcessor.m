@@ -128,7 +128,7 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
 
-    if(([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
+    if(([messageNode check:@"/<type=groupchat>"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
         // Ignore all group chat msgs from unkown groups
         if([[DataLayer sharedInstance] isContactInList:messageNode.fromUser forAccount:account.accountNo] == NO)
@@ -150,7 +150,7 @@ static NSMutableDictionary* _typingNotifications;
         if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] == YES && [messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload#"] == NO)
         {
             DDLogInfo(@"Handling KeyTransportElement without trying to add a 1:1 buddy %@", possibleUnkownContact);
-            [account.omemo decryptMessage:messageNode];
+            [account.omemo decryptMessage:messageNode withMucParticipantJid:nil];
             return message;
         }
         
@@ -207,6 +207,11 @@ static NSMutableDictionary* _typingNotifications;
         {
             NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo];
             participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
+        }
+        else if([[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo] == nil)
+        {
+            DDLogError(@"BUG: Got incoming groupchat with jid but this jid was not recorded in our db!");
+            DDLogError(@"Recorded members and participants: %@", [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:messageNode.fromUser forAccountId:account.accountNo]);
         }
         DDLogInfo(@"Extracted participantJid: %@", participantJid);
     }
@@ -269,7 +274,7 @@ static NSMutableDictionary* _typingNotifications;
                 DDLogInfo(@"Ignoring encrypted mam history message without fallback body");
         }
         else
-            decrypted = [account.omemo decryptMessage:messageNode];
+            decrypted = [account.omemo decryptMessage:messageNode withMucParticipantJid:participantJid];
     }
     
 #ifdef IS_ALPHA

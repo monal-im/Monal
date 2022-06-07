@@ -184,10 +184,6 @@
     {
         DDLogVerbose(@"Got muc presence from full jid: %@", presenceNode.from);
         
-        //handle muc status codes in self-presences
-        if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
-            [self handleStatusCodes:presenceNode];
-        
         //extract info if present (use an empty dict if no info is present)
         NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
         if(!item)
@@ -212,6 +208,10 @@
             else
                 DDLogInfo(@"Ignoring presence updates from %@, MUC not in buddylist", presenceNode.fromUser);
         }
+        
+        //handle muc status codes in self-presences (after the above code, to make sure we are registered as participant in our db, too)
+        if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
+            [self handleStatusCodes:presenceNode];        
     }
 }
 
@@ -437,6 +437,16 @@
                         @"account": self->_account
                     });
                 });
+            }
+      
+            if([[[DataLayer sharedInstance] getMucTypeOfRoom:node.fromUser andAccount:_account.accountNo] isEqualToString:@"group"])
+                DDLogInfo(@"Recorded members and participants of group %@: %@", node.fromUser, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:node.fromUser forAccountId:_account.accountNo]);
+            else
+            {
+//these lists can potentially get really long for public channels --> restrict logging them to alpha builds
+#ifdef IS_ALPHA
+            DDLogInfo(@"Recorded members and participants of channel %@: %@", node.fromUser, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:node.fromUser forAccountId:_account.accountNo]);
+#endif
             }
             
             //MAYBE TODO: send out notification indicating we joined that room

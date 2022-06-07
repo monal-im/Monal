@@ -173,6 +173,17 @@
                 DDLogInfo(@"Got new muc avatar hash '%@' for muc %@, fetching new image via vcard-temp...", avatarHash, presenceNode.fromUser);
                 [self fetchAvatarForRoom:presenceNode.fromUser];
             }
+            else if(avatarHash == nil && currentHash != nil && ![currentHash isEqualToString:@""])
+            {
+                [[MLImageManager sharedInstance] setIconForContact:presenceNode.fromUser andAccount:_account.accountNo WithData:nil];
+                [[DataLayer sharedInstance] setAvatarHash:@"" forContact:presenceNode.fromUser andAccount:_account.accountNo];
+                //delete cache to make sure the image will be regenerated
+                [[MLImageManager sharedInstance] purgeCacheForContact:presenceNode.fromUser andAccount:_account.accountNo];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                    @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo]
+                }];
+                DDLogInfo(@"Avatar of muc '%@' deleted successfully", presenceNode.fromUser);
+            }
             else
                 DDLogInfo(@"Avatar hash '%@' of muc %@ did not change, not updating avatar...", avatarHash, presenceNode.fromUser);
         }

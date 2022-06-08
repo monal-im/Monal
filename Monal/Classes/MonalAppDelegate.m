@@ -403,7 +403,16 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) applicationDidBecomeActive:(UIApplication*) application
 {
-    //[UIApplication sharedApplication].applicationIconBadgeNumber=0;
+    if([[MLXMPPManager sharedInstance] connectedXMPP].count > 0)
+    {
+        //show spinner
+        [self.activeChats.spinner startAnimating];
+    }
+    else
+    {
+        //hide spinner
+        [self.activeChats.spinner stopAnimating];
+    }
 }
 
 -(void) setActiveChats:(UIViewController*) activeChats
@@ -989,6 +998,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     {
         DDLogInfo(@"### ALL ACCOUNTS IDLE AND FILETRANSFERS COMPLETE NOW ###");
         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+        
+        //hide spinner
+        [self.activeChats.spinner stopAnimating];
         
         //use a synchronized block to disconnect only once
         @synchronized(self) {

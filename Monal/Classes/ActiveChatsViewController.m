@@ -49,15 +49,16 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(id) initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
     return self;
 }
 
 -(void) viewDidLoad
 {
     [super viewDidLoad];
+    
+    self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
+    self.spinner.hidesWhenStopped = YES;
+    
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
@@ -88,6 +89,9 @@ static NSMutableSet* _smacksWarningDisplayed;
 #endif
     self.settingsButton.image = [UIImage systemImageNamed:@"gearshape.fill"];
     self.composeButton.image = [UIImage systemImageNamed:@"person.2.fill"];
+    
+    UIBarButtonItem* spinnerButton = [[UIBarButtonItem alloc] initWithCustomView:self.spinner];
+    [self.navigationItem setRightBarButtonItems:@[self.composeButton, spinnerButton] animated:NO];
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;

@@ -203,15 +203,29 @@ static NSMutableDictionary* _typingNotifications;
         ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
         actualFrom = messageNode.fromResource;
         participantJid = [messageNode findFirst:@"/<type=groupchat>/{http://jabber.org/protocol/muc#user}x/item@jid"];
-        if(participantJid == nil)
+        if(participantJid != nil)
+        {
+#ifdef DEBUG
+            MLAssert([[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo] != nil,
+                @"BUG: Got incoming groupchat with jid but this jid was not recorded in our db!", (@{
+                    @"muc": messageNode.fromUser,
+                    @"participantJid": participantJid,
+                    @"actualFrom": actualFrom,
+                    @"getMembersAndParticipantsOfMuc": [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:messageNode.fromUser forAccountId:account.accountNo]
+                })
+            );
+#else
+            if([[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo] == nil)
+            {
+                DDLogError(@"BUG: Got incoming groupchat %@ with jid %@ for nick %@ but this jid was not recorded in our db!", messageNode.fromUser, participantJid, actualFrom);
+                DDLogError(@"Recorded members and participants: %@", [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:messageNode.fromUser forAccountId:account.accountNo]);
+            }
+#endif
+        }
+        else
         {
             NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo];
             participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
-        }
-        else if([[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo] == nil)
-        {
-            DDLogError(@"BUG: Got incoming groupchat with jid but this jid was not recorded in our db!");
-            DDLogError(@"Recorded members and participants: %@", [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:messageNode.fromUser forAccountId:account.accountNo]);
         }
         DDLogInfo(@"Extracted participantJid: %@", participantJid);
     }

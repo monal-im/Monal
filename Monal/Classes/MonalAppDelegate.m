@@ -1055,9 +1055,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     [HelperTools dispatchSyncReentrant:^{
         //log both cases if present
-        if(self->_bgTask == UIBackgroundTaskInvalid)
+        if(self->_bgTask != UIBackgroundTaskInvalid)
             DDLogVerbose(@"Not starting UIKit background task, already running: %d", (int)self->_bgTask);
-        if(self->_bgFetch == nil)
+        if(self->_bgFetch != nil)
             DDLogVerbose(@"Not starting UIKit background task, bg fetch already running: %@", self->_bgFetch);
         //don't start uikit bg task if it's already running or a bg fetch is running already
         if(self->_bgTask == UIBackgroundTaskInvalid && self->_bgFetch == nil)

@@ -77,6 +77,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             DDLogInfo(@"Got new parsed stanza: %@", parsedStanza);
             for(NSString* query in @[
                 @"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\",
+                @"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node~eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node",
             ])
             {
                 id result = [parsedStanza find:query];
@@ -402,7 +403,16 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) applicationDidBecomeActive:(UIApplication*) application
 {
-    //[UIApplication sharedApplication].applicationIconBadgeNumber=0;
+    if([[MLXMPPManager sharedInstance] connectedXMPP].count > 0)
+    {
+        //show spinner
+        [self.activeChats.spinner startAnimating];
+    }
+    else
+    {
+        //hide spinner
+        [self.activeChats.spinner stopAnimating];
+    }
 }
 
 -(void) setActiveChats:(UIViewController*) activeChats
@@ -989,6 +999,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogInfo(@"### ALL ACCOUNTS IDLE AND FILETRANSFERS COMPLETE NOW ###");
         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
         
+        //hide spinner
+        [self.activeChats.spinner stopAnimating];
+        
         //use a synchronized block to disconnect only once
         @synchronized(self) {
             if(_backgroundTimer != nil || [_wakeupCompletions count] > 0)
@@ -1054,9 +1067,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     [HelperTools dispatchSyncReentrant:^{
         //log both cases if present
-        if(self->_bgTask == UIBackgroundTaskInvalid)
+        if(self->_bgTask != UIBackgroundTaskInvalid)
             DDLogVerbose(@"Not starting UIKit background task, already running: %d", (int)self->_bgTask);
-        if(self->_bgFetch == nil)
+        if(self->_bgFetch != nil)
             DDLogVerbose(@"Not starting UIKit background task, bg fetch already running: %@", self->_bgFetch);
         //don't start uikit bg task if it's already running or a bg fetch is running already
         if(self->_bgTask == UIBackgroundTaskInvalid && self->_bgFetch == nil)

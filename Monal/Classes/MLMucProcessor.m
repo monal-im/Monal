@@ -173,6 +173,17 @@
                 DDLogInfo(@"Got new muc avatar hash '%@' for muc %@, fetching new image via vcard-temp...", avatarHash, presenceNode.fromUser);
                 [self fetchAvatarForRoom:presenceNode.fromUser];
             }
+            else if(avatarHash == nil && currentHash != nil && ![currentHash isEqualToString:@""])
+            {
+                [[MLImageManager sharedInstance] setIconForContact:presenceNode.fromUser andAccount:_account.accountNo WithData:nil];
+                [[DataLayer sharedInstance] setAvatarHash:@"" forContact:presenceNode.fromUser andAccount:_account.accountNo];
+                //delete cache to make sure the image will be regenerated
+                [[MLImageManager sharedInstance] purgeCacheForContact:presenceNode.fromUser andAccount:_account.accountNo];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                    @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo]
+                }];
+                DDLogInfo(@"Avatar of muc '%@' deleted successfully", presenceNode.fromUser);
+            }
             else
                 DDLogInfo(@"Avatar hash '%@' of muc %@ did not change, not updating avatar...", avatarHash, presenceNode.fromUser);
         }
@@ -183,10 +194,6 @@
     else
     {
         DDLogVerbose(@"Got muc presence from full jid: %@", presenceNode.from);
-        
-        //handle muc status codes in self-presences
-        if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
-            [self handleStatusCodes:presenceNode];
         
         //extract info if present (use an empty dict if no info is present)
         NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
@@ -212,6 +219,10 @@
             else
                 DDLogInfo(@"Ignoring presence updates from %@, MUC not in buddylist", presenceNode.fromUser);
         }
+        
+        //handle muc status codes in self-presences (after the above code, to make sure we are registered as participant in our db, too)
+        if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
+            [self handleStatusCodes:presenceNode];        
     }
 }
 
@@ -437,6 +448,16 @@
                         @"account": self->_account
                     });
                 });
+            }
+      
+            if([[[DataLayer sharedInstance] getMucTypeOfRoom:node.fromUser andAccount:_account.accountNo] isEqualToString:@"group"])
+                DDLogInfo(@"Recorded members and participants of group %@: %@", node.fromUser, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:node.fromUser forAccountId:_account.accountNo]);
+            else
+            {
+//these lists can potentially get really long for public channels --> restrict logging them to alpha builds
+#ifdef IS_ALPHA
+            DDLogInfo(@"Recorded members and participants of channel %@: %@", node.fromUser, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:node.fromUser forAccountId:_account.accountNo]);
+#endif
             }
             
             //MAYBE TODO: send out notification indicating we joined that room

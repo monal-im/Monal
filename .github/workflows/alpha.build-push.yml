@@ -28,10 +28,10 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v2
+      - name: Deinit submodules
+        run: git submodule deinit --all --force
       - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: Checkout submodules
-        run: git submodule update --remote --merge
+        run: git submodule update --init --recursive --remote --merge
       - name: Make our build scripts executable
         run: chmod +x ./scripts/build.sh
       - run: chmod +x ./scripts/prepare-alpha-certs.sh

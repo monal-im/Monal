@@ -311,6 +311,9 @@ $$
 
 -(void) queryOMEMODevices:(NSString*) jid
 {
+    //TODO: I don't know if that ever gets triggered (new incoming message stanzas add the contact to our list before handing off the message to omemo for decryption)
+    //TODO: if it's the other way round and a new jid gets added by the monal user, the contact will be in our list, too
+    //TODO: if the monal user uses another device to write to a non-roster user, the non-roster contact is created before handing off the message to omemo for decryption, too
     if([[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo] == NO)
     {
         [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandler(self, handleDevicelistSubscribe)];
@@ -800,7 +803,7 @@ $$
     }
 }
 
--(NSString*) decryptMessage:(XMPPMessage*) messageNode
+-(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid
 {
     if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
     {
@@ -813,18 +816,17 @@ $$
     NSString* senderJid = nil;
     if([messageNode check:@"/<type=groupchat>"])
     {
-        NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:messageNode.fromResource inRoom:messageNode.fromUser forAccountId:self.account.accountNo];
-        if(mucParticipant == nil || mucParticipant[@"participant_jid"] == nil)
+        if(mucParticipantJid == nil)
         {
-            DDLogError(@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipant);
+            DDLogError(@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipantJid);
 #ifdef IS_ALPHA
-            return [NSString stringWithFormat:@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipant];
+            return [NSString stringWithFormat:@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipantJid];
 #else
             return nil;
 #endif
         }
         else
-            senderJid = mucParticipant[@"participant_jid"];
+            senderJid = mucParticipantJid;
     }
     else
         senderJid = messageNode.fromUser;

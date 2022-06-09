@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* settingsButton;
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* composeButton;
 @property (nonatomic, strong) chatViewController* currentChatViewController;
+@property (nonatomic, strong) UIActivityIndicatorView* spinner;
 
 -(void) presentChatWithContact:(MLContact* _Nullable) contact;
 -(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion;

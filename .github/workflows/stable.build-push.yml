@@ -31,10 +31,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Deinit submodules
+        run: git submodule deinit --all --force
       - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: Checkout submodules
-        run: git submodule update --remote
+        run: git submodule update --init --recursive --remote --merge
       - name: Get last build tag and increment it
         run: |
           oldBuildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')

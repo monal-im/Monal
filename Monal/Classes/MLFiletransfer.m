@@ -316,11 +316,19 @@ $$class_handler(handleHardlinking, $$ID(NSNumber*, accountNo), $$ID(NSString*, c
     NSError* error;
     [_fileManager createDirectoryAtURL:hardLink.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} error:&error];
     if(error)
-        @throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_DIR" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    {
+        DDLogError(@"error creating hardlinkgin dir struct: %@", error);
+        return;
+    }
+        //@throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_DIR" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     [_fileManager linkItemAtURL:[NSURL fileURLWithPath:cacheFile] toURL:hardLink error:&error];
     [HelperTools configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:[hardLink path]];
     if(error)
-        @throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_FILE" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    {
+        DDLogError(@"error creating hardlink: %@", error);
+        return;
+    }
+        //@throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_FILE" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
 $$
 
 +(void) hardlinkFileForMessage:(MLMessage*) msg

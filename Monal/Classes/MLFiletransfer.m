@@ -314,13 +314,13 @@ $$class_handler(handleHardlinking, $$ID(NSNumber*, accountNo), $$ID(NSString*, c
     
     DDLogInfo(@"Hardlinking cache file at '%@' into documents directory at %@", cacheFile, hardLink);
     NSError* error;
-    [_fileManager createDirectoryAtURL:hardLink.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFileProtectionKey: NSFileProtectionComplete} error:&error];
+    [_fileManager createDirectoryAtURL:hardLink.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} error:&error];
     if(error)
-        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+        @throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_DIR" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     [_fileManager linkItemAtURL:[NSURL fileURLWithPath:cacheFile] toURL:hardLink error:&error];
-    [HelperTools configureFileProtection:NSFileProtectionComplete forFile:[hardLink path]];
+    [HelperTools configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:[hardLink path]];
     if(error)
-        DDLogError(@"Failed to hardlink cache file at '%@' to '%@': %@...", cacheFile, hardLink, error);
+        @throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_FILE" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
 $$
 
 +(void) hardlinkFileForMessage:(MLMessage*) msg

@@ -323,9 +323,13 @@ $$class_handler(handleHardlinking, $$ID(NSNumber*, accountNo), $$ID(NSString*, c
             //return;
         }
             //@throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_DIR" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+        [HelperTools configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:[hardLink path]];
     }
-    [_fileManager linkItemAtURL:[NSURL fileURLWithPath:cacheFile] toURL:hardLink error:&error];
-    [HelperTools configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:[hardLink path]];
+    
+    if(![_fileManager fileExistsAtPath:cacheFile])
+        DDLogError(@"Source file does not exists?!");
+    
+    [_fileManager linkItemAtPath:cacheFile toPath:[hardLink path] error:&error];
     if(error)
     {
         DDLogError(@"error creating hardlink: %@", error);
@@ -386,12 +390,12 @@ $$
     NSURL* hardLink = [hardlinkBase URLByAppendingPathComponent:fileInfo[@"filename"]];
     MLHandler* handler = $newHandler(self, handleHardlinking, $ID(accountNo, msg.accountId), $ID(cacheFile, fileInfo[@"cacheFile"]), $ID(hardLink));
     
-    if(NO)//[HelperTools isAppExtension])
+    /*if([HelperTools isAppExtension])
     {
         DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at %@: we are in the appex, rescheduling this to next account connect", fileInfo[@"cacheFile"], hardLink);
         [account addReconnectionHandler:handler];
     }
-    else
+    else*/
         $call(handler);
 }
 

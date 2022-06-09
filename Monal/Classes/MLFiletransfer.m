@@ -383,7 +383,7 @@ $$
     NSURL* hardLink = [hardlinkBase URLByAppendingPathComponent:fileInfo[@"filename"]];
     MLHandler* handler = $newHandler(self, handleHardlinking, $ID(accountNo, msg.accountId), $ID(cacheFile, fileInfo[@"cacheFile"]), $ID(hardLink));
     
-    if([HelperTools isAppExtension])
+    if(NO)//[HelperTools isAppExtension])
     {
         DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at %@: we are in the appex, rescheduling this to next account connect", fileInfo[@"cacheFile"], hardLink);
         [account addReconnectionHandler:handler];

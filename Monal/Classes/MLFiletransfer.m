@@ -314,19 +314,22 @@ $$class_handler(handleHardlinking, $$ID(NSNumber*, accountNo), $$ID(NSString*, c
     
     DDLogInfo(@"Hardlinking cache file at '%@' into documents directory at %@", cacheFile, hardLink);
     NSError* error;
-    [_fileManager createDirectoryAtURL:hardLink.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} error:&error];
-    if(error)
+    if(![_fileManager fileExistsAtPath:[hardLink.URLByDeletingLastPathComponent path]])
     {
-        DDLogError(@"error creating hardlinkgin dir struct: %@", error);
-        return;
+        [_fileManager createDirectoryAtURL:hardLink.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} error:&error];
+        if(error)
+        {
+            DDLogError(@"error creating hardlinkgin dir struct: %@", error);
+            //return;
+        }
+            //@throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_DIR" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     }
-        //@throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_DIR" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     [_fileManager linkItemAtURL:[NSURL fileURLWithPath:cacheFile] toURL:hardLink error:&error];
     [HelperTools configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:[hardLink path]];
     if(error)
     {
         DDLogError(@"error creating hardlink: %@", error);
-        return;
+        //return;
     }
         //@throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_FILE" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
 $$

@@ -346,19 +346,31 @@ $$
         hardlinkBase = [hardlinkBase URLByAppendingPathComponent:groupDisplayName];
     hardlinkBase = [hardlinkBase URLByAppendingPathComponent:fromDisplayName];
     
-    //put every mime-type in its own type directory
-    if([fileInfo[@"mimeType"] hasPrefix:@"image/"])
-        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Images", @"directory for downloaded images")];
-    else if([fileInfo[@"mimeType"] hasPrefix:@"video/"])
-        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Videos", @"directory for downloaded videos")];
-    else if([fileInfo[@"mimeType"] hasPrefix:@"audio/"])
-        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Audios", @"directory for downloaded audios")];
+    //put incoming and outgoing files in different directories
+    if(msg.inbound)
+    {
+        //put every mime-type in its own type directory
+        if([fileInfo[@"mimeType"] hasPrefix:@"image/"])
+            hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Received Images", @"directory for downloaded images")];
+        else if([fileInfo[@"mimeType"] hasPrefix:@"video/"])
+            hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Received Videos", @"directory for downloaded videos")];
+        else if([fileInfo[@"mimeType"] hasPrefix:@"audio/"])
+            hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Received Audios", @"directory for downloaded audios")];
+        else
+            hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Received Files", @"directory for downloaded files")];
+    }
     else
-        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Files", @"directory for downloaded files")];
-    
-    //add /sent to hardlinkBase for outgoing files
-    if(!msg.inbound)
-        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Sent", @"directory for own sent files")];
+    {
+        //put every mime-type in its own type directory
+        if([fileInfo[@"mimeType"] hasPrefix:@"image/"])
+            hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Sent Images", @"directory for downloaded images")];
+        else if([fileInfo[@"mimeType"] hasPrefix:@"video/"])
+            hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Sent Videos", @"directory for downloaded videos")];
+        else if([fileInfo[@"mimeType"] hasPrefix:@"audio/"])
+            hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Sent Audios", @"directory for downloaded audios")];
+        else
+            hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Sent Files", @"directory for downloaded files")];
+    }
     
     NSURL* hardLink = [hardlinkBase URLByAppendingPathComponent:fileInfo[@"filename"]];
     MLHandler* handler = $newHandler(self, handleHardlinking, $ID(accountNo, msg.accountId), $ID(cacheFile, fileInfo[@"cacheFile"]), $ID(hardLink));

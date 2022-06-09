@@ -28,13 +28,15 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 
 +(void) initialize
 {
+    NSError* error;
     _fileManager = [NSFileManager defaultManager];
     _documentCacheDir = [[[_fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path] stringByAppendingPathComponent:@"documentCache"];
-    NSError* error;
+    
     [_fileManager createDirectoryAtURL:[NSURL fileURLWithPath:_documentCacheDir] withIntermediateDirectories:YES attributes:nil error:&error];
     if(error)
-        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     [HelperTools configureFileProtectionFor:_documentCacheDir];
+    
     _currentlyTransfering = [[NSMutableSet alloc] init];
     _expectedDownloadSizes = [[NSMutableDictionary alloc] init];
 }
@@ -251,15 +253,18 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
                 [HelperTools configureFileProtectionFor:cacheFile];
             }
             
-            DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
-            
-            //update db with content type and size
+            //update MLMessage object with mime type and size
             NSNumber* filetransferSize = @([[_fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]);
-            [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:filetransferSize];
-            
-            //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = filetransferSize;
+            
+            //hardlink cache file if possible
+            [self hardlinkFileForMessage:msg];
+            
+            DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
+            //update db with content type and size
+            [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:filetransferSize];
+            //send out update notification (using our directly update MLMessage object instead of reloading it from db after updating the db)
             xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
             
@@ -294,6 +299,79 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 }
 
 
+$$class_handler(handleHardlinking, $$ID(NSNumber*, accountNo), $$ID(NSString*, cacheFile), $$ID(NSURL*, hardLink))
+    if([HelperTools isAppExtension])
+    {
+        DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at %@: we STILL are in the appex, rescheduling this to next account connect", cacheFile, hardLink);
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+        [account addReconnectionHandler:$newHandler(self, handleHardlinking,
+            $ID(accountNo),
+            $ID(cacheFile),
+            $ID(hardLink),
+        )];
+        return;
+    }
+    
+    DDLogInfo(@"Hardlinking cache file at '%@' into documents directory at %@", cacheFile, hardLink);
+    NSError* error;
+    [_fileManager createDirectoryAtURL:hardLink.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFileProtectionKey: NSFileProtectionComplete} error:&error];
+    if(error)
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    [_fileManager linkItemAtURL:[NSURL fileURLWithPath:cacheFile] toURL:hardLink error:&error];
+    [HelperTools configureFileProtection:NSFileProtectionComplete forFile:[hardLink path]];
+    if(error)
+        DDLogError(@"Failed to hardlink cache file at '%@' to '%@': %@...", cacheFile, hardLink, error);
+$$
+
++(void) hardlinkFileForMessage:(MLMessage*) msg
+{
+    NSDictionary* fileInfo = [self getFileInfoForMessage:msg];
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
+    
+    NSString* groupDisplayName = nil;
+    NSString* fromDisplayName = nil;
+    MLContact* contact = [MLContact createContactFromJid:msg.buddyName andAccountNo:msg.accountId];
+    if(msg.isMuc)
+    {
+        groupDisplayName = contact.contactDisplayName;
+        fromDisplayName = msg.contactDisplayName;
+    }
+    else
+        fromDisplayName = contact.contactDisplayName;
+    
+    //this resembles to /Files/<account_jid>/<contact_name> for 1:1 contacts and /Files/<account_jid>/<group_name>/<contact_in_group_name> for mucs (channels AND groups)
+    NSURL* hardlinkBase = [[_fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+    hardlinkBase = [hardlinkBase URLByAppendingPathComponent:account.connectionProperties.identity.jid];
+    if(groupDisplayName != nil)
+        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:groupDisplayName];
+    hardlinkBase = [hardlinkBase URLByAppendingPathComponent:fromDisplayName];
+    
+    //put every mime-type in its own type directory
+    if([fileInfo[@"mimeType"] hasPrefix:@"image/"])
+        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Images", @"directory for downloaded images")];
+    else if([fileInfo[@"mimeType"] hasPrefix:@"video/"])
+        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Videos", @"directory for downloaded videos")];
+    else if([fileInfo[@"mimeType"] hasPrefix:@"audio/"])
+        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Audios", @"directory for downloaded audios")];
+    else
+        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Files", @"directory for downloaded files")];
+    
+    //add /sent to hardlinkBase for outgoing files
+    if(!msg.inbound)
+        hardlinkBase = [hardlinkBase URLByAppendingPathComponent:NSLocalizedString(@"Sent", @"directory for own sent files")];
+    
+    NSURL* hardLink = [hardlinkBase URLByAppendingPathComponent:fileInfo[@"filename"]];
+    MLHandler* handler = $newHandler(self, handleHardlinking, $ID(accountNo, msg.accountId), $ID(cacheFile, fileInfo[@"cacheFile"]), $ID(hardLink));
+    
+    if([HelperTools isAppExtension])
+    {
+        DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at %@: we are in the appex, rescheduling this to next account connect", fileInfo[@"cacheFile"], hardLink);
+        [account addReconnectionHandler:handler];
+    }
+    else
+        $call(handler);
+}
+
 +(NSDictionary*) getFileInfoForMessage:(MLMessage*) msg
 {
     if(![msg.messageType isEqualToString:kMessageTypeFiletransfer])
@@ -326,11 +404,11 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
     return @{
         @"url": msg.messageText,
         @"filename": filename,
-        @"cacheId": [cacheFile lastPathComponent],
-        @"cacheFile": cacheFile,
         @"needsDownloading": @NO,
         @"mimeType": [self getMimeTypeOfCacheFile:cacheFile],
         @"size": @([[_fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]),
+        @"cacheId": [cacheFile lastPathComponent],
+        @"cacheFile": cacheFile,
     };
 }
 

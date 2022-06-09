@@ -334,7 +334,7 @@ void logException(NSException* exception)
     return token;
 }
 
-+(void) configureFileProtectionFor:(NSString*) file
++(void) configureFileProtection:(NSString*) protectionLevel forFile:(NSString*) file
 {
 #if TARGET_OS_IPHONE
     NSFileManager* fileManager = [NSFileManager defaultManager];
@@ -342,7 +342,7 @@ void logException(NSException* exception)
     {
         //DDLogVerbose(@"protecting file '%@'...", file);
         NSError* error;
-        [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
+        [fileManager setAttributes:@{NSFileProtectionKey: protectionLevel} ofItemAtPath:file error:&error];
         if(error)
         {
             DDLogError(@"Error configuring file protection level for: %@", file);
@@ -354,6 +354,11 @@ void logException(NSException* exception)
     else
         ;//DDLogVerbose(@"file '%@' does not exist!", file);
 #endif
+}
+
++(void) configureFileProtectionFor:(NSString*) file
+{
+    [self configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:file];
 }
 
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid

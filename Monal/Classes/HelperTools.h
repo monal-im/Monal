@@ -43,6 +43,7 @@ void logException(NSException* exception);
 +(UIColor*) generateColorFromJid:(NSString*) jid;
 +(NSString*) bytesToHuman:(int64_t) bytes;
 +(NSString*) stringFromToken:(NSData*) tokenIn;
++(void) configureFileProtection:(NSString*) protectionLevel forFile:(NSString*) file;
 +(void) configureFileProtectionFor:(NSString*) file;
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
 +(void) clearSyncErrorsOnAppForeground;

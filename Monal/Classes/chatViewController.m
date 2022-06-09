@@ -1453,7 +1453,7 @@ enum msgSentState {
 }
 
 //only for messages going out
--(NSNumber*) addMessageto:(NSString *)to withMessage:(nonnull NSString *) message andId:(nonnull NSString *) messageId messageType:(nonnull NSString *) messageType mimeType:(NSString *) mimeType size:(NSNumber *) size
+-(MLMessage* _Nullable) addMessageto:(NSString *)to withMessage:(nonnull NSString *) message andId:(nonnull NSString *) messageId messageType:(nonnull NSString *) messageType mimeType:(NSString *) mimeType size:(NSNumber *) size
 {
     if(!self.jid || !message)
     {
@@ -1503,10 +1503,12 @@ enum msgSentState {
         //create and donate interaction to allow for ios 15 suggestions
         if(@available(iOS 15.0, macCatalyst 15.0, *))
             [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
+        
+        return messageObj;
     }
     else
         DDLogError(@"failed to add message to history db");
-    return messageDBId;
+    return nil;
 }
 
 -(void) handleNewMessage:(NSNotification *)notification
@@ -2946,8 +2948,10 @@ enum msgSentState {
                         if(!error)
                         {
                             NSString* newMessageID = [[NSUUID UUID] UUIDString];
-                            [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
+                            MLMessage* msg = [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
                             [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
+                                DDLogInfo(@"File upload sent to contact...");
+                                [MLFiletransfer hardlinkFileForMessage:msg];        //hardlink cache file if possible
                                 [self hideUploadHUD];
                             }];
                         }
@@ -3043,22 +3047,26 @@ enum msgSentState {
     if(!error)
     {
         NSString* newMessageID = [[NSUUID UUID] UUIDString];
-        [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-        [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:nil];
-        DDLogInfo(@"File sent");
-    }
-    if(self.uploadQueue.count > 0)
-    {
-        [self.uploadMenuView performBatchUpdates:^{
-            [self deleteQueueItemAtIndex:0];
-        } completion:^(BOOL finished){
-            [self emptyUploadQueue];
+        MLMessage* msg = [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
+        [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
+            DDLogInfo(@"File upload sent to contact...");
+            [MLFiletransfer hardlinkFileForMessage:msg];        //hardlink cache file if possible
+            
+            if(self.uploadQueue.count > 0)
+            {
+                [self.uploadMenuView performBatchUpdates:^{
+                    [self deleteQueueItemAtIndex:0];
+                } completion:^(BOOL finished){
+                    [self emptyUploadQueue];
+                }];
+            }
+            else
+            {
+                [self hideUploadQueue];
+                [self hideUploadHUD];
+            }
         }];
-    }
-    else
-    {
-        [self hideUploadQueue];
-        [self hideUploadHUD];
+        DDLogInfo(@"upload done");
     }
 }
 

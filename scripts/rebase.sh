@@ -10,6 +10,7 @@ git fetch origin alpha.build
 git fetch origin develop
 if $(git rev-parse --is-shallow-repository); then
     git pull --unshallow
+    git submodule update --init --remote
 fi
 date
 git branch tmpcopy

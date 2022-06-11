@@ -28,13 +28,12 @@ jobs:
       EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Stable_iOS_ExportOptions.plist"
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-      - name: Deinit submodules
-        run: git submodule deinit --all --force
+          clean: true
+          submodules: true
       - name: Checkout submodules
-        run: git submodule update --init --recursive --remote --merge
+        run: git submodule update --remote
       - name: Get last build tag and increment it
         run: |
           oldBuildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')

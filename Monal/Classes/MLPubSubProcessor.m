@@ -31,7 +31,7 @@
 
 @implementation MLPubSubProcessor
 
-$$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $$ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     DDLogDebug(@"Got new avatar metadata from '%@'", jid);
     if([type isEqualToString:@"publish"])
     {
@@ -131,7 +131,7 @@ $$class_handler(handleAvatarFetchResult, $$ID(xmpp*, account), $$ID(NSString*, j
     }
 $$
 
-$$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $$ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     //new/updated nickname
     if([type isEqualToString:@"publish"])
     {
@@ -188,7 +188,7 @@ $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
     }
 $$
 
-$$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $$ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(![jid isEqualToString:account.connectionProperties.identity.jid])
     {
         DDLogWarn(@"Ignoring bookmarks update not coming from our own jid");

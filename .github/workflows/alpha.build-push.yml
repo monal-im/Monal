@@ -31,6 +31,8 @@ jobs:
         with:
           clean: true
           submodules: true
+      - name: Fetch tags
+        run: git fetch --tags
       - name: Checkout submodules
         run: git submodule update --remote
       - name: Make our build scripts executable

@@ -19,6 +19,8 @@ jobs:
           clean: true
           submodules: true
           ref: alpha.build
+      - name: Fetch tags
+        run: git fetch --tags
       - name: Checkout submodules
         run: git submodule update --remote
       - run: git branch

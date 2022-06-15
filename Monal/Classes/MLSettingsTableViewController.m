@@ -13,6 +13,7 @@
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
 #import "XMPPEdit.h"
+#import <Monal-Swift.h>
 
 @import SafariServices;
 
@@ -320,9 +321,11 @@ enum DummySettingsRows {
                 case PrivacySettingsRow:
                     [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
                     break;
-                case NotificationsRow:
-                    [self performSegueWithIdentifier:@"showNotification" sender:self];
+                case NotificationsRow: {
+                    UIViewController* notificationSettingsController = [[SwiftuiInterface new] makeViewWithName:@"NotificationSettings"];
+                    [self showDetailViewController:notificationSettingsController sender:self];
                     break;
+                }
                 case BackgroundsRow:
                     [self performSegueWithIdentifier:@"showBackgrounds" sender:self];
                     break;

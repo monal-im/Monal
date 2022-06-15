@@ -24,8 +24,11 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 
 -(void) setRegisterOnAppserverWithToken:(NSString*) token;
 -(void) setUnregisterOnAppserver;
+-(void) setPushEnableWithNode:(NSString*) node onAppserver:(NSString*) jid;
+#ifndef IS_ALPHA
 -(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid;
--(void) setPushDisable;
+#endif
+-(void) setPushDisable:(NSString*) node;
 
 /**
  Makes an iq to bind with a resouce. Passing nil will set no resource.
@@ -115,6 +118,9 @@ removes a contact from the roster
  create instant room
  */
 -(void) setInstantRoom;
+
+-(void) setVcardAvatarWithData:(NSData*) imageData andType:(NSString*) imageType;
+-(void) setVcardQuery;
 
 #pragma mark - account
 

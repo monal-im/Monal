@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLLogInViewController : UIViewController <UITextFieldDelegate, MLLQRCodeScannerAccountLoginDeleagte>
+@interface MLLogInViewController : UIViewController <UITextFieldDelegate, MLLQRCodeScannerAccountLoginDelegate>
 @property (nonatomic, weak) IBOutlet UITextField* jid;
 @property (nonatomic, weak) IBOutlet UITextField* password;
 @property (nonatomic, weak) IBOutlet UIButton* loginButton;

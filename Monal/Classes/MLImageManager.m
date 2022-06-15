@@ -52,6 +52,25 @@
     return composedImage;
 }
 
++(UIImage*) image:(UIImage*) image withMucOverlay:(UIImage*) overlay
+{
+    UIGraphicsImageRendererFormat* format = [[UIGraphicsImageRendererFormat alloc] init];
+    format.opaque = NO;
+    format.preferredRange = UIGraphicsImageRendererFormatRangeStandard;
+    format.scale = 1.0;
+    CGRect drawRect = CGRectMake(0, 0, image.size.width, image.size.height);
+    CGFloat overlaySize = (float)(image.size.width / 3);
+    UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:drawRect.size format:format];
+    return [renderer imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull context __unused) {
+        [image drawInRect:drawRect];
+        CGRect overlayRect = CGRectMake(0,                  //renderer.format.bounds.size.width - overlaySize
+                                        0,                  //renderer.format.bounds.size.height - overlaySize
+                                        overlaySize,
+                                        overlaySize);
+        [overlay drawInRect:overlayRect];
+    }];
+}
+
 -(id) init
 {
     self = [super init];
@@ -246,28 +265,41 @@
     toreturn = [self.iconCache objectForKey:cacheKey];
     if(!toreturn)
     {
-        if(contact.isGroup)
-            toreturn = [MLImageManager circularImage:([@"channel" isEqualToString:contact.mucType] ? [UIImage imageNamed:@"noicon_channel"] : [UIImage imageNamed:@"noicon_muc"])];
-        else
+        NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+        writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
+        writablePath = [writablePath stringByAppendingPathComponent:filename];
+        
+        DDLogVerbose(@"Loading avatar image at: %@", writablePath);
+        UIImage* savedImage = [UIImage imageWithContentsOfFile:writablePath];
+        if(savedImage)
+            toreturn = savedImage;
+        DDLogVerbose(@"Loaded image: %@", toreturn);
+        
+        if(toreturn == nil)             //return default avatar
         {
-            NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-            writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
-            writablePath = [writablePath stringByAppendingPathComponent:filename];
-
-            DDLogVerbose(@"Loading avatar image at: %@", writablePath);
-            UIImage* savedImage = [UIImage imageWithContentsOfFile:writablePath];
-            if(savedImage)
-                toreturn = savedImage;
-            DDLogVerbose(@"Loaded image: %@", toreturn);
-
-            if(toreturn == nil)
+            DDLogVerbose(@"Using/generating dummy icon for contact: %@", contact);
+            if(contact.isGroup)
             {
-                DDLogVerbose(@"Generating dummy icon for contact: %@", contact);
-                toreturn = [self generateDummyIconForContact:contact];
+                if([@"channel" isEqualToString:contact.mucType])
+                    toreturn = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_channel" inBundle:nil compatibleWithTraitCollection:nil]];
+                else
+                    toreturn = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_muc" inBundle:nil compatibleWithTraitCollection:nil]];
             }
+            else
+                toreturn = [self generateDummyIconForContact:contact];
+        }
+        else if(contact.isGroup)        //add group indicator overlay for non-default muc avatar
+        {
+            UIImage* overlay = nil;
+            if([@"channel" isEqualToString:contact.mucType])
+                overlay = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_channel" inBundle:nil compatibleWithTraitCollection:nil]];
+            else
+                overlay = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_muc" inBundle:nil compatibleWithTraitCollection:nil]];
+            if(overlay)
+                toreturn = [MLImageManager image:toreturn withMucOverlay:overlay];
         }
         
-        //uiimage image named is cached if avaialable, but onlyif not in appex due to memory limits therein
+        //uiimage is cached if avaialable, but only if not in appex due to memory limits therein
         if(toreturn && ![HelperTools isAppExtension])
             [self.iconCache setObject:toreturn forKey:cacheKey];
         

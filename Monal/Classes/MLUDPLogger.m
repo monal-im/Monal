@@ -181,14 +181,6 @@ static NSString* _processID;
     addr.sin_port           = htons([[[HelperTools defaultsDB] stringForKey:@"udpLoggerPort"] integerValue]);
     addr.sin_addr.s_addr    = inet_addr([[[HelperTools defaultsDB] stringForKey:@"udpLoggerHostname"] UTF8String]);
     
-    if(_cfsocketout != NULL && !CFSocketIsValid(_cfsocketout))
-    {
-        CFSocketInvalidate(_cfsocketout);       //just to make sure
-        //release old socket object and create new one
-        CFRelease(_cfsocketout);
-        _cfsocketout = NULL;
-    }
-    
     if(_cfsocketout == NULL)
     {
         _cfsocketout = CFSocketCreate(

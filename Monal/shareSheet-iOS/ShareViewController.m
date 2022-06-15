@@ -14,8 +14,10 @@
 #import "MLConstants.h"
 #import "HelperTools.h"
 #import "DataLayer.h"
+#import "MLFiletransfer.h"
 
 #import <MapKit/MapKit.h>
+#import <MobileCoreServices/MobileCoreServices.h>
 
 @import Intents;
 
@@ -29,11 +31,6 @@
 
 @end
 
-// Magic const
-const u_int32_t MagicPublicUrl = 1 << 0;
-const u_int32_t MagicPlainTxt = 1 << 1;
-const u_int32_t MagicMapKitItem = 1 << 2;
-
 @implementation ShareViewController
 
 +(void) initialize
@@ -42,6 +39,8 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
+    
+    DDLogInfo(@"Initialized ShareViewController");
 }
 
 -(void) viewDidLoad
@@ -60,8 +59,6 @@ const u_int32_t MagicMapKitItem = 1 << 2;
 
 - (void) presentationAnimationDidFinish
 {
-    DDLogInfo(@"Monal ShareViewController presentationAnimationDidFinish");
-    
     // list pinned chats above normal chats
     NSMutableArray<MLContact*>* recipients = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
     [recipients addObjectsFromArray:[[DataLayer sharedInstance] activeContactsWithPinned:NO]];
@@ -105,6 +102,7 @@ const u_int32_t MagicMapKitItem = 1 << 2;
             }
         }
     }
+    
     [self reloadConfigurationItems];
 }
 
@@ -122,8 +120,7 @@ const u_int32_t MagicMapKitItem = 1 << 2;
 {
     if(self.recipient != nil && self.account != nil)
         return YES;
-    else
-        return NO;
+    return NO;
 }
 
 -(void) didSelectPost
@@ -131,12 +128,138 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
     DDLogVerbose(@"Attachments = %@", item.attachments);
 
-    u_int32_t magicIdentifyer = 0;
-    NSMutableDictionary<NSNumber*, NSItemProvider*>* magicIdentifyerDic = [[NSMutableDictionary alloc] init];
-
-    for(NSItemProvider* provider in item.attachments)
+    //we curently are only able to handle exactly one shared item (see plist file)
+    if([item.attachments count] != 1)
     {
-        DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
+        DDLogError(@"We currently are only able to handle exactly one shared item, ignoring this multi-item share!");
+        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+        return;
+    }
+    
+    NSItemProvider* provider = item.attachments.firstObject;
+        
+    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+    payload[@"account_id"] = self.recipient.accountId;
+    payload[@"recipient"] = self.recipient.contactJid;
+    payload[@"comment"] = self.contentText;
+    
+    //for a list of types, see UTCoreTypes.h in MobileCoreServices framework
+    DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
+    if([provider hasItemConformingToTypeIdentifier:@"com.apple.mapkit.map-item"])
+    {
+        // convert map item to geo:
+        [provider loadItemForTypeIdentifier:@"com.apple.mapkit.map-item" options:nil completionHandler:^(NSData*  _Nullable item, NSError * _Null_unspecified error) {
+            NSError* err;
+            MKMapItem* mapItem = [NSKeyedUnarchiver unarchivedObjectOfClass:[MKMapItem class] fromData:item error:&err];
+            if(err != nil)
+                DDLogError(@"Error extracting mapkit item: %@", err);
+            else
+            {
+                DDLogInfo(@"Got mapkit item: %@", item);
+                payload[@"type"] = @"geo";
+                payload[@"data"] = [NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude];
+                [self savePayloadMsgAndComplete:payload];
+            }
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeImage])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(NSURL*  _Nullable item, NSError * _Null_unspecified error) {
+            if(error != nil)
+            {
+                DDLogWarn(@"Got error, retrying with UIImage: %@", error);
+                [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(UIImage*  _Nullable item, NSError * _Null_unspecified error) {
+                    DDLogInfo(@"Got memory image item: %@", item);
+                    payload[@"type"] = @"image";
+                    payload[@"data"] = [MLFiletransfer prepareUIImageUpload:item];
+                    [self savePayloadMsgAndComplete:payload];
+                }];
+            }
+            else
+            {
+                DDLogInfo(@"Got image item: %@", item);
+                payload[@"type"] = @"image";
+                payload[@"data"] = [MLFiletransfer prepareFileUpload:item];
+                [self savePayloadMsgAndComplete:payload];
+            }
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeAudiovisualContent])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeAudiovisualContent options:nil completionHandler:^(NSURL*  _Nullable item, NSError * _Null_unspecified error) {
+            DDLogInfo(@"Got audiovisual item: %@", item);
+            payload[@"type"] = @"audiovisual";
+            payload[@"data"] = [MLFiletransfer prepareFileUpload:item];
+            [self savePayloadMsgAndComplete:payload];
+        }];
+    }
+    /*else if([provider hasItemConformingToTypeIdentifier:(NSString*)])
+    {
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)])
+    {
+    }*/
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeContact])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeContact options:nil completionHandler:^(NSURL*  _Nullable item, NSError * _Null_unspecified error) {
+            DDLogInfo(@"Got contact item: %@", item);
+            payload[@"type"] = @"contact";
+            payload[@"data"] = [MLFiletransfer prepareFileUpload:item];
+            [self savePayloadMsgAndComplete:payload];
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeFileURL])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeFileURL options:nil completionHandler:^(NSURL*  _Nullable item, NSError * _Null_unspecified error) {
+            DDLogInfo(@"Got file url item: %@", item);
+            payload[@"type"] = @"file";
+            payload[@"data"] = [MLFiletransfer prepareFileUpload:item];
+            [self savePayloadMsgAndComplete:payload];
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeURL])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeURL options:nil completionHandler:^(NSURL*  _Nullable item, NSError * _Null_unspecified error) {
+            DDLogInfo(@"Got internet url item: %@", item);
+            payload[@"type"] = @"url";
+            payload[@"data"] = item.absoluteString;
+            [self savePayloadMsgAndComplete:payload];
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
+    {
+        DDLogInfo(@"Got direct text item: %@", self.contentText);
+        payload[@"type"] = @"text";
+        payload[@"data"] = self.contentText;
+        payload[@"comment"] = @"";
+        [self savePayloadMsgAndComplete:payload];
+    }
+    else
+    {
+        DDLogError(@"Could not save payload");
+        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+    }
+    
+    
+    
+    
+    /*
+        if([provider hasItemConformingToTypeIdentifier:kUTTypeImage])
+        {
+            magicIdentifyer |= MagicPublicFileUrl;
+            [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicPublicFileUrl]];
+        }
+        if([provider hasItemConformingToTypeIdentifier:kUTTypeImage])
+        {
+            magicIdentifyer |= MagicPublicFileUrl;
+            [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicPublicFileUrl]];
+        }
+        
+        if([provider hasItemConformingToTypeIdentifier:@"public.file-url"])
+        {
+            magicIdentifyer |= MagicPublicFileUrl;
+            [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicPublicFileUrl]];
+        }
         if([provider hasItemConformingToTypeIdentifier:@"public.url"])
         {
            magicIdentifyer |= MagicPublicUrl;
@@ -153,10 +276,7 @@ const u_int32_t MagicMapKitItem = 1 << 2;
            [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicMapKitItem]];
         }
     }
-    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-    payload[@"account_id"] = self.recipient.accountId;
-    payload[@"recipient"] = self.recipient.contactJid;
-    payload[@"comment"] = self.contentText;
+    
 
     // use best matching providers
     if((magicIdentifyer & MagicMapKitItem) > 0) {
@@ -170,6 +290,11 @@ const u_int32_t MagicMapKitItem = 1 << 2;
             payload[@"data"] = [NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude];
             [self savePayloadMsgAndComplete:payload];
         }];
+    }
+    else if((magicIdentifyer & MagicPublicFileUrl) > 0)
+    {
+        NSItemProvider* provider = [magicIdentifyerDic objectForKey:[NSNumber numberWithUnsignedInt:MagicPublicFileUrl]];
+        
     }
     else if((magicIdentifyer & MagicPublicUrl) > 0)
     {
@@ -187,10 +312,14 @@ const u_int32_t MagicMapKitItem = 1 << 2;
         payload[@"comment"] = @"";
         [self savePayloadMsgAndComplete:payload];
     }
+    else
+        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+    */
 }
 
 -(void) savePayloadMsgAndComplete:(NSDictionary*) payload
 {
+    DDLogDebug(@"Saving payload dictionary to outbox: %@", payload);
     [[DataLayer sharedInstance] addShareSheetPayload:payload];
     [self.extensionContext completeRequestReturningItems:@[] completionHandler:^(BOOL expired __unused) {
         [self openMainApp:payload[@"recipient"]];
@@ -283,6 +412,7 @@ const u_int32_t MagicMapKitItem = 1 << 2;
 
 -(void) openMainApp:(NSString*) recipient
 {
+    DDLogInfo(@"Now opening mainapp...");
     NSURL* mainAppUrl = [NSURL URLWithString:@"monalOpen://"];
     [self openURL:mainAppUrl];
 }

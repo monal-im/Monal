@@ -77,7 +77,7 @@ static NSRegularExpression* dataFormQueryRegex;
 -(MLXMLNode*) setField:(NSString* _Nonnull) name withType:(NSString* _Nullable) type andValue:(NSString* _Nonnull) value
 {
     NSDictionary* attrs = type ? @{@"type": type, @"var": name} : @{@"var": name};
-    [self removeChild:[self findFirst:@"field<var=%@>", name]];
+    [self removeChildNode:[self findFirst:@"field<var=%@>", name]];
     MLXMLNode* field = [self addChildNode:[[MLXMLNode alloc] initWithElement:@"field" withAttributes:attrs andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:value]
     ] andData:nil]];
@@ -119,7 +119,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(void) removeField:(NSString* _Nonnull) name
 {
-    [self removeChild:[self findFirst:@"field<var=%@>", name]];
+    [self removeChildNode:[self findFirst:@"field<var=%@>", name]];
     [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 
@@ -230,7 +230,7 @@ static NSRegularExpression* dataFormQueryRegex;
 {
     if(!obj)
     {
-        [self removeChild:[self findFirst:@"field<var=%@>", key]];
+        [self removeChildNode:[self findFirst:@"field<var=%@>", key]];
         [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
         return;
     }
@@ -290,7 +290,7 @@ static NSRegularExpression* dataFormQueryRegex;
 -(void) removeAllObjects
 {
     for(MLXMLNode* child in self.children)
-        [self removeChild:child];
+        [self removeChildNode:child];
     [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 

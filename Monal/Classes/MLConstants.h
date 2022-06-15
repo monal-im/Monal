@@ -25,19 +25,22 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 	#define SHORT_PING 16.0
 	#define LONG_PING 32.0
     #define MUC_PING 600
+    #define BGFETCH_DEFAULT_INTERVAL 3600*1
 #else
 	#define SHORT_PING 4.0
 	#define LONG_PING 16.0
     #define MUC_PING 3600
+    #define BGFETCH_DEFAULT_INTERVAL 3600*3
 #endif
 
 @class MLContact;
 
 //some typedefs used throughout the project
-typedef void (^contactCompletion)(MLContact *selectedContact);
+typedef void (^contactCompletion)(MLContact* _Nonnull selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
 typedef void (^monal_void_block_t)(void);
-typedef void (^monal_id_block_t)(id);
+typedef void (^monal_id_block_t)(id _Nonnull);
+typedef void (^monal_upload_completion_t)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error);
 
 typedef enum NotificationPrivacySettingOption {
     DisplayNameAndMessage,
@@ -49,7 +52,7 @@ typedef enum NotificationPrivacySettingOption {
 //some useful macros
 #define weakify(var)                        __weak __typeof__(var) AHKWeak_##var = var
 #define strongify(var)                      _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
-#define nilWrapper(var)                     (var == nil           ? [NSNull null] : var)
+#define nilWrapper(var)                     (var == nil           ? (id)[NSNull null] : (id)var)
 #define nilExtractor(var)                   (var == [NSNull null] ? nil           : var)
 #define nilDefault(var, def)                (var == nil ? def : var)
 #define emptyDefault(var, eq, def)          (var == nil || [var isEqual:eq] ? def : var)
@@ -57,12 +60,15 @@ typedef enum NotificationPrivacySettingOption {
 #define updateIfPrimitiveNotEqual(a, b)     if(a != b) a = b
 
 
-//see https://stackoverflow.com/a/62984543/3528174
-#define STRIP_PARENTHESES(X) __ESC(__ISH X)
-#define __ISH(...) __ISH __VA_ARGS__
-#define __ESC(...) __ESC_(__VA_ARGS__)
-#define __ESC_(...) __VAN ## __VA_ARGS__
-#define __VAN__ISH
+//make sure we don't define this twice
+#ifndef STRIP_PARENTHESES
+    //see https://stackoverflow.com/a/62984543/3528174
+    #define STRIP_PARENTHESES(X) __ESC(__ISH X)
+    #define __ISH(...) __ISH __VA_ARGS__
+    #define __ESC(...) __ESC_(__VA_ARGS__)
+    #define __ESC_(...) __VAN ## __VA_ARGS__
+    #define __VAN__ISH
+#endif
 
 #if defined(IS_ALPHA) || defined(DEBUG)
     #define unreachable() { \
@@ -77,7 +83,7 @@ typedef enum NotificationPrivacySettingOption {
 
 // https://clang-analyzer.llvm.org/faq.html#unlocalized_string
 __attribute__((annotate("returns_localized_nsstring")))
-static inline NSString* LocalizationNotNeeded(NSString* s)
+static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 {
   return s;
 }

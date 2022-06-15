@@ -43,14 +43,9 @@
 		265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */; };
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
 		2666F018249D380D00372E28 /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
-		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
-		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
-		2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC521D9D3F700256507 /* MLKeyCell.m */; };
-		268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */; };
-		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
 		26AA70152146BBB900598605 /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA70142146BBB900598605 /* ShareViewController.m */; };
 		26AA70182146BBB900598605 /* iosShare.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70162146BBB900598605 /* iosShare.storyboard */; };
 		26AA701C2146BBB900598605 /* shareSheet.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70112146BBB800598605 /* shareSheet.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -60,7 +55,6 @@
 		26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */ = {isa = PBXBuildFile; fileRef = 26B0CA8A21AE410E0080B133 /* AlertSounds */; };
 		26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
-		26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */; };
 		26CC579623A0867400ABB92A /* monalxmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CC579423A0867400ABB92A /* monalxmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		26CC57A223A086AA00ABB92A /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
@@ -95,7 +89,6 @@
 		26E8462224EABAD600ECE419 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462424EABAD600ECE419 /* Settings.storyboard */; };
 		26E8462524EABAE200ECE419 /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462724EABAE200ECE419 /* Login.storyboard */; };
 		26E8462824EABAED00ECE419 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462A24EABAED00ECE419 /* Main.storyboard */; };
-		26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */; };
 		26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D02196836700EF5720 /* MLLogInViewController.m */; };
 		26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D421968A4100EF5720 /* GLCapsuleView.m */; };
 		26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D821968A8600EF5720 /* GLRoundedView.m */; };
@@ -106,12 +99,15 @@
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
 		389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
+		3D06A515281FFCC000DDAE90 /* NotificationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */; };
 		3D2B1870262A12A10092E181 /* MLUploadQueueItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D2B186F262A12A10092E181 /* MLUploadQueueItem.m */; };
 		3D4BC2C92626294200292F14 /* MLUploadQueueDocumentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */; };
 		3D65B78D27234B74005A30F4 /* ContactDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D65B78C27234B74005A30F4 /* ContactDetails.swift */; };
-		3D65B791272350F0005A30F4 /* ContactDetailsInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D65B790272350F0005A30F4 /* ContactDetailsInterface.swift */; };
+		3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */; };
+		3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */; };
 		3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */; };
 		3DBAD1E62627A2BC0078BD27 /* MLUploadQueueBaseCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DBAD1E52627A2BC0078BD27 /* MLUploadQueueBaseCell.m */; };
+		3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */; };
 		43A92B80C8CD5E04074B5A3E /* Pods_MonalXMPPUnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
 		540BD0D224D8D1F40087A743 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 540BD0D124D8D1F20087A743 /* IPC.h */; };
@@ -135,8 +131,6 @@
 		5427C94E276A6BE1003217D5 /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		542CF3FF2763314F002C3710 /* hsluv.c in Sources */ = {isa = PBXBuildFile; fileRef = 542CF3FD2763314E002C3710 /* hsluv.c */; };
 		542CF4002763314F002C3710 /* hsluv.h in Headers */ = {isa = PBXBuildFile; fileRef = 542CF3FE2763314F002C3710 /* hsluv.h */; };
-		542CF4252765DC44002C3710 /* MLContactOMEMOKeys.m in Sources */ = {isa = PBXBuildFile; fileRef = 542CF4242765DC44002C3710 /* MLContactOMEMOKeys.m */; };
-		542CF42C2765DC62002C3710 /* MLContactOMEMOKeys.h in Headers */ = {isa = PBXBuildFile; fileRef = 542CF42B2765DC62002C3710 /* MLContactOMEMOKeys.h */; };
 		54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 544656BA2534910D006B2953 /* XMPPDataForm.m */; };
 		544656BD25349133006B2953 /* XMPPDataForm.h in Headers */ = {isa = PBXBuildFile; fileRef = 544656BC25349133006B2953 /* XMPPDataForm.h */; };
@@ -150,6 +144,9 @@
 		54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15D504A24C727CC002F75BB /* MLLogFileManager.m */; };
 		54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */ = {isa = PBXBuildFile; fileRef = 54E594BA2523C34900E4172B /* MLPubSub.h */; };
 		54E594BE2523C34B00E4172B /* MLPubSub.m in Sources */ = {isa = PBXBuildFile; fileRef = 54E594BC2523C34A00E4172B /* MLPubSub.m */; };
+		54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81828231690003664BD /* WelcomeLogIn.swift */; };
+		54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81B282316F5003664BD /* RegisterAccount.swift */; };
+		54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81D2823170D003664BD /* RegisterAccountSelectServer.swift */; };
 		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
 		A4CD17069281C209783314FD /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AF6D1CD4CB7FE955E330121 /* Pods_NotificaionService.framework */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
@@ -161,7 +158,6 @@
 		C104918B261301530054AC9E /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049198261301710054AC9E /* MLCryptoTest.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
-		C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */ = {isa = PBXBuildFile; fileRef = C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */; };
 		C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */; };
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
@@ -182,6 +178,8 @@
 		C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C1B940E926144AF500E9D290 /* AESGCMTest.m */; };
 		C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */ = {isa = PBXBuildFile; fileRef = C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */; };
 		C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */; };
+		C1D7D7AF283FB4E500401389 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
+		C1D7D7B0283FB4E700401389 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		C1E4654824EE517000CA5AAF /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		C1F5C7A92775DA000001F295 /* MLContactSoftwareVersionInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */; };
 		C1F5C7AA2775DA000001F295 /* MLContactSoftwareVersionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */; };
@@ -296,7 +294,6 @@
 		260773C2232FC4E800BFD50F /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
 		260773C3232FC4E800BFD50F /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
 		260773C5232FC4E800BFD50F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		260773CD232FC5DF00BFD50F /* NotificaionService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificaionService.entitlements; sourceTree = "<group>"; };
 		26080210110ABA4E005E194D /* Monal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Monal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2609B5271FD5B26800F09FA1 /* MLSplitViewDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSplitViewDelegate.h; sourceTree = "<group>"; };
 		2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSplitViewDelegate.m; sourceTree = "<group>"; };
@@ -378,18 +375,10 @@
 		266A0B7B24EAC36100875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = external/uk.lproj/Login.strings; sourceTree = "<group>"; };
 		266A0B7C24EAC36600875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = external/uk.lproj/Settings.strings; sourceTree = "<group>"; };
 		266A0B7D24EAC36900875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = external/uk.lproj/ContactDetails.strings; sourceTree = "<group>"; };
-		2673CABB21D8617300256507 /* MLContactDetailHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactDetailHeader.h; sourceTree = "<group>"; };
-		2673CABC21D8617300256507 /* MLContactDetailHeader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactDetailHeader.m; sourceTree = "<group>"; };
-		2673CABE21D9242E00256507 /* MLKeysTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeysTableViewController.h; sourceTree = "<group>"; };
-		2673CABF21D9242E00256507 /* MLKeysTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLKeysTableViewController.m; sourceTree = "<group>"; };
-		2673CAC421D9D3F700256507 /* MLKeyCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeyCell.h; sourceTree = "<group>"; };
-		2673CAC521D9D3F700256507 /* MLKeyCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLKeyCell.m; sourceTree = "<group>"; };
 		267B671A226A200D003DB850 /* AESGcm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AESGcm.h; sourceTree = "<group>"; };
 		267B671B226A200D003DB850 /* AESGcm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGcm.m; sourceTree = "<group>"; };
 		267B671F226A222E003DB850 /* MLEncryptedPayload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLEncryptedPayload.h; sourceTree = "<group>"; };
 		267B6720226A222E003DB850 /* MLEncryptedPayload.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLEncryptedPayload.m; sourceTree = "<group>"; };
-		268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDetailsTableViewCell.h; sourceTree = "<group>"; };
-		268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDetailsTableViewCell.m; sourceTree = "<group>"; };
 		268DD58417C4541000C673A9 /* MLChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatCell.h; sourceTree = "<group>"; };
 		268DD58517C4541000C673A9 /* MLChatCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatCell.m; sourceTree = "<group>"; };
 		2696EED01791245A00BC54B8 /* chatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chatViewController.h; sourceTree = "<group>"; };
@@ -412,8 +401,6 @@
 		26B2A4BA1B73061400272E63 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		26B51C4618654D98002134C3 /* LogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogViewController.h; sourceTree = "<group>"; };
 		26B51C4718654D98002134C3 /* LogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
-		26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLNotificationSettingsViewController.h; sourceTree = "<group>"; };
-		26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNotificationSettingsViewController.m; sourceTree = "<group>"; };
 		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
 		26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLHTTPRequest.m; sourceTree = "<group>"; };
 		26C4B22221B6B91300610282 /* MLDNSLookup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDNSLookup.h; sourceTree = "<group>"; };
@@ -512,14 +499,10 @@
 		26E8467824EAC1A200ECE419 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = external/vi.lproj/Settings.strings; sourceTree = "<group>"; };
 		26E8467924EAC1A800ECE419 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = external/vi.lproj/ContactDetails.strings; sourceTree = "<group>"; };
 		26E8467E24EAC1BB00ECE419 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = external/vi.lproj/iosShare.strings; sourceTree = "<group>"; };
-		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
-		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
 		26EC40FD17BDD85F0031304D /* addContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = addContact.h; sourceTree = "<group>"; };
 		26EC40FE17BDD85F0031304D /* addContact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = addContact.m; sourceTree = "<group>"; };
 		26EC411117BDE39E0031304D /* MLImageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLImageManager.h; sourceTree = "<group>"; };
 		26EC411217BDE39E0031304D /* MLImageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLImageManager.m; sourceTree = "<group>"; };
-		26EE1B0A21A8F3CE00264B95 /* MLWelcomeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLWelcomeViewController.h; sourceTree = "<group>"; };
-		26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLWelcomeViewController.m; sourceTree = "<group>"; };
 		26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLNotificationManager.h; path = Classes/MLNotificationManager.h; sourceTree = "<group>"; };
 		26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLNotificationManager.m; path = Classes/MLNotificationManager.m; sourceTree = "<group>"; };
 		26F396CF2196836700EF5720 /* MLLogInViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLogInViewController.h; sourceTree = "<group>"; };
@@ -541,7 +524,6 @@
 		26FC619324EB6C250094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = external/en.lproj/Settings.strings; sourceTree = "<group>"; };
 		26FC619424EB6C260094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = external/en.lproj/ContactDetails.strings; sourceTree = "<group>"; };
 		26FC619524EB6C270094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = external/en.lproj/iosShare.strings; sourceTree = "<group>"; };
-		26FDB4341DC16A9800A129E0 /* Monal.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Monal.entitlements; sourceTree = "<group>"; };
 		26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLResizingTextView.h; sourceTree = "<group>"; };
 		26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLResizingTextView.m; sourceTree = "<group>"; };
 		29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -555,16 +537,19 @@
 		389E298925E901CA009A5268 /* MLAudioRecoderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAudioRecoderManager.m; sourceTree = "<group>"; };
 		389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAudioRecoderManager.h; sourceTree = "<group>"; };
 		39B989B9775C0725A810D271 /* Pods-MonalUITests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.adhoc.xcconfig"; sourceTree = "<group>"; };
+		3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettings.swift; sourceTree = "<group>"; };
 		3D2B186E262A12A10092E181 /* MLUploadQueueItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueItem.h; sourceTree = "<group>"; };
 		3D2B186F262A12A10092E181 /* MLUploadQueueItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueItem.m; sourceTree = "<group>"; };
 		3D4BC2C72626294200292F14 /* MLUploadQueueDocumentCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueDocumentCell.h; sourceTree = "<group>"; };
 		3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueDocumentCell.m; sourceTree = "<group>"; };
 		3D65B78C27234B74005A30F4 /* ContactDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
-		3D65B790272350F0005A30F4 /* ContactDetailsInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailsInterface.swift; sourceTree = "<group>"; };
+		3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftuiHelpers.swift; sourceTree = "<group>"; };
+		3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmemoQrCodeView.swift; sourceTree = "<group>"; };
 		3D9EE5322617677700135D46 /* MLUploadQueueImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueImageCell.h; sourceTree = "<group>"; };
 		3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueImageCell.m; sourceTree = "<group>"; };
 		3DBAD1E42627A2BC0078BD27 /* MLUploadQueueBaseCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueBaseCell.h; sourceTree = "<group>"; };
 		3DBAD1E52627A2BC0078BD27 /* MLUploadQueueBaseCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueBaseCell.m; sourceTree = "<group>"; };
+		3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmemoKeys.swift; sourceTree = "<group>"; };
 		3EB7A7084FA9A8F68A3D251C /* Pods-MonalXMPPUnitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.debug.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.debug.xcconfig"; sourceTree = "<group>"; };
 		4862C3A0242FB4F709B8F3FF /* Pods-MonalXMPPUnitTests.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.beta.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.beta.xcconfig"; sourceTree = "<group>"; };
 		4A614910EEF29D66DD4B37E3 /* Pods-NotificaionService.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.adhoc.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.adhoc.xcconfig"; sourceTree = "<group>"; };
@@ -586,8 +571,6 @@
 		541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPubSubProcessor.m; sourceTree = "<group>"; };
 		542CF3FD2763314E002C3710 /* hsluv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hsluv.c; sourceTree = "<group>"; };
 		542CF3FE2763314F002C3710 /* hsluv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hsluv.h; sourceTree = "<group>"; };
-		542CF4242765DC44002C3710 /* MLContactOMEMOKeys.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactOMEMOKeys.m; sourceTree = "<group>"; };
-		542CF42B2765DC62002C3710 /* MLContactOMEMOKeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactOMEMOKeys.h; sourceTree = "<group>"; };
 		54391BB9273499E80050DAFB /* UIColor+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIColor+Extension.h"; sourceTree = "<group>"; };
 		54391BBA273499E80050DAFB /* UIColor+Extension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Extension.m"; sourceTree = "<group>"; };
 		544656BA2534910D006B2953 /* XMPPDataForm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPDataForm.m; sourceTree = "<group>"; };
@@ -600,6 +583,9 @@
 		54A22D2C26185E7E00B56EAD /* MLNotificationQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLNotificationQueue.h; sourceTree = "<group>"; };
 		54E594BA2523C34900E4172B /* MLPubSub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPubSub.h; sourceTree = "<group>"; };
 		54E594BC2523C34A00E4172B /* MLPubSub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPubSub.m; sourceTree = "<group>"; };
+		54F0B81828231690003664BD /* WelcomeLogIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeLogIn.swift; sourceTree = "<group>"; };
+		54F0B81B282316F5003664BD /* RegisterAccount.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterAccount.swift; sourceTree = "<group>"; };
+		54F0B81D2823170D003664BD /* RegisterAccountSelectServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterAccountSelectServer.swift; sourceTree = "<group>"; };
 		5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_monalxmpp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6142E73A9912F6E327A8CD14 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		6A6D58F695CDFAF204F3B3EB /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.appstore.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -630,8 +616,6 @@
 		C132EA9726C92DDA00BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/ContactDetails.strings; sourceTree = "<group>"; };
 		C132EA9926C92DDA00BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C132EA9B26C92E9000BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/iosShare.strings; sourceTree = "<group>"; };
-		C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLOmemoQrCodeView.h; sourceTree = "<group>"; };
-		C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLOmemoQrCodeView.m; sourceTree = "<group>"; };
 		C13CF819261A00D0005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "external/zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
 		C13CF81A261A00FD005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "external/zh-Hans.lproj/Login.strings"; sourceTree = "<group>"; };
 		C13CF81B261A00FD005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "external/zh-Hans.lproj/Settings.strings"; sourceTree = "<group>"; };
@@ -646,6 +630,10 @@
 		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
 		C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLQRCodeScanner.swift; sourceTree = "<group>"; };
+		C1567E3528255C64006E9637 /* Monal.macos.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Monal.macos.entitlements; sourceTree = "<group>"; };
+		C1567E3628255C64006E9637 /* Monal.ios.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Monal.ios.entitlements; sourceTree = "<group>"; };
+		C1567E3728255D02006E9637 /* NotificaionService.ios.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = NotificaionService.ios.entitlements; sourceTree = "<group>"; };
+		C1567E3828255D02006E9637 /* NotificaionService.macos.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = NotificaionService.macos.entitlements; sourceTree = "<group>"; };
 		C158D3FE25A0AB810005AA40 /* MLMucProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLMucProcessor.h; sourceTree = "<group>"; };
 		C158D41225A0AC630005AA40 /* MLMucProcessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLMucProcessor.m; sourceTree = "<group>"; };
 		C15A4E5B279D2AC60055CD11 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = external/ko.lproj/Main.strings; sourceTree = "<group>"; };
@@ -881,7 +869,8 @@
 		260773C1232FC4E800BFD50F /* NotificaionService */ = {
 			isa = PBXGroup;
 			children = (
-				260773CD232FC5DF00BFD50F /* NotificaionService.entitlements */,
+				C1567E3728255D02006E9637 /* NotificaionService.ios.entitlements */,
+				C1567E3828255D02006E9637 /* NotificaionService.macos.entitlements */,
 				260773C2232FC4E800BFD50F /* NotificationService.h */,
 				260773C3232FC4E800BFD50F /* NotificationService.m */,
 				260773C5232FC4E800BFD50F /* Info.plist */,
@@ -1019,12 +1008,11 @@
 				26B51C4718654D98002134C3 /* LogViewController.m */,
 				2644D4971FF29E5600F46AB5 /* MLSettingsTableViewController.h */,
 				2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */,
-				26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */,
-				26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */,
 				265BD14E21A2D15600A59251 /* MLBackgroundSettings.h */,
 				265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */,
 				26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */,
 				26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */,
+				3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */,
 				C13EBB8C24DC685C008AADDA /* MLPrivacySettingsViewController.h */,
 				C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */,
 				384E4EA525F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.h */,
@@ -1042,8 +1030,6 @@
 				2661102A238F17CB0030A4EE /* MLContact.m */,
 				26611024238F17B20030A4EE /* MLMessage.h */,
 				26611025238F17B20030A4EE /* MLMessage.m */,
-				542CF4242765DC44002C3710 /* MLContactOMEMOKeys.m */,
-				542CF42B2765DC62002C3710 /* MLContactOMEMOKeys.h */,
 				C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */,
 				C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */,
 			);
@@ -1109,21 +1095,10 @@
 			isa = PBXGroup;
 			children = (
 				C1F5C7AB2777621B0001F295 /* ContactResources.swift */,
-				26EC40FA17BDD8560031304D /* ContactDetails.h */,
-				26EC40FB17BDD8560031304D /* ContactDetails.m */,
-				268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */,
-				268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */,
-				3D65B790272350F0005A30F4 /* ContactDetailsInterface.swift */,
+				3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */,
+				3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */,
 				3D65B78C27234B74005A30F4 /* ContactDetails.swift */,
 				C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */,
-				2673CABB21D8617300256507 /* MLContactDetailHeader.h */,
-				2673CABC21D8617300256507 /* MLContactDetailHeader.m */,
-				2673CABE21D9242E00256507 /* MLKeysTableViewController.h */,
-				2673CABF21D9242E00256507 /* MLKeysTableViewController.m */,
-				2673CAC421D9D3F700256507 /* MLKeyCell.h */,
-				2673CAC521D9D3F700256507 /* MLKeyCell.m */,
-				C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */,
-				C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */,
 			);
 			name = "Contact Details";
 			sourceTree = "<group>";
@@ -1234,6 +1209,7 @@
 				262797AC178A573F00B85D94 /* Tableviewcells */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
 				261A627F176C055400059090 /* ContactsViewController.m */,
+				3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */,
 				261A6283176C156500059090 /* ActiveChatsViewController.h */,
 				261A6284176C156500059090 /* ActiveChatsViewController.m */,
 				2609B5271FD5B26800F09FA1 /* MLSplitViewDelegate.h */,
@@ -1247,6 +1223,9 @@
 		26F396CE2196830E00EF5720 /* OnBoard */ = {
 			isa = PBXGroup;
 			children = (
+				54F0B81D2823170D003664BD /* RegisterAccountSelectServer.swift */,
+				54F0B81B282316F5003664BD /* RegisterAccount.swift */,
+				54F0B81828231690003664BD /* WelcomeLogIn.swift */,
 				26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */,
 				26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */,
 				26F396DB2197507100EF5720 /* GLTintButton.h */,
@@ -1257,8 +1236,6 @@
 				26F396D421968A4100EF5720 /* GLCapsuleView.m */,
 				26F396CF2196836700EF5720 /* MLLogInViewController.h */,
 				26F396D02196836700EF5720 /* MLLogInViewController.m */,
-				26EE1B0A21A8F3CE00264B95 /* MLWelcomeViewController.h */,
-				26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */,
 				2602A70722A5431A006D3E72 /* MLRegSuccessViewController.h */,
 				2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */,
 				C12436122434AB5D00B8F074 /* MLAttributedLabel.h */,
@@ -1302,8 +1279,9 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				C1567E3628255C64006E9637 /* Monal.ios.entitlements */,
+				C1567E3528255C64006E9637 /* Monal.macos.entitlements */,
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
-				26FDB4341DC16A9800A129E0 /* Monal.entitlements */,
 				29B97315FDCFA39411CA2CEA /* Root Sources */,
 				080E96DDFE201D6D7F000001 /* Shared */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -1440,7 +1418,6 @@
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 				5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
-				542CF42C2765DC62002C3710 /* MLContactOMEMOKeys.h in Headers */,
 				54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */,
 				544656BD25349133006B2953 /* XMPPDataForm.h in Headers */,
 				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
@@ -1601,7 +1578,7 @@
 				CLASSPREFIX = ML;
 				DefaultBuildSystemTypeForWorkspace = Original;
 				LastSwiftUpdateCheck = 1240;
-				LastUpgradeCheck = 1220;
+				LastUpgradeCheck = 1330;
 				ORGANIZATIONNAME = Monal.im;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
@@ -1734,6 +1711,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1D7D7B0283FB4E700401389 /* Media.xcassets in Resources */,
+				C1D7D7AF283FB4E500401389 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1961,7 +1940,7 @@
 			files = (
 				26D89F061A890672009B147C /* MLSwitchCell.m in Sources */,
 				C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */,
-				3D65B791272350F0005A30F4 /* ContactDetailsInterface.swift in Sources */,
+				3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */,
 				C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
@@ -1977,24 +1956,24 @@
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
+				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
 				2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */,
 				26F396DC2197507200EF5720 /* GLTintButton.m in Sources */,
 				384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */,
 				C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
-				2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountListController.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
+				54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */,
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
 				264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */,
 				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
-				268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */,
+				3D06A515281FFCC000DDAE90 /* NotificationSettings.swift in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
-				26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
-				2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */,
-				C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */,
+				54F0B81E2823170E003664BD /* RegisterAccountSelectServer.swift in Sources */,
+				3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
@@ -2005,6 +1984,7 @@
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
 				C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */,
 				3DBAD1E62627A2BC0078BD27 /* MLUploadQueueBaseCell.m in Sources */,
+				3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
 				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
 				2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */,
@@ -2013,7 +1993,6 @@
 				2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */,
 				265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */,
 				26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */,
-				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */,
 				3D2B1870262A12A10092E181 /* MLUploadQueueItem.m in Sources */,
@@ -2022,8 +2001,6 @@
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */,
 				C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */,
-				26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */,
-				2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */,
 				E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */,
 				C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */,
 				54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */,
@@ -2071,7 +2048,6 @@
 				26CC57D323A08D7100ABB92A /* DataLayer.m in Sources */,
 				26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */,
 				C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */,
-				542CF4252765DC44002C3710 /* MLContactOMEMOKeys.m in Sources */,
 				C1F5C7AA2775DA000001F295 /* MLContactSoftwareVersionInfo.m in Sources */,
 				26CC57D423A08D7100ABB92A /* MLImageManager.m in Sources */,
 				540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */,
@@ -2424,7 +2400,9 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -2447,6 +2425,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"DEBUG=1",
+					"IS_ALPHA=1",
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -2460,7 +2439,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -2475,6 +2454,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -2493,7 +2473,9 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = NotificaionService/NotificaionService.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = NotificaionService/NotificaionService.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -2523,7 +2505,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
@@ -2572,7 +2554,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = NotificaionService/NotificaionService.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = NotificaionService/NotificaionService.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -2607,7 +2591,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
@@ -2658,7 +2642,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = NotificaionService/NotificaionService.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = NotificaionService/NotificaionService.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -2693,7 +2679,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
@@ -2783,7 +2769,9 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -2815,7 +2803,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -2829,6 +2817,7 @@
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = AppStore;
 		};
@@ -2875,7 +2864,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2950,7 +2939,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3028,7 +3017,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3093,7 +3082,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
@@ -3186,7 +3175,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
@@ -3280,7 +3269,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
@@ -3374,7 +3363,9 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -3406,7 +3397,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -3420,6 +3411,7 @@
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Adhoc;
 		};
@@ -3740,7 +3732,9 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -3760,6 +3754,10 @@
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_PEDANTIC = NO;
@@ -3772,7 +3770,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -3786,6 +3784,7 @@
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Beta;
 		};
@@ -3852,7 +3851,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3901,7 +3900,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = NotificaionService/NotificaionService.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = NotificaionService/NotificaionService.macos.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -3936,7 +3937,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
@@ -4026,7 +4027,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 5.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;

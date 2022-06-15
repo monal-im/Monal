@@ -532,8 +532,9 @@ NSString *const kAskSubscribe=@"subscribe";
     updateIfIdNotEqual(self.accountId, contact.accountId);
     updateIfIdNotEqual(self.groupSubject, contact.groupSubject);
     updateIfIdNotEqual(self.accountNickInGroup, contact.accountNickInGroup);
-    updateIfIdNotEqual(self.mucType, contact.mucType);
     updateIfPrimitiveNotEqual(self.isGroup, contact.isGroup);
+    if(self.isGroup)
+        updateIfIdNotEqual(self.mucType, nilDefault(contact.mucType, @"channel"));
     updateIfPrimitiveNotEqual(self.isMentionOnly, contact.isMentionOnly);
     updateIfPrimitiveNotEqual(self.isPinned, contact.isPinned);
     updateIfPrimitiveNotEqual(self.isBlocked, contact.isBlocked);
@@ -580,7 +581,7 @@ NSString *const kAskSubscribe=@"subscribe";
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@", self.accountId, self.contactJid];
+    return [NSString stringWithFormat:@"%@: %@ (%@)", self.accountId, self.contactJid, self.isGroup ? self.mucType : @"1:1"];
 }
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic
@@ -598,6 +599,7 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.isGroup = [[dic objectForKey:@"Muc"] boolValue];
     if(contact.isGroup  && !contact.mucType)
         contact.mucType = @"channel";       //default value
+    contact.mucType = nilDefault(contact.mucType, @"");
     contact.isMentionOnly = [[dic objectForKey:@"mentionOnly"] boolValue];
     contact.isPinned = [[dic objectForKey:@"pinned"] boolValue];
     contact.isBlocked = [[dic objectForKey:@"blocked"] boolValue];

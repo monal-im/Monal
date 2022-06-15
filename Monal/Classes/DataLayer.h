@@ -46,7 +46,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) setRosterVersion:(NSString *) version forAccount: (NSNumber*) accountNo;
 
 // Buddy Commands
--(BOOL) addContact:(NSString*) contact  forAccount:(NSNumber*) accountNo nickname:(NSString* _Nullable) nickName andMucNick:(NSString* _Nullable) mucNick;
+-(BOOL) addContact:(NSString*) contact  forAccount:(NSNumber*) accountNo nickname:(NSString* _Nullable) nickName;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 -(BOOL) clearBuddies:(NSNumber*) accountNo;
 -(NSDictionary* _Nullable) contactDictionaryForUsername:(NSString*) username forAccount: (NSNumber*) accountNo;
@@ -183,6 +183,7 @@ extern NSString* const kMessageTypeFiletransfer;
  if the server replies with an error for a message, store it
  */
 -(void) setMessageId:(NSString* _Nonnull) messageid errorType:(NSString *_Nonnull) errorType errorReason:(NSString *_Nonnull)errorReason;
+-(void) clearErrorOfMessageId:(NSString* _Nonnull) messageid;
 
 /**
  sets a preview info for a specified message
@@ -276,7 +277,7 @@ extern NSString* const kMessageTypeFiletransfer;
                                              accountNo:(NSNumber*  _Nonnull) accountNo
                                              betweenBuddy:(NSString* _Nonnull) contactJid;
 
--(NSArray*) getAllCachedImages;
+-(NSArray<NSDictionary*>*) getAllCachedImages;
 -(void) removeImageCacheTables;
 -(NSArray*) getAllMessagesForFiletransferUrl:(NSString*) url;
 -(void) upgradeImageMessagesToFiletransferMessages;
@@ -289,9 +290,6 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) addShareSheetPayload:(NSDictionary*) payload;
 -(NSArray*) getShareSheetPayloadForAccountNo:(NSNumber*) accountNo;
 -(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId;
-
--(BOOL) getAppexCleanShutdownStatus;
--(void) setAppexCleanShutdownStatus:(BOOL) shutdownStatus;
 
 @end
 

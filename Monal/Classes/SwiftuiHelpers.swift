@@ -12,6 +12,9 @@ import monalxmpp
 import Combine
 import CocoaLumberjack
 
+let monalGreen = Color(UIColor(red:128.0/255, green:203.0/255, blue:182.0/255, alpha:1.0));
+let monalDarkGreen = Color(UIColor(red:20.0/255, green:138.0/255, blue:103.0/255, alpha:1.0));
+
 class SheetDismisserProtocol: ObservableObject {
     weak var host: UIHostingController<AnyView>? = nil
     func dismiss() {
@@ -50,7 +53,7 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
     init(_ obj: ObjType) {
         self.obj = obj
     }
-    
+
     private func addObserverForMember(_ member: String){
         if(!self.observedMembers.contains(member)) {
             DDLogDebug("Adding observer for member \(member)")
@@ -64,7 +67,7 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
             self.observedMembers.add(member)
         }
     }
-    
+
     subscript<T>(member: String) -> T {
         get {
             addObserverForMember(member)
@@ -128,14 +131,51 @@ struct NavigationLazyView<Content: View>: View {
     }
 }
 
+// Alert properties for use in Alert
+struct AlertPrompt {
+    var title: Text = Text("")
+    var message: Text = Text("")
+    var dismissLabel: Text = Text("Close")
+}
+
+// Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
-class ContactDetailsInterface: NSObject {
+class SwiftuiInterface : NSObject {
     @objc
     func makeContactDetails(_ contact: MLContact) -> UIViewController {
         let delegate = SheetDismisserProtocol()
-        let details = ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact))
-        let host = UIHostingController(rootView:AnyView(details))
-        details.delegate.host = host
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        host.rootView = AnyView(ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact)))
+        return host
+    }
+    
+    @objc
+    func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        if(ownContact == nil) {
+            host.rootView = AnyView(OmemoKeys(contact: nil))
+        } else {
+            host.rootView = AnyView(OmemoKeys(contact: ObservableKVOWrapper<MLContact>(ownContact!)))
+        }
+        return host
+    }
+
+    @objc
+    func makeView(name: String) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
+        case "NotificationSettings":
+            host.rootView = AnyView(NotificationSettings(delegate:delegate))
+        case "WelcomeLogIn":
+            host.rootView = AnyView(WelcomeLogIn(delegate:delegate))
+        default:
+            assert(false, "unreachable"); // TODO port unreachable macro to swift
+        }
         return host
     }
 }

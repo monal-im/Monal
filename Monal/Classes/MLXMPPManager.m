@@ -39,7 +39,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(!setDefaults)
     {
         [[HelperTools defaultsDB] setBool:YES forKey:@"Sound"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
+        [[HelperTools defaultsDB] setBool:NO forKey:@"ChatBackgrounds"];
 
         // Privacy Settings
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowImages"];
@@ -68,7 +68,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self upgradeBoolUserSettingsIfUnset:@"ShowImages" toDefault:YES];
 
     // upgrade ChatBackgrounds
-    [self upgradeBoolUserSettingsIfUnset:@"ChatBackgrounds" toDefault:YES];
+    [self upgradeBoolUserSettingsIfUnset:@"ChatBackgrounds" toDefault:NO];
 
     [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
 
@@ -126,6 +126,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     // remove old settings from shareSheet outbox
     [self removeObjectUserSettingsIfSet:@"lastRecipient"];
     [self removeObjectUserSettingsIfSet:@"lastAccount"];
+    // remove HasSeenIntro bool
+    [self removeObjectUserSettingsIfSet:@"HasSeenIntro"];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -270,13 +272,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             {
                 BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
                 [self disconnectAll];
-                if(!wasIdle)
-                {
-                    DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored (will be ignored in appex)");
-                    //this will automatically start the app if connectivity gets restored
-                    //don't queue this notification because it should be handled immediately
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundFetchingTask object:nil];
-                }
+                DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored (will be ignored in appex)");
+                //this will automatically start the app if connectivity gets restored (force as soon as possible if !wasIdle)
+                //don't queue this notification because it should be handled immediately
+                [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundFetchingTask object:nil userInfo:@{@"force": @(!wasIdle)}];
             }
         }
     });
@@ -348,7 +347,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
-        [xmppAccount unfreezed];
+        [xmppAccount unfreeze];
         if(_hasConnectivity)
             [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         [xmppAccount setClientActive];
@@ -419,8 +418,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             DDLogInfo(@"existing but disabled account, ignoring");
             return;
         }
-        DDLogInfo(@"existing account, calling unfreezed");
-        [existing unfreezed];
+        DDLogInfo(@"existing account, calling unfreeze");
+        [existing unfreeze];
         DDLogInfo(@"existing account, just pinging.");
         if(_hasConnectivity)
             [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
@@ -492,8 +491,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(account)
     {
         DDLogVerbose(@"got account and cleaning up.. ");
+#ifndef IS_ALPHA
         if(lastConnectedAccount)
             [account unregisterPush];
+#endif
         [account disconnect:YES];
         account = nil;
         DDLogVerbose(@"done cleaning up account ");
@@ -558,7 +559,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 #pragma mark -  XMPP commands
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString *messageId)) completion
+-(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {
     NSString* msgid = [[NSUUID UUID] UUIDString];
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
@@ -568,7 +569,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     NSAssert(contact, @"Contact should not be nil");
     
     NSString* messageType = kMessageTypeText;
-    if(isUpload)
+    if(uploadInfo != nil)
         messageType = kMessageTypeFiletransfer;
     
     // Save message to history
@@ -580,14 +581,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                        withId:msgid
                     encrypted:encrypted
                   messageType:messageType
-                     mimeType:nil
-                         size:nil
+                     mimeType:uploadInfo[@"mimeType"]
+                         size:uploadInfo[@"size"]
     ];
     // Send message
     if(messageDBId != nil)
     {
         DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
-        [self sendMessage:message toContact:contact isEncrypted:encrypted isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString* messageIdSend) {
+        [self sendMessage:message toContact:contact isEncrypted:encrypted isUpload:(uploadInfo != nil) messageId:msgid withCompletionHandler:^(BOOL successSend, NSString* messageIdSend) {
             completion(successSend, messageIdSend);
         }];
         DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
@@ -641,7 +642,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #pragma mark - contact
 
 //this handler will simply retry the removeContact: call
-$$class_handler(handleRemoveContact, $_ID(MLContact*, contact))
+$$class_handler(handleRemoveContact, $$ID(MLContact*, contact))
     [[MLXMPPManager sharedInstance] removeContact:contact];
 $$
 
@@ -677,7 +678,7 @@ $$
 }
 
 //this handler will simply retry the addContact:withPreauthToken: call
-$$class_handler(handleAddContact, $_ID(MLContact*, contact), $_ID(NSString*, preauthToken))
+$$class_handler(handleAddContact, $$ID(MLContact*, contact), $_ID(NSString*, preauthToken))
     [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
 $$
 
@@ -793,6 +794,7 @@ $$
             [xmppAccount enablePush];
 }
 
+#ifndef IS_ALPHA
 //this handler will simply retry the unregisterPush call
 $$class_handler(unregisterPushHandler)
     [[MLXMPPManager sharedInstance] unregisterPush];
@@ -813,46 +815,6 @@ $$
             }
     }
 }
-
-
-#pragma mark - share sheet added
-
--(MLContact* _Nullable) sendAllOutboxes
-{
-    //send all sharesheet outboxes (this method will be called by AppDelegate if opened via monalOpen:// url)
-    MLContact* lastRecipientContact = nil;
-    for(xmpp* xmppAccount in [self connectedXMPP])
-    {
-        MLContact* recipientContact = [self sendOutboxForAccount:xmppAccount];
-        if(recipientContact != nil)
-            lastRecipientContact = recipientContact;
-    }
-    return lastRecipientContact;
-}
-
--(MLContact*) sendOutboxForAccount:(xmpp*) account
-{
-    MLContact* recipientContact = nil;
-    for(NSDictionary* payload in [[DataLayer sharedInstance] getShareSheetPayloadForAccountNo:account.accountNo])
-    {
-        DDLogInfo(@"Sending outbox entry: %@", payload);
-        recipientContact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
-        BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:recipientContact.contactJid andAccountNo:recipientContact.accountId];
-        if([payload[@"comment"] length] > 0)
-            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"comment"] toContact:recipientContact isEncrypted:encrypted isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                DDLogInfo(@"SHARESHEET_SEND_COMMENT success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
-            }];
-        if([payload[@"type"] isEqualToString:@"geo"] || [payload[@"type"] isEqualToString:@"url"] || [payload[@"type"] isEqualToString:@"text"])
-        {
-            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] toContact:recipientContact isEncrypted:encrypted isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
-                [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
-            }];
-        }
-        else
-            MLAssert(NO, @"Outbox payload type unknown", payload);
-    }
-    return recipientContact;
-}
+#endif
 
 @end

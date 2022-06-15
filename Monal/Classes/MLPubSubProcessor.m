@@ -31,7 +31,7 @@
 
 @implementation MLPubSubProcessor
 
-$$class_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     DDLogDebug(@"Got new avatar metadata from '%@'", jid);
     if([type isEqualToString:@"publish"])
     {
@@ -87,7 +87,7 @@ $$class_handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(
 $$
 
 //this handler will simply retry the fetchNode for urn:xmpp:avatar:data if in mainapp
-$$class_handler(fetchAvatarAgain, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, avatarHash))
+$$class_handler(fetchAvatarAgain, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, avatarHash))
     if([HelperTools isAppExtension])
     {
         DDLogWarn(@"Not loading avatar image of '%@' because we are still in appex, rescheduling it again!", jid);
@@ -97,7 +97,7 @@ $$class_handler(fetchAvatarAgain, $_ID(xmpp*, account), $_ID(NSString*, jid), $_
         [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:$newHandler(self, handleAvatarFetchResult)];
 $$
 
-$$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(handleAvatarFetchResult, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     //ignore errors here (e.g. simply don't update the avatar image)
     //(this should never happen if other clients and servers behave properly)
     if(!success)
@@ -131,7 +131,7 @@ $$class_handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), 
     }
 $$
 
-$$class_handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     //new/updated nickname
     if([type isEqualToString:@"publish"])
     {
@@ -188,7 +188,7 @@ $$class_handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $
     }
 $$
 
-$$class_handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(![jid isEqualToString:account.connectionProperties.identity.jid])
     {
         DDLogWarn(@"Ignoring bookmarks update not coming from our own jid");
@@ -288,7 +288,7 @@ $$class_handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_
     }
 $$
 
-$$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(!success)
     {
         //item-not-found means: no bookmarks in storage --> use an empty data dict
@@ -371,7 +371,7 @@ $$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success)
         for(NSString* room in toRemove)
         {
             DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountNo);
-            [[data[itemId] findFirst:@"{storage:bookmarks}storage"] removeChild:[data[itemId] findFirst:@"{storage:bookmarks}storage/conference<jid=%@>", room]];
+            [[data[itemId] findFirst:@"{storage:bookmarks}storage"] removeChildNode:[data[itemId] findFirst:@"{storage:bookmarks}storage/conference<jid=%@>", room]];
             changed = YES;
         }
         
@@ -416,7 +416,7 @@ $$class_handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success)
     } andHandler:$newHandler(self, bookmarksPublished)];
 $$
 
-$$class_handler(bookmarksPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$class_handler(bookmarksPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         DDLogWarn(@"Could not publish bookmarks to pep!");
@@ -426,7 +426,7 @@ $$class_handler(bookmarksPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(
     DDLogDebug(@"Published bookmarks to pep");
 $$
 
-$$class_handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$class_handler(rosterNamePublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         DDLogWarn(@"Could not publish roster name to pep!");
@@ -436,7 +436,7 @@ $$class_handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID
     DDLogDebug(@"Published roster name to pep");
 $$
 
-$$class_handler(rosterNameDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$class_handler(rosterNameDeleted, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         //item-not-found means: nick already deleted --> ignore this error
@@ -452,7 +452,7 @@ $$class_handler(rosterNameDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(X
     DDLogDebug(@"Removed roster name from pep");
 $$
 
-$$class_handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$class_handler(avatarDeleted, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         //item-not-found means: avatar already deleted --> ignore this error
@@ -468,7 +468,7 @@ $$class_handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPI
     DDLogDebug(@"Removed avatar from pep");
 $$
 
-$$class_handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$class_handler(avatarMetadataPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar metadata to pep!");
@@ -478,7 +478,7 @@ $$class_handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), 
     DDLogDebug(@"Published avatar metadata to pep");
 $$
 
-$$class_handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSString*, imageHash), $_ID(NSData*, imageData))
+$$class_handler(avatarDataPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $$ID(NSString*, imageHash), $$UINTEGER(imageBytesLen))
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar image data for hash %@!", imageHash);
@@ -495,7 +495,7 @@ $$class_handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID
                 [[MLXMLNode alloc] initWithElement:@"info" withAttributes:@{
                     @"id": imageHash,
                     @"type": @"image/jpeg",
-                    @"bytes": [NSString stringWithFormat:@"%lu", (unsigned long)imageData.length]
+                    @"bytes": [NSString stringWithFormat:@"%lu", (unsigned long)imageBytesLen]
                 } andChildren:@[] andData:nil]
             ] andData:nil]
         ] andData:nil]

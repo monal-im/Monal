@@ -20,10 +20,21 @@
 
 static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
+@interface NotificationService ()
++(BOOL) getAppexCleanShutdownStatus;
++(void) setAppexCleanShutdownStatus:(BOOL) shutdownStatus;
+@end
+
+@interface PushSingleton : NSObject
+@property (atomic, strong) NSMutableArray* handlerList;
+@property (atomic) BOOL isFirstPush;
+@end
+
 @interface PushHandler : NSObject
 @property (atomic, strong) void (^handler)(UNNotificationContent* _Nonnull);
 @property (atomic, strong) monal_void_block_t _Nullable expirationTimer;
 @end
+
 
 @implementation PushHandler
 
@@ -60,11 +71,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 @end
 
 
-@interface PushSingleton : NSObject
-@property (atomic, strong) NSMutableArray* handlerList;
-@property (atomic) BOOL isFirstPush;
-@end
-
 @implementation PushSingleton
 
 +(id) instance
@@ -85,6 +91,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     self.isFirstPush = YES;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     return self;
 }
 
@@ -121,9 +128,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) killAppex
 {
     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+    DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
     
-    [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
+    [NotificationService setAppexCleanShutdownStatus:YES];
     
     DDLogInfo(@"Now killing appex process, goodbye...");
     [DDLog flushLog];
@@ -207,6 +215,16 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogDebug(@"locking process and connecting accounts");
         [DDLog flushLog];
         [MLProcessLock lock];
+        
+        //handle message notifications by initializing the MLNotificationManager
+        [MLNotificationManager sharedInstance];
+        
+        //initialize the xmpp manager (used for connectivity checks etc.)
+        //we initialize it here to make sure the connectivity check is complete when using it later
+        [MLXMPPManager sharedInstance];
+        usleep(100000);     //wait for initial connectivity check (100ms)
+        
+        //now connect all enabled accounts
         [[MLXMPPManager sharedInstance] connectIfNecessary];
     }
 }
@@ -234,14 +252,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //check if this was the last handler (ignore if we got a new one in between our call to checkForLastHandler and feedNextHandler, this case will be handled below anyways)
     if(isLastHandler)
     {
-        DDLogInfo(@"Last push expired shutting down in 1500ms if no new push comes in in the meantime");
-        //wait 1500ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
+        DDLogInfo(@"Last push expired shutting down in 500ms if no new push comes in in the meantime");
+        //wait 500ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
         //after the last push expired we have ~5 seconds run time left to do the clean disconnect
-        //--> waiting 1500ms before checking if this was the last push that expired (e.g. no new push came in) does not do any harm here
+        //--> waiting 500ms before checking if this was the last push that expired (e.g. no new push came in) does not do any harm here
         //WARNING: we have to closely watch apple...if they remove this 5 second gap between this call to the expiration handler and the actual
         //appex freeze, this sleep will no longer be harmless and could even cause smacks state corruption (by not diconnecting cleanly and having stanzas
         //still in the TCP queue delivered on next appex unfreeze even if they have been handled by the mainapp already)
-        usleep(1500000);
+        usleep(500000);
         
         //this returns YES if we got new pushes in the meantime --> do nothing if so
         if(![self checkForNewPushes])
@@ -250,9 +268,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             
             //don't post sync errors here, already did so above (see explanation there)
             
-            //check idle state and schedule a background task (handled in the main app) if not idle
-            if(![[MLXMPPManager sharedInstance] allAccountsIdle])
-                [self scheduleBackgroundFetchingTask];
+            //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
+            [self scheduleBackgroundFetchingTask:![[MLXMPPManager sharedInstance] allAccountsIdle]];
             
             //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
             //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
@@ -336,8 +353,15 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogVerbose(@"Unread badge updated successfully");
 }
 
--(void) scheduleBackgroundFetchingTask
+-(void) nowIdle:(NSNotification*) notification
 {
+    DDLogInfo(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
+    [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:NO];
+}
+
+-(void) scheduleBackgroundFetchingTask:(BOOL) force
+{
+    DDLogInfo(@"Scheduling new BackgroundFetchingTask with force=%s...", force ? "yes" : "no");
     [HelperTools dispatchSyncReentrant:^{
         NSError *error = NULL;
         // cancel existing task (if any)
@@ -348,23 +372,22 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
         request.requiresNetworkConnectivity = YES;
         request.requiresExternalPower = NO;
-        //assume there will be one next push incoming shortly and add an extra of 10 seconds on top of its handling time
-        request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];
+        if(force)
+            request.earliestBeginDate = nil;
+        else
+            request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
         BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
         if(!success) {
             // Errorcodes https://stackoverflow.com/a/58224050/872051
-            DDLogError(@"Failed to submit BGTask request %@, error: %@", request, error);
+            DDLogError(@"Failed to submit BGTask request: %@", error);
         } else {
-            DDLogVerbose(@"Success submitting BGTask request %@, error: %@", request, error);
+            DDLogVerbose(@"Success submitting BGTask request %@", request);
         }
     } onQueue:dispatch_get_main_queue()];
 }
 
 @end
 
-
-@interface NotificationService ()
-@end
 
 static NSMutableArray* handlers;;
 static BOOL warnUnclean = NO;
@@ -386,32 +409,40 @@ static BOOL warnUnclean = NO;
     //init IPC
     [IPC initializeForProcess:@"NotificationServiceExtension"];
     
-    //handle message notifications by initializing the MLNotificationManager
-    [MLNotificationManager sharedInstance];
-    
-    //initialize the xmppmanager (used later for connectivity checks etc.)
-    //we initialize it here to make sure the connectivity check is complete when using it later
-    [MLXMPPManager sharedInstance];
-    
     //log startup
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    usleep(100000);     //wait for initial connectivity check (100ms)
     
 #ifdef DEBUG
-    BOOL shutdownStatus = [[DataLayer sharedInstance] getAppexCleanShutdownStatus];
+    BOOL shutdownStatus = [NotificationService getAppexCleanShutdownStatus];
     warnUnclean = !shutdownStatus;
     if(warnUnclean)
         DDLogError(@"detected unclean appex shutdown!");
 #endif
     
     //mark this appex as unclean (will be cleared directly before calling exit(0))
-    [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
+    [NotificationService setAppexCleanShutdownStatus:NO];
     
     DDLogInfo(@"Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
     [DDLog flushLog];
+}
+
++(BOOL) getAppexCleanShutdownStatus
+{
+    //we use the defaultsDB to avoid write transaction to the main DB which would kill the main app while running in the background
+    //(use the standardUserDefaults of the appex instead of the shared one exposed by our HelperTools to reduce kills due to locking even further)
+    NSNumber* wasClean = [[NSUserDefaults standardUserDefaults] objectForKey:@"clean_appex_shutdown"];
+    return wasClean == nil || wasClean.boolValue;
+}
+
++(void) setAppexCleanShutdownStatus:(BOOL) shutdownStatus
+{
+    //we use the defaultsDB to avoid write transaction to the main DB which would kill the main app while running in the background
+    //(use the standardUserDefaults of the appex instead of the shared one exposed by our HelperTools to reduce kills due to locking even further)
+    [[NSUserDefaults standardUserDefaults] setBool:shutdownStatus forKey:@"clean_appex_shutdown"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(id) init
@@ -493,7 +524,7 @@ static BOOL warnUnclean = NO;
     if([handlers count] > 0)
     {
         //we don't want two error notifications for the user
-        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
+        [NotificationService setAppexCleanShutdownStatus:YES];
         
         //we feed all handlers, these shouldn't be silenced already, because we wouldn't see this expiration
         for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
@@ -507,12 +538,12 @@ static BOOL warnUnclean = NO;
         }
     }
     else
-        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
+        [NotificationService setAppexCleanShutdownStatus:NO];
 #else
     if([handlers count] > 0)
     {
         //we don't want two error notifications for the user
-        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:YES];
+        [NotificationService setAppexCleanShutdownStatus:YES];
         
         //we feed all handlers, these shouldn't be silenced already, because we wouldn't see this expiration
         for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
@@ -523,7 +554,7 @@ static BOOL warnUnclean = NO;
         }
     }
     else
-        [[DataLayer sharedInstance] setAppexCleanShutdownStatus:NO];
+        [NotificationService setAppexCleanShutdownStatus:NO];
 #endif
 
     DDLogInfo(@"Committing suicide...");

@@ -197,4 +197,15 @@
     return NSSelectorFromString([NSString stringWithFormat:@"MLHandler_%@_withArguments:andBoundArguments:", handlerName]);
 }
 
++(void) throwDynamicExceptionForType:(NSString*) type andVar:(NSString*) var andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
+{
+    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
+    NSArray* filePathComponents = [fileStr pathComponents];
+    if([filePathComponents count]>1)
+        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+    NSString* text = [NSString stringWithFormat:@"Dynamic unpacking exception triggered for '%@' var '%@' at %@:%d in %s", type, var, fileStr, line, func];
+    DDLogError(text);
+    @throw [NSException exceptionWithName:text reason:text userInfo:userInfo];
+}
+
 @end

@@ -12,15 +12,14 @@
 #import "MLContactCell.h"
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
-#import "ContactDetails.h"
 #import "MLImageManager.h"
-#import "MLWelcomeViewController.h"
 #import "MLRegisterViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
 #import "MLXEPSlashMeHandler.h"
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
+#import <Monal-Swift.h>
 
 @import QuartzCore.CATransaction;
 
@@ -50,24 +49,25 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(id) initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
     return self;
 }
 
 -(void) viewDidLoad
 {
     [super viewDidLoad];
+    
+    self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
+    self.spinner.hidesWhenStopped = YES;
+    
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
-    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate setActiveChatsController:self];
+    MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
+    appDelegate.activeChats = self;
     
-     self.chatListTable = [[UITableView alloc] init];
-     self.chatListTable.delegate = self;
-     self.chatListTable.dataSource = self;
+    self.chatListTable = [[UITableView alloc] init];
+    self.chatListTable.delegate = self;
+    self.chatListTable.dataSource = self;
     
     self.view = self.chatListTable;
     
@@ -89,6 +89,9 @@ static NSMutableSet* _smacksWarningDisplayed;
 #endif
     self.settingsButton.image = [UIImage systemImageNamed:@"gearshape.fill"];
     self.composeButton.image = [UIImage systemImageNamed:@"person.2.fill"];
+    
+    UIBarButtonItem* spinnerButton = [[UIBarButtonItem alloc] initWithCustomView:self.spinner];
+    [self.navigationItem setRightBarButtonItems:@[self.composeButton, spinnerButton] animated:NO];
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
@@ -213,6 +216,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     if([removedContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact] == NO)
         return;
     dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogInfo(@"Contact removed, closing chat view...");
         // remove contact from activechats table
         [self refreshDisplay];
         // open placeholder
@@ -311,7 +315,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     [super viewWillAppear:animated];
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
         [self refreshDisplay];      // load contacts
-    // only check if the login screen has to be shown if there are no active chats
+    // only check if the login screens have been shown if there are no active chats
     [self segueToIntroScreensIfNeeded];
 }
 
@@ -363,13 +367,14 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) segueToIntroScreensIfNeeded
 {
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenIntro"]) {
-        [self performSegueWithIdentifier:@"showIntro" sender:self];
-        return;
-    }
     // display quick start if the user never seen it or if there are 0 enabled accounts
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"] || [[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
+#ifdef IS_ALPHA
+        UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
+        [self presentViewController:loginViewController animated:YES completion:^{}];
+#else
         [self performSegueWithIdentifier:@"showLogin" sender:self];
+#endif
         return;
     }
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
@@ -403,32 +408,46 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact
 {
+    return [self presentChatWithContact:contact andCompletion:nil];
+}
+
+-(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion
+{
+    // clear old chat before opening a new one (but not for splitView == YES)
+    if([HelperTools deviceUsesSplitView] == NO)
+        [self.navigationController popViewControllerAnimated:NO];
+    
     // show placeholder if contact is nil, open chat otherwise
     if(contact == nil)
     {
-        [self openConversationPlaceholder:contact];
+        [self openConversationPlaceholder:nil];
+        if(completion != nil)
+            completion(@NO);
         return;
     }
     // check if the contact is a buddy
     if([[DataLayer sharedInstance] isContactInList:contact.contactJid forAccount:contact.accountId] == NO)
     {
         DDLogError(@"Contact %@ unkown", contact.contactJid);
-        [self openConversationPlaceholder:contact];
+        [self openConversationPlaceholder:nil];
+        if(completion != nil)
+            completion(@NO);
         return;
     }
     // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
     if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
     {
         // make sure the already open chat is reloaded and return
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+        if(completion != nil)
+            completion(@YES);
         return;
     }
 
-    // clear old chat before opening a new one (but not for splitView == YES)
-    if([HelperTools deviceUsesSplitView] == NO)
-        [self.navigationController popViewControllerAnimated:NO];
     // open chat
     [self performSegueWithIdentifier:@"showConversation" sender:contact];
+    if(completion != nil)
+        completion(@YES);
 }
 
 /*
@@ -483,19 +502,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
-    if([segue.identifier isEqualToString:@"showIntro"])
-    {
-        MLWelcomeViewController* welcome = (MLWelcomeViewController*) segue.destinationViewController;
-        welcome.completion = ^{
-            if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
-            {
-                if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
-                    [self performSegueWithIdentifier:@"showLogin" sender:self];
-                }
-            }
-        };
-    }
-    else if([segue.identifier isEqualToString:@"showRegister"])
+    if([segue.identifier isEqualToString:@"showRegister"])
     {
         UINavigationController* navigationController = (UINavigationController*)segue.destinationViewController;
         MLRegisterViewController* reg = (MLRegisterViewController*)navigationController.visibleViewController;
@@ -516,12 +523,12 @@ static NSMutableSet* _smacksWarningDisplayed;
         UIBarButtonItem* barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
         self.navigationItem.backBarButtonItem = barButtonItem;
         [chatVC setupWithContact:sender];
+        self.currentChatViewController = chatVC;
     }
     else if([segue.identifier isEqualToString:@"showDetails"])
     {
-        UINavigationController* nav = segue.destinationViewController;
-        ContactDetails* details = (ContactDetails*)nav.topViewController;
-        details.contact = sender;
+        UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];
+        [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
     else if([segue.identifier isEqualToString:@"showContacts"])
     {

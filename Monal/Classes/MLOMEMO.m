@@ -184,13 +184,15 @@ const int KEY_SIZE = 16;
     }
 }
 
-$$instance_handler(devicelistHandler, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
-    //type will be "publish", "retract", "purge" or "delete", "publish" and "retract" will have the data dictionary filled with id --> data pairs
+$$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $$ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    //type will be "publish", "retract", "purge" or "delete". "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
     MLAssert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"], @"pep node must be 'eu.siacs.conversations.axolotl.devicelist'");
-    if(type && [type isEqualToString:@"publish"]) {
+    if([type isEqualToString:@"publish"])
+    {
         MLXMLNode* publishedDevices = [data objectForKey:@"current"];
-        if(publishedDevices && jid) {
+        if(publishedDevices && jid)
+        {
             NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub#event}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
 
@@ -255,25 +257,19 @@ $$
     [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:$newHandler(self, handleBundleFetchResult, $ID(rid, deviceid))];
 }
 
-$$instance_handler(handleBundleFetchResult, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data), $_ID(NSString*, rid))
-    if(errorIq)
+$$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data), $$ID(NSString*, rid))
+    if(!success)
     {
-        DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);
-        NSString* bundleName = [errorIq findFirst:@"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node"];
-        if(bundleName)
-        {
-            NSString* ridFromIQ = [bundleName componentsSeparatedByString:@":"][1];
-            if(ridFromIQ)
-            {
-                SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.intValue];
-                [self.monalSignalStore markDeviceAsDeleted:address];
-            }
-        }
+        if(errorIq)
+            DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);
+        else if(errorReason)
+            DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorReason);
+        
+        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.intValue];
+        [self.monalSignalStore markDeviceAsDeleted:address];
     }
     else
     {
-        if(!rid || !jid)
-            return;
         // check that a corresponding buddy exists -> prevent foreign key errors
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
         if(!receivedKeys && data.count == 1)
@@ -290,6 +286,8 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $_ID(xmpp*, account),
             [self processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
         }
     }
+    
+    //this has to be done even in error cases!
     if(self.openBundleFetchCnt > 1 && self.omemoLoginState >= LoggedIn)
     {
         self.openBundleFetchCnt--;
@@ -313,6 +311,9 @@ $$
 
 -(void) queryOMEMODevices:(NSString*) jid
 {
+    //TODO: I don't know if that ever gets triggered (new incoming message stanzas add the contact to our list before handing off the message to omemo for decryption)
+    //TODO: if it's the other way round and a new jid gets added by the monal user, the contact will be in our list, too
+    //TODO: if the monal user uses another device to write to a non-roster user, the non-roster contact is created before handing off the message to omemo for decryption, too
     if([[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo] == NO)
     {
         [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandler(self, handleDevicelistSubscribe)];
@@ -321,31 +322,39 @@ $$
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
 }
 
-$$instance_handler(handleDevicelistSubscribe, account.omemo, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$instance_handler(handleDevicelistSubscribe, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(success == NO)
     {
-        DDLogError(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorIq);
+        if(errorIq)
+            DDLogError(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorIq);
+        else
+            DDLogError(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorReason);
     }
     // TODO: improve error handling
 $$
 
-$$instance_handler(handleDevicelistUnsubscribe, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+$$instance_handler(handleDevicelistUnsubscribe, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(success == NO)
     {
-        DDLogError(@"Error while unsubscribing omemo deviceslist from: %@ - %@", jid, errorIq);
+        if(errorIq)
+            DDLogError(@"Error while unsubscribing omemo deviceslist from: %@ - %@", jid, errorIq);
+        else
+            DDLogError(@"Error while unsubscribing omemo deviceslist from: %@ - %@", jid, errorReason);
     }
     // TODO: improve error handling
 $$
 
-$$instance_handler(handleManualDevices, account.omemo, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data))
-    if(errorIq)
+$$instance_handler(handleManualDevices, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    if(success == NO)
     {
-        DDLogError(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorIq);
+        if(errorIq)
+            DDLogError(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorIq);
+        else
+            DDLogError(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorReason);
+        // TODO: improve error handling
     }
     else
     {
-        if(!jid)
-            return;
         MLXMLNode* publishedDevices = [data objectForKey:@"current"];
         if(!publishedDevices && data.count == 1)
         {
@@ -356,7 +365,8 @@ $$instance_handler(handleManualDevices, account.omemo, $_ID(xmpp*, account), $_I
         {
             DDLogWarn(@"More than one devicelist item found from %@", jid);
         }
-        if(publishedDevices) {
+        if(publishedDevices)
+        {
             NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
 
@@ -743,12 +753,17 @@ $$
 // called after a buddy was deleted from roster OR after a MUC member was removed
 -(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid isMuc:(BOOL) isMuc
 {
-    NSArray<NSString*>* danglingJids = @[];
+    NSMutableSet<NSString*>* danglingJids = [[NSMutableSet alloc] init];
     if(isMuc == YES)
-        danglingJids = [self.monalSignalStore removeDanglingMucSessions];
+        danglingJids = [[NSMutableSet alloc] initWithSet:[self.monalSignalStore removeDanglingMucSessions]];
     else if([self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid] == NO)
-        danglingJids = @[buddyJid];
+            [danglingJids addObject:buddyJid];
 
+    [self unsubscribeFromDanglingJids:danglingJids];
+}
+
+-(void) unsubscribeFromDanglingJids:(NSSet<NSString*>*) danglingJids
+{
     for(NSString* jid in danglingJids)
     {
         [self.account.pubsub unsubscribeFromNode:@"eu.siacs.conversations.axolotl.devicelist" forJid:jid withHandler:$newHandler(self, handleDevicelistUnsubscribe)];
@@ -788,7 +803,7 @@ $$
     }
 }
 
--(NSString*) decryptMessage:(XMPPMessage*) messageNode
+-(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid
 {
     if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
     {
@@ -801,18 +816,17 @@ $$
     NSString* senderJid = nil;
     if([messageNode check:@"/<type=groupchat>"])
     {
-        NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:messageNode.fromResource inRoom:messageNode.fromUser forAccountId:self.account.accountNo];
-        if(mucParticipant == nil || mucParticipant[@"participant_jid"] == nil)
+        if(mucParticipantJid == nil)
         {
-            DDLogError(@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipant);
+            DDLogError(@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipantJid);
 #ifdef IS_ALPHA
-            return [NSString stringWithFormat:@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipant];
+            return [NSString stringWithFormat:@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipantJid];
 #else
             return nil;
 #endif
         }
         else
-            senderJid = mucParticipant[@"participant_jid"];
+            senderJid = mucParticipantJid;
     }
     else
         senderJid = messageNode.fromUser;
@@ -1042,6 +1056,8 @@ $$
     // We should not delete our own device
     if([source isEqualToString:self.accountJid] && rid == self.monalSignalStore.deviceid)
         return;
+    else if([source isEqualToString:self.accountJid])
+        [self.ownReceivedDeviceList removeObject:[NSNumber numberWithUnsignedInt:rid]];
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid];
     [self.monalSignalStore deleteDeviceforAddress:address];
@@ -1058,6 +1074,11 @@ $$
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.accountJid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
+}
+
+-(void) cleanup {
+    NSSet<NSString*>* danglingJids = [self.monalSignalStore removeDanglingMucSessions];
+    [self unsubscribeFromDanglingJids:danglingJids];
 }
 
 @end

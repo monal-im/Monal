@@ -86,6 +86,17 @@ NSString* const kiqErrorType = @"error";
     ] andData:nil]];
 }
 
+// direct push registration at xmpp server without registration at appserver
+-(void) setPushEnableWithNode:(NSString*) node onAppserver:(NSString*) jid
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
+        @"jid": jid,
+        @"node": node
+    } andChildren:@[] andData:nil]];
+}
+
+#ifndef IS_ALPHA
+// legacy push registration at appserver
 -(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
@@ -97,12 +108,13 @@ NSString* const kiqErrorType = @"error";
         }]
     ] andData:nil]];
 }
+#endif
 
--(void) setPushDisable
+-(void) setPushDisable:(NSString*) node
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"disable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
         @"jid": [HelperTools pushServer],
-        @"node": [[[UIDevice currentDevice] identifierForVendor] UUIDString]
+        @"node": node
     } andChildren:@[] andData:nil]];
 }
 
@@ -274,7 +286,7 @@ NSString* const kiqErrorType = @"error";
 -(void) setRosterRequest:(NSString*) version
 {
     NSDictionary* attrs = @{};
-    if(version)
+    if(version && ![version isEqual:@""])
         attrs = @{@"ver": version};
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:attrs andChildren:@[] andData:nil]];
 }
@@ -337,6 +349,21 @@ NSString* const kiqErrorType = @"error";
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#owner" withAttributes:@{} andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"http://jabber.org/protocol/muc#roomconfig"]
     ] andData:nil]];
+}
+
+-(void) setVcardAvatarWithData:(NSData*) imageData andType:(NSString*) imageType
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"vCard" andNamespace:@"vcard-temp" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"PHOTO" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"PHOTO" andData:imageType],
+            [[MLXMLNode alloc] initWithElement:@"BINVAL" andData:[HelperTools encodeBase64WithData:imageData]],
+        ] andData:nil]
+    ] andData:nil]];
+}
+
+-(void) setVcardQuery
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"vCard" andNamespace:@"vcard-temp"]];
 }
 
 #pragma mark - Account Management

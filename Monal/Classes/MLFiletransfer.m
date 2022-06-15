@@ -22,6 +22,8 @@ static NSFileManager* _fileManager;
 static NSString* _documentCacheDir;
 static NSMutableSet* _currentlyTransfering;
 
+NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
+
 @implementation MLFiletransfer
 
 +(void) initialize
@@ -34,6 +36,7 @@ static NSMutableSet* _currentlyTransfering;
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     [HelperTools configureFileProtectionFor:_documentCacheDir];
     _currentlyTransfering = [[NSMutableSet alloc] init];
+    _expectedDownloadSizes = [[NSMutableDictionary alloc] init];
 }
 
 +(BOOL) isIdle
@@ -46,11 +49,20 @@ static NSMutableSet* _currentlyTransfering;
 
 +(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId
 {
+    NSString* url;
     MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
     if(!msg)
     {
         DDLogError(@"historyId %@ does not yield an MLMessage object, aborting", historyId);
         return;
+    }
+    url = [self genCanonicalUrl:msg.messageText];
+    @synchronized(_expectedDownloadSizes)
+    {
+        if(_expectedDownloadSizes[url] == NULL)
+        {
+            _expectedDownloadSizes[url] = msg.filetransferSize;
+        }
     }
     //make sure we don't check or download this twice
     @synchronized(_currentlyTransfering)
@@ -64,7 +76,6 @@ static NSMutableSet* _currentlyTransfering;
     }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         DDLogInfo(@"Requesting mime-type and size for historyID %@ from http server", historyId);
-        NSString* url = [self genCanonicalUrl:msg.messageText];
         NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
         request.HTTPMethod = @"HEAD";
         request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
@@ -94,7 +105,7 @@ static NSMutableSet* _currentlyTransfering;
             
             //update db with content type and size
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:contentLength];
-            
+
             //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = contentLength;
@@ -160,6 +171,8 @@ static NSMutableSet* _currentlyTransfering;
         }
         
         NSURLSession* session = [NSURLSession sharedSession];
+        // set app defined description for download size checks
+        [session setSessionDescription:url];
         NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
             if(error)
             {
@@ -257,6 +270,30 @@ static NSMutableSet* _currentlyTransfering;
     });
 }
 
+-(void) URLSession:(NSURLSession*) session downloadTask:(NSURLSessionDownloadTask*) downloadTask didWriteData:(int64_t) bytesWritten totalBytesWritten:(int64_t) totalBytesWritten totalBytesExpectedToWrite:(int64_t) totalBytesExpectedToWrite
+{
+    @synchronized(_expectedDownloadSizes)
+    {
+        NSNumber* expectedSize = _expectedDownloadSizes[session.sessionDescription];
+        if(expectedSize == NULL) {
+            [downloadTask cancel];
+        } else if(totalBytesWritten >= expectedSize.intValue + 1024 * 1000 * 1000) {
+            [downloadTask cancel];
+        } else {
+            // everything is ok
+        }
+    }
+}
+
+-(void) URLSession:(nonnull NSURLSession*) session downloadTask:(nonnull NSURLSessionDownloadTask*) downloadTask didFinishDownloadingToURL:(nonnull NSURL*) location
+{
+    @synchronized(_expectedDownloadSizes)
+    {
+        [_expectedDownloadSizes removeObjectForKey:session.sessionDescription];
+    }
+}
+
+
 +(NSDictionary*) getFileInfoForMessage:(MLMessage*) msg
 {
     if(![msg.messageType isEqualToString:kMessageTypeFiletransfer])
@@ -310,9 +347,9 @@ static NSMutableSet* _currentlyTransfering;
     }
 }
 
-+(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion
++(MLHandler*) prepareFileUpload:(NSURL*) fileUrl
 {
-    DDLogInfo(@"Uploading file stored at %@", [fileUrl path]);
+    DDLogInfo(@"Preparing for upload of file stored at %@", [fileUrl path]);
     
     //copy file to our document cache (temporary filename because the upload url is unknown yet)
     NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
@@ -324,18 +361,21 @@ static NSMutableSet* _currentlyTransfering;
     {
         [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
         DDLogError(@"File upload failed: %@", error);
-        return completion(nil, nil, nil, error);
+        return $newHandler(self, errorCompletion, $ID(error));
     }
     [HelperTools configureFileProtectionFor:file];
     
-    [self internalUploadHandlerForTmpFile:file userFacingFilename:[fileUrl lastPathComponent] mimeType:[self getMimeTypeOfOriginalFile:[fileUrl path]] onAccount:account withEncryption:encrypt andCompletion:completion];
+    return $newHandler(self, internalTmpFileUploadHandler,
+        $ID(file),
+        $ID(userFacingFilename, [fileUrl lastPathComponent]),
+        $ID(mimeType, [self getMimeTypeOfOriginalFile:[fileUrl path]])
+    );
 }
 
-+(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion
++(MLHandler*) prepareUIImageUpload:(UIImage*) image
 {
+    DDLogInfo(@"Preparing for upload of image from UIImage object");
     double imageQuality = [[HelperTools defaultsDB] doubleForKey:@"ImageUploadQuality"];
-    
-    DDLogInfo(@"Uploading image from UIImage object");
     
     //copy file to our document cache (temporary filename because the upload url is unknown yet)
     NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
@@ -348,11 +388,34 @@ static NSMutableSet* _currentlyTransfering;
     {
         [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
         DDLogError(@"File upload failed: %@", error);
-        return completion(nil, nil, nil, error);
+        return $newHandler(self, errorCompletion, $ID(error));
     }
     [HelperTools configureFileProtectionFor:file];
     
-    [self internalUploadHandlerForTmpFile:file userFacingFilename:[NSString stringWithFormat:@"%@.jpg", [[NSUUID UUID] UUIDString]] mimeType:@"image/jpeg" onAccount:account withEncryption:encrypt andCompletion:completion];
+    return $newHandler(self, internalTmpFileUploadHandler,
+        $ID(file),
+        $ID(userFacingFilename, ([NSString stringWithFormat:@"%@.jpg", [[NSUUID UUID] UUIDString]])),
+        $ID(mimeType, @"image/jpeg")
+    );
+}
+
+//proxy to allow calling the completion with a (possibly) serialized error
+$$class_handler(errorCompletion, $$ID(NSError*, error), $$ID(monal_upload_completion_t, completion))
+    completion(nil, nil, nil, error);
+$$
+
++(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(monal_upload_completion_t) completion
+{
+    DDLogInfo(@"Uploading file stored at %@", [fileUrl path]);
+    //directly call internal file upload handler returned as MLHandler and bind our (non serializable) completion block to it
+    $call([self prepareFileUpload:fileUrl], $ID(account), $BOOL(encrypted), $ID(completion));
+}
+
++(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(monal_upload_completion_t) completion
+{
+    DDLogInfo(@"Uploading image from UIImage object");
+    //directly call internal file upload handler returned as MLHandler and bind our (non serializable) completion block to it
+    $call([self prepareUIImageUpload:image], $ID(account), $BOOL(encrypted), $ID(completion));
 }
 
 +(void) doStartupCleanup
@@ -513,8 +576,7 @@ static NSMutableSet* _currentlyTransfering;
     }];
 }
 
-+(void) internalUploadHandlerForTmpFile:(NSString*) file userFacingFilename:(NSString*) userFacingFilename mimeType:(NSString*) mimeType onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable)) completion
-{
+$$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSString*, userFacingFilename), $$ID(NSString*, mimeType), $$ID(xmpp*, account), $$BOOL(encrypted), $$ID(monal_upload_completion_t, completion))
     NSError* error;
     
     //make sure we don't upload the same tmpfile twice (should never happen anyways)
@@ -623,7 +685,7 @@ static NSMutableSet* _currentlyTransfering;
             return completion(nil, nil, nil, error);
         }
     }];
-}
+$$
 
 +(void) markAsComplete:(id) obj
 {

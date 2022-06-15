@@ -249,7 +249,7 @@
         }
         dispatch_async(dispatch_get_main_queue(), ^{
             self.loginHUD.hidden=YES;
-            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:[NSString stringWithFormat:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.\n\nTechnical error message: %@", @""), notification.userInfo[@"message"]] preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
@@ -372,7 +372,7 @@
 {
     if([segue.identifier isEqualToString:@"scanQRCode"])
     {
-        MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
+        MLQRCodeScannerController* qrCodeScanner = (MLQRCodeScannerController*)segue.destinationViewController;
         qrCodeScanner.loginDelegate = self;
         return;     //do not remove observers
     }
@@ -393,9 +393,12 @@
     // Insert jid and password into text fields
     self.jid.text = jid;
     self.password.text = password;
+    [self closeQRCodeScanner];
+}
+
+- (void) closeQRCodeScanner {
     // Close QR-Code scanner
     [self.navigationController popViewControllerAnimated:YES];
 }
-
 
 @end

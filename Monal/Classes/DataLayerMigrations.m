@@ -34,7 +34,7 @@
 
 +(BOOL) migrateDB:(MLSQLite*) db withDataLayer:(DataLayer*) dataLayer
 {
-    //migrate dbversion ino flags table (the exception indicates we are already migrated)
+    //migrate dbversion into flags table if necessary
     [db voidWriteTransaction:^{
         NSNumber* alreadyMigrated = [db executeScalar:@"SELECT count(*) FROM sqlite_master WHERE type='table' AND name='dbversion';"];
         if([alreadyMigrated boolValue])
@@ -1103,6 +1103,22 @@
                         WHERE b.buddy_name==(a.username || '@' || a.domain) \
                     ) \
             "];
+        }];
+        
+        //clear roster version to remove all non-muc roster entries pointing to a muc jid
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.118 withBlock:^{
+            [db executeNonQuery:@"UPDATE account SET rosterVersion=NULL;"];
+        }];
+        
+        //change data column in sharesheet outbox table to TEXT instead of length-bound VARCHAR and truncate table to make sure we don't have NULL data entries
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.119 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE sharesheet_outbox DROP COLUMN data;"];
+            [db executeNonQuery:@"ALTER TABLE sharesheet_outbox ADD COLUMN data TEXT DEFAULT NULL;"];
+            [db executeNonQuery:@"DELETE FROM sharesheet_outbox;"];
+        }];
+        
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.120 withBlock:^{
+            //dummy upgrade to make sure all state gets invalidatet because of new MLHandler behaviour (mandatory arguments)
         }];
 
         // check if db version changed

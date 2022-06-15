@@ -14,13 +14,15 @@ jobs:
     runs-on: self-hosted
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
+          clean: true
+          submodules: true
           ref: alpha.build
-      - name: Deinit submodules
-        run: git submodule deinit --all --force
+      - name: Fetch tags
+        run: git fetch --tags
       - name: Checkout submodules
-        run: git submodule update --init --recursive --remote --merge
+        run: git submodule update --remote
       - run: git branch
       - run: git config --local user.email "pushBot@monal.im"
       - run: git config --local user.name "Monal-IM-Push[BOT]"

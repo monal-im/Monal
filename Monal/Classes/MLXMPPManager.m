@@ -128,6 +128,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self removeObjectUserSettingsIfSet:@"lastAccount"];
     // remove HasSeenIntro bool
     [self removeObjectUserSettingsIfSet:@"HasSeenIntro"];
+
+    // add default pushserver
+    [self upgradeObjectUserSettingsIfUnset:@"selectedPushServer" toDefault:[HelperTools getSelectedPushServerBasedOnLocale]];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -466,7 +469,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     int index = 0;
     int pos = -1;
     xmpp* account;
-    BOOL lastConnectedAccount = NO;
     @synchronized(_connectedXMPP) {
         for(xmpp* xmppAccount in _connectedXMPP)
         {
@@ -483,18 +485,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         {
             [_connectedXMPP removeObjectAtIndex:pos];
             DDLogVerbose(@"removed account at pos  %d", pos);
-
-            if([_connectedXMPP count] == 0)
-                lastConnectedAccount = YES;
         }
     }
     if(account)
     {
         DDLogVerbose(@"got account and cleaning up.. ");
-#ifndef IS_ALPHA
-        if(lastConnectedAccount)
-            [account unregisterPush];
-#endif
         [account disconnect:YES];
         account = nil;
         DDLogVerbose(@"done cleaning up account ");
@@ -793,28 +788,4 @@ $$
         for(xmpp* xmppAccount in [self connectedXMPP])
             [xmppAccount enablePush];
 }
-
-#ifndef IS_ALPHA
-//this handler will simply retry the unregisterPush call
-$$class_handler(unregisterPushHandler)
-    [[MLXMPPManager sharedInstance] unregisterPush];
-$$
-
--(void) unregisterPush
-{
-    @synchronized(_connectedXMPP) {
-        for(xmpp* xmppAccount in _connectedXMPP)
-            if(xmppAccount)
-            {
-                //postpone unregister until at least one account is connected
-                if(xmppAccount.accountState < kStateBound)
-                    [xmppAccount addReconnectionHandler:$newHandler(self, unregisterPushHandler)];
-                else
-                    [xmppAccount unregisterPush];
-                break;
-            }
-    }
-}
-#endif
-
 @end

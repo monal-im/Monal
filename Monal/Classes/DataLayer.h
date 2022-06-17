@@ -283,6 +283,12 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) upgradeImageMessagesToFiletransferMessages;
 
 -(void) invalidateAllAccountStates;
+
+-(NSString*) lastUsedPushServerForAccount:(NSNumber*) accountNo;
+-(void) updateUsedPushServer:(NSString*) pushServer forAccount:(NSNumber*) accountNo;
+
+
+
 -(void) deleteDelayedMessageStanzasForAccount:(NSNumber*) accountNo;
 -(void) addDelayedMessageStanza:(MLXMLNode*) stanza forArchiveJid:(NSString*) archiveJid andAccountNo:(NSNumber*) accountNo;
 -(MLXMLNode* _Nullable) getNextDelayedMessageStanzaForArchiveJid:(NSString*) archiveJid andAccountNo:(NSNumber*) accountNo;

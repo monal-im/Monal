@@ -31,7 +31,9 @@ void logException(NSException* exception);
 +(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
-+(NSString*) pushServer;
+
++(NSDictionary<NSString*, NSString*>*) getInvalidPushServers;
++(NSString*) getSelectedPushServerBasedOnLocale;
 
 +(NSData*) serializeObject:(id) obj;
 +(id) unserializeData:(NSData*) data;

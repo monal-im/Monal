@@ -88,15 +88,31 @@ void logException(NSException* exception)
     return message;
 }
 
-+(NSString*) pushServer
++(NSDictionary<NSString*, NSString*>*) getInvalidPushServers
+{
+    return @{
+        @"ios13push.monal.im": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
+        @"push.monal.im": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
+    };
+}
+
++(NSString*) getSelectedPushServerBasedOnLocale
 {
 #ifdef IS_ALPHA
     return @"alpha.push.monal-im.org";
 #else
-    return @"ios13push.monal.im";
+    if([[[NSLocale currentLocale] countryCode] isEqualToString:@"US"])
+    {
+        return @"us.prod.push.monal-im.org";
+    }
+    else
+    {
+        return @"eu.prod.push.monal-im.org";
+    }
 #endif
 }
 
+// on push
 
 +(NSData*) serializeObject:(id) obj
 {

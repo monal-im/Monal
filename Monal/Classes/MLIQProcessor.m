@@ -518,34 +518,8 @@ $$class_handler(handleSetMamPrefs, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
         return;
     }
 $$
-#ifndef IS_ALPHA
-$$class_handler(handleAppserverNodeRegistered, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
-    if([iqNode check:@"/<type=error>"])
-    {
-        DDLogError(@"Registering on appserver returned an error: %@", [iqNode findFirst:@"error"]);
-        [HelperTools postError:NSLocalizedString(@"Appserver error", @"") withNode:iqNode andAccount:account andIsSevere:YES];
-        account.connectionProperties.registeredOnPushAppserver = NO;
-        return;
-    }
-    
-    XMPPDataForm* dataForm = [iqNode findFirst:@"{http://jabber.org/protocol/commands}command<status=complete><node=v1-register-push>/{jabber:x:data}x"];
-    if(!dataForm)
-    {
-        DDLogError(@"Appserver returned invalid data: %@", iqNode);
-        [HelperTools postError:NSLocalizedString(@"Appserver returned invalid data", @"") withNode:nil andAccount:account andIsSevere:NO];
-        account.connectionProperties.registeredOnPushAppserver = NO;
-        return;
-    }
-    
-    DDLogInfo(@"ENABLING PUSH: %@ < %@", dataForm[@"node"], dataForm[@"secret"]);
-    account.connectionProperties.registeredOnPushAppserver = YES;
-    XMPPIQ* enable = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [enable setPushEnableWithNode:dataForm[@"node"] andSecret:dataForm[@"secret"] onAppserver:dataForm[@"jid"]];
-    [account sendIq:enable withHandler:$newHandler(MLIQProcessor, handlePushEnabled)];
-$$
-#endif
 
-$$class_handler(handlePushEnabled, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
+$$class_handler(handlePushEnabled, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, selectedPushServer))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Enabling push returned an error: %@", [iqNode findFirst:@"error"]);
@@ -553,6 +527,8 @@ $$class_handler(handlePushEnabled, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
         account.connectionProperties.pushEnabled = NO;
         return;
     }
+    // save used push server to db
+    [[DataLayer sharedInstance] updateUsedPushServer:selectedPushServer forAccount:account.accountNo];
     DDLogInfo(@"Push is enabled now");
     account.connectionProperties.pushEnabled = YES;
 $$

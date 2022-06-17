@@ -3,6 +3,9 @@
 cd "$(dirname "$0")"
 cd ../Monal
 
+git submodule deinit --all -f
+git submodule update --init --recursive --remote
+
 # for folder in "localization/external" "shareSheet-iOS/localization/external"; do
 #     git fetch origin
 #     git reset --hard origin/main
@@ -24,8 +27,11 @@ for folder in "localization/external" "shareSheet-iOS/localization/external"; do
             # Remove default comments that are not supported by weblate
             sed -i '' '/^\/\* No comment provided by engineer\. \*\/$/d' $file
     done
-#     git add -u
-#     git status
-#     git commit -m "Updated translations"
-#     git push
+    git add -u
+    git status
+    git commit -m "Updated translations"
+    git push
 done
+
+git submodule deinit --all -f
+git submodule update --init --recursive

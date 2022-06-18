@@ -449,7 +449,9 @@ $$
     
     u_int16_t i=(u_int16_t)arc4random();
     NSString* randomID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
-    [hardlinkPathComponents addObject:[NSString stringWithFormat:@"%@_%@", randomID, fileInfo[@"filename"]]];
+    NSString* fileExtension = [fileInfo[@"filename"] pathExtension];
+    NSString* fileBasename = [fileInfo[@"filename"] stringByDeletingPathExtension];
+    [hardlinkPathComponents addObject:[[NSString stringWithFormat:@"%@_%@", fileBasename, randomID] stringByAppendingPathExtension:fileExtension]];
     
     MLHandler* handler = $newHandler(self, handleHardlinking, $ID(cacheFile, fileInfo[@"cacheFile"]), $ID(hardlinkPathComponents), $BOOL(direct, NO));
     if([HelperTools isAppExtension])

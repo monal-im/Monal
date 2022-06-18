@@ -59,33 +59,6 @@ NSString* const kiqErrorType = @"error";
 
 #pragma mark iq set
 
--(void) setRegisterOnAppserverWithToken:(NSString*) token
-{
-    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"command" andNamespace:@"http://jabber.org/protocol/commands" withAttributes:@{
-        @"node": @"v1-register-push",
-        @"action": @"execute"
-    } andChildren:@[
-        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"https://github.com/tmolitor-stud-tu/mod_push_appserver/#v1-register-push" andDictionary:@{
-            @"type": @"apns",
-            @"node": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
-            @"token": token
-        }]
-    ] andData:nil]];
-}
-
--(void) setUnregisterOnAppserver
-{
-    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"command" andNamespace:@"http://jabber.org/protocol/commands" withAttributes:@{
-        @"node": @"v1-unregister-push",
-        @"action": @"execute"
-    } andChildren:@[
-        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"https://github.com/tmolitor-stud-tu/mod_push_appserver/#v1-unregister-push" andDictionary:@{
-            @"type": @"apns",
-            @"node": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
-        }]
-    ] andData:nil]];
-}
-
 // direct push registration at xmpp server without registration at appserver
 -(void) setPushEnableWithNode:(NSString*) node onAppserver:(NSString*) jid
 {
@@ -95,25 +68,10 @@ NSString* const kiqErrorType = @"error";
     } andChildren:@[] andData:nil]];
 }
 
-#ifndef IS_ALPHA
-// legacy push registration at appserver
--(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid
-{
-    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
-        @"jid": jid,
-        @"node": node
-    } andChildren:@[
-        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:@{
-            @"secret": secret
-        }]
-    ] andData:nil]];
-}
-#endif
-
--(void) setPushDisable:(NSString*) node
+-(void) setPushDisable:(NSString*) node onPushServer:(NSString*) pushServer
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"disable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
-        @"jid": [HelperTools pushServer],
+        @"jid": pushServer,
         @"node": node
     } andChildren:@[] andData:nil]];
 }

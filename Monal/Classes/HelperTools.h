@@ -31,7 +31,10 @@ void logException(NSException* exception);
 +(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
-+(NSString*) pushServer;
+
++(NSDictionary<NSString*, NSString*>*) getInvalidPushServers;
++(NSString*) getSelectedPushServerBasedOnLocale;
++(NSDictionary<NSString*, NSString*>*) getAvailablePushServers;
 
 +(NSData*) serializeObject:(id) obj;
 +(id) unserializeData:(NSData*) data;
@@ -41,6 +44,7 @@ void logException(NSException* exception);
 +(UIColor*) generateColorFromJid:(NSString*) jid;
 +(NSString*) bytesToHuman:(int64_t) bytes;
 +(NSString*) stringFromToken:(NSData*) tokenIn;
++(void) configureFileProtection:(NSString*) protectionLevel forFile:(NSString*) file;
 +(void) configureFileProtectionFor:(NSString*) file;
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
 +(void) clearSyncErrorsOnAppForeground;

@@ -12,6 +12,10 @@ contents.xcworkspacedata
 # Pods
 Monal/Pods
 
+#Don't accidentally commit localization state
+Monal/localization/external
+Monal/shareSheet-iOS/localization/external
+
 # certs and other encrypted stuff
 *.pem
 *.key

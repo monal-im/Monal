@@ -1816,6 +1816,20 @@ static NSDateFormatter* dbFormatter;
 #endif
 }
 
+-(NSString*) lastUsedPushServerForAccount:(NSNumber*) accountNo
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT registeredPushServer FROM account WHERE account_id=?;" andArguments:@[accountNo]];
+    }];
+}
+
+-(void) updateUsedPushServer:(NSString*) pushServer forAccount:(NSNumber*) accountNo
+{
+    [self.db voidWriteTransaction:^{
+        [self.db executeScalarReader:@"UPDATE account SET registeredPushServer=? WHERE account_id=?;" andArguments:@[pushServer, accountNo]];
+    }];
+}
+
 -(void) version
 {
     // checking db version and upgrading if necessary

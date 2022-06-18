@@ -88,15 +88,46 @@ void logException(NSException* exception)
     return message;
 }
 
-+(NSString*) pushServer
++(NSDictionary<NSString*, NSString*>*) getInvalidPushServers
+{
+    return @{
+        @"ios13push.monal.im": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
+        @"push.monal.im": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
+    };
+}
+
++(NSString*) getSelectedPushServerBasedOnLocale
 {
 #ifdef IS_ALPHA
     return @"alpha.push.monal-im.org";
 #else
-    return @"ios13push.monal.im";
+    if([[[NSLocale currentLocale] countryCode] isEqualToString:@"US"])
+    {
+        return @"us.prod.push.monal-im.org";
+    }
+    else
+    {
+        return @"eu.prod.push.monal-im.org";
+    }
 #endif
 }
 
++(NSDictionary<NSString*, NSString*>*) getAvailablePushServers
+{
+#ifdef IS_ALPHA
+    return @{
+        @"alpha.push.monal-im.org": @"Europe - Alpha",
+        @"alpha2.push.monal-im.org": @"Disabled - Alpha Test",
+    };
+#else
+    return @{
+        @"us.prod.push.monal-im.org": @"US",
+        @"eu.prod.push.monal-im.org": @"Europe",
+    };
+#endif
+}
+
+// on push
 
 +(NSData*) serializeObject:(id) obj
 {
@@ -334,7 +365,7 @@ void logException(NSException* exception)
     return token;
 }
 
-+(void) configureFileProtectionFor:(NSString*) file
++(void) configureFileProtection:(NSString*) protectionLevel forFile:(NSString*) file
 {
 #if TARGET_OS_IPHONE
     NSFileManager* fileManager = [NSFileManager defaultManager];
@@ -342,7 +373,7 @@ void logException(NSException* exception)
     {
         //DDLogVerbose(@"protecting file '%@'...", file);
         NSError* error;
-        [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
+        [fileManager setAttributes:@{NSFileProtectionKey: protectionLevel} ofItemAtPath:file error:&error];
         if(error)
         {
             DDLogError(@"Error configuring file protection level for: %@", file);
@@ -354,6 +385,11 @@ void logException(NSException* exception)
     else
         ;//DDLogVerbose(@"file '%@' does not exist!", file);
 #endif
+}
+
++(void) configureFileProtectionFor:(NSString*) file
+{
+    [self configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:file];
 }
 
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid

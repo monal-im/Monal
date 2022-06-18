@@ -22,13 +22,8 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 -(id) initAsResponseTo:(XMPPIQ*) iq;
 -(id) initAsErrorTo:(XMPPIQ*) iq;
 
--(void) setRegisterOnAppserverWithToken:(NSString*) token;
--(void) setUnregisterOnAppserver;
 -(void) setPushEnableWithNode:(NSString*) node onAppserver:(NSString*) jid;
-#ifndef IS_ALPHA
--(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid;
-#endif
--(void) setPushDisable:(NSString*) node;
+-(void) setPushDisable:(NSString*) node onPushServer:(NSString*) pushServer;
 
 /**
  Makes an iq to bind with a resouce. Passing nil will set no resource.

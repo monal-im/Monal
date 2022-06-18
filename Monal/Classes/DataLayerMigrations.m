@@ -1118,7 +1118,22 @@
         }];
         
         [self updateDB:db withDataLayer:dataLayer toVersion:5.120 withBlock:^{
-            //dummy upgrade to make sure all state gets invalidatet because of new MLHandler behaviour (mandatory arguments)
+            //dummy upgrade to make sure all state gets invalidated because of new MLHandler behaviour (mandatory arguments)
+        }];
+
+        // add push server column to accounts
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.201 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE account ADD COLUMN registeredPushServer TEXT DEFAULT NULL;"];
+            #ifdef IS_ALPHA
+                NSString* currentPushserver = @"push.molitor-dietzel.de";
+            #else
+                NSString* currentPushserver = @"ios13push.monal.im";
+            #endif
+            [db executeNonQuery:@"UPDATE account SET registeredPushServer=?;" andArguments:@[currentPushserver]];
+        }];
+        
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.202 withBlock:^{
+            //dummy upgrade to make sure all state gets invalidated because of new mandatory {MLFiletransfer, handleHardlinking} arguments
         }];
 
         // check if db version changed

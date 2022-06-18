@@ -419,7 +419,8 @@ $$
     [hardlinkPathComponents addObject:account.connectionProperties.identity.jid];
     if(groupDisplayName != nil)
         [hardlinkPathComponents addObject:groupDisplayName];
-    [hardlinkPathComponents addObject:fromDisplayName];
+    else
+        [hardlinkPathComponents addObject:fromDisplayName];
     
     //put incoming and outgoing files in different directories
     if(msg.inbound)
@@ -433,6 +434,10 @@ $$
             [hardlinkPathComponents addObject:NSLocalizedString(@"Received Audios", @"directory for downloaded audios")];
         else
             [hardlinkPathComponents addObject:NSLocalizedString(@"Received Files", @"directory for downloaded files")];
+        
+        //add fromDisplayName inside the "received xxx" dir so that the received and sent dirs are at the same level
+        if(groupDisplayName != nil)
+            [hardlinkPathComponents addObject:fromDisplayName];
     }
     else
     {

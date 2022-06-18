@@ -112,6 +112,21 @@ void logException(NSException* exception)
 #endif
 }
 
++(NSDictionary<NSString*, NSString*>*) getAvailablePushServers
+{
+#ifdef IS_ALPHA
+    return @{
+        @"alpha.push.monal-im.org": @"Europe - Alpha",
+        @"alpha2.push.monal-im.org": @"Disabled - Alpha Test",
+    };
+#else
+    return @{
+        @"us.prod.push.monal-im.org": @"US",
+        @"eu.prod.push.monal-im.org": @"Europe",
+    };
+#endif
+}
+
 // on push
 
 +(NSData*) serializeObject:(id) obj

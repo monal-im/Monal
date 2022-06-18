@@ -34,6 +34,7 @@ void logException(NSException* exception);
 
 +(NSDictionary<NSString*, NSString*>*) getInvalidPushServers;
 +(NSString*) getSelectedPushServerBasedOnLocale;
++(NSDictionary<NSString*, NSString*>*) getAvailablePushServers;
 
 +(NSData*) serializeObject:(id) obj;
 +(id) unserializeData:(NSData*) data;

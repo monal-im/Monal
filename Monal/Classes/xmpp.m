@@ -4129,15 +4129,14 @@ NSString* const kStanza = @"stanza";
 -(void) enablePush
 {
     NSString* pushToken = [MLXMPPManager sharedInstance].pushToken;
-    if(pushToken == nil || [pushToken length] == 0 || self.accountState < kStateBound)
+    NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
+    if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateBound)
     {
-        DDLogInfo(@"NOT registering and enabling push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         return;
     }
-
     if([MLXMPPManager sharedInstance].hasAPNSToken) {
         BOOL needsDeregister = false;
-        NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
         // check if the currently used push server is an old server that should no longer be used
         if([[HelperTools getInvalidPushServers] objectForKey:selectedPushServer] != nil)
         {
@@ -4164,7 +4163,7 @@ NSString* const kStanza = @"stanza";
         [enablePushIq setPushEnableWithNode:pushToken onAppserver:selectedPushServer];
         [self sendIq:enablePushIq withHandler:$newHandler(MLIQProcessor, handlePushEnabled, $ID(selectedPushServer))];
     }
-    else if([MLXMPPManager sharedInstance].hasAPNSToken == NO)
+    else // [MLXMPPManager sharedInstance].hasAPNSToken == NO
     {
         if(self.connectionProperties.supportsPush)
         {
@@ -4191,6 +4190,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) disablePushOnOldAndAdditionalServers:(NSString*) additionalServer
 {
+    // Disable push on old / legacy servers
     NSDictionary<NSString*, NSString*>* oldServers = [HelperTools getInvalidPushServers];
     for(NSString* server in oldServers)
     {
@@ -4199,11 +4199,24 @@ NSString* const kStanza = @"stanza";
         [disable setPushDisable:[oldServers objectForKey:server] onPushServer:server];
         [self send:disable];
     }
+    // disable push on the last used server
     if(additionalServer != nil && [MLXMPPManager sharedInstance].pushToken != nil)
     {
-        DDLogInfo(@"Disabling push on pushserver: %@", additionalServer);
+        DDLogInfo(@"Disabling push on last used pushserver: %@", additionalServer);
         XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
         [disable setPushDisable:[MLXMPPManager sharedInstance].pushToken onPushServer:additionalServer];
+        [self send:disable];
+    }
+    // disable push on all non selected available push servers
+    NSString* selectedNewPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
+    for(NSString* availServer in [HelperTools getAvailablePushServers])
+    {
+        if([availServer isEqualToString:selectedNewPushServer] == YES)
+        {
+            continue;
+        }
+        XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
+        [disable setPushDisable:[MLXMPPManager sharedInstance].pushToken onPushServer:availServer];
         [self send:disable];
     }
 }

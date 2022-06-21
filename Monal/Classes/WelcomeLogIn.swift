@@ -84,6 +84,7 @@ struct WelcomeLogIn: View {
                                 set: { string in self.jid = string.lowercased() })
                             )
                             .disableAutocorrection(true)
+                            .keyboardType(.emailAddress)
                             
                             SecureField("Password", text: $password)
                             

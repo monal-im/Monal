@@ -243,12 +243,14 @@ struct OmemoKeysForContact: View {
 
 struct OmemoKeys: View {
     private var ownKeys: Bool
-    private var contacts: [ObservableKVOWrapper<MLContact>]
+    private var viewContact: ObservableKVOWrapper<MLContact>? // store initial contact with which the view was initialized for refreshs...
     private var account: xmpp?
 
     // Needed for the alert message that is displayed when the scanned contact is not in the group
     @State private var scannedJid : String = ""
     @State private var scannedFingerprints : Dictionary<NSInteger, String> = [:]
+
+    @State private var contacts: [ObservableKVOWrapper<MLContact>] // contact list may change/be reloaded -> state
 
     @State var selectedContact : ObservableKVOWrapper<MLContact>? // for reason why see start of body
     @State private var navigateToQRCodeView = false
@@ -259,29 +261,39 @@ struct OmemoKeys: View {
     init(contact: ObservableKVOWrapper<MLContact>?) {
         self.account = nil
         self.ownKeys = false
-        self.contacts = []
         self.selectedContact = nil
+        self.contacts = OmemoKeys.getContactList(viewContact: contact)
+        self.viewContact = contact
+
         if let contact = contact {
             if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId) {
                 self.account = account
                 self.ownKeys = (!(contact.isGroup && contact.mucType == "group") && self.account!.connectionProperties.identity.jid == contact.contactJid)
             }
+        }
+    }
+
+    static func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> [ObservableKVOWrapper<MLContact>] {
+        if let contact = viewContact {
             if(contact.isGroup && contact.mucType == "group") {
                 //this uses the account the muc belongs to and treats every other account to be remote, even when multiple accounts of the same monal instance are in the same group
                 let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: contact.accountId))
-                self.contacts = []
+                var contactList : [ObservableKVOWrapper<MLContact>] = []
                 for jidDict in jidList {
                     if let participantJid = jidDict["participant_jid"] {
                         let contact = MLContact.createContact(fromJid: participantJid as! String, andAccountNo: contact.accountId)
-                        self.contacts.append(ObservableKVOWrapper<MLContact>(contact))
+                        contactList.append(ObservableKVOWrapper<MLContact>(contact))
                     }
                 }
+                return contactList
             } else {
-                self.contacts = [contact]
+                return [contact]
             }
+        } else {
+            return []
         }
     }
-    
+
     func resetTrustFromQR(scannedJid : String, scannedFingerprints : Dictionary<NSInteger, String>) {
         let knownDevices = Array(self.account!.omemo.knownDevices(forAddressName: scannedJid))
         for (qrDeviceId, fingerprint) in scannedFingerprints {
@@ -378,6 +390,7 @@ struct OmemoKeys: View {
                     resetTrustFromQR(scannedJid: self.scannedJid, scannedFingerprints: self.scannedFingerprints)
                     self.scannedJid = ""
                     self.scannedFingerprints = [:]
+                    self.contacts = OmemoKeys.getContactList(viewContact: self.viewContact) // refresh all contacts because trust may have changed
             }))
         }
     }

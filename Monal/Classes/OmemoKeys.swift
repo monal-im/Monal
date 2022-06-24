@@ -295,6 +295,9 @@ struct OmemoKeys: View {
     }
 
     func resetTrustFromQR(scannedJid : String, scannedFingerprints : Dictionary<NSInteger, String>) {
+        // untrust all devices from jid
+        self.account!.omemo.untrustAllDevices(from: scannedJid)
+        // trust all devices that were part of the qr code
         let knownDevices = Array(self.account!.omemo.knownDevices(forAddressName: scannedJid))
         for (qrDeviceId, fingerprint) in scannedFingerprints {
             if(knownDevices.contains(NSNumber(integerLiteral: qrDeviceId))) {

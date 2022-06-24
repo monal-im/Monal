@@ -2770,6 +2770,7 @@ enum msgSentState {
         row = [self.messageList objectAtIndex:indexPath.row];
     } else {
         DDLogError(@"Attempt to access beyond bounds");
+        return;
     }
 
     [self.previewedIds addObject:row.messageDBId];

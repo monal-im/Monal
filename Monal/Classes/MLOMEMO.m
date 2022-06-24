@@ -131,7 +131,7 @@ const int KEY_SIZE = 16;
 
 -(void) setupSignal
 {
-    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self.account.accountNo];
+    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self.account.accountNo andAccountJid:self.accountJid];
 
     // signal store
     SignalStorage* signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
@@ -463,12 +463,12 @@ $$
     [self.monalSignalStore updateTrust:trust forAddress:address];
 }
 
--(void) untrustAllDevicesFrom:(NSString*)jid
+-(void) untrustAllDevicesFrom:(NSString*) jid
 {
     [self.monalSignalStore untrustAllDevicesFrom:jid];
 }
 
--(NSData*) getIdentityForAddress:(SignalAddress*)address
+-(NSData*) getIdentityForAddress:(SignalAddress*) address
 {
     return [self.monalSignalStore getIdentityForAddress:address];
 }

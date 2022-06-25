@@ -16,6 +16,8 @@
 #import "MLContactSoftwareVersionInfo.h"
 #import "MLOMEMO.h"
 
+@import WebRTC;
+
 @interface MLIQProcessor()
 
 @end
@@ -73,6 +75,29 @@
 
 +(void) processSetIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
+    if([iqNode check:@"{urn:tmp:monal:sdp:1}sdp"])
+    {
+        DDLogDebug(@"Received SDP offer: %@", iqNode);
+        NSString* rawSDP = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:sdp:1}sdp#|base64"] encoding:NSUTF8StringEncoding];
+        NSString* type = [iqNode findFirst:@"{urn:tmp:monal:sdp:1}sdp@type"];
+        RTCSessionDescription* resultSDP = [[RTCSessionDescription alloc] initWithType:[RTCSessionDescription typeForString:type] sdp:rawSDP];
+        [[MLNotificationQueue currentQueue] postNotificationName:@"kMonalIncomingSDP" object:account userInfo:@{@"sdp":resultSDP}];
+        [account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
+        return;
+    }
+    
+    if([iqNode check:@"{urn:tmp:monal:candidate:1}candidate"])
+    {
+        DDLogDebug(@"Received ICE candidate: %@", iqNode);
+        NSString* rawSDP = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:candidate:1}candidate#|base64"] encoding:NSUTF8StringEncoding];
+        NSNumber* sdpMLineIndex = [iqNode findFirst:@"{urn:tmp:monal:candidate:1}candidate@sdpMLineIndex|int"];
+        NSString* sdpMid = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:candidate:1}candidate@sdpMid|base64"] encoding:NSUTF8StringEncoding];;
+        RTCIceCandidate* incomingCandidate = [[RTCIceCandidate alloc] initWithSdp:rawSDP sdpMLineIndex:[sdpMLineIndex intValue] sdpMid:sdpMid];
+        [[MLNotificationQueue currentQueue] postNotificationName:@"kMonalIncomingCandidate" object:account userInfo:@{@"candidate":incomingCandidate}];
+        [account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
+        return;
+    }
+    
     //its a roster push (sanity check will be done in processRosterWithAccount:andIqNode:)
     if([iqNode check:@"{jabber:iq:roster}query"])
     {

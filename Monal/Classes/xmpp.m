@@ -47,6 +47,7 @@
 #import "AESGcm.h"
 
 @import AVFoundation;
+@import WebRTC;
 
 #define STATE_VERSION 5
 #define CONNECT_TIMEOUT 12.0
@@ -4501,6 +4502,37 @@ NSString* const kStanza = @"stanza";
 {
     self.statusMessage = message;
     [self sendPresence];
+}
+
+-(void) sendSDP:(RTCSessionDescription*) sdp toContact:(MLContact*) contact
+{
+    //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCSessionDescription.h
+    XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:[NSString stringWithFormat:@"%@/Monal-iOS.517fe431", contact.contactJid]];
+    [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"sdp" andNamespace:@"urn:tmp:monal:sdp:1" withAttributes:@{
+        @"type": [RTCSessionDescription stringForType:sdp.type]
+    } andChildren:@[] andData:[HelperTools encodeBase64WithString:sdp.sdp]]];
+    [self sendIq:sdpIQ withResponseHandler:^(XMPPIQ* result) {
+        DDLogDebug(@"Received SDP offer result: %@", result);
+    } andErrorHandler:^(XMPPIQ* error) {
+        if(error != nil)
+            DDLogError(@"Got error for sdp offer: %@", error);
+    }];
+}
+
+-(void) sendCandidate:(RTCIceCandidate*) candidate toContact:(MLContact*) contact
+{
+    //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCIceCandidate.h
+    XMPPIQ* candidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:[NSString stringWithFormat:@"%@/Monal-iOS.517fe431", contact.contactJid]];
+    [candidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"candidate" andNamespace:@"urn:tmp:monal:candidate:1" withAttributes:@{
+        @"sdpMLineIndex": [[NSNumber numberWithInt:candidate.sdpMLineIndex] stringValue],
+        @"sdpMid": [HelperTools encodeBase64WithString:candidate.sdpMid]
+    } andChildren:@[] andData:[HelperTools encodeBase64WithString:candidate.sdp]]];
+    [self sendIq:candidateIQ withResponseHandler:^(XMPPIQ* result) {
+        DDLogDebug(@"Received ICE candidate result: %@", result);
+    } andErrorHandler:^(XMPPIQ* error) {
+        if(error != nil)
+            DDLogError(@"Got error for ICE candidate: %@", error);
+    }];
 }
 
 -(NSString*) description

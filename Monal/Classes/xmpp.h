@@ -57,6 +57,9 @@ FOUNDATION_EXPORT NSString* const kData;
 @class MLMessageProcessor;
 @class MLMucProcessor;
 
+@class RTCSessionDescription;
+@class RTCIceCandidate;
+
 typedef void (^xmppCompletion)(BOOL success, NSString* _Nullable message);
 typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
 typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
@@ -235,6 +238,10 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) updateIqHandlerTimeouts;
 
 -(void) addReconnectionHandler:(MLHandler*) handler;
+
+
+-(void) sendSDP:(RTCSessionDescription*) sdp toContact:(MLContact*) contact;
+-(void) sendCandidate:(RTCIceCandidate*) candidate toContact:(MLContact*) contact;
 
 @end
 

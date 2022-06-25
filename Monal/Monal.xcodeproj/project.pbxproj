@@ -147,6 +147,8 @@
 		54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81828231690003664BD /* WelcomeLogIn.swift */; };
 		54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81B282316F5003664BD /* RegisterAccount.swift */; };
 		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
+		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
+		84F520E12865484A0068D1C1 /* AVPrototype.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F520E0286548490068D1C1 /* AVPrototype.swift */; };
 		A4CD17069281C209783314FD /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AF6D1CD4CB7FE955E330121 /* Pods_NotificaionService.framework */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
 		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
@@ -591,6 +593,8 @@
 		6BCB9FB4EBEA3735D24A44DF /* Pods-shareSheet.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.beta.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.beta.xcconfig"; sourceTree = "<group>"; };
 		7D6715099247A9CCC180EE30 /* Pods-MonalUITests.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.beta.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.beta.xcconfig"; sourceTree = "<group>"; };
 		7FA9582E4CC566FE5466C557 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.debug.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
+		84D31CE528653B83006D7926 /* WebRTCClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebRTCClient.swift; path = Classes/WebRTCClient.swift; sourceTree = SOURCE_ROOT; };
+		84F520E0286548490068D1C1 /* AVPrototype.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVPrototype.swift; path = Classes/AVPrototype.swift; sourceTree = SOURCE_ROOT; };
 		86CF04FDE084C646CA14B774 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D1107310486CEB800E47090 /* Monal-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Monal-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
@@ -1119,6 +1123,7 @@
 		26B2A4B41B73040000272E63 /* Monal-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				84D31CDA28653AA9006D7926 /* WebRTC */,
 				C1E4654424EE515200CA5AAF /* localization */,
 				2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */,
 				26B2A4BA1B73061400272E63 /* Images.xcassets */,
@@ -1350,6 +1355,15 @@
 				6BCB9FB4EBEA3735D24A44DF /* Pods-shareSheet.beta.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		84D31CDA28653AA9006D7926 /* WebRTC */ = {
+			isa = PBXGroup;
+			children = (
+				84F520E0286548490068D1C1 /* AVPrototype.swift */,
+				84D31CE528653B83006D7926 /* WebRTCClient.swift */,
+			);
+			path = WebRTC;
 			sourceTree = "<group>";
 		};
 		C1049187261301530054AC9E /* MonalXMPPUnitTests */ = {
@@ -1961,6 +1975,7 @@
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
+				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
 				2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */,
 				26F396DC2197507200EF5720 /* GLTintButton.m in Sources */,
@@ -2009,6 +2024,7 @@
 				E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */,
 				C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */,
 				54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */,
+				84F520E12865484A0068D1C1 /* AVPrototype.swift in Sources */,
 				C1B1982625AB31B800D5028E /* MLBlockedUsersTableViewController.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,

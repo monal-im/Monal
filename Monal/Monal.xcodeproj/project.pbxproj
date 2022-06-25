@@ -528,7 +528,7 @@
 		29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalXMPPUnitTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIM_Prefix.pch; sourceTree = "<group>"; };
+		32CA4F630368D1EE00C91783 /* MonalSourceCodePrefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonalSourceCodePrefix.pch; sourceTree = "<group>"; };
 		384E4EA525F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAutoDownloadFiletransferSettingViewController.h; sourceTree = "<group>"; };
 		384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAutoDownloadFiletransferSettingViewController.m; sourceTree = "<group>"; };
 		3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXEPSlashMeHandler.h; sourceTree = "<group>"; };
@@ -1298,7 +1298,7 @@
 		29B97315FDCFA39411CA2CEA /* Root Sources */ = {
 			isa = PBXGroup;
 			children = (
-				32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */,
+				32CA4F630368D1EE00C91783 /* MonalSourceCodePrefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
 			name = "Root Sources";
@@ -2417,7 +2417,7 @@
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
+				GCC_PREFIX_HEADER = MonalSourceCodePrefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"DEBUG=1",
@@ -2786,7 +2786,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
+				GCC_PREFIX_HEADER = MonalSourceCodePrefix.pch;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_PEDANTIC = NO;
@@ -3380,7 +3380,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
+				GCC_PREFIX_HEADER = MonalSourceCodePrefix.pch;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_PEDANTIC = NO;
@@ -3749,7 +3749,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
+				GCC_PREFIX_HEADER = MonalSourceCodePrefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"DEBUG=1",

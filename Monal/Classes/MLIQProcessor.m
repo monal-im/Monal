@@ -16,6 +16,9 @@
 #import "MLContactSoftwareVersionInfo.h"
 #import "MLOMEMO.h"
 
+@import WebRTC;
+@import CallKit;
+
 @interface MLIQProcessor()
 
 @end
@@ -73,6 +76,20 @@
 
 +(void) processSetIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
+    if([iqNode check:@"{urn:tmp:monal:webrtc:sdp:1}sdp"])
+    {
+        DDLogDebug(@"Received Monal SDP offer: %@", iqNode);
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingSDP object:account userInfo:@{@"iqNode": iqNode}];
+        return;
+    }
+    
+    if([iqNode check:@"{urn:tmp:monal:webrtc:candidate:1}candidate"])
+    {
+        DDLogDebug(@"Received ICE candidate: %@", iqNode);
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingICECandidate object:account userInfo:@{@"iqNode": iqNode}];
+        return;
+    }
+    
     //its a roster push (sanity check will be done in processRosterWithAccount:andIqNode:)
     if([iqNode check:@"{jabber:iq:roster}query"])
     {
@@ -501,6 +518,27 @@ $$class_handler(handleServerDiscoItems, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
             [discoInfo setiqTo:[item objectForKey:@"jid"]];
             [discoInfo setDiscoInfoNode];
             [account sendIq:discoInfo withHandler:$newHandler(self, handleServiceDiscoInfo)];
+            
+            [account queryExternalServicesOn:[item objectForKey:@"jid"]];
+        }
+    }
+$$
+
+$$class_handler(handleExternalDisco, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"External service disco query to '%@' returned an error: %@", iqNode.from, [iqNode findFirst:@"error"]);
+        //[HelperTools postError:NSLocalizedString(@"XMPP External Service Disco Error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
+        return;
+    }
+    
+    for(MLXMLNode* service in [iqNode find:@"{urn:xmpp:extdisco:2}services/service"])
+    {
+        if([service check:@"/<type=stun>"] || [service check:@"/<type=turn>"])
+        {
+            NSMutableDictionary* info = [NSMutableDictionary dictionaryWithDictionary:@{@"directoryJid": iqNode.from}];
+            [info addEntriesFromDictionary:[service findFirst:@"/@@"]];
+            [account.connectionProperties.discoveredStunTurnServers addObject:info];
         }
     }
 $$

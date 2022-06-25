@@ -23,6 +23,7 @@
 #import "MLSettingsAboutViewController.h"
 #import "MLMucProcessor.h"
 #import "MBProgressHUD.h"
+#import "MLVoIPProcessor.h"
 
 @import NotificationBannerSwift;
 
@@ -180,6 +181,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         [[MLImageManager sharedInstance] cleanupHashes];
     });
     
+    //initialize callkit
+    _voipProcessor = [[MLVoIPProcessor alloc] init];
+    
     //only proceed with launching if the NotificationServiceExtension is *not* running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
@@ -303,6 +307,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 //activate push
                 DDLogInfo(@"Registering for APNS...");
                 [[UIApplication sharedApplication] registerForRemoteNotifications];
+                [self->_voipProcessor voipRegistration];
             }
             else
             {
@@ -1097,9 +1102,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         
         //use a synchronized block to disconnect only once
         @synchronized(self) {
-            if(_backgroundTimer != nil || [_wakeupCompletions count] > 0)
+            if(_backgroundTimer != nil || [_wakeupCompletions count] > 0 || _voipProcessor.pendingCallsCount > 0)
             {
-                DDLogInfo(@"### ignoring idle state because background timer or wakeup completion timers are still running ###");
+                DDLogInfo(@"### ignoring idle state because background timer or wakeup completion timers or pending calls are still running ###");
                 return;
             }
             if(_shutdownPending)

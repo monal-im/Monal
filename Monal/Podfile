@@ -21,6 +21,7 @@ def monal
   pod 'TOCropViewController'
   pod 'NotificationBannerSwift', '~> 3.1.0'
   pod 'FLAnimatedImage', '~> 1.0'
+  #pod 'GoogleWebRTC'
 end
 
 def monalxmpp
@@ -32,6 +33,7 @@ def monalxmpp
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
   pod 'ASN1Decoder'
   signalDeps
+  pod 'WebRTC-lib'
 end
 
 target 'shareSheet' do

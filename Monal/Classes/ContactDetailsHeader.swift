@@ -78,6 +78,14 @@ struct ContactDetailsHeader: View {
                     }
                 }
                 .buttonStyle(BorderlessButtonStyle())
+                
+                Spacer().frame(width: 20)
+                NavigationLink {
+                    LazyClosureView(AVPrototype(contact: contact))
+                } label: {
+                    Label("Call", systemImage:"phone")
+                }
+                
                 /*
                 Spacer().frame(width: 20)
                 Button(action: {

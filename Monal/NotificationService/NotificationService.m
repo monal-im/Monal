@@ -18,6 +18,8 @@
 #import "MLFiletransfer.h"
 #import "xmpp.h"
 
+@import CallKit;
+
 @interface NotificationService ()
 +(BOOL) getAppexCleanShutdownStatus;
 +(void) setAppexCleanShutdownStatus:(BOOL) shutdownStatus;
@@ -90,6 +92,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleIncomingVoipCall:) name:kMonalIncomingVoipCall object:nil];
     return self;
 }
 
@@ -154,6 +157,27 @@
     
     //return NO if this was the last handler and YES if not
     return [self checkForLastHandler];
+}
+
+-(void) handleIncomingVoipCall:(NSNotification*) notification
+{
+    DDLogInfo(@"Got incoming VOIP call");
+    [self disconnectAndFeedAllWaitingHandlers];
+    
+    if(@available(iOS 14.5, macCatalyst 14.5, *))
+    {
+        NSString* payload = [HelperTools encodeBase64WithData:[HelperTools serializeObject:notification.userInfo]];
+        [CXProvider reportNewIncomingVoIPPushPayload:@{@"base64Payload": payload} completion:^(NSError* _Nullable error) {
+            if(error != nil)
+                DDLogError(@"Got error for reportNewIncomingVoIPPushPayload: %@", error);
+            else
+                DDLogInfo(@"Successfully called reportNewIncomingVoIPPushPayload");
+        }];
+    }
+    else
+        DDLogError(@"iOS < 14.5 detected, ignoring incoming call!");
+    
+    [self killAppex];
 }
 
 -(void) disconnectAndFeedAllWaitingHandlers

@@ -47,6 +47,7 @@
 #import "AESGcm.h"
 
 @import AVFoundation;
+@import WebRTC;
 
 #define STATE_VERSION 5
 #define CONNECT_TIMEOUT 12.0
@@ -3261,6 +3262,9 @@ NSString* const kStanza = @"stanza";
         
         if(self.connectionProperties.discoveredServices)
             [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
+        
+        if(self.connectionProperties.discoveredStunTurnServers)
+            [values setObject:[self.connectionProperties.discoveredStunTurnServers copy] forKey:@"discoveredStunTurnServers"];
 
         [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
         [values setValue:[NSDate date] forKey:@"stateSavedAt"];
@@ -3425,6 +3429,7 @@ NSString* const kStanza = @"stanza";
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
             self.connectionProperties.discoveredServices = [dic objectForKey:@"discoveredServices"];
+            self.connectionProperties.discoveredStunTurnServers = [dic objectForKey:@"discoveredStunTurnServers"];
             
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
             self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
@@ -3634,6 +3639,33 @@ NSString* const kStanza = @"stanza";
     [self sendIq:accountInfo withHandler:$newHandler(MLIQProcessor, handleAccountDiscoInfo)];
 }
 
+-(void) queryExternalServicesOn:(NSString*) jid
+{
+    XMPPIQ* externalDisco = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [externalDisco setiqTo:jid];
+    [externalDisco addChildNode:[[MLXMLNode alloc] initWithElement:@"services" andNamespace:@"urn:xmpp:extdisco:2"]];
+    [self sendIq:externalDisco withHandler:$newHandler(MLIQProcessor, handleExternalDisco)];
+}
+
+-(void) queryExternalServiceCredentialsFor:(NSDictionary*) service completion:(monal_id_block_t) completion
+{
+    XMPPIQ* credentialsQuery = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [credentialsQuery setiqTo:service[@"directoryJid"]];
+    [credentialsQuery addChildNode:[[MLXMLNode alloc] initWithElement:@"credentials" andNamespace:@"urn:xmpp:extdisco:2" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"service"  withAttributes:@{
+            @"type": service[@"type"],
+            @"host": service[@"host"],
+            @"port": service[@"port"],
+        } andChildren:@[] andData:nil]
+    ] andData:nil]];
+    [self sendIq:credentialsQuery withResponseHandler:^(XMPPIQ* response) {
+        completion([response findFirst:@"{urn:xmpp:extdisco:2}credentials/service@@"]);
+    } andErrorHandler:^(XMPPIQ* error) {
+        DDLogWarn(@"Got error while quering for credentials of external service %@: %@", service, error);
+        completion(@{});
+    }];
+}
+
 -(void) purgeOfflineStorage
 {
     XMPPIQ* purgeIq = [[XMPPIQ alloc] initWithType:kiqSetType];
@@ -3710,6 +3742,7 @@ NSString* const kStanza = @"stanza";
     //(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
     self.connectionProperties.serverFeatures = nil;
     self.connectionProperties.discoveredServices = nil;
+    self.connectionProperties.discoveredStunTurnServers = [[NSMutableArray alloc] init];
     self.connectionProperties.uploadServer = nil;
     self.connectionProperties.conferenceServer = nil;
     self.connectionProperties.usingCarbons2 = NO;
@@ -3748,6 +3781,9 @@ NSString* const kStanza = @"stanza";
     //the offline messages will come in *after* we started to query mam, because the disco result comes in first (and this is what triggers mam catchup)
     //--> no holes in our history can be caused by these offline messages in conjunction with mam catchup,
     //    however all offline messages will be received twice (as offline message AND via mam catchup)
+    
+    //query external services to learn stun/turn servers
+    [self queryExternalServicesOn:self.connectionProperties.identity.domain];
     
     //send own csi state (this must be done *after* presences to not delay/filter incoming presence flood needed to prime our database
     [self sendCurrentCSIState];

@@ -281,7 +281,13 @@ NSString *const kAskSubscribe=@"subscribe";
         displayName = fallbackName;
     }
     DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, displayName);
-    return nilDefault(displayName, @"");
+    MLAssert(displayName != nil, @"Display name should never be nil!", (@{
+        @"jid": nilWrapper(self.contactJid),
+        @"nickName": nilWrapper(self.nickName),
+        @"fullName": nilWrapper(self.fullName),
+        @"fallbackName": nilWrapper(fallbackName)
+    }));
+    return displayName;
 }
 
 -(NSString*) contactDisplayName

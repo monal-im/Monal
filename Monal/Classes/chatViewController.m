@@ -25,7 +25,6 @@
 #import "MLConstants.h"
 #import "MLFiletransfer.h"
 #import "MLImageManager.h"
-#import "MLMetaInfo.h"
 #import "MLMucProcessor.h"
 #import "MLNotificationQueue.h"
 #import "MLOMEMO.h"
@@ -2797,20 +2796,25 @@ enum msgSentState {
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:row.url];
     [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on some sites for og tags e.g. youtube
     request.timeoutInterval = 10;
-    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error)
+    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error)
     {
-
-        NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        // prevent repeated calls to this logic  by setting to non null
-        row.previewText=[MLMetaInfo ogContentWithTag:@"og:title" inHTML:body];
-        row.previewImage=[NSURL URLWithString:[[MLMetaInfo ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding]];
-        if(row.previewText.length == 0)
-            row.previewText = @" ";
-        [[DataLayer sharedInstance] setMessageId:row.messageId previewText:[row.previewText copy] andPreviewImage:[row.previewImage.absoluteString copy]];
-        //reload cells
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-        });
+        NSString* body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        MLOgHtmlParser* ogParser = [[MLOgHtmlParser alloc] initWithHtml:body];
+        if(ogParser != nil)
+        {
+            row.previewText = [ogParser getOgTitle];
+            row.previewImage = [ogParser getOgImage];
+            [[DataLayer sharedInstance] setMessageId:row.messageId previewText:[row.previewText copy] andPreviewImage:[row.previewImage.absoluteString copy]];
+            //reload cells
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            });
+        }
+        else
+        {
+            row.previewText = @"";
+            row.previewImage = [NSURL URLWithString:@""];
+        }
     }] resume];
 }
 

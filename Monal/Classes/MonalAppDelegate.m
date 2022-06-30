@@ -26,6 +26,7 @@
 
 @import NotificationBannerSwift;
 @import WebRTC;
+#import "Monal-Swift.h"
 
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
@@ -59,6 +60,8 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     monal_id_block_t _completionToCall;
     BOOL _shutdownPending;
     BOOL _wasFreezed;
+    NSMutableDictionary* _pendingCalls;
+    WebRTCClient* _webRTCClient;
 }
 @end
 
@@ -108,6 +111,23 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     DDLogVerbose(@"Setting _shutdownPending to NO...");
     _shutdownPending = NO;
     _wasFreezed = NO;
+    _pendingCalls = [[NSMutableDictionary alloc] init];
+    _webRTCClient = [[WebRTCClient alloc] iceServers:@[
+        @"stun:stun.l.google.com:19302",
+        @"stun:stun1.l.google.com:19302",
+        @"stun:stun2.l.google.com:19302",
+        @"stun:stun3.l.google.com:19302",
+        @"stun:stun4.l.google.com:19302"
+    ]];
+    /*: @[
+        @"stun:stun.l.google.com:19302",
+        @"stun:stun1.l.google.com:19302",
+        @"stun:stun2.l.google.com:19302",
+        @"stun:stun3.l.google.com:19302",
+        @"stun:stun4.l.google.com:19302"
+    ]];
+    //_webRTCClient.delegate = self;
+    */
     
     //[self runParserTests];
     return self;
@@ -211,11 +231,12 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleScheduleBackgroundTaskNotification:) name:kScheduleBackgroundTask object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(prepareForFreeze:) name:kMonalWillBeFreezed object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(prepareForFreeze:) name:kMonalWillBeFreezed object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleIncomingVoipCall:) name:kMonalIncomingVoipCall object:nil];
     
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     center.delegate = self;
@@ -1650,9 +1671,17 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     DDLogInfo(@"APNS voip didInvalidatePushTokenForType called and ignored...");
 }
 
-// Handle incoming voip pushes
+//called if jmi message was received by appex
 -(void) pushRegistry:(PKPushRegistry*) registry didReceiveIncomingPushWithPayload:(PKPushPayload*) payload forType:(PKPushType) type withCompletionHandler:(void (^)(void)) completion
 {
+    NSDictionary* userInfo = [HelperTools unserializeData:[HelperTools dataWithBase64EncodedString:payload.dictionaryPayload[@"base64Payload"]]];
+    [self processIncomingCall:userInfo withCompletion:completion];
+}
+
+//called if jmi message was received by mainapp
+-(void) handleIncomingVoipCall:(NSNotification*) notification
+{
+    [self processIncomingCall:notification.userInfo withCompletion:nil];
 }
     
 -(void) providerDidReset:(CXProvider*) provider
@@ -1665,6 +1694,38 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     DDLogDebug(@"CXProvider: providerDidBegin with provider=%@", provider);
 }
 
+-(void) provider:(CXProvider*) provider performAnswerCallAction:(CXAnswerCallAction*) action
+{
+    DDLogDebug(@"CXProvider: performAnswerCallAction with provider=%@, CXAnswerCallAction=%@, pendingCallsInfo: %@", provider, action, _pendingCalls[action.callUUID]);
+    XMPPMessage* messageNode = _pendingCalls[action.callUUID][@"messageNode"];
+    xmpp* account = _pendingCalls[action.callUUID][@"account"];
+    
+    XMPPMessage* acceptNode = [[XMPPMessage alloc] init];
+    acceptNode.to = messageNode.from;
+    [acceptNode.attributes setObject:kMessageChatType forKey:@"type"];
+    [acceptNode addChildNode:[[MLXMLNode alloc] initWithElement:@"accept" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
+        @"id": [messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"]
+    } andChildren:@[] andData:nil]];
+    [acceptNode setStoreHint];
+    [account send:acceptNode];
+    
+//     self.webRTCClient.offer { (sdp) in
+//                     DDLogInfo("Sending local SDP answer...")
+//                     DDLogDebug("Answer: \(sdp)");
+//                     self.webRTCClient.answer { (localSdp) in
+//                         let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID:self.contact.obj.accountId)
+//                         account?.sendSDP(localSdp, to:self.contact.obj)
+//                     }
+//                 }
+    [action fulfill];
+}
+
+-(void) provider:(CXProvider*) provider performEndCallAction:(CXEndCallAction*) action
+{
+    DDLogDebug(@"CXProvider: performEndCallAction with provider=%@, CXEndCallAction=%@", provider, action);
+    [action fulfill];
+}
+
 -(void) provider:(CXProvider*) provider didActivateAudioSession:(AVAudioSession*) audioSession
 {
     DDLogDebug(@"CXProvider: didActivateAudioSession with provider=%@, audioSession=%@", provider, audioSession);
@@ -1675,6 +1736,42 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
 {
     DDLogDebug(@"CXProvider: didDeactivateAudioSession with provider=%@, audioSession=%@", provider, audioSession);
     [[RTCAudioSession sharedInstance] audioSessionDidDeactivate:audioSession];
+}
+
+-(void) processIncomingCall:(NSDictionary* _Nonnull) userInfo withCompletion:(void (^ _Nullable)(void)) completion
+{
+    XMPPMessage* messageNode =  userInfo[@"messageNode"];
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:userInfo[@"accountNo"]];
+    MLAssert(account != nil, @"account is nil in processIncomingCall!", userInfo);
+    
+    //save mapping from callkit uuid to our own call info
+    NSUUID* uuid = [NSUUID UUID];
+    _pendingCalls[uuid] = @{@"messageNode": messageNode, @"account": account};
+    
+    CXCallUpdate* update = [[CXCallUpdate alloc] init];
+    update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:messageNode.fromUser];
+    [self.cxprovider reportNewIncomingCallWithUUID:uuid update:update completion:^(NSError *error) {
+        if(error != nil)
+        {
+            DDLogError(@"Call disallowed by system: %@", error);
+            
+            XMPPMessage* rejectNode = [[XMPPMessage alloc] init];
+            rejectNode.to = messageNode.from;
+            [rejectNode.attributes setObject:kMessageChatType forKey:@"type"];
+            [rejectNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
+                @"id": [messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"]
+            } andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"busy"],
+                    [[MLXMLNode alloc] initWithElement:@"text" andData:@"Busy here"],
+                ] andData:nil]
+            ] andData:nil]];
+            [rejectNode setStoreHint];
+            [account send:rejectNode];
+        }
+    }];
+    if(completion != nil)
+        completion();
 }
 
 @end

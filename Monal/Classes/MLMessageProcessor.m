@@ -19,6 +19,7 @@
 #import "MLFiletransfer.h"
 #import "MLMucProcessor.h"
 #import "MLNotificationQueue.h"
+#import "MonalAppDelegate.h"
 
 @interface MLPubSub ()
 -(void) handleHeadlineMessage:(XMPPMessage*) messageNode;
@@ -113,17 +114,17 @@ static NSMutableDictionary* _typingNotifications;
         if([messageNode check:@"{urn:xmpp:jingle-message:1}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=audio>"])
         {
             DDLogInfo(@"Got incoming JMI call");
+            NSDictionary* callData = @{
+                @"messageNode": messageNode,
+                @"accountNo": account.accountNo,
+            };
             if([HelperTools isAppExtension])
             {
-                DDLogInfo(@"Dispatching this stanza to mainapp by not committing our db transaction containing the incoming stanza");
-                //don't queue this notification because it should be handled IMMEDIATELY and INLINE
-                //this notification will never return because it kills the appex
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalTriggerVOIPPush object:nil];
+                DDLogInfo(@"Dispatching this stanza to mainapp...");
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:nil userInfo:callData];
             }
             else
-            {
-                
-            }
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:nil userInfo:callData];
         }
         else
             DDLogWarn(@"Ignoring non-audio call, not implemented yet");

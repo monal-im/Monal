@@ -18,6 +18,8 @@
 #import "MLFiletransfer.h"
 #import "xmpp.h"
 
+@import CallKit;
+
 static NSString* kBackgroundProcessingTask = @"im.monal.process";
 static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
 
@@ -93,7 +95,7 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(feedAllWaitingHandlersAndKillAppexWithoutDisconnecting) name:kMonalTriggerVOIPPush object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleIncomingVoipCall:) name:kMonalIncomingVoipCall object:nil];
     return self;
 }
 
@@ -160,27 +162,23 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     return [self checkForLastHandler];
 }
 
--(void) feedAllWaitingHandlersAndKillAppexWithoutDisconnecting
+-(void) handleIncomingVoipCall:(NSNotification*) notification
 {
-    DDLogInfo(@"NOT disconnecting accounts (e.g. aborting db transactions on exit) and feeding all pending handlers: %lu", [self.handlerList count]);
-    
-    //this will only be called by kMonalTriggerVOIPPush which means we are the write transaction guarding the incoming stanza of this account
-    //is the only write transaction running --> just pass the voip push to the mainapp and kill ourselves not commiting this transaction
-    
-    //feed all waiting handlers with empty notifications to silence them
-    //this will terminate/freeze the app extension afterwards
-    while([self feedNextHandler])
-        ;
+    DDLogInfo(@"Got incoming VOIP call");
+    [self disconnectAndFeedAllWaitingHandlers];
     
     if(@available(iOS 14.5, macCatalyst 14.5, *))
     {
-        [CXProvider reportNewIncomingVoIPPushPayload:@{@"incomingCall": @YES} completion:^(NSError* _Nullable error) {
+        NSString* payload = [HelperTools encodeBase64WithData:[HelperTools serializeObject:notification.userInfo]];
+        [CXProvider reportNewIncomingVoIPPushPayload:@{@"base64Payload": payload} completion:^(NSError* _Nullable error) {
             if(error != nil)
                 DDLogError(@"Got error for reportNewIncomingVoIPPushPayload: %@", error);
             else
                 DDLogInfo(@"Successfully called reportNewIncomingVoIPPushPayload");
         }];
     }
+    else
+        DDLogError(@"iOS < 14.5 detected, ignoring incoming call!");
     
     [self killAppex];
 }

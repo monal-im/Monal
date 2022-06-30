@@ -79,17 +79,6 @@
     if([iqNode check:@"{urn:tmp:monal:sdp:1}sdp"])
     {
         DDLogDebug(@"Received SDP offer: %@", iqNode);
-        
-        if(@available(iOS 14.5, macCatalyst 14.5, *))
-        {
-            [CXProvider reportNewIncomingVoIPPushPayload:@{@"iqNode": iqNode} completion:^(NSError* _Nullable error) {
-                if(error != nil)
-                    DDLogError(@"Got error for reportNewIncomingVoIPPushPayload: %@", error);
-                else
-                    DDLogInfo(@"Successfully called reportNewIncomingVoIPPushPayload");
-            }];
-        }
-        
         NSString* rawSDP = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:sdp:1}sdp#|base64"] encoding:NSUTF8StringEncoding];
         NSString* type = [iqNode findFirst:@"{urn:tmp:monal:sdp:1}sdp@type"];
         RTCSessionDescription* resultSDP = [[RTCSessionDescription alloc] initWithType:[RTCSessionDescription typeForString:type] sdp:rawSDP];

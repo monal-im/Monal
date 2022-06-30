@@ -12,6 +12,7 @@
 @import PushKit;
 @import CallKit;
 @import UserNotifications;
+@import WebRTC;
 
 @class ActiveChatsViewController;
 @class MLContact;

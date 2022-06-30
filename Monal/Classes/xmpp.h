@@ -243,6 +243,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) sendSDP:(RTCSessionDescription*) sdp toContact:(MLContact*) contact;
 -(void) sendCandidate:(RTCIceCandidate*) candidate toContact:(MLContact*) contact;
 
+-(void) initiateAudioCall:(NSString*) uuid toContact:(MLContact*) contact;
+
 @end
 
 NS_ASSUME_NONNULL_END

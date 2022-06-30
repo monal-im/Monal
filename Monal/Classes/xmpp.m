@@ -4517,16 +4517,6 @@ NSString* const kStanza = @"stanza";
     [self send:messageNode];
 }
 
--(void) acceptAudioCall:(NSString*) uuid fromContact:(MLContact*) contact
-{
-    <message from='juliet@capulet.example/phone'
-         to='romeo@montague.example'
-         type='chat'>
-  <accept xmlns='urn:xmpp:jingle-message:1' id='a73sjjvkla37jfea'/>
-  <store xmlns="urn:xmpp:hints"/>
-</message>
-}
-
 -(void) sendSDP:(RTCSessionDescription*) sdp toContact:(MLContact*) contact
 {
     //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCSessionDescription.h

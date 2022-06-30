@@ -121,7 +121,7 @@ enum DummySettingsRows {
 
 #pragma mark view lifecylce
 
-- (void)viewDidLoad
+-(void) viewDidLoad
 {
     [super viewDidLoad];
     
@@ -224,13 +224,13 @@ enum DummySettingsRows {
 #endif
 }
 
-- (void)viewWillAppear:(BOOL)animated
+- (void) viewWillAppear:(BOOL) animated
 {
     [super viewWillAppear:animated];
     DDLogVerbose(@"xmpp edit view will appear");
 }
 
-- (void)viewWillDisappear:(BOOL)animated
+- (void) viewWillDisappear:(BOOL) animated
 {
     [super viewWillDisappear:animated];
     DDLogVerbose(@"xmpp edit view will hide");

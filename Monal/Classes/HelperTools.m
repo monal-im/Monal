@@ -61,7 +61,7 @@ void logException(NSException* exception)
         if([filePathComponents count]>1)
             fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
         DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
-        @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s", fileStr, line, func] reason:text userInfo:userInfo];
+        @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
     }
 }
 

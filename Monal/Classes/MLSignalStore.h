@@ -21,38 +21,39 @@
 
 @interface MLSignalStore : NSObject <SignalStore>
 @property (nonatomic, assign) u_int32_t deviceid;
-@property (nonatomic, strong) SignalIdentityKeyPair* identityKeyPair;
-@property (nonatomic, strong) SignalSignedPreKey* signedPreKey;
-@property (nonatomic, strong) NSArray<SignalPreKey*>* preKeys;
+@property (nonatomic, assign) NSString* _Nonnull accountJid;
+@property (nonatomic, strong) SignalIdentityKeyPair* _Nullable identityKeyPair;
+@property (nonatomic, strong) SignalSignedPreKey* _Nullable signedPreKey;
+@property (nonatomic, strong) NSArray<SignalPreKey*>* _Nullable preKeys;
 
--(MLSignalStore*) initWithAccountId:(NSNumber*) accountId;
+-(MLSignalStore* _Nonnull) initWithAccountId:(NSNumber* _Nonnull) accountId andAccountJid:(NSString* _Nonnull) accountJid;
 -(void) saveValues;
 
--(NSData*) getIdentityForAddress:(SignalAddress*) address;
+-(NSData* _Nullable) getIdentityForAddress:(SignalAddress* _Nonnull) address;
 /**
  all devices even those without sessions
  */
--(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName;
--(NSArray<NSNumber*>*) knownDevicesWithValidSessionEntryForName:(NSString*) addrName;
--(NSMutableArray<SignalPreKey*>*) readPreKeys;
+-(NSArray<NSNumber*>* _Nullable) knownDevicesForAddressName:(NSString* _Nullable) addressName;
+-(NSArray<NSNumber*>* _Nullable) knownDevicesWithValidSessionEntryForName:(NSString* _Nullable) addrName;
+-(NSMutableArray<SignalPreKey*>* _Nonnull) readPreKeys;
 
--(void) deleteDeviceforAddress:(SignalAddress*) address;
+-(void) deleteDeviceforAddress:(SignalAddress* _Nonnull) address;
 
--(void) markDeviceAsDeleted:(SignalAddress*) address;
--(void) removeDeviceDeletedMark:(SignalAddress*) address;
--(void) updateLastSuccessfulDecryptTime:(SignalAddress*) address;
--(void) markSessionAsBroken:(SignalAddress*) address;
--(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceId;
+-(void) markDeviceAsDeleted:(SignalAddress* _Nonnull) address;
+-(void) removeDeviceDeletedMark:(SignalAddress* _Nonnull) address;
+-(void) updateLastSuccessfulDecryptTime:(SignalAddress* _Nonnull) address;
+-(void) markSessionAsBroken:(SignalAddress* _Nonnull) address;
+-(BOOL) isSessionBrokenForJid:(NSString* _Nonnull) jid andDeviceId:(NSNumber* _Nonnull) deviceId;
 
 // MUC session management
--(BOOL) sessionsExistForBuddy:(NSString*) buddyJid;
--(BOOL) checkIfSessionIsStillNeeded:(NSString*) buddyJid;
--(NSSet<NSString*>*) removeDanglingMucSessions;
+-(BOOL) sessionsExistForBuddy:(NSString* _Nonnull) buddyJid;
+-(BOOL) checkIfSessionIsStillNeeded:(NSString* _Nonnull) buddyJid;
+-(NSSet<NSString*>* _Nonnull) removeDanglingMucSessions;
 
--(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*) address;
--(int) getInternalTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey;
--(void) untrustAllDevicesFrom:(NSString*) jid;
--(NSNumber*) getTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey;
+-(void) updateTrust:(BOOL) trust forAddress:(SignalAddress* _Nonnull) address;
+-(int) getInternalTrustLevel:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nonnull) identityKey;
+-(void) untrustAllDevicesFrom:(NSString* _Nonnull) jid;
+-(NSNumber* _Nonnull) getTrustLevel:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nonnull) identityKey;
 
 -(int) getHighestPreyKeyId;
 -(unsigned int) getPreKeyCount;

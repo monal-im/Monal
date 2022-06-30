@@ -1136,6 +1136,25 @@
             //dummy upgrade to make sure all state gets invalidated because of new mandatory {MLFiletransfer, handleHardlinking} arguments
         }];
 
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.203 withBlock:^{
+            // ensure that we TOFU trust our own device ids
+            [db executeNonQuery:@"UPDATE signalContactIdentity \
+                SET trustLevel=1 \
+                WHERE \
+                    ROWID IN ( \
+                        SELECT sci.ROWID \
+                        FROM account as a \
+                        INNER JOIN signalIdentity as si \
+                            ON a.account_id = si.account_id \
+                        INNER JOIN signalContactIdentity as sci \
+                            ON sci.account_id = a.account_id \
+                            AND si.deviceid = sci.contactDeviceId \
+                        WHERE \
+                            sci.trustLevel = 0 \
+                    ) \
+            ;"];
+        }];
+
         // check if db version changed
         NSNumber* newdbversion = [self readDBVersion:db];
 

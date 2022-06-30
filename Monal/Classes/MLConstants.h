@@ -101,6 +101,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kDataNameSpace @"jabber:x:data"
 
 //all other constants needed
+#define kMonalTriggerVOIPPush @"kMonalTriggerVOIPPush"
 #define kMonalWillBeFreezed @"kMonalWillBeFreezed"
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMonalMucSubjectChanged @"kMonalMucSubjectChanged"

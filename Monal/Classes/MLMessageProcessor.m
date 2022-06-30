@@ -112,23 +112,21 @@ static NSMutableDictionary* _typingNotifications;
         //only allow audio calls for now
         if([messageNode check:@"{urn:xmpp:jingle-message:1}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=audio>"])
         {
-            DDLogInfo(@"Got incoming jmi call");
+            DDLogInfo(@"Got incoming JMI call");
             if([HelperTools isAppExtension])
             {
-                DDLogInfo(@"Dispatching this to mainapp by not committing our db transaction containing this incoming stanza");
-                if(@available(iOS 14.5, macCatalyst 14.5, *))
-                {
-                    [CXProvider reportNewIncomingVoIPPushPayload:@{@"iqNode": iqNode} completion:^(NSError* _Nullable error) {
-                        if(error != nil)
-                            DDLogError(@"Got error for reportNewIncomingVoIPPushPayload: %@", error);
-                        else
-                            DDLogInfo(@"Successfully called reportNewIncomingVoIPPushPayload");
-                    }];
-                }
+                DDLogInfo(@"Dispatching this stanza to mainapp by not committing our db transaction containing the incoming stanza");
+                //don't queue this notification because it should be handled IMMEDIATELY and INLINE
+                //this notification will never return because it kills the appex
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalTriggerVOIPPush object:nil];
+            }
+            else
+            {
+                
             }
         }
         else
-            DDLogWarn(@"Not accepting non-audio call, not implemented yet");
+            DDLogWarn(@"Ignoring non-audio call, not implemented yet");
         return message;
     }
     

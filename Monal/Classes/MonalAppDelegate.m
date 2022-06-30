@@ -244,7 +244,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         ];
     }
     UNNotificationCategory* messageCategory;
-    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings | UNAuthorizationOptionProvisional;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings;
+#if TARGET_OS_MACCATALYST
+    authOptions |= UNAuthorizationOptionProvisional;
+#endif
     messageCategory = [UNNotificationCategory
         categoryWithIdentifier:@"message"
         actions:@[replyAction, markAsReadAction]

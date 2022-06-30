@@ -25,6 +25,7 @@
 #import "MBProgressHUD.h"
 
 @import NotificationBannerSwift;
+@import WebRTC;
 
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
@@ -186,6 +187,10 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
         [[MLImageManager sharedInstance] cleanupHashes];
     });
     
+    //initialize callkit
+    self.cxprovider = [[CXProvider alloc] initWithConfiguration:[[CXProviderConfiguration alloc] init]];
+    [self.cxprovider setDelegate:self queue:dispatch_get_main_queue()];
+    
     //only proceed with launching if the NotificationServiceExtension is *not* running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
@@ -277,6 +282,7 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
                 //activate push
                 DDLogInfo(@"Registering for APNS...");
                 [[UIApplication sharedApplication] registerForRemoteNotifications];
+                [self voipRegistration];
             }
             else
             {
@@ -1622,6 +1628,53 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
                 MLAssert(NO, @"Outbox payload type unknown", payload);
         }];
     }
+}
+
+
+-(void) voipRegistration
+{
+    PKPushRegistry* voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
+    voipRegistry.delegate = self;
+    voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+}
+
+// Handle updated APNS tokens
+-(void) pushRegistry:(PKPushRegistry*) registry didUpdatePushCredentials:(PKPushCredentials*) credentials forType:(NSString*) type
+{
+    NSString* token = [HelperTools stringFromToken:credentials.token];
+    DDLogDebug(@"Ignoring APNS voip token string: %@", token);
+}
+
+-(void) pushRegistry:(PKPushRegistry*) registry didInvalidatePushTokenForType:(NSString*) type
+{
+    DDLogInfo(@"APNS voip didInvalidatePushTokenForType called and ignored...");
+}
+
+// Handle incoming voip pushes
+-(void) pushRegistry:(PKPushRegistry*) registry didReceiveIncomingPushWithPayload:(PKPushPayload*) payload forType:(PKPushType) type withCompletionHandler:(void (^)(void)) completion
+{
+}
+    
+-(void) providerDidReset:(CXProvider*) provider
+{
+    DDLogDebug(@"CXProvider: providerDidReset with provider=%@", provider);
+}
+
+-(void) providerDidBegin:(CXProvider*) provider
+{
+    DDLogDebug(@"CXProvider: providerDidBegin with provider=%@", provider);
+}
+
+-(void) provider:(CXProvider*) provider didActivateAudioSession:(AVAudioSession*) audioSession
+{
+    DDLogDebug(@"CXProvider: didActivateAudioSession with provider=%@, audioSession=%@", provider, audioSession);
+    [[RTCAudioSession sharedInstance] audioSessionDidActivate:audioSession];
+}
+
+-(void) provider:(CXProvider*) provider didDeactivateAudioSession:(AVAudioSession*) audioSession
+{
+    DDLogDebug(@"CXProvider: didDeactivateAudioSession with provider=%@, audioSession=%@", provider, audioSession);
+    [[RTCAudioSession sharedInstance] audioSessionDidDeactivate:audioSession];
 }
 
 @end

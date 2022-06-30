@@ -6,20 +6,21 @@
 //  Copyright __MyCompanyName__ 2008. All rights reserved.
 //
 
+#import "MLConstants.h"
+
 @import UIKit;
 @import PushKit;
-
-#import "DataLayer.h"
-#import "MLProcessLock.h"
-
+@import CallKit;
 @import UserNotifications;
 
 @class ActiveChatsViewController;
+@class MLContact;
 
-@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate>
+@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate, PKPushRegistryDelegate, CXProviderDelegate>
 
 @property (nonatomic, strong) UIWindow* _Nullable window;
 @property (nonatomic, weak) ActiveChatsViewController* _Nullable activeChats;
+@property (nonatomic, strong) CXProvider* _Nullable cxprovider;
 
 -(void) updateUnread;
 -(void) handleXMPPURL:(NSURL* _Nonnull) url;

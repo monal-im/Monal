@@ -4,6 +4,7 @@
 //
 //  Created by Stasel on 20/05/2018.
 //  Copyright © 2018 Stasel. All rights reserved.
+//  Copyright © 2022 Thilo Molitor. All rights reserved.
 //
 
 import Foundation
@@ -54,8 +55,13 @@ final class WebRTCClient: NSObject {
         config.continualGatheringPolicy = .gatherContinually
         
         // Define media constraints. DtlsSrtpKeyAgreement is required to be true to be able to connect with web browsers.
-        let constraints = RTCMediaConstraints(mandatoryConstraints: nil,
-                                              optionalConstraints: ["DtlsSrtpKeyAgreement":kRTCMediaConstraintsValueTrue])
+        let constraints = RTCMediaConstraints(mandatoryConstraints: [
+            "DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue
+        ], optionalConstraints: [
+            "echoCancellation": kRTCMediaConstraintsValueTrue,
+            "noiseSuppression": kRTCMediaConstraintsValueTrue,
+            "VoiceActivityDetection": kRTCMediaConstraintsValueTrue
+        ])
         
         guard let peerConnection = WebRTCClient.factory.peerConnection(with: config, constraints: constraints, delegate: nil) else {
             fatalError("Could not create new RTCPeerConnection")
@@ -146,6 +152,8 @@ final class WebRTCClient: NSObject {
         } catch let error {
             debugPrint("Error changeing AVAudioSession category: \(error)")
         }
+        self.rtcAudioSession.useManualAudio = true
+        self.rtcAudioSession.isAudioEnabled = false
         self.rtcAudioSession.unlockForConfiguration()
     }
     

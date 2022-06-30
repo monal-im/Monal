@@ -106,6 +106,32 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     
+    //handle incoming jmi calls (TODO: add entry to local history, once the UI for this is implemented)
+    if([messageNode check:@"{urn:xmpp:jingle-message:1}propose"])
+    {
+        //only allow audio calls for now
+        if([messageNode check:@"{urn:xmpp:jingle-message:1}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=audio>"])
+        {
+            DDLogInfo(@"Got incoming jmi call");
+            if([HelperTools isAppExtension])
+            {
+                DDLogInfo(@"Dispatching this to mainapp by not committing our db transaction containing this incoming stanza");
+                if(@available(iOS 14.5, macCatalyst 14.5, *))
+                {
+                    [CXProvider reportNewIncomingVoIPPushPayload:@{@"iqNode": iqNode} completion:^(NSError* _Nullable error) {
+                        if(error != nil)
+                            DDLogError(@"Got error for reportNewIncomingVoIPPushPayload: %@", error);
+                        else
+                            DDLogInfo(@"Successfully called reportNewIncomingVoIPPushPayload");
+                    }];
+                }
+            }
+        }
+        else
+            DDLogWarn(@"Not accepting non-audio call, not implemented yet");
+        return message;
+    }
+    
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(
         ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&

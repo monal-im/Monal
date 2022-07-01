@@ -16,6 +16,7 @@ protocol WebRTCClientDelegate: AnyObject {
     func webRTCClient(_ client: WebRTCClient, didReceiveData data: Data)
 }
 
+@objc
 final class WebRTCClient: NSObject {
     
     // The `RTCPeerConnectionFactory` is in charge of creating new RTCPeerConnection instances.
@@ -44,6 +45,7 @@ final class WebRTCClient: NSObject {
         fatalError("WebRTCClient:init is unavailable")
     }
     
+    @objc
     required init(iceServers: [String]) {
         let config = RTCConfiguration()
         config.iceServers = [RTCIceServer(urlStrings: iceServers)]

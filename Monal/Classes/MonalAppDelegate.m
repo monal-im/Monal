@@ -112,14 +112,7 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     _shutdownPending = NO;
     _wasFreezed = NO;
     _pendingCalls = [[NSMutableDictionary alloc] init];
-    _webRTCClient = [[WebRTCClient alloc] iceServers:@[
-        @"stun:stun.l.google.com:19302",
-        @"stun:stun1.l.google.com:19302",
-        @"stun:stun2.l.google.com:19302",
-        @"stun:stun3.l.google.com:19302",
-        @"stun:stun4.l.google.com:19302"
-    ]];
-    /*: @[
+    _webRTCClient = [[WebRTCClient alloc] initWithIceServers:@[
         @"stun:stun.l.google.com:19302",
         @"stun:stun1.l.google.com:19302",
         @"stun:stun2.l.google.com:19302",
@@ -127,7 +120,6 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
         @"stun:stun4.l.google.com:19302"
     ]];
     //_webRTCClient.delegate = self;
-    */
     
     //[self runParserTests];
     return self;

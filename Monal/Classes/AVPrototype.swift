@@ -37,10 +37,8 @@ struct AVPrototype: View {
             Text(self.state)
             Button("Start Call") {
                 let uuid = UUID()
-                let handle = CXHandle(type: .emailAddress, value: "jappleseed@apple.com")
-                
+                let handle = CXHandle(type:.emailAddress, value:self.contact.obj.contactJid)
                 let startCallAction = CXStartCallAction(call: uuid, handle: handle)
-                
                 let transaction = CXTransaction(action: startCallAction)
                 self.callController.request(transaction) { error in
                     if let error = error {

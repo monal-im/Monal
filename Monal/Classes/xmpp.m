@@ -3318,7 +3318,9 @@ NSString* const kStanza = @"stanza";
 
 -(void) addReconnectionHandler:(MLHandler*) handler
 {
-    [_reconnectionHandlers addObject:handler];
+    @synchronized(_reconnectionHandlers) {
+        [_reconnectionHandlers addObject:handler];
+    }
     [self persistState];
 }
 

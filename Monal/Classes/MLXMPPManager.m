@@ -22,6 +22,7 @@
 @import SAMKeychain;
 
 static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
+#define FIRST_LOGIN_TIMEOUT 30.0
 
 @interface MLXMPPManager()
 {
@@ -621,6 +622,85 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     xmpp* account = [self getConnectedAccountForID:accountNo];
     if(account)
         [account sendChatState:isTyping toJid:jid];
+}
+
+#pragma mark - login/register
+-(void) notifyLoginError:(NSString*) title description:(NSString*) description
+{
+    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError
+                                                        object:nil
+                                                      userInfo:@{
+                                                        @"title": title,
+                                                        @"description": description}
+    ];
+}
+
+-(NSNumber*) login:(NSString*) jid password:(NSString*) password
+{
+    NSArray* elements = [jid componentsSeparatedByString:@"@"];
+
+    NSString* domain;
+    NSString* user;
+    //if it is a JID
+    if([elements count] > 1)
+    {
+        user = [elements objectAtIndex:0];
+        domain = [elements objectAtIndex:1];
+    }
+
+    // Note to code reviewer -> maybe move those checks to the UI?
+    if(!user || !domain)
+    {
+        [self notifyLoginError:NSLocalizedString(@"Invalid Credentials", @"")
+                   description:NSLocalizedString(@"Your XMPP account should be in in the format user@domain. For special configurations, use manual setup.", @"")];
+        return nil;
+    }
+
+    if(password.length == 0)
+    {
+        [self notifyLoginError:NSLocalizedString(@"Invalid Credentials", @"")
+                   description:NSLocalizedString(@"Please enter a password.", @"")];
+        return nil;
+    }
+
+    if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString]) {
+        [self notifyLoginError:NSLocalizedString(@"Duplicate Account", @"")
+                   description:NSLocalizedString(@"This account already exists on this instance", @"")];
+        return nil;
+    }
+
+    NSMutableDictionary* dic  = [[NSMutableDictionary alloc] init];
+    [dic setObject:domain.lowercaseString forKey:kDomain];
+    [dic setObject:user.lowercaseString forKey:kUsername];
+    [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
+    [dic setObject:@YES forKey:kEnabled];
+    [dic setObject:@NO forKey:kDirectTLS];
+
+    NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
+    if(accountNo)
+    {
+        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+        [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo.stringValue];
+        [[MLXMPPManager sharedInstance] connectAccount:accountNo];
+    }
+    return accountNo;
+}
+
+-(void) addNewAccountToKeychain:(NSNumber*) accountNo withPassword:(NSString*) password
+{
+    if(accountNo != nil && password != nil) {
+        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+        [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo.stringValue];
+        [self connectAccount:accountNo];
+    }
+}
+
+-(void) clearAccountInfoForAccountNo:(NSNumber*) accountNo
+{
+    [[MLXMPPManager sharedInstance] disconnectAccount:accountNo];
+    [[DataLayer sharedInstance] removeAccount:accountNo];
+    // trigger UI removal
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 }
 
 #pragma mark - getting details

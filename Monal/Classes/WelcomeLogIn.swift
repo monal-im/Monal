@@ -19,6 +19,14 @@ struct WelcomeLogIn: View {
 
     @State private var showAlert = false
     @State private var showQRCodeScanner = false
+
+    // login related
+    @State private var showLoadingState = false
+    @State private var loadingOverlay = WelcomeLogInOverlayInPlace(headline: "", description: "")
+    @State private var timeoutEnabled = false
+    @State private var errorObserverEnabled = false
+    @State private var newAccountNo: NSNumber? = nil
+    @State private var loginComplete = false
     
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
     
@@ -57,9 +65,27 @@ struct WelcomeLogIn: View {
         return !credentialsEntered || credentialsFaulty ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
     }
     
+    private func checkLoginTimeout() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30.0) {
+            if self.timeoutEnabled == true {
+                if self.newAccountNo != nil {
+                    MLXMPPManager.sharedInstance().clearAccountInfo(forAccountNo: self.newAccountNo!)
+                    self.newAccountNo = nil
+                }
+                self.alertPrompt.title = Text("Timeout Error")
+                self.alertPrompt.message = Text("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.")
+                self.timeoutEnabled = false
+                self.showLoadingState = false
+                self.showAlert = true
+            }
+        }
+    }
+
+    let hasParentNavigationView : Bool
+
     var body: some View {
         NavigationView {
-            ZStack {
+            ZStack(alignment: .center) {
                 Color(UIColor.systemGroupedBackground).ignoresSafeArea()
                 
                 ScrollView {
@@ -91,9 +117,15 @@ struct WelcomeLogIn: View {
                             HStack() {
                                 Button(action: {
                                     showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
-                                    
+
                                     if (!showAlert) {
-                                        // TODO: Code/Action for actual login via jid and password and jump to whatever view after successful login
+                                        self.timeoutEnabled = true
+                                        checkLoginTimeout()
+                                        self.loadingOverlay.headline = NSLocalizedString("Logging in", comment: "")
+                                        self.loadingOverlay.description = ""
+                                        self.showLoadingState = true
+                                        self.errorObserverEnabled = true
+                                        self.newAccountNo = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
                                     }
                                 }){
                                     Text("Login")
@@ -105,7 +137,11 @@ struct WelcomeLogIn: View {
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
                                 .alert(isPresented: $showAlert) {
-                                    Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
+                                    Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
+                                        if(self.loginComplete == true) {
+                                            self.delegate.dismiss()
+                                        }
+                                    }))
                                 }
 
                                 // Just sets the credential in jid and password variables and shows them in the input fields
@@ -136,17 +172,19 @@ struct WelcomeLogIn: View {
 
                             }
                             
-                            NavigationLink(destination: RegisterAccount()) {
+                            NavigationLink(destination: RegisterAccount(delegate: self.delegate)) {
                                 Text("Register")
                             }
                             
-                            Button(action: {
-                                self.delegate.dismiss()
-                            }){
-                               Text("Set up account later")
-                                   .frame(maxWidth: .infinity)
-                                   .padding(.top, 10.0)
-                                   .padding(.bottom, 9.0)
+                            if(self.hasParentNavigationView == false) {
+                                Button(action: {
+                                    self.delegate.dismiss()
+                                }){
+                                    Text("Set up account later")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.top, 10.0)
+                                        .padding(.bottom, 9.0)
+                                }
                             }
                         }
                         .frame(minHeight: 310)
@@ -155,26 +193,86 @@ struct WelcomeLogIn: View {
                     }
                 }
 
-                .navigationTitle("Welcome")
-
-                .navigationBarBackButtonHidden(true)                   // will not be shown because swiftui does not know we navigated here from UIKit
-                .navigationBarItems(leading: Button(action : {
+                // TODO fix those workarounds as soon as settings are not a storyboard anymore
+                .navigationBarHidden(UIDevice.current.userInterfaceIdiom == .phone)
+                .navigationBarTitle(Text("Welcome"), displayMode: self.hasParentNavigationView == true ? .inline : .automatic)
+                .navigationBarHidden(false)
+                .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
+                .navigationBarItems(leading: self.hasParentNavigationView == true ? nil : Button(action : {
                     self.delegate.dismiss()
                 }){
                     Image(systemName: "arrow.backward")
                 }
                 .keyboardShortcut(.escape, modifiers: []))
+                .disabled(self.showLoadingState == true)
+                .blur(radius: self.showLoadingState == true ? 3 : 0)
+                if (self.showLoadingState == true) {
+                    loadingOverlay
+                }
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
         .onDisappear {UITableView.appearance().tableHeaderView = nil}
-
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
+            if self.errorObserverEnabled == false {
+                return
+            }
+            if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo, let errorMessage = notification.userInfo?["message"] as? String {
+                if xmppAccount.accountNo.intValue == newAccountNo.intValue {
+                    timeoutEnabled = false
+                    showLoadingState = false
+                    errorObserverEnabled = false
+                    alertPrompt.title = Text("Error")
+                    alertPrompt.message = Text(String(format: NSLocalizedString("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.\n\nTechnical error message: %@", comment: ""), errorMessage))
+                    showAlert = true
+                    MLXMPPManager.sharedInstance().clearAccountInfo(forAccountNo: newAccountNo)
+                    self.newAccountNo = nil
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMLHasConnectedNotice")).receive(on: RunLoop.main)) { notification in
+            if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
+                if xmppAccount.accountNo.intValue == newAccountNo.intValue {
+                    self.timeoutEnabled = false
+                    self.errorObserverEnabled = false
+                    HelperTools.defaultsDB().set(true, forKey: "HasSeenLogin")
+                    self.loadingOverlay.headline = NSLocalizedString("Loading contact list", comment: "")
+                    self.loadingOverlay.description = ""
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedCatchup")).receive(on: RunLoop.main)) { notification in
+            if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
+                if xmppAccount.accountNo.intValue == newAccountNo.intValue {
+                    self.loadingOverlay.headline = NSLocalizedString("Loading omemo bundles", comment: "")
+                    self.loadingOverlay.description = ""
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalUpdateBundleFetchStatus")).receive(on: RunLoop.main)) { notification in
+            if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
+                if notificationAccountNo.intValue == newAccountNo.intValue {
+                    self.loadingOverlay.headline = NSLocalizedString("Loading omemo bundles", comment: "")
+                    self.loadingOverlay.description = String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all)
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedOmemoBundleFetch")).receive(on: RunLoop.main)) { notification in
+            if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
+                if (notificationAccountNo.intValue == newAccountNo.intValue) {
+                    showLoadingState = false
+                    alertPrompt.title = Text("Success!")
+                    alertPrompt.message = Text("You are set up and connected.")
+                    loginComplete = true
+                    showAlert = true
+                }
+            }
+        }
     }
 }
 
 struct WelcomeLogIn_Previews: PreviewProvider {
     static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        WelcomeLogIn(delegate:delegate)
+        WelcomeLogIn(delegate:delegate, hasParentNavigationView: false)
     }
 }

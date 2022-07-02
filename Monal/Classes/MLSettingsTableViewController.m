@@ -305,8 +305,11 @@ enum DummySettingsRows {
             {
                 switch(indexPath.row - [self getAccountNum]) {
                     case QuickSettingsRow:
-                        [self performSegueWithIdentifier:@"showLogin" sender:self];
+                    {
+                        UIViewController* loginView = [[SwiftuiInterface new] makeViewWithName:@"LogIn"];
+                        [self showDetailViewController:loginView sender:self];
                         break;
+                    }
                     case AdvancedSettingsRow:
                         [self performSegueWithIdentifier:@"editXMPP" sender:self];
                         break;

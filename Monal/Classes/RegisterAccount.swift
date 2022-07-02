@@ -26,6 +26,8 @@ struct WebView: UIViewRepresentable {
 }
 
 struct RegisterAccount: View {
+    var delegate: SheetDismisserProtocol
+
     static let XMPPServer: [Dictionary<String, String>] = [
         ["XMPPServer": "Input", "TermsSite_default": ""],
         ["XMPPServer": "yax.im", "TermsSite_default": "https://yaxim.org/yax.im/"],
@@ -46,8 +48,11 @@ struct RegisterAccount: View {
     @State private var selectedServerIndex = 1
 
     @State private var showAlert = false
+    @State private var showLoading = false
+    @State private var registerComplete = false
 
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
+    @State private var loadingOverlay = WelcomeLogInOverlayInPlace(headline: NSLocalizedString("Registering account...", comment: ""), description: "")
 
     @State private var showWebView = false
 
@@ -130,6 +135,45 @@ struct RegisterAccount: View {
         return (!serverSelected && (!serverProvided || xmppServerFaulty)) || (!credentialsEntered || credentialsFaulty || credentialsExist) ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
     }
 
+    private func createXMPPInstance() -> xmpp {
+        let identity = MLXMPPIdentity.init(jid: String.init(format: "nothing@%@", self.providedServer), password: "nothing", andResource: "MonalReg");
+        let server = MLXMPPServer.init(host: "", andPort: 5222, andDirectTLS: false)
+        return xmpp.init(server: server, andIdentity: identity, andAccountNo: -1)
+    }
+
+    private func register() {
+        self.showLoading = true
+        let xmppAccount = createXMPPInstance()
+        xmppAccount.registerUser(self.username, withPassword: self.password, captcha: nil, andHiddenFields: [:]) {success, errorMsg in
+            self.showLoading = false
+            xmppAccount.disconnect(true)
+            if(success == true) {
+                let dic = [
+                    kDomain: self.providedServer,
+                    kUsername: self.username,
+                    kResource: HelperTools.encodeRandomResource(),
+                    kEnabled: true,
+                    kDirectTLS: false
+                ] as [String : Any]
+
+                let accountNo = DataLayer.sharedInstance().addAccount(with: dic);
+                if accountNo != nil {
+                    MLXMPPManager.sharedInstance().addNewAccount(toKeychain: accountNo!, withPassword: "")
+                }
+                alertPrompt.title = Text("Success!")
+                alertPrompt.message = Text("You are set up and connected.")
+                self.registerComplete = true
+                self.showAlert = true
+            } else {
+                let alertMsg = errorMsg ?? NSLocalizedString("Could not register your username. Please check your code or change the username and try again.", comment: "")
+                self.alertPrompt.title = Text("Registration Error")
+                self.alertPrompt.message = Text(alertMsg)
+
+                self.showAlert = true
+            }
+        }
+    }
+
     var body: some View {
         ZStack {
             Color(UIColor.systemGroupedBackground).ignoresSafeArea()
@@ -187,7 +231,7 @@ struct RegisterAccount: View {
                             showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert)
                             
                             if (!showAlert) {
-                                // TODO: Code/Action for registration and jump to whatever view after successful registration
+                                register()
                             }
                         }){
                             Text("Register\(actualServerText)")
@@ -199,7 +243,11 @@ struct RegisterAccount: View {
                         }
                         .buttonStyle(BorderlessButtonStyle())
                         .alert(isPresented: $showAlert) {
-                            Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
+                            Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
+                                if(self.registerComplete == true) {
+                                    self.delegate.dismiss()
+                                }
+                            }))
                         }
                         Text("The selectable XMPP servers are public servers which are not affiliated to Monal. This registration page is provided for convenience only.")
                         .font(.system(size: 10))
@@ -214,21 +262,19 @@ struct RegisterAccount: View {
                             }
                             .frame(maxWidth: .infinity)
                             .sheet(isPresented: $showWebView) {
-                                Text("Terms of\n\(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)")
-                                    .font(.largeTitle.weight(.bold))
-                                    .multilineTextAlignment(.center)
-                                WebView(url: URL(string: (RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["TermsSite_\(Locale.current.languageCode ?? "default")"] ?? RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["TermsSite_default"])!)!)
-                                Button (action: {
-                                    showWebView.toggle()
-                                }){
-                                    Text("Close")
-                                        .padding(9.0)
-                                        .background(Color(UIColor.tertiarySystemFill))
-                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                NavigationView {
+                                    WebView(url: URL(string: (RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["TermsSite_\(Locale.current.languageCode ?? "default")"] ?? RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["TermsSite_default"])!)!)
+                                        .navigationBarTitle("Terms of \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)", displayMode: .inline)
+                                        .toolbar(content: {
+                                            ToolbarItem(placement: .bottomBar) {
+                                                Button (action: {
+                                                    showWebView.toggle()
+                                                }){
+                                                    Text("Close")
+                                                }
+                                            }
+                                        })
                                 }
-                                .buttonStyle(BorderlessButtonStyle())
-                                .padding(.top, 10.0)
-                                .padding(.bottom, 9.0)
                             }
                         }
                     }
@@ -236,18 +282,19 @@ struct RegisterAccount: View {
                     .textFieldStyle(.roundedBorder)
                 }
             }
+            .disabled(showLoading)
+            .blur(radius: self.showLoading == true ? 3 : 0)
+            if(showLoading == true) {
+                self.loadingOverlay
+            }
         }
-
         .navigationTitle("Register")
     }
 }
 
 struct RegisterAccount_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        RegisterAccount()
+        RegisterAccount(delegate:delegate)
     }
 }
-
-
-
- 

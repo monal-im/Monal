@@ -86,6 +86,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 -(NSDate *) connectedTimeFor:(NSNumber*) accountNo;
 
+-(NSNumber*) login:(NSString*) jid password: (NSString*) password;
+-(void) clearAccountInfoForAccountNo:(NSNumber*) accountNo;
+-(void) addNewAccountToKeychain:(NSNumber*) accountNo withPassword:(NSString*) password;
+
 /**
  update the password in the keychan and update memory cache
  */

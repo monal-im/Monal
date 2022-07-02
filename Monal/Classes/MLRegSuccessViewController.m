@@ -31,7 +31,10 @@
 {
     //call completion handler if given (e.g. add contact and open chatview)
     if(self.completionHandler)
+    {
+        DDLogVerbose(@"Calling reg completion handler...");
         self.completionHandler();
+    }
     
     // open privacy settings after 1 second
     //(if we directly segue to an open chat, this will be done after 0.5 seconds,

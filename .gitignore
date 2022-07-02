@@ -2,15 +2,38 @@
 .DS_Store
 
 # Xcode
-Monal/Monal.xcodeproj/project.xcworkspace/xcuserdata/anurodhp.xcuserdatad/UserInterfaceState.xcuserstate
-Monal/Monal.xcodeproj/xcuserdata/anurodhp.xcuserdatad/xcschemes/Monal.xcscheme
-Monal/Monal.xcodeproj/xcuserdata/anurodhp.xcuserdatad/xcschemes/jrtplib-static.xcscheme
-Monal/Monal.xcodeproj/xcuserdata/anurodhp.xcuserdatad/xcschemes/xcschememanagement.plist
+Monal/Monal.xcodeproj/xcuserdata/*
+Monal/Monal.xcodeproj/project.xcworkspace/xcshareddata/*
+Monal/Monal.xcodeproj/project.xcworkspace/xcuserdata/*
 contents.xcworkspacedata
 ._*
+*.xcscmblueprint
+*.xccheckout
+Monal/Monal.xcworkspace/xcshareddata/*
+Monal/Monal.xcworkspace/xcuserdata/*
+
+Monal/build/*
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+profile
+*.moved-aside
+DerivedData
+
 
 # Pods
 Monal/Pods
+
+#Don't accidentally commit localization state
+Monal/localization/external
+Monal/localization/external/*
+Monal/shareSheet-iOS/localization/external
+Monal/shareSheet-iOS/localization/external/*
 
 # certs and other encrypted stuff
 *.pem

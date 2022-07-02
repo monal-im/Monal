@@ -50,7 +50,6 @@ struct XMPPLoginQRCode : Codable
         self.title = NSLocalizedString("QR-Code Scanner", comment: "")
         view.backgroundColor = UIColor.black
 
-#if TARGET_OS_MACCATALYST
         switch AVCaptureDevice.authorizationStatus(for: .video)
         {
             case .authorized:
@@ -68,10 +67,10 @@ struct XMPPLoginQRCode : Codable
 
             case .restricted:
                 return
+
+            @unknown default:
+                return;
         }
-#else
-        setupCaptureSession()
-#endif
     }
 
     override func viewWillAppear(_ animated: Bool)

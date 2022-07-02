@@ -8,6 +8,7 @@
 
 import SwiftUI
 import monalxmpp
+import OrderedCollections
 
 struct NotificationSettings: View {
     @ViewBuilder
@@ -33,9 +34,12 @@ struct NotificationSettings: View {
     private let applePushToken: String
     private let xmppAccountInfo: [xmpp]
 
+    private let availablePushServers: Dictionary<String, String>
+
     @State private var pushPermissionEnabled = false // state because we get this value through an async call
     @State private var showPushToken = false
-    @State private var pushServer = 0
+
+    @State private var selectedPushServer: String
 
     var body: some View {
         NavigationView {
@@ -85,12 +89,20 @@ struct NotificationSettings: View {
                         }.opacity(0.5)
                     }
                 }
-                Section(header: Text("Selected Region").font(.title3)) {
-                    Text("Not implemented yet...").font(.footnote)
-                    Picker("Push Server", selection: $pushServer) {
-                        Text("Europe 1").tag(0)
-                        Text("Europe 2").tag(1)
+                Section(header: Text("Pushserver Region").font(.title3)) {
+                    Picker("Push Server", selection: $selectedPushServer) {
+                        ForEach(self.availablePushServers.sorted(by: >), id: \.key) { pushServerFqdn, pushServerName in
+                            Text(pushServerName).tag(pushServerFqdn)
+                        }
                     }.pickerStyle(.menu)//.menuStyle(.borderlessButton)
+                    .onChange(of: selectedPushServer) { pushServerFqdn in
+                        print("Selected \(pushServerFqdn) as push server")
+                        HelperTools.defaultsDB().setValue(pushServerFqdn, forKey: "selectedPushServer")
+                        // enable push again to switch to the selected server
+                        for account in self.xmppAccountInfo {
+                            account.enablePush()
+                        }
+                    }
                 }
             }
             // TODO fix those workarounds as soon as settings are not a storyboard anymore
@@ -111,6 +123,10 @@ struct NotificationSettings: View {
         self.applePushToken = MLXMPPManager.sharedInstance().pushToken;
         self.xmppAccountInfo = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
         self.delegate = delegate
+
+        // push server selector
+        self.availablePushServers = HelperTools.getAvailablePushServers()
+        self.selectedPushServer = HelperTools.defaultsDB().object(forKey: "selectedPushServer") as! String
     }
 }
 

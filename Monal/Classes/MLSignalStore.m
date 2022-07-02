@@ -36,7 +36,7 @@
     return [MLSQLite sharedInstanceForFile:_dbPath];
 }
 
--(MLSignalStore*) initWithAccountId:(NSNumber*) accountId
+-(MLSignalStore*) initWithAccountId:(NSNumber*) accountId andAccountJid:(NSString* _Nonnull) accountJid
 {
     self = [super init];
     NSFileManager* fileManager = [NSFileManager defaultManager];
@@ -52,6 +52,7 @@
     if(row)
     {
         self.deviceid = [(NSNumber *)[row objectForKey:@"deviceid"] unsignedIntValue];
+        self.accountJid = accountJid;
         
         NSData* idKeyPub = [row objectForKey:@"identityPublicKey"];
         NSData* idKeyPrivate = [row objectForKey:@"identityPrivateKey"];
@@ -341,7 +342,7 @@
 -(BOOL) identityPublicKeyExists:(NSData*) publicKey andPrivateKey:(NSData *) privateKey
 {
     return [[self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:@"SELECT COUNT(*) FROM signalIdentity WHERE account_id=? AND deviceid=? AND identityPublicKey=? AND identityPrivateKey=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:self.deviceid], publicKey, privateKey]];
+        return [self.sqliteDatabase executeScalar:@"SELECT COUNT(*) FROM signalIdentity WHERE account_id=? AND deviceid=? AND identityPublicKey=? AND identityPrivateKey=?;" andArguments:@[self.accountId, [NSNumber numberWithUnsignedInt:self.deviceid], publicKey, privateKey]];
     }] boolValue];
 }
 
@@ -486,9 +487,20 @@
 
 -(void) untrustAllDevicesFrom:(NSString*) jid
 {
-    [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountId, jid]];
-    }];
+    if([jid isEqualToString:self.accountJid] == NO)
+    {
+        // untrust all devices
+        [self.sqliteDatabase voidWriteTransaction:^{
+            [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountId, jid]];
+        }];
+    }
+    else
+    {
+        // untrust all of our own devices except our own device id
+        [self.sqliteDatabase voidWriteTransaction:^{
+            [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=? AND contactDeviceId!=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountId, jid, [NSNumber numberWithUnsignedInt:self.deviceid]]];
+        }];
+    }
 }
 
 -(NSNumber*) getTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey

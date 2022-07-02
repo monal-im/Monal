@@ -194,9 +194,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
  enable APNS push with provided tokens
  */
 -(void) enablePush;
-#ifndef IS_ALPHA
--(void) unregisterPush;
-#endif
+-(void) disablePush;
 
 -(void) mamFinishedFor:(NSString*) archiveJid;
 

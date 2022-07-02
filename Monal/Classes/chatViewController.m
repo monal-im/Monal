@@ -25,7 +25,6 @@
 #import "MLConstants.h"
 #import "MLFiletransfer.h"
 #import "MLImageManager.h"
-#import "MLMetaInfo.h"
 #import "MLMucProcessor.h"
 #import "MLNotificationQueue.h"
 #import "MLOMEMO.h"
@@ -218,7 +217,9 @@ enum msgSentState {
 
     [self setChatInputHeightConstraints:YES];
 
+#if !TARGET_OS_MACCATALYST
     [self initAudioRecordButton];
+#endif
 
     // setup refreshControl for infinite scrolling
     UIRefreshControl* refreshControl = [[UIRefreshControl alloc] init];
@@ -1021,27 +1022,34 @@ enum msgSentState {
     [self resignTextView];
 }
 
--(void) recordMessageAudio:(UILongPressGestureRecognizer*)gestureRecognizer{
+-(void) recordMessageAudio:(UILongPressGestureRecognizer*) gestureRecognizer
+{
     [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
-            if (granted) {
-                if (gestureRecognizer.state == UIGestureRecognizerStateBegan){
-                    [[MLAudioRecoderManager sharedInstance] setRecoderManagerDelegate:self];
-                    [[MLAudioRecoderManager sharedInstance] start];
-                } else if (gestureRecognizer.state == UIGestureRecognizerStateEnded){
-                    [[MLAudioRecoderManager sharedInstance] stop];
-                }
-            } else {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Please Allow Audio Access",@ "") message:NSLocalizedString(@"If you want to use audio message you will need to allow access in Settings-> Privacy-> Microphone.",@ "") preferredStyle:UIAlertControllerStyleAlert];
-
-                    UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-
-                    }];
-
-                    [messageAlert addAction:closeAction];
-                    [self presentViewController:messageAlert animated:YES completion:nil];
-                });
+        if (granted)
+        {
+            if (gestureRecognizer.state == UIGestureRecognizerStateBegan)
+            {
+                [[MLAudioRecoderManager sharedInstance] setRecoderManagerDelegate:self];
+                [[MLAudioRecoderManager sharedInstance] start];
             }
+            else if (gestureRecognizer.state == UIGestureRecognizerStateEnded)
+            {
+                [[MLAudioRecoderManager sharedInstance] stop];
+            }
+        }
+        else
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Please Allow Audio Access", @"") message:NSLocalizedString(@"If you want to use audio message you will need to allow access in Settings-> Privacy-> Microphone.", @"") preferredStyle:UIAlertControllerStyleAlert];
+
+                UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+
+                }];
+
+                [messageAlert addAction:closeAction];
+                [self presentViewController:messageAlert animated:YES completion:nil];
+            });
+        }
     }];
 }
 
@@ -1453,7 +1461,7 @@ enum msgSentState {
 }
 
 //only for messages going out
--(NSNumber*) addMessageto:(NSString *)to withMessage:(nonnull NSString *) message andId:(nonnull NSString *) messageId messageType:(nonnull NSString *) messageType mimeType:(NSString *) mimeType size:(NSNumber *) size
+-(MLMessage* _Nullable) addMessageto:(NSString *)to withMessage:(nonnull NSString *) message andId:(nonnull NSString *) messageId messageType:(nonnull NSString *) messageType mimeType:(NSString *) mimeType size:(NSNumber *) size
 {
     if(!self.jid || !message)
     {
@@ -1503,10 +1511,12 @@ enum msgSentState {
         //create and donate interaction to allow for ios 15 suggestions
         if(@available(iOS 15.0, macCatalyst 15.0, *))
             [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
+        
+        return messageObj;
     }
     else
         DDLogError(@"failed to add message to history db");
-    return messageDBId;
+    return nil;
 }
 
 -(void) handleNewMessage:(NSNotification *)notification
@@ -2691,6 +2701,11 @@ enum msgSentState {
 
 -(void) setSendButtonIconWithTextLength:(NSUInteger)txtLength
 {
+#if TARGET_OS_MACCATALYST
+    self.isAudioMessage = NO;
+    [self.audioRecordButton setHidden:YES];
+    [self.sendButton setHidden:NO];
+#else
     if ((txtLength == 0) && (self.uploadQueue.count == 0))
     {
         self.isAudioMessage = YES;
@@ -2703,6 +2718,7 @@ enum msgSentState {
         [self.audioRecordButton setHidden:YES];
         [self.sendButton setHidden:NO];
     }
+#endif
 }
 
 #pragma mark - link preview
@@ -2768,6 +2784,7 @@ enum msgSentState {
         row = [self.messageList objectAtIndex:indexPath.row];
     } else {
         DDLogError(@"Attempt to access beyond bounds");
+        return;
     }
 
     [self.previewedIds addObject:row.messageDBId];
@@ -2779,20 +2796,25 @@ enum msgSentState {
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:row.url];
     [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on some sites for og tags e.g. youtube
     request.timeoutInterval = 10;
-    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error)
+    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error)
     {
-
-        NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        // prevent repeated calls to this logic  by setting to non null
-        row.previewText=[MLMetaInfo ogContentWithTag:@"og:title" inHTML:body];
-        row.previewImage=[NSURL URLWithString:[[MLMetaInfo ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding]];
-        if(row.previewText.length == 0)
-            row.previewText = @" ";
-        [[DataLayer sharedInstance] setMessageId:row.messageId previewText:[row.previewText copy] andPreviewImage:[row.previewImage.absoluteString copy]];
-        //reload cells
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-        });
+        NSString* body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        MLOgHtmlParser* ogParser = [[MLOgHtmlParser alloc] initWithHtml:body];
+        if(ogParser != nil)
+        {
+            row.previewText = [ogParser getOgTitle];
+            row.previewImage = [ogParser getOgImage];
+            [[DataLayer sharedInstance] setMessageId:row.messageId previewText:[row.previewText copy] andPreviewImage:[row.previewImage.absoluteString copy]];
+            //reload cells
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            });
+        }
+        else
+        {
+            row.previewText = @"";
+            row.previewImage = [NSURL URLWithString:@""];
+        }
     }] resume];
 }
 
@@ -2916,46 +2938,51 @@ enum msgSentState {
 }
 
 #pragma mark - MLAudioRecoderManager delegate
--(void)notifyStart
+-(void) notifyStart
 {
-    CGFloat infoHeight = self.inputContainerView.frame.size.height;
-    CGFloat infoWidth = self.inputContainerView.frame.size.width;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        CGFloat infoHeight = self.inputContainerView.frame.size.height;
+        CGFloat infoWidth = self.inputContainerView.frame.size.width;
 
-    UIColor* labelBackgroundColor = self.inputContainerView.backgroundColor;
-    self.audioRecoderInfoView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, infoWidth - 50, infoHeight)];
-    self.audioRecoderInfoView.backgroundColor = labelBackgroundColor;
-    UILabel *audioTimeInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 0, infoWidth - 50, infoHeight)];
-    [audioTimeInfoLabel setText:NSLocalizedString(@"Recording audio", @"")];
-    [self.audioRecoderInfoView addSubview:audioTimeInfoLabel];
-    [self.inputContainerView addSubview:self.audioRecoderInfoView];
+        UIColor* labelBackgroundColor = self.inputContainerView.backgroundColor;
+        self.audioRecoderInfoView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, infoWidth - 50, infoHeight)];
+        self.audioRecoderInfoView.backgroundColor = labelBackgroundColor;
+        UILabel *audioTimeInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 0, infoWidth - 50, infoHeight)];
+        [audioTimeInfoLabel setText:NSLocalizedString(@"Recording audio", @"")];
+        [self.audioRecoderInfoView addSubview:audioTimeInfoLabel];
+        [self.inputContainerView addSubview:self.audioRecoderInfoView];
+    });
 }
 
--(void)notifyStop:(NSURL*) fileURL
+-(void) notifyStop:(NSURL*) fileURL
 {
-    [self.audioRecoderInfoView removeFromSuperview];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.audioRecoderInfoView removeFromSuperview];
 
-    [self showUploadHUD];
+        [self showUploadHUD];
+    });
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
         NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
 
-            [coordinator coordinateReadingItemAtURL:fileURL options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
-                [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self showPotentialError:error];
-                        if(!error)
-                        {
-                            NSString* newMessageID = [[NSUUID UUID] UUIDString];
-                            [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-                            [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
-                                [self hideUploadHUD];
-                            }];
-                        }
-                        DDLogVerbose(@"upload done");
-                    });
-                }];
+        [coordinator coordinateReadingItemAtURL:fileURL options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
+            [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self showPotentialError:error];
+                    if(!error)
+                    {
+                        NSString* newMessageID = [[NSUUID UUID] UUIDString];
+                        MLMessage* msg = [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
+                        [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
+                            DDLogInfo(@"File upload sent to contact...");
+                            [MLFiletransfer hardlinkFileForMessage:msg];        //hardlink cache file if possible
+                            [self hideUploadHUD];
+                        }];
+                    }
+                    DDLogVerbose(@"upload done");
+                });
             }];
-
+        }];
     });
 }
 
@@ -3043,22 +3070,26 @@ enum msgSentState {
     if(!error)
     {
         NSString* newMessageID = [[NSUUID UUID] UUIDString];
-        [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-        [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:nil];
-        DDLogInfo(@"File sent");
-    }
-    if(self.uploadQueue.count > 0)
-    {
-        [self.uploadMenuView performBatchUpdates:^{
-            [self deleteQueueItemAtIndex:0];
-        } completion:^(BOOL finished){
-            [self emptyUploadQueue];
+        MLMessage* msg = [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
+        [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
+            DDLogInfo(@"File upload sent to contact...");
+            [MLFiletransfer hardlinkFileForMessage:msg];        //hardlink cache file if possible
+            
+            if(self.uploadQueue.count > 0)
+            {
+                [self.uploadMenuView performBatchUpdates:^{
+                    [self deleteQueueItemAtIndex:0];
+                } completion:^(BOOL finished){
+                    [self emptyUploadQueue];
+                }];
+            }
+            else
+            {
+                [self hideUploadQueue];
+                [self hideUploadHUD];
+            }
         }];
-    }
-    else
-    {
-        [self hideUploadQueue];
-        [self hideUploadHUD];
+        DDLogInfo(@"upload done");
     }
 }
 

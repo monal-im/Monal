@@ -968,15 +968,7 @@ NSString* const kStanza = @"stanza";
                     //disable push for this node
                     if(self.connectionProperties.supportsPush)
                     {
-#ifdef IS_ALPHA
-                        XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
-                        [disable setPushDisable:[MLXMPPManager sharedInstance].pushToken];
-                        [self writeToStream:disable.XMLString];
-#else
-                        XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
-                        [disable setPushDisable:[[[UIDevice currentDevice] identifierForVendor] UUIDString]];
-                        [self writeToStream:disable.XMLString];		// dont even bother queueing
-#endif
+                        [self disablePush];
                     }
                     [self sendLastAck];
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the xmpp stream directly afterwards
@@ -2798,7 +2790,6 @@ NSString* const kStanza = @"stanza";
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.registeredOnPushAppserver] forKey:@"registeredOnPushAppserver"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
@@ -3005,12 +2996,6 @@ NSString* const kStanza = @"stanza";
             {
                 NSNumber* pushEnabled = [dic objectForKey:@"pushEnabled"];
                 self.connectionProperties.pushEnabled = pushEnabled.boolValue;
-            }
-            
-            if([dic objectForKey:@"registeredOnPushAppserver"])
-            {
-                NSNumber* registeredOnPushAppserver = [dic objectForKey:@"registeredOnPushAppserver"];
-                self.connectionProperties.registeredOnPushAppserver = registeredOnPushAppserver.boolValue;
             }
             
             if([dic objectForKey:@"supportsClientState"])
@@ -3275,7 +3260,6 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.usingCarbons2 = NO;
     self.connectionProperties.supportsPush = NO;
     self.connectionProperties.pushEnabled = NO;
-    self.connectionProperties.registeredOnPushAppserver = NO;
     self.connectionProperties.supportsMam2 = NO;
     self.connectionProperties.supportsPubSub = NO;
     self.connectionProperties.supportsHTTPUpload = NO;
@@ -3334,7 +3318,9 @@ NSString* const kStanza = @"stanza";
 
 -(void) addReconnectionHandler:(MLHandler*) handler
 {
-    [_reconnectionHandlers addObject:handler];
+    @synchronized(_reconnectionHandlers) {
+        [_reconnectionHandlers addObject:handler];
+    }
     [self persistState];
 }
 
@@ -4145,57 +4131,97 @@ NSString* const kStanza = @"stanza";
 -(void) enablePush
 {
     NSString* pushToken = [MLXMPPManager sharedInstance].pushToken;
-    if(pushToken == nil || [pushToken length] == 0 || self.accountState < kStateBound)
+    NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
+    if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateBound)
     {
-        DDLogInfo(@"NOT registering and enabling push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         return;
     }
-
     if([MLXMPPManager sharedInstance].hasAPNSToken) {
-#ifdef IS_ALPHA
-        // enable push directly without appserver registration
-        self.connectionProperties.registeredOnPushAppserver = YES;
+        BOOL needsDeregister = false;
+        // check if the currently used push server is an old server that should no longer be used
+        if([[HelperTools getInvalidPushServers] objectForKey:selectedPushServer] != nil)
+        {
+            needsDeregister = YES;
+            DDLogInfo(@"Selecting new push server because the previous is a legacy server");
+            // select new pushserver
+            NSString* newPushServer = [HelperTools getSelectedPushServerBasedOnLocale];
+            [[HelperTools defaultsDB] setObject:newPushServer forKey:@"selectedPushServer"];
+            selectedPushServer = newPushServer;
+        }
+        // check if the last used push server (db) matches the currently selected server
+        NSString* lastUsedPushServer = [[DataLayer sharedInstance] lastUsedPushServerForAccount:self.accountNo];
+        if([lastUsedPushServer isEqualToString:selectedPushServer] == NO)
+        {
+            [self disablePushOnOldAndAdditionalServers:lastUsedPushServer];
+        }
+        else if(needsDeregister)
+        {
+            [self disablePushOnOldAndAdditionalServers:nil];
+        }
+        // push is now disabled on the existing server
+        // enable push
         XMPPIQ* enablePushIq = [[XMPPIQ alloc] initWithType:kiqSetType];
-        [enablePushIq setPushEnableWithNode:pushToken onAppserver:[HelperTools pushServer]];
-        [self sendIq:enablePushIq withHandler:$newHandler(MLIQProcessor, handlePushEnabled)];
-#else
-        // old style push
-        DDLogInfo(@"registering (and enabling) push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
-        XMPPIQ* registerNode = [[XMPPIQ alloc] initWithType:kiqSetType];
-        [registerNode setRegisterOnAppserverWithToken:pushToken];
-        [registerNode setiqTo:[HelperTools pushServer]];
-        [self sendIq:registerNode withHandler:$newHandler(MLIQProcessor, handleAppserverNodeRegistered)];
-#endif
+        [enablePushIq setPushEnableWithNode:pushToken onAppserver:selectedPushServer];
+        [self sendIq:enablePushIq withHandler:$newHandler(MLIQProcessor, handlePushEnabled, $ID(selectedPushServer))];
     }
-    else if([MLXMPPManager sharedInstance].hasAPNSToken == NO)
+    else // [MLXMPPManager sharedInstance].hasAPNSToken == NO
     {
-        //disable push for this node
-        DDLogInfo(@"DISABLING push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         if(self.connectionProperties.supportsPush)
         {
-#ifdef IS_ALPHA
-            XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
-            [disable setPushDisable:pushToken];
-            [self send:disable];
-#else
-            XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
-            [disable setPushDisable:[[[UIDevice currentDevice] identifierForVendor] UUIDString]];
-            [self send:disable];
-#endif
+            //disable push for this node
+            [self disablePush];
         }
     }
 }
 
-#ifndef IS_ALPHA
--(void) unregisterPush
+-(void) disablePush
 {
-    DDLogInfo(@"Unregistering push");
-
-    XMPPIQ* unregisterNode = [[XMPPIQ alloc] initWithType:kiqSetType to:[HelperTools pushServer]];
-    [unregisterNode setUnregisterOnAppserver];
-    [self send:unregisterNode];
+    DDLogVerbose(@"Trying to disable push on account: %@", self.accountNo);
+    NSString* pushToken = [[HelperTools defaultsDB] objectForKey:@"pushToken"];
+    NSString* pushServer = [[DataLayer sharedInstance] lastUsedPushServerForAccount:self.accountNo];
+    if(pushToken == nil || pushServer == nil)
+    {
+        return;
+    }
+    DDLogInfo(@"DISABLING push token %@ on server %@ (accountState: %ld, supportsPush: %@)", pushToken, pushServer, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+    XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [disable setPushDisable:pushToken onPushServer:pushServer];
+    [self send:disable];
 }
-#endif
+
+-(void) disablePushOnOldAndAdditionalServers:(NSString*) additionalServer
+{
+    // Disable push on old / legacy servers
+    NSDictionary<NSString*, NSString*>* oldServers = [HelperTools getInvalidPushServers];
+    for(NSString* server in oldServers)
+    {
+        DDLogInfo(@"Disabling push on old pushserver: %@", server);
+        XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
+        [disable setPushDisable:[oldServers objectForKey:server] onPushServer:server];
+        [self send:disable];
+    }
+    // disable push on the last used server
+    if(additionalServer != nil && [MLXMPPManager sharedInstance].pushToken != nil)
+    {
+        DDLogInfo(@"Disabling push on last used pushserver: %@", additionalServer);
+        XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
+        [disable setPushDisable:[MLXMPPManager sharedInstance].pushToken onPushServer:additionalServer];
+        [self send:disable];
+    }
+    // disable push on all non selected available push servers
+    NSString* selectedNewPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
+    for(NSString* availServer in [HelperTools getAvailablePushServers])
+    {
+        if([availServer isEqualToString:selectedNewPushServer] == YES)
+        {
+            continue;
+        }
+        XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
+        [disable setPushDisable:[MLXMPPManager sharedInstance].pushToken onPushServer:availServer];
+        [self send:disable];
+    }
+}
 
 -(void) updateIqHandlerTimeouts
 {

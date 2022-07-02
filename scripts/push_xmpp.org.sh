@@ -47,6 +47,14 @@ git add -u
 git commit -m "New timestamp for Monal stable release with build number $buildNumber"
 git push --set-upstream origin monal-release-push --force
 
+echo ""
+echo "******************************************************************"
+echo "* Amending last commit in master to trigger PR creating workflow *"
+echo "******************************************************************"
+
+git checkout master
+git commit -C HEAD --amend --no-edit
+git push --force-with-lease
 
 echo ""
 echo "***************"

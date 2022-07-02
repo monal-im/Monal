@@ -9,7 +9,8 @@
 import SwiftUI
 import SafariServices
 import WebKit
- 
+import monalxmpp
+
 struct WebView: UIViewRepresentable {
  
     var url: URL
@@ -25,22 +26,51 @@ struct WebView: UIViewRepresentable {
 }
 
 struct RegisterAccount: View {
-    static private let credFaultyPattern = ".*@.*"
+    static let XMPPServer: [Dictionary<String, String>] = [
+        ["XMPPServer": "Input", "TermsSite_default": ""],
+        ["XMPPServer": "yax.im", "TermsSite_default": "https://yaxim.org/yax.im/"],
+        ["XMPPServer": "jabber.de", "TermsSite_default": "https://www.jabber.de/impressum/datenschutz/"],
+        ["XMPPServer": "xabber.de", "TermsSite_default": "https://www.draugr.de"],
+        ["XMPPServer": "trashserver.net", "TermsSite_default": "https://trashserver.net/en/privacy/", "TermsSite_de": "https://trashserver.net/datenschutz/"]
+    ]
 
-    @Binding private var selectedServerIndex : Int
-    @Binding private var providedServer : String
+    private let xmppServerInputSelectLabel = Text("Manual input")
+    
+    static private let xmppFaultyPattern = ".+\\..{2,}$"
+    static private let credFaultyPattern = ".*@.*"
 
     @State private var username: String = ""
     @State private var password: String = ""
-        
+
+    @State private var providedServer: String = ""
+    @State private var selectedServerIndex = 1
+
     @State private var showAlert = false
-    @State private var showWebView = false
-    
+
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
 
-    private var actualServer: String
-    private var actualTermsUrl: String
-    private var showTermsUrl = false
+    @State private var showWebView = false
+
+    private var serverSelectedAlert: Bool {
+        alertPrompt.title = Text("No XMPP server!")
+        alertPrompt.message = Text("Please select a XMPP server or provide one.")
+
+        return serverSelected
+    }
+
+    private var serverProvidedAlert: Bool {
+        alertPrompt.title = Text("No XMPP server!")
+        alertPrompt.message = Text("Please select a XMPP server or provide one.")
+
+        return serverProvided
+    }
+
+    private var xmppServerFaultyAlert: Bool {
+        alertPrompt.title = Text("XMPP server domain not valid!")
+        alertPrompt.message = Text("Please provide a valid XMPP server domain or select one.")
+
+        return xmppServerFaulty
+    }
 
     private var credentialsEnteredAlert: Bool {
         alertPrompt.title = Text("No Empty Values!")
@@ -63,6 +93,27 @@ struct RegisterAccount: View {
         return credentialsExist
     }
 
+    private var actualServer: String {
+        let tmp = RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]
+        return (tmp != nil && tmp != "Input") ? tmp! : serverProvided && !xmppServerFaulty ? providedServer : "?"
+    }
+
+    private var actualServerText: Text {
+        return Text(" with \(actualServer)")
+    }
+
+   private var serverSelected: Bool {
+        return selectedServerIndex != 0
+    }
+
+    private var serverProvided: Bool {
+        return providedServer != ""
+    }
+
+    private var xmppServerFaulty: Bool {
+        return providedServer.range(of: RegisterAccount.xmppFaultyPattern, options:.regularExpression) == nil
+    }
+
     private var credentialsEntered: Bool {
         return !username.isEmpty && !password.isEmpty
     }
@@ -72,112 +123,131 @@ struct RegisterAccount: View {
     }
 
     private var credentialsExist: Bool {
-        // TODO: To be replaced by actual test if user already exist on the monal instance
-        return false
+        return DataLayer.sharedInstance().doesAccountExistUser(username, andDomain:actualServer)
     }
 
     private var buttonColor: Color {
-            return !credentialsEntered || credentialsFaulty ? .gray : .blue
-    }
-    
-    init(_ selectedServerIndex: Binding<Int>, _ providedServer: Binding<String>) {
-        self._selectedServerIndex = selectedServerIndex
-        self._providedServer = providedServer
-        actualServer = providedServer.wrappedValue
-        actualTermsUrl = "None"
-        
-        if (actualServer == "") {
-            actualServer = "None"
-            actualTermsUrl = "None"
-            
-            if let temp = RegisterAccountSelectServer.XMPPServer[selectedServerIndex.wrappedValue]["XMPPServer"] {
-                if (temp != "") {
-                    actualServer = temp
- 
-                    let temp = RegisterAccountSelectServer.XMPPServer[selectedServerIndex.wrappedValue]["TermsSite_\(Locale.current.languageCode ?? "default")"] ?? RegisterAccountSelectServer.XMPPServer[selectedServerIndex.wrappedValue]["TermsSite_default"] ?? ""
-                        if (temp != "") {
-                            actualTermsUrl = temp
-                            showTermsUrl = true
-                        }
-                }
-            }
-        }
+        return (!serverSelected && (!serverProvided || xmppServerFaulty)) || (!credentialsEntered || credentialsFaulty || credentialsExist) ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading) {
-                Text("Choose a username and a password to register an account on selected server \(actualServer).")
-                   .padding()
-                
-                Form {
-                    Text("Register for \(actualServer)")
-                    TextField("Username", text: Binding(get: { self.username }, set: { string in self.username = string.lowercased() }))
-                        .disableAutocorrection(true)
-                    SecureField("Password", text: $password)
+        ZStack {
+            Color(UIColor.systemGroupedBackground).ignoresSafeArea()
+            
+            ScrollView {
+                VStack(alignment: .leading) {
+                    VStack(alignment: .leading) {
+                        Text("Like email, you can register your account on many sites and talk to anyone. You can use this page to register an account with a selected or provided XMPP server. You also have to choose a username and a password.")
+                            .padding()
+                    }
+                    .background(Color(UIColor.systemBackground))
                     
-                    Button(action: {
-                        showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
-                        
-                        if !showAlert {
-                            // TODO: Code/Action for registration and jump to whatever view after successful registration
+                    Form {
+                        Menu {
+                            Picker("", selection: $selectedServerIndex) {
+                                ForEach (RegisterAccount.XMPPServer.indices, id: \.self) {
+                                    if ($0 == 0) {
+                                        xmppServerInputSelectLabel.tag(0)
+                                    }
+                                    else {
+                                        Text(RegisterAccount.XMPPServer[$0]["XMPPServer"] ?? "").tag($0)
+                                    }
+                                }
+                            }
+                            .labelsHidden()
+                            .pickerStyle(.inline)
                         }
-                    }){
-                        Text("Register")
-                            .frame(maxWidth: .infinity)
+                        label: {
+                            HStack {
+                            if (selectedServerIndex != 0) {
+                                Text(RegisterAccount.XMPPServer[selectedServerIndex]["XMPPServer"]!).font(.system(size: 17)).frame(maxWidth: .infinity)
+                                Image(systemName: "checkmark")
+                            }
+                            else {
+                                xmppServerInputSelectLabel.font(.system(size: 17)).frame(maxWidth: .infinity)
+                            }
+                            }
                             .padding(9.0)
-                            .background(Color(red: 0.897, green: 0.878, blue: 0.878))
-                            .foregroundColor(buttonColor)
+                            .background(Color(UIColor.tertiarySystemFill))
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    }
-                    .buttonStyle(BorderlessButtonStyle())
-                    .alert(isPresented: $showAlert) {
-                        Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
-                    }
-                    
-                    Button (action: {
-                        showWebView.toggle()
-                    }){
-                        Text("Terms of use")
-                    }
-                    .disabled(!showTermsUrl)
-                    .opacity(showTermsUrl ? 1 : 0)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 10.0)
-                    .padding(.bottom, 9.0)
-                    .sheet(isPresented: $showWebView) {
-                        Text("Terms of\n\(actualServer)")
-                            .font(.largeTitle.weight(.bold))
-                            .multilineTextAlignment(.center)
-                        WebView(url: URL(string: actualTermsUrl)!)
-                        Button (action: {
-                            showWebView.toggle()
+
+                        }
+                        
+
+                        if (selectedServerIndex == 0) {
+                            TextField("Provide XMPP-Server", text: Binding(get: { self.providedServer }, set: { string in self.providedServer = string.lowercased() }))
+                                .disableAutocorrection(true)
+                        }
+
+                        TextField("Username", text: Binding(get: { self.username }, set: { string in self.username = string.lowercased() }))
+                            .disableAutocorrection(true)
+                        SecureField("Password", text: $password)
+                        
+                        Button(action: {
+                            showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert)
+                            
+                            if (!showAlert) {
+                                // TODO: Code/Action for registration and jump to whatever view after successful registration
+                            }
                         }){
-                            Text("Close")
+                            Text("Register\(actualServerText)")
+                                .frame(maxWidth: .infinity)
                                 .padding(9.0)
-                                .background(Color(red: 0.897, green: 0.878, blue: 0.878))
+                                .background(Color(UIColor.tertiarySystemFill))
+                                .foregroundColor(buttonColor)
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
                         .buttonStyle(BorderlessButtonStyle())
-                        .padding(.top, 10.0)
-                        .padding(.bottom, 9.0)
+                        .alert(isPresented: $showAlert) {
+                            Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
+                        }
+                        Text("The selectable XMPP servers are public servers which are not affiliated to Monal. This registration page is provided for convenience only.")
+                        .font(.system(size: 10))
+                        .padding(.vertical, 8)
+                        
+                        if (selectedServerIndex != 0) {
+                            Button (action: {
+                                showWebView.toggle()
+                            }){
+                                Text("Terms of use for \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)")
+                                    .font(.system(size: 10))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .sheet(isPresented: $showWebView) {
+                                Text("Terms of\n\(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)")
+                                    .font(.largeTitle.weight(.bold))
+                                    .multilineTextAlignment(.center)
+                                WebView(url: URL(string: (RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["TermsSite_\(Locale.current.languageCode ?? "default")"] ?? RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["TermsSite_default"])!)!)
+                                Button (action: {
+                                    showWebView.toggle()
+                                }){
+                                    Text("Close")
+                                        .padding(9.0)
+                                        .background(Color(UIColor.tertiarySystemFill))
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                                .padding(.top, 10.0)
+                                .padding(.bottom, 9.0)
+                            }
+                        }
                     }
+                    .frame(height: 370)
+                    .textFieldStyle(.roundedBorder)
                 }
-                .frame(minHeight: 310)
-                .textFieldStyle(.roundedBorder)
-                
             }
         }
-        
-        .navigationTitle("Register Account")
+
+        .navigationTitle("Register")
     }
 }
 
 struct RegisterAccount_Previews: PreviewProvider {
-    @State private var providedServer: String = ""
-    @State private var selectedServerIndex = 0
-
     static var previews: some View {
-        RegisterAccount(RegisterAccount_Previews().$selectedServerIndex, RegisterAccount_Previews().$providedServer)
+        RegisterAccount()
     }
 }
+
+
+
+ 

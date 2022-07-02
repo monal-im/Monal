@@ -244,7 +244,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         ];
     }
     UNNotificationCategory* messageCategory;
-    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings | UNAuthorizationOptionProvisional;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings;
+#if TARGET_OS_MACCATALYST
+    authOptions |= UNAuthorizationOptionProvisional;
+#endif
     messageCategory = [UNNotificationCategory
         categoryWithIdentifier:@"message"
         actions:@[replyAction, markAsReadAction]
@@ -281,13 +284,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 [[HelperTools defaultsDB] removeObjectForKey:@"pushToken"];
                 [[MLXMPPManager sharedInstance] setPushToken:nil];
                 
-                //unregister from push appserver
                 if((oldToken != nil && oldToken.length != 0) || oldGranted)
                 {
-                    DDLogWarn(@"Unregistering node from appserver!");
-#ifndef IS_ALPHA
-                    [[MLXMPPManager sharedInstance] unregisterPush];
-#endif
                     //this is only needed for better UI (settings --> noifications should reflect the proper state)
                     //both invalidations are needed because we don't know the timing of this notification granting handler
                     DDLogInfo(@"Invalidating all account states...");
@@ -437,132 +435,132 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
  */
 -(void) handleXMPPURL:(NSURL*) url
 {
-    //TODO just uses fist enabled account. maybe change in the future
-    xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
-    NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-    DDLogVerbose(@"URI path '%@'", components.path);
-    DDLogVerbose(@"URI query '%@'", components.query);
-    
-    NSString* jid = components.path;
-    NSDictionary* jidParts = [HelperTools splitJid:jid];
-    BOOL isRegister = NO;
-    BOOL isRoster = NO;
-    BOOL isGroupJoin = NO;
-    BOOL isIbr = NO;
-    NSString* preauthToken = nil;
-    //someone had the really superior (NOT!) idea to split uri query parts by ';' instead of the standard '&' making all existing uri libs useless
-    //see: https://xmpp.org/extensions/xep-0147.html
-    //blame this author: Peter Saint-Andre
-    NSArray* queryItems = [components.query componentsSeparatedByString:@";"];
-    for(NSString* item in queryItems)
-    {
-        NSArray* itemParts = [item componentsSeparatedByString:@"="];
-        NSString* name = itemParts[0];
-        NSString* value = @"";
-        if([itemParts count] > 1)
-            value = itemParts[1];
-        DDLogVerbose(@"URI part '%@' = '%@'", name, value);
-        if([name isEqualToString:@"register"])
-            isRegister = YES;
-        if([name isEqualToString:@"roster"])
-            isRoster = YES;
-        if([name isEqualToString:@"join"])
-            isGroupJoin = YES;
-        if([name isEqualToString:@"ibr"] && [value isEqualToString:@"y"])
-            isIbr = YES;
-        if([name isEqualToString:@"preauth"])
-            preauthToken = [value copy];
-    }
-    
-    if(!jidParts[@"host"])
-    {
-        DDLogError(@"Ignoring xmpp: uri without host jid part!");
-        return;
-    }
-    
-    if(isRegister || (isRoster && account==nil && isIbr))
-    {
-        NSString* username = nilDefault(jidParts[@"node"], @"");
-        NSString* host = jidParts[@"host"];
-        
-        if(isRoster)
-            username = @"";         //roster does not specify a predefined username for the new account, register does (optional)
-        
-        //this should never happen
-        MLAssert(self.activeChats != nil, @"Can not handle register invite, active chats not loaded!", (@{
-           @"components": components,
-           @"username": username,
-           @"host": host,
-        }));
-        
-        weakify(self);
-        [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^{
-            strongify(self);
+    //make sure we have the active chats ui loaded and accessible
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        while(self.activeChats == nil)
+            usleep(100000);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //TODO just uses fist enabled account. maybe change in the future
             xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+            NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+            DDLogVerbose(@"URI path '%@'", components.path);
+            DDLogVerbose(@"URI query '%@'", components.query);
             
-            //this should never happen
-            MLAssert(account != nil, @"Can not use account after register!", (@{
-                @"components": components,
-                @"username": username,
-                @"host": host,
-            }));
+            NSString* jid = components.path;
+            NSDictionary* jidParts = [HelperTools splitJid:jid];
+            BOOL isRegister = NO;
+            BOOL isRoster = NO;
+            BOOL isGroupJoin = NO;
+            BOOL isIbr = NO;
+            NSString* preauthToken = nil;
+            //someone had the really superior (NOT!) idea to split uri query parts by ';' instead of the standard '&' making all existing uri libs useless
+            //see: https://xmpp.org/extensions/xep-0147.html
+            //blame this author: Peter Saint-Andre
+            NSArray* queryItems = [components.query componentsSeparatedByString:@";"];
+            for(NSString* item in queryItems)
+            {
+                NSArray* itemParts = [item componentsSeparatedByString:@"="];
+                NSString* name = itemParts[0];
+                NSString* value = @"";
+                if([itemParts count] > 1)
+                    value = itemParts[1];
+                DDLogVerbose(@"URI part '%@' = '%@'", name, value);
+                if([name isEqualToString:@"register"])
+                    isRegister = YES;
+                if([name isEqualToString:@"roster"])
+                    isRoster = YES;
+                if([name isEqualToString:@"join"])
+                    isGroupJoin = YES;
+                if([name isEqualToString:@"ibr"] && [value isEqualToString:@"y"])
+                    isIbr = YES;
+                if([name isEqualToString:@"preauth"])
+                    preauthToken = [value copy];
+            }
             
-            if(account != nil)      //silence memory warning despite assertion above
+            if(!jidParts[@"host"])
+            {
+                DDLogError(@"Ignoring xmpp: uri without host jid part!");
+                return;
+            }
+            
+            if(isRegister || (isRoster && account==nil && isIbr))
+            {
+                NSString* username = nilDefault(jidParts[@"node"], @"");
+                NSString* host = jidParts[@"host"];
+                
+                if(isRoster)
+                    username = @"";         //roster does not specify a predefined username for the new account, register does (optional)
+                
+                weakify(self);
+                [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^{
+                    strongify(self);
+                    xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+                    
+                    //this should never happen
+                    MLAssert(account != nil, @"Can not use account after register!", (@{
+                        @"components": components,
+                        @"username": username,
+                        @"host": host,
+                    }));
+                    
+                    if(account != nil)      //silence memory warning despite assertion above
+                    {
+                        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                        //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
+                        [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
+                        [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
+                        [self openChatOfContact:contact];
+                    }
+                }];
+                return;
+            }
+            
+            if(isRoster && account)
             {
                 MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
                 //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
                 [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
                 [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
                 [self openChatOfContact:contact];
-            }
-        }];
-        return;
-    }
-    
-    if(isRoster && account)
-    {
-        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-        //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
-        [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
-        [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
-        [self openChatOfContact:contact];
-        return;
-    }
-    
-    if(isGroupJoin && account)
-    {
-        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-        contact.isGroup = YES;                                  //this is a group --> tell addContact: to join this group
-        //wait for join to finish before opening contact
-        NSNumber* accountNo = account.accountNo;                //needed because of retain cycle
-        [account.mucProcessor addUIHandler:^(id _data) {
-            NSDictionary* data = (NSDictionary*)_data;
-            if(![data[@"success"] boolValue])
-            {
-                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error entering groupchat", @"") message:data[@"errorMessage"] preferredStyle:UIAlertControllerStyleAlert];
-                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                }]];
-                [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
-                [[MLXMPPManager sharedInstance] removeContact:contact];
                 return;
             }
-            [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:accountNo];
-            [self openChatOfContact:contact];
-        } forMuc:jid];
-        [[MLXMPPManager sharedInstance] addContact:contact];    //will handle group joins and normal contacts transparently
-        return;
-    }
-    
-    //fallback: only add to local roster, but don't subscribe
-    //TODO: show toast in chatView that informs the user that this contact was not added to his contact list
-    if(account)
-    {
-        [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
-        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-        [self openChatOfContact:contact];
-    }
-    
-    DDLogError(@"No account available to handel xmpp: uri!");
+            
+            if(isGroupJoin && account)
+            {
+                MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                contact.isGroup = YES;                                  //this is a group --> tell addContact: to join this group
+                //wait for join to finish before opening contact
+                NSNumber* accountNo = account.accountNo;                //needed because of retain cycle
+                [account.mucProcessor addUIHandler:^(id _data) {
+                    NSDictionary* data = (NSDictionary*)_data;
+                    if(![data[@"success"] boolValue])
+                    {
+                        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error entering groupchat", @"") message:data[@"errorMessage"] preferredStyle:UIAlertControllerStyleAlert];
+                        [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                        }]];
+                        [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
+                        [[MLXMPPManager sharedInstance] removeContact:contact];
+                        return;
+                    }
+                    [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:accountNo];
+                    [self openChatOfContact:contact];
+                } forMuc:jid];
+                [[MLXMPPManager sharedInstance] addContact:contact];    //will handle group joins and normal contacts transparently
+                return;
+            }
+            
+            //fallback: only add to local roster, but don't subscribe
+            //TODO: show toast in chatView that informs the user that this contact was not added to his contact list
+            if(account)
+            {
+                [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
+                MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                [self openChatOfContact:contact];
+            }
+            
+            DDLogError(@"No account available to handel xmpp: uri!");
+        });
+    });
 }
 
 -(BOOL) application:(UIApplication*) app openURL:(NSURL*) url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*) options

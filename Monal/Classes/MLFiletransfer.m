@@ -316,10 +316,7 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
     
     if(![_fileManager fileExistsAtPath:cacheFile])
     {
-        DDLogError(@"Source file does not exists?!");
-#ifdef DEBUG
-        @throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_FILE_NOT_PRESENT" reason:@"Could not hardlink cacheFile, file not present!" userInfo:@{@"cacheFile": cacheFile}];
-#endif
+        DDLogWarn(@"Could not hardlink cacheFile, file not present: %@", cacheFile);
         return;
     }
     

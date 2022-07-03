@@ -136,7 +136,7 @@ struct RegisterAccount: View {
     }
 
     private func createXMPPInstance() -> xmpp {
-        let identity = MLXMPPIdentity.init(jid: String.init(format: "nothing@%@", self.providedServer), password: "nothing", andResource: "MonalReg");
+        let identity = MLXMPPIdentity.init(jid: String.init(format: "nothing@%@", self.actualServer), password: "nothing", andResource: "MonalReg");
         let server = MLXMPPServer.init(host: "", andPort: 5222, andDirectTLS: false)
         return xmpp.init(server: server, andIdentity: identity, andAccountNo: -1)
     }
@@ -149,7 +149,7 @@ struct RegisterAccount: View {
             xmppAccount.disconnect(true)
             if(success == true) {
                 let dic = [
-                    kDomain: self.providedServer,
+                    kDomain: self.actualServer,
                     kUsername: self.username,
                     kResource: HelperTools.encodeRandomResource(),
                     kEnabled: true,
@@ -158,7 +158,7 @@ struct RegisterAccount: View {
 
                 let accountNo = DataLayer.sharedInstance().addAccount(with: dic);
                 if accountNo != nil {
-                    MLXMPPManager.sharedInstance().addNewAccount(toKeychain: accountNo!, withPassword: "")
+                    MLXMPPManager.sharedInstance().addNewAccount(toKeychain: accountNo!, withPassword: self.password)
                 }
                 alertPrompt.title = Text("Success!")
                 alertPrompt.message = Text("You are set up and connected.")

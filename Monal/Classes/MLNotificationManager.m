@@ -20,6 +20,7 @@
 @import UserNotifications;
 @import CoreServices;
 @import Intents;
+@import AVFoundation;
 
 @interface MLNotificationManager ()
 @property (nonatomic, assign) NotificationPrivacySettingOption notificationPrivacySetting;
@@ -309,20 +310,96 @@
             if(info)
             {
                 NSString* mimeType = info[@"mimeType"];
-                if(![info[@"needsDownloading"] boolValue] && [mimeType hasPrefix:@"audio/"])
+                if(![info[@"needsDownloading"] boolValue])
                 {
-                    NSString* typeHint = (NSString*)kUTTypeMPEG4Audio;
-                    if([mimeType isEqualToString:@"audio/mpeg"])
-                        typeHint = (NSString*)kUTTypeMP3;
-                    if([mimeType isEqualToString:@"audio/mp4"])
-                        typeHint = (NSString*)kUTTypeMPEG4Audio;
-                    if([mimeType isEqualToString:@"audio/wav"])
-                        typeHint = (NSString*)kUTTypeWaveformAudio;
-                    if([mimeType isEqualToString:@"audio/x-aiff"])
-                        typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
+                    /*
+                    if([mimeType hasPrefix:@"audio/"])
+                    {
+                        NSString* typeHint = (NSString*)kUTTypeMPEG4Audio;
+                        if([mimeType isEqualToString:@"audio/mpeg"])
+                            typeHint = (NSString*)kUTTypeMP3;
+                        if([mimeType isEqualToString:@"audio/mp4"])
+                            typeHint = (NSString*)kUTTypeMPEG4Audio;
+                        if([mimeType isEqualToString:@"audio/wav"])
+                            typeHint = (NSString*)kUTTypeWaveformAudio;
+                        if([mimeType isEqualToString:@"audio/x-aiff"])
+                            typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
+                        
+                        if(typeHint != nil)
+                            audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
+                    }
+                    */
                     
-                    if(typeHint != nil)
-                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
+                    if([mimeType hasPrefix:@"image/"])
+                    {
+                        UNNotificationAttachment* attachment;
+                        NSString* typeHint = (NSString*)kUTTypePNG;
+                        if([mimeType isEqualToString:@"image/jpeg"])
+                            typeHint = (NSString*)kUTTypeJPEG;
+                        if([mimeType isEqualToString:@"image/png"])
+                            typeHint = (NSString*)kUTTypePNG;
+                        if([mimeType isEqualToString:@"image/gif"])
+                            typeHint = (NSString*)kUTTypeGIF;
+                        NSError *error;
+                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+                        if(error)
+                            DDLogError(@"Error %@", error);
+                        else if(attachment)
+                        {
+                            content.attachments = @[attachment];
+                            msgText = NSLocalizedString(@"📷 An Image", @"");
+                        }
+                    }
+                    else if([mimeType hasPrefix:@"audio/"])
+                    {
+                        UNNotificationAttachment* attachment;
+                        NSString* typeHint = (NSString*)kUTTypeMPEG4Audio;
+                        if([mimeType isEqualToString:@"audio/mpeg"])
+                            typeHint = (NSString*)kUTTypeMP3;
+                        if([mimeType isEqualToString:@"audio/mp4"])
+                            typeHint = (NSString*)kUTTypeMPEG4Audio;
+                        if([mimeType isEqualToString:@"audio/wav"])
+                            typeHint = (NSString*)kUTTypeWaveformAudio;
+                        if([mimeType isEqualToString:@"audio/x-aiff"])
+                            typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
+                        NSError *error;
+                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+                        if(error)
+                            DDLogError(@"Error %@", error);
+                        else if(attachment)
+                        {
+                            content.attachments = @[attachment];
+                            msgText = NSLocalizedString(@"🎵 An Audiomessage", @"");
+                        }
+                    }
+                    else if([mimeType hasPrefix:@"video/"])
+                    {
+                        UNNotificationAttachment* attachment;
+                        NSString* typeHint = @"public.mpeg-4";
+                        if([mimeType isEqualToString:@"video/mpeg"])
+                            typeHint = @"public.mpeg";
+                        if([mimeType isEqualToString:@"video/mp4"])
+                            typeHint = @"public.mpeg-4";
+                        if([mimeType isEqualToString:@"video/x-msvideo"])
+                            typeHint = @"public.avi";
+                        if([mimeType isEqualToString:@"video/quicktime"])
+                            typeHint = @"com.apple.quicktime-movie";
+                        if([mimeType isEqualToString:@"video/3gpp"])
+                            typeHint = (NSString*)AVFileType3GPP;
+                        NSError *error;
+                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+                        if(error)
+                            DDLogError(@"Error %@", error);
+                        else if(attachment)
+                        {
+                            content.attachments = @[attachment];
+                            msgText = NSLocalizedString(@"🎥 A Video", @"");
+                        }
+                    }
+                    else if([mimeType isEqualToString:@"application/pdf"])
+                        msgText = NSLocalizedString(@"📄 A Document", @"");
+                    else
+                        msgText = NSLocalizedString(@"📁 A File", @"");
                 }
                 else
                 {
@@ -335,20 +412,20 @@
                     else if([mimeType isEqualToString:@"application/pdf"])
                         msgText = NSLocalizedString(@"📄 A Document", @"");
                     else
-                        msgText = NSLocalizedString(@"Sent a File 📁", @"");
+                        msgText = NSLocalizedString(@"📁 A File", @"");
                 }
             }
             else
             {
                 // empty info dict default to "Sent a file"
                 DDLogWarn(@"Got filetransfer with unknown type");
-                msgText = NSLocalizedString(@"Sent a File 📁", @"");
+                msgText = NSLocalizedString(@"A File 📁", @"");
             }
         }
         else if([message.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
-            msgText = NSLocalizedString(@"Sent a Link 🔗", @"");
+            msgText = NSLocalizedString(@"A Link 🔗", @"");
         else if([message.messageType isEqualToString:kMessageTypeGeo])
-            msgText = NSLocalizedString(@"Sent a Location 📍", @"");
+            msgText = NSLocalizedString(@"A Location 📍", @"");
     }
     content.body = msgText;     //save message text to notification content
     

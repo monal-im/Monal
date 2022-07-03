@@ -239,11 +239,13 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 -(void) addReconnectionHandler:(MLHandler*) handler;
 
-
--(void) sendSDP:(RTCSessionDescription*) sdp toContact:(MLContact*) contact;
--(void) sendCandidate:(RTCIceCandidate*) candidate toContact:(MLContact*) contact;
+-(void) queryExternalServicesOn:(NSString*) jid;
+-(void) queryExternalServiceCredentialsFor:(NSDictionary*) service completion:(monal_id_block_t) completion;
 
 -(void) initiateAudioCall:(NSString*) uuid toContact:(MLContact*) contact;
+
+-(void) sendSDP:(RTCSessionDescription*) sdp forCallID:(NSString*) callID toFullJid:(NSString*) fullJid;
+-(void) sendCandidate:(RTCIceCandidate*) candidate forCallID:(NSString*) callID toFullJid:(NSString*) fullJid;
 
 @end
 

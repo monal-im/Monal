@@ -76,34 +76,17 @@
 
 +(void) processSetIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    if([iqNode check:@"{urn:tmp:monal:sdp:1}sdp"])
+    if([iqNode check:@"{urn:tmp:monal:webrtc:sdp:1}sdp"])
     {
-        DDLogDebug(@"Received SDP offer: %@", iqNode);
-        NSString* rawSDP = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:sdp:1}sdp#|base64"] encoding:NSUTF8StringEncoding];
-        NSString* type = [iqNode findFirst:@"{urn:tmp:monal:sdp:1}sdp@type"];
-        RTCSessionDescription* resultSDP = [[RTCSessionDescription alloc] initWithType:[RTCSessionDescription typeForString:type] sdp:rawSDP];
-        [[MLNotificationQueue currentQueue] postNotificationName:@"kMonalIncomingSDP" object:account userInfo:@{
-            @"from": iqNode.from,
-            @"resource": iqNode.fromResource,
-            @"sdp":resultSDP,
-        }];
-        [account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
+        DDLogDebug(@"Received Monal SDP offer: %@", iqNode);
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingSDP object:account userInfo:@{@"iqNode": iqNode}];
         return;
     }
     
-    if([iqNode check:@"{urn:tmp:monal:candidate:1}candidate"])
+    if([iqNode check:@"{urn:tmp:monal:webrtc:candidate:1}candidate"])
     {
         DDLogDebug(@"Received ICE candidate: %@", iqNode);
-        NSString* rawSDP = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:candidate:1}candidate#|base64"] encoding:NSUTF8StringEncoding];
-        NSNumber* sdpMLineIndex = [iqNode findFirst:@"{urn:tmp:monal:candidate:1}candidate@sdpMLineIndex|int"];
-        NSString* sdpMid = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:candidate:1}candidate@sdpMid|base64"] encoding:NSUTF8StringEncoding];;
-        RTCIceCandidate* incomingCandidate = [[RTCIceCandidate alloc] initWithSdp:rawSDP sdpMLineIndex:[sdpMLineIndex intValue] sdpMid:sdpMid];
-        [[MLNotificationQueue currentQueue] postNotificationName:@"kMonalIncomingCandidate" object:account userInfo:@{
-            @"from": iqNode.from,
-            @"resource": iqNode.fromResource,
-            @"candidate":incomingCandidate,
-        }];
-        [account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingICECandidate object:account userInfo:@{@"iqNode": iqNode}];
         return;
     }
     
@@ -522,6 +505,27 @@ $$class_handler(handleServerDiscoItems, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
             [discoInfo setiqTo:[item objectForKey:@"jid"]];
             [discoInfo setDiscoInfoNode];
             [account sendIq:discoInfo withHandler:$newHandler(self, handleServiceDiscoInfo)];
+            
+            [account queryExternalServicesOn:[item objectForKey:@"jid"]];
+        }
+    }
+$$
+
+$$class_handler(handleExternalDisco, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"External service disco query to our server returned an error: %@", [iqNode findFirst:@"error"]);
+        [HelperTools postError:NSLocalizedString(@"XMPP External Service Disco Error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
+        return;
+    }
+    
+    for(MLXMLNode* service in [iqNode find:@"{urn:xmpp:extdisco:2}services/service"])
+    {
+        if([service check:@"/<type=stun>"] || [service check:@"/<type=turn>"])
+        {
+            NSMutableDictionary* info = [NSMutableDictionary dictionaryWithDictionary:@{@"directoryJid": iqNode.from}];
+            [info addEntriesFromDictionary:[service findFirst:@"/@@"]];
+            [account.connectionProperties.discoveredStunTurnServers addObject:info];
         }
     }
 $$

@@ -9,19 +9,15 @@
 #import "MLConstants.h"
 
 @import UIKit;
-@import PushKit;
-@import CallKit;
 @import UserNotifications;
-@import WebRTC;
 
 @class ActiveChatsViewController;
 @class MLContact;
 
-@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate, PKPushRegistryDelegate, CXProviderDelegate>
+@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate>
 
 @property (nonatomic, strong) UIWindow* _Nullable window;
 @property (nonatomic, weak) ActiveChatsViewController* _Nullable activeChats;
-@property (nonatomic, strong) CXProvider* _Nullable cxprovider;
 
 -(void) updateUnread;
 -(void) handleXMPPURL:(NSURL* _Nonnull) url;

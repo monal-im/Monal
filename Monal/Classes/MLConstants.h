@@ -102,6 +102,8 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 
 //all other constants needed
 #define kMonalIncomingVoipCall @"kMonalIncomingVoipCall"
+#define kMonalIncomingSDP @"kMonalIncomingSDP"
+#define kMonalIncomingICECandidate @"kMonalIncomingICECandidate"
 #define kMonalWillBeFreezed @"kMonalWillBeFreezed"
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMonalMucSubjectChanged @"kMonalMucSubjectChanged"

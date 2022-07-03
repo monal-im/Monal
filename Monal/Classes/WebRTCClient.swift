@@ -10,6 +10,7 @@
 import Foundation
 import WebRTC
 
+@objc
 protocol WebRTCClientDelegate: AnyObject {
     func webRTCClient(_ client: WebRTCClient, didDiscoverLocalCandidate candidate: RTCIceCandidate)
     func webRTCClient(_ client: WebRTCClient, didChangeConnectionState state: RTCIceConnectionState)
@@ -28,7 +29,7 @@ final class WebRTCClient: NSObject {
         return RTCPeerConnectionFactory(encoderFactory: videoEncoderFactory, decoderFactory: videoDecoderFactory)
     }()
     
-    weak var delegate: WebRTCClientDelegate?
+    @objc var delegate: WebRTCClientDelegate?
     private let peerConnection: RTCPeerConnection
     private let rtcAudioSession =  RTCAudioSession.sharedInstance()
     private let audioQueue = DispatchQueue(label: "audio")
@@ -46,9 +47,11 @@ final class WebRTCClient: NSObject {
     }
     
     @objc
-    required init(iceServers: [String]) {
+    required init(iceServers: [RTCIceServer]) {
         let config = RTCConfiguration()
-        config.iceServers = [RTCIceServer(urlStrings: iceServers)]
+        config.iceTransportPolicy = .all
+        //config.iceTransportPolicy = .relay
+        config.iceServers = iceServers
         
         // Unified plan is more superior than planB
         config.sdpSemantics = .unifiedPlan
@@ -78,6 +81,7 @@ final class WebRTCClient: NSObject {
     }
     
     // MARK: Signaling
+    @objc
     func offer(completion: @escaping (_ sdp: RTCSessionDescription) -> Void) {
         let constrains = RTCMediaConstraints(mandatoryConstraints: self.mediaConstrains,
                                              optionalConstraints: nil)
@@ -92,6 +96,7 @@ final class WebRTCClient: NSObject {
         }
     }
     
+    @objc
     func answer(completion: @escaping (_ sdp: RTCSessionDescription) -> Void)  {
         let constrains = RTCMediaConstraints(mandatoryConstraints: self.mediaConstrains,
                                              optionalConstraints: nil)
@@ -106,15 +111,18 @@ final class WebRTCClient: NSObject {
         }
     }
     
-    func set(remoteSdp: RTCSessionDescription, completion: @escaping (Error?) -> ()) {
+    @objc
+    func setRemoteSdp(_ remoteSdp: RTCSessionDescription, completion: @escaping (Error?) -> ()) {
         self.peerConnection.setRemoteDescription(remoteSdp, completionHandler: completion)
     }
     
-    func set(remoteCandidate: RTCIceCandidate, completion: @escaping (Error?) -> ()) {
+    @objc
+    func setRemoteCandidate(_ remoteCandidate : RTCIceCandidate, completion: @escaping (Error?) -> ()) {
         self.peerConnection.add(remoteCandidate, completionHandler: completion)
     }
     
     // MARK: Media
+    @objc
     func startCaptureLocalVideo(renderer: RTCVideoRenderer) {
         guard let capturer = self.videoCapturer as? RTCCameraVideoCapturer else {
             return
@@ -142,6 +150,7 @@ final class WebRTCClient: NSObject {
         self.localVideoTrack?.add(renderer)
     }
     
+    @objc
     func renderRemoteVideo(to renderer: RTCVideoRenderer) {
         self.remoteVideoTrack?.add(renderer)
     }
@@ -209,6 +218,7 @@ final class WebRTCClient: NSObject {
         return dataChannel
     }
     
+    @objc
     func sendData(_ data: Data) {
         let buffer = RTCDataBuffer(data: data, isBinary: true)
         self.remoteDataChannel?.sendData(buffer)

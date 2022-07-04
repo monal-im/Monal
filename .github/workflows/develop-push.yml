@@ -27,8 +27,5 @@ jobs:
       - run: git config --local user.email "pushBot@monal.im"
       - run: git config --local user.name "Monal-IM-Push[BOT]"
       - run: chmod +x ./scripts/rebase.sh
-      - run: chmod +x ./scripts/updateLocalization.sh
-      - name: Update translations
-        run: ./scripts/updateLocalization.sh BUILDSERVER
       - name: Rebase
         run: ./scripts/rebase.sh

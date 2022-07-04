@@ -9,7 +9,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  rebaseAlpha:
+  rebaseAlphaAndUpdateTranslations:
     # The type of runner that the job will run on
     runs-on: self-hosted
     steps:
@@ -27,5 +27,8 @@ jobs:
       - run: git config --local user.email "pushBot@monal.im"
       - run: git config --local user.name "Monal-IM-Push[BOT]"
       - run: chmod +x ./scripts/rebase.sh
+      - run: chmod +x ./scripts/updateLocalization.sh
+      - name: Update translations
+        run: ./scripts/updateLocalization.sh
       - name: Rebase
         run: ./scripts/rebase.sh

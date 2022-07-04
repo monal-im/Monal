@@ -18,7 +18,8 @@
 #import "MLFiletransfer.h"
 #import "xmpp.h"
 
-static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
+static NSString* kBackgroundProcessingTask = @"im.monal.process";
+static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
 
 @interface NotificationService ()
 +(BOOL) getAppexCleanShutdownStatus;
@@ -269,7 +270,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             //don't post sync errors here, already did so above (see explanation there)
             
             //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
-            [self scheduleBackgroundFetchingTask:![[MLXMPPManager sharedInstance] allAccountsIdle]];
+            [self scheduleBackgroundTask:![[MLXMPPManager sharedInstance] allAccountsIdle]];
             
             //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
             //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
@@ -359,29 +360,43 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:NO];
 }
 
--(void) scheduleBackgroundFetchingTask:(BOOL) force
+-(void) scheduleBackgroundTask:(BOOL) force
 {
-    DDLogInfo(@"Scheduling new BackgroundFetchingTask with force=%s...", force ? "yes" : "no");
+    DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");
     [HelperTools dispatchSyncReentrant:^{
-        NSError *error = NULL;
-        // cancel existing task (if any)
-        [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
-        // new task
-        //BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-        BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-        //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-        request.requiresNetworkConnectivity = YES;
-        request.requiresExternalPower = NO;
+        NSError* error;
         if(force)
-            request.earliestBeginDate = nil;
+        {
+            // cancel existing task (if any)
+            //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundProcessingTask];
+            // new task
+            BGProcessingTaskRequest* processingRequest = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundProcessingTask];
+            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+            processingRequest.earliestBeginDate = nil;
+            processingRequest.requiresNetworkConnectivity = YES;
+            processingRequest.requiresExternalPower = NO;
+            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:processingRequest error:&error])
+            {
+                // Errorcodes https://stackoverflow.com/a/58224050/872051
+                DDLogError(@"Failed to submit BGTask request %@: %@", processingRequest, error);
+            }
+            else
+                DDLogVerbose(@"Success submitting BGTask request %@", processingRequest);
+        }
         else
-            request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
-        BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
-        if(!success) {
-            // Errorcodes https://stackoverflow.com/a/58224050/872051
-            DDLogError(@"Failed to submit BGTask request: %@", error);
-        } else {
-            DDLogVerbose(@"Success submitting BGTask request %@", request);
+        {
+            // cancel existing task (if any)
+            //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
+            // new task
+            BGAppRefreshTaskRequest* refreshingRequest = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundRefreshingTask];
+            refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
+            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:refreshingRequest error:&error])
+            {
+                // Errorcodes https://stackoverflow.com/a/58224050/872051
+                DDLogError(@"Failed to submit BGTask request %@: %@", refreshingRequest, error);
+            }
+            else
+                DDLogVerbose(@"Success submitting BGTask request %@", refreshingRequest);
         }
     } onQueue:dispatch_get_main_queue()];
 }

@@ -117,7 +117,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalMessageErrorNotice @"kMonalMessageErrorNotice"
 #define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
 #define kXMPPError @"kXMPPError"
-#define kScheduleBackgroundFetchingTask @"kScheduleBackgroundFetchingTask"
+#define kScheduleBackgroundTask @"kScheduleBackgroundTask"
 #define kMonalUpdateUnread @"kMonalUpdateUnread"
 
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"

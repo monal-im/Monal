@@ -29,6 +29,6 @@ jobs:
       - run: chmod +x ./scripts/rebase.sh
       - run: chmod +x ./scripts/updateLocalization.sh
       - name: Update translations
-        run: ./scripts/updateLocalization.sh
+        run: ./scripts/updateLocalization.sh BUILDSERVER
       - name: Rebase
         run: ./scripts/rebase.sh

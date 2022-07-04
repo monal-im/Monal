@@ -8,11 +8,11 @@ If you want to  use the latest stable versions, search for Monal in the iOS or O
 [Visit the blog to read about the development](https://monal.im)!
 
 ## Releases
-|        | iOS                                                      | macOS                                                    | macOS (homebrew)                            |
-|--------|----------------------------------------------------------|----------------------------------------------------------|---------------------------------------------|
-| Stable | [App Store](https://apps.apple.com/app/id317711500)      | [App Store](https://apps.apple.com/app/id1499227291)     |                                             |
-| Beta   | [Testflight](https://testflight.apple.com/join/RjIlyvqa) | [Testflight](https://testflight.apple.com/join/nBWaZryI) | brew install --cask monal                   |
-| Alpha  |                                                          |                                                          | brew tap monal-im/homebrew-monal-alpha<br>brew install --cask monal-alpha |
+|        | iOS                                                           | macOS                                                    | macOS (homebrew)                                                          |
+|--------|---------------------------------------------------------------|----------------------------------------------------------|---------------------------------------------------------------------------|
+| Stable | [App Store](https://apps.apple.com/app/id317711500)           | [App Store](https://apps.apple.com/app/id1499227291)     |                                                                           |
+| Beta   | [Testflight](https://testflight.apple.com/join/RjIlyvqa)      | [Testflight](https://testflight.apple.com/join/nBWaZryI) | brew install --cask monal                                                 |
+| Alpha  | upon request to [info@monal-im.org](mailto:info@monal-im.org) |                                                          | brew tap monal-im/homebrew-monal-alpha<br>brew install --cask monal-alpha |
 
 
 ## Support Chat (MUC) and Wiki

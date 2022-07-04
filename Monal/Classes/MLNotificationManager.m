@@ -310,6 +310,18 @@
             if(info)
             {
                 NSString* mimeType = info[@"mimeType"];
+                
+                if([mimeType hasPrefix:@"image/"])
+                    msgText = NSLocalizedString(@"📷 An Image", @"");
+                else if([mimeType hasPrefix:@"audio/"])
+                    msgText = NSLocalizedString(@"🎵 A Audiomessage", @"");
+                else if([mimeType hasPrefix:@"video/"])
+                    msgText = NSLocalizedString(@"🎥 A Video", @"");
+                else if([mimeType isEqualToString:@"application/pdf"])
+                    msgText = NSLocalizedString(@"📄 A Document", @"");
+                else
+                    msgText = NSLocalizedString(@"📁 A File", @"");
+                
                 if(![info[@"needsDownloading"] boolValue])
                 {
                     /*
@@ -327,6 +339,7 @@
                         
                         if(typeHint != nil)
                             audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
+                        msgText = NSLocalizedString(@"🎵 A Audiomessage", @"");
                     }
                     */
                     
@@ -340,15 +353,12 @@
                             typeHint = (NSString*)kUTTypePNG;
                         if([mimeType isEqualToString:@"image/gif"])
                             typeHint = (NSString*)kUTTypeGIF;
-                        NSError *error;
+                        NSError* error;
                         attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
                         if(error)
                             DDLogError(@"Error %@", error);
                         else if(attachment)
-                        {
                             content.attachments = @[attachment];
-                            msgText = NSLocalizedString(@"📷 An Image", @"");
-                        }
                     }
                     else if([mimeType hasPrefix:@"audio/"])
                     {
@@ -362,15 +372,14 @@
                             typeHint = (NSString*)kUTTypeWaveformAudio;
                         if([mimeType isEqualToString:@"audio/x-aiff"])
                             typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
-                        NSError *error;
+                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
+                        DDLogVerbose(@"Added audio attachment(%@ = %@): %@", mimeType, typeHint, audioAttachment);
+                        NSError* error;
                         attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
                         if(error)
                             DDLogError(@"Error %@", error);
                         else if(attachment)
-                        {
                             content.attachments = @[attachment];
-                            msgText = NSLocalizedString(@"🎵 An Audiomessage", @"");
-                        }
                     }
                     else if([mimeType hasPrefix:@"video/"])
                     {
@@ -386,33 +395,13 @@
                             typeHint = @"com.apple.quicktime-movie";
                         if([mimeType isEqualToString:@"video/3gpp"])
                             typeHint = (NSString*)AVFileType3GPP;
-                        NSError *error;
+                        NSError* error;
                         attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
                         if(error)
                             DDLogError(@"Error %@", error);
                         else if(attachment)
-                        {
                             content.attachments = @[attachment];
-                            msgText = NSLocalizedString(@"🎥 A Video", @"");
-                        }
                     }
-                    else if([mimeType isEqualToString:@"application/pdf"])
-                        msgText = NSLocalizedString(@"📄 A Document", @"");
-                    else
-                        msgText = NSLocalizedString(@"📁 A File", @"");
-                }
-                else
-                {
-                    if([mimeType hasPrefix:@"image/"])
-                        msgText = NSLocalizedString(@"📷 An Image", @"");
-                    else if([mimeType hasPrefix:@"audio/"])
-                        msgText = NSLocalizedString(@"🎵 A Audiomessage", @"");
-                    else if([mimeType hasPrefix:@"video/"])
-                        msgText = NSLocalizedString(@"🎥 A Video", @"");
-                    else if([mimeType isEqualToString:@"application/pdf"])
-                        msgText = NSLocalizedString(@"📄 A Document", @"");
-                    else
-                        msgText = NSLocalizedString(@"📁 A File", @"");
                 }
             }
             else

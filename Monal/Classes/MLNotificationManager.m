@@ -419,13 +419,13 @@
             {
                 // empty info dict default to "Sent a file"
                 DDLogWarn(@"Got filetransfer with unknown type");
-                msgText = NSLocalizedString(@"A File 📁", @"");
+                msgText = NSLocalizedString(@"📁 A File", @"");
             }
         }
         else if([message.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
-            msgText = NSLocalizedString(@"A Link 🔗", @"");
+            msgText = NSLocalizedString(@"🔗 A Link", @"");
         else if([message.messageType isEqualToString:kMessageTypeGeo])
-            msgText = NSLocalizedString(@"A Location 📍", @"");
+            msgText = NSLocalizedString(@"📍 A Location", @"");
     }
     content.body = msgText;     //save message text to notification content
     

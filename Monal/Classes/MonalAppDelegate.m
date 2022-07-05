@@ -1399,7 +1399,9 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
             //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
             // new task
             BGAppRefreshTaskRequest* refreshingRequest = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundRefreshingTask];
-            refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
+            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+            refreshingRequest.earliestBeginDate = nil;
+            //refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
             if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:refreshingRequest error:&error])
             {
                 // Errorcodes https://stackoverflow.com/a/58224050/872051

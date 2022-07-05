@@ -51,8 +51,13 @@ struct RegisterAccount: View {
     @State private var showLoading = false
     @State private var registerComplete = false
 
+    @State private var xmppAccount: xmpp?
+    @State private var captchaImg: Image?
+    @State private var hiddenFields: Dictionary<AnyHashable, Any> = [:]
+    @State private var captchaText: String = ""
+
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @State private var loadingOverlay = WelcomeLogInOverlayInPlace(headline: NSLocalizedString("Registering account...", comment: ""), description: "")
+    @State private var loadingOverlay = WelcomeLogInOverlayInPlace(headline: NSLocalizedString("", comment: ""), description: "")
 
     @State private var showWebView = false
 
@@ -142,11 +147,10 @@ struct RegisterAccount: View {
     }
 
     private func register() {
+        self.loadingOverlay.headline = NSLocalizedString("Registering account...", comment: "")
         self.showLoading = true
-        let xmppAccount = createXMPPInstance()
-        xmppAccount.registerUser(self.username, withPassword: self.password, captcha: nil, andHiddenFields: [:]) {success, errorMsg in
+        self.xmppAccount!.registerUser(self.username, withPassword: self.password, captcha: self.captchaText.isEmpty == true ? nil : self.captchaText, andHiddenFields: self.hiddenFields) {success, errorMsg in
             self.showLoading = false
-            xmppAccount.disconnect(true)
             if(success == true) {
                 let dic = [
                     kDomain: self.actualServer,
@@ -168,10 +172,32 @@ struct RegisterAccount: View {
                 let alertMsg = errorMsg ?? NSLocalizedString("Could not register your username. Please check your code or change the username and try again.", comment: "")
                 self.alertPrompt.title = Text("Registration Error")
                 self.alertPrompt.message = Text(alertMsg)
-
+                self.captchaText = ""
                 self.showAlert = true
+                fetchRequestForm() // < force reload the form to update the captcha
             }
         }
+    }
+    
+    private func fetchRequestForm() {
+        self.loadingOverlay.headline = NSLocalizedString("Fetching registration form...", comment: "")
+        self.showLoading = true
+        self.xmppAccount = createXMPPInstance()
+        self.xmppAccount!.disconnect(true)
+        self.xmppAccount!.requestRegForm(withToken: nil, andCompletion: {captchaData, hiddenFieldsDict in
+            self.hiddenFields = hiddenFieldsDict
+            if captchaData.isEmpty == true {
+                register()
+            } else {
+                self.showLoading = false
+                let captchaUIImg = UIImage.init(data: captchaData)
+                if captchaUIImg != nil {
+                    self.captchaImg = Image(uiImage: captchaUIImg!)
+                }
+            }
+        }, andErrorCompletion: {_, errorMsg in
+            self.showLoading = false
+        })
     }
 
     var body: some View {
@@ -198,6 +224,11 @@ struct RegisterAccount: View {
                                     }
                                 }
                             }
+                            .onChange(of: selectedServerIndex, perform: { (_) in
+                                self.captchaImg = nil
+                                self.captchaText = ""
+                                self.xmppAccount = nil
+                            })
                             .labelsHidden()
                             .pickerStyle(.inline)
                         }
@@ -214,9 +245,7 @@ struct RegisterAccount: View {
                             .padding(9.0)
                             .background(Color(UIColor.tertiarySystemFill))
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-
                         }
-                        
 
                         if (selectedServerIndex == 0) {
                             TextField("Provide XMPP-Server", text: Binding(get: { self.providedServer }, set: { string in self.providedServer = string.lowercased() }))
@@ -226,12 +255,29 @@ struct RegisterAccount: View {
                         TextField("Username", text: Binding(get: { self.username }, set: { string in self.username = string.lowercased() }))
                             .disableAutocorrection(true)
                         SecureField("Password", text: $password)
+                        if (self.captchaImg != nil) {
+                            HStack {
+                                self.captchaImg
+                                Spacer()
+                                Button(action: {
+                                    fetchRequestForm()
+                                }, label: {
+                                    Image(systemName: "arrow.clockwise")
+                                })
+                                .buttonStyle(.borderless)
+                            }
+                            TextField("Captcha", text: $captchaText)
+                        }
                         
                         Button(action: {
                             showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert)
                             
                             if (!showAlert) {
-                                register()
+                                if(self.xmppAccount == nil) {
+                                    fetchRequestForm()
+                                } else {
+                                    register()
+                                }
                             }
                         }){
                             Text("Register\(actualServerText)")
@@ -252,7 +298,7 @@ struct RegisterAccount: View {
                         Text("The selectable XMPP servers are public servers which are not affiliated to Monal. This registration page is provided for convenience only.")
                         .font(.system(size: 10))
                         .padding(.vertical, 8)
-                        
+
                         if (selectedServerIndex != 0) {
                             Button (action: {
                                 showWebView.toggle()

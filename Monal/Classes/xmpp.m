@@ -4412,6 +4412,11 @@ NSString* const kStanza = @"stanza";
     if(msg.isMuc && [@"channel" isEqualToString:msg.mucType])
         return;
     
+    MLContact* contact = [MLContact createContactFromJid:msg.buddyName andAccountNo:msg.accountId];
+    //don't send chatmarkers to 1:1 chats with users in our contact list that did not subscribe us (e.g. are not allowed to see us)
+    if(!contact.isGroup && !contact.isSubscribedFrom)
+        return;
+    
     XMPPMessage* displayedNode = [[XMPPMessage alloc] init];
     //the message type is needed so that the store hint is accepted by the server
     displayedNode.attributes[@"type"] = msg.isMuc ? @"groupchat" : @"chat";

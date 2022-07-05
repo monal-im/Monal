@@ -343,18 +343,24 @@ NSString *const kAskSubscribe=@"subscribe";
         _avatar = [[UIImage alloc] init];           //empty dummy image, to not save nil (should never happen, MLImageManager has default images)
 }
 
--(BOOL) isSubscribed
-{
-    return [self.subscription isEqualToString:kSubBoth]
-        || [self.subscription isEqualToString:kSubTo];
-}
-
 -(BOOL) isInRoster
 {
     // mucs have a subscription of both (ensured by the datalayer)
     return [self.subscription isEqualToString:kSubBoth]
         || [self.subscription isEqualToString:kSubTo]
         || [self.ask isEqualToString:kAskSubscribe];
+}
+
+-(BOOL) isSubscribedTo
+{
+    return [self.subscription isEqualToString:kSubBoth]
+        || [self.subscription isEqualToString:kSubTo];
+}
+
+-(BOOL) isSubscribedFrom
+{
+    return [self.subscription isEqualToString:kSubBoth]
+        || [self.subscription isEqualToString:kSubFrom];
 }
 
 // this will cache the unread count on first access

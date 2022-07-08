@@ -64,7 +64,12 @@ const int KEY_SIZE = 16;
 
     [self setupSignal];
     self.brokenSessions = [[NSMutableDictionary alloc] init];
-    NSArray<NSNumber*>* ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];
+    NSArray<NSNumber*>* ownCachedDevices = [[NSArray alloc] init];
+    if([self createLocalIdentiyKeyPairIfNeeded:[[NSSet alloc] init]] == NO)
+    {
+        // local keys were already present
+        ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];
+    }
     self.ownReceivedDeviceList = [[NSMutableSet alloc] initWithArray:ownCachedDevices];
     self.openPreKeySession = [[NSMutableSet alloc] init];
 
@@ -140,8 +145,6 @@ const int KEY_SIZE = 16;
 
     // init MLPubSub handler
     [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:$newHandler(self, devicelistHandler)];
-
-    [self createLocalIdentiyKeyPairIfNeeded:[[NSSet alloc] init]];
 }
 
 -(BOOL) createLocalIdentiyKeyPairIfNeeded:(NSSet<NSNumber*>*) ownDeviceIds
@@ -311,13 +314,7 @@ $$
 
 -(void) queryOMEMODevices:(NSString*) jid
 {
-    //TODO: I don't know if that ever gets triggered (new incoming message stanzas add the contact to our list before handing off the message to omemo for decryption)
-    //TODO: if it's the other way round and a new jid gets added by the monal user, the contact will be in our list, too
-    //TODO: if the monal user uses another device to write to a non-roster user, the non-roster contact is created before handing off the message to omemo for decryption, too
-    if([[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo] == NO)
-    {
-        [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandler(self, handleDevicelistSubscribe)];
-    }
+    [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandler(self, handleDevicelistSubscribe)];
     // fetch newest devicelist
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
 }
@@ -859,7 +856,6 @@ $$
         return nil;
 #endif
     }
-
     NSString* deviceKeyPath = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
     NSString* deviceKeyPathPreKey = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid];
 
@@ -882,6 +878,9 @@ $$
     }
     else
     {
+        // subscribe to remote devicelist if no session exists yet
+        [self checkIfMucMemberHasExistingSession:senderJid];
+
         SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
         SignalCiphertextType messagetype;
 

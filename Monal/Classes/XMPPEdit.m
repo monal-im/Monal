@@ -23,6 +23,7 @@
 @import MobileCoreServices;
 @import AVFoundation;
 @import UniformTypeIdentifiers.UTCoreTypes;
+@import Intents;
 
 enum kSettingSection {
     kSettingSectionAvatar,
@@ -341,7 +342,13 @@ enum DummySettingsRows {
                         [account publishAvatar:self.selectedAvatarImage];
                     }
                     else
+                    {
                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+                        [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
+                            if(error != nil)
+                                DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+                        }];
+                    }
                     //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
                     [self showSuccessHUD];
@@ -379,7 +386,13 @@ enum DummySettingsRows {
                     [account publishAvatar:self.selectedAvatarImage];
             }
             else
+            {
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+                [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
+                    if(error != nil)
+                        DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+                }];
+            }
             //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             [self showSuccessHUD];
@@ -417,6 +430,11 @@ enum DummySettingsRows {
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
         [self.db removeAccount:self.accountNo];
         [SAMKeychain deletePasswordForService:kMonalKeychainName account:self.accountNo.stringValue];
+        
+        [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
+            if(error != nil)
+                DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+        }];
 
         MBProgressHUD* hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;

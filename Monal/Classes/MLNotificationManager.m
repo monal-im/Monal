@@ -442,6 +442,7 @@
     
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionIncoming;
+    interaction.identifier = [NSString stringWithFormat:@"%@|%@", message.accountId, message.buddyName];
     
     NSError* error = nil;
     UNNotificationContent* updatedContent = [content contentByUpdatingWithProvider:intent error:&error];
@@ -462,9 +463,11 @@
 
 -(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
-    INSendMessageIntent* intent = [self makeIntentForMessage:[[DataLayer sharedInstance] messageForHistoryID:messageDBId] usingText:@"dummyText" andAudioAttachment:nil direction:INInteractionDirectionOutgoing];
+    MLMessage* message = [[DataLayer sharedInstance] messageForHistoryID:messageDBId];
+    INSendMessageIntent* intent = [self makeIntentForMessage:message usingText:@"dummyText" andAudioAttachment:nil direction:INInteractionDirectionOutgoing];
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionOutgoing;
+    interaction.identifier = [NSString stringWithFormat:@"%@|%@", message.accountId, message.buddyName];
     [interaction donateInteractionWithCompletion:^(NSError *error) {
         if(error)
             DDLogError(@"Could not donate outgoing interaction: %@", error);

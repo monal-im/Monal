@@ -21,8 +21,7 @@
 static NSFileManager* _fileManager;
 static NSString* _documentCacheDir;
 static NSMutableSet* _currentlyTransfering;
-
-NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
+static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 
 @implementation MLFiletransfer
 
@@ -43,8 +42,7 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 
 +(BOOL) isIdle
 {
-    @synchronized(_currentlyTransfering)
-    {
+    @synchronized(_currentlyTransfering) {
         return [_currentlyTransfering count] == 0;
     }
 }
@@ -59,16 +57,12 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
         return;
     }
     url = [self genCanonicalUrl:msg.messageText];
-    @synchronized(_expectedDownloadSizes)
-    {
-        if(_expectedDownloadSizes[url] == NULL)
-        {
+    @synchronized(_expectedDownloadSizes) {
+        if(_expectedDownloadSizes[url] == nil)
             _expectedDownloadSizes[url] = msg.filetransferSize;
-        }
     }
     //make sure we don't check or download this twice
-    @synchronized(_currentlyTransfering)
-    {
+    @synchronized(_currentlyTransfering) {
         if([_currentlyTransfering containsObject:historyId])
         {
             DDLogDebug(@"Already checking/downloading this content, ignoring");
@@ -277,23 +271,20 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 
 -(void) URLSession:(NSURLSession*) session downloadTask:(NSURLSessionDownloadTask*) downloadTask didWriteData:(int64_t) bytesWritten totalBytesWritten:(int64_t) totalBytesWritten totalBytesExpectedToWrite:(int64_t) totalBytesExpectedToWrite
 {
-    @synchronized(_expectedDownloadSizes)
-    {
+    @synchronized(_expectedDownloadSizes) {
         NSNumber* expectedSize = _expectedDownloadSizes[session.sessionDescription];
-        if(expectedSize == NULL) {
+        if(expectedSize == nil)                                                 //don't allow downloads of files without size in http header
             [downloadTask cancel];
-        } else if(totalBytesWritten >= expectedSize.intValue + 1024 * 1000 * 1000) {
+        else if(totalBytesWritten >= expectedSize.intValue + 512 * 1024)        //allow for a maximum of 512KiB of extra data
             [downloadTask cancel];
-        } else {
-            // everything is ok
-        }
+        else                                                                    // everything is ok
+            ;
     }
 }
 
 -(void) URLSession:(nonnull NSURLSession*) session downloadTask:(nonnull NSURLSessionDownloadTask*) downloadTask didFinishDownloadingToURL:(nonnull NSURL*) location
 {
-    @synchronized(_expectedDownloadSizes)
-    {
+    @synchronized(_expectedDownloadSizes) {
         [_expectedDownloadSizes removeObjectForKey:session.sessionDescription];
     }
 }

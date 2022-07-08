@@ -464,6 +464,12 @@ enum msgSentState {
 #endif
 }
 
+-(void) observeValueForKeyPath:(NSString*) keyPath ofObject:(id) object change:(NSDictionary *) change context:(void*) context
+{
+    if([keyPath isEqualToString:@"isEncrypted"] && object == self.contact)
+        [self displayEncryptionStateInUI];
+}
+
 -(void) displayEncryptionStateInUI
 {
     if(self.contact.isEncrypted)
@@ -671,6 +677,8 @@ enum msgSentState {
     [self scrollToBottom];
 
     [self tempfreezeAutoloading];
+    
+    [self.contact addObserver:self forKeyPath:@"isEncrypted" options:NSKeyValueObservingOptionNew context:nil];
 }
 
 
@@ -716,6 +724,7 @@ enum msgSentState {
 
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc removeObserver:self];
+    [self.contact removeObserver:self forKeyPath:@"isEncrypted"];
 
     // Save message draft
     BOOL success = [self saveMessageDraft];
@@ -747,6 +756,14 @@ enum msgSentState {
 -(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    @try
+    {
+        [self.contact removeObserver:self forKeyPath:@"isEncrypted"];
+    }
+    @catch(id theException)
+    {
+        //do nothing
+    }
     [self stopLastInteractionTimer];
 }
 

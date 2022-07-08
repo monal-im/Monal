@@ -59,7 +59,6 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     monal_id_block_t _completionToCall;
     BOOL _shutdownPending;
     BOOL _wasFreezed;
-    MLVoIPProcessor* _voipProcessor;
 }
 @end
 

@@ -4540,18 +4540,6 @@ NSString* const kStanza = @"stanza";
 }
 
 
--(void) initiateAudioCall:(NSString*) uuid toContact:(MLContact*) contact
-{
-    XMPPMessage* messageNode = [[XMPPMessage alloc] init];
-    messageNode.to = contact.contactJid;
-    [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
-    [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"propose" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{@"id": uuid} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"description" andNamespace:@"urn:xmpp:jingle:apps:rtp:1" withAttributes:@{@"media": @"audio"} andChildren:@[] andData:nil]
-    ] andData:nil]];
-    [messageNode setStoreHint];
-    [self send:messageNode];
-}
-
 -(void) sendSDP:(RTCSessionDescription*) sdp forCallID:(NSString*) callID toFullJid:(NSString*) fullJid
 {
     //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCSessionDescription.h

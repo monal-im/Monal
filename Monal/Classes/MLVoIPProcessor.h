@@ -14,6 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MLVoIPProcessor : NSObject
 @property (nonatomic, readonly) NSUInteger pendingCallsCount;
 -(void) voipRegistration;
+
+-(NSUUID*) initiateAudioCallToContact:(MLContact*) contact;
 @end
 
 NS_ASSUME_NONNULL_END

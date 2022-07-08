@@ -13,11 +13,13 @@
 
 @class ActiveChatsViewController;
 @class MLContact;
+@class MLVoIPProcessor;
 
 @interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate>
 
 @property (nonatomic, strong) UIWindow* _Nullable window;
 @property (nonatomic, weak) ActiveChatsViewController* _Nullable activeChats;
+@property (nonatomic, strong) MLVoIPProcessor* _Nullable voipProcessor;
 
 -(void) updateUnread;
 -(void) handleXMPPURL:(NSURL* _Nonnull) url;

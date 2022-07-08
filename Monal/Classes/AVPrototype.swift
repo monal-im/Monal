@@ -25,22 +25,9 @@ struct AVPrototype: View {
     var body: some View {
         VStack {
             Button("Start Call") {
-                let uuid = UUID()
-                let handle = CXHandle(type:.emailAddress, value:self.contact.obj.contactJid)
-                let startCallAction = CXStartCallAction(call: uuid, handle: handle)
-                let transaction = CXTransaction(action: startCallAction)
-                self.callController.request(transaction) { error in
-                    if let error = error {
-                        print("Error requesting transaction: \(error)")
-                    } else {
-                        print("Requested transaction successfully")
-                    }
-                }
-                
-//                 self.webRTCClient.offer { (sdp) in
-//                     DDLogInfo("Got local SDP offer...")
-//                     DDLogDebug("Offer: \(sdp)");
-//                 }
+                let appDelegate = UIApplication.shared.delegate as! AppDelegate
+                let voipProcessor = appDelegate.voipProcessor
+                voipProcessor.initiateAudioCall(toContact:self.contact.obj)
             }
         }
         .navigationBarTitle("AV Prototype (Audio only)", displayMode: .inline)

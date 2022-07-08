@@ -121,13 +121,30 @@ static NSMutableDictionary* _typingNotifications;
             if([HelperTools isAppExtension])
             {
                 DDLogInfo(@"Dispatching this stanza to mainapp...");
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:nil userInfo:callData];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:account userInfo:callData];
             }
             else
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:nil userInfo:callData];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:account userInfo:callData];
         }
         else
-            DDLogWarn(@"Ignoring non-audio call, not implemented yet");
+            DDLogWarn(@"Ignoring incoming non-audio JMI call, not implemented yet");
+        return message;
+    }
+    //handle all other JMI events (TODO: add entry to local history, once the UI for this is implemented)
+    else if([messageNode check:@"{urn:xmpp:jingle-message:1}*"])
+    {
+        DDLogInfo(@"Got %@ for JMI call %@", [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*$"], [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id"]);
+        if([HelperTools isAppExtension])
+            DDLogWarn(@"Ignoring incoming JMI message: we are in the appex which means any outgoing or ongoing call was already terminated");
+        else
+        {
+            NSDictionary* callData = @{
+                @"messageNode": messageNode,
+                @"accountNo": account.accountNo,
+            };
+            //this is needed because this file resides in the monalxmpp compilation unit while the MLVoipProcessor resides in the monal compilation unit (the ui unit)
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingJMIStanza object:account userInfo:callData];
+        }
         return message;
     }
     

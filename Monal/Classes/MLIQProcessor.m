@@ -315,6 +315,13 @@ $$
             [[DataLayer sharedInstance] addContact:contact[@"jid"]
                                         forAccount:account.accountNo
                                           nickname:[contact objectForKey:@"name"] ? [contact objectForKey:@"name"] : @""];
+#ifndef DISABLE_OMEMO
+            if(contactObj.isGroup == NO)
+            {
+                // Request omemo devicelist
+                [account.omemo queryOMEMODevices:contactObj.contactJid];
+            }
+#endif// DISABLE_OMEMO
             
             DDLogVerbose(@"Setting subscription status '%@' (ask=%@) for contact %@", contact[@"subscription"], contact[@"ask"], contact[@"jid"]);
             [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]

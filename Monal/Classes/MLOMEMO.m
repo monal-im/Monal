@@ -429,6 +429,12 @@ $$
                 // save own receivedDevices for catchupDone handling
                 [self.ownReceivedDeviceList setSet:receivedDevices];
             }
+            else
+            {
+                // list was empty -> remove all devices from local list
+                // next if will ensure that eventually our device id is published
+                [self.ownReceivedDeviceList removeAllObjects];
+            }
             if(self.omemoLoginState == CatchupDone)
             {
                 // the catchup done handler or the bundleFetch handler will send our own devices while logging in

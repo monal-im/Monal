@@ -91,6 +91,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //upgrade message autodeletion
     [self upgradeBoolUserSettingsIfUnset:@"AutodeleteAllMessagesAfter3Days" toDefault:NO];
 
+    //upgrade default omemo on
+    [self upgradeBoolUserSettingsIfUnset:@"OMEMODefaultOn" toDefault:YES];
+    
     // upgrade udp logger
     [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerHostname" toDefault:@""];

@@ -378,7 +378,12 @@ static NSDateFormatter* dbFormatter;
         else
             toPass = cleanNickName;
         
-        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick', 'encrypt') VALUES(?, ?, ?, ?, ?, ?, 1) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;" andArguments:@[accountNo, contact, @"", toPass, @0, @"", toPass]];
+        BOOL encrypt = NO;
+#ifndef DISABLE_OMEMO
+        encrypt = [[HelperTools defaultsDB] boolForKey:@"OMEMODefaultOn"];
+#endif// DISABLE_OMEMO
+        
+        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick', 'encrypt') VALUES(?, ?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;" andArguments:@[accountNo, contact, @"", toPass, @0, @"", @(encrypt), toPass]];
     }];
 }
 

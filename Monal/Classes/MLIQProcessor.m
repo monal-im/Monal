@@ -289,6 +289,7 @@ $$
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove] && !contactObj.isGroup)
         {
             [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
+            [contactObj removeShareInteractions];
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
         }
         else
@@ -307,6 +308,7 @@ $$
             {
                 DDLogWarn(@"Removing muc '%@' from contactlist, got 'normal' roster entry!", contact[@"jid"]);
                 [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
+                [contactObj removeShareInteractions];
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
                 contactObj = [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo];
             }

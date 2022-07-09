@@ -16,6 +16,8 @@
 #import "MLNotificationQueue.h"
 #import "MLImageManager.h"
 
+@import Intents;
+
 NSString *const kSubBoth=@"both";
 NSString *const kSubNone=@"none";
 NSString *const kSubTo=@"to";
@@ -371,6 +373,14 @@ NSString *const kAskSubscribe=@"subscribe";
     return _unreadCount;
 }
 
+-(void) removeShareInteractions
+{
+    [INInteraction deleteInteractionsWithIdentifiers:@[[NSString stringWithFormat:@"%@|%@", self.accountId, self.contactJid]] completion:^(NSError* error) {
+        if(error != nil)
+            DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+    }];
+}
+
 -(void) toggleMute:(BOOL) mute
 {
     if(self.isMuted == mute)
@@ -469,6 +479,7 @@ NSString *const kAskSubscribe=@"subscribe";
 -(void) removeFromRoster
 {
     [[MLXMPPManager sharedInstance] removeContact:self];
+    [self removeShareInteractions];
 }
 
 -(void) addToRoster

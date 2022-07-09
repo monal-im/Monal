@@ -105,6 +105,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(void) removeFromRoster;
 -(void) addToRoster;
 -(void) clearHistory;
+-(void) removeShareInteractions;
 
 @end
 

@@ -1031,6 +1031,7 @@ $$
     else
     {
         [[DataLayer sharedInstance] removeBuddy:room forAccount:_account.accountNo];
+        [[MLContact createContactFromJid:room andAccountNo:_account.accountNo] removeShareInteractions];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:_account userInfo:@{
             @"contact": [MLContact createContactFromJid:room andAccountNo:_account.accountNo]
         }];

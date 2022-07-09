@@ -359,10 +359,10 @@ enum DummySettingsRows {
                     [self performSegueWithIdentifier:@"showOpenSource" sender:self];
                     break;
                 case PrivacyRow:
-                    [self openLink:@"https://monal.im/monal-privacy-policy/"];
+                    [self openLink:@"https://monal-im.org/privacy"];
                     break;
                 case AboutRow:
-                    [self openLink:@"https://monal.im/about/"];
+                    [self openLink:@"https://monal-im.org/about"];
                     break;
 #ifdef DEBUG
                 case LogRow:

@@ -66,7 +66,7 @@
 
 -(IBAction) registerAccount:(id)sender;
 {
-    [self openLink:@"https://monal.im/welcome-to-xmpp/"];
+    [self openLink:@"https://monal-im.org"];
 }
 
 -(IBAction) login:(id)sender

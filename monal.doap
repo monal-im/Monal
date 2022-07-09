@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet href="https://monal.im/files/doap-style.xsl" type="text/xsl"?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-        xmlns:xmpp="https://linkmauve.fr/ns/xmpp-doap#"
-        xmlns="http://usefulinc.com/ns/doap#"
-        xmlns:schema="https://schema.org/">
+<rdf:RDF xmlns="http://usefulinc.com/ns/doap#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xmpp="https://linkmauve.fr/ns/xmpp-doap#" xmlns:schema="https://schema.org/" xmlns:foaf="http://xmlns.com/foaf/0.1/">
   <Project>
 
     <name>Monal</name>
@@ -16,7 +12,7 @@
     to chat in minutes. Monal attempts to create a decent chat experience with XMPP in the Apple ecosystem.
     </description>
 
-    <homepage rdf:resource="https://monal.im/" />
+    <homepage rdf:resource="https://monal-im.org" />
     <bug-database rdf:resource="https://github.com/monal-im/Monal/issues" />
     <license rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/develop/LICENSE" />
     <schema:documentation rdf:resource="https://github.com/monal-im/Monal/wiki"/>

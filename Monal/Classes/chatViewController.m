@@ -724,7 +724,14 @@ enum msgSentState {
 
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc removeObserver:self];
-    [self.contact removeObserver:self forKeyPath:@"isEncrypted"];
+        @try
+    {
+        [self.contact removeObserver:self forKeyPath:@"isEncrypted"];
+    }
+    @catch(id theException)
+    {
+        //do nothing
+    }
 
     // Save message draft
     BOOL success = [self saveMessageDraft];

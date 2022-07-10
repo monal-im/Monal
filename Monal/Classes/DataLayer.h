@@ -294,7 +294,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(MLXMLNode* _Nullable) getNextDelayedMessageStanzaForArchiveJid:(NSString*) archiveJid andAccountNo:(NSNumber*) accountNo;
 
 -(void) addShareSheetPayload:(NSDictionary*) payload;
--(NSArray*) getShareSheetPayloadForAccountNo:(NSNumber*) accountNo;
+-(NSArray*) getShareSheetPayload;
 -(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId;
 
 @end

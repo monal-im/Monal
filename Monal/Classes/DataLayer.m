@@ -1947,10 +1947,10 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSArray*) getShareSheetPayloadForAccountNo:(NSNumber*) accountNo
+-(NSArray*) getShareSheetPayload
 {
     return [self.db idWriteTransaction:^{
-        NSArray* payloadList = [self.db executeReader:@"SELECT * FROM sharesheet_outbox WHERE account_id=? ORDER BY id ASC;" andArguments:@[accountNo]];
+        NSArray* payloadList = [self.db executeReader:@"SELECT * FROM sharesheet_outbox ORDER BY id DESC;"];
         NSMutableArray* retval = [[NSMutableArray alloc] init];
         for(NSDictionary* entry_ in payloadList)
         {

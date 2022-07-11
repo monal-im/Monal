@@ -52,17 +52,14 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
-+(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
++(void) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
-    if(!check)
-    {
-        NSString* fileStr = [NSString stringWithFormat:@"%s", file];
-        NSArray* filePathComponents = [fileStr pathComponents];
-        if([filePathComponents count]>1)
-            fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
-        DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
-        @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
-    }
+    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
+    NSArray* filePathComponents = [fileStr pathComponents];
+    if([filePathComponents count]>1)
+        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+    DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
+    @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
 }
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere

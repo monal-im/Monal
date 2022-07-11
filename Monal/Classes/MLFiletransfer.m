@@ -590,13 +590,21 @@ $$
 
 +(void) doStartupCleanup
 {
-    //delete leftover tmp files
+    //delete leftover tmp files older than 1 day
+    NSDate* now = [NSDate date];
     NSArray* directoryContents = [_fileManager contentsOfDirectoryAtPath:_documentCacheDir error:nil];
     NSPredicate* filter = [NSPredicate predicateWithFormat:@"self ENDSWITH '.tmp'"];
     for(NSString* file in [directoryContents filteredArrayUsingPredicate:filter])
     {
-        DDLogInfo(@"Deleting leftover tmp file at %@", [_documentCacheDir stringByAppendingPathComponent:file]);
-        [_fileManager removeItemAtPath:[_documentCacheDir stringByAppendingPathComponent:file] error:nil];
+        NSURL* fileUrl = [NSURL fileURLWithPath:file];
+        NSDate* fileDate;
+        NSError* error;
+        [fileUrl getResourceValue:&fileDate forKey:NSURLContentModificationDateKey error:&error];
+        if(!error && [now timeIntervalSinceDate:fileDate]/86400 > 1)
+        {
+            DDLogInfo(@"Deleting leftover tmp file at %@", [_documentCacheDir stringByAppendingPathComponent:file]);
+            [_fileManager removeItemAtPath:[_documentCacheDir stringByAppendingPathComponent:file] error:nil];
+        }
     }
     
     //*** migrate old image store to new fileupload store if needed***

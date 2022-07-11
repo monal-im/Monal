@@ -910,7 +910,7 @@ static NSDateFormatter* dbFormatter;
         NSString* nick = mucNick;
         if(!nick)
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
-        NSAssert(nick, @"Could not determine muc nick when adding muc");
+        MLAssert(nick != nil, @"Could not determine muc nick when adding muc");
         
         [self cleanupMembersAndParticipantsListFor:room forAccountId:accountNo];
         return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', 'muc_nick') VALUES(?, ?, 1, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET muc=1, muc_nick=?;" andArguments:@[accountNo, room, mucNick ? mucNick : @"", mucNick ? mucNick : @""]];
@@ -1008,7 +1008,7 @@ static NSDateFormatter* dbFormatter;
         NSString* nick = mucNick;
         if(!nick)
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
-        NSAssert(nick, @"Could not determine muc nick when adding muc");
+        MLAssert(nick != nil, @"Could not determine muc nick when adding muc");
         
         [self.db executeNonQuery:@"INSERT INTO muc_favorites (room, nick, account_id) VALUES(?, ?, ?) ON CONFLICT(room, account_id) DO UPDATE SET nick=?;" andArguments:@[room, nick, accountNo, nick]];
     }];
@@ -2242,8 +2242,8 @@ static NSDateFormatter* dbFormatter;
 
 -(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSNumber* _Nonnull) accountNo
 {
-    NSAssert(jid, @"jid should not be null");
-    NSAssert(accountNo != NULL, @"accountNo should not be null");
+    MLAssert(jid != nil, @"jid should not be null");
+    MLAssert(accountNo != nil, @"accountNo should not be null");
 
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT lastInteraction FROM buddylist WHERE account_id=? AND buddy_name=?;";
@@ -2259,8 +2259,8 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSNumber* _Nonnull) accountNo
 {
-    NSAssert(jid, @"jid should not be null");
-    NSAssert(accountNo != NULL, @"accountNo should not be null");
+    MLAssert(jid != nil, @"jid should not be null");
+    MLAssert(accountNo != nil, @"accountNo should not be null");
 
     NSNumber* timestamp = @0;       //default value for "online" or "unknown"
     if(lastInteractionTime)

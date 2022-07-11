@@ -619,9 +619,9 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
         MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
         NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
-        NSAssert(fromContact, @"fromContact should not be nil");
-        NSAssert(messageId, @"messageId should not be nil");
-        NSAssert(account, @"account should not be nil");
+        MLAssert(fromContact, @"fromContact should not be nil");
+        MLAssert(messageId, @"messageId should not be nil");
+        MLAssert(account, @"account should not be nil");
         
         //make sure we have an active buddy for this chat
         [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountId];

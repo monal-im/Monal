@@ -562,9 +562,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     NSString* msgid = [[NSUUID UUID] UUIDString];
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
 
-    NSAssert(message, @"Message should not be nil");
-    NSAssert(account, @"Account should not be nil");
-    NSAssert(contact, @"Contact should not be nil");
+    MLAssert(message != nil, @"Message should not be nil");
+    MLAssert(account != nil, @"Account should not be nil");
+    MLAssert(contact != nil, @"Contact should not be nil");
     
     NSString* messageType = kMessageTypeText;
     if(uploadInfo != nil)

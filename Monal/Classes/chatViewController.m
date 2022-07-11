@@ -616,8 +616,8 @@ enum msgSentState {
     [super viewWillAppear:animated];
 
     //throw on empty contacts
-    NSAssert(self.contact.contactJid, @"can not open chat for empty contact jid");
-    NSAssert(self.contact.accountId, @"can not open chat for empty account id");
+    MLAssert(self.contact.contactJid, @"can not open chat for empty contact jid");
+    MLAssert(self.contact.accountId, @"can not open chat for empty account id");
 
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -1398,7 +1398,7 @@ enum msgSentState {
     [self dismissViewControllerAnimated:YES completion:nil];
     for(PHPickerResult* userSelection in results) {
         NSItemProvider* provider = userSelection.itemProvider;
-        NSAssert(provider != nil, @"Expected a NSItemProvider");
+        MLAssert(provider != nil, @"Expected a NSItemProvider");
         if([provider hasItemConformingToTypeIdentifier:@"com.apple.quicktime-movie"] == YES)
         {
             [provider loadItemForTypeIdentifier:@"com.apple.quicktime-movie" options:nil completionHandler:^(NSURL* path, NSError* error)
@@ -1434,7 +1434,7 @@ enum msgSentState {
                     return;
                 }
 #endif
-                assert([object isKindOfClass: [UIImage class]]);
+                MLAssert([object isKindOfClass: [UIImage class]], @"document picker did not pick an object of type UIImage");
                 UIImage* image = (UIImage*)object;
 
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -1460,7 +1460,7 @@ enum msgSentState {
     }
     else if([info[UIImagePickerControllerMediaType] isEqualToString:(NSString*)kUTTypeMovie])
     {
-        NSAssert(info[UIImagePickerControllerMediaURL] != nil, @"Expected video url");
+        MLAssert(info[UIImagePickerControllerMediaURL] != nil, @"Expected video url");
         [self addImagesToQueue:@[info[UIImagePickerControllerMediaURL]]];
     }
     else
@@ -3125,7 +3125,7 @@ enum msgSentState {
         [self hideUploadHUD];
         return;
     }
-    assert(self.uploadQueue.count >= 1);
+    MLAssert(self.uploadQueue.count >= 1, @"upload queue contains less than 1 element");
     [self showUploadHUD];
 
     DDLogVerbose(@"start dispatch");
@@ -3239,7 +3239,7 @@ enum msgSentState {
     }
     else
     { // some image in the queue
-        assert(self.uploadQueue.count >= (NSUInteger)indexPath.item);
+        MLAssert(self.uploadQueue.count >= (NSUInteger)indexPath.item, @"index path is greater than count in upload queue");
         MLUploadQueueItem* uploadItem = self.uploadQueue[indexPath.item];
         if([uploadItem getType] == UPLOAD_QUEUE_TYPE_RAW_IMAGE || [uploadItem getType] == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL)
         {
@@ -3271,13 +3271,13 @@ enum msgSentState {
 
 - (NSInteger)collectionView:(nonnull UICollectionView*) collectionView numberOfItemsInSection:(NSInteger)section
 {
-    assert(section == 0);
+    MLAssert(section == 0, @"section is only allowed to be zero");
     return self.uploadQueue.count == 0 ? 0 : self.uploadQueue.count + 1;
 }
 
 - (void) notifyUploadQueueRemoval:(NSUInteger) index
 {
-    assert(index < self.uploadQueue.count);
+    MLAssert(index < self.uploadQueue.count, @"index is only allowed to be smaller than uploadQueue.count");
     [self.uploadMenuView performBatchUpdates:^{
         [self deleteQueueItemAtIndex:index];
     } completion:^(BOOL finished) {
@@ -3314,8 +3314,8 @@ enum msgSentState {
     for(UIDragItem* item in session.items)
     {
         NSItemProvider* provider = item.itemProvider;
-        assert(provider != nil);
-        assert([provider hasItemConformingToTypeIdentifier:(NSString*) kUTTypeItem]);
+        MLAssert(provider != nil, @"provider must not be nil");
+        MLAssert([provider hasItemConformingToTypeIdentifier:(NSString*) kUTTypeItem], @"provider must supply item conforming to kUTTypeItem");
         [provider loadItemForTypeIdentifier:(NSString*) kUTTypeItem options:nil completionHandler:^(id <NSSecureCoding> urlItem, NSError *error)
         {
             if ([(NSObject*)urlItem isKindOfClass: [NSURL class]])

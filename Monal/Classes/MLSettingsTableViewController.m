@@ -167,7 +167,7 @@ enum DummySettingsRows {
         }
         else
         {
-            assert(self.selected);
+            MLAssert(self.selected != nil, @"self.selected must not be nil");
             editor.originIndex = self.selected;
             editor.accountNo = [self getAccountNoByIndex:self.selected.row];
         }
@@ -187,7 +187,7 @@ enum DummySettingsRows {
             }
             else
             {
-                NSAssert(indexPath.row - [self getAccountNum] < SettingsAccountRowsCnt, @"Tried to tap onto a row ment to be for a concrete account, not for quick or advanced settings");
+                MLAssert(indexPath.row - [self getAccountNum] < SettingsAccountRowsCnt, @"Tried to tap onto a row ment to be for a concrete account, not for quick or advanced settings");
                 // User selected one of the 'add account' promts
                 switch(indexPath.row - [self getAccountNum]) {
                     case QuickSettingsRow:

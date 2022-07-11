@@ -18,6 +18,7 @@
 #import "MLNotificationQueue.h"
 #import "MLMucProcessor.h"
 #import "XMPPIQ.h"
+#import "HelperTools.h"
 
 @interface MLPubSubProcessor()
 
@@ -507,7 +508,7 @@ $$
 
 +(void) handleErrorWithDescription:(NSString*) description andAccount:(xmpp*) account andErrorIq:(XMPPIQ*) errorIq andErrorReason:(NSString*) errorReason andIsSevere:(BOOL) isSevere
 {
-    NSAssert(errorIq || errorReason, @"at least one of errorIq or errorReason must be set when calling error handler!");
+    MLAssert(errorIq || errorReason, @"at least one of errorIq or errorReason must be set when calling error handler!");
     if(errorIq)
         [HelperTools postError:description withNode:errorIq andAccount:account andIsSevere:isSevere];
     else if(errorReason)

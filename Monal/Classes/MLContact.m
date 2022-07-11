@@ -155,8 +155,8 @@ NSString *const kAskSubscribe=@"subscribe";
 
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
 {
-    assert(jid != nil);
-    assert(accountNo != nil && accountNo.intValue >= 0);
+    MLAssert(jid != nil, @"jid must not be nil");
+    MLAssert(accountNo != nil && accountNo.intValue >= 0, @"accountNo must not be nil and > 0");
     NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
     
     // check if we know this contact and return a dummy one if not

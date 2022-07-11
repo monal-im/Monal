@@ -16,6 +16,7 @@
 #import "UIColor+Theme.h"
 #import "xmpp.h"
 #import <Monal-Swift.h>
+#import "HelperTools.h"
 
 @interface ContactsViewController ()
 
@@ -236,7 +237,7 @@
 
 -(NSString*) tableView:(UITableView*) tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath*) indexPath
 {
-    NSAssert(indexPath.section == 0, @"Wrong section");
+    MLAssert(indexPath.section == 0, @"Wrong section");
     MLContact* contact = self.contacts[indexPath.row];
     if(contact.isGroup == YES)
         return NSLocalizedString(@"Remove Conversation", @"");

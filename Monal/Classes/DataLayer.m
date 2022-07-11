@@ -1950,7 +1950,7 @@ static NSDateFormatter* dbFormatter;
 -(NSArray*) getShareSheetPayload
 {
     return [self.db idWriteTransaction:^{
-        NSArray* payloadList = [self.db executeReader:@"SELECT * FROM sharesheet_outbox ORDER BY id DESC;"];
+        NSArray* payloadList = [self.db executeReader:@"SELECT * FROM sharesheet_outbox ORDER BY id ASC;"];
         NSMutableArray* retval = [[NSMutableArray alloc] init];
         for(NSDictionary* entry_ in payloadList)
         {

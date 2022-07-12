@@ -48,7 +48,6 @@ struct RegisterAccount: View {
     @State private var selectedServerIndex = 1
 
     @State private var showAlert = false
-    @State private var showLoading = false
     @State private var registerComplete = false
 
     @State private var xmppAccount: xmpp?
@@ -57,7 +56,7 @@ struct RegisterAccount: View {
     @State private var captchaText: String = ""
 
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @State private var loadingOverlay = WelcomeLogInOverlayInPlace(headline: NSLocalizedString("", comment: ""), description: "")
+    @State private var loadingOverlay = LoadingOverlay(headline: NSLocalizedString("", comment: ""), description: "")
 
     @State private var showWebView = false
 
@@ -106,13 +105,27 @@ struct RegisterAccount: View {
     private func showRegistrationAlert(alertMessage: String?) {
         alertPrompt.title = Text("Registration Error")
         alertPrompt.message = Text(alertMessage ?? NSLocalizedString("Could not register your username. Please check your code or change the username and try again.", comment: ""))
+        hideLoadingOverlay()
         showAlert = true
     }
     
     private func showSuccessAlert() {
         alertPrompt.title = Text("Success!")
         alertPrompt.message = Text("You are set up and connected.")
+        hideLoadingOverlay()
         showAlert = true
+    }
+
+    private func showLoadingOverlay(headline: String, description: String) {
+        loadingOverlay.headline = headline
+        loadingOverlay.description = description
+        loadingOverlay.enabled = true
+    }
+
+    private func hideLoadingOverlay() {
+        loadingOverlay.headline = ""
+        loadingOverlay.description = ""
+        loadingOverlay.enabled = false
     }
 
     private var actualServer: String {
@@ -159,10 +172,11 @@ struct RegisterAccount: View {
     }
 
     private func register() {
-        self.loadingOverlay.headline = NSLocalizedString("Registering account...", comment: "")
-        self.showLoading = true
+        showLoadingOverlay(
+            headline: NSLocalizedString("Registering account...", comment: ""),
+            description: "")
         self.xmppAccount!.registerUser(self.username, withPassword: self.password, captcha: self.captchaText.isEmpty == true ? nil : self.captchaText, andHiddenFields: self.hiddenFields) {success, errorMsg in
-            self.showLoading = false
+            hideLoadingOverlay()
             if(success == true) {
                 let dic = [
                     kDomain: self.actualServer,
@@ -176,8 +190,8 @@ struct RegisterAccount: View {
                 if accountNo != nil {
                     MLXMPPManager.sharedInstance().addNewAccount(toKeychain: accountNo!, withPassword: self.password)
                 }
-                showSuccessAlert()
                 self.registerComplete = true
+                showSuccessAlert()
             } else {
                 showRegistrationAlert(alertMessage: errorMsg)
                 self.captchaText = ""
@@ -187,8 +201,9 @@ struct RegisterAccount: View {
     }
 
     private func fetchRequestForm() {
-        self.loadingOverlay.headline = NSLocalizedString("Fetching registration form...", comment: "")
-        self.showLoading = true
+        showLoadingOverlay(
+            headline: NSLocalizedString("Fetching registration form...", comment: ""),
+            description: "")
         self.xmppAccount = createXMPPInstance()
         self.xmppAccount!.disconnect(true)
         self.xmppAccount!.requestRegForm(withToken: nil, andCompletion: {captchaData, hiddenFieldsDict in
@@ -196,14 +211,16 @@ struct RegisterAccount: View {
             if captchaData.isEmpty == true {
                 register()
             } else {
-                self.showLoading = false
+                hideLoadingOverlay()
                 let captchaUIImg = UIImage.init(data: captchaData)
                 if captchaUIImg != nil {
                     self.captchaImg = Image(uiImage: captchaUIImg!)
+                } else {
+                    showRegistrationAlert(alertMessage: NSLocalizedString("Could not read captcha!", comment: ""))
                 }
             }
         }, andErrorCompletion: {_, errorMsg in
-            self.showLoading = false
+            showRegistrationAlert(alertMessage: errorMsg)
         })
     }
 
@@ -335,11 +352,9 @@ struct RegisterAccount: View {
                     .textFieldStyle(.roundedBorder)
                 }
             }
-            .disabled(showLoading)
-            .blur(radius: self.showLoading == true ? 3 : 0)
-            if(showLoading == true) {
-                self.loadingOverlay
-            }
+            .disabled(self.loadingOverlay.enabled)
+            .blur(radius: self.loadingOverlay.enabled == true ? 3 : 0)
+            self.loadingOverlay
         }
         .navigationTitle("Register")
     }

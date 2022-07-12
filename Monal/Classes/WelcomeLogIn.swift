@@ -21,8 +21,7 @@ struct WelcomeLogIn: View {
     @State private var showQRCodeScanner = false
 
     // login related
-    @State private var showLoadingState = false
-    @State private var loadingOverlay = WelcomeLogInOverlayInPlace(headline: "", description: "")
+    @State private var loadingOverlay = LoadingOverlay(headline: "", description: "")
     @State private var currentTimeout : DispatchTime? = nil
     @State private var errorObserverEnabled = false
     @State private var newAccountNo: NSNumber? = nil
@@ -49,21 +48,36 @@ struct WelcomeLogIn: View {
     }
 
     private func showTimeoutAlert() {
+        hideLoadingOverlay()
         alertPrompt.title = Text("Timeout Error")
         alertPrompt.message = Text("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.")
         showAlert = true
     }
 
     private func showSuccessAlert() {
+        hideLoadingOverlay()
         alertPrompt.title = Text("Success!")
         alertPrompt.message = Text("You are set up and connected.")
         showAlert = true
     }
 
     private func showLoginErrorAlert(errorMessage: String) {
+        hideLoadingOverlay()
         alertPrompt.title = Text("Error")
         alertPrompt.message = Text(String(format: NSLocalizedString("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.\n\nTechnical error message: %@", comment: ""), errorMessage))
         showAlert = true
+    }
+
+    private func showLoadingOverlay(headline: String, description: String) {
+        loadingOverlay.headline = headline
+        loadingOverlay.description = description
+        loadingOverlay.enabled = true
+    }
+
+    private func hideLoadingOverlay() {
+        loadingOverlay.headline = ""
+        loadingOverlay.description = ""
+        loadingOverlay.enabled = false
     }
 
     private var credentialsEntered: Bool {
@@ -93,7 +107,6 @@ struct WelcomeLogIn: View {
                     self.newAccountNo = nil
                 }
                 self.currentTimeout = nil
-                self.showLoadingState = false
                 showTimeoutAlert()
             }
         }
@@ -138,9 +151,9 @@ struct WelcomeLogIn: View {
 
                                     if (!showAlert) {
                                         startLoginTimeout()
-                                        self.loadingOverlay.headline = NSLocalizedString("Logging in", comment: "")
-                                        self.loadingOverlay.description = ""
-                                        self.showLoadingState = true
+                                        showLoadingOverlay(
+                                            headline: NSLocalizedString("Logging in", comment: ""),
+                                            description: "")
                                         self.errorObserverEnabled = true
                                         self.newAccountNo = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
                                     }
@@ -220,11 +233,9 @@ struct WelcomeLogIn: View {
                     Image(systemName: "arrow.backward")
                 }
                 .keyboardShortcut(.escape, modifiers: []))
-                .disabled(self.showLoadingState == true)
-                .blur(radius: self.showLoadingState == true ? 3 : 0)
-                if (self.showLoadingState == true) {
-                    loadingOverlay
-                }
+                .disabled(self.loadingOverlay.enabled == true)
+                .blur(radius: self.loadingOverlay.enabled == true ? 3 : 0)
+                loadingOverlay
             }
         }
         .onDisappear {UITableView.appearance().tableHeaderView = nil}
@@ -235,7 +246,6 @@ struct WelcomeLogIn: View {
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo, let errorMessage = notification.userInfo?["message"] as? String {
                 if xmppAccount.accountNo.intValue == newAccountNo.intValue {
                     currentTimeout = nil // <- disable timeout on error
-                    showLoadingState = false
                     errorObserverEnabled = false
                     showLoginErrorAlert(errorMessage: errorMessage)
                     MLXMPPManager.sharedInstance().clearAccountInfo(forAccountNo: newAccountNo)
@@ -249,31 +259,33 @@ struct WelcomeLogIn: View {
                     currentTimeout = nil // <- disable timeout on successful connection
                     self.errorObserverEnabled = false
                     HelperTools.defaultsDB().set(true, forKey: "HasSeenLogin")
-                    self.loadingOverlay.headline = NSLocalizedString("Loading contact list", comment: "")
-                    self.loadingOverlay.description = ""
+                    showLoadingOverlay(
+                        headline: NSLocalizedString("Loading contact list", comment: ""),
+                        description: "")
                 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedCatchup")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
                 if xmppAccount.accountNo.intValue == newAccountNo.intValue {
-                    self.loadingOverlay.headline = NSLocalizedString("Loading omemo bundles", comment: "")
-                    self.loadingOverlay.description = ""
+                    showLoadingOverlay(
+                        headline: NSLocalizedString("Loading omemo bundles", comment: ""),
+                        description: "")
                 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalUpdateBundleFetchStatus")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if notificationAccountNo.intValue == newAccountNo.intValue {
-                    self.loadingOverlay.headline = NSLocalizedString("Loading omemo bundles", comment: "")
-                    self.loadingOverlay.description = String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all)
+                    showLoadingOverlay(
+                        headline: NSLocalizedString("Loading omemo bundles", comment: ""),
+                        description: String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all))
                 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedOmemoBundleFetch")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if (notificationAccountNo.intValue == newAccountNo.intValue) {
-                    showLoadingState = false
                     showSuccessAlert()
                     loginComplete = true
                 }

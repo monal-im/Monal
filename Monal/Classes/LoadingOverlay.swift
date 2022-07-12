@@ -8,40 +8,37 @@
 
 import SwiftUI
 
-struct WelcomeLogInOverlayInPlace: View {
+struct LoadingOverlay: View {
     var headline: String
     var description: String
+    var enabled: Bool = false
 
     var body: some View {
-        VStack{
-            Text(self.headline).font(.headline)
-            Text(self.description).font(.footnote)
-            ProgressView()
-        }
-        .frame(width: 250, height: 100)
-        .background(Color.secondary.colorInvert())
-        .cornerRadius(20)
-    }
-}
-
-struct WelcomeLogInOverlay<Content: View>: View {
-    let underlyingView: Content
-    @State var headline: String
-    @State var description: String
-
-    var body: some View {
-        ZStack {
-            underlyingView
-                .disabled(true)
-                .blur(radius: 3)
-            WelcomeLogInOverlayInPlace(headline: self.headline, description: self.description)
+        if enabled == true {
+            VStack {
+                Text(self.headline).font(.headline)
+                Text(self.description).font(.footnote)
+                ProgressView()
+            }
+            .frame(width: 250, height: 100)
+            .background(Color.secondary.colorInvert())
+            .cornerRadius(20)
         }
     }
 }
 
-struct WelcomeLogInOverlay_Previews: PreviewProvider {
-    static var delegate = SheetDismisserProtocol()
+struct LoadingOverlay_Previews: PreviewProvider {
+    static private var overlay = LoadingOverlay(headline: "Loading...", description: "More info?", enabled: true)
     static var previews: some View {
-        WelcomeLogInOverlay<WelcomeLogIn>(underlyingView: WelcomeLogIn(delegate: delegate, hasParentNavigationView: false), headline: "Loading...", description: "More info?")
+        ZStack {
+            Form {
+                Text("Entry 1")
+                Text("Entry 2")
+                Text("Entry 3")
+            }
+            .disabled(true)
+            .blur(radius: 3) // <- disabled/blur are the recommended changes to the background
+            overlay
+        }
     }
 }

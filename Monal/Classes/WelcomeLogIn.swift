@@ -23,7 +23,7 @@ struct WelcomeLogIn: View {
     // login related
     @State private var showLoadingState = false
     @State private var loadingOverlay = WelcomeLogInOverlayInPlace(headline: "", description: "")
-    @State private var timeoutEnabled = false
+    @State private var currentTimeout : DispatchTime? = nil
     @State private var errorObserverEnabled = false
     @State private var newAccountNo: NSNumber? = nil
     @State private var loginComplete = false
@@ -48,6 +48,24 @@ struct WelcomeLogIn: View {
         return credentialsExist
     }
 
+    private func showTimeoutAlert() {
+        alertPrompt.title = Text("Timeout Error")
+        alertPrompt.message = Text("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.")
+        showAlert = true
+    }
+
+    private func showSuccessAlert() {
+        alertPrompt.title = Text("Success!")
+        alertPrompt.message = Text("You are set up and connected.")
+        showAlert = true
+    }
+
+    private func showLoginErrorAlert(errorMessage: String) {
+        alertPrompt.title = Text("Error")
+        alertPrompt.message = Text(String(format: NSLocalizedString("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.\n\nTechnical error message: %@", comment: ""), errorMessage))
+        showAlert = true
+    }
+
     private var credentialsEntered: Bool {
         return !jid.isEmpty && !password.isEmpty
     }
@@ -65,18 +83,18 @@ struct WelcomeLogIn: View {
         return !credentialsEntered || credentialsFaulty ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
     }
     
-    private func checkLoginTimeout() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 30.0) {
-            if self.timeoutEnabled == true {
+    private func startLoginTimeout() {
+        let newTimeout = DispatchTime.now() + 30.0;
+        self.currentTimeout = newTimeout
+        DispatchQueue.main.asyncAfter(deadline: newTimeout) {
+            if newTimeout == self.currentTimeout {
                 if self.newAccountNo != nil {
                     MLXMPPManager.sharedInstance().clearAccountInfo(forAccountNo: self.newAccountNo!)
                     self.newAccountNo = nil
                 }
-                self.alertPrompt.title = Text("Timeout Error")
-                self.alertPrompt.message = Text("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.")
-                self.timeoutEnabled = false
+                self.currentTimeout = nil
                 self.showLoadingState = false
-                self.showAlert = true
+                showTimeoutAlert()
             }
         }
     }
@@ -119,8 +137,7 @@ struct WelcomeLogIn: View {
                                     showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
 
                                     if (!showAlert) {
-                                        self.timeoutEnabled = true
-                                        checkLoginTimeout()
+                                        startLoginTimeout()
                                         self.loadingOverlay.headline = NSLocalizedString("Logging in", comment: "")
                                         self.loadingOverlay.description = ""
                                         self.showLoadingState = true
@@ -169,7 +186,6 @@ struct WelcomeLogIn: View {
                                         }
                                     )
                                 }
-
                             }
                             
                             NavigationLink(destination: RegisterAccount(delegate: self.delegate)) {
@@ -218,12 +234,10 @@ struct WelcomeLogIn: View {
             }
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo, let errorMessage = notification.userInfo?["message"] as? String {
                 if xmppAccount.accountNo.intValue == newAccountNo.intValue {
-                    timeoutEnabled = false
+                    currentTimeout = nil // <- disable timeout on error
                     showLoadingState = false
                     errorObserverEnabled = false
-                    alertPrompt.title = Text("Error")
-                    alertPrompt.message = Text(String(format: NSLocalizedString("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.\n\nTechnical error message: %@", comment: ""), errorMessage))
-                    showAlert = true
+                    showLoginErrorAlert(errorMessage: errorMessage)
                     MLXMPPManager.sharedInstance().clearAccountInfo(forAccountNo: newAccountNo)
                     self.newAccountNo = nil
                 }
@@ -232,7 +246,7 @@ struct WelcomeLogIn: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMLHasConnectedNotice")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
                 if xmppAccount.accountNo.intValue == newAccountNo.intValue {
-                    self.timeoutEnabled = false
+                    currentTimeout = nil // <- disable timeout on successful connection
                     self.errorObserverEnabled = false
                     HelperTools.defaultsDB().set(true, forKey: "HasSeenLogin")
                     self.loadingOverlay.headline = NSLocalizedString("Loading contact list", comment: "")
@@ -260,10 +274,8 @@ struct WelcomeLogIn: View {
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if (notificationAccountNo.intValue == newAccountNo.intValue) {
                     showLoadingState = false
-                    alertPrompt.title = Text("Success!")
-                    alertPrompt.message = Text("You are set up and connected.")
+                    showSuccessAlert()
                     loginComplete = true
-                    showAlert = true
                 }
             }
         }

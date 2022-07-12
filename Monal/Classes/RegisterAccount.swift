@@ -102,6 +102,18 @@ struct RegisterAccount: View {
         
         return credentialsExist
     }
+    
+    private func showRegistrationAlert(alertMessage: String?) {
+        alertPrompt.title = Text("Registration Error")
+        alertPrompt.message = Text(alertMessage ?? NSLocalizedString("Could not register your username. Please check your code or change the username and try again.", comment: ""))
+        showAlert = true
+    }
+    
+    private func showSuccessAlert() {
+        alertPrompt.title = Text("Success!")
+        alertPrompt.message = Text("You are set up and connected.")
+        showAlert = true
+    }
 
     private var actualServer: String {
         let tmp = RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]
@@ -164,21 +176,16 @@ struct RegisterAccount: View {
                 if accountNo != nil {
                     MLXMPPManager.sharedInstance().addNewAccount(toKeychain: accountNo!, withPassword: self.password)
                 }
-                alertPrompt.title = Text("Success!")
-                alertPrompt.message = Text("You are set up and connected.")
+                showSuccessAlert()
                 self.registerComplete = true
-                self.showAlert = true
             } else {
-                let alertMsg = errorMsg ?? NSLocalizedString("Could not register your username. Please check your code or change the username and try again.", comment: "")
-                self.alertPrompt.title = Text("Registration Error")
-                self.alertPrompt.message = Text(alertMsg)
+                showRegistrationAlert(alertMessage: errorMsg)
                 self.captchaText = ""
-                self.showAlert = true
                 fetchRequestForm() // < force reload the form to update the captcha
             }
         }
     }
-    
+
     private func fetchRequestForm() {
         self.loadingOverlay.headline = NSLocalizedString("Fetching registration form...", comment: "")
         self.showLoading = true
@@ -203,7 +210,7 @@ struct RegisterAccount: View {
     var body: some View {
         ZStack {
             Color(UIColor.systemGroupedBackground).ignoresSafeArea()
-            
+
             ScrollView {
                 VStack(alignment: .leading) {
                     VStack(alignment: .leading) {
@@ -211,7 +218,7 @@ struct RegisterAccount: View {
                             .padding()
                     }
                     .background(Color(UIColor.systemBackground))
-                    
+
                     Form {
                         Menu {
                             Picker("", selection: $selectedServerIndex) {
@@ -234,13 +241,13 @@ struct RegisterAccount: View {
                         }
                         label: {
                             HStack {
-                            if (selectedServerIndex != 0) {
-                                Text(RegisterAccount.XMPPServer[selectedServerIndex]["XMPPServer"]!).font(.system(size: 17)).frame(maxWidth: .infinity)
-                                Image(systemName: "checkmark")
-                            }
-                            else {
-                                xmppServerInputSelectLabel.font(.system(size: 17)).frame(maxWidth: .infinity)
-                            }
+                                if (selectedServerIndex != 0) {
+                                    Text(RegisterAccount.XMPPServer[selectedServerIndex]["XMPPServer"]!).font(.system(size: 17)).frame(maxWidth: .infinity)
+                                    Image(systemName: "checkmark")
+                                }
+                                else {
+                                    xmppServerInputSelectLabel.font(.system(size: 17)).frame(maxWidth: .infinity)
+                                }
                             }
                             .padding(9.0)
                             .background(Color(UIColor.tertiarySystemFill))
@@ -268,10 +275,10 @@ struct RegisterAccount: View {
                             }
                             TextField("Captcha", text: $captchaText)
                         }
-                        
+
                         Button(action: {
                             showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert)
-                            
+
                             if (!showAlert) {
                                 if(self.xmppAccount == nil) {
                                     fetchRequestForm()

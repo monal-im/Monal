@@ -268,12 +268,18 @@ struct WelcomeLogIn: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedCatchup")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
                 if xmppAccount.accountNo.intValue == newAccountNo.intValue {
+#if !DISABLE_OMEMO
                     showLoadingOverlay(
                         headline: NSLocalizedString("Loading omemo bundles", comment: ""),
                         description: "")
+#else
+                    self.loginComplete = true
+                    showSuccessAlert()
+#endif
                 }
             }
         }
+#if !DISABLE_OMEMO
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalUpdateBundleFetchStatus")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if notificationAccountNo.intValue == newAccountNo.intValue {
@@ -286,11 +292,12 @@ struct WelcomeLogIn: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedOmemoBundleFetch")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if (notificationAccountNo.intValue == newAccountNo.intValue) {
+                    self.loginComplete = true
                     showSuccessAlert()
-                    loginComplete = true
                 }
             }
         }
+#endif
     }
 }
 

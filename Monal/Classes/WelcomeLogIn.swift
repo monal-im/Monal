@@ -238,6 +238,7 @@ struct WelcomeLogIn: View {
                 loadingOverlay
             }
         }
+        .navigationViewStyle(.stack)
         .onDisappear {UITableView.appearance().tableHeaderView = nil}
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
             if self.errorObserverEnabled == false {

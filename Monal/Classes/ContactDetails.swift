@@ -228,6 +228,7 @@ struct ContactDetails: View {
             }.keyboardShortcut(.escape, modifiers: []))
             .navigationBarTitle(contact.contactDisplayName as String, displayMode: .inline)
         }
+        .navigationViewStyle(.stack)
     }
 }
 

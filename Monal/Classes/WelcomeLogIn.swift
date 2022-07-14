@@ -273,7 +273,8 @@ struct WelcomeLogIn: View {
                     showLoadingOverlay(
                         headline: NSLocalizedString("Loading omemo bundles", comment: ""),
                         description: "")
-#else
+#endif
+#if DISABLE_OMEMO
                     self.loginComplete = true
                     showSuccessAlert()
 #endif

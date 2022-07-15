@@ -745,7 +745,7 @@ $$
 
 
 // called after a new MUC member was added
--(void) checkIfMucMemberHasExistingSession:(NSString*) buddyJid
+-(void) subscribeAndFetchDevicelistIfNoSessionExistsForJid:(NSString*) buddyJid
 {
     if([self.monalSignalStore sessionsExistForBuddy:buddyJid] == NO)
     {
@@ -879,7 +879,7 @@ $$
     else
     {
         // subscribe to remote devicelist if no session exists yet
-        [self checkIfMucMemberHasExistingSession:senderJid];
+        [self subscribeAndFetchDevicelistIfNoSessionExistsForJid:senderJid];
 
         SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
         SignalCiphertextType messagetype;

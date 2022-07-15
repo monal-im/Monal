@@ -286,7 +286,7 @@
 #ifndef DISABLE_OMEMO
                 if(isTypeGroup == YES)
                 {
-                    [_account.omemo checkIfMucMemberHasExistingSession:item[@"jid"]];
+                    [_account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:item[@"jid"]];
                 }
 #endif// DISABLE_OMEMO
             }

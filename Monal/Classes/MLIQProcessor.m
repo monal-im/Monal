@@ -593,6 +593,7 @@ $$
             [versionDBInfo.appVersion isEqualToString:iqAppVersion] &&
             [versionDBInfo.platformOs isEqualToString:iqPlatformOS]))
         {
+            DDLogVerbose(@"Updating version info for %@", iqNode.from);
             MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS];
 
             [[DataLayer sharedInstance] setSoftwareVersionInfoForContact:iqNode.fromUser

@@ -56,7 +56,7 @@ struct RegisterAccount: View {
     @State private var captchaText: String = ""
 
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @State private var loadingOverlay = LoadingOverlay(headline: NSLocalizedString("", comment: ""), description: "")
+    @State private var loadingOverlay = LoadingOverlay(headline: "", description: "")
 
     @State private var showWebView = false
 

@@ -648,21 +648,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         domain = [elements objectAtIndex:1];
     }
 
-    // Note to code reviewer -> maybe move those checks to the UI?
-    if(!user || !domain)
-    {
-        [self notifyLoginError:NSLocalizedString(@"Invalid Credentials", @"")
-                   description:NSLocalizedString(@"Your XMPP account should be in in the format user@domain. For special configurations, use manual setup.", @"")];
-        return nil;
-    }
-
-    if(password.length == 0)
-    {
-        [self notifyLoginError:NSLocalizedString(@"Invalid Credentials", @"")
-                   description:NSLocalizedString(@"Please enter a password.", @"")];
-        return nil;
-    }
-
     if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString]) {
         [self notifyLoginError:NSLocalizedString(@"Duplicate Account", @"")
                    description:NSLocalizedString(@"This account already exists on this instance", @"")];
@@ -677,12 +662,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [dic setObject:@NO forKey:kDirectTLS];
 
     NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
-    if(accountNo)
-    {
-        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-        [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo.stringValue];
-        [[MLXMPPManager sharedInstance] connectAccount:accountNo];
-    }
+    [self addNewAccountToKeychain:accountNo withPassword:password];
     return accountNo;
 }
 
@@ -695,7 +675,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     }
 }
 
--(void) clearAccountInfoForAccountNo:(NSNumber*) accountNo
+-(void) removeAccountForAccountNo:(NSNumber*) accountNo
 {
     [[MLXMPPManager sharedInstance] disconnectAccount:accountNo];
     [[DataLayer sharedInstance] removeAccount:accountNo];

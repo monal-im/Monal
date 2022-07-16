@@ -103,7 +103,7 @@ struct WelcomeLogIn: View {
         DispatchQueue.main.asyncAfter(deadline: newTimeout) {
             if newTimeout == self.currentTimeout {
                 if self.newAccountNo != nil {
-                    MLXMPPManager.sharedInstance().clearAccountInfo(forAccountNo: self.newAccountNo!)
+                    MLXMPPManager.sharedInstance().removeAccount(forAccountNo: self.newAccountNo!)
                     self.newAccountNo = nil
                 }
                 self.currentTimeout = nil
@@ -249,7 +249,7 @@ struct WelcomeLogIn: View {
                     currentTimeout = nil // <- disable timeout on error
                     errorObserverEnabled = false
                     showLoginErrorAlert(errorMessage: errorMessage)
-                    MLXMPPManager.sharedInstance().clearAccountInfo(forAccountNo: newAccountNo)
+                    MLXMPPManager.sharedInstance().removeAccount(forAccountNo: newAccountNo)
                     self.newAccountNo = nil
                 }
             }

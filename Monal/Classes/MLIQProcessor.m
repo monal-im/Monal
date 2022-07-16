@@ -588,23 +588,22 @@ $$
     
     MLContactSoftwareVersionInfo* versionDBInfo = [[DataLayer sharedInstance] getSoftwareVersionInfoForContact:iqNode.fromUser resource:iqNode.fromResource andAccount:account.accountNo];
     
-    if (versionDBInfo != nil) {
-        if (!([versionDBInfo.appName isEqualToString:iqAppName] &&
-            [versionDBInfo.appVersion isEqualToString:iqAppVersion] &&
-            [versionDBInfo.platformOs isEqualToString:iqPlatformOS]))
-        {
-            DDLogVerbose(@"Updating version info for %@", iqNode.from);
-            MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS];
+    if(versionDBInfo == nil || !(
+        [versionDBInfo.appName isEqualToString:iqAppName] &&
+        [versionDBInfo.appVersion isEqualToString:iqAppVersion] &&
+        [versionDBInfo.platformOs isEqualToString:iqPlatformOS]
+    )) {
+        DDLogVerbose(@"Updating software version info for %@", iqNode.from);
+        MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS];
 
-            [[DataLayer sharedInstance] setSoftwareVersionInfoForContact:iqNode.fromUser
-                                                                resource:iqNode.fromResource
-                                                              andAccount:account.accountNo
-                                                        withSoftwareInfo:newSoftwareVersionInfo];
-            
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh            
-                                                                object:account
-                                                              userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
-        }
+        [[DataLayer sharedInstance] setSoftwareVersionInfoForContact:iqNode.fromUser
+                                                            resource:iqNode.fromResource
+                                                            andAccount:account.accountNo
+                                                    withSoftwareInfo:newSoftwareVersionInfo];
+        
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh            
+                                                            object:account
+                                                            userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
     }
 }
 

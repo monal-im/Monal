@@ -57,8 +57,10 @@ struct ContactResources: View {
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalXmppUserSoftWareVersionRefresh")).receive(on: RunLoop.main)) { notification in
+                DDLogVerbose("Got software version info...")
                 if let obj = notification.object as? xmpp, let softwareInfo = notification.userInfo?["versionInfo"] as? MLContactSoftwareVersionInfo {
                     if softwareInfo.fromJid == contact.obj.contactJid && obj.accountNo == contact.obj.accountId {
+                        DDLogVerbose("Successfully matched software version info update to current contact")
                         self.contactVersionInfos[softwareInfo.resource] = softwareInfo
                     }
                 }

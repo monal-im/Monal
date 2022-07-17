@@ -628,16 +628,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(NSNumber*) login:(NSString*) jid password:(NSString*) password
 {
+    //if it is a JID
     NSArray* elements = [jid componentsSeparatedByString:@"@"];
+    MLAssert([elements count] > 1, @"Got invalid jid", (@{@"jid": nilWrapper(jid), @"elements": elements}));
 
     NSString* domain;
     NSString* user;
-    //if it is a JID
-    if([elements count] > 1)
-    {
-        user = [elements objectAtIndex:0];
-        domain = [elements objectAtIndex:1];
-    }
+    user = [elements objectAtIndex:0];
+    domain = [elements objectAtIndex:1];
 
     if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString])
     {

@@ -625,15 +625,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 #pragma mark - login/register
--(void) notifyLoginError:(NSString*) title description:(NSString*) description
-{
-    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError
-                                                        object:nil
-                                                      userInfo:@{
-                                                        @"title": title,
-                                                        @"description": description}
-    ];
-}
 
 -(NSNumber*) login:(NSString*) jid password:(NSString*) password
 {
@@ -648,9 +639,12 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         domain = [elements objectAtIndex:1];
     }
 
-    if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString]) {
-        [self notifyLoginError:NSLocalizedString(@"Duplicate Account", @"")
-                   description:NSLocalizedString(@"This account already exists on this instance", @"")];
+    if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString])
+    {
+        [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:nil userInfo:@{
+            @"title": NSLocalizedString(@"Duplicate Account", @""),
+            @"description": NSLocalizedString(@"This account already exists on this instance", @"")
+        }];
         return nil;
     }
 

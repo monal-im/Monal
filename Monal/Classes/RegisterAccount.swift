@@ -30,6 +30,7 @@ struct RegisterAccount: View {
 
     static let XMPPServer: [Dictionary<String, String>] = [
         ["XMPPServer": "Input", "TermsSite_default": ""],
+        ["XMPPServer": "conversations.im", "TermsSite_default": "https://account.conversations.im/privacy/"],
         ["XMPPServer": "yax.im", "TermsSite_default": "https://yaxim.org/yax.im/"],
         ["XMPPServer": "jabber.de", "TermsSite_default": "https://www.jabber.de/impressum/datenschutz/"],
         ["XMPPServer": "xabber.de", "TermsSite_default": "https://www.draugr.de"],

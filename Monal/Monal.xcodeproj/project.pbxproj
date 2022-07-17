@@ -103,6 +103,7 @@
 		3D4BC2C92626294200292F14 /* MLUploadQueueDocumentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */; };
 		3D65B78D27234B74005A30F4 /* ContactDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D65B78C27234B74005A30F4 /* ContactDetails.swift */; };
 		3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */; };
+		3D7D352328626CB80042C5E5 /* LoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */; };
 		3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */; };
 		3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */; };
 		3DBAD1E62627A2BC0078BD27 /* MLUploadQueueBaseCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DBAD1E52627A2BC0078BD27 /* MLUploadQueueBaseCell.m */; };
@@ -542,6 +543,7 @@
 		3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueDocumentCell.m; sourceTree = "<group>"; };
 		3D65B78C27234B74005A30F4 /* ContactDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
 		3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftuiHelpers.swift; sourceTree = "<group>"; };
+		3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingOverlay.swift; sourceTree = "<group>"; };
 		3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmemoQrCodeView.swift; sourceTree = "<group>"; };
 		3D9EE5322617677700135D46 /* MLUploadQueueImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueImageCell.h; sourceTree = "<group>"; };
 		3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueImageCell.m; sourceTree = "<group>"; };
@@ -1056,6 +1058,7 @@
 			isa = PBXGroup;
 			children = (
 				C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */,
+				3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */,
 				26F396CE2196830E00EF5720 /* OnBoard */,
 				26DB52111777C83100B50353 /* Modal views */,
 				26DB52121777EA5100B50353 /* Tab views */,
@@ -1985,6 +1988,7 @@
 				3DBAD1E62627A2BC0078BD27 /* MLUploadQueueBaseCell.m in Sources */,
 				3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
+				3D7D352328626CB80042C5E5 /* LoadingOverlay.swift in Sources */,
 				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
 				2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,

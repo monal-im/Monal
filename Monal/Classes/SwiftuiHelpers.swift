@@ -172,7 +172,9 @@ class SwiftuiInterface : NSObject {
         case "NotificationSettings":
             host.rootView = AnyView(NotificationSettings(delegate:delegate))
         case "WelcomeLogIn":
-            host.rootView = AnyView(WelcomeLogIn(delegate:delegate))
+            host.rootView = AnyView(WelcomeLogIn(delegate:delegate, hasParentNavigationView: false))
+        case "LogIn":
+            host.rootView = AnyView(WelcomeLogIn(delegate:delegate, hasParentNavigationView: true))
         default:
             assert(false, "unreachable"); // TODO port unreachable macro to swift
         }

@@ -22,6 +22,7 @@
 @import SAMKeychain;
 
 static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
+#define FIRST_LOGIN_TIMEOUT 30.0
 
 @interface MLXMPPManager()
 {
@@ -621,6 +622,65 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     xmpp* account = [self getConnectedAccountForID:accountNo];
     if(account)
         [account sendChatState:isTyping toJid:jid];
+}
+
+#pragma mark - login/register
+-(void) notifyLoginError:(NSString*) title description:(NSString*) description
+{
+    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError
+                                                        object:nil
+                                                      userInfo:@{
+                                                        @"title": title,
+                                                        @"description": description}
+    ];
+}
+
+-(NSNumber*) login:(NSString*) jid password:(NSString*) password
+{
+    NSArray* elements = [jid componentsSeparatedByString:@"@"];
+
+    NSString* domain;
+    NSString* user;
+    //if it is a JID
+    if([elements count] > 1)
+    {
+        user = [elements objectAtIndex:0];
+        domain = [elements objectAtIndex:1];
+    }
+
+    if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString]) {
+        [self notifyLoginError:NSLocalizedString(@"Duplicate Account", @"")
+                   description:NSLocalizedString(@"This account already exists on this instance", @"")];
+        return nil;
+    }
+
+    NSMutableDictionary* dic  = [[NSMutableDictionary alloc] init];
+    [dic setObject:domain.lowercaseString forKey:kDomain];
+    [dic setObject:user.lowercaseString forKey:kUsername];
+    [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
+    [dic setObject:@YES forKey:kEnabled];
+    [dic setObject:@NO forKey:kDirectTLS];
+
+    NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
+    [self addNewAccountToKeychain:accountNo withPassword:password];
+    return accountNo;
+}
+
+-(void) addNewAccountToKeychain:(NSNumber*) accountNo withPassword:(NSString*) password
+{
+    if(accountNo != nil && password != nil) {
+        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+        [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo.stringValue];
+        [self connectAccount:accountNo];
+    }
+}
+
+-(void) removeAccountForAccountNo:(NSNumber*) accountNo
+{
+    [[MLXMPPManager sharedInstance] disconnectAccount:accountNo];
+    [[DataLayer sharedInstance] removeAccount:accountNo];
+    // trigger UI removal
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 }
 
 #pragma mark - getting details

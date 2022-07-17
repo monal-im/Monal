@@ -228,11 +228,12 @@ struct WelcomeLogIn: View {
                 .navigationBarHidden(false)
                 .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
                 .navigationBarItems(leading: self.hasParentNavigationView == true ? nil : Button(action : {
-                    self.delegate.dismiss()
-                }){
-                    Image(systemName: "arrow.backward")
-                }
-                .keyboardShortcut(.escape, modifiers: []))
+                        self.delegate.dismiss()
+                    }){
+                        Image(systemName: "arrow.backward")
+                    }
+                    .keyboardShortcut(.escape, modifiers: [])
+                )
                 .disabled(self.loadingOverlay.enabled == true)
                 .blur(radius: self.loadingOverlay.enabled == true ? 3 : 0)
                 loadingOverlay

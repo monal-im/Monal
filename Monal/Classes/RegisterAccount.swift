@@ -32,8 +32,6 @@ struct RegisterAccount: View {
         ["XMPPServer": "Input", "TermsSite_default": ""],
         ["XMPPServer": "conversations.im", "TermsSite_default": "https://account.conversations.im/privacy/"],
         ["XMPPServer": "yax.im", "TermsSite_default": "https://yaxim.org/yax.im/"],
-        ["XMPPServer": "jabber.de", "TermsSite_default": "https://www.jabber.de/impressum/datenschutz/"],
-        ["XMPPServer": "xabber.de", "TermsSite_default": "https://www.draugr.de"],
         ["XMPPServer": "trashserver.net", "TermsSite_default": "https://trashserver.net/en/privacy/", "TermsSite_de": "https://trashserver.net/datenschutz/"]
     ]
 
@@ -46,7 +44,7 @@ struct RegisterAccount: View {
     @State private var password: String = ""
 
     @State private var providedServer: String = ""
-    @State private var selectedServerIndex = 1
+    @State private var selectedServerIndex = Int.random(in: 1 ..< XMPPServer.count)
 
     @State private var showAlert = false
     @State private var registerComplete = false

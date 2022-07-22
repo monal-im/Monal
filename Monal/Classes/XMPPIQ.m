@@ -65,7 +65,19 @@ NSString* const kiqErrorType = @"error";
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
         @"jid": jid,
         @"node": node
-    } andChildren:@[] andData:nil]];
+    } andChildren:@[
+        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:@{
+#ifdef IS_ALPHA
+            @"pushModule": @"monalAlpha"
+#else //IS_ALPHA
+#ifdef TARGET_OS_MACCATALYST
+            @"pushModule": @"monalProdCatalyst"
+#else //TARGET_OS_MACCATALYST
+            @"pushModule": @"monalProdiOS"
+#endif //NOT TARGET_OS_MACCATALYST
+#endif //NOT IS_ALPHA
+        }]
+    ] andData:nil]];
 }
 
 -(void) setPushDisable:(NSString*) node onPushServer:(NSString*) pushServer

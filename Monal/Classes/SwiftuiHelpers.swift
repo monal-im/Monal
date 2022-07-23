@@ -92,24 +92,17 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
 }
 
 // clear button for text fields, see https://stackoverflow.com/a/58896723/3528174
-struct ClearButton: ViewModifier
-{
+struct ClearButton: ViewModifier {
     @Binding var text: String
-
-    public func body(content: Content) -> some View
-    {
-        ZStack(alignment: .trailing)
-        {
+    public func body(content: Content) -> some View {
+        ZStack(alignment: .trailing) {
             content
-            if !text.isEmpty
-            {
-                Button(action:
-                {
+            if(!text.isEmpty) {
+                Button(action: {
                     self.text = ""
-                })
-                {
+                }) {
                     Image(systemName: "delete.left")
-                        .foregroundColor(Color(UIColor.opaqueSeparator))
+                    .foregroundColor(Color(UIColor.opaqueSeparator))
                 }
                 .padding(.trailing, 8)
             }

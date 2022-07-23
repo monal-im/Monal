@@ -196,7 +196,7 @@ struct RegisterAccount: View {
                 ] as [String : Any]
 
                 let accountNo = DataLayer.sharedInstance().addAccount(with: dic);
-                if accountNo != nil {
+                if(accountNo != nil) {
                     MLXMPPManager.sharedInstance().addNewAccount(toKeychain: accountNo!, withPassword: self.password)
                 }
                 self.registerComplete = true
@@ -229,7 +229,7 @@ struct RegisterAccount: View {
             } else {
                 hideLoadingOverlay()
                 let captchaUIImg = UIImage.init(data: captchaData)
-                if captchaUIImg != nil {
+                if(captchaUIImg != nil) {
                     self.captchaImg = Image(uiImage: captchaUIImg!)
                 } else {
                     showRegistrationAlert(alertMessage: NSLocalizedString("Could not read captcha!", comment: ""))
@@ -256,7 +256,7 @@ struct RegisterAccount: View {
                         Menu {
                             Picker("", selection: $selectedServerIndex) {
                                 ForEach (RegisterAccount.XMPPServer.indices, id: \.self) {
-                                    if ($0 == 0) {
+                                    if($0 == 0) {
                                         xmppServerInputSelectLabel.tag(0)
                                     }
                                     else {
@@ -274,7 +274,7 @@ struct RegisterAccount: View {
                         }
                         label: {
                             HStack {
-                                if (selectedServerIndex != 0) {
+                                if(selectedServerIndex != 0) {
                                     Text(RegisterAccount.XMPPServer[selectedServerIndex]["XMPPServer"]!).font(.system(size: 17)).frame(maxWidth: .infinity)
                                     Image(systemName: "checkmark")
                                 }
@@ -287,7 +287,7 @@ struct RegisterAccount: View {
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
 
-                        if (selectedServerIndex == 0) {
+                        if(selectedServerIndex == 0) {
                             TextField("Provide XMPP-Server", text: Binding(get: { self.providedServer }, set: { string in self.providedServer = string.lowercased() }))
                                 .disableAutocorrection(true)
                         }
@@ -295,7 +295,7 @@ struct RegisterAccount: View {
                         TextField("Username", text: Binding(get: { self.username }, set: { string in self.username = string.lowercased() }))
                             .disableAutocorrection(true)
                         SecureField("Password", text: $password)
-                        if (self.captchaImg != nil) {
+                        if(self.captchaImg != nil) {
                             HStack {
                                 self.captchaImg
                                 Spacer()
@@ -312,7 +312,7 @@ struct RegisterAccount: View {
                         Button(action: {
                             showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert)
 
-                            if (!showAlert) {
+                            if(!showAlert) {
                                 self.errorObserverEnabled = true
                                 if(self.xmppAccount == nil) {
                                     fetchRequestForm()
@@ -340,7 +340,7 @@ struct RegisterAccount: View {
                         .font(.system(size: 10))
                         .padding(.vertical, 8)
 
-                        if (selectedServerIndex != 0) {
+                        if(selectedServerIndex != 0) {
                             Button (action: {
                                 showWebView.toggle()
                             }){

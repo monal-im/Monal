@@ -101,8 +101,8 @@ struct WelcomeLogIn: View {
         let newTimeout = DispatchTime.now() + 30.0;
         self.currentTimeout = newTimeout
         DispatchQueue.main.asyncAfter(deadline: newTimeout) {
-            if newTimeout == self.currentTimeout {
-                if self.newAccountNo != nil {
+            if(newTimeout == self.currentTimeout) {
+                if(self.newAccountNo != nil) {
                     MLXMPPManager.sharedInstance().removeAccount(forAccountNo: self.newAccountNo!)
                     self.newAccountNo = nil
                 }
@@ -226,11 +226,11 @@ struct WelcomeLogIn: View {
         .navigationBarTitle(Text("Welcome"))
         .onDisappear {UITableView.appearance().tableHeaderView = nil}       //why that??
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
-            if self.errorObserverEnabled == false {
+            if(self.errorObserverEnabled == false) {
                 return
             }
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo, let errorMessage = notification.userInfo?["message"] as? String {
-                if xmppAccount.accountNo.intValue == newAccountNo.intValue {
+                if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
                     currentTimeout = nil // <- disable timeout on error
                     errorObserverEnabled = false
                     showLoginErrorAlert(errorMessage: errorMessage)
@@ -241,7 +241,7 @@ struct WelcomeLogIn: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMLHasConnectedNotice")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
-                if xmppAccount.accountNo.intValue == newAccountNo.intValue {
+                if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
                     currentTimeout = nil // <- disable timeout on successful connection
                     self.errorObserverEnabled = false
                     HelperTools.defaultsDB().set(true, forKey: "HasSeenLogin")
@@ -253,7 +253,7 @@ struct WelcomeLogIn: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedCatchup")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
-                if xmppAccount.accountNo.intValue == newAccountNo.intValue {
+                if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
 #if !DISABLE_OMEMO
                     showLoadingOverlay(
                         headline: NSLocalizedString("Loading omemo bundles", comment: ""),
@@ -269,7 +269,7 @@ struct WelcomeLogIn: View {
 #if !DISABLE_OMEMO
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalUpdateBundleFetchStatus")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
-                if notificationAccountNo.intValue == newAccountNo.intValue {
+                if(notificationAccountNo.intValue == newAccountNo.intValue) {
                     showLoadingOverlay(
                         headline: NSLocalizedString("Loading omemo bundles", comment: ""),
                         description: String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all))
@@ -278,7 +278,7 @@ struct WelcomeLogIn: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedOmemoBundleFetch")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
-                if (notificationAccountNo.intValue == newAccountNo.intValue) {
+                if(notificationAccountNo.intValue == newAccountNo.intValue) {
                     self.loginComplete = true
                     showSuccessAlert()
                 }

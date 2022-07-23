@@ -131,6 +131,55 @@ struct NavigationLazyView<Content: View>: View {
     }
 }
 
+// use this to wrap a view into NavigationView, if it should be the outermost swiftui view of a new view stack
+struct AddTopLevelNavigation<Content: View>: View {
+    let build: () -> Content
+    let delegate: SheetDismisserProtocol
+    init(withDelegate delegate: SheetDismisserProtocol, to build: @autoclosure @escaping () -> Content) {
+        self.build = build
+        self.delegate = delegate
+    }
+    init(withDelegate delegate: SheetDismisserProtocol, andClosure build: @escaping () -> Content) {
+        self.build = build
+        self.delegate = delegate
+    }
+    var body: some View {
+        NavigationView {
+            build()
+            .navigationBarTitleDisplayMode(.automatic)
+            .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
+            .navigationBarItems(leading: Button(action : {
+                self.delegate.dismiss()
+            }){
+                Image(systemName: "arrow.backward")
+            }.keyboardShortcut(.escape, modifiers: []))
+        }
+        .navigationViewStyle(.stack)
+    }
+}
+
+// TODO: fix those workarounds as soon as we have no storyboards anymore
+struct UIKitWorkaround<Content: View>: View {
+    let build: () -> Content
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+    init(withClosure build: @escaping () -> Content) {
+        self.build = build
+    }
+    var body: some View {
+        if(UIDevice.current.userInterfaceIdiom == .phone) {
+            build().navigationBarTitleDisplayMode(.inline)
+        } else {
+            NavigationView {
+                build()
+                .navigationBarTitleDisplayMode(.automatic)
+            }
+            .navigationViewStyle(.stack)
+        }
+    }
+}
+
 // Alert properties for use in Alert
 struct AlertPrompt {
     var title: Text = Text("")
@@ -146,7 +195,7 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact))))
         return host
     }
     
@@ -169,14 +218,14 @@ class SwiftuiInterface : NSObject {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
-        case "NotificationSettings":
-            host.rootView = AnyView(NotificationSettings(delegate:delegate))
-        case "WelcomeLogIn":
-            host.rootView = AnyView(WelcomeLogIn(delegate:delegate, hasParentNavigationView: false))
-        case "LogIn":
-            host.rootView = AnyView(WelcomeLogIn(delegate:delegate, hasParentNavigationView: true))
-        default:
-            assert(false, "unreachable"); // TODO port unreachable macro to swift
+            case "NotificationSettings":
+                host.rootView = AnyView(UIKitWorkaround(NotificationSettings(delegate:delegate)))
+            case "WelcomeLogIn":
+                host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate)))
+            case "LogIn":
+                host.rootView = AnyView(UIKitWorkaround(WelcomeLogIn(delegate:delegate)))
+            default:
+                assert(false, "unreachable"); // TODO port unreachable macro to swift
         }
         return host
     }

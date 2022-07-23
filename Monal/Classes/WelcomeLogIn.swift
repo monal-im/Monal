@@ -112,135 +112,119 @@ struct WelcomeLogIn: View {
         }
     }
 
-    let hasParentNavigationView : Bool
-
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .center) {
-                Color(UIColor.systemGroupedBackground).ignoresSafeArea()
-                
-                ScrollView {
-                    VStack(alignment: .leading) {
-                        HStack () {
-                            Image(decorative: "AppLogo")
-                                .resizable()
-                                .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
-                                .padding()
-                            
-                            Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
-                                .padding()
-                                .padding(.leading, -16.0)
-                            
-                        }
-                        .frame(maxWidth: .infinity)
-                        .background(Color(UIColor.systemBackground))
+        ZStack(alignment: .center) {
+            Color(UIColor.systemGroupedBackground).ignoresSafeArea()
+            
+            ScrollView {
+                VStack(alignment: .leading) {
+                    HStack () {
+                        Image(decorative: "AppLogo")
+                            .resizable()
+                            .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
+                            .padding()
+                        
+                        Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
+                            .padding()
+                            .padding(.leading, -16.0)
+                        
+                    }
+                    .frame(maxWidth: .infinity)
+                    .background(Color(UIColor.systemBackground))
 
-                        Form {
-                            TextField("user@domain.tld", text: Binding(
-                                get: { self.jid },
-                                set: { string in self.jid = string.lowercased() })
-                            )
-                            .disableAutocorrection(true)
-                            .keyboardType(.emailAddress)
-                            
-                            SecureField("Password", text: $password)
-                            
-                            HStack() {
-                                Button(action: {
-                                    showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
+                    Form {
+                        TextField("user@domain.tld", text: Binding(
+                            get: { self.jid },
+                            set: { string in self.jid = string.lowercased() })
+                        )
+                        .disableAutocorrection(true)
+                        .keyboardType(.emailAddress)
+                        
+                        SecureField("Password", text: $password)
+                        
+                        HStack() {
+                            Button(action: {
+                                showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
 
-                                    if (!showAlert) {
-                                        startLoginTimeout()
-                                        showLoadingOverlay(
-                                            headline: NSLocalizedString("Logging in", comment: ""),
-                                            description: "")
-                                        self.errorObserverEnabled = true
-                                        self.newAccountNo = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
+                                if (!showAlert) {
+                                    startLoginTimeout()
+                                    showLoadingOverlay(
+                                        headline: NSLocalizedString("Logging in", comment: ""),
+                                        description: "")
+                                    self.errorObserverEnabled = true
+                                    self.newAccountNo = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
+                                }
+                            }){
+                                Text("Login")
+                                    .frame(maxWidth: .infinity)
+                                    .padding(9.0)
+                                    .background(Color(UIColor.tertiarySystemFill))
+                                    .foregroundColor(buttonColor)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
+                            .buttonStyle(BorderlessButtonStyle())
+                            .alert(isPresented: $showAlert) {
+                                Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
+                                    if(self.loginComplete == true) {
+                                        self.delegate.dismiss()
                                     }
-                                }){
-                                    Text("Login")
-                                        .frame(maxWidth: .infinity)
-                                        .padding(9.0)
-                                        .background(Color(UIColor.tertiarySystemFill))
-                                        .foregroundColor(buttonColor)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                                .alert(isPresented: $showAlert) {
-                                    Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
-                                        if(self.loginComplete == true) {
-                                            self.delegate.dismiss()
-                                        }
-                                    }))
-                                }
+                                }))
+                            }
 
-                                // Just sets the credential in jid and password variables and shows them in the input fields
-                                // so user can control what they scanned and if o.k. login via the "Login" button.
-                                Button(action: {
-                                    showQRCodeScanner = true
-                                }){
-                                    Image(systemName: "qrcode")
-                                        .frame(maxHeight: .infinity)
-                                        .padding(9.0)
-                                        .background(Color(UIColor.tertiarySystemFill))
-                                        .foregroundColor(.black)
-                                        .clipShape(Circle())
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                                .sheet(isPresented: $showQRCodeScanner) {
-                                    Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
-                                    // Get existing credentials from QR and put values in jid and password
-                                    MLQRCodeScanner(
-                                        handleLogin: { jid, password in
-                                            self.jid = jid
-                                            self.password = password
-                                        }, handleClose: {
-                                            self.showQRCodeScanner = false
-                                        }
-                                    )
-                                }
+                            // Just sets the credential in jid and password variables and shows them in the input fields
+                            // so user can control what they scanned and if o.k. login via the "Login" button.
+                            Button(action: {
+                                showQRCodeScanner = true
+                            }){
+                                Image(systemName: "qrcode")
+                                    .frame(maxHeight: .infinity)
+                                    .padding(9.0)
+                                    .background(Color(UIColor.tertiarySystemFill))
+                                    .foregroundColor(.black)
+                                    .clipShape(Circle())
                             }
-                            
-                            NavigationLink(destination: RegisterAccount(delegate: self.delegate)) {
-                                Text("Register")
-                            }
-                            
-                            if(self.hasParentNavigationView == false) {
-                                Button(action: {
-                                    self.delegate.dismiss()
-                                }){
-                                    Text("Set up account later")
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.top, 10.0)
-                                        .padding(.bottom, 9.0)
-                                }
+                            .buttonStyle(BorderlessButtonStyle())
+                            .sheet(isPresented: $showQRCodeScanner) {
+                                Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
+                                // Get existing credentials from QR and put values in jid and password
+                                MLQRCodeScanner(
+                                    handleLogin: { jid, password in
+                                        self.jid = jid
+                                        self.password = password
+                                    }, handleClose: {
+                                        self.showQRCodeScanner = false
+                                    }
+                                )
                             }
                         }
-                        .frame(minHeight: 310)
-                        .textFieldStyle(.roundedBorder)
-                        .onAppear {UITableView.appearance().tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 30))}
+                        
+                        NavigationLink(destination: NavigationLazyView(RegisterAccount(delegate: self.delegate))) {
+                            Text("Register")
+                            .foregroundColor(Color.primary)
+                        }
+                        
+                        if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
+                            Button(action: {
+                                self.delegate.dismiss()
+                            }){
+                                Text("Set up account later")
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.top, 10.0)
+                                    .padding(.bottom, 9.0)
+                            }
+                        }
                     }
+                    .frame(minHeight: 310)
+                    .textFieldStyle(.roundedBorder)
+                    .onAppear {UITableView.appearance().tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 30))}
                 }
-
-                // TODO fix those workarounds as soon as settings are not a storyboard anymore
-                .navigationBarHidden(UIDevice.current.userInterfaceIdiom == .phone)
-                .navigationBarTitle(Text("Welcome"), displayMode: self.hasParentNavigationView == true ? .inline : .automatic)
-                .navigationBarHidden(false)
-                .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
-                .navigationBarItems(leading: self.hasParentNavigationView == true ? nil : Button(action : {
-                        self.delegate.dismiss()
-                    }){
-                        Image(systemName: "arrow.backward")
-                    }
-                    .keyboardShortcut(.escape, modifiers: [])
-                )
-                .disabled(self.loadingOverlay.enabled == true)
-                .blur(radius: self.loadingOverlay.enabled == true ? 3 : 0)
-                loadingOverlay
             }
+            .disabled(self.loadingOverlay.enabled == true)
+            .blur(radius: self.loadingOverlay.enabled == true ? 3 : 0)
+            loadingOverlay
         }
-        .navigationViewStyle(.stack)
-        .onDisappear {UITableView.appearance().tableHeaderView = nil}
+        .navigationBarTitle(Text("Welcome"))
+        .onDisappear {UITableView.appearance().tableHeaderView = nil}       //why that??
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
             if self.errorObserverEnabled == false {
                 return
@@ -307,6 +291,6 @@ struct WelcomeLogIn: View {
 struct WelcomeLogIn_Previews: PreviewProvider {
     static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        WelcomeLogIn(delegate:delegate, hasParentNavigationView: false)
+        WelcomeLogIn(delegate:delegate)
     }
 }

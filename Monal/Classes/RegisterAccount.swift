@@ -12,7 +12,6 @@ import WebKit
 import monalxmpp
 
 struct WebView: UIViewRepresentable {
- 
     var url: URL
  
     func makeUIView(context: Context) -> WKWebView {
@@ -58,6 +57,7 @@ struct RegisterAccount: View {
     @State private var loadingOverlay = LoadingOverlay(headline: "", description: "")
 
     @State private var showWebView = false
+    @State private var errorObserverEnabled = false
 
     private var serverSelectedAlert: Bool {
         alertPrompt.title = Text("No XMPP server!")
@@ -102,6 +102,11 @@ struct RegisterAccount: View {
     }
     
     private func showRegistrationAlert(alertMessage: String?) {
+        if(self.xmppAccount != nil) {
+            DDLogDebug("Disconnecting registering xmpp account...")
+            self.xmppAccount!.disconnect(true)
+        }
+        self.xmppAccount = nil;
         alertPrompt.title = Text("Registration Error")
         alertPrompt.message = Text(alertMessage ?? NSLocalizedString("Could not register your username. Please check your code or change the username and try again.", comment: ""))
         hideLoadingOverlay()
@@ -171,6 +176,11 @@ struct RegisterAccount: View {
     }
 
     private func register() {
+        if(self.xmppAccount != nil) {
+            self.xmppAccount!.disconnect(true)
+        }
+        self.xmppAccount = createXMPPInstance()
+        self.xmppAccount!.disconnect(true)
         showLoadingOverlay(
             headline: NSLocalizedString("Registering account...", comment: ""),
             description: "")
@@ -194,7 +204,9 @@ struct RegisterAccount: View {
             } else {
                 showRegistrationAlert(alertMessage: errorMsg)
                 self.captchaText = ""
-                fetchRequestForm() // < force reload the form to update the captcha
+                if(self.captchaImg != nil) {
+                    fetchRequestForm() // < force reload the form to update the captcha
+                }
             }
         }
     }
@@ -207,7 +219,12 @@ struct RegisterAccount: View {
         self.xmppAccount!.disconnect(true)
         self.xmppAccount!.requestRegForm(withToken: nil, andCompletion: {captchaData, hiddenFieldsDict in
             self.hiddenFields = hiddenFieldsDict
-            if captchaData.isEmpty == true {
+            if(self.xmppAccount != nil) {
+                self.xmppAccount!.disconnect(true)
+            }
+            self.xmppAccount = createXMPPInstance()
+            self.xmppAccount!.disconnect(true)
+            if(captchaData.isEmpty == true) {
                 register()
             } else {
                 hideLoadingOverlay()
@@ -296,6 +313,7 @@ struct RegisterAccount: View {
                             showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert)
 
                             if (!showAlert) {
+                                self.errorObserverEnabled = true
                                 if(self.xmppAccount == nil) {
                                     fetchRequestForm()
                                 } else {
@@ -356,6 +374,19 @@ struct RegisterAccount: View {
             self.loadingOverlay
         }
         .navigationTitle("Register")
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
+            DDLogDebug("Got xmpp error")
+            if(self.errorObserverEnabled == false) {
+                return
+            }
+            if let xmppAccount = notification.object as? xmpp, let errorMessage = notification.userInfo?["message"] as? String {
+                if(xmppAccount == self.xmppAccount) {
+                    DDLogDebug("XMPP account matches registering one")
+                    errorObserverEnabled = false
+                    showRegistrationAlert(alertMessage: errorMessage)
+                }
+            }
+        }
     }
 }
 

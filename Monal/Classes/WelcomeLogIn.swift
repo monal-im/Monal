@@ -198,7 +198,7 @@ struct WelcomeLogIn: View {
                             }
                         }
                         
-                        NavigationLink(destination: NavigationLazyView(RegisterAccount(delegate: self.delegate))) {
+                        NavigationLink(destination: LazyClosureView(RegisterAccount(delegate: self.delegate))) {
                             Text("Register")
                             .foregroundColor(Color.primary)
                         }

@@ -319,15 +319,15 @@ struct OmemoKeys: View {
     var body: some View {
         // workaround for the fact that NavigationLink inside a form forces a formatting we don't want
         if(self.selectedContact != nil) { // selectedContact is set to a value either when the user presses a QR code button or if there is only a single contact to choose from (-> user views a single account)
-            NavigationLink(destination:NavigationLazyView(OmemoQrCodeView(contact: self.selectedContact!)), isActive: $navigateToQRCodeView){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
-            NavigationLink(destination: MLQRCodeScanner(
+            NavigationLink(destination:LazyClosureView(OmemoQrCodeView(contact: self.selectedContact!)), isActive: $navigateToQRCodeView){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
+            NavigationLink(destination: LazyClosureView(MLQRCodeScanner(
                 handleContact: { jid, fingerprints in
                     // we scanned a contact but it was not in the contact list, show the alert...
                     self.scannedJid = jid
                     self.scannedFingerprints = fingerprints
                     showScannedContactMissmatchAlert = true
                 }, handleClose: {}
-            ), isActive: $navigateToQRCodeScanner){}.hidden().disabled(true)
+            )), isActive: $navigateToQRCodeScanner){}.hidden().disabled(true)
         }
         List {
             let helpDescription = (self.ownKeys == true) ?

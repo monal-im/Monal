@@ -117,8 +117,9 @@ struct ClearButton: ViewModifier
     }
 }
 
-// lazy loading of navigation destination views, see https://stackoverflow.com/a/61234030/3528174
-struct NavigationLazyView<Content: View>: View {
+// lazy loading of views (e.g. when used inside a NavigationLink) with the additional ability to use a closure to modify/wrap them
+// see https://stackoverflow.com/a/61234030/3528174
+struct LazyClosureView<Content: View>: View {
     let build: () -> Content
     init(_ build: @autoclosure @escaping () -> Content) {
         self.build = build

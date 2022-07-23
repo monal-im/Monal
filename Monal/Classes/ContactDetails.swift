@@ -43,18 +43,18 @@ struct ContactDetails: View {
                 }
 #if !DISABLE_OMEMO
                 if(contact.isGroup == false) {
-                    NavigationLink(destination: NavigationLazyView(OmemoKeys(contact: contact))) {
+                    NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
                         Text("Encryption Keys")
                     }
                 } else if(contact.isGroup && contact.mucType == "group") {
-                    NavigationLink(destination: NavigationLazyView(OmemoKeys(contact: contact))) {
+                    NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
                         Text("Encryption Keys")
                     }
                 }
 #endif
                 
                 if(!contact.isGroup) {
-                    NavigationLink(destination: NavigationLazyView(ContactResources(contact: contact))) {
+                    NavigationLink(destination: LazyClosureView(ContactResources(contact: contact))) {
                         Text("Resources")
                     }
                 }

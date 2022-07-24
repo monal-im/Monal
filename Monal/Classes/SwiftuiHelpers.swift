@@ -205,6 +205,15 @@ class SwiftuiInterface : NSObject {
         }
         return host
     }
+    
+    @objc
+    func makeAccountRegistration(_ registerData: [String:Any]?) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:RegisterAccount(delegate:delegate, registerData:registerData)))
+        return host
+    }
 
     @objc
     func makeView(name: String) -> UIViewController {

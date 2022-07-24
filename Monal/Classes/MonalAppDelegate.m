@@ -496,7 +496,16 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
                 weakify(self);
                 [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^{
                     strongify(self);
-                    xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+                    
+                    //search for newly created account
+                    xmpp* account = nil;
+                    NSString* jid = [NSString stringWithFormat:@"%@@%@", username, host];
+                    for(xmpp* xmppAccount in [MLXMPPManager sharedInstance].connectedXMPP)
+                        if([xmppAccount.connectionProperties.identity.jid isEqualToString:jid])
+                        {
+                            account = xmppAccount;
+                            break;
+                        }
                     
                     //this should never happen
                     MLAssert(account != nil, @"Can not use account after register!", (@{

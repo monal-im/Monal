@@ -39,11 +39,13 @@ struct RegisterAccount: View {
     static private let xmppFaultyPattern = ".+\\..{2,}$"
     static private let credFaultyPattern = ".*@.*"
 
-    @State private var username: String = ""
-    @State private var password: String = ""
+    @State public var username: String = "aaa"
+    @State public var password: String = ""
+    @State public var registerToken: String?
+    @State public var completionHandler:(()->Void)? = {}
 
-    @State private var providedServer: String = ""
-    @State private var selectedServerIndex = Int.random(in: 1 ..< XMPPServer.count)
+    @State public var providedServer: String = ""
+    @State public var selectedServerIndex = Int.random(in: 1 ..< XMPPServer.count)
 
     @State private var showAlert = false
     @State private var registerComplete = false
@@ -60,6 +62,19 @@ struct RegisterAccount: View {
     @State private var showWebView = false
     @State private var errorObserverEnabled = false
 
+    init(delegate:SheetDismisserProtocol, registerData:[String:Any]? = nil) {
+        self.delegate = delegate
+        if let registerData = registerData {
+            DDLogDebug("Feeding RegisterAccount with data: \(registerData)");
+            //for State stuff see https://forums.swift.org/t/assignment-to-state-var-in-init-doesnt-do-anything-but-the-compiler-gened-one-works/35235
+            self._selectedServerIndex = State(wrappedValue:0)
+            self._providedServer = State(wrappedValue:(registerData["host"] as? String) ?? "")
+            self._username = State(wrappedValue:(registerData["username"] as? String) ?? "")
+            self._registerToken = State(wrappedValue:registerData["token"] as? String)
+            self._completionHandler = State(wrappedValue:(registerData["completion"] as? (()->Void)?) ?? {})
+        }
+    }
+    
     private var serverSelectedAlert: Bool {
         alertPrompt.title = Text("No XMPP server!")
         alertPrompt.message = Text("Please select a XMPP server or provide one.")
@@ -110,7 +125,7 @@ struct RegisterAccount: View {
     
     private func showSuccessAlert() {
         alertPrompt.title = Text("Success!")
-        alertPrompt.message = Text("You are set up and connected.")
+        alertPrompt.message = Text("You are set up and connected. People can message you at: \(self.username)@\(self.actualServer)")
         hideLoadingOverlay(overlay)
         showAlert = true
     }
@@ -120,7 +135,7 @@ struct RegisterAccount: View {
         return (tmp != nil && tmp != "Input") ? tmp! : serverProvided && !xmppServerFaulty ? providedServer : "?"
     }
 
-   private var serverSelected: Bool {
+    private var serverSelected: Bool {
         return selectedServerIndex != 0
     }
 
@@ -201,7 +216,7 @@ struct RegisterAccount: View {
                 showLoadingOverlay(overlay, headline:NSLocalizedString("Fetching registration form...", comment: ""))
                 self.xmppAccount = createXMPPInstance()
                 self.xmppAccount!.disconnect(true)
-                self.xmppAccount!.requestRegForm(withToken: nil, andCompletion: {captchaData, hiddenFieldsDict in
+                self.xmppAccount!.requestRegForm(withToken: self.registerToken, andCompletion: {captchaData, hiddenFieldsDict in
                     DispatchQueue.main.async {
                         self.hiddenFields = hiddenFieldsDict
                         if(self.xmppAccount != nil) {
@@ -319,6 +334,10 @@ struct RegisterAccount: View {
                     .alert(isPresented: $showAlert) {
                         Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                             if(self.registerComplete == true) {
+                                if let completion = self.completionHandler {
+                                    DDLogVerbose("Calling reg completion handler...")
+                                    completion()
+                                }
                                 self.delegate.dismiss()
                             }
                         }))

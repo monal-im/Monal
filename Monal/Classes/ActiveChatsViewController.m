@@ -13,7 +13,6 @@
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
 #import "MLImageManager.h"
-#import "MLRegisterViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
 #import "MLXEPSlashMeHandler.h"
@@ -504,17 +503,8 @@ static NSMutableSet* _smacksWarningDisplayed;
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
     if([segue.identifier isEqualToString:@"showRegister"])
     {
-        UINavigationController* navigationController = (UINavigationController*)segue.destinationViewController;
-        MLRegisterViewController* reg = (MLRegisterViewController*)navigationController.visibleViewController;
-        NSDictionary* registerData = (NSDictionary*)sender;
-        if(registerData)
-        {
-            DDLogDebug(@"Feeding MLRegisterViewController withdata: %@", registerData);
-            reg.registerServer = nilExtractor(registerData[@"host"]);
-            reg.registerUsername = nilExtractor(registerData[@"username"]);
-            reg.registerToken = nilExtractor(registerData[@"token"]);
-            reg.completionHandler = nilExtractor(registerData[@"completion"]);
-        }
+        UIViewController* registerViewController = [[SwiftuiInterface new] makeAccountRegistration:(NSDictionary*)sender];
+        [self presentViewController:registerViewController animated:YES completion:^{}];
     }
     else if([segue.identifier isEqualToString:@"showConversation"])
     {

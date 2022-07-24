@@ -10,9 +10,9 @@ import SwiftUI
 import monalxmpp
 
 struct WelcomeLogIn: View {
-    var delegate: SheetDismisserProtocol
-    
     static private let credFaultyPattern = "^.+@.+\\..{2,}$"
+    
+    var delegate: SheetDismisserProtocol
     
     @State private var jid: String = ""
     @State private var password: String = ""
@@ -21,13 +21,13 @@ struct WelcomeLogIn: View {
     @State private var showQRCodeScanner = false
 
     // login related
-    @State private var loadingOverlay = LoadingOverlay(headline: "", description: "")
     @State private var currentTimeout : DispatchTime? = nil
     @State private var errorObserverEnabled = false
     @State private var newAccountNo: NSNumber? = nil
     @State private var loginComplete = false
     
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
+    @StateObject private var overlay = LoadingOverlayState()
     
     private var credentialsEnteredAlert: Bool {
         alertPrompt.title = Text("No Empty Values!")
@@ -48,36 +48,24 @@ struct WelcomeLogIn: View {
     }
 
     private func showTimeoutAlert() {
-        hideLoadingOverlay()
+        hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Timeout Error")
         alertPrompt.message = Text("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.")
         showAlert = true
     }
 
     private func showSuccessAlert() {
-        hideLoadingOverlay()
+        hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Success!")
         alertPrompt.message = Text("You are set up and connected.")
         showAlert = true
     }
 
     private func showLoginErrorAlert(errorMessage: String) {
-        hideLoadingOverlay()
+        hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Error")
         alertPrompt.message = Text(String(format: NSLocalizedString("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.\n\nTechnical error message: %@", comment: ""), errorMessage))
         showAlert = true
-    }
-
-    private func showLoadingOverlay(headline: String, description: String) {
-        loadingOverlay.headline = headline
-        loadingOverlay.description = description
-        loadingOverlay.enabled = true
-    }
-
-    private func hideLoadingOverlay() {
-        loadingOverlay.headline = ""
-        loadingOverlay.description = ""
-        loadingOverlay.enabled = false
     }
 
     private var credentialsEntered: Bool {
@@ -113,116 +101,108 @@ struct WelcomeLogIn: View {
     }
 
     var body: some View {
-        ZStack(alignment: .center) {
-            Color(UIColor.systemGroupedBackground).ignoresSafeArea()
-            
-            ScrollView {
-                VStack(alignment: .leading) {
-                    HStack () {
-                        Image(decorative: "AppLogo")
-                            .resizable()
-                            .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
-                            .padding()
-                        
-                        Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
-                            .padding()
-                            .padding(.leading, -16.0)
-                        
-                    }
-                    .frame(maxWidth: .infinity)
-                    .background(Color(UIColor.systemBackground))
-
-                    Form {
-                        TextField("user@domain.tld", text: Binding(
-                            get: { self.jid },
-                            set: { string in self.jid = string.lowercased() })
-                        )
-                        .disableAutocorrection(true)
-                        .keyboardType(.emailAddress)
-                        
-                        SecureField("Password", text: $password)
-                        
-                        HStack() {
-                            Button(action: {
-                                showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
-
-                                if (!showAlert) {
-                                    startLoginTimeout()
-                                    showLoadingOverlay(
-                                        headline: NSLocalizedString("Logging in", comment: ""),
-                                        description: "")
-                                    self.errorObserverEnabled = true
-                                    self.newAccountNo = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
-                                }
-                            }){
-                                Text("Login")
-                                    .frame(maxWidth: .infinity)
-                                    .padding(9.0)
-                                    .background(Color(UIColor.tertiarySystemFill))
-                                    .foregroundColor(buttonColor)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                            .alert(isPresented: $showAlert) {
-                                Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
-                                    if(self.loginComplete == true) {
-                                        self.delegate.dismiss()
-                                    }
-                                }))
-                            }
-
-                            // Just sets the credential in jid and password variables and shows them in the input fields
-                            // so user can control what they scanned and if o.k. login via the "Login" button.
-                            Button(action: {
-                                showQRCodeScanner = true
-                            }){
-                                Image(systemName: "qrcode")
-                                    .frame(maxHeight: .infinity)
-                                    .padding(9.0)
-                                    .background(Color(UIColor.tertiarySystemFill))
-                                    .foregroundColor(.black)
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                            .sheet(isPresented: $showQRCodeScanner) {
-                                Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
-                                // Get existing credentials from QR and put values in jid and password
-                                MLQRCodeScanner(
-                                    handleLogin: { jid, password in
-                                        self.jid = jid
-                                        self.password = password
-                                    }, handleClose: {
-                                        self.showQRCodeScanner = false
-                                    }
-                                )
-                            }
-                        }
-                        
-                        NavigationLink(destination: LazyClosureView(RegisterAccount(delegate: self.delegate))) {
-                            Text("Register")
-                            .foregroundColor(Color.primary)
-                        }
-                        
-                        if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
-                            Button(action: {
-                                self.delegate.dismiss()
-                            }){
-                                Text("Set up account later")
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.top, 10.0)
-                                    .padding(.bottom, 9.0)
-                            }
-                        }
-                    }
-                    .frame(minHeight: 310)
-                    .textFieldStyle(.roundedBorder)
-                    .onAppear {UITableView.appearance().tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 30))}
+        ScrollView {
+            VStack(alignment: .leading) {
+                HStack () {
+                    Image(decorative: "AppLogo")
+                        .resizable()
+                        .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
+                        .padding()
+                    
+                    Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
+                        .padding()
+                        .padding(.leading, -16.0)
+                    
                 }
+                .frame(maxWidth: .infinity)
+                .background(Color(UIColor.systemBackground))
+
+                Form {
+                    TextField("user@domain.tld", text: Binding(
+                        get: { self.jid },
+                        set: { string in self.jid = string.lowercased() })
+                    )
+                    .disableAutocorrection(true)
+                    .keyboardType(.emailAddress)
+                    
+                    SecureField("Password", text: $password)
+                    
+                    HStack() {
+                        Button(action: {
+                            showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
+
+                            if (!showAlert) {
+                                startLoginTimeout()
+                                showLoadingOverlay(overlay, headline:NSLocalizedString("Logging in", comment: ""))
+                                self.errorObserverEnabled = true
+                                self.newAccountNo = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
+                            }
+                        }){
+                            Text("Login")
+                                .frame(maxWidth: .infinity)
+                                .padding(9.0)
+                                .background(Color(UIColor.tertiarySystemFill))
+                                .foregroundColor(buttonColor)
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
+                        .alert(isPresented: $showAlert) {
+                            Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
+                                if(self.loginComplete == true) {
+                                    self.delegate.dismiss()
+                                }
+                            }))
+                        }
+
+                        // Just sets the credential in jid and password variables and shows them in the input fields
+                        // so user can control what they scanned and if o.k. login via the "Login" button.
+                        Button(action: {
+                            showQRCodeScanner = true
+                        }){
+                            Image(systemName: "qrcode")
+                                .frame(maxHeight: .infinity)
+                                .padding(9.0)
+                                .background(Color(UIColor.tertiarySystemFill))
+                                .foregroundColor(.black)
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
+                        .sheet(isPresented: $showQRCodeScanner) {
+                            Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
+                            // Get existing credentials from QR and put values in jid and password
+                            MLQRCodeScanner(
+                                handleLogin: { jid, password in
+                                    self.jid = jid
+                                    self.password = password
+                                }, handleClose: {
+                                    self.showQRCodeScanner = false
+                                }
+                            )
+                        }
+                    }
+                    
+                    NavigationLink(destination: LazyClosureView(RegisterAccount(delegate: self.delegate))) {
+                        Text("Register")
+                        .foregroundColor(Color.primary)
+                    }
+                    
+                    if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
+                        Button(action: {
+                            self.delegate.dismiss()
+                        }){
+                            Text("Set up account later")
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 10.0)
+                                .padding(.bottom, 9.0)
+                        }
+                    }
+                }
+                .frame(minHeight: 310)
+                .textFieldStyle(.roundedBorder)
+                .onAppear {UITableView.appearance().tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 30))}
             }
-            .disabled(self.loadingOverlay.enabled == true)
-            .blur(radius: self.loadingOverlay.enabled == true ? 3 : 0)
-            loadingOverlay
         }
+        .addLoadingOverlay(overlay)
         .navigationBarTitle(Text("Welcome"))
         .onDisappear {UITableView.appearance().tableHeaderView = nil}       //why that??
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
@@ -231,38 +211,39 @@ struct WelcomeLogIn: View {
             }
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo, let errorMessage = notification.userInfo?["message"] as? String {
                 if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
-                    currentTimeout = nil // <- disable timeout on error
-                    errorObserverEnabled = false
-                    showLoginErrorAlert(errorMessage: errorMessage)
-                    MLXMPPManager.sharedInstance().removeAccount(forAccountNo: newAccountNo)
-                    self.newAccountNo = nil
+                    DispatchQueue.main.async {
+                        currentTimeout = nil // <- disable timeout on error
+                        errorObserverEnabled = false
+                        showLoginErrorAlert(errorMessage: errorMessage)
+                        MLXMPPManager.sharedInstance().removeAccount(forAccountNo: newAccountNo)
+                        self.newAccountNo = nil
+                    }
                 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMLHasConnectedNotice")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
                 if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
-                    currentTimeout = nil // <- disable timeout on successful connection
-                    self.errorObserverEnabled = false
-                    HelperTools.defaultsDB().set(true, forKey: "HasSeenLogin")
-                    showLoadingOverlay(
-                        headline: NSLocalizedString("Loading contact list", comment: ""),
-                        description: "")
+                    DispatchQueue.main.async {
+                        currentTimeout = nil // <- disable timeout on successful connection
+                        self.errorObserverEnabled = false
+                        HelperTools.defaultsDB().set(true, forKey: "HasSeenLogin")
+                        showLoadingOverlay(overlay, headline:NSLocalizedString("Loading contact list", comment: ""))
+                    }
                 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedCatchup")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
                 if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
-#if !DISABLE_OMEMO
-                    showLoadingOverlay(
-                        headline: NSLocalizedString("Loading omemo bundles", comment: ""),
-                        description: "")
-#endif
+                    DispatchQueue.main.async {
 #if DISABLE_OMEMO
-                    self.loginComplete = true
-                    showSuccessAlert()
+                        self.loginComplete = true
+                        showSuccessAlert()
+#else
+                        showLoadingOverlay(overlay, headline:NSLocalizedString("Loading omemo bundles", comment: ""))
 #endif
+                    }
                 }
             }
         }
@@ -270,17 +251,23 @@ struct WelcomeLogIn: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalUpdateBundleFetchStatus")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if(notificationAccountNo.intValue == newAccountNo.intValue) {
-                    showLoadingOverlay(
-                        headline: NSLocalizedString("Loading omemo bundles", comment: ""),
-                        description: String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all))
+                    DispatchQueue.main.async {
+                        showLoadingOverlay(
+                            overlay, 
+                            headline:NSLocalizedString("Loading omemo bundles", comment: ""),
+                            description:String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all)
+                        )
+                    }
                 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedOmemoBundleFetch")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if(notificationAccountNo.intValue == newAccountNo.intValue) {
-                    self.loginComplete = true
-                    showSuccessAlert()
+                    DispatchQueue.main.async {
+                        self.loginComplete = true
+                        showSuccessAlert()
+                    }
                 }
             }
         }

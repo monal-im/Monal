@@ -7,38 +7,95 @@
 //
 
 import SwiftUI
+import monalxmpp
 
-struct LoadingOverlay: View {
-    var headline: String
-    var description: String
-    var enabled: Bool = false
+//data class for overlay state
+class LoadingOverlayState : ObservableObject {
+    var enabled: Bool
+    var headline: AnyView
+    var description: AnyView
+    init(enabled:Bool = false, headline:AnyView = AnyView(Text("")), description:AnyView = AnyView(Text(""))) {
+        self.enabled = enabled
+        self.headline = headline
+        self.description = description
+    }
+}
 
-    var body: some View {
-        if enabled == true {
-            VStack {
-                Text(self.headline).font(.headline)
-                Text(self.description).font(.footnote)
-                ProgressView()
+//view modifier for overlay
+struct LoadingOverlay: ViewModifier {
+    @ObservedObject var state : LoadingOverlayState
+    public func body(content: Content) -> some View {
+        ZStack(alignment: .center) {
+            Color(UIColor.systemGroupedBackground).ignoresSafeArea()
+            
+            content
+            .disabled(state.enabled == true)
+            .blur(radius:(state.enabled == true ? 3 : 0))
+            
+            if(state.enabled == true) {
+                VStack {
+                    state.headline.font(.headline)
+                    state.description.font(.footnote)
+                    ProgressView()
+                }
+                .frame(width: 250, height: 100)
+                .background(Color.secondary.colorInvert())
+                .cornerRadius(20)
             }
-            .frame(width: 250, height: 100)
-            .background(Color.secondary.colorInvert())
-            .cornerRadius(20)
         }
     }
 }
 
+//this extension contains the easy-access view modifier
+extension View {    
+    func addLoadingOverlay(_ overlay: LoadingOverlayState) -> some View {
+        modifier(LoadingOverlay(state:overlay))
+    }
+}
+
+func showLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayState, headlineView headline: T1, descriptionView description: T2) {
+    overlay.headline = AnyView(headline)
+    overlay.description = AnyView(description)
+    overlay.enabled = true
+    //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
+    overlay.objectWillChange.send()
+}
+
+func showLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headline: T, description: T = "") {
+    overlay.headline = AnyView(Text(headline))
+    overlay.description = AnyView(Text(description))
+    overlay.enabled = true
+    //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
+    overlay.objectWillChange.send()
+}
+
+func hideLoadingOverlay(_ overlay: LoadingOverlayState) {
+    overlay.headline = AnyView(Text(""))
+    overlay.description = AnyView(Text(""))
+    overlay.enabled = false
+    //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
+    overlay.objectWillChange.send()
+}
+
 struct LoadingOverlay_Previews: PreviewProvider {
-    static private var overlay = LoadingOverlay(headline: "Loading...", description: "More info?", enabled: true)
+    @StateObject static var overlay1 = LoadingOverlayState(enabled:true, headline:AnyView(Text("Loading")), description:AnyView(Text("More info?")))
+    @StateObject static var overlay2 = LoadingOverlayState(enabled:true, headline:AnyView(Text("Loading")), description:AnyView(HStack {
+        Image(systemName: "checkmark")
+        Text("Doing a lot of work...")
+    }))
     static var previews: some View {
-        ZStack {
-            Form {
-                Text("Entry 1")
-                Text("Entry 2")
-                Text("Entry 3")
-            }
-            .disabled(true)
-            .blur(radius: 3) // <- disabled/blur are the recommended changes to the background
-            overlay
+        Form {
+            Text("Entry 1")
+            Text("Entry 2")
+            Text("Entry 3")
         }
+        .addLoadingOverlay(overlay1)
+        
+        Form {
+            Text("Entry 1")
+            Text("Entry 2")
+            Text("Entry 3")
+        }
+        .addLoadingOverlay(overlay2)
     }
 }

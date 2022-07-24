@@ -335,7 +335,7 @@ struct RegisterAccount: View {
 
                         if(!showAlert) {
                             self.errorObserverEnabled = true
-                            if(self.xmppAccount == nil) {
+                            if(self.captchaImg == nil) {
                                 fetchRequestForm()
                             } else {
                                 register()

@@ -175,7 +175,6 @@ struct RegisterAccount: View {
             self.xmppAccount!.disconnect(true)
         }
         self.xmppAccount = createXMPPInstance()
-        self.xmppAccount!.disconnect(true)
         self.xmppAccount!.registerUser(self.username, withPassword: self.password, captcha: self.captchaText.isEmpty == true ? nil : self.captchaText, andHiddenFields: self.hiddenFields) {success, errorMsg in
             DispatchQueue.main.async {
                 hideLoadingOverlay(overlay)
@@ -214,19 +213,21 @@ struct RegisterAccount: View {
         DispatchQueue.main.asyncAfter(deadline: newTimeout) {
             if(newTimeout == self.currentTimeout) {
                 showLoadingOverlay(overlay, headline:NSLocalizedString("Fetching registration form...", comment: ""))
+                if(self.xmppAccount != nil) {
+                    self.xmppAccount!.disconnect(true)
+                }
                 self.xmppAccount = createXMPPInstance()
-                self.xmppAccount!.disconnect(true)
                 self.xmppAccount!.requestRegForm(withToken: self.registerToken, andCompletion: {captchaData, hiddenFieldsDict in
                     DispatchQueue.main.async {
                         self.hiddenFields = hiddenFieldsDict
-                        if(self.xmppAccount != nil) {
-                            self.xmppAccount!.disconnect(true)
-                        }
-                        self.xmppAccount = createXMPPInstance()
-                        self.xmppAccount!.disconnect(true)
                         if(captchaData.isEmpty == true) {
                             register()
                         } else {
+                            //only disconnect if waiting for captcha input (to make sure we don't get any spurious timeout errors from the server)
+                            if(self.xmppAccount != nil) {
+                                self.xmppAccount!.disconnect(true)
+                                self.xmppAccount = nil
+                            }
                             hideLoadingOverlay(overlay)
                             let captchaUIImg = UIImage.init(data: captchaData)
                             if(captchaUIImg != nil) {

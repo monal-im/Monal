@@ -262,7 +262,7 @@ struct OmemoKeys: View {
         self.account = nil
         self.ownKeys = false
         self.selectedContact = nil
-        self.contacts = OmemoKeys.getContactList(viewContact: contact)
+        self.contacts = getContactList(viewContact: contact)
         self.viewContact = contact
 
         if let contact = contact {
@@ -270,32 +270,6 @@ struct OmemoKeys: View {
                 self.account = account
                 self.ownKeys = (!(contact.isGroup && contact.mucType == "group") && self.account!.connectionProperties.identity.jid == contact.contactJid)
             }
-        }
-    }
-
-    static func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> [ObservableKVOWrapper<MLContact>] {
-        if let contact = viewContact {
-            if(contact.isGroup && contact.mucType == "group") {
-                //this uses the account the muc belongs to and treats every other account to be remote, even when multiple accounts of the same monal instance are in the same group
-                let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: contact.accountId))
-                var contactList : [ObservableKVOWrapper<MLContact>] = []
-                for jidDict in jidList {
-                    //jid can be participant_jid (if currently joined to muc) or member_jid (if not joined but member of muc)
-                    var jid : String? = jidDict["participant_jid"] as? String
-                    if(jid == nil) {
-                        jid = jidDict["member_jid"] as? String
-                    }
-                    if(jid != nil) {
-                        let contact = MLContact.createContact(fromJid: jid!, andAccountNo: contact.accountId)
-                        contactList.append(ObservableKVOWrapper<MLContact>(contact))
-                    }
-                }
-                return contactList
-            } else {
-                return [contact]
-            }
-        } else {
-            return []
         }
     }
 
@@ -398,7 +372,7 @@ struct OmemoKeys: View {
                     resetTrustFromQR(scannedJid: self.scannedJid, scannedFingerprints: self.scannedFingerprints)
                     self.scannedJid = ""
                     self.scannedFingerprints = [:]
-                    self.contacts = OmemoKeys.getContactList(viewContact: self.viewContact) // refresh all contacts because trust may have changed
+                    self.contacts = getContactList(viewContact: self.viewContact) // refresh all contacts because trust may have changed
             }))
         }
     }

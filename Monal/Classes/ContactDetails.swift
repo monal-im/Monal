@@ -41,6 +41,12 @@ struct ContactDetails: View {
                 Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {
                     contact.obj.togglePinnedChat(!contact.isPinned);
                 }
+
+                if(contact.obj.isGroup && contact.obj.mucType == "group") {
+                    NavigationLink(destination: LazyClosureView(MemberList(mucContact: contact))) {
+                        Text("Members")
+                    }
+                }
 #if !DISABLE_OMEMO
                 if(contact.isGroup == false) {
                     NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {

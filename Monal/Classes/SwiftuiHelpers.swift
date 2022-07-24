@@ -12,6 +12,9 @@ import monalxmpp
 import Combine
 import CocoaLumberjack
 
+typealias monal_void_block_t = @convention(block) () -> Void;
+typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
+
 let monalGreen = Color(UIColor(red:128.0/255, green:203.0/255, blue:182.0/255, alpha:1.0));
 let monalDarkGreen = Color(UIColor(red:20.0/255, green:138.0/255, blue:103.0/255, alpha:1.0));
 
@@ -207,7 +210,7 @@ class SwiftuiInterface : NSObject {
     }
     
     @objc
-    func makeAccountRegistration(_ registerData: [String:Any]?) -> UIViewController {
+    func makeAccountRegistration(_ registerData: [String:AnyObject]?) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host

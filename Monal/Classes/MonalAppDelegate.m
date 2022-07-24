@@ -494,18 +494,11 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
                     username = @"";         //roster does not specify a predefined username for the new account, register does (optional)
                 
                 weakify(self);
-                [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^{
+                [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^(NSNumber* accountNo) {
                     strongify(self);
-                    
-                    //search for newly created account
-                    xmpp* account = nil;
-                    NSString* jid = [NSString stringWithFormat:@"%@@%@", username, host];
-                    for(xmpp* xmppAccount in [MLXMPPManager sharedInstance].connectedXMPP)
-                        if([xmppAccount.connectionProperties.identity.jid isEqualToString:jid])
-                        {
-                            account = xmppAccount;
-                            break;
-                        }
+                    DDLogVerbose(@"Got accountNo for newly registered account: %@", accountNo);
+                    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+                    DDLogInfo(@"Got newly registered account: %@", account);
                     
                     //this should never happen
                     MLAssert(account != nil, @"Can not use account after register!", (@{
@@ -517,6 +510,7 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
                     if(account != nil)      //silence memory warning despite assertion above
                     {
                         MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                        DDLogInfo(@"Adding contact to roster: %@", contact);
                         //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
                         [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
                         [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
@@ -529,6 +523,7 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
             if(isRoster && account)
             {
                 MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                DDLogInfo(@"Adding contact to roster: %@", contact);
                 //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
                 [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
                 [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];

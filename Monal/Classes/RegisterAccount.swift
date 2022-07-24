@@ -39,16 +39,17 @@ struct RegisterAccount: View {
     static private let xmppFaultyPattern = ".+\\..{2,}$"
     static private let credFaultyPattern = ".*@.*"
 
-    @State public var username: String = "aaa"
-    @State public var password: String = ""
-    @State public var registerToken: String?
-    @State public var completionHandler:(()->Void)? = {}
+    @State private var username: String = ""
+    @State private var password: String = ""
+    @State private var registerToken: String?
+    @State private var completionHandler:((AnyObject?)->Void)?
 
-    @State public var providedServer: String = ""
-    @State public var selectedServerIndex = Int.random(in: 1 ..< XMPPServer.count)
+    @State private var providedServer: String = ""
+    @State private var selectedServerIndex = Int.random(in: 1 ..< XMPPServer.count)
 
     @State private var showAlert = false
     @State private var registerComplete = false
+    @State private var registeredAccountNo = -1
 
     @State private var xmppAccount: xmpp?
     @State private var captchaImg: Image?
@@ -62,16 +63,21 @@ struct RegisterAccount: View {
     @State private var showWebView = false
     @State private var errorObserverEnabled = false
 
-    init(delegate:SheetDismisserProtocol, registerData:[String:Any]? = nil) {
+    init(delegate:SheetDismisserProtocol, registerData:[String:AnyObject]? = nil) {
         self.delegate = delegate
         if let registerData = registerData {
-            DDLogDebug("Feeding RegisterAccount with data: \(registerData)");
+            DDLogDebug("RegisterAccount created with data: \(registerData)");
             //for State stuff see https://forums.swift.org/t/assignment-to-state-var-in-init-doesnt-do-anything-but-the-compiler-gened-one-works/35235
             self._selectedServerIndex = State(wrappedValue:0)
             self._providedServer = State(wrappedValue:(registerData["host"] as? String) ?? "")
             self._username = State(wrappedValue:(registerData["username"] as? String) ?? "")
             self._registerToken = State(wrappedValue:registerData["token"] as? String)
-            self._completionHandler = State(wrappedValue:(registerData["completion"] as? (()->Void)?) ?? {})
+            if let completion = registerData["completion"] {
+                //see https://stackoverflow.com/a/40592109/3528174
+                self._completionHandler = State(wrappedValue:unsafeBitCast(completion, to:monal_id_block_t.self))
+            }
+            DDLogVerbose("registerToken is now: \(String(describing:self.registerToken))")
+            DDLogVerbose("Completion handler is now: \(String(describing:self.completionHandler))")
         }
     }
     
@@ -112,11 +118,6 @@ struct RegisterAccount: View {
     }
     
     private func showRegistrationAlert(alertMessage: String?) {
-        if(self.xmppAccount != nil) {
-            DDLogDebug("Disconnecting registering xmpp account...")
-            self.xmppAccount!.disconnect(true)
-        }
-        self.xmppAccount = nil;
         alertPrompt.title = Text("Registration Error")
         alertPrompt.message = Text(alertMessage ?? NSLocalizedString("Could not register your username. Please check your code or change the username and try again.", comment: ""))
         hideLoadingOverlay(overlay)
@@ -169,15 +170,21 @@ struct RegisterAccount: View {
         return xmpp.init(server: server, andIdentity: identity, andAccountNo: -1)
     }
 
-    private func register() {
-        showLoadingOverlay(overlay, headline:NSLocalizedString("Registering account...", comment: ""))
+    private func cleanupXMPPInstance() {
         if(self.xmppAccount != nil) {
+            DDLogDebug("Disconnecting registering xmpp account...")
             self.xmppAccount!.disconnect(true)
         }
-        self.xmppAccount = createXMPPInstance()
+        self.xmppAccount = nil;
+    }
+    
+    private func register() {
+        showLoadingOverlay(overlay, headline:NSLocalizedString("Registering account...", comment: ""))
+        if(self.xmppAccount == nil) {
+            self.xmppAccount = createXMPPInstance()
+        }
         self.xmppAccount!.registerUser(self.username, withPassword: self.password, captcha: self.captchaText.isEmpty == true ? nil : self.captchaText, andHiddenFields: self.hiddenFields) {success, errorMsg in
             DispatchQueue.main.async {
-                hideLoadingOverlay(overlay)
                 if(success == true) {
                     let dic = [
                         kDomain: self.actualServer,
@@ -189,12 +196,20 @@ struct RegisterAccount: View {
 
                     let accountNo = DataLayer.sharedInstance().addAccount(with: dic);
                     if(accountNo != nil) {
-                        MLXMPPManager.sharedInstance().addNewAccount(toKeychain: accountNo!, withPassword: self.password)
+                        self.registeredAccountNo = accountNo!.intValue
+                        MLXMPPManager.sharedInstance().addNewAccountToKeychainAndConnect(withPassword:self.password, andAccountNo:accountNo!)
+                        cleanupXMPPInstance()
+                    } else {
+                        cleanupXMPPInstance()
+                        showRegistrationAlert(alertMessage:NSLocalizedString("Account already configured in Monal!", comment: ""))
+                        self.captchaText = ""
+                        if(self.captchaImg != nil) {
+                            fetchRequestForm() // < force reload the form to update the captcha
+                        }
                     }
-                    self.registerComplete = true
-                    showSuccessAlert()
                 } else {
-                    showRegistrationAlert(alertMessage: errorMsg)
+                    cleanupXMPPInstance()
+                    showRegistrationAlert(alertMessage:errorMsg)
                     self.captchaText = ""
                     if(self.captchaImg != nil) {
                         fetchRequestForm() // < force reload the form to update the captcha
@@ -233,12 +248,14 @@ struct RegisterAccount: View {
                             if(captchaUIImg != nil) {
                                 self.captchaImg = Image(uiImage: captchaUIImg!)
                             } else {
+                                cleanupXMPPInstance()
                                 showRegistrationAlert(alertMessage: NSLocalizedString("Could not read captcha!", comment: ""))
                             }
                         }
                     }
                 }, andErrorCompletion: {_, errorMsg in
                     DispatchQueue.main.async {
+                        cleanupXMPPInstance()
                         showRegistrationAlert(alertMessage: errorMsg)
                     }
                 })
@@ -271,6 +288,7 @@ struct RegisterAccount: View {
                             self.captchaImg = nil
                             self.captchaText = ""
                             self.xmppAccount = nil
+                            self.registerToken = nil
                         })
                         .labelsHidden()
                         .pickerStyle(.inline)
@@ -335,11 +353,11 @@ struct RegisterAccount: View {
                     .alert(isPresented: $showAlert) {
                         Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                             if(self.registerComplete == true) {
+                                self.delegate.dismiss()
                                 if let completion = self.completionHandler {
                                     DDLogVerbose("Calling reg completion handler...")
-                                    completion()
+                                    completion(self.registeredAccountNo as NSNumber)
                                 }
-                                self.delegate.dismiss()
                             }
                         }))
                     }
@@ -384,11 +402,32 @@ struct RegisterAccount: View {
                 return
             }
             if let xmppAccount = notification.object as? xmpp, let errorMessage = notification.userInfo?["message"] as? String {
-                if(xmppAccount == self.xmppAccount) {
+                if(xmppAccount.accountNo.intValue == self.registeredAccountNo || xmppAccount.accountNo.intValue == -1) {
                     DispatchQueue.main.async {
                         DDLogDebug("XMPP account matches registering one")
-                        errorObserverEnabled = false
+                        self.errorObserverEnabled = false
+                        xmppAccount.disconnect(true)        //disconnect account (even if not listed in connectedAccounts and having id -1)
+                        MLXMPPManager.sharedInstance().removeAccount(forAccountNo:xmppAccount.accountNo)     //remove from connectedAccounts and db, if listed, do nothing otherwise (e.g. in the -1 case)
+                        //reset local state var if the account had id -1 (e.g. is dummy for registering recorded in self.xmppAccount)
+                        if(xmppAccount == self.xmppAccount) {
+                            self.xmppAccount = nil
+                        }
                         showRegistrationAlert(alertMessage: errorMessage)
+                    }
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMLHasConnectedNotice")).receive(on: RunLoop.main)) { notification in
+            if(self.registerComplete == true) {
+                return
+            }
+            if let xmppAccount = notification.object as? xmpp {
+                if(xmppAccount.accountNo.intValue == self.registeredAccountNo) {
+                    DispatchQueue.main.async {
+                        hideLoadingOverlay(overlay)
+                        self.errorObserverEnabled = false
+                        self.registerComplete = true
+                        showSuccessAlert()
                     }
                 }
             }

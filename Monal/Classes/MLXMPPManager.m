@@ -654,13 +654,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [dic setObject:@NO forKey:kDirectTLS];
 
     NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
-    [self addNewAccountToKeychain:accountNo withPassword:password];
+    if(accountNo == nil)
+        return nil;
+    [self addNewAccountToKeychainAndConnectWithPassword:password andAccountNo:accountNo];
     return accountNo;
 }
 
--(void) addNewAccountToKeychain:(NSNumber*) accountNo withPassword:(NSString*) password
+-(void) addNewAccountToKeychainAndConnectWithPassword:(NSString*) password andAccountNo:(NSNumber*) accountNo
 {
-    if(accountNo != nil && password != nil) {
+    if(accountNo != nil && password != nil)
+    {
         [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
         [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo.stringValue];
         [self connectAccount:accountNo];

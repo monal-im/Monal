@@ -136,6 +136,12 @@ struct WelcomeLogIn: View {
                                 showLoadingOverlay(overlay, headline:NSLocalizedString("Logging in", comment: ""))
                                 self.errorObserverEnabled = true
                                 self.newAccountNo = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
+                                if(self.newAccountNo == nil) {
+                                    currentTimeout = nil // <- disable timeout on error
+                                    errorObserverEnabled = false
+                                    showLoginErrorAlert(errorMessage:NSLocalizedString("Account already configured in Monal!", comment: ""))
+                                    self.newAccountNo = nil
+                                }
                             }
                         }){
                             Text("Login")

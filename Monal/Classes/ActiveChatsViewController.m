@@ -714,7 +714,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 //we can not call this var "completion" because then some dumb comiler check kicks in and tells us "completion handler is never called" which ich plainly wrong
 //callback doesn't seem to be a word in the objc compiler's "bad words" dictionary, so this makes it compile again
--(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_void_block_t) callback
+-(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_id_block_t) callback
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
@@ -722,7 +722,9 @@ static NSMutableSet* _smacksWarningDisplayed;
             @"host": nilWrapper(host),
             @"username": nilWrapper(username),
             @"token": nilWrapper(token),
-            @"completion": nilDefault(callback, ^{}),
+            @"completion": nilDefault(callback, ^(id accountNo){
+                DDLogWarn(@"Dummy reg completion called for accountNo: %@", accountNo);
+            }),
         }];
     }];
 }

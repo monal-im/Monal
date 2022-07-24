@@ -88,7 +88,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(NSNumber* _Nullable) login:(NSString*) jid password:(NSString*) password;
 -(void) removeAccountForAccountNo:(NSNumber*) accountNo;
--(void) addNewAccountToKeychain:(NSNumber*) accountNo withPassword:(NSString*) password;
+-(void) addNewAccountToKeychainAndConnectWithPassword:(NSString*) password andAccountNo:(NSNumber*) accountNo;
 
 /**
  update the password in the keychan and update memory cache

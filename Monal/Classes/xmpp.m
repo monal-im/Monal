@@ -2643,11 +2643,13 @@ NSString* const kStanza = @"stanza";
         )
         {
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+#ifndef TARGET_OS_SIMULATOR
                 if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
                     DDLogDebug(@"SEND: redacted sasl element: %@", [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
                 else if([stanza check:@"/{jabber:client}iq<type=set>/{jabber:iq:register}query"])
                     DDLogDebug(@"SEND: redacted register/change password iq");
                 else
+#endif
                     DDLogDebug(@"SEND: %@", stanza);
                 [self->_outputQueue addObject:stanza];
                 [self writeFromQueue];      // try to send if there is space

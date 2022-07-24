@@ -6,7 +6,6 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 import monalxmpp
-import monal
 
 import SwiftUI
 import CocoaLumberjack
@@ -26,9 +25,10 @@ struct AVPrototype: View {
     var body: some View {
         VStack {
             Button("Start Call") {
-                let appDelegate = UIApplication.shared.delegate as! AppDelegate
-                let voipProcessor = appDelegate.voipProcessor
-                voipProcessor.initiateAudioCall(toContact:self.contact.obj)
+                let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+                if let voipProcessor = appDelegate.voipProcessor {
+                    voipProcessor.initiateAudioCall(to:self.contact.obj)
+                }
             }
         }
         .navigationBarTitle("AV Prototype (Audio only)", displayMode: .inline)

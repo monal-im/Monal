@@ -33,6 +33,10 @@ static NSMutableDictionary* _pendingCalls;
 }
 @property (nonatomic, strong) CXProvider* _Nullable cxprovider;
 @property (nonatomic, strong) CXCallController* _Nullable callController;
+-(void) acceptCall:(NSUUID*) uuid;
+-(void) retractCall:(NSUUID*) uuid;
+-(void) rejectCall:(NSUUID*) uuid;
+-(void) finishCall:(NSUUID*) uuid withReason:(NSString*) reason;
 @end
 
 
@@ -85,18 +89,19 @@ static NSMutableDictionary* _pendingCalls;
                 //otherwise the call was outgoing (--> initialize callkit ui for outgoing call, we are connected now)
                 else
                 {
+                    XMPPMessage* messageNode = _pendingCalls[self.uuid][@"messageNode"];
                     CXHandle* handle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:messageNode.fromUser];
-                    CXStartCallAction* startCallAction = [[CXStartCallAction alloc] initWithCallUUID:uuid handle:handle];
+                    CXStartCallAction* startCallAction = [[CXStartCallAction alloc] initWithCallUUID:self.uuid handle:handle];
                     CXTransaction* transaction = [[CXTransaction alloc] initWithAction:startCallAction];
-                    [self.callController requestTransaction:transaction completion:^(NSError* error) {
+                    [self.voipProcessor.callController requestTransaction:transaction completion:^(NSError* error) {
                         @synchronized(_pendingCalls) {
-                            if(_pendingCalls[uuid] == nil)
+                            if(_pendingCalls[self.uuid] == nil)
                                 return;
                             
                             if(error != nil)
                             {
-                                DDLogError("Error requesting call transaction, retracting call: %@", error);
-                                [self retractCall:uuid];
+                                DDLogError(@"Error requesting call transaction, retracting call: %@", error);
+                                [self.voipProcessor retractCall:self.uuid];
                                 return;
                             }
                         }
@@ -303,13 +308,13 @@ static NSMutableDictionary* _pendingCalls;
             else
             {
                 DDLogDebug(@"Successfully passed SDP to webRTCClient...");
-                //it seems we have to create an offer and ignore it before we can create an answer
+                //it seems we have to create an offer and ignore it before we can create the desired answer
                 WebRTCClient* webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
                 [webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
                     [webRTCClient answerWithCompletion:^(RTCSessionDescription* localSdp) {
                         XMPPIQ* responseIq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
                         [responseIq addChildNode:[[MLXMLNode alloc] initWithElement:@"sdp" andNamespace:@"urn:tmp:monal:webrtc:sdp:1" withAttributes:@{
-                            @"id": localCallID,
+                            @"id": callID,
                             @"type": [RTCSessionDescription stringForType:localSdp.type]
                         } andChildren:@[] andData:[HelperTools encodeBase64WithString:localSdp.sdp]]];
                         [account send:responseIq];
@@ -342,7 +347,7 @@ static NSMutableDictionary* _pendingCalls;
         MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
         XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
         MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
-        XMPPMessage* account = _pendingCalls[uuid][@"account"];
+        xmpp* account = _pendingCalls[uuid][@"account"];
         MLAssert(account != nil, @"account not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
         WebRTCClient* webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
         MLAssert(webRTCClient != nil, @"webRTCClient not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
@@ -427,7 +432,7 @@ static NSMutableDictionary* _pendingCalls;
 -(void) initWebRTCForPendingCall:(NSUUID*) uuid
 {
     xmpp* account;
-    BBOL incoming;
+    BOOL incoming;
     @synchronized(_pendingCalls) {
         MLAssert(_pendingCalls[uuid] != nil, @"Pending call not present anymore!", (@{
             @"uuid": uuid,
@@ -545,7 +550,7 @@ static NSMutableDictionary* _pendingCalls;
 
 -(NSUUID*) initiateAudioCallToContact:(MLContact*) contact
 {
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountNo];
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
     MLAssert(account != nil, @"account is nil in initiateAudioCallToContact!", (@{@"contact": contact}));
     
     NSUUID* uuid = [NSUUID UUID];
@@ -578,7 +583,7 @@ static NSMutableDictionary* _pendingCalls;
     MLAssert(messageNode != nil, @"messageNode is nil in handleIncomingJMIStanza!", notification.userInfo);
     xmpp* account = notification.object;
     MLAssert(account != nil, @"account is nil in handleIncomingJMIStanza!", notification.userInfo);
-    NSString* callID = [messageNode check:@"{urn:xmpp:jingle-message:1}*@id"];
+    NSString* callID = [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id"];
     @synchronized(_pendingCalls) {
         NSUUID* uuid = [self getUUIDForCallID:callID onAccount:account];
         if(uuid == nil)
@@ -607,7 +612,7 @@ static NSMutableDictionary* _pendingCalls;
         MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
         XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
         MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        XMPPMessage* account = _pendingCalls[uuid][@"account"];
+        xmpp* account = _pendingCalls[uuid][@"account"];
         MLAssert(account != nil, @"account not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
         
         XMPPMessage* jmiNode = [[XMPPMessage alloc] init];
@@ -627,7 +632,7 @@ static NSMutableDictionary* _pendingCalls;
         MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
         XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
         MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        XMPPMessage* account = _pendingCalls[uuid][@"account"];
+        xmpp* account = _pendingCalls[uuid][@"account"];
         MLAssert(account != nil, @"account not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
         
         XMPPMessage* jmiNode = [[XMPPMessage alloc] init];
@@ -654,7 +659,7 @@ static NSMutableDictionary* _pendingCalls;
         MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
         XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
         MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        XMPPMessage* account = _pendingCalls[uuid][@"account"];
+        xmpp* account = _pendingCalls[uuid][@"account"];
         MLAssert(account != nil, @"account not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
         
         XMPPMessage* jmiNode = [[XMPPMessage alloc] init];
@@ -681,7 +686,7 @@ static NSMutableDictionary* _pendingCalls;
         MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
         XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
         MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        XMPPMessage* account = _pendingCalls[uuid][@"account"];
+        xmpp* account = _pendingCalls[uuid][@"account"];
         MLAssert(account != nil, @"account not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
         
         XMPPMessage* jmiNode = [[XMPPMessage alloc] init];

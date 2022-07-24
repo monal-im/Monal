@@ -30,7 +30,7 @@ final class WebRTCClient: NSObject {
     }()
     
     @objc var delegate: WebRTCClientDelegate?
-    private let peerConnection: RTCPeerConnection
+    @objc public let peerConnection: RTCPeerConnection
     private let rtcAudioSession =  RTCAudioSession.sharedInstance()
     private let audioQueue = DispatchQueue(label: "audio")
     private let mediaConstrains = [kRTCMediaConstraintsOfferToReceiveAudio: kRTCMediaConstraintsValueTrue,

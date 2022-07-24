@@ -370,7 +370,7 @@ static NSMutableDictionary* _pendingCalls;
 
 -(void) provider:(CXProvider*) provider performStartCallAction:(CXStartCallAction*) action
 {
-    DDLogDebug(@"CXProvider: performAnswerCallAction with provider=%@, CXStartCallAction=%@", provider, action);
+    DDLogDebug(@"CXProvider: performStartCallAction with provider=%@, CXStartCallAction=%@", provider, action);
 }
 
 -(void) provider:(CXProvider*) provider performAnswerCallAction:(CXAnswerCallAction*) action
@@ -390,6 +390,7 @@ static NSMutableDictionary* _pendingCalls;
     }
     
     //webrtc was already initialized --> connect voip call
+    DDLogDebug(@"webrtc was already initialized --> connect voip call");
     [self connectIncommingVoIPCall:action.callUUID];
 }
 
@@ -408,9 +409,11 @@ static NSMutableDictionary* _pendingCalls;
         else
             [self finishCall:action.callUUID withReason:@"success"];
         
+        //end webrtc call if already established or in the process of establishing
         if(_pendingCalls[action.callUUID][@"webRTCClient"])
         {
-            //TODO: end webrtc call
+            WebRTCClient* webRTCClient = _pendingCalls[action.callUUID][@"webRTCClient"];
+            [webRTCClient.peerConnection close];
         }
         
     }
@@ -420,13 +423,19 @@ static NSMutableDictionary* _pendingCalls;
 -(void) provider:(CXProvider*) provider didActivateAudioSession:(AVAudioSession*) audioSession
 {
     DDLogDebug(@"CXProvider: didActivateAudioSession with provider=%@, audioSession=%@", provider, audioSession);
+    [[RTCAudioSession sharedInstance] lockForConfiguration];
     [[RTCAudioSession sharedInstance] audioSessionDidActivate:audioSession];
+    [[RTCAudioSession sharedInstance] setIsAudioEnabled:YES];
+    [[RTCAudioSession sharedInstance] unlockForConfiguration];
 }
 
 -(void) provider:(CXProvider*) provider didDeactivateAudioSession:(AVAudioSession*) audioSession
 {
     DDLogDebug(@"CXProvider: didDeactivateAudioSession with provider=%@, audioSession=%@", provider, audioSession);
+    [[RTCAudioSession sharedInstance] lockForConfiguration];
     [[RTCAudioSession sharedInstance] audioSessionDidDeactivate:audioSession];
+    [[RTCAudioSession sharedInstance] setIsAudioEnabled:NO];
+    [[RTCAudioSession sharedInstance] unlockForConfiguration];
 }
 
 -(void) initWebRTCForPendingCall:(NSUUID*) uuid
@@ -456,6 +465,7 @@ static NSMutableDictionary* _pendingCalls;
                     return;
             }
             //call was already accepted --> connect voip call
+            DDLogDebug(@"incoming: call was already accepted --> connect voip call");
             [self connectIncommingVoIPCall:uuid];
         }
         else
@@ -470,6 +480,7 @@ static NSMutableDictionary* _pendingCalls;
                     return;
             }
             //call was already accepted --> connect voip call
+            DDLogDebug(@"outgoing: call was already accepted --> connect voip call");
             [self connectOutgoingVoIPCall:uuid];
         }
     };

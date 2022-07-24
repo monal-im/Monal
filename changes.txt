@@ -1,0 +1,5 @@
+commit 2b506accd9e17e2587e564be3c9068895a19c99b
+Author: Jan Stoyke <michael-jan.stoyke@tu-ilmenau.de>
+Date:   Sun Jul 24 21:57:10 2022 +0200
+
+    RegisterAccount: Fix register with captcha

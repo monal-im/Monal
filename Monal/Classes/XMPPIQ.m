@@ -263,14 +263,15 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setVersion
 {
+    NSOperatingSystemVersion osVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"name" andData:@"Monal"],
 #if TARGET_OS_MACCATALYST
-        [[MLXMLNode alloc] initWithElement:@"os" andData:@"macOS"],
+        [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"macOS %lu.%lu.%lu", osVersion.majorVersion, osVersion.minorVersion, osVersion.patchVersion]],
 #else
-        [[MLXMLNode alloc] initWithElement:@"os" andData:@"iOS"],
+        [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"macOS %lu.%lu.%lu", osVersion.majorVersion, osVersion.minorVersion, osVersion.patchVersion]],
 #endif
-        [[MLXMLNode alloc] initWithElement:@"version" andData:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]],
+        [[MLXMLNode alloc] initWithElement:@"version" andData:[HelperTools appBuildVersionInfo]]
     ] andData:nil]];
 }
 

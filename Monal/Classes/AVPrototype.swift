@@ -6,6 +6,7 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 import monalxmpp
+import monal
 
 import SwiftUI
 import CocoaLumberjack

@@ -243,7 +243,6 @@
                         <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showOpenSource" id="pZO-HH-rUP"/>
                         <segue destination="Qll-5F-nAT" kind="showDetail" identifier="showLogs" id="2Ew-6e-Nd2"/>
                         <segue destination="rxA-nN-Z6Z" kind="showDetail" identifier="showSounds" id="oQU-xT-ytM"/>
-                        <segue destination="WJO-2T-Dwn" kind="presentation" identifier="showLogin" modalPresentationStyle="formSheet" id="YJk-Fq-Ipq"/>
                         <segue destination="NvL-Ob-NsV" kind="showDetail" identifier="showBackgrounds" id="x8n-Ay-hav"/>
                         <segue destination="Gyh-aW-NTY" kind="showDetail" identifier="showPrivacySettings" id="xJI-Ls-Afp"/>
                         <segue destination="SlO-1R-gBS" kind="showDetail" identifier="editXMPP" id="dnZ-Tg-Jwr"/>
@@ -252,14 +251,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lLi-28-cfT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-802" y="3829"/>
-        </scene>
-        <!--Login-->
-        <scene sceneID="PlG-yS-aDe">
-            <objects>
-                <viewControllerPlaceholder storyboardIdentifier="login" storyboardName="Login" id="WJO-2T-Dwn" sceneMemberID="viewController"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="vsp-E8-u9K" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-1334" y="3210"/>
         </scene>
         <!--Log View Controller-->
         <scene sceneID="g88-aY-02X">

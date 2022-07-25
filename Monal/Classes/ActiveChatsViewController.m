@@ -368,12 +368,8 @@ static NSMutableSet* _smacksWarningDisplayed;
 {
     // display quick start if the user never seen it or if there are 0 enabled accounts
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"] || [[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
-#ifdef IS_ALPHA
         UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
         [self presentViewController:loginViewController animated:YES completion:^{}];
-#else
-        [self performSegueWithIdentifier:@"showLogin" sender:self];
-#endif
         return;
     }
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {

@@ -223,39 +223,12 @@
                     </navigationItem>
                     <connections>
                         <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
-                        <segue destination="cC0-5a-Jvb" kind="show" identifier="showDetails" id="hqW-lo-9tZ"/>
                         <segue destination="WjA-je-Xez" kind="show" identifier="showNewRecipient" id="7Wf-Gt-qkN"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1204" y="-2626"/>
-        </scene>
-        <!--Login-->
-        <scene sceneID="VNB-KG-5f7">
-            <objects>
-                <viewControllerPlaceholder storyboardIdentifier="login" storyboardName="Login" id="DkD-PA-Cmm" sceneMemberID="viewController"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Ccl-9E-t0H" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-2628" y="-1383"/>
-        </scene>
-        <!--register-->
-        <scene sceneID="AAA-KG-5f7">
-            <objects>
-                <viewControllerPlaceholder storyboardName="Login" referencedIdentifier="register" id="AAA-PA-Cmm" sceneMemberID="viewController"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="AAA-9E-t0H" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-2628" y="-1383"/>
-        </scene>
-        <!--ContactDetails-->
-        <scene sceneID="t0V-UK-nzF">
-            <objects>
-                <viewControllerPlaceholder storyboardName="ContactDetails" id="cC0-5a-Jvb" sceneMemberID="viewController">
-                    <navigationItem key="navigationItem" id="f8S-5w-kUZ"/>
-                </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="2Tm-st-u4d" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2195" y="-694"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="ctJ-St-O59">
@@ -361,9 +334,6 @@
                         <outlet property="composeButton" destination="pyP-qb-mfr" id="j5k-6a-lBi"/>
                         <outlet property="settingsButton" destination="BWH-2I-fSI" id="SMS-5d-HUX"/>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="RLU-kt-b8r"/>
-                        <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="RNX-bQ-8Zb"/>
-                        <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="sv2-wf-aN0"/>
-                        <segue destination="AAA-PA-Cmm" kind="presentation" identifier="showRegister" id="AAA-wf-aN0"/>
                         <segue destination="cmS-oG-cv9" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot9"/>
                         <segue destination="iM6-Fx-aHL" kind="showDetail" identifier="showConversationPlaceholder" id="xp1-3q-JGG"/>
                     </connections>
@@ -798,7 +768,7 @@
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
                                         <rect key="frame" x="0.0" y="557.5" width="1024" height="242"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xhf-eh-Dkx" id="BdL-U7-BOc">
@@ -2510,7 +2480,6 @@
                         <outlet property="transparentLayer" destination="cUR-xM-Mq7" id="0Fl-vg-WUH"/>
                         <outlet property="uploadMenuView" destination="DZg-BI-mVA" id="WEJ-wz-HnZ"/>
                         <outlet property="view" destination="Riz-2Q-bcU" id="d0E-AR-8aA"/>
-                        <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" id="tEM-gR-7nN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -2764,7 +2733,6 @@
     </scenes>
     <inferredMetricsTieBreakers>
         <segue reference="D1Q-JS-32d"/>
-        <segue reference="tEM-gR-7nN"/>
         <segue reference="U4S-rm-QvZ"/>
     </inferredMetricsTieBreakers>
     <resources>

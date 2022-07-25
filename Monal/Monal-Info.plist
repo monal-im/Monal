@@ -14,10 +14,6 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleTypeIconFiles</key>
-			<array>
-				<string>/Users/anurodhp/Development/monalxmpp/Monal/Images.xcassets/AppIcon.appiconset/Icon-80.png</string>
-			</array>
 			<key>CFBundleTypeName</key>
 			<string>XMPP Message</string>
 			<key>CFBundleTypeRole</key>
@@ -62,7 +58,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationCategoryType</key>
@@ -83,9 +79,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Monal allows users to take photos and upload to a conversation</string>
 	<key>NSLocationUsageDescription</key>
-	<string>Monal  uses your location when you send a location message in a conversation.</string>
+	<string>Monal uses your location when you send a location message in a conversation.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Monal  uses your location when you send a location message in a conversation.</string>
+	<string>Monal uses your location when you send a location message in a conversation.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Monal uses the microphone to transmit your voice in audio calls.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
@@ -139,10 +135,6 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>XMPP Message</string>
-			<key>UTTypeIconFiles</key>
-			<array>
-				<string>/Users/anurodhp/Development/monalxmpp/Monal/Images.xcassets/AppIcon.appiconset/Icon-80.png</string>
-			</array>
 			<key>UTTypeIdentifier</key>
 			<string>im.monal.xmpp</string>
 			<key>UTTypeTagSpecification</key>

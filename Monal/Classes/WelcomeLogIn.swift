@@ -28,6 +28,12 @@ struct WelcomeLogIn: View {
     
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
     @StateObject private var overlay = LoadingOverlayState()
+
+#if IS_ALPHA
+    let appLogoId = "AlphaAppLogo"
+#else
+    let appLogoId = "AppLogo"
+#endif
     
     private var credentialsEnteredAlert: Bool {
         alertPrompt.title = Text("No Empty Values!")
@@ -104,7 +110,7 @@ struct WelcomeLogIn: View {
         ScrollView {
             VStack(alignment: .leading) {
                 HStack () {
-                    Image(decorative: "AppLogo")
+                    Image(decorative: appLogoId)
                         .resizable()
                         .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
                         .padding()

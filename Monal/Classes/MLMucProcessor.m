@@ -983,6 +983,12 @@ $$
         //remove handler (it will only be called once)
         [self removeUIHandlerForMuc:room];
         
+        if(node == nil)
+        {
+            DDLogInfo(@"Could not extract UI error message. node == nil");
+            return;
+        }
+        
         //prepare data
         NSString* message = [HelperTools extractXMPPError:node withDescription:description];
         NSDictionary* data = @{

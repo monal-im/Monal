@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) UIActivityIndicatorView* spinner;
 
 -(void) presentChatWithContact:(MLContact* _Nullable) contact;
--(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion;
+-(void) presentChatWithContact:(MLContact* _Nullable) contact andCompletion:(monal_id_block_t _Nullable) completion;
 -(void) refreshDisplay;
 
 -(void) showContacts;

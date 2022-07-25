@@ -6,14 +6,5 @@
 	<string>app-store</string>
 	<key>compileBitcode</key>
 	<false/>
-	<key>provisioningProfiles</key>
-	<dict>
-		<key>G7YU7X7KRJ.SworIM</key>
-		<string>Monal App Store</string>
-		<key>G7YU7X7KRJ.SworIM.shareSheet</key>
-		<string>Monal Share Sheet</string>
-		<key>G7YU7X7KRJ.SworIM.NotificaionService</key>
-		<string>Monal iOS Notification filtering</string>
-	</dict>
 </dict>
 </plist>

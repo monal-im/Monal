@@ -139,7 +139,7 @@
     if([HelperTools isNotInFocus])
     {
         DDLogVerbose(@"notification manager should show notification in background: %@", message.messageText);
-        [self showNotificaionForMessage:message withSound:sound andAccount:xmppAccount];
+        [self showNotificationForMessage:message withSound:sound andAccount:xmppAccount];
     }
     else
     {
@@ -147,7 +147,7 @@
         if(![message isEqualToContact:self.currentContact])
         {
             DDLogVerbose(@"notification manager should show notification in foreground: %@", message.messageText);
-            [self showNotificaionForMessage:message withSound:sound andAccount:xmppAccount];
+            [self showNotificationForMessage:message withSound:sound andAccount:xmppAccount];
         }
         else
         {
@@ -261,22 +261,22 @@
     [self publishNotificationContent:[self updateBadgeForContent:content] withID:idval];
 }
 
--(void) showNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
+-(void) showNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
 {
     // always use legacy notifications if we should only show a generic "New Message" notifiation without name or content
     if(self.notificationPrivacySetting > DisplayOnlyName)
-        return [self showLegacyNotificaionForMessage:message withSound:sound];
+        return [self showLegacyNotificationForMessage:message withSound:sound];
     
     // use modern communication notifications on ios >= 15.0 and legacy ones otherwise
     if(@available(iOS 15.0, macCatalyst 15.0, *))
     {
         DDLogDebug(@"Using communication notifications");
-        return [self showModernNotificaionForMessage:message withSound:sound andAccount:account];
+        return [self showModernNotificationForMessage:message withSound:sound andAccount:account];
     }
-    return [self showLegacyNotificaionForMessage:message withSound:sound];
+    return [self showLegacyNotificationForMessage:message withSound:sound];
 }
 
--(void) showModernNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+-(void) showModernNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     NSString* idval = [self identifierWithMessage:message];
@@ -642,7 +642,7 @@
     return person;
 }
 
--(void) showLegacyNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound
+-(void) showLegacyNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];

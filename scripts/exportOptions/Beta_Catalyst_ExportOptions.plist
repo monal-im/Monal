@@ -10,12 +10,5 @@
 	<false/>
 	<key>signingCertificate</key>
 	<string>Developer ID Application</string>
-	<key>provisioningProfiles</key>
-	<dict>
-		<key>maccatalyst.G7YU7X7KRJ.SworIM</key>
-		<string>Monal Catalyst Developer id</string>
-		<key>maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService</key>
-		<string>Monal Catalyst Notification NSE</string>
-	</dict>
 </dict>
 </plist>

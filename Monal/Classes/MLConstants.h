@@ -17,7 +17,11 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 
 
 //configure app group constants
-#define kAppGroup @"group.monal"
+#ifdef IS_ALPHA
+    #define kAppGroup @"group.monalalpha"
+#else
+    #define kAppGroup @"group.monal"
+#endif
 #define kMonalKeychainName @"Monal"
 
 //this is in seconds

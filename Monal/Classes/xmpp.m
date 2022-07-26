@@ -4552,7 +4552,7 @@ NSString* const kStanza = @"stanza";
         DDLogDebug(@"Received SDP offer result: %@", result);
     } andErrorHandler:^(XMPPIQ* error) {
         if(error != nil)
-            DDLogError(@"Got error for sdp offer: %@", error);
+            DDLogError(@"Got error for SDP offer: %@", error);
     }];
 }
 

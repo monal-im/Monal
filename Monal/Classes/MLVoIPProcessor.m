@@ -360,7 +360,8 @@ static NSMutableDictionary* _pendingCalls;
         MLAssert(webRTCClient != nil, @"webRTCClient not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
         
         [webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
-            [account sendSDP:sdp forCallID:[messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"] toFullJid:messageNode.from];
+            DDLogDebug(@"WebRTC reported local SDP offer, sending to '%@'...", messageNode.from);
+            [account sendSDP:sdp forCallID:[messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"] toFullJid:messageNode.to];
         }];
     }
 }

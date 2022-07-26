@@ -67,11 +67,12 @@ static NSMutableDictionary* _pendingCalls;
         NSString* localCallID = [messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"];
         BOOL incoming = [account.connectionProperties.identity.jid isEqualToString:((XMPPMessage*)_pendingCalls[self.uuid][@"messageNode"]).toUser];
         if(incoming)
-            remoteJid = ((XMPPMessage*)_pendingCalls[self.uuid][@"messageNode"]).fromUser;
+            remoteJid = ((XMPPMessage*)_pendingCalls[self.uuid][@"messageNode"]).from;
         else
             remoteJid = _pendingCalls[self.uuid][@"acceptedByRemote"];
         MLAssert(remoteJid != nil, @"remoteJid not found in pending calls when discovering local ice candidate!", (@{@"uuid": self.uuid}));
         
+        DDLogDebug(@"Sending new local ICE candidate to '%@'...", remoteJid);
         [account sendCandidate:candidate forCallID:localCallID toFullJid:remoteJid];
     }
 }

@@ -514,8 +514,8 @@ $$
 $$class_handler(handleExternalDisco, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
-        DDLogError(@"External service disco query to our server returned an error: %@", [iqNode findFirst:@"error"]);
-        [HelperTools postError:NSLocalizedString(@"XMPP External Service Disco Error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
+        DDLogError(@"External service disco query to '%@' returned an error: %@", iqNode.from, [iqNode findFirst:@"error"]);
+        //[HelperTools postError:NSLocalizedString(@"XMPP External Service Disco Error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
         return;
     }
     

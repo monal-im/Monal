@@ -256,7 +256,13 @@ static NSMutableDictionary* _pendingCalls;
         NSUUID* uuid = [self getUUIDForCallID:callID onAccount:account];
         if(uuid == nil)
         {
-            DDLogWarn(@"Ignoring incoming ICE candidate for unknown call: %@", callID);
+            //not found --> ignore incoming sdp and respond with error
+            DDLogWarn(@"Could not find pending call for remote ICE candidate offer, responding with error...");
+            XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+            [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"unexpected-request" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+            ] andData:nil]];
+            [account send:errorIq];
             return;
         }
         DDLogInfo(@"%@: Got remote ICE candidate for call %@: %@", account, callID, incomingCandidate);
@@ -278,14 +284,6 @@ static NSMutableDictionary* _pendingCalls;
             }
         }];
     }
-    
-    //not found --> ignore incoming sdp and respond with error
-    DDLogWarn(@"Could not find pending call for remote sdp offer, responding with error...");
-    XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-    [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"unexpected-request" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-    ] andData:nil]];
-    [account send:errorIq];
 }
 
 -(void) processIncomingSDP:(NSNotification*) notification

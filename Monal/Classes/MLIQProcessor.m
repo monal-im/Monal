@@ -303,11 +303,16 @@ $$
             continue;
         contact[@"jid"] = [[NSString stringWithFormat:@"%@", contact[@"jid"]] lowercaseString];
         MLContact* contactObj = [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo];
-        if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove] && !contactObj.isGroup)
+        if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
-            [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
-            [contactObj removeShareInteractions];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
+            if(contactObj.isGroup)
+                DDLogWarn(@"Got roster remove request for MUC, ignoring it (possibly even triggered by us).");
+            else
+            {
+                [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
+                [contactObj removeShareInteractions];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
+            }
         }
         else
         {

@@ -59,10 +59,15 @@ static NSMutableDictionary* _pendingCalls;
             @"candidate": candidate,
         }));
         
-        xmpp* account = _pendingCalls[self.uuid][@"account"];
         XMPPMessage* messageNode = _pendingCalls[self.uuid][@"messageNode"];
+        MLAssert(messageNode != nil, @"messageNode not found in pending calls when discovering local ice candidate!", (@{@"uuid": uuid}));
+        NSString* remoteJid = _pendingCalls[self.uuid][@"acceptedByRemote"];
+        MLAssert(remoteJid != nil, @"remoteJid not found in pending calls when discovering local ice candidate!", (@{@"uuid": uuid}));
+        xmpp* account = _pendingCalls[self.uuid][@"account"];
+        MLAssert(account != nil, @"account not found in pending calls when discovering local ice candidate!", (@{@"uuid": uuid}));
+        
         NSString* localCallID = [messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"];
-        [account sendCandidate:candidate forCallID:localCallID toFullJid:messageNode.from];
+        [account sendCandidate:candidate forCallID:localCallID toFullJid:remoteJid];
     }
 }
     

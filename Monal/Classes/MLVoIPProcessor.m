@@ -498,7 +498,7 @@ static NSMutableDictionary* _pendingCalls;
                 _pendingCalls[uuid][@"webRTCClient"] = webRTCClient;
                 
                 //for outgoing calls: don't try to connect voip call if call wasn't accepted by remote yet (will be done once accepted)
-                if(_pendingCalls[uuid][@"acceptedByRemote"] != nil)
+                if(_pendingCalls[uuid][@"acceptedByRemote"] == nil)
                 {
                     DDLogInfo(@"Not connecting outgoing call, because not yet accepted by remote user...");
                     return;

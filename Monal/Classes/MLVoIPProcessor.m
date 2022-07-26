@@ -354,14 +354,16 @@ static NSMutableDictionary* _pendingCalls;
         MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
         XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
         MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
+        NSString* remoteJid = _pendingCalls[uuid][@"acceptedByRemote"];
+        MLAssert(remoteJid != nil, @"remoteJid not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
         xmpp* account = _pendingCalls[uuid][@"account"];
         MLAssert(account != nil, @"account not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
         WebRTCClient* webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
         MLAssert(webRTCClient != nil, @"webRTCClient not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
         
         [webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
-            DDLogDebug(@"WebRTC reported local SDP offer, sending to '%@'...", messageNode.from);
-            [account sendSDP:sdp forCallID:[messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"] toFullJid:messageNode.to];
+            DDLogDebug(@"WebRTC reported local SDP offer, sending to '%@'...", remoteJid);
+            [account sendSDP:sdp forCallID:[messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"] toFullJid:remoteJid];
         }];
     }
 }
@@ -496,7 +498,7 @@ static NSMutableDictionary* _pendingCalls;
                 _pendingCalls[uuid][@"webRTCClient"] = webRTCClient;
                 
                 //for outgoing calls: don't try to connect voip call if call wasn't accepted by remote yet (will be done once accepted)
-                if(!_pendingCalls[uuid][@"acceptedByRemote"])
+                if(_pendingCalls[uuid][@"acceptedByRemote"] != nil)
                 {
                     DDLogInfo(@"Not connecting outgoing call, because not yet accepted by remote user...");
                     return;
@@ -640,7 +642,7 @@ static NSMutableDictionary* _pendingCalls;
         if([messageNode check:@"{urn:xmpp:jingle-message:1}accept"])
         {
             //save state for initWebRTCForPendingCall
-            _pendingCalls[uuid][@"acceptedByRemote"] = @YES;
+            _pendingCalls[uuid][@"acceptedByRemote"] = messageNode.from;
             
             //connect call immediatley if we already managed to initialize our webrtc client while the remote device was ringing
             if(_pendingCalls[uuid][@"webRTCClient"] != nil)

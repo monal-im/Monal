@@ -456,7 +456,7 @@ static NSMutableDictionary* _pendingCalls;
         }));
         
         account = _pendingCalls[uuid][@"account"];
-        incoming = [account.connectionProperties.identity.jid isEqualToString:((XMPPMessage*)_pendingCalls[uuid][@"messageNode"]).fromUser];
+        incoming = [account.connectionProperties.identity.jid isEqualToString:((XMPPMessage*)_pendingCalls[uuid][@"messageNode"]).toUser];
     }
     
     DDLogInfo(@"Initializing WebRTC for pending %@ call %@...", incoming ? @"incoming" : @"outgoing", uuid);

@@ -248,7 +248,7 @@ static NSMutableDictionary* _pendingCalls;
     
     NSString* rawSDP = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate#|base64"] encoding:NSUTF8StringEncoding];
     NSNumber* sdpMLineIndex = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@sdpMLineIndex|int"];
-    NSString* sdpMid = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@sdpMid|base64"] encoding:NSUTF8StringEncoding];;
+    NSString* sdpMid = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@sdpMid|base64"] encoding:NSUTF8StringEncoding];
     RTCIceCandidate* incomingCandidate = [[RTCIceCandidate alloc] initWithSdp:rawSDP sdpMLineIndex:[sdpMLineIndex intValue] sdpMid:sdpMid];
     NSString* callID = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@id"];
     
@@ -271,6 +271,7 @@ static NSMutableDictionary* _pendingCalls;
         webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
     }
     [webRTCClient setRemoteCandidate:incomingCandidate completion:^(id error) {
+        DDLogDebug(@"Got callback...");
         if(error)
         {
             DDLogError(@"Got error while passing new remote ICE candidate to webRTCClient: %@", error);
@@ -286,6 +287,7 @@ static NSMutableDictionary* _pendingCalls;
             [account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
         }
     }];
+    DDLogDebug(@"Leaving method...");
 }
 
 -(void) processIncomingSDP:(NSNotification*) notification

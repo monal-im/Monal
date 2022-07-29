@@ -253,6 +253,7 @@ static NSMutableDictionary* _pendingCalls;
     NSString* callID = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@id"];
     
     //search pending calls for callID
+    WebRTCClient* webRTCClient;
     @synchronized(_pendingCalls) {
         NSUUID* uuid = [self getUUIDForCallID:callID onAccount:account];
         if(uuid == nil)
@@ -267,24 +268,24 @@ static NSMutableDictionary* _pendingCalls;
             return;
         }
         DDLogInfo(@"%@: Got remote ICE candidate for call %@: %@", account, callID, incomingCandidate);
-        WebRTCClient* webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
-        [webRTCClient setRemoteCandidate:incomingCandidate completion:^(id error) {
-            if(error)
-            {
-                DDLogError(@"Got error while passing new remote ICE candidate to webRTCClient: %@", error);
-                XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-                [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"internal-server-error" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-                ] andData:nil]];
-                [account send:errorIq];
-            }
-            else
-            {
-                DDLogDebug(@"Successfully passed new remote ICE candidate to webRTCClient...");
-                [account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
-            }
-        }];
+        webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
     }
+    [webRTCClient setRemoteCandidate:incomingCandidate completion:^(id error) {
+        if(error)
+        {
+            DDLogError(@"Got error while passing new remote ICE candidate to webRTCClient: %@", error);
+            XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+            [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"internal-server-error" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+            ] andData:nil]];
+            [account send:errorIq];
+        }
+        else
+        {
+            DDLogDebug(@"Successfully passed new remote ICE candidate to webRTCClient...");
+            [account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
+        }
+    }];
 }
 
 -(void) processIncomingSDP:(NSNotification*) notification

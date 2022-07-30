@@ -121,13 +121,14 @@ static NSMutableDictionary* _pendingCalls;
                             @synchronized(_pendingCalls) {
                                 if(_pendingCalls[self.uuid] == nil)
                                     return;
-                                
                                 if(error != nil)
                                 {
                                     DDLogError(@"Error requesting call transaction, retracting call: %@", error);
                                     [self.voipProcessor retractCall:self.uuid];
                                     return;
                                 }
+                                else
+                                    DDLogInfo(@"Successfully created outgoing call transaction for CallKit..");
                             }
                         }];
                     }

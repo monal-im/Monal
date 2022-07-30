@@ -242,9 +242,6 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) queryExternalServicesOn:(NSString*) jid;
 -(void) queryExternalServiceCredentialsFor:(NSDictionary*) service completion:(monal_id_block_t) completion;
 
--(void) sendSDP:(RTCSessionDescription*) sdp forCallID:(NSString*) callID toFullJid:(NSString*) fullJid;
--(void) sendCandidate:(RTCIceCandidate*) candidate forCallID:(NSString*) callID toFullJid:(NSString*) fullJid;
-
 @end
 
 NS_ASSUME_NONNULL_END

@@ -4539,40 +4539,6 @@ NSString* const kStanza = @"stanza";
     [self sendPresence];
 }
 
-
--(void) sendSDP:(RTCSessionDescription*) sdp forCallID:(NSString*) callID toFullJid:(NSString*) fullJid
-{
-    //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCSessionDescription.h
-    XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:fullJid];
-    [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"sdp" andNamespace:@"urn:tmp:monal:webrtc:sdp:1" withAttributes:@{
-        @"id": callID,
-        @"type": [RTCSessionDescription stringForType:sdp.type]
-    } andChildren:@[] andData:[HelperTools encodeBase64WithString:sdp.sdp]]];
-    [self sendIq:sdpIQ withResponseHandler:^(XMPPIQ* result) {
-        DDLogDebug(@"Received SDP offer result: %@", result);
-    } andErrorHandler:^(XMPPIQ* error) {
-        if(error != nil)
-            DDLogError(@"Got error for SDP offer: %@", error);
-    }];
-}
-
--(void) sendCandidate:(RTCIceCandidate*) candidate forCallID:(NSString*) callID toFullJid:(NSString*) fullJid
-{
-    //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCIceCandidate.h
-    XMPPIQ* candidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:fullJid];
-    [candidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"candidate" andNamespace:@"urn:tmp:monal:webrtc:candidate:1" withAttributes:@{
-        @"id": callID,
-        @"sdpMLineIndex": [[NSNumber numberWithInt:candidate.sdpMLineIndex] stringValue],
-        @"sdpMid": [HelperTools encodeBase64WithString:candidate.sdpMid]
-    } andChildren:@[] andData:[HelperTools encodeBase64WithString:candidate.sdp]]];
-    [self sendIq:candidateIQ withResponseHandler:^(XMPPIQ* result) {
-        DDLogDebug(@"Received ICE candidate result: %@", result);
-    } andErrorHandler:^(XMPPIQ* error) {
-        if(error != nil)
-            DDLogError(@"Got error for ICE candidate: %@", error);
-    }];
-}
-
 -(NSString*) description
 {
     return [NSString stringWithFormat:@"%@[%@]: %@", self.accountNo, _internalID, self.connectionProperties.identity.jid];

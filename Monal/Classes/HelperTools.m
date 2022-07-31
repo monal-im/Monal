@@ -52,7 +52,7 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
-+(void) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
++(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
     NSString* fileStr = [NSString stringWithFormat:@"%s", file];
     NSArray* filePathComponents = [fileStr pathComponents];

@@ -82,7 +82,11 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
                 @"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node~eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node",
             ])
             {
+//yes, but this is not insecure because these are string literals boxed into an NSArray above rather than containing unchecked user input
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-security"
                 id result = [parsedStanza find:query];
+#pragma clang diagnostic pop
                 DDLogDebug(@"Query: '%@', result: '%@'", query, result);
             }
         }

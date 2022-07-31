@@ -856,12 +856,10 @@ $$
         return nil;
 #endif
     }
-    NSString* deviceKeyPath = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
-    NSString* deviceKeyPathPreKey = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid];
 
-    NSData* messageKey = [messageNode findFirst:deviceKeyPath];
-    BOOL devicePreKey = [[messageNode findFirst:deviceKeyPathPreKey] boolValue];
-    DDLogVerbose(@"Decrypting using:\n%@ --> %@\n%@ --> %@", deviceKeyPath, messageKey, deviceKeyPathPreKey, devicePreKey ? @"YES" : @"NO");
+    NSData* messageKey = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
+    BOOL devicePreKey = [[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid] boolValue];
+    DDLogVerbose(@"Decrypting using:\nrid=%u --> messageKey=%@\nrid=%u --> isPreKey=%@", self.monalSignalStore.deviceid, messageKey, self.monalSignalStore.deviceid, devicePreKey ? @"YES" : @"NO");
 
     if(!messageKey && isKeyTransportElement)
     {

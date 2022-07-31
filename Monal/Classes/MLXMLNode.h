@@ -30,13 +30,13 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Query for text contents, elementNames, attributes or child elements
  */
--(NSArray*) find:(NSString*) queryString, ...;
--(id _Nullable) findFirst:(NSString*) queryString, ...;
+-(NSArray*) find:(NSString* _Nonnull) queryString, ... NS_FORMAT_FUNCTION(1, 2);
+-(id _Nullable) findFirst:(NSString* _Nonnull) queryString, ... NS_FORMAT_FUNCTION(1, 2);
 
 /**
  Check if the current node matches the queryString and/or its extraction command would return something
  */
--(BOOL) check:(NSString*) queryString, ...;
+-(BOOL) check:(NSString* _Nonnull) queryString, ... NS_FORMAT_FUNCTION(1, 2);
 
 /**
  Quickly set an XMLNS attribute

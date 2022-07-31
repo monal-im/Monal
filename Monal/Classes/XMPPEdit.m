@@ -257,6 +257,7 @@ enum DummySettingsRows {
 
 -(IBAction) save:(id) sender
 {
+    NSError* error;
     [self.currentTextField resignFirstResponder];
 
     DDLogVerbose(@"Saving");
@@ -277,7 +278,20 @@ enum DummySettingsRows {
         [self alertWithTitle:NSLocalizedString(@"Username missing", @"") andMsg:NSLocalizedString(@"Your entered XMPP ID is missing the username", @"")];
         return;
     }
-
+    
+    //check if our keychain contains a password
+    if(self.enabled && self.password.length == 0)
+    {
+        [SAMKeychain passwordForService:kMonalKeychainName account:self.accountNo.stringValue error:&error];
+        if(error != nil)
+        {
+            DDLogError(@"Keychain error: %@", error);
+            self.enabled = NO;
+            [self alertWithTitle:NSLocalizedString(@"Password missing", @"") andMsg:NSLocalizedString(@"Please enter a password below before activating this account.", @"")];
+            return;
+        }
+    }
+    
     NSArray* elements = [self.jid componentsSeparatedByString:@"@"];
 
     //if it is a JID
@@ -326,9 +340,11 @@ enum DummySettingsRows {
         else
         {
             BOOL accountExists = [[DataLayer sharedInstance] doesAccountExistUser:user andDomain:domain];
-            if(!accountExists) {
+            if(!accountExists)
+            {
                 NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
-                if(accountID) {
+                if(accountID)
+                {
                     self.accountNo = accountID;
                     self.editMode = YES;
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
@@ -353,16 +369,18 @@ enum DummySettingsRows {
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
                     [self showSuccessHUD];
                 }
-            } else {
-                [self alertWithTitle:NSLocalizedString(@"Account Exists", @"") andMsg:NSLocalizedString(@"This account already exists in Monal.", @"")];
             }
+            else
+                [self alertWithTitle:NSLocalizedString(@"Account Exists", @"") andMsg:NSLocalizedString(@"This account already exists in Monal.", @"")];
         }
     }
     else
     {
         BOOL updatedAccount = [[DataLayer sharedInstance] updateAccounWithDictionary:dic];
-        if(updatedAccount) {
-            [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountNo];
+        if(updatedAccount)
+        {
+            if(self.password.length)
+                [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountNo];
             if(self.enabled)
             {
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];

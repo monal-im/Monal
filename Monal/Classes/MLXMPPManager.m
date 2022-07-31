@@ -437,14 +437,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
 
     NSError* error;
-    NSString* password = [SAMKeychain passwordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]] error:&error];
+    NSString* password = [SAMKeychain passwordForService:kMonalKeychainName account:((NSNumber*)account[kAccountID]).stringValue error:&error];
     if(error)
     {
-        DDLogError(@"Keychain error: %@", [NSString stringWithFormat:@"%@", error]);
+        DDLogError(@"Keychain error: %@", error);
         // Disable account as a login will not be possible
-        [[DataLayer sharedInstance] disableEnabledAccount:[account objectForKey:kAccountID]];
+        [[DataLayer sharedInstance] disableEnabledAccount:account[kAccountID]];
         // @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
-        [self disconnectAccount:[account objectForKey:kAccountID]];
+        [self disconnectAccount:account[kAccountID]];
         return;
     }
     MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@", [account objectForKey:kUsername], [account objectForKey:kDomain]] password:password andResource:[account objectForKey:kResource]];

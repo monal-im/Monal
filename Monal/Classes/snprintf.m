@@ -97,6 +97,49 @@
  *   usually expose bugs in system implementations rather than in ours :-)
  */
 
+#import <Foundation/Foundation.h>
+
+//swap comments here to print debug statements
+//#import "MLConstants.h"
+#define DDLogError(...)
+
+//make sure we always use the code from this file
+#undef snprintf
+#undef vsnprintf
+#undef asprintf
+#undef vasprintf
+#define snprintf rpl_snprintf
+#define vsnprintf rpl_vsnprintf
+#define asprintf rpl_asprintf
+#define vasprintf rpl_vasprintf
+
+//define every external utility function as present, but none of the printf-type functions:
+//we want to always use our internal functions here
+#define HAVE_STDARG_H                   1
+//#define HAVE_VSNPRINTF                1
+//#define HAVE_SNPRINTF                 1
+//#define HAVE_VASPRINTF                1
+//#define HAVE_ASPRINTF                 1
+#define HAVE_STDARG_H                   1
+#define HAVE_STDDEF_H                   1
+#define HAVE_STDINT_H                   1
+#define HAVE_STDLIB_H                   1
+#define HAVE_FLOAT_H                    1
+#define HAVE_INTTYPES_H                 1
+#define HAVE_LOCALE_H                   1
+#define HAVE_LOCALECONV                 1
+#define HAVE_LCONV_DECIMAL_POINT        1
+#define HAVE_LCONV_THOUSANDS_SEP        1
+#define HAVE_LONG_DOUBLE                1
+#define HAVE_LONG_LONG_INT              1
+#define HAVE_UNSIGNED_LONG_LONG_INT     1
+#define HAVE_INTMAX_T                   1
+#define HAVE_UINTMAX_T                  1
+#define HAVE_UINTPTR_T                  1
+#define HAVE_PTRDIFF_T                  1
+#define HAVE_VA_COPY                    1
+#define HAVE___VA_COPY                  1
+
 /*
  * Usage
  *
@@ -531,15 +574,17 @@ static UINTMAX_T cast(LDOUBLE);
 static UINTMAX_T myround(LDOUBLE);
 static LDOUBLE mypow10(int);
 
-extern int errno;
+//seems to be not needed anymore in this modern environment
+//extern int errno;
 
 int
-rpl_vsnprintf(char *str, size_t size, const char *format, va_list args)
+rpl_vsnprintf(char *str, size_t size, const char *format, va_list* args)
 {
 	LDOUBLE fvalue;
 	INTMAX_T value;
 	unsigned char cvalue;
 	const char *strvalue;
+	id idvalue;
 	INTMAX_T *intmaxptr;
 	PTRDIFF_T *ptrdiffptr;
 	SSIZE_T *sizeptr;
@@ -624,7 +669,7 @@ rpl_vsnprintf(char *str, size_t size, const char *format, va_list args)
 				 * taken as a `-' flag followed by a positive
 				 * field width." (7.19.6.1, 5)
 				 */
-				if ((width = va_arg(args, int)) < 0) {
+				if ((width = va_arg(*args, int)) < 0) {
 					flags |= PRINT_F_MINUS;
 					width = -width;
 				}
@@ -657,7 +702,7 @@ rpl_vsnprintf(char *str, size_t size, const char *format, va_list args)
 				 * taken as if the precision were omitted."
 				 * (7.19.6.1, 5)
 				 */
-				if ((precision = va_arg(args, int)) < 0)
+				if ((precision = va_arg(*args, int)) < 0)
 					precision = -1;
 				ch = *format++;
 				state = PRINT_S_MOD;
@@ -708,28 +753,28 @@ rpl_vsnprintf(char *str, size_t size, const char *format, va_list args)
 			case 'i':
 				switch (cflags) {
 				case PRINT_C_CHAR:
-					value = (signed char)va_arg(args, int);
+					value = (signed char)va_arg(*args, int);
 					break;
 				case PRINT_C_SHORT:
-					value = (short int)va_arg(args, int);
+					value = (short int)va_arg(*args, int);
 					break;
 				case PRINT_C_LONG:
-					value = va_arg(args, long int);
+					value = va_arg(*args, long int);
 					break;
 				case PRINT_C_LLONG:
-					value = va_arg(args, LLONG);
+					value = va_arg(*args, LLONG);
 					break;
 				case PRINT_C_SIZE:
-					value = va_arg(args, SSIZE_T);
+					value = va_arg(*args, SSIZE_T);
 					break;
 				case PRINT_C_INTMAX:
-					value = va_arg(args, INTMAX_T);
+					value = va_arg(*args, INTMAX_T);
 					break;
 				case PRINT_C_PTRDIFF:
-					value = va_arg(args, PTRDIFF_T);
+					value = va_arg(*args, PTRDIFF_T);
 					break;
 				default:
-					value = va_arg(args, int);
+					value = va_arg(*args, int);
 					break;
 				}
 				fmtint(str, &len, size, value, 10, width,
@@ -751,30 +796,30 @@ rpl_vsnprintf(char *str, size_t size, const char *format, va_list args)
 				flags |= PRINT_F_UNSIGNED;
 				switch (cflags) {
 				case PRINT_C_CHAR:
-					value = (unsigned char)va_arg(args,
+					value = (unsigned char)va_arg(*args,
 					    unsigned int);
 					break;
 				case PRINT_C_SHORT:
-					value = (unsigned short int)va_arg(args,
+					value = (unsigned short int)va_arg(*args,
 					    unsigned int);
 					break;
 				case PRINT_C_LONG:
-					value = va_arg(args, unsigned long int);
+					value = va_arg(*args, unsigned long int);
 					break;
 				case PRINT_C_LLONG:
-					value = va_arg(args, ULLONG);
+					value = va_arg(*args, ULLONG);
 					break;
 				case PRINT_C_SIZE:
-					value = va_arg(args, size_t);
+					value = va_arg(*args, size_t);
 					break;
 				case PRINT_C_INTMAX:
-					value = va_arg(args, UINTMAX_T);
+					value = va_arg(*args, UINTMAX_T);
 					break;
 				case PRINT_C_PTRDIFF:
-					value = va_arg(args, UPTRDIFF_T);
+					value = va_arg(*args, UPTRDIFF_T);
 					break;
 				default:
-					value = va_arg(args, unsigned int);
+					value = va_arg(*args, unsigned int);
 					break;
 				}
 				fmtint(str, &len, size, value, base, width,
@@ -807,21 +852,33 @@ rpl_vsnprintf(char *str, size_t size, const char *format, va_list args)
 				/* FALLTHROUGH */
 			case 'f':
 				if (cflags == PRINT_C_LDOUBLE)
-					fvalue = va_arg(args, LDOUBLE);
+					fvalue = va_arg(*args, LDOUBLE);
 				else
-					fvalue = va_arg(args, double);
+					fvalue = va_arg(*args, double);
 				fmtflt(str, &len, size, fvalue, width,
 				    precision, flags, &overflow);
 				if (overflow)
 					goto out;
 				break;
 			case 'c':
-				cvalue = va_arg(args, int);
+				cvalue = (unsigned char)va_arg(*args, int);
 				OUTCHAR(str, len, size, cvalue);
 				break;
 			case 's':
-				strvalue = va_arg(args, char *);
+				DDLogError(@"before s: %p", *args);
+				strvalue = va_arg(*args, char *);
+				DDLogError(@"after s: %p", *args);
+				DDLogError(@"value: %s", strvalue);
 				fmtstr(str, &len, size, strvalue, width,
+				    precision, flags);
+				break;
+			case '@':
+				DDLogError(@"before @: %p", *args);
+				idvalue = va_arg(*args, id);
+				DDLogError(@"after @: %p", *args);
+				const char *cstr = [[NSString stringWithFormat:@"%@", idvalue] UTF8String];
+				DDLogError(@"value: %s", cstr);
+				fmtstr(str, &len, size, cstr, width,
 				    precision, flags);
 				break;
 			case 'p':
@@ -831,7 +888,7 @@ rpl_vsnprintf(char *str, size_t size, const char *format, va_list args)
 				 * characters, in an implementation-defined
 				 * manner." (C99: 7.19.6.1, 8)
 				 */
-				if ((strvalue = va_arg(args, void *)) == NULL)
+				if ((strvalue = va_arg(*args, void *)) == NULL)
 					/*
 					 * We use the glibc format.  BSD prints
 					 * "0x0", SysV "0".
@@ -854,19 +911,19 @@ rpl_vsnprintf(char *str, size_t size, const char *format, va_list args)
 			case 'n':
 				switch (cflags) {
 				case PRINT_C_CHAR:
-					charptr = va_arg(args, signed char *);
-					*charptr = len;
+					charptr = va_arg(*args, signed char *);
+					*charptr = (signed char)len;
 					break;
 				case PRINT_C_SHORT:
-					shortptr = va_arg(args, short int *);
-					*shortptr = len;
+					shortptr = va_arg(*args, short int *);
+					*shortptr = (short)len;
 					break;
 				case PRINT_C_LONG:
-					longptr = va_arg(args, long int *);
+					longptr = va_arg(*args, long int *);
 					*longptr = len;
 					break;
 				case PRINT_C_LLONG:
-					llongptr = va_arg(args, LLONG *);
+					llongptr = va_arg(*args, LLONG *);
 					*llongptr = len;
 					break;
 				case PRINT_C_SIZE:
@@ -877,20 +934,20 @@ rpl_vsnprintf(char *str, size_t size, const char *format, va_list args)
 					 * signed integer type corresponding to
 					 * size_t argument." (7.19.6.1, 7)
 					 */
-					sizeptr = va_arg(args, SSIZE_T *);
+					sizeptr = va_arg(*args, SSIZE_T *);
 					*sizeptr = len;
 					break;
 				case PRINT_C_INTMAX:
-					intmaxptr = va_arg(args, INTMAX_T *);
+					intmaxptr = va_arg(*args, INTMAX_T *);
 					*intmaxptr = len;
 					break;
 				case PRINT_C_PTRDIFF:
-					ptrdiffptr = va_arg(args, PTRDIFF_T *);
+					ptrdiffptr = va_arg(*args, PTRDIFF_T *);
 					*ptrdiffptr = len;
 					break;
 				default:
-					intptr = va_arg(args, int *);
-					*intptr = len;
+					intptr = va_arg(*args, int *);
+					*intptr = (int)len;
 					break;
 				}
 				break;
@@ -1483,18 +1540,23 @@ mymemcpy(void *dst, void *src, size_t len)
 #endif	/* NEED_MYMEMCPY */
 
 int
-rpl_vasprintf(char **ret, const char *format, va_list ap)
+rpl_vasprintf(char **ret, const char *format, va_list *ap)
 {
 	size_t size;
 	int len;
 	va_list aq;
 
-	VA_COPY(aq, ap);
-	len = vsnprintf(NULL, 0, format, aq);
+	VA_COPY(aq, *ap);
+	DDLogError(@"before copy: aq=%p, ap=%p", aq, *ap);
+	len = vsnprintf(NULL, 0, format, &aq);
+	DDLogError(@"after copy: aq=%p, ap=%p", aq, *ap);
 	VA_END_COPY(aq);
 	if (len < 0 || (*ret = malloc(size = len + 1)) == NULL)
 		return -1;
-	return vsnprintf(*ret, size, format, ap);
+	DDLogError(@"before real: ap=%p", *ap);
+	len = vsnprintf(*ret, size, format, ap);
+	DDLogError(@"after real: ap=%p", *ap);
+	return len;
 }
 #endif	/* !HAVE_VASPRINTF */
 
@@ -1519,7 +1581,7 @@ rpl_snprintf(va_alist) va_dcl
 	VA_SHIFT(ap, str, char *);
 	VA_SHIFT(ap, size, size_t);
 	VA_SHIFT(ap, format, const char *);
-	len = vsnprintf(str, size, format, ap);
+	len = vsnprintf(str, size, format, &ap);
 	va_end(ap);
 	return len;
 }
@@ -1544,7 +1606,7 @@ rpl_asprintf(va_alist) va_dcl
 	VA_START(ap, format);
 	VA_SHIFT(ap, ret, char **);
 	VA_SHIFT(ap, format, const char *);
-	len = vasprintf(ret, format, ap);
+	len = vasprintf(ret, format, &ap);
 	va_end(ap);
 	return len;
 }

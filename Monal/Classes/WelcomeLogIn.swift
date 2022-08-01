@@ -195,7 +195,7 @@ struct WelcomeLogIn: View {
                     
                     NavigationLink(destination: LazyClosureView(RegisterAccount(delegate: self.delegate))) {
                         Text("Register")
-                        .foregroundColor(Color.primary)
+                        .foregroundColor(Color(UIColor.systemBlue))
                     }
                     
                     if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
@@ -206,6 +206,7 @@ struct WelcomeLogIn: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(.top, 10.0)
                                 .padding(.bottom, 9.0)
+                                .foregroundColor(Color(UIColor.systemGray))
                         }
                     }
                 }

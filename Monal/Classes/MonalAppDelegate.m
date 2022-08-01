@@ -108,7 +108,10 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     [xmlParser parse];     //blocking operation
     DDLogInfo(@"parse ended");
     [DDLog flushLog];
+//make sure apple's code analyzer will not reject the app for the appstore because of our call to exit()
+#ifdef IS_ALPHA
     exit(0);
+#endif
 }
 
 -(id) init

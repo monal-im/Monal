@@ -1008,6 +1008,7 @@
 		26715E5E17650AF900684F3D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */,
 				C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */,
 				3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */,
 				26F396CE2196830E00EF5720 /* OnBoard */,
@@ -1161,7 +1162,6 @@
 				262797AC178A573F00B85D94 /* Tableviewcells */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
 				261A627F176C055400059090 /* ContactsViewController.m */,
-				3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */,
 				261A6283176C156500059090 /* ActiveChatsViewController.h */,
 				261A6284176C156500059090 /* ActiveChatsViewController.m */,
 				2609B5271FD5B26800F09FA1 /* MLSplitViewDelegate.h */,

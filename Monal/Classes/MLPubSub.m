@@ -491,7 +491,7 @@ $$instance_handler(handleSubscribe, account.pubsub, $$ID(xmpp*, account), $$ID(X
     
     if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/subscription<node=%@><jid=%@><subscription=subscribed>", node, account.connectionProperties.identity.jid])
     {
-        DDLogDebug(@"Successfully subscribed to node '%@' on jid '%@'...", node, iqNode.fromUser);
+        DDLogDebug(@"Successfully subscribed to node '%@' on jid '%@' for '%@'...", node, iqNode.fromUser, account.connectionProperties.identity.jid);
         
         //call subscribe callback (if given)
         $call(handler,
@@ -502,7 +502,7 @@ $$instance_handler(handleSubscribe, account.pubsub, $$ID(xmpp*, account), $$ID(X
     }
     else
     {
-        DDLogError(@"Could not subscribe to node '%@' on jid '%@': %@", node, iqNode.fromUser, iqNode);
+        DDLogError(@"Could not subscribe to node '%@' on jid '%@' for '%@': %@", node, iqNode.fromUser, account.connectionProperties.identity.jid, iqNode);
         
         //call subscribe callback (if given) with error iq node
         $call(handler,

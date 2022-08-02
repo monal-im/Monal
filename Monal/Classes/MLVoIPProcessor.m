@@ -391,22 +391,21 @@ static NSMutableDictionary* _pendingCalls;
 -(void) provider:(CXProvider*) provider performStartCallAction:(CXStartCallAction*) action
 {
     DDLogDebug(@"CXProvider: performStartCallAction with provider=%@, CXStartCallAction=%@", provider, action);
-    NSUUID* uuid = action.callUUID;
     
-    DDLogInfo(@"Now connecting outgoing VoIP call %@...", uuid);
+    DDLogInfo(@"Now connecting outgoing VoIP call %@...", action.callUUID);
     //TODO: in our non-jingle protocol the initiator (e.g. we) has to initialize the webrtc session by sending the proper IQs
     @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
-        XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
-        MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
-        NSString* remoteJid = _pendingCalls[uuid][@"acceptedByRemote"];
-        MLAssert(remoteJid != nil, @"remoteJid not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
-        xmpp* account = _pendingCalls[uuid][@"account"];
-        MLAssert(account != nil, @"account not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
-        WebRTCClient* webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
-        MLAssert(webRTCClient != nil, @"webRTCClient not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
+        MLAssert(_pendingCalls[action.callUUID] != nil, @"uuid not found in pending calls when trying to connect outgoing call!", (@{@"uuid": action.callUUID}));
+        XMPPMessage* messageNode = _pendingCalls[action.callUUID][@"messageNode"];
+        MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to connect outgoing call!", (@{@"uuid": action.callUUID}));
+        NSString* remoteJid = _pendingCalls[action.callUUID][@"acceptedByRemote"];
+        MLAssert(remoteJid != nil, @"remoteJid not found in pending calls when trying to connect outgoing call!", (@{@"uuid": action.callUUID}));
+        xmpp* account = _pendingCalls[action.callUUID][@"account"];
+        MLAssert(account != nil, @"account not found in pending calls when trying to connect outgoing call!", (@{@"uuid": action.callUUID}));
+        WebRTCClient* webRTCClient = _pendingCalls[action.callUUID][@"webRTCClient"];
+        MLAssert(webRTCClient != nil, @"webRTCClient not found in pending calls when trying to connect outgoing call!", (@{@"uuid": action.callUUID}));
         
-        _pendingCalls[uuid][@"startCallAction"] = action;
+        _pendingCalls[action.callUUID][@"startCallAction"] = action;
         [webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
             DDLogDebug(@"WebRTC reported local SDP offer, sending to '%@'...", remoteJid);
             
@@ -419,7 +418,7 @@ static NSMutableDictionary* _pendingCalls;
             [account sendIq:sdpIQ withResponseHandler:^(XMPPIQ* result) {
                 DDLogDebug(@"Received SDP response for offer: %@", result);
                 @synchronized(_pendingCalls) {
-                    if(_pendingCalls[uuid] == nil)
+                    if(_pendingCalls[action.callUUID] == nil)
                     {
                         DDLogWarn(@"Could not find pending call for remote sdp response, ignoring...");
                         return;

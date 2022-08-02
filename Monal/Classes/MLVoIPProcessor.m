@@ -113,24 +113,8 @@ static NSMutableDictionary* _pendingCalls;
                     //otherwise the call was outgoing (--> initialize callkit ui for outgoing call, we are connected now)
                     else
                     {
-                        DDLogInfo(@"Initializing CallKit for outgoing call...");
-                        CXHandle* handle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:_pendingCalls[self.uuid][@"acceptedByRemote"]];
-                        CXStartCallAction* startCallAction = [[CXStartCallAction alloc] initWithCallUUID:self.uuid handle:handle];
-                        CXTransaction* transaction = [[CXTransaction alloc] initWithAction:startCallAction];
-                        [self.voipProcessor.callController requestTransaction:transaction completion:^(NSError* error) {
-                            @synchronized(_pendingCalls) {
-                                if(_pendingCalls[self.uuid] == nil)
-                                    return;
-                                if(error != nil)
-                                {
-                                    DDLogError(@"Error requesting call transaction, retracting call: %@", error);
-                                    [self.voipProcessor retractCall:self.uuid];
-                                    return;
-                                }
-                                else
-                                    DDLogInfo(@"Successfully created outgoing call transaction for CallKit..");
-                            }
-                        }];
+                        DDLogInfo(@"Informing CallKit of successful connection of outgoing call...");
+                        [_pendingCalls[self.uuid][@"startCallAction"] fulfill];
                     }
                 }
                 break;
@@ -374,6 +358,41 @@ static NSMutableDictionary* _pendingCalls;
 
 -(void) connectOutgoingVoIPCall:(NSUUID*) uuid
 {
+    DDLogInfo(@"Initializing CallKit for outgoing call...");
+    CXHandle* handle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:_pendingCalls[uuid][@"acceptedByRemote"]];
+    CXStartCallAction* startCallAction = [[CXStartCallAction alloc] initWithCallUUID:uuid handle:handle];
+    CXTransaction* transaction = [[CXTransaction alloc] initWithAction:startCallAction];
+    [self.callController requestTransaction:transaction completion:^(NSError* error) {
+        @synchronized(_pendingCalls) {
+            if(_pendingCalls[uuid] == nil)
+                return;
+            if(error != nil)
+            {
+                DDLogError(@"Error requesting call transaction, retracting call: %@", error);
+                [self retractCall:uuid];
+                return;
+            }
+            else
+                DDLogInfo(@"Successfully created outgoing call transaction for CallKit..");
+        }
+    }];
+}
+
+-(void) providerDidReset:(CXProvider*) provider
+{
+    DDLogDebug(@"CXProvider: providerDidReset with provider=%@", provider);
+}
+
+-(void) providerDidBegin:(CXProvider*) provider
+{
+    DDLogDebug(@"CXProvider: providerDidBegin with provider=%@", provider);
+}
+
+-(void) provider:(CXProvider*) provider performStartCallAction:(CXStartCallAction*) action
+{
+    DDLogDebug(@"CXProvider: performStartCallAction with provider=%@, CXStartCallAction=%@", provider, action);
+    NSUUID* uuid = action.callUUID;
+    
     DDLogInfo(@"Now connecting outgoing VoIP call %@...", uuid);
     //TODO: in our non-jingle protocol the initiator (e.g. we) has to initialize the webrtc session by sending the proper IQs
     @synchronized(_pendingCalls) {
@@ -387,6 +406,7 @@ static NSMutableDictionary* _pendingCalls;
         WebRTCClient* webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
         MLAssert(webRTCClient != nil, @"webRTCClient not found in pending calls when trying to connect outgoing call!", (@{@"uuid": uuid}));
         
+        _pendingCalls[uuid][@"startCallAction"] = action;
         [webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
             DDLogDebug(@"WebRTC reported local SDP offer, sending to '%@'...", remoteJid);
             
@@ -421,21 +441,6 @@ static NSMutableDictionary* _pendingCalls;
             }];
         }];
     }
-}
-
--(void) providerDidReset:(CXProvider*) provider
-{
-    DDLogDebug(@"CXProvider: providerDidReset with provider=%@", provider);
-}
-
--(void) providerDidBegin:(CXProvider*) provider
-{
-    DDLogDebug(@"CXProvider: providerDidBegin with provider=%@", provider);
-}
-
--(void) provider:(CXProvider*) provider performStartCallAction:(CXStartCallAction*) action
-{
-    DDLogDebug(@"CXProvider: performStartCallAction with provider=%@, CXStartCallAction=%@", provider, action);
 }
 
 -(void) provider:(CXProvider*) provider performAnswerCallAction:(CXAnswerCallAction*) action

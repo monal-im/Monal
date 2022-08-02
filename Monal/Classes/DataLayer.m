@@ -31,6 +31,7 @@ NSString* const kAccountState = @"account_state";
 //used for account rows
 NSString *const kDomain = @"domain";
 NSString *const kEnabled = @"enabled";
+NSString *const kNeedsPasswordMigration = @"needs_password_migration";
 
 NSString *const kServer = @"server";
 NSString *const kPort = @"other_port";
@@ -249,7 +250,8 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) updateAccounWithDictionary:(NSDictionary*) dictionary
 {
     return [self.db boolWriteTransaction:^{
-        NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=? WHERE account_id=?;";
+        DDLogVerbose(@"Updating account with: %@", dictionary);
+        NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=?, needs_password_migration=? WHERE account_id=?;";
         NSString* server = (NSString*)[dictionary objectForKey:kServer];
         NSString* port = (NSString*)[dictionary objectForKey:kPort];
         NSArray* params = @[
@@ -262,7 +264,8 @@ static NSDateFormatter* dbFormatter;
             [dictionary objectForKey:kDirectTLS],
             [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
             [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
-            [dictionary objectForKey:kAccountID]
+            [dictionary objectForKey:kNeedsPasswordMigration],
+            [dictionary objectForKey:kAccountID],
         ];
         return (BOOL)[self.db executeNonQuery:query andArguments:params];
     }];
@@ -318,10 +321,17 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) disableEnabledAccount:(NSNumber*) accountNo
+-(BOOL) disableAccountForPasswordMigration:(NSNumber*) accountNo
 {
     return [self.db boolWriteTransaction:^{
-        return [self.db executeNonQuery:@"UPDATE account SET enabled=0 WHERE account_id=?;" andArguments:@[accountNo]];
+        return [self.db executeNonQuery:@"UPDATE account SET enabled=0, needs_password_migration=1 WHERE account_id=?;" andArguments:@[accountNo]];
+    }];
+}
+
+-(NSArray*) accountListNeedingPasswordMigration
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeReader:@"SELECT * FROM account WHERE NOT enabled AND needs_password_migration ORDER BY account_id ASC;"];
     }];
 }
 

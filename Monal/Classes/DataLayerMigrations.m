@@ -1154,10 +1154,14 @@
                     ) \
             ;"];
         }];
+        
+        //add needs_password_migration field to accounts db
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.301 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE account ADD COLUMN needs_password_migration BOOL DEFAULT false;"];
+        }];
 
         // check if db version changed
         NSNumber* newdbversion = [self readDBVersion:db];
-
         if([dbversion isEqualToNumber:newdbversion] == NO)
         {
             // invalidate account state if the database has changed
@@ -1167,7 +1171,7 @@
         }
         else
         {
-            DDLogInfo(@"Database: no migration needed version %@", newdbversion);
+            DDLogInfo(@"Database: no migration needed, version: %@", newdbversion);
             return NO;
         }
     }];

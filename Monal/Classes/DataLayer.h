@@ -21,6 +21,7 @@ extern NSString* const kAccountID;
 extern NSString* const kAccountState;
 extern NSString* const kDomain;
 extern NSString* const kEnabled;
+extern NSString* const kNeedsPasswordMigration;
 
 extern NSString* const kServer;
 extern NSString* const kPort;
@@ -150,9 +151,10 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) removeAccount:(NSNumber*) accountNo;
 
 /**
- disables account
+ password migration
  */
--(BOOL) disableEnabledAccount:(NSNumber*) accountNo;
+-(BOOL) disableAccountForPasswordMigration:(NSNumber*) accountNo;
+-(NSArray*) accountListNeedingPasswordMigration;
 
 -(NSMutableDictionary* _Nullable) readStateForAccount:(NSNumber*) accountNo;
 -(void) persistState:(NSDictionary*) state forAccount:(NSNumber*) accountNo;

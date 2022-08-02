@@ -287,6 +287,7 @@ enum DummySettingsRows {
         {
             DDLogError(@"Keychain error: %@", error);
             self.enabled = NO;
+            [self.tableView reloadData];
             [self alertWithTitle:NSLocalizedString(@"Password missing", @"") andMsg:NSLocalizedString(@"Please enter a password below before activating this account.", @"")];
             return;
         }
@@ -376,6 +377,7 @@ enum DummySettingsRows {
     }
     else
     {
+        [dic setObject:[NSNumber numberWithBool:NO] forKey:kNeedsPasswordMigration];
         BOOL updatedAccount = [[DataLayer sharedInstance] updateAccounWithDictionary:dic];
         if(updatedAccount)
         {

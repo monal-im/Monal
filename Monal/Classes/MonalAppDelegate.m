@@ -432,6 +432,7 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
 
 -(void) setActiveChats:(UIViewController*) activeChats
 {
+    DDLogDebug(@"Active chats did load...");
     _activeChats = (ActiveChatsViewController*)activeChats;
     [self openChatOfContact:_contactToOpen withCompletion:_completionToCall];
 }

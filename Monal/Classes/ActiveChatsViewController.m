@@ -364,8 +364,22 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
 }
 
+-(void) didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
 -(void) segueToIntroScreensIfNeeded
 {
+    //open password migration if needed
+    NSArray* needingMigration = [[DataLayer sharedInstance] accountListNeedingPasswordMigration];
+    if(needingMigration.count > 0)
+    {
+        UIViewController* passwordMigration = [[SwiftuiInterface new] makePasswordMigration:needingMigration];
+        [self presentViewController:passwordMigration animated:YES completion:^{}];
+        return;
+    }
     // display quick start if the user never seen it or if there are 0 enabled accounts
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"] || [[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
         UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
@@ -376,12 +390,6 @@ static NSMutableSet* _smacksWarningDisplayed;
         [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
         return;
     }
-}
-
--(void) didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 -(void) openConversationPlaceholder:(MLContact*) contact

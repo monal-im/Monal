@@ -441,9 +441,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(error)
     {
         DDLogError(@"Keychain error: %@", error);
-        // Disable account as a login will not be possible
-        [[DataLayer sharedInstance] disableEnabledAccount:account[kAccountID]];
-        // @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+        // Disable account because login will not be possible
+        [[DataLayer sharedInstance] disableAccountForPasswordMigration:account[kAccountID]];
         [self disconnectAccount:account[kAccountID]];
         return;
     }

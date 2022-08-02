@@ -796,25 +796,6 @@
             </objects>
             <point key="canvasLocation" x="889.85507246376824" y="3587.9464285714284"/>
         </scene>
-        <!--Code Scanner-->
-        <scene sceneID="OAb-uy-jDb">
-            <objects>
-                <viewController id="6KG-ev-udT" customClass="MLQRCodeScanner" customModule="Monal" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="003-8R-Zo8"/>
-                        <viewControllerLayoutGuide type="bottom" id="mJp-JT-iUV"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="3tB-cm-ZZl">
-                        <rect key="frame" x="0.0" y="0.0" width="1024" height="1366"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                    <navigationItem key="navigationItem" id="T6U-nt-nrH"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="9Oy-hs-ARb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="3029" y="3690"/>
-        </scene>
         <!--Privacy-->
         <scene sceneID="XgW-i3-pwr">
             <objects>

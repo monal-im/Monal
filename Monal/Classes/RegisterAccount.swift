@@ -310,11 +310,14 @@ struct RegisterAccount: View {
 
                     if(selectedServerIndex == 0) {
                         TextField("Provide XMPP-Server", text: Binding(get: { self.providedServer }, set: { string in self.providedServer = string.lowercased() }))
+                            //ios15: .textInputAutocapitalization(.never)
                             .disableAutocorrection(true)
                     }
 
                     TextField("Username", text: Binding(get: { self.username }, set: { string in self.username = string.lowercased() }))
+                        //ios15: .textInputAutocapitalization(.never)
                         .disableAutocorrection(true)
+                    
                     SecureField("Password", text: $password)
                     if(self.captchaImg != nil) {
                         HStack {
@@ -328,6 +331,8 @@ struct RegisterAccount: View {
                             .buttonStyle(.borderless)
                         }
                         TextField("Captcha", text: $captchaText)
+                            //ios15: .textInputAutocapitalization(.never)
+                            .disableAutocorrection(true)
                     }
 
                     Button(action: {

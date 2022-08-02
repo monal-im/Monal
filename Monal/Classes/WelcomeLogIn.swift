@@ -128,6 +128,7 @@ struct WelcomeLogIn: View {
                         get: { self.jid },
                         set: { string in self.jid = string.lowercased() })
                     )
+                    //ios15: .textInputAutocapitalization(.never)
                     .disableAutocorrection(true)
                     .keyboardType(.emailAddress)
                     

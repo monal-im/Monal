@@ -61,7 +61,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerKey"];
 
         [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"DefaulsMigratedToAppGroup"];
         [[HelperTools defaultsDB] synchronize];
     }
 

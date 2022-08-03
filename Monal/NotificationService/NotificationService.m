@@ -492,14 +492,6 @@ static BOOL warnUnclean = NO;
             warnUnclean = NO;       //try again on error
     }
     
-    //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)
-    if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
-    {
-        DDLogWarn(@"defaults not migrated to app group, ignoring push and posting notification as coming from the appserver (a dummy one)");
-        contentHandler([request.content mutableCopy]);
-        return;
-    }
-    
     //proxy to push singleton
     DDLogDebug(@"proxying to incomingPush");
     [DDLog flushLog];

@@ -53,38 +53,11 @@ static NSDateFormatter* dbFormatter;
 
 +(void) initialize
 {
-    NSError* error;
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     NSString* writableDBPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
-    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString* oldDBPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"sworim.sqlite"];
     
-    //database move is incomplete --> start from scratch
-    //this can happen if the notification extension was run after the app upgrade but before the main app was opened
-    //in this scenario the db doesn't get copyed but created from the default file (e.g. it is empty)
-    if([fileManager fileExistsAtPath:oldDBPath] && [fileManager fileExistsAtPath:writableDBPath])
-    {
-        DDLogInfo(@"initialize: old AND new db files present, delete new one and start from scratch");
-        [fileManager removeItemAtPath:writableDBPath error:&error];
-        if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-    }
-    
-    //old install is being upgraded --> copy old database to new app group path
-    if([fileManager fileExistsAtPath:oldDBPath] && ![fileManager fileExistsAtPath:writableDBPath])
-    {
-        DDLogInfo(@"initialize: copying existing DB from OLD path to new app group one: %@ --> %@", oldDBPath, writableDBPath);
-        [fileManager copyItemAtPath:oldDBPath toPath:writableDBPath error:&error];
-        if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-        DDLogInfo(@"initialize: removing old DB at: %@", oldDBPath);
-        [fileManager removeItemAtPath:oldDBPath error:&error];
-        if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-    }
-    
-    //the file still does not exist (e.g. fresh install) --> copy default database to app group path
+    //the file does not exist (e.g. fresh install) --> copy default database to app group path
     if(![fileManager fileExistsAtPath:writableDBPath])
     {
         DDLogInfo(@"initialize: copying default DB to: %@", writableDBPath);
@@ -148,6 +121,36 @@ static NSDateFormatter* dbFormatter;
 -(void) createTransaction:(monal_void_block_t) block
 {
     [self.db voidWriteTransaction:block];
+}
+
+-(void) version
+{
+    // checking db version and upgrading if necessary
+    DDLogInfo(@"Database version check");
+
+    //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
+    //this is a special case because it can not be done while in a transaction!!!
+    [self.db enableWAL];
+
+    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
+    [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+    [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
+
+    // Vacuum after db updates
+    if([DataLayerMigrations migrateDB:self.db withDataLayer:self])
+    {
+        [self.db vacuum];
+        DDLogInfo(@"Database Vacuum complete");
+    }
+
+    //turn foreign keys on again
+    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
+    [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+    
+    DDLogInfo(@"Database version check completed");
+    return;
 }
 
 #pragma mark account commands
@@ -1849,36 +1852,6 @@ static NSDateFormatter* dbFormatter;
     [self.db voidWriteTransaction:^{
         [self.db executeScalarReader:@"UPDATE account SET registeredPushServer=? WHERE account_id=?;" andArguments:@[pushServer, accountNo]];
     }];
-}
-
--(void) version
-{
-    // checking db version and upgrading if necessary
-    DDLogInfo(@"Database version check");
-
-    //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
-    //this is a special case because it can not be done while in a transaction!!!
-    [self.db enableWAL];
-
-    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
-    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
-    [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
-    [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
-
-    // Vacuum after db updates
-    if([DataLayerMigrations migrateDB:self.db withDataLayer:self])
-    {
-        [self.db vacuum];
-        DDLogInfo(@"Database Vacuum complete");
-    }
-
-    //turn foreign keys on again
-    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
-    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
-    [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
-    
-    DDLogInfo(@"Database version check completed");
-    return;
 }
 
 -(void) deleteDelayedMessageStanzasForAccount:(NSString*) accountNo

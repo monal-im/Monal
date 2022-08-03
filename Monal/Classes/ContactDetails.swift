@@ -35,7 +35,7 @@ struct ContactDetails: View {
                 if(!contact.isGroup) {
                     TextField("Change Nickname", text: $contact.nickNameView)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .modifier(ClearButton(text: $contact.nickNameView))
+                        .addClearButton(text:$contact.nickNameView)
                 }
                 
                 Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {

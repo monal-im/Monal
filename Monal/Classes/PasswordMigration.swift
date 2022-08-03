@@ -37,7 +37,7 @@ struct PasswordMigration: View {
                         .resizable()
                         .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
                         .padding()                    
-                    Text("Your accounts got deactivated, because you restored an iCloud backup of this App. Please reenter your passwords to activate them again.")
+                    Text("Your accounts got deactivated, because you restored an iCloud backup of Monal. Please reenter your passwords to activate them again.")
                         .padding()
                         .padding(.leading, -16.0)
                 }

@@ -437,16 +437,34 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
 
     NSError* error;
+    NSString* jid = [NSString stringWithFormat:@"%@@%@", account[kUsername], account[kDomain]];
     NSString* password = [SAMKeychain passwordForService:kMonalKeychainName account:((NSNumber*)account[kAccountID]).stringValue error:&error];
     if(error)
     {
         DDLogError(@"Keychain error: %@", error);
+        
         // Disable account because login will not be possible
         [[DataLayer sharedInstance] disableAccountForPasswordMigration:account[kAccountID]];
         [self disconnectAccount:account[kAccountID]];
+        
+        //show notifications for disabled accounts to warn user if in appex
+        if([HelperTools isAppExtension])
+        {
+            UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+            content.title = NSLocalizedString(@"Account disabled", @"");;
+            content.subtitle = jid;
+            content.body = NSLocalizedString(@"You restored an iCloud backup of Monal, please open the app to reenable this account.", @"");
+            content.sound = [UNNotificationSound defaultSound];
+            content.categoryIdentifier = @"simple";
+            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"disabled::%@", jid] content:content trigger:nil];
+            error = [HelperTools postUserNotificationRequest:request];
+            if(error)
+                DDLogError(@"Error posting account disabled notification: %@", error);
+        }
+        
         return;
     }
-    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@", [account objectForKey:kUsername], [account objectForKey:kDomain]] password:password andResource:[account objectForKey:kResource]];
+    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:jid password:password andResource:[account objectForKey:kResource]];
     MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
     xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[account objectForKey:kAccountID]];
     xmppAccount.statusMessage = [account objectForKey:@"statusMessage"];

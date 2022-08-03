@@ -223,19 +223,6 @@ struct ContactDetails: View {
     }
 }
 
-/* struct Resources: UIViewControllerRepresentable {
-    @ObservedObject var contact: ObservableKVOWrapper<MLContact>
-    func makeUIViewController(context: Context) -> UIViewController {
-        let controller = MLResourcesTableViewController()
-        controller.contact = self.contact.obj
-        return controller
-    }
-    
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-    }
-}*/
-
-
 struct ContactDetails_Previews: PreviewProvider {
     static var delegate = SheetDismisserProtocol()
     static var previews: some View {

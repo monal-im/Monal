@@ -476,7 +476,36 @@ static BOOL warnUnclean = NO;
 -(void) didReceiveNotificationRequest:(UNNotificationRequest*) request withContentHandler:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
     DDLogInfo(@"Notification handler called (request id: %@)", request.identifier);
+    DDLogInfo(@"Push userInfo: %@", request.content.userInfo);
     [handlers addObject:contentHandler];
+    
+    //only show this notification once a day at maximum (and if a build number was given in our push)
+    NSDate* lastAppVersionAlert = [[HelperTools defaultsDB] objectForKey:@"lastAppVersionAlert"];
+    if((lastAppVersionAlert == nil || [[NSDate date] timeIntervalSinceDate:lastAppVersionAlert] > 86400) && request.content.userInfo[@"firstGoodBuildNumber"] != nil)
+    {
+        NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+        long buildNumber = ((NSString*)[infoDict objectForKey:@"CFBundleVersion"]).integerValue;
+        long firstGoodBuildNumber = ((NSNumber*)request.content.userInfo[@"firstGoodBuildNumber"]).integerValue;
+        BOOL isKnownGoodBuild = NO;
+        for(NSNumber* allowed in request.content.userInfo[@"knownGoodBuildNumber"])
+            if(buildNumber == allowed.integerValue)
+                isKnownGoodBuild = YES;
+        DDLogDebug(@"current build number: %ld, firstGoodBuildNumber: %ld, isKnownGoodBuild: %@", buildNumber, firstGoodBuildNumber, isKnownGoodBuild ? @"YES" : @"NO");
+        if(buildNumber < firstGoodBuildNumber && !isKnownGoodBuild)
+        {
+            UNMutableNotificationContent* tooOldContent = [[UNMutableNotificationContent alloc] init];
+            tooOldContent.title = NSLocalizedString(@"Very old app version", @"");
+            tooOldContent.subtitle = NSLocalizedString(@"Please update!", @"");
+            tooOldContent.body = NSLocalizedString(@"This app is too old and can contain security bugs as well as suddenly cease operation. Please Upgrade!", @"");
+            tooOldContent.sound = [UNNotificationSound defaultSound];
+            UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:tooOldContent trigger:nil];
+            NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
+            if(error)
+                DDLogError(@"Error posting local app-too-old notification: %@", error);
+            [[HelperTools defaultsDB] setObject:[NSDate now] forKey:@"lastAppVersionAlert"];
+            [[HelperTools defaultsDB] synchronize];
+        }
+    }
     
     if(warnUnclean)
     {

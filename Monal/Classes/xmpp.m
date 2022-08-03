@@ -2232,7 +2232,12 @@ NSString* const kStanza = @"stanza";
             
             //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
             [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES];
+            //disconnect account (we don't want to try this again)
             [self disconnect];
+            //make sure we don'T try this again even when the mainapp/appex gets restarted
+            NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:self.accountNo] copyItems:YES];
+            accountDic[kEnabled] = @NO;
+            [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}challenge"])
         {

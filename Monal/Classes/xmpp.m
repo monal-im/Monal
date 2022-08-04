@@ -25,7 +25,7 @@
 #import "HelperTools.h"
 #import "MLXMPPManager.h"
 #import "MLNotificationQueue.h"
-
+#import "SCRAM.h"
 #import "MLImageManager.h"
 
 //XMPP objects
@@ -68,6 +68,7 @@ NSString* const kStanza = @"stanza";
 -(void) setInternalState:(NSDictionary*) state;
 -(void) resetForNewSession;
 @end
+
 
 @interface xmpp()
 {
@@ -125,6 +126,10 @@ NSString* const kStanza = @"stanza";
     MLXMLNode* _cachedStreamFeaturesBeforeAuth;
     MLXMLNode* _cachedStreamFeaturesAfterAuth;
     xmppPipeliningState _pipeliningState;
+    
+    //scram related stuff
+    SCRAM* _scramHandler;
+    NSSet* _supportedSaslMechanisms;
 }
 
 @property (nonatomic, assign) BOOL smacksRequestInFlight;
@@ -864,6 +869,9 @@ NSString* const kStanza = @"stanza";
         
         [self cleanupSendQueue];
         
+        DDLogVerbose(@"Removing scramHandler...");
+        self->_scramHandler = nil;
+        
         //(re)read persisted state and start connection
         [self readState];
         if([self connectionTask])
@@ -918,6 +926,9 @@ NSString* const kStanza = @"stanza";
                 timer();
             [self->_timersToCancelOnDisconnect removeAllObjects];
         }
+        
+        DDLogVerbose(@"Removing scramHandler...");
+        self->_scramHandler = nil;
         
         if(self->_accountState<kStateReconnecting)
         {
@@ -2253,6 +2264,7 @@ NSString* const kStanza = @"stanza";
                 if(!message)
                     message = NSLocalizedString(@"There was a SASL error on the server.", @"");
             }
+            message = [NSString stringWithFormat:NSLocalizedString(@"Login Error: %@", @""), message];
             
             //clear pipeline cache to make sure we have a fresh restart next time
             _pipeliningState = kPipelinedNothing;
@@ -2272,42 +2284,98 @@ NSString* const kStanza = @"stanza";
         {
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
-            if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
+            
+            //only allow challenge handling, if we are in scram mode (e.g. we selected a SCRAM-XXX auth method)
+            if(!self->_scramHandler)
+                return [self invalidXMLError];
+            
+            NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}challenge#|base64"] encoding:NSUTF8StringEncoding];
+            if(![self->_scramHandler parseServerFirstMessage:innerSASLData])
             {
-                MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-                //TODO: implement SCRAM SHA1 and SHA256 based auth
-                [self send:responseXML];
+                DDLogError(@"SCRAM says this server first message was wrong!");
                 
-                //pipeline stream restart
-                /*
-                 * WARNING: this can not be done, because pipelining a stream restart will break the local parser:
-                 *          1. the <?xml ...?> "tag" confuses the parser if its coming in an already established stream (e.g. if it sees it twice)
-                 *          2. the parser can not be reset after receiving the sasl <success/> because the old parser could have already swallowed everything
-                 *             coming after the <success/> (e.g. the new stream opening and stream features and possibly even the smacks resumption data)
-                 *          3. making the used parser (NSXMLParser) ignore subsequent <?xml ...?> headers does not seem possible
-                 *          4. switching to a new parser (maybe written in rust) can solve this and would save us 1 RTT more in every sasl scheme (even challenge-response ones)
-                DDLogDebug(@"Pipelining stream restart after response to auth challenge...");
-                _pipeliningState = kPipelinedStreamRestart;
-                [self startXMPPStreamWithXMLOpening:NO];
+                //clear pipeline cache to make sure we have a fresh restart next time
+                _pipeliningState = kPipelinedNothing;
+                _cachedStreamFeaturesBeforeAuth = nil;
+                _cachedStreamFeaturesAfterAuth = nil;
                 
-                //pipeline stream resume/bind after auth onto our stream header if we have cached stream features available
-                if(_cachedStreamFeaturesAfterAuth != nil)
-                {
-                    DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", _cachedStreamFeaturesAfterAuth);
-                    _pipeliningState = kPipelinedResumeOrBind;
-                    [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
-                }
-                */
+                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+                [HelperTools postError:NSLocalizedString(@"Error handling SASL challenge of server, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
+                [self disconnect];
                 
                 return;
             }
+            
+            MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:ietf:params:xml:ns:xmpp-sasl" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFinalMessage]]];
+            [self send:responseXML];
+            
+            //pipeline stream restart
+            /*
+            * WARNING: this can not be done, because pipelining a stream restart will break the local parser:
+            *          1. the <?xml ...?> "tag" confuses the parser if its coming in an already established stream (e.g. if it sees it twice)
+            *          2. the parser can not be reset after receiving the sasl <success/> because the old parser could have already swallowed everything
+            *             coming after the <success/> (e.g. the new stream opening and stream features and possibly even the smacks resumption data)
+            *          3. making the used parser (NSXMLParser) ignore subsequent <?xml ...?> headers does not seem possible
+            *          4. switching to a new parser (maybe written in rust) can solve this and would save us 1 RTT more in every sasl scheme (even challenge-response ones)
+            DDLogDebug(@"Pipelining stream restart after response to auth challenge...");
+            _pipeliningState = kPipelinedStreamRestart;
+            [self startXMPPStreamWithXMLOpening:NO];
+            
+            //pipeline stream resume/bind after auth onto our stream header if we have cached stream features available
+            if(_cachedStreamFeaturesAfterAuth != nil)
+            {
+                DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", _cachedStreamFeaturesAfterAuth);
+                _pipeliningState = kPipelinedResumeOrBind;
+                [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
+            }
+            */
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}success"])
         {
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
+            
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
+            NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
+            
+            //only parse and validate scram response, if we are in scram mode (e.g. not sasl plain)
+            if(self->_scramHandler != nil)
+            {
+                NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}success#|base64"] encoding:NSUTF8StringEncoding];
+                if(![self->_scramHandler parseServerFinalMessage:innerSASLData])
+                {
+                    DDLogError(@"SCRAM says this server final message was wrong!");
+                    
+                    //clear pipeline cache to make sure we have a fresh restart next time
+                    _pipeliningState = kPipelinedNothing;
+                    _cachedStreamFeaturesBeforeAuth = nil;
+                    _cachedStreamFeaturesAfterAuth = nil;
+                    
+                    //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+                    [HelperTools postError:NSLocalizedString(@"Error handling SASL authentication of server, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
+                    [self disconnect];
+                    
+                    return;
+                }
+                else
+                    DDLogDebug(@"SCRAM says this server final message was correct");
+                
+                //build mechanism list displayed in ui (mark _scramHandler.method as used)
+                for(NSString* mechanism in _supportedSaslMechanisms)
+                    mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
+                
+                self->_scramHandler = nil;
+            }
+            else
+            {
+                //build mechanism list displayed in ui (mark PLAIN as used)
+                for(NSString* mechanism in _supportedSaslMechanisms)
+                    mechanismList[mechanism] = @([@"PLAIN" isEqualToString:mechanism]);
+            }
+            DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
+            self.connectionProperties.saslMethods = mechanismList;
+            
             self->_accountState = kStateLoggedIn;
             _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
             if(_cancelLoginTimer)
@@ -2496,16 +2564,32 @@ NSString* const kStanza = @"stanza";
     else
     {
         //extract menchanisms presented
-        NSSet* supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
+        _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
         
-        if([supportedSaslMechanisms containsObject:@"PLAIN"])
+        //check for supported scram mechanisms (highest security first!)
+        for(NSString* mechanism in [SCRAM supportedMechanisms])
+            if([_supportedSaslMechanisms containsObject:mechanism])
+            {
+                self->_scramHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:mechanism];
+                [self send:[[MLXMLNode alloc]
+                    initWithElement:@"auth"
+                    andNamespace:@"urn:ietf:params:xml:ns:xmpp-sasl"
+                    withAttributes:@{@"mechanism": mechanism}
+                    andChildren:@[]
+                    andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessage]]
+                ]];
+                return;
+            }
+        
+        //use plain as fallback
+        if([_supportedSaslMechanisms containsObject:@"PLAIN"])
         {
             [self send:[[MLXMLNode alloc]
                 initWithElement:@"auth"
                 andNamespace:@"urn:ietf:params:xml:ns:xmpp-sasl"
                 withAttributes:@{@"mechanism": @"PLAIN"}
                 andChildren:@[]
-                andData:[HelperTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@", self.connectionProperties.identity.user, self.connectionProperties.identity.password]]
+                andData:[HelperTools encodeBase64WithString:[NSString stringWithFormat:@"\0%@\0%@", self.connectionProperties.identity.user, self.connectionProperties.identity.password]]
             ]];
             
             //even double pipelining (e.g. pipelining onto the already pipelined sasl plain auth) is possible when using auth=PLAIN
@@ -2528,23 +2612,21 @@ NSString* const kStanza = @"stanza";
                 [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
             }
             */
+            
+            return;
         }
-        else
-        {
-            //TODO: implement SCRAM SHA1 and SHA256 based auth
-            
-            //no supported auth mechanism
-            DDLogInfo(@"no supported auth mechanism, disconnecting!");
-            
-            //clear pipeline cache to make sure we have a fresh restart next time
-            _pipeliningState = kPipelinedNothing;
-            _cachedStreamFeaturesBeforeAuth = nil;
-            _cachedStreamFeaturesAfterAuth = nil;
-            
-            //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-            [HelperTools postError:NSLocalizedString(@"No supported auth mechanism found, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
-            [self disconnect];
-        }
+        
+        //no supported auth mechanism
+        DDLogInfo(@"no supported auth mechanism, disconnecting!");
+        
+        //clear pipeline cache to make sure we have a fresh restart next time
+        _pipeliningState = kPipelinedNothing;
+        _cachedStreamFeaturesBeforeAuth = nil;
+        _cachedStreamFeaturesAfterAuth = nil;
+        
+        //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+        [HelperTools postError:NSLocalizedString(@"No supported auth mechanism found, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
+        [self disconnect];
     }
 }
 

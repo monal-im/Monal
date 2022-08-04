@@ -68,18 +68,27 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSDate*) parseDateTimeString:(NSString*) datetime;
 +(NSString*) generateDateTimeString:(NSDate*) datetime;
 +(NSString*) encodeRandomResource;
+
 +(NSData* _Nullable) sha1:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha1:(NSString* _Nullable) data;
++(NSData* _Nullable) sha1HmacForKey:(NSData* _Nullable) key andData:(NSData* _Nullable) data;
++(NSString* _Nullable) stringSha1HmacForKey:(NSString* _Nullable) key andData:(NSString* _Nullable) data;
 +(NSData* _Nullable) sha256:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha256:(NSString* _Nullable) data;
 +(NSData* _Nullable) sha256HmacForKey:(NSData* _Nullable) key andData:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha256HmacForKey:(NSString* _Nullable) key andData:(NSString* _Nullable) data;
++(NSData* _Nullable) sha512:(NSData* _Nullable) data;
++(NSString* _Nullable) stringSha512:(NSString* _Nullable) data;
++(NSData* _Nullable) sha512HmacForKey:(NSData* _Nullable) key andData:(NSData* _Nullable) data;
++(NSString* _Nullable) stringSha512HmacForKey:(NSString* _Nullable) key andData:(NSString* _Nullable) data;
+
 +(NSString*) encodeBase64WithString:(NSString*) strData;
 +(NSString*) encodeBase64WithData:(NSData*) objData;
 +(NSData*) dataWithBase64EncodedString:(NSString*) string;
++(NSString*) hexadecimalString:(NSData*) data;
++(NSData*) dataWithHexString:(NSString*) hex;
++(NSData*) XORData:(NSData*) data1 withData:(NSData*) data2;
 
-+(NSString *)hexadecimalString:(NSData*) data;
-+(NSData *)dataWithHexString:(NSString *)hex;
 +(NSString *)signalHexKeyWithData:(NSData*) data;
 +(NSString *)signalHexKeyWithSpacesWithData:(NSData*) data;
 

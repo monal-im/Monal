@@ -899,9 +899,11 @@ NSString* const kStanza = @"stanza";
         if(self->_cancelReconnectTimer)
             self->_cancelReconnectTimer();
         self->_cancelReconnectTimer = nil;
-        for(monal_void_block_t timer in self->_timersToCancelOnDisconnect)
-            timer();
-        self->_timersToCancelOnDisconnect = [[NSMutableArray alloc] init];
+        @synchronized(self->_timersToCancelOnDisconnect) {
+            for(monal_void_block_t timer in self->_timersToCancelOnDisconnect)
+                timer();
+            [self->_timersToCancelOnDisconnect removeAllObjects];
+        }
         
         if(self->_accountState<kStateReconnecting)
         {
@@ -1378,10 +1380,12 @@ NSString* const kStanza = @"stanza";
         else if([self->_parseQueue operationCount] > 4)
         {
             DDLogWarn(@"parseQueue overflow, delaying ping by 10 seconds.");
-            [self->_timersToCancelOnDisconnect addObject:createTimer(10.0, (^{
-                DDLogDebug(@"ping delay expired, retrying ping.");
-                [self sendPing:timeout];
-            }))];
+            @synchronized(self->_timersToCancelOnDisconnect) {
+                [self->_timersToCancelOnDisconnect addObject:createTimer(10.0, (^{
+                    DDLogDebug(@"ping delay expired, retrying ping.");
+                    [self sendPing:timeout];
+                }))];
+            }
         }
         else
         {
@@ -3981,14 +3985,17 @@ NSString* const kStanza = @"stanza";
         case NSStreamEventEndEncountered:
         {
             DDLogInfo(@"%@ Stream %@ encountered eof, trying to reconnect via parse queue in 1 second", [stream class], stream);
-            //use a timer to make sure the incoming data was pushed *through* the MLPipe and reached the parseQueue already when pushng our reconnct block onto the parseQueue
-            [self->_timersToCancelOnDisconnect addObject:createTimer(1.0, (^{
-                //add this to parseQueue to make sure we completely handle everything that came in before the connection was closed, before handling the close event itself
-                [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                    DDLogInfo(@"Inside parseQueue: %@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
-                    [self reconnect];
-                }]] waitUntilFinished:NO];
-            }))];
+            //use a timer to make sure the incoming data was pushed *through* the MLPipe and reached the parseQueue
+            //already when pushing our reconnect block onto the parseQueue
+            @synchronized(self->_timersToCancelOnDisconnect) {
+                [self->_timersToCancelOnDisconnect addObject:createTimer(1.0, (^{
+                    //add this to parseQueue to make sure we completely handle everything that came in before the connection was closed, before handling the close event itself
+                    [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                        DDLogInfo(@"Inside parseQueue: %@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
+                        [self reconnect];
+                    }]] waitUntilFinished:NO];
+                }))];
+            }
             break;
         }
     }

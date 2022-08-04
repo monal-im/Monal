@@ -8,11 +8,13 @@
 
 #import "MLServerDetails.h"
 #import "UIColor+Theme.h"
+#import "SCRAM.h"
 
 @interface MLServerDetails ()
 
-@property (nonatomic, strong) NSMutableArray *serverCaps;
-@property (nonatomic, strong) NSMutableArray *srvRecords;
+@property (nonatomic, strong) NSMutableArray* serverCaps;
+@property (nonatomic, strong) NSMutableArray* srvRecords;
+@property (nonatomic, strong) NSMutableArray* saslMethods;
 
 @end
 
@@ -21,6 +23,7 @@
 enum MLServerDetailsSections {
     SUPPORTED_SERVER_XEPS_SECTION,
     SRV_RECORS_SECTION,
+    SASL_SECTION,
     ML_SERVER_DETAILS_SECTIONS_CNT
 };
 
@@ -33,12 +36,14 @@ enum MLServerDetailsSections {
     [super viewWillAppear:animated];
     self.serverCaps = [[NSMutableArray alloc] init];
     self.srvRecords = [[NSMutableArray alloc] init];
+    self.saslMethods = [[NSMutableArray alloc] init];
 
     self.navigationItem.title = self.xmppAccount.connectionProperties.identity.domain;
     self.tableView.allowsSelection = NO;
 
     [self checkServerCaps:self.xmppAccount.connectionProperties];
     [self convertSRVRecordsToReadable];
+    [self checkSASLMethods:self.xmppAccount.connectionProperties];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -126,10 +131,12 @@ enum MLServerDetailsSections {
     }];
 }
 
--(void) convertSRVRecordsToReadable {
+-(void) convertSRVRecordsToReadable
+{
     BOOL foundCurrentConn = NO;
 
-    for(id srvEntry in self.xmppAccount.discoveredServersList) {
+    for(id srvEntry in self.xmppAccount.discoveredServersList)
+    {
         NSString* hostname = [srvEntry objectForKey:@"server"];
         NSNumber* port = [srvEntry objectForKey:@"port"];
         NSString* isSecure = [[srvEntry objectForKey:@"isSecure"] boolValue] ? NSLocalizedString(@"Yes", @"") : NSLocalizedString(@"No", @"");
@@ -143,13 +150,35 @@ enum MLServerDetailsSections {
         {
             entryColor = @"Green";
             foundCurrentConn = YES;
-        } else if(!foundCurrentConn) {
+        }
+        else if(!foundCurrentConn)
+        {
             // Set the color of all connections entries that failed to red
             // discoveredServersList is sorted. Therfore all entries before foundCurrentConn == YES have failed
             entryColor = @"Red";
         }
 
         [self.srvRecords addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Server: %@", @""), hostname], @"Description": [NSString stringWithFormat:NSLocalizedString(@"Port: %@, Direct TLS: %@, Priority: %@", @""), port, isSecure, prio], @"Color": entryColor}];
+    }
+}
+
+-(void) checkSASLMethods:(MLXMPPConnection*) connection
+{
+    DDLogVerbose(@"saslMethods: %@", connection.saslMethods);
+    if(connection.saslMethods == nil)
+        return;
+    for(NSString* method in [connection.saslMethods.allKeys sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"self" ascending:YES]]])
+    {
+        BOOL used = [connection.saslMethods[method] boolValue];
+        BOOL supported = [[SCRAM supportedMechanisms] containsObject:method] || [@[@"PLAIN"] containsObject:method];
+        NSString* description = NSLocalizedString(@"Unknown authentication method", @"");
+        if([method isEqualToString:@"PLAIN"])
+            description = NSLocalizedString(@"Sends password in cleartext (only encrypted by TLS)", @"");
+        else if([method isEqualToString:@"EXTERNAL"])
+            description = NSLocalizedString(@"Uses TLS client certificates for authentication", @"");
+        else if([method hasPrefix:@"SCRAM-"])
+            description = NSLocalizedString(@"Salted Challenge Response Authentication Mechanism using the given Hash Method", @"");
+        [self.saslMethods addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Method: %@", @""), method], @"Description":description, @"Color":(used ? @"Green" : (!supported ? @"Yellow" : @"None"))}];
     }
 }
 
@@ -164,6 +193,8 @@ enum MLServerDetailsSections {
         return self.serverCaps.count;
     } else if(section == SRV_RECORS_SECTION) {
         return self.srvRecords.count;
+    } else if(section == SASL_SECTION) {
+        return self.saslMethods.count;
     }
     return 0;
 }
@@ -177,6 +208,8 @@ enum MLServerDetailsSections {
         dic = [self.serverCaps objectAtIndex:indexPath.row];
     } else if(indexPath.section == SRV_RECORS_SECTION) {
         dic = [self.srvRecords objectAtIndex:indexPath.row];
+    } else if(indexPath.section == SASL_SECTION) {
+        dic = [self.saslMethods objectAtIndex:indexPath.row];
     }
 
     cell.textLabel.text = [dic objectForKey:@"Title"];
@@ -214,7 +247,9 @@ enum MLServerDetailsSections {
     if(section == SUPPORTED_SERVER_XEPS_SECTION) {
         return NSLocalizedString(@"These are the modern XMPP capabilities Monal detected on your server after you have logged in.", @"");
     } else if(section == SRV_RECORS_SECTION) {
-        return NSLocalizedString(@"These are SRV resource records found for your domain", @"");
+        return NSLocalizedString(@"These are SRV resource records found for your domain.", @"");
+    } else if(section == SASL_SECTION) {
+        return NSLocalizedString(@"These are the SASL methods your server supports.", @"");
     }
     return @"";
 }

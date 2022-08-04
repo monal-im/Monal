@@ -56,6 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL accountDiscoDone;
 
+@property (nonatomic, strong) NSDictionary* saslMethods;
 
 -(id) initWithServer:(MLXMPPServer*) server andIdentity:(MLXMPPIdentity*) identity;
 

@@ -896,6 +896,27 @@ void logException(NSException* exception)
     return resource;
 }
 
++(NSString*) appBuildVersionInfo
+{
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+#ifdef IS_ALPHA
+        NSString* versionTxt = [NSString stringWithFormat:@"Alpha %@ (%s: %s UTC)", [infoDict objectForKey:@"CFBundleShortVersionString"], __DATE__, __TIME__];
+#else
+        NSString* versionTxt = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
+#endif
+    return  versionTxt;
+}
+
++(NSNumber*) currentTimestampInSeconds
+{
+    return [HelperTools dateToNSNumberSeconds:[NSDate date]];
+}
+
++(NSNumber*) dateToNSNumberSeconds:(NSDate*) date
+{
+    return [NSNumber numberWithUnsignedLong:(unsigned long)date.timeIntervalSince1970];
+}
+
 #pragma mark Hashes
 
 +(NSData*) sha1:(NSData*) data
@@ -912,6 +933,22 @@ void logException(NSException* exception)
 +(NSString*) stringSha1:(NSString*) data
 {
     return [self hexadecimalString:[self sha1:[data dataUsingEncoding:NSUTF8StringEncoding]]];
+}
+
++(NSData*) sha1HmacForKey:(NSData*) key andData:(NSData*) data
+{
+    if(!key || !data)
+        return nil;
+	unsigned char digest[CC_SHA1_DIGEST_LENGTH];
+	CCHmac(kCCHmacAlgSHA1, [key bytes], (UInt32)[key length], [data bytes], (UInt32)[data length], digest);
+    return [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
+}
+
++(NSString*) stringSha1HmacForKey:(NSString*) key andData:(NSString*) data
+{
+    if(!key || !data)
+        return nil;
+	return [self hexadecimalString:[self sha1HmacForKey:[key dataUsingEncoding:NSUTF8StringEncoding] andData:[data dataUsingEncoding:NSUTF8StringEncoding]]];
 }
 
 +(NSData*) sha256:(NSData*) data
@@ -946,8 +983,39 @@ void logException(NSException* exception)
 	return [self hexadecimalString:[self sha256HmacForKey:[key dataUsingEncoding:NSUTF8StringEncoding] andData:[data dataUsingEncoding:NSUTF8StringEncoding]]];
 }
 
++(NSData*) sha512:(NSData*) data
+{
+    if(!data)
+        return nil;
+    NSData* hashed;
+    unsigned char digest[CC_SHA512_DIGEST_LENGTH];
+    if(CC_SHA512([data bytes], (UInt32)[data length], digest))
+        hashed = [NSData dataWithBytes:digest length:CC_SHA512_DIGEST_LENGTH];
+    return hashed;
+}
 
-#pragma mark Base64
++(NSString*) stringSha512:(NSString*) data
+{
+    return [self hexadecimalString:[self sha512:[data dataUsingEncoding:NSUTF8StringEncoding]]];
+}
+
++(NSData*) sha512HmacForKey:(NSData*) key andData:(NSData*) data
+{
+    if(!key || !data)
+        return nil;
+	unsigned char digest[CC_SHA512_DIGEST_LENGTH];
+	CCHmac(kCCHmacAlgSHA512, [key bytes], (UInt32)[key length], [data bytes], (UInt32)[data length], digest);
+    return [NSData dataWithBytes:digest length:CC_SHA512_DIGEST_LENGTH];
+}
+
++(NSString*) stringSha512HmacForKey:(NSString*) key andData:(NSString*) data
+{
+    if(!key || !data)
+        return nil;
+	return [self hexadecimalString:[self sha512HmacForKey:[key dataUsingEncoding:NSUTF8StringEncoding] andData:[data dataUsingEncoding:NSUTF8StringEncoding]]];
+}
+
+#pragma mark base64, hex and other data formats
 
 +(NSString*) encodeBase64WithString:(NSString*) strData
 {
@@ -983,7 +1051,6 @@ void logException(NSException* exception)
     return [NSString stringWithString:hexString];
 }
 
-
 +(NSData*) dataWithHexString:(NSString*) hex
 {
     char buf[3];
@@ -1009,6 +1076,22 @@ void logException(NSException* exception)
     return [NSData dataWithBytesNoCopy:bytes length:[hex length]/2 freeWhenDone:YES];
 }
 
+//see https://stackoverflow.com/a/29911397/3528174
++(NSData*) XORData:(NSData*) data1 withData:(NSData*) data2
+{
+    const char* data1Bytes = [data1 bytes];
+    const char* data2Bytes = [data2 bytes];
+    // Mutable data that individual xor'd bytes will be added to
+    NSMutableData* xorData = [[NSMutableData alloc] init];
+    for(NSUInteger i = 0; i < data1.length; i++)
+    {
+        const char xorByte = data1Bytes[i] ^ data2Bytes[i];
+        [xorData appendBytes:&xorByte length:1];
+    }
+    return xorData;
+}
+
+#pragma mark omemo stuff
 
 +(NSString *)signalHexKeyWithData:(NSData*) data
 {
@@ -1034,6 +1117,7 @@ void logException(NSException* exception)
     return hex.uppercaseString;
 }
 
+#pragma mark ui stuff
 
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title
 {
@@ -1069,17 +1153,6 @@ void logException(NSException* exception)
     return qrCode.outputImage;
 }
 
-+(NSString*) appBuildVersionInfo
-{
-    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-#ifdef IS_ALPHA
-        NSString* versionTxt = [NSString stringWithFormat:@"Alpha %@ (%s: %s UTC)", [infoDict objectForKey:@"CFBundleShortVersionString"], __DATE__, __TIME__];
-#else
-        NSString* versionTxt = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
-#endif
-    return  versionTxt;
-}
-
 +(BOOL) deviceUsesSplitView
 {
 #if TARGET_OS_MACCATALYST
@@ -1096,16 +1169,6 @@ void logException(NSException* exception)
             return NO;
     }
 #endif
-}
-
-+(NSNumber*) currentTimestampInSeconds
-{
-    return [HelperTools dateToNSNumberSeconds:[NSDate date]];
-}
-
-+(NSNumber*) dateToNSNumberSeconds:(NSDate*) date
-{
-    return [NSNumber numberWithUnsignedLong:(unsigned long)date.timeIntervalSince1970];
 }
 
 @end

@@ -16,6 +16,8 @@
 #import "MLNotificationQueue.h"
 #import "MLImageManager.h"
 
+@import Intents;
+
 NSString *const kSubBoth=@"both";
 NSString *const kSubNone=@"none";
 NSString *const kSubTo=@"to";
@@ -153,8 +155,8 @@ NSString *const kAskSubscribe=@"subscribe";
 
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
 {
-    assert(jid != nil);
-    assert(accountNo != nil && accountNo.intValue >= 0);
+    MLAssert(jid != nil, @"jid must not be nil");
+    MLAssert(accountNo != nil && accountNo.intValue >= 0, @"accountNo must not be nil and > 0");
     NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
     
     // check if we know this contact and return a dummy one if not
@@ -343,12 +345,6 @@ NSString *const kAskSubscribe=@"subscribe";
         _avatar = [[UIImage alloc] init];           //empty dummy image, to not save nil (should never happen, MLImageManager has default images)
 }
 
--(BOOL) isSubscribed
-{
-    return [self.subscription isEqualToString:kSubBoth]
-        || [self.subscription isEqualToString:kSubTo];
-}
-
 -(BOOL) isInRoster
 {
     // mucs have a subscription of both (ensured by the datalayer)
@@ -357,12 +353,32 @@ NSString *const kAskSubscribe=@"subscribe";
         || [self.ask isEqualToString:kAskSubscribe];
 }
 
+-(BOOL) isSubscribedTo
+{
+    return [self.subscription isEqualToString:kSubBoth]
+        || [self.subscription isEqualToString:kSubTo];
+}
+
+-(BOOL) isSubscribedFrom
+{
+    return [self.subscription isEqualToString:kSubBoth]
+        || [self.subscription isEqualToString:kSubFrom];
+}
+
 // this will cache the unread count on first access
 -(NSInteger) unreadCount
 {
     if(_unreadCount == -1)
         _unreadCount = [[[DataLayer sharedInstance] countUserUnreadMessages:self.contactJid forAccount:self.accountId] integerValue];
     return _unreadCount;
+}
+
+-(void) removeShareInteractions
+{
+    [INInteraction deleteInteractionsWithIdentifiers:@[[NSString stringWithFormat:@"%@|%@", self.accountId, self.contactJid]] completion:^(NSError* error) {
+        if(error != nil)
+            DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+    }];
 }
 
 -(void) toggleMute:(BOOL) mute
@@ -463,6 +479,7 @@ NSString *const kAskSubscribe=@"subscribe";
 -(void) removeFromRoster
 {
     [[MLXMPPManager sharedInstance] removeContact:self];
+    [self removeShareInteractions];
 }
 
 -(void) addToRoster

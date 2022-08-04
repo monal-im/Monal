@@ -94,7 +94,7 @@ struct ContactDetailsHeader: View {
                         Image(systemName: contact.isEncrypted ? "lock.fill" : "lock.open.fill")
                     }
                     .alert(isPresented: $showingCannotEncryptAlert) {
-                        Alert(title: Text("Encryption Not Supported"), message: Text("This contact does not appear to have any devices that support encryption."), dismissButton: .default(Text("Close")))
+                        Alert(title: Text("No OMEMO keys found"), message: Text("This contact may not support OMEMO encrypted messages. Please try again in a few seconds."), dismissButton: .default(Text("Close")))
                     }
                     .buttonStyle(BorderlessButtonStyle())
                 }

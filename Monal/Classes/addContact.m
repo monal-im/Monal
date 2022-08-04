@@ -14,7 +14,6 @@
 #import "MLAccountPickerViewController.h"
 #import "DataLayer.h"
 #import "xmpp.h"
-#import "MLOMEMO.h"
 #import "MBProgressHUD.h"
 #import "MLMucProcessor.h"
 

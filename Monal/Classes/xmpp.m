@@ -96,6 +96,7 @@ NSString* const kStanza = @"stanza";
     monal_void_block_t _cancelLoginTimer;
     monal_void_block_t _cancelPingTimer;
     monal_void_block_t _cancelReconnectTimer;
+    NSMutableArray* _timersToCancelOnDisconnect;
     NSMutableArray* _smacksAckHandler;
     NSMutableDictionary* _iqHandlers;
     NSMutableArray* _reconnectionHandlers;
@@ -246,6 +247,7 @@ NSString* const kStanza = @"stanza";
     _pipeliningState = kPipelinedNothing;
     _cachedStreamFeaturesBeforeAuth = nil;
     _cachedStreamFeaturesAfterAuth = nil;
+    _timersToCancelOnDisconnect = [[NSMutableArray alloc] init];
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
@@ -597,6 +599,18 @@ NSString* const kStanza = @"stanza";
         [self createStreams];
         return NO;
     }
+    
+    //already tried to connect once (e.g. _SRVDiscoveryDone==YES) and either all SRV records were tried or we didn't discovered any
+    if(_SRVDiscoveryDone && [_usableServersList count] == 0)
+    {
+        //in this condition, the registration failed
+        if(_registration || _registrationSubmission)
+        {
+            DDLogWarn(@"Could not connect for registering, publishing error...");
+            [self postError:[NSString stringWithFormat:NSLocalizedString(@"Server for domain '%@' not responding!", @""), self.connectionProperties.identity.domain] withIsSevere:NO];
+            return YES;
+        }
+    }
 
     // do DNS discovery if it hasn't already been set
     if(!_SRVDiscoveryDone)
@@ -621,7 +635,8 @@ NSString* const kStanza = @"stanza";
         if(![[row objectForKey:@"isEnabled"] boolValue])
         {
             DDLogInfo(@"SRV entry prohibits XMPP connection for server %@", self.connectionProperties.identity.domain);
-            [self postError:[NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for domain %@", @""), self.connectionProperties.identity.domain] withIsSevere:YES];
+            //this is not severe on registration, but severe otherwise
+            [self postError:[NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for domain %@", @""), self.connectionProperties.identity.domain] withIsSevere:!(_registration || _registrationSubmission)];
             return YES;
         }
     }
@@ -774,7 +789,7 @@ NSString* const kStanza = @"stanza";
     self->_cancelLoginTimer = createTimer(CONNECT_TIMEOUT, (^{
         [self dispatchAsyncOnReceiveQueue: ^{
             self->_cancelLoginTimer = nil;
-            DDLogInfo(@"login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
+            DDLogInfo(@"Login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
             [self reconnect];
         }];
     }));
@@ -844,10 +859,6 @@ NSString* const kStanza = @"stanza";
             return;
         }
         
-        //return here if we are just registering a new account (we don't want to time out while registering)
-        if(self->_registration || self->_registrationSubmission)
-            return;
-        
         [self reinitLoginTimer];
     }];
 }
@@ -888,6 +899,9 @@ NSString* const kStanza = @"stanza";
         if(self->_cancelReconnectTimer)
             self->_cancelReconnectTimer();
         self->_cancelReconnectTimer = nil;
+        for(monal_void_block_t timer in self->_timersToCancelOnDisconnect)
+            timer();
+        self->_timersToCancelOnDisconnect = [[NSMutableArray alloc] init];
         
         if(self->_accountState<kStateReconnecting)
         {
@@ -1125,10 +1139,6 @@ NSString* const kStanza = @"stanza";
 
 -(void) reconnectWithStreamError:(MLXMLNode* _Nullable) streamError andWaitingTime:(double) wait
 {
-    //we never want to reconnect while registering
-    if(_registration || _registrationSubmission)
-        return;
-
     if(_reconnectInProgress)
     {
         DDLogInfo(@"Ignoring reconnect while one already in progress");
@@ -1368,10 +1378,10 @@ NSString* const kStanza = @"stanza";
         else if([self->_parseQueue operationCount] > 4)
         {
             DDLogWarn(@"parseQueue overflow, delaying ping by 10 seconds.");
-            createTimer(10.0, (^{
+            [self->_timersToCancelOnDisconnect addObject:createTimer(10.0, (^{
                 DDLogDebug(@"ping delay expired, retrying ping.");
                 [self sendPing:timeout];
-            }));
+            }))];
         }
         else
         {
@@ -2222,7 +2232,12 @@ NSString* const kStanza = @"stanza";
             
             //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
             [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES];
+            //disconnect account (we don't want to try this again)
             [self disconnect];
+            //make sure we don'T try this again even when the mainapp/appex gets restarted
+            NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:self.accountNo] copyItems:YES];
+            accountDic[kEnabled] = @NO;
+            [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}challenge"])
         {
@@ -2355,13 +2370,21 @@ NSString* const kStanza = @"stanza";
             NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
             NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
             DDLogWarn(@"Got *INSECURE* XMPP stream error %@: %@", errorReason, errorText);
-//this error could be a mitm or some other network problem caused by an active attacker, just ignore it since we are not in a tls context here
-#ifdef IS_ALPHA
+            
             NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
                 message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
-            [self postError:message withIsSevere:NO];
+            
+            //don't ignore this error when trying to register, even though it could be a mitm etc.
+            if(_registration || _registrationSubmission)
+                [self postError:message withIsSevere:NO];
+            else
+            {
+//this error could be a mitm or some other network problem caused by an active attacker, just ignore it since we are not in a tls context here
+#ifdef IS_ALPHA
+                [self postError:message withIsSevere:NO];
 #endif
+            }
             [self reconnect];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -2425,11 +2448,6 @@ NSString* const kStanza = @"stanza";
     
     if(_registration)
     {
-        //make sure this does not time out while the user is filling out the registration form
-        //but still have a timeout for the connection until this point
-        if(self->_cancelLoginTimer)
-            self->_cancelLoginTimer();
-        self->_cancelLoginTimer = nil;
         if(_registrationToken && self.connectionProperties.supportsPreauthIbr)
         {
             DDLogInfo(@"Registration: Calling submitRegToken");
@@ -2630,11 +2648,13 @@ NSString* const kStanza = @"stanza";
         )
         {
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+#ifndef TARGET_OS_SIMULATOR
                 if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
                     DDLogDebug(@"SEND: redacted sasl element: %@", [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
                 else if([stanza check:@"/{jabber:client}iq<type=set>/{jabber:iq:register}query"])
                     DDLogDebug(@"SEND: redacted register/change password iq");
                 else
+#endif
                     DDLogDebug(@"SEND: %@", stanza);
                 [self->_outputQueue addObject:stanza];
                 [self writeFromQueue];      // try to send if there is space
@@ -3768,6 +3788,7 @@ NSString* const kStanza = @"stanza";
 {
     //this is a registration request
     _registration = YES;
+    _registrationSubmission = NO;
     _registrationToken = token;
     _regFormCompletion = completion;
     _regFormErrorCompletion = errorCompletion;
@@ -3961,13 +3982,13 @@ NSString* const kStanza = @"stanza";
         {
             DDLogInfo(@"%@ Stream %@ encountered eof, trying to reconnect via parse queue in 1 second", [stream class], stream);
             //use a timer to make sure the incoming data was pushed *through* the MLPipe and reached the parseQueue already when pushng our reconnct block onto the parseQueue
-            createTimer(1.0, (^{
+            [self->_timersToCancelOnDisconnect addObject:createTimer(1.0, (^{
                 //add this to parseQueue to make sure we completely handle everything that came in before the connection was closed, before handling the close event itself
                 [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     DDLogInfo(@"Inside parseQueue: %@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
                     [self reconnect];
                 }]] waitUntilFinished:NO];
-            }));
+            }))];
             break;
         }
     }
@@ -4410,6 +4431,11 @@ NSString* const kStanza = @"stanza";
     
     //don't send chatmarkers in channels
     if(msg.isMuc && [@"channel" isEqualToString:msg.mucType])
+        return;
+    
+    MLContact* contact = [MLContact createContactFromJid:msg.buddyName andAccountNo:msg.accountId];
+    //don't send chatmarkers to 1:1 chats with users in our contact list that did not subscribe us (e.g. are not allowed to see us)
+    if(!contact.isGroup && !contact.isSubscribedFrom)
         return;
     
     XMPPMessage* displayedNode = [[XMPPMessage alloc] init];

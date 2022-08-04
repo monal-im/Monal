@@ -52,17 +52,14 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
-+(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
++(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
-    if(!check)
-    {
-        NSString* fileStr = [NSString stringWithFormat:@"%s", file];
-        NSArray* filePathComponents = [fileStr pathComponents];
-        if([filePathComponents count]>1)
-            fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
-        DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
-        @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
-    }
+    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
+    NSArray* filePathComponents = [fileStr pathComponents];
+    if([filePathComponents count]>1)
+        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+    DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
+    @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
 }
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
@@ -114,17 +111,14 @@ void logException(NSException* exception)
 
 +(NSDictionary<NSString*, NSString*>*) getAvailablePushServers
 {
-#ifdef IS_ALPHA
-    return @{
-        @"alpha.push.monal-im.org": @"Europe - Alpha",
-        @"alpha2.push.monal-im.org": @"Disabled - Alpha Test",
-    };
-#else
     return @{
         @"us.prod.push.monal-im.org": @"US",
         @"eu.prod.push.monal-im.org": @"Europe",
-    };
+        @"alpha.push.monal-im.org": @"Alpha/Debug (more Logging)",
+#ifdef IS_ALPHA
+        @"alpha2.push.monal-im.org": @"Disabled - Alpha Test",
 #endif
+    };
 }
 
 // on push

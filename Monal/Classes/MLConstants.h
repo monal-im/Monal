@@ -17,7 +17,11 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 
 
 //configure app group constants
-#define kAppGroup @"group.monal"
+#ifdef IS_ALPHA
+    #define kAppGroup @"group.monalalpha"
+#else
+    #define kAppGroup @"group.monal"
+#endif
 #define kMonalKeychainName @"Monal"
 
 //this is in seconds
@@ -52,10 +56,10 @@ typedef enum NotificationPrivacySettingOption {
 //some useful macros
 #define weakify(var)                        __weak __typeof__(var) AHKWeak_##var = var
 #define strongify(var)                      _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
-#define nilWrapper(var)                     (var == nil           ? (id)[NSNull null] : (id)var)
-#define nilExtractor(var)                   (var == [NSNull null] ? nil           : var)
-#define nilDefault(var, def)                (var == nil ? def : var)
-#define emptyDefault(var, eq, def)          (var == nil || [var isEqual:eq] ? def : var)
+#define nilWrapper(var)                     (var == nil ? (id)[NSNull null] : (id)var)
+#define nilExtractor(var)                   ((id)var == [NSNull null] ? nil : var)
+#define nilDefault(var, def)                (var == nil || (id)var == [NSNull null] ? def : var)
+#define emptyDefault(var, eq, def)          (var == nil || (id)var == [NSNull null] || [var isEqual:eq] ? def : var)
 #define updateIfIdNotEqual(a, b)            if(a != b && ![a isEqual:b]) a = b
 #define updateIfPrimitiveNotEqual(a, b)     if(a != b) a = b
 
@@ -117,7 +121,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalMessageErrorNotice @"kMonalMessageErrorNotice"
 #define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
 #define kXMPPError @"kXMPPError"
-#define kScheduleBackgroundFetchingTask @"kScheduleBackgroundFetchingTask"
+#define kScheduleBackgroundTask @"kScheduleBackgroundTask"
 #define kMonalUpdateUnread @"kMonalUpdateUnread"
 
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"

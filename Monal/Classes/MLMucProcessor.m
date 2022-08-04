@@ -286,7 +286,7 @@
 #ifndef DISABLE_OMEMO
                 if(isTypeGroup == YES)
                 {
-                    [_account.omemo checkIfMucMemberHasExistingSession:item[@"jid"]];
+                    [_account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:item[@"jid"]];
                 }
 #endif// DISABLE_OMEMO
             }
@@ -983,6 +983,12 @@ $$
         //remove handler (it will only be called once)
         [self removeUIHandlerForMuc:room];
         
+        if(node == nil)
+        {
+            DDLogInfo(@"Could not extract UI error message. node == nil");
+            return;
+        }
+        
         //prepare data
         NSString* message = [HelperTools extractXMPPError:node withDescription:description];
         NSDictionary* data = @{
@@ -1031,6 +1037,7 @@ $$
     else
     {
         [[DataLayer sharedInstance] removeBuddy:room forAccount:_account.accountNo];
+        [[MLContact createContactFromJid:room andAccountNo:_account.accountNo] removeShareInteractions];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:_account userInfo:@{
             @"contact": [MLContact createContactFromJid:room andAccountNo:_account.accountNo]
         }];

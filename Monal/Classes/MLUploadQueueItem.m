@@ -8,6 +8,7 @@
 
 #import "MLUploadQueueItem.h"
 #import "MLConstants.h"
+#import "HelperTools.h"
 
 @interface MLUploadQueueItem()
 {
@@ -25,21 +26,21 @@
 
 -(UIImage*) getImage
 {
-    assert(_type == UPLOAD_QUEUE_TYPE_RAW_IMAGE || _type == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL);
-    assert(self.image != nil);
+    MLAssert(_type == UPLOAD_QUEUE_TYPE_RAW_IMAGE || _type == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL, @"upload type must be raw image or image with url");
+    MLAssert(self.image != nil, @"self.image must not be nil");
     return self.image;
 }
 
 -(NSURL*) getURL
 {
-    assert(_type == UPLOAD_QUEUE_TYPE_URL || _type == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL);
-    assert(self.url != nil);
+    MLAssert(_type == UPLOAD_QUEUE_TYPE_URL || _type == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL, @"upload type must be url or image with url");
+    MLAssert(self.url != nil, @"self.url must not be nil");
     return self.url;
 }
 
 -(id) initWithImage:(UIImage*) image {
     self = [super init];
-    assert(image != nil);
+    MLAssert(image != nil, @"image must not be nil");
     _type = UPLOAD_QUEUE_TYPE_RAW_IMAGE;
     self.image = image;
     self.url = nil;
@@ -49,8 +50,8 @@
 -(id) initWithImage:(UIImage*) image imageUrl:(NSURL *)url
 {
     self = [super init];
-    assert(image != nil);
-    assert(url != nil);
+    MLAssert(image != nil, @"image must not be nil");
+    MLAssert(url != nil, @"url must not be nil");
     _type = UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL;
     self.image = image;
     self.url = url;
@@ -60,7 +61,7 @@
 -(id) initWithURL:(NSURL*) url
 {
     self = [super init];
-    assert(url != nil);
+    MLAssert(url != nil, @"url must not be nil");
     _type = UPLOAD_QUEUE_TYPE_URL;
     self.url = url;
     self.image = nil;

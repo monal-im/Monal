@@ -13,7 +13,6 @@
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
 #import "MLImageManager.h"
-#import "MLRegisterViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
 #import "MLXEPSlashMeHandler.h"
@@ -365,28 +364,32 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
 }
 
+-(void) didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
 -(void) segueToIntroScreensIfNeeded
 {
+    //open password migration if needed
+    NSArray* needingMigration = [[DataLayer sharedInstance] accountListNeedingPasswordMigration];
+    if(needingMigration.count > 0)
+    {
+        UIViewController* passwordMigration = [[SwiftuiInterface new] makePasswordMigration:needingMigration];
+        [self presentViewController:passwordMigration animated:YES completion:^{}];
+        return;
+    }
     // display quick start if the user never seen it or if there are 0 enabled accounts
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"] || [[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
-#ifdef IS_ALPHA
         UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
         [self presentViewController:loginViewController animated:YES completion:^{}];
-#else
-        [self performSegueWithIdentifier:@"showLogin" sender:self];
-#endif
         return;
     }
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
         [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
         return;
     }
-}
-
--(void) didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 -(void) openConversationPlaceholder:(MLContact*) contact
@@ -504,17 +507,8 @@ static NSMutableSet* _smacksWarningDisplayed;
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
     if([segue.identifier isEqualToString:@"showRegister"])
     {
-        UINavigationController* navigationController = (UINavigationController*)segue.destinationViewController;
-        MLRegisterViewController* reg = (MLRegisterViewController*)navigationController.visibleViewController;
-        NSDictionary* registerData = (NSDictionary*)sender;
-        if(registerData)
-        {
-            DDLogDebug(@"Feeding MLRegisterViewController withdata: %@", registerData);
-            reg.registerServer = nilExtractor(registerData[@"host"]);
-            reg.registerUsername = nilExtractor(registerData[@"username"]);
-            reg.registerToken = nilExtractor(registerData[@"token"]);
-            reg.completionHandler = nilExtractor(registerData[@"completion"]);
-        }
+        UIViewController* registerViewController = [[SwiftuiInterface new] makeAccountRegistration:(NSDictionary*)sender];
+        [self presentViewController:registerViewController animated:YES completion:^{}];
     }
     else if([segue.identifier isEqualToString:@"showConversation"])
     {
@@ -724,7 +718,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 //we can not call this var "completion" because then some dumb comiler check kicks in and tells us "completion handler is never called" which ich plainly wrong
 //callback doesn't seem to be a word in the objc compiler's "bad words" dictionary, so this makes it compile again
--(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_void_block_t) callback
+-(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_id_block_t) callback
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
@@ -732,7 +726,9 @@ static NSMutableSet* _smacksWarningDisplayed;
             @"host": nilWrapper(host),
             @"username": nilWrapper(username),
             @"token": nilWrapper(token),
-            @"completion": nilDefault(callback, ^{}),
+            @"completion": nilDefault(callback, ^(id accountNo){
+                DDLogWarn(@"Dummy reg completion called for accountNo: %@", accountNo);
+            }),
         }];
     }];
 }

@@ -22,7 +22,7 @@ if [[ -e "xmpp.org" ]]; then
 fi
 git clone git@xmpp.org.push.repo:monal-im/xmpp.org.git
 cd xmpp.org
-git config --local user.email "pushBot@monal.im"
+git config --local user.email "pushBot@monal-im.org"
 git config --local user.name "Monal-IM-Push[BOT]"
 git remote add upstream https://github.com/xsf/xmpp.org.git
 git fetch upstream

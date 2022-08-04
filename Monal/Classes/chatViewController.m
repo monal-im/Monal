@@ -247,8 +247,7 @@ enum msgSentState {
 
 -(void) initNavigationBarItems
 {
-    UIView *cusView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 120, self.navigationController.navigationBar.frame.size.height)];
-    //cusView.backgroundColor = [UIColor redColor];
+    UIView* cusView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 120, self.navigationController.navigationBar.frame.size.height)];
 
     self.navBarIcon = [[UIImageView alloc] initWithFrame:CGRectMake(0, 7, 30, 30)];
     self.navBarContactJid = [[UILabel alloc] initWithFrame:CGRectMake(38, 7, 200, 18)];
@@ -352,7 +351,7 @@ enum msgSentState {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.messageTable scrollToRowAtIndexPath:msgIdxPath atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
             MLBaseCell* selectedCell = [self.messageTable cellForRowAtIndexPath:msgIdxPath];
-            UIColor *originColor = [selectedCell.backgroundColor copy];
+            UIColor* originColor = [selectedCell.backgroundColor copy];
             selectedCell.backgroundColor = [UIColor lightGrayColor];
 
             [UIView animateWithDuration:0.2 delay:0.2 options:UIViewAnimationOptionCurveLinear animations:^{
@@ -462,6 +461,12 @@ enum msgSentState {
         [self displayEncryptionStateInUI];
     }];
 #endif
+}
+
+-(void) observeValueForKeyPath:(NSString*) keyPath ofObject:(id) object change:(NSDictionary *) change context:(void*) context
+{
+    if([keyPath isEqualToString:@"isEncrypted"] && object == self.contact)
+        [self displayEncryptionStateInUI];
 }
 
 -(void) displayEncryptionStateInUI
@@ -610,8 +615,8 @@ enum msgSentState {
     [super viewWillAppear:animated];
 
     //throw on empty contacts
-    NSAssert(self.contact.contactJid, @"can not open chat for empty contact jid");
-    NSAssert(self.contact.accountId, @"can not open chat for empty account id");
+    MLAssert(self.contact.contactJid, @"can not open chat for empty contact jid");
+    MLAssert(self.contact.accountId, @"can not open chat for empty account id");
 
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -671,6 +676,8 @@ enum msgSentState {
     [self scrollToBottom];
 
     [self tempfreezeAutoloading];
+    
+    [self.contact addObserver:self forKeyPath:@"isEncrypted" options:NSKeyValueObservingOptionNew context:nil];
 }
 
 
@@ -681,8 +688,16 @@ enum msgSentState {
     if(self.xmppAccount) {
         BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
         if(!omemoDeviceForContactFound) {
-            if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo] && (!self.contact.isGroup || (self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"]))) {
-                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo] && self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])
+            {
+                // a group that does not support OMEMO has encryption enabled
+                // disable it
+                self.contact.isEncrypted = NO;
+                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+            }
+            else if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo] && (!self.contact.isGroup || (self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])))
+            {
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No OMEMO keys found", @"") message:NSLocalizedString(@"This contact may not support OMEMO encrypted messages. Please try again in a few seconds.", @"") preferredStyle:UIAlertControllerStyleAlert];
                 [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     // Disable encryption
                     self.contact.isEncrypted = NO;
@@ -716,6 +731,14 @@ enum msgSentState {
 
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc removeObserver:self];
+        @try
+    {
+        [self.contact removeObserver:self forKeyPath:@"isEncrypted"];
+    }
+    @catch(id theException)
+    {
+        //do nothing
+    }
 
     // Save message draft
     BOOL success = [self saveMessageDraft];
@@ -747,6 +770,14 @@ enum msgSentState {
 -(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    @try
+    {
+        [self.contact removeObserver:self forKeyPath:@"isEncrypted"];
+    }
+    @catch(id theException)
+    {
+        //do nothing
+    }
     [self stopLastInteractionTimer];
 }
 
@@ -771,10 +802,8 @@ enum msgSentState {
                 self.backgroundImage.image = [UIImage imageNamed:imageName];
             }
         }
-        self.transparentLayer.hidden = NO;
     } else {
         self.backgroundImage.hidden = YES;
-        self.transparentLayer.hidden = YES;
     }
 }
 
@@ -1374,7 +1403,7 @@ enum msgSentState {
     [self dismissViewControllerAnimated:YES completion:nil];
     for(PHPickerResult* userSelection in results) {
         NSItemProvider* provider = userSelection.itemProvider;
-        NSAssert(provider != nil, @"Expected a NSItemProvider");
+        MLAssert(provider != nil, @"Expected a NSItemProvider");
         if([provider hasItemConformingToTypeIdentifier:@"com.apple.quicktime-movie"] == YES)
         {
             [provider loadItemForTypeIdentifier:@"com.apple.quicktime-movie" options:nil completionHandler:^(NSURL* path, NSError* error)
@@ -1410,7 +1439,7 @@ enum msgSentState {
                     return;
                 }
 #endif
-                assert([object isKindOfClass: [UIImage class]]);
+                MLAssert([object isKindOfClass: [UIImage class]], @"document picker did not pick an object of type UIImage");
                 UIImage* image = (UIImage*)object;
 
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -1436,7 +1465,7 @@ enum msgSentState {
     }
     else if([info[UIImagePickerControllerMediaType] isEqualToString:(NSString*)kUTTypeMovie])
     {
-        NSAssert(info[UIImagePickerControllerMediaURL] != nil, @"Expected video url");
+        MLAssert(info[UIImagePickerControllerMediaURL] != nil, @"Expected video url");
         [self addImagesToQueue:@[info[UIImagePickerControllerMediaURL]]];
     }
     else
@@ -3101,7 +3130,7 @@ enum msgSentState {
         [self hideUploadHUD];
         return;
     }
-    assert(self.uploadQueue.count >= 1);
+    MLAssert(self.uploadQueue.count >= 1, @"upload queue contains less than 1 element");
     [self showUploadHUD];
 
     DDLogVerbose(@"start dispatch");
@@ -3215,7 +3244,7 @@ enum msgSentState {
     }
     else
     { // some image in the queue
-        assert(self.uploadQueue.count >= (NSUInteger)indexPath.item);
+        MLAssert(self.uploadQueue.count >= (NSUInteger)indexPath.item, @"index path is greater than count in upload queue");
         MLUploadQueueItem* uploadItem = self.uploadQueue[indexPath.item];
         if([uploadItem getType] == UPLOAD_QUEUE_TYPE_RAW_IMAGE || [uploadItem getType] == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL)
         {
@@ -3247,13 +3276,13 @@ enum msgSentState {
 
 - (NSInteger)collectionView:(nonnull UICollectionView*) collectionView numberOfItemsInSection:(NSInteger)section
 {
-    assert(section == 0);
+    MLAssert(section == 0, @"section is only allowed to be zero");
     return self.uploadQueue.count == 0 ? 0 : self.uploadQueue.count + 1;
 }
 
 - (void) notifyUploadQueueRemoval:(NSUInteger) index
 {
-    assert(index < self.uploadQueue.count);
+    MLAssert(index < self.uploadQueue.count, @"index is only allowed to be smaller than uploadQueue.count");
     [self.uploadMenuView performBatchUpdates:^{
         [self deleteQueueItemAtIndex:index];
     } completion:^(BOOL finished) {
@@ -3290,8 +3319,8 @@ enum msgSentState {
     for(UIDragItem* item in session.items)
     {
         NSItemProvider* provider = item.itemProvider;
-        assert(provider != nil);
-        assert([provider hasItemConformingToTypeIdentifier:(NSString*) kUTTypeItem]);
+        MLAssert(provider != nil, @"provider must not be nil");
+        MLAssert([provider hasItemConformingToTypeIdentifier:(NSString*) kUTTypeItem], @"provider must supply item conforming to kUTTypeItem");
         [provider loadItemForTypeIdentifier:(NSString*) kUTTypeItem options:nil completionHandler:^(id <NSSecureCoding> urlItem, NSError *error)
         {
             if ([(NSObject*)urlItem isKindOfClass: [NSURL class]])

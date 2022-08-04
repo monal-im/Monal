@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "260773BF232FC4E800BFD50F"
-               BuildableName = "NotificaionService.appex"
-               BlueprintName = "NotificaionService"
+               BuildableName = "NotificationService.appex"
+               BlueprintName = "NotificationService"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -47,7 +47,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C1850E7225F383F3003D506A"
+               BlueprintIdentifier = "C1850EB425F38A2D003D506A"
                BuildableName = "MonalUITests.xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
@@ -70,8 +70,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "260773BF232FC4E800BFD50F"
-            BuildableName = "NotificaionService.appex"
-            BlueprintName = "NotificaionService"
+            BuildableName = "NotificationService.appex"
+            BlueprintName = "NotificationService"
             ReferencedContainer = "container:Monal.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -91,7 +91,6 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES"
-      askForAppToLaunch = "Yes"
       launchAutomaticallySubstyle = "2">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">

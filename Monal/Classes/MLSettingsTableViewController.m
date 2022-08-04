@@ -167,7 +167,7 @@ enum DummySettingsRows {
         }
         else
         {
-            assert(self.selected);
+            MLAssert(self.selected != nil, @"self.selected must not be nil");
             editor.originIndex = self.selected;
             editor.accountNo = [self getAccountNoByIndex:self.selected.row];
         }
@@ -187,7 +187,7 @@ enum DummySettingsRows {
             }
             else
             {
-                NSAssert(indexPath.row - [self getAccountNum] < SettingsAccountRowsCnt, @"Tried to tap onto a row ment to be for a concrete account, not for quick or advanced settings");
+                MLAssert(indexPath.row - [self getAccountNum] < SettingsAccountRowsCnt, @"Tried to tap onto a row ment to be for a concrete account, not for quick or advanced settings");
                 // User selected one of the 'add account' promts
                 switch(indexPath.row - [self getAccountNum]) {
                     case QuickSettingsRow:
@@ -305,8 +305,11 @@ enum DummySettingsRows {
             {
                 switch(indexPath.row - [self getAccountNum]) {
                     case QuickSettingsRow:
-                        [self performSegueWithIdentifier:@"showLogin" sender:self];
+                    {
+                        UIViewController* loginView = [[SwiftuiInterface new] makeViewWithName:@"LogIn"];
+                        [self showDetailViewController:loginView sender:self];
                         break;
+                    }
                     case AdvancedSettingsRow:
                         [self performSegueWithIdentifier:@"editXMPP" sender:self];
                         break;
@@ -359,10 +362,10 @@ enum DummySettingsRows {
                     [self performSegueWithIdentifier:@"showOpenSource" sender:self];
                     break;
                 case PrivacyRow:
-                    [self openLink:@"https://monal.im/monal-privacy-policy/"];
+                    [self openLink:@"https://monal-im.org/privacy"];
                     break;
                 case AboutRow:
-                    [self openLink:@"https://monal.im/about/"];
+                    [self openLink:@"https://monal-im.org/about"];
                     break;
 #ifdef DEBUG
                 case LogRow:

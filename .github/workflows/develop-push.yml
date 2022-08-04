@@ -1,3 +1,4 @@
+# build a new alpha release
 name: develop-push
 
 # Controls when the action will run.
@@ -6,26 +7,63 @@ on:
   push:
     branches: [ develop ]
 
+  workflow_dispatch:
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  rebaseAlpha:
+  buildAndPublishAlpha:
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ['ARM64', 'self-hosted']
+    env:
+      APP_NAME: "Monal"
+      APP_DIR: "Monal.alpha.app"
+      BUILD_TYPE: "Alpha"
+      ALPHA_UPLOAD_SECRET: ${{ secrets.ALPHA_UPLOAD_SECRET }}
+      EXPORT_OPTIONS_CATALYST_APP_EXPORT: "../scripts/exportOptions/Alpha_Catalyst_ExportOptions.plist"
+      EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Alpha_iOS_ExportOptions.plist"
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
         with:
           clean: true
           submodules: true
-          ref: alpha.build
       - name: Fetch tags
         run: git fetch --tags
       - name: Checkout submodules
         run: git submodule update --remote
-      - run: git branch
-      - run: git config --local user.email "pushBot@monal.im"
-      - run: git config --local user.name "Monal-IM-Push[BOT]"
-      - run: chmod +x ./scripts/rebase.sh
-      - name: Rebase
-        run: ./scripts/rebase.sh
+      - name: Make our build scripts executable
+        run: chmod +x ./scripts/build.sh
+      - name: Run build
+        run: ./scripts/build.sh
+      - run: |
+          cd Monal/build/app/tar_release
+          tar -cf "../$APP_NAME.tar" "$APP_DIR"
+          cd ../../../..
+      - name: save changelog
+        run: |
+          echo '${{github.event.commits}}' > changes.txt
+      - name: Uploading to alpha site
+        run: ./scripts/uploadAlpha.sh
+      - name: Notarize catalyst
+        run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monal-catalyst
+          path: Monal/build/app/Monal.tar
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monal-ios
+          path: Monal/build/ipa/Monal.ipa
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monal-catalyst-dsym
+          path: Monal/build/macos_Monal.xcarchive/dSYMs
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v2
+        with:
+          name: monal-ios-dsym
+          path: Monal/build/ios_Monal.xcarchive/dSYMs
+          if-no-files-found: error

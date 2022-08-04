@@ -1,6 +1,6 @@
 //
 //  NotificationService.m
-//  NotificaionService
+//  NotificationService
 //
 //  Created by Anurodh Pokharel on 9/16/19.
 //  Copyright © 2019 Monal.im. All rights reserved.
@@ -18,7 +18,8 @@
 #import "MLFiletransfer.h"
 #import "xmpp.h"
 
-static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
+static NSString* kBackgroundProcessingTask = @"im.monal.process";
+static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
 
 @interface NotificationService ()
 +(BOOL) getAppexCleanShutdownStatus;
@@ -269,7 +270,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             //don't post sync errors here, already did so above (see explanation there)
             
             //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
-            [self scheduleBackgroundFetchingTask:![[MLXMPPManager sharedInstance] allAccountsIdle]];
+            [self scheduleBackgroundTask:![[MLXMPPManager sharedInstance] allAccountsIdle]];
             
             //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
             //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
@@ -359,29 +360,43 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:NO];
 }
 
--(void) scheduleBackgroundFetchingTask:(BOOL) force
+-(void) scheduleBackgroundTask:(BOOL) force
 {
-    DDLogInfo(@"Scheduling new BackgroundFetchingTask with force=%s...", force ? "yes" : "no");
+    DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");
     [HelperTools dispatchSyncReentrant:^{
-        NSError *error = NULL;
-        // cancel existing task (if any)
-        [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
-        // new task
-        //BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-        BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-        //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-        request.requiresNetworkConnectivity = YES;
-        request.requiresExternalPower = NO;
+        NSError* error;
         if(force)
-            request.earliestBeginDate = nil;
+        {
+            // cancel existing task (if any)
+            //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundProcessingTask];
+            // new task
+            BGProcessingTaskRequest* processingRequest = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundProcessingTask];
+            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+            processingRequest.earliestBeginDate = nil;
+            processingRequest.requiresNetworkConnectivity = YES;
+            processingRequest.requiresExternalPower = NO;
+            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:processingRequest error:&error])
+            {
+                // Errorcodes https://stackoverflow.com/a/58224050/872051
+                DDLogError(@"Failed to submit BGTask request %@: %@", processingRequest, error);
+            }
+            else
+                DDLogVerbose(@"Success submitting BGTask request %@", processingRequest);
+        }
         else
-            request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
-        BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
-        if(!success) {
-            // Errorcodes https://stackoverflow.com/a/58224050/872051
-            DDLogError(@"Failed to submit BGTask request: %@", error);
-        } else {
-            DDLogVerbose(@"Success submitting BGTask request %@", request);
+        {
+            // cancel existing task (if any)
+            //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
+            // new task
+            BGAppRefreshTaskRequest* refreshingRequest = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundRefreshingTask];
+            refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
+            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:refreshingRequest error:&error])
+            {
+                // Errorcodes https://stackoverflow.com/a/58224050/872051
+                DDLogError(@"Failed to submit BGTask request %@: %@", refreshingRequest, error);
+            }
+            else
+                DDLogVerbose(@"Success submitting BGTask request %@", refreshingRequest);
         }
     } onQueue:dispatch_get_main_queue()];
 }
@@ -461,7 +476,36 @@ static BOOL warnUnclean = NO;
 -(void) didReceiveNotificationRequest:(UNNotificationRequest*) request withContentHandler:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
     DDLogInfo(@"Notification handler called (request id: %@)", request.identifier);
+    DDLogInfo(@"Push userInfo: %@", request.content.userInfo);
     [handlers addObject:contentHandler];
+    
+    //only show this notification once a day at maximum (and if a build number was given in our push)
+    NSDate* lastAppVersionAlert = [[HelperTools defaultsDB] objectForKey:@"lastAppVersionAlert"];
+    if((lastAppVersionAlert == nil || [[NSDate date] timeIntervalSinceDate:lastAppVersionAlert] > 86400) && request.content.userInfo[@"firstGoodBuildNumber"] != nil)
+    {
+        NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+        long buildNumber = ((NSString*)[infoDict objectForKey:@"CFBundleVersion"]).integerValue;
+        long firstGoodBuildNumber = ((NSNumber*)request.content.userInfo[@"firstGoodBuildNumber"]).integerValue;
+        BOOL isKnownGoodBuild = NO;
+        for(NSNumber* allowed in request.content.userInfo[@"knownGoodBuildNumber"])
+            if(buildNumber == allowed.integerValue)
+                isKnownGoodBuild = YES;
+        DDLogDebug(@"current build number: %ld, firstGoodBuildNumber: %ld, isKnownGoodBuild: %@", buildNumber, firstGoodBuildNumber, isKnownGoodBuild ? @"YES" : @"NO");
+        if(buildNumber < firstGoodBuildNumber && !isKnownGoodBuild)
+        {
+            UNMutableNotificationContent* tooOldContent = [[UNMutableNotificationContent alloc] init];
+            tooOldContent.title = NSLocalizedString(@"Very old app version", @"");
+            tooOldContent.subtitle = NSLocalizedString(@"Please update!", @"");
+            tooOldContent.body = NSLocalizedString(@"This app is too old and can contain security bugs as well as suddenly cease operation. Please Upgrade!", @"");
+            tooOldContent.sound = [UNNotificationSound defaultSound];
+            UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:tooOldContent trigger:nil];
+            NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
+            if(error)
+                DDLogError(@"Error posting local app-too-old notification: %@", error);
+            [[HelperTools defaultsDB] setObject:[NSDate now] forKey:@"lastAppVersionAlert"];
+            [[HelperTools defaultsDB] synchronize];
+        }
+    }
     
     if(warnUnclean)
     {
@@ -475,14 +519,6 @@ static BOOL warnUnclean = NO;
             DDLogError(@"Error posting local appex unclean shutdown error notification: %@", error);
         else
             warnUnclean = NO;       //try again on error
-    }
-    
-    //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)
-    if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
-    {
-        DDLogWarn(@"defaults not migrated to app group, ignoring push and posting notification as coming from the appserver (a dummy one)");
-        contentHandler([request.content mutableCopy]);
-        return;
     }
     
     //proxy to push singleton

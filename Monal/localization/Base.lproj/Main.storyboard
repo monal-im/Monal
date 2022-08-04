@@ -223,39 +223,12 @@
                     </navigationItem>
                     <connections>
                         <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
-                        <segue destination="cC0-5a-Jvb" kind="show" identifier="showDetails" id="hqW-lo-9tZ"/>
                         <segue destination="WjA-je-Xez" kind="show" identifier="showNewRecipient" id="7Wf-Gt-qkN"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1204" y="-2626"/>
-        </scene>
-        <!--Login-->
-        <scene sceneID="VNB-KG-5f7">
-            <objects>
-                <viewControllerPlaceholder storyboardIdentifier="login" storyboardName="Login" id="DkD-PA-Cmm" sceneMemberID="viewController"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Ccl-9E-t0H" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-2628" y="-1383"/>
-        </scene>
-        <!--register-->
-        <scene sceneID="AAA-KG-5f7">
-            <objects>
-                <viewControllerPlaceholder storyboardName="Login" referencedIdentifier="register" id="AAA-PA-Cmm" sceneMemberID="viewController"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="AAA-9E-t0H" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-2628" y="-1383"/>
-        </scene>
-        <!--ContactDetails-->
-        <scene sceneID="t0V-UK-nzF">
-            <objects>
-                <viewControllerPlaceholder storyboardName="ContactDetails" id="cC0-5a-Jvb" sceneMemberID="viewController">
-                    <navigationItem key="navigationItem" id="f8S-5w-kUZ"/>
-                </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="2Tm-st-u4d" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2195" y="-694"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="ctJ-St-O59">
@@ -361,9 +334,6 @@
                         <outlet property="composeButton" destination="pyP-qb-mfr" id="j5k-6a-lBi"/>
                         <outlet property="settingsButton" destination="BWH-2I-fSI" id="SMS-5d-HUX"/>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="RLU-kt-b8r"/>
-                        <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="RNX-bQ-8Zb"/>
-                        <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="sv2-wf-aN0"/>
-                        <segue destination="AAA-PA-Cmm" kind="presentation" identifier="showRegister" id="AAA-wf-aN0"/>
                         <segue destination="cmS-oG-cv9" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot9"/>
                         <segue destination="iM6-Fx-aHL" kind="showDetail" identifier="showConversationPlaceholder" id="xp1-3q-JGG"/>
                     </connections>
@@ -522,11 +492,8 @@
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" insetsLayoutMarginsFromSafeArea="NO" image="Tie_My_Boat_by_Ray_Garcia" translatesAutoresizingMaskIntoConstraints="NO" id="SEk-WZ-Rcm">
                                 <rect key="frame" x="0.0" y="20" width="1024" height="1326"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </imageView>
-                            <view alpha="0.25" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cUR-xM-Mq7">
-                                <rect key="frame" x="0.0" y="6" width="1024" height="1360"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" keyboardDismissMode="interactive" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Kkq-aZ-5fP">
                                 <rect key="frame" x="0.0" y="0.0" width="1024" height="1358"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -798,7 +765,7 @@
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
                                         <rect key="frame" x="0.0" y="557.5" width="1024" height="242"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xhf-eh-Dkx" id="BdL-U7-BOc">
@@ -2473,17 +2440,13 @@
                         <color key="backgroundColor" systemColor="tertiarySystemBackgroundColor"/>
                         <gestureRecognizers/>
                         <constraints>
-                            <constraint firstItem="cUR-xM-Mq7" firstAttribute="top" secondItem="ZKQ-3D-6NG" secondAttribute="top" constant="-64" id="5fs-Nr-GdT"/>
-                            <constraint firstItem="cUR-xM-Mq7" firstAttribute="bottom" secondItem="ZKQ-3D-6NG" secondAttribute="bottom" id="6xU-rf-RyY"/>
                             <constraint firstItem="SEk-WZ-Rcm" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="FL9-Tl-rIX"/>
                             <constraint firstAttribute="bottom" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="34" id="Iwu-bN-lxd"/>
                             <constraint firstItem="SEk-WZ-Rcm" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="top" constant="20" symbolic="YES" id="JBl-HT-76g"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="cUR-xM-Mq7" secondAttribute="trailing" constant="-20" id="OyZ-VO-0b4"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="leading" secondItem="ZKQ-3D-6NG" secondAttribute="leading" id="SIK-A8-KjT"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="top" id="T8K-jc-eWo"/>
                             <constraint firstItem="ZKQ-3D-6NG" firstAttribute="trailing" secondItem="SEk-WZ-Rcm" secondAttribute="trailing" id="Vxx-8b-Xhg"/>
                             <constraint firstItem="ZKQ-3D-6NG" firstAttribute="bottom" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="8" id="l0B-p3-Pbr"/>
-                            <constraint firstItem="cUR-xM-Mq7" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="nxB-c0-v3z"/>
                             <constraint firstItem="ZKQ-3D-6NG" firstAttribute="trailing" secondItem="Kkq-aZ-5fP" secondAttribute="trailing" id="xwD-cC-ws0"/>
                             <constraint firstAttribute="bottom" secondItem="SEk-WZ-Rcm" secondAttribute="bottom" constant="20" symbolic="YES" id="y5H-Ps-mKI"/>
                         </constraints>
@@ -2507,10 +2470,8 @@
                         <outlet property="plusButton" destination="c6B-5o-sqL" id="eKA-Yp-C43"/>
                         <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
                         <outlet property="tableviewBottom" destination="Iwu-bN-lxd" id="6KW-KJ-mpd"/>
-                        <outlet property="transparentLayer" destination="cUR-xM-Mq7" id="0Fl-vg-WUH"/>
                         <outlet property="uploadMenuView" destination="DZg-BI-mVA" id="WEJ-wz-HnZ"/>
                         <outlet property="view" destination="Riz-2Q-bcU" id="d0E-AR-8aA"/>
-                        <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" id="tEM-gR-7nN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -2764,7 +2725,6 @@
     </scenes>
     <inferredMetricsTieBreakers>
         <segue reference="D1Q-JS-32d"/>
-        <segue reference="tEM-gR-7nN"/>
         <segue reference="U4S-rm-QvZ"/>
     </inferredMetricsTieBreakers>
     <resources>

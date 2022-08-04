@@ -3,19 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>method</key>
-	<string>developer-id</string>
+	<string>mac-application</string>
 	<key>destination</key>
 	<string>export</string>
 	<key>compileBitcode</key>
 	<false/>
-	<key>signingCertificate</key>
-	<string>Developer ID Application</string>
-	<key>provisioningProfiles</key>
-	<dict>
-		<key>maccatalyst.G7YU7X7KRJ.SworIM</key>
-		<string>Monal Catalyst Developer id</string>
-		<key>maccatalyst.G7YU7X7KRJ.SworIM.NotificaionService</key>
-		<string>Monal Catalyst Notification NSE</string>
-	</dict>
+	<key>uploadBitcode</key>
+	<false/>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<key>teamID</key>
+	<string>S8D843U34Y</string>
 </dict>
 </plist>

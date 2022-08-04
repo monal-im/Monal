@@ -274,7 +274,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(id) valueForKey:(NSString*) key
 {
-    return [self findFirst:[NSString stringWithFormat:@"field<var=%@>/value#", key]];
+    return [self findFirst:@"field<var=%@>/value#", key];
 }
 
 -(id) objectForKey:(NSString*) key

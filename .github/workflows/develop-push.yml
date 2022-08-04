@@ -46,7 +46,7 @@ jobs:
       - name: Uploading to alpha site
         run: ./scripts/uploadAlpha.sh
       - name: Notarize catalyst
-        run: xcrun altool --notarize-app --primary-bundle-id monal.alpha --asc-provider S8D843U34Y -f ./Monal/build/app/Monal.zip  -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
+        run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
       - uses: actions/upload-artifact@v2
         with:
           name: monal-catalyst

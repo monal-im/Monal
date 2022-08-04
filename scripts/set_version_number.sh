@@ -16,6 +16,6 @@ echo "*******************************************"
 echo "*     Setting buildNumber to $buildNumber *"
 echo "*******************************************"
 
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "NotificaionService/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "NotificationService/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "shareSheet-iOS/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $buildNumber" "Monal-Info.plist"

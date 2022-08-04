@@ -247,8 +247,7 @@ enum msgSentState {
 
 -(void) initNavigationBarItems
 {
-    UIView *cusView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 120, self.navigationController.navigationBar.frame.size.height)];
-    //cusView.backgroundColor = [UIColor redColor];
+    UIView* cusView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 120, self.navigationController.navigationBar.frame.size.height)];
 
     self.navBarIcon = [[UIImageView alloc] initWithFrame:CGRectMake(0, 7, 30, 30)];
     self.navBarContactJid = [[UILabel alloc] initWithFrame:CGRectMake(38, 7, 200, 18)];
@@ -352,7 +351,7 @@ enum msgSentState {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.messageTable scrollToRowAtIndexPath:msgIdxPath atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
             MLBaseCell* selectedCell = [self.messageTable cellForRowAtIndexPath:msgIdxPath];
-            UIColor *originColor = [selectedCell.backgroundColor copy];
+            UIColor* originColor = [selectedCell.backgroundColor copy];
             selectedCell.backgroundColor = [UIColor lightGrayColor];
 
             [UIView animateWithDuration:0.2 delay:0.2 options:UIViewAnimationOptionCurveLinear animations:^{
@@ -803,10 +802,8 @@ enum msgSentState {
                 self.backgroundImage.image = [UIImage imageNamed:imageName];
             }
         }
-        self.transparentLayer.hidden = NO;
     } else {
         self.backgroundImage.hidden = YES;
-        self.transparentLayer.hidden = YES;
     }
 }
 

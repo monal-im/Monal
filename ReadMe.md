@@ -11,7 +11,7 @@ If you want to  use the latest stable versions, search for Monal in the iOS or O
 |        | iOS                                                           | macOS                                                    | macOS (homebrew)                                                          |
 |--------|---------------------------------------------------------------|----------------------------------------------------------|---------------------------------------------------------------------------|
 | Stable | [App Store](https://apps.apple.com/app/id317711500)           | [App Store](https://apps.apple.com/app/id1499227291)     |                                                                           |
-| Beta   | [Testflight]()      | [Testflight]() | brew install --cask monal                                                 |
+| Beta   | [Testflight](https://testflight.apple.com/join/lLLlgHpB)      | [Testflight](https://testflight.apple.com/join/tGH2m5vf) | brew install --cask monal                                                 |
 | Alpha  | upon request to [info@monal-im.org](mailto:info@monal-im.org) |                                                          | brew tap monal-im/homebrew-monal-alpha<br>brew install --cask monal-alpha |
 
 
@@ -41,7 +41,7 @@ We host and manage translations via [Weblate](https://hosted.weblate.org/engage/
 
 ### Platform information
 
-Monal requires at least iOS 12 and macOS 10.15 (Catalina)
+Monal always supports the two latest MacOS and iOS major releases.
 
 ### Supported XEPs
 

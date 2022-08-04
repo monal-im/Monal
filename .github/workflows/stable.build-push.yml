@@ -46,15 +46,15 @@ jobs:
       - name: Run build
         run: ./scripts/build.sh
       - name: validate ios app
-        run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+        run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
       - name: push tag to stable repo
         run: |
           buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           git push origin Build_iOS_$buildNumber
       - name: Publish ios to appstore connect
-        run: xcrun altool --upload-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/build/apple_connect_upload_mail.txt) -p "$(cat /Users/build/apple_connect_upload_secret.txt)"
+        run: xcrun altool --upload-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
       - name: Publish catalyst to appstore connect
-        run: xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/build/apple_connect_upload_mail.txt)" -p "$(cat /Users/build/apple_connect_upload_secret.txt)" --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
+        run: xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
       - name: Update xmpp.org client list with new timestamp
         run: ./scripts/push_xmpp.org.sh
       - uses: actions/upload-artifact@v2

@@ -9,9 +9,9 @@ function exportMacOS {
         -exportPath "build/app" \
         -exportOptionsPlist "$EXPORT_OPTIONS_CATALYST" \
         -allowProvisioningUpdates \
-        -authenticationKeyPath "/Users/build/appstoreconnect/apiKey.p8" \
-        -authenticationKeyID "$(cat /Users/build/appstoreconnect/apiKeyId.txt)" \
-        -authenticationKeyIssuerID "$(cat /Users/build/appstoreconnect/apiIssuerId.txt)" \
+        -authenticationKeyPath "/Users/ci/appstoreconnect/apiKey.p8" \
+        -authenticationKeyID "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" \
+        -authenticationKeyIssuerID "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)" \
         -configuration $BUILD_TYPE
 
     echo "build dir:"
@@ -54,9 +54,9 @@ xcrun xcodebuild \
     -destination 'generic/platform=macOS,variant=Mac Catalyst,name=Any Mac' \
     -archivePath "build/macos_Monal.xcarchive" \
     -allowProvisioningUpdates \
-    -authenticationKeyPath "/Users/build/appstoreconnect/apiKey.p8" \
-    -authenticationKeyID "$(cat /Users/build/appstoreconnect/apiKeyId.txt)" \
-    -authenticationKeyIssuerID "$(cat /Users/build/appstoreconnect/apiIssuerId.txt)" \
+    -authenticationKeyPath "/Users/ci/appstoreconnect/apiKey.p8" \
+    -authenticationKeyID "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" \
+    -authenticationKeyIssuerID "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)" \
     archive \
     BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \
     SUPPORTS_MACCATALYST=YES
@@ -105,9 +105,9 @@ xcrun xcodebuild \
     -configuration $BUILD_TYPE \
     -archivePath "build/ios_$APP_NAME.xcarchive" \
     -allowProvisioningUpdates \
-    -authenticationKeyPath "/Users/build/appstoreconnect/apiKey.p8" \
-    -authenticationKeyID "$(cat /Users/build/appstoreconnect/apiKeyId.txt)" \
-    -authenticationKeyIssuerID "$(cat /Users/build/appstoreconnect/apiIssuerId.txt)" \
+    -authenticationKeyPath "/Users/ci/appstoreconnect/apiKey.p8" \
+    -authenticationKeyID "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" \
+    -authenticationKeyIssuerID "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)" \
     clean archive
 
 echo ""
@@ -123,9 +123,9 @@ xcodebuild \
     -exportOptionsPlist $EXPORT_OPTIONS_IOS \
     -allowProvisioningUpdates \
     -allowProvisioningDeviceRegistration \
-    -authenticationKeyPath "/Users/build/appstoreconnect/apiKey.p8" \
-    -authenticationKeyID "$(cat /Users/build/appstoreconnect/apiKeyId.txt)" \
-    -authenticationKeyIssuerID "$(cat /Users/build/appstoreconnect/apiIssuerId.txt)"
+    -authenticationKeyPath "/Users/ci/appstoreconnect/apiKey.p8" \
+    -authenticationKeyID "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" \
+    -authenticationKeyIssuerID "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
 
 echo "build dir:"
 ls -l "build"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-KEY_PASSWORD="$(cat /Users/build/encryption_secret.txt)"
+KEY_PASSWORD="$(cat /Users/ci/encryption_secret.txt)"
 
 #decrypt all encrypted files
 for file in ./scripts/*.enc; do

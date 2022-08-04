@@ -8,5 +8,11 @@
 	<string>export</string>
 	<key>compileBitcode</key>
 	<false/>
+	<key>uploadBitcode</key>
+	<false/>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<key>teamID</key>
+	<string>S8D843U34Y</string>
 </dict>
 </plist>

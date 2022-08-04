@@ -11,6 +11,6 @@
 
 @interface MLServerDetails : UITableViewController
 
-@property (nonatomic, weak) xmpp *xmppAccount;
+@property (nonatomic, weak) xmpp* xmppAccount;
 
 @end

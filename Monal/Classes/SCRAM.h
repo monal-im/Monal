@@ -9,17 +9,21 @@
 #ifndef SCRAM_h
 #define SCRAM_h
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SCRAM : NSObject
-+(NSArray*) supportedMechanisms;
++(NSArray*) supportedMechanismsIncludingChannelBinding:(BOOL) include;
 
 -(instancetype) initWithUsername:(NSString*) username password:(NSString*) password andMethod:(NSString*) method;
 
--(NSString*) clientFirstMessage;
+-(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType;
 -(BOOL) parseServerFirstMessage:(NSString*) str;
--(NSString*) clientFinalMessage;
+-(NSString*) clientFinalMessageWithChannelBindingData:(NSData* _Nullable) channelBindingData;
 -(BOOL) parseServerFinalMessage:(NSString*) str;
 
 @property (nonatomic, readonly) NSString* method;
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif /* SCRAM_h */

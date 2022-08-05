@@ -260,11 +260,12 @@
         sec_protocol_options_t options = nw_tls_copy_sec_protocol_options(tls_options);
         sec_protocol_options_set_tls_server_name(options, [SNIDomain cStringUsingEncoding:NSUTF8StringEncoding]);
         sec_protocol_options_add_tls_application_protocol(options, "xmpp-client");
-        sec_protocol_options_set_tls_resumption_enabled(options, 1);
-        sec_protocol_options_set_tls_tickets_enabled(options, 1);
         sec_protocol_options_set_tls_ocsp_enabled(options, 1);
         sec_protocol_options_set_tls_false_start_enabled(options, 1);
         sec_protocol_options_set_min_tls_protocol_version(options, tls_protocol_version_TLSv12);
+        //these two must be disabled for channel binding (you should never reuse the same channel binding data)
+        sec_protocol_options_set_tls_resumption_enabled(options, 0);
+        sec_protocol_options_set_tls_tickets_enabled(options, 0);
     }, ^(nw_protocol_options_t tcp_options) {
         nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
         //nw_tcp_options_set_no_delay(tcp_options, YES);              //disable nagle's algorithm
@@ -473,6 +474,25 @@
         error = self.shared_state.error;
     }
     return error;
+}
+
+-(BOOL) isTLS13
+{
+    MLAssert([self streamStatus] >= NSStreamStatusOpen && [self streamStatus] < NSStreamStatusClosed, @"Stream must be open to call this method!", (@{@"streamStatus": @([self streamStatus])}));
+    nw_protocol_metadata_t p_metadata = nw_connection_copy_protocol_metadata(self.shared_state.connection, nw_protocol_copy_tls_definition());
+    MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
+    sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
+    return sec_protocol_metadata_get_negotiated_tls_protocol_version(s_metadata) == tls_protocol_version_TLSv13;
+}
+
+-(NSData*) channelBindingData_TLSExporter
+{
+    MLAssert([self streamStatus] >= NSStreamStatusOpen && [self streamStatus] < NSStreamStatusClosed, @"Stream must be open to call this method!", (@{@"streamStatus": @([self streamStatus])}));
+    nw_protocol_metadata_t p_metadata = nw_connection_copy_protocol_metadata(self.shared_state.connection, nw_protocol_copy_tls_definition());
+    MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
+    sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
+    //see https://www.rfc-editor.org/rfc/rfc9266.html
+    return (NSData*)sec_protocol_metadata_create_secret(s_metadata, 24, "EXPORTER-Channel-Binding", 32);
 }
 
 -(void) stream:(NSStream*) stream handleEvent:(NSStreamEvent) event

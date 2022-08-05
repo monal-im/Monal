@@ -14,6 +14,7 @@
 
 @interface SCRAM ()
 {
+    BOOL _usingChannelBinding;
     NSString* _method;
     NSString* _username;
     NSString* _password;
@@ -36,25 +37,36 @@
 @implementation SCRAM
 
 //list supported mechanisms (highest security first!)
-+(NSArray*) supportedMechanisms
++(NSArray*) supportedMechanismsIncludingChannelBinding:(BOOL) include
 {
+    if(include)
+        return @[@"SCRAM-SHA-512-PLUS", @"SCRAM-SHA-256-PLUS", @"SCRAM-SHA-1-PLUS", @"SCRAM-SHA-512", @"SCRAM-SHA-256", @"SCRAM-SHA-1"];
     return @[@"SCRAM-SHA-512", @"SCRAM-SHA-256", @"SCRAM-SHA-1"];
 }
 
 -(instancetype) initWithUsername:(NSString*) username password:(NSString*) password andMethod:(NSString*) method
 {
     self = [super init];
-    MLAssert([[[self class] supportedMechanisms] containsObject:method], @"Unsupported SCRAM hash method!", (@{@"method": nilWrapper(method)}));
-    _method = method;
+    MLAssert([[[self class] supportedMechanismsIncludingChannelBinding:YES] containsObject:method], @"Unsupported SCRAM hash method!", (@{@"method": nilWrapper(method)}));
+    _usingChannelBinding = [@"-PLUS" isEqualToString:[method substringFromIndex:method.length-5]];
+    if(_usingChannelBinding)
+        _method = [method substringWithRange:NSMakeRange(0, method.length-5)];
+    else
+        _method = method;
     _username = username;
     _password = password;
     _nonce = [NSUUID UUID].UUIDString;
     return self;
 }
 
--(NSString*) clientFirstMessage
+-(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType
 {
-    _gssHeader = @"n,,";
+    if(channelBindingType == nil)
+        _gssHeader = @"n,,";                                                                //not supported by us
+    else if(!_usingChannelBinding)
+        _gssHeader = @"y,,";                                                                //supported by us BUT NOT advertised by the server
+    else
+        _gssHeader = [NSString stringWithFormat:@"p=%@,,", channelBindingType];             //supported by us AND advertised by the server
     _clientFirstMessageBare = [NSString stringWithFormat:@"n=%@,r=%@", [self quote:_username], _nonce];
     return [NSString stringWithFormat:@"%@%@", _gssHeader, _clientFirstMessageBare];
 }
@@ -77,8 +89,14 @@
 }
 
 //see https://stackoverflow.com/a/29299946/3528174
--(NSString*) clientFinalMessage
+-(NSString*) clientFinalMessageWithChannelBindingData:(NSData* _Nullable) channelBindingData
 {
+    //calculate gss header with optional channel binding data
+    NSMutableData* gssHeaderWithChannelBindingData = [[NSMutableData alloc] init];
+    [gssHeaderWithChannelBindingData appendData:[_gssHeader dataUsingEncoding:NSUTF8StringEncoding]];
+    if(channelBindingData != nil)
+        [gssHeaderWithChannelBindingData appendData:channelBindingData];
+    
     //calculate saltedPassword (e.g. Hi(Normalize(password), salt, i))
     uint32_t i = htonl(1);
     NSMutableData* salti = [NSMutableData dataWithData:_salt];
@@ -99,7 +117,7 @@
     NSData* storedKey = [self hash:clientKey];
     
     //calculate authMessage (e.g. client-first-message-bare + "," + server-first-message + "," + client-final-message-without-proof)
-    NSString* clientFinalMessageWithoutProof = [NSString stringWithFormat:@"c=%@,r=%@", [HelperTools encodeBase64WithString:_gssHeader], _nonce];
+    NSString* clientFinalMessageWithoutProof = [NSString stringWithFormat:@"c=%@,r=%@", [HelperTools encodeBase64WithData:gssHeaderWithChannelBindingData], _nonce];
     NSString* authMessage = [NSString stringWithFormat:@"%@,%@,%@", _clientFirstMessageBare, _serverFirstMessage, clientFinalMessageWithoutProof];
     
     //calculate clientSignature (e.g. HMAC(StoredKey, AuthMessage))

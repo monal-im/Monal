@@ -16,6 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property(readonly) NSStreamStatus streamStatus;
 @property(nullable, readonly, copy) NSError* streamError;
 
+@property(readonly) BOOL isTLS13;
+@property(readonly) NSData* channelBindingData_TLSExporter;
+
 +(void) connectWithSNIDomain:(NSString*) SNIDomain connectHost:(NSString*) host connectPort:(NSNumber*) port inputStream:(NSInputStream* _Nullable * _Nonnull) inputStream  outputStream:(NSOutputStream* _Nullable * _Nonnull) outputStream;
 
 @end

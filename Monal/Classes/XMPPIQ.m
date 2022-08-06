@@ -70,7 +70,7 @@ NSString* const kiqErrorType = @"error";
 #ifdef IS_ALPHA
             @"pushModule": @"monalAlpha"
 #else //IS_ALPHA
-#ifdef TARGET_OS_MACCATALYST
+#if TARGET_OS_MACCATALYST
             @"pushModule": @"monalProdCatalyst"
 #else //TARGET_OS_MACCATALYST
             @"pushModule": @"monalProdiOS"
@@ -269,7 +269,7 @@ NSString* const kiqErrorType = @"error";
 #if TARGET_OS_MACCATALYST
         [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"macOS %lu.%lu.%lu", osVersion.majorVersion, osVersion.minorVersion, osVersion.patchVersion]],
 #else
-        [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"macOS %lu.%lu.%lu", osVersion.majorVersion, osVersion.minorVersion, osVersion.patchVersion]],
+        [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"iOS %lu.%lu.%lu", osVersion.majorVersion, osVersion.minorVersion, osVersion.patchVersion]],
 #endif
         [[MLXMLNode alloc] initWithElement:@"version" andData:[HelperTools appBuildVersionInfo]]
     ] andData:nil]];

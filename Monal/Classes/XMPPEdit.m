@@ -447,7 +447,6 @@ enum DummySettingsRows {
     UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
         DDLogVerbose(@"Deleting accountNo %@", self.accountNo);
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
         [self.db removeAccount:self.accountNo];
         [SAMKeychain deletePasswordForService:kMonalKeychainName account:self.accountNo.stringValue];
         

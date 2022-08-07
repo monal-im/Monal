@@ -405,7 +405,7 @@ static NSDateFormatter* dbFormatter;
 {
     [self.db voidWriteTransaction:^{
         //clean up logs...
-        [self messageHistoryClean:buddy forAccount:accountNo];
+        [self clearMessagesWithBuddy:buddy onAccount:accountNo];
         //...and delete contact
         [self.db executeNonQuery:@"DELETE FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
     }];
@@ -1385,18 +1385,21 @@ static NSDateFormatter* dbFormatter;
 -(void) clearMessages:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=?;" andArguments:@[kMessageTypeFiletransfer, accountNo]];
         for(NSNumber* historyId in messageHistoryIDs)
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=?;" andArguments:@[accountNo]];
         
         [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=?;" andArguments:@[accountNo]];
+        [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
 }
 
 -(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=?;" andArguments:@[kMessageTypeFiletransfer, accountNo, buddy]];
         for(NSNumber* historyId in messageHistoryIDs)
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
@@ -1404,6 +1407,7 @@ static NSDateFormatter* dbFormatter;
         
         //better UX without deleting the active chat
         //[self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
+        [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
 }
 
@@ -1411,6 +1415,7 @@ static NSDateFormatter* dbFormatter;
 -(void) autodeleteAllMessagesAfter3Days
 {
     [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         //3 days before now
         NSString* pastDate = [dbFormatter stringFromDate:[[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay value:-3 toDate:[NSDate date] options:0]];
         //delete all transferred files old enough
@@ -1421,16 +1426,19 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE timestamp<?;" andArguments:@[pastDate]];
         //delete all chats with empty history from active chats list
         [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
+        [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
 }
 
 -(void) deleteMessageHistory:(NSNumber*) messageNo
 {
     [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         MLMessage* msg = [self messageForHistoryID:messageNo];
         if([msg.messageType isEqualToString:kMessageTypeFiletransfer])
             [MLFiletransfer deleteFileForMessage:msg];
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE message_history_id=?;" andArguments:@[messageNo]];
+        [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
 }
 
@@ -1493,16 +1501,6 @@ static NSDateFormatter* dbFormatter;
         eligible &= editAllowed.intValue == 1;
         eligible &= [msg.messageType isEqualToString:kMessageTypeText];
         return eligible;
-    }];
-}
-
--(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo
-{
-    return [self.db boolWriteTransaction:^{
-        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=?;" andArguments:@[kMessageTypeFiletransfer, accountNo, buddy]];
-        for(NSNumber* historyId in messageHistoryIDs)
-            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
-        return [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
     }];
 }
 

@@ -1084,28 +1084,19 @@ enum msgSentState {
 
 -(BOOL) shouldPerformSegueWithIdentifier:(NSString*) identifier sender:(id) sender
 {
-    if([identifier isEqualToString:@"showDetails"])
-    {
-        //don't show contact details for mucs (they will get their own muc details later on)
-        if(self.contact.isGroup)
-            return NO;
-    }
     return YES;
 }
 
-//this is needed to prevent segues invoked programmatically
 -(void) performSegueWithIdentifier:(NSString*) identifier sender:(id) sender
 {
-#if !defined(TARGET_IPHONE_SIMULATOR) && !defined(IS_ALPHA)
+    //this is needed to prevent segues invoked programmatically
     if([self shouldPerformSegueWithIdentifier:identifier sender:sender] == NO)
-#endif
+        return;
+    if([identifier isEqualToString:@"showDetails"])
     {
-        if([identifier isEqualToString:@"showDetails"])
-        {
-            UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails: self.contact];
-            [self presentViewController:detailsViewController animated:YES completion:^{}];
-            return;
-        }
+        UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails: self.contact];
+        [self presentViewController:detailsViewController animated:YES completion:^{}];
+        return;
     }
     [super performSegueWithIdentifier:identifier sender:sender];
 }

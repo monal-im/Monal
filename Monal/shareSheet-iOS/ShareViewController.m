@@ -59,9 +59,10 @@
 
 - (void) presentationAnimationDidFinish
 {
-    // list pinned chats above normal chats
-    NSMutableArray<MLContact*>* recipients = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
-    [recipients addObjectsFromArray:[[DataLayer sharedInstance] activeContactsWithPinned:NO]];
+    // list all contacts, not only active chats
+    // that will clutter the list of selectable contacts, but you can always use sirikit interactions
+    // to get the recently used contacts listed
+    NSMutableArray<MLContact*>* recipients = [[DataLayer sharedInstance] contactList];
     
     self.recipients = recipients;
     self.accounts = [[DataLayer sharedInstance] enabledAccountList];

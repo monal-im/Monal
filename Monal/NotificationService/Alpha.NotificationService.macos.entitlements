@@ -14,7 +14,7 @@
 	<true/>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)G7YU7X7KRJ.SworIM</string>
+		<string>$(AppIdentifierPrefix)monal.alpha</string>
 	</array>
 </dict>
 </plist>

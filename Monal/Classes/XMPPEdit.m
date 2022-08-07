@@ -343,15 +343,16 @@ enum DummySettingsRows {
             BOOL accountExists = [[DataLayer sharedInstance] doesAccountExistUser:user andDomain:domain];
             if(!accountExists)
             {
+                DDLogVerbose(@"Creating account: %@", dic);
                 NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
                 if(accountID)
                 {
                     self.accountNo = accountID;
-                    self.editMode = YES;
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
                     [SAMKeychain setPassword:self.password forService:kMonalKeychainName account:self.accountNo.stringValue];
                     if(self.enabled)
                     {
+                        DDLogVerbose(@"Now connecting newly created account: %@", self.accountNo);
                         [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
                         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
                         [account publishStatusMessage:self.statusMessage];
@@ -360,6 +361,7 @@ enum DummySettingsRows {
                     }
                     else
                     {
+                        DDLogVerbose(@"Making sure newly created account is not connected and deleting all SiriKit interactions: %@", self.accountNo);
                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
                         [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
                             if(error != nil)
@@ -378,13 +380,19 @@ enum DummySettingsRows {
     else
     {
         [dic setObject:[NSNumber numberWithBool:NO] forKey:kNeedsPasswordMigration];
+        DDLogVerbose(@"Updating existing account: %@", dic);
         BOOL updatedAccount = [[DataLayer sharedInstance] updateAccounWithDictionary:dic];
         if(updatedAccount)
         {
+            DDLogVerbose(@"DB update succeeded: %@", self.accountNo);
             if(self.password.length)
+            {
+                DDLogVerbose(@"Now setting password for account %@ in SAMKeychain: '%@'", self.accountNo, self.password);
                 [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountNo];
+            }
             if(self.enabled)
             {
+                DDLogVerbose(@"Account is still enabled, updating in-memory structures to reflect new settings: %@", self.accountNo);
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
                 xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
                 //it is okay to only update the server settings here:
@@ -407,6 +415,7 @@ enum DummySettingsRows {
             }
             else
             {
+                DDLogVerbose(@"Account is not enabled anymore, deleting all SiriKit interactions and making sure it's disconnected: %@", self.accountNo);
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
                 [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
                     if(error != nil)

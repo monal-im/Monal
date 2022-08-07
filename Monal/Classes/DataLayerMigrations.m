@@ -949,6 +949,10 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:5.301 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE account ADD COLUMN needs_password_migration BOOL DEFAULT false;"];
         }];
+        
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.302 withBlock:^{
+            //dummy upgrade to make sure all state gets invalidated, we want to be sure push gets correctly enabled
+        }];
 
         // check if db version changed
         NSNumber* newdbversion = [self readDBVersion:db];

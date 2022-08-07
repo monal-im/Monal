@@ -216,8 +216,6 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSString*) lastStanzaIdForAccount:(NSNumber*) accountNo;
 -(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSNumber*) accountNo;
 
--(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSNumber*) accountNo;
-
 -(NSArray<MLMessage*>*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSNumber*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
 -(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSNumber*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;

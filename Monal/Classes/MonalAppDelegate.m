@@ -614,18 +614,25 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
     {
         DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
+        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
+        MLAssert(fromContact, @"fromContact should not be nil");
+        NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
+        MLAssert(messageId, @"messageId should not be nil");
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
+        //this can happen if that account got disabled
+        if(account == nil)
+        {
+            //call completion handler directly (we did not handle anything and no connectIfNecessary was called)
+            if(completionHandler)
+                completionHandler();
+            return;
+        }
         
         //add our completion handler to handler queue
         [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
             completionHandler();
         }];
         
-        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
-        NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
-        MLAssert(fromContact, @"fromContact should not be nil");
-        MLAssert(messageId, @"messageId should not be nil");
-        MLAssert(account, @"account should not be nil");
         
         //make sure we have an active buddy for this chat
         [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountId];

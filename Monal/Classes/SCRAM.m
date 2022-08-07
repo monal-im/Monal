@@ -67,7 +67,7 @@
         _gssHeader = @"y,,";                                                                //supported by us BUT NOT advertised by the server
     else
         _gssHeader = [NSString stringWithFormat:@"p=%@,,", channelBindingType];             //supported by us AND advertised by the server
-    _clientFirstMessageBare = [NSString stringWithFormat:@"n=%@,r=%@", [self quote:_username], _nonce];
+    _clientFirstMessageBare = [NSString stringWithFormat:@"n=%@,r=%@,d=nKFUXQ7h9IL3eo17pKygmacnEsk=", [self quote:_username], _nonce];
     return [NSString stringWithFormat:@"%@%@", _gssHeader, _clientFirstMessageBare];
 }
 
@@ -189,4 +189,22 @@
     return str;
 }
 
+
+-(instancetype) init
+{
+    self = [super init];
+    
+    _usingChannelBinding = YES;
+    _method = @"SCRAM-SHA-1";
+    _username = @"user";
+    _password = @"pencil";
+    _nonce = @"12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6";
+    
+    DDLogError(@"client-first-message: %@", [self clientFirstMessageWithChannelBinding:@"tls-exporter"]);
+    DDLogError(@"server-first-message parsed: %@", [self parseServerFirstMessage:@"r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6,s=QSXCR+Q6sek8bf92,i=4096"] ? @"YES" : @"NO");
+    DDLogError(@"client-final-message: %@", [self clientFinalMessageWithChannelBindingData:[HelperTools dataWithBase64EncodedString:@"xyhC850EN493g6zCWYBZXd2DVrVaHW1g9MHBWJ3XRVQ="]]);
+    DDLogError(@"_expectedServerSignature: v=%@", _expectedServerSignature);
+    
+    exit(0);
+}
 @end

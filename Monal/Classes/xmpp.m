@@ -212,6 +212,8 @@ NSString* const kStanza = @"stanza";
     if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
         [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
     
+    
+    DDLogError(@"SCRAM: %@", [[SCRAM alloc] init]);
     return self;
 }
 
@@ -2251,7 +2253,7 @@ NSString* const kStanza = @"stanza";
             _cachedStreamFeaturesAfterAuth = nil;
             
             //don't report error but reconnect if we pipelined stuff that is not correct anymore...
-            else if(oldPipeliningState != kPipelinedNothing)
+            if(oldPipeliningState != kPipelinedNothing)
                 [self reconnect];
             //...but don't try again if it's really the password, that's wrong
             else

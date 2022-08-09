@@ -4,6 +4,7 @@ PODS:
     - CocoaLumberjack/Core
   - DACircularProgress (2.3.1)
   - DZNEmptyDataSet (1.8.1)
+  - FLAnimatedImage (1.0.16)
   - IDMPhotoBrowser (1.10.2):
     - DACircularProgress
     - pop
@@ -30,6 +31,7 @@ PODS:
 DEPENDENCIES:
   - CocoaLumberjack/Swift
   - DZNEmptyDataSet
+  - FLAnimatedImage (~> 1.0)
   - IDMPhotoBrowser
   - MBProgressHUD (~> 1.2.0)
   - NotificationBannerSwift (~> 3.1.0)
@@ -45,6 +47,7 @@ SPEC REPOS:
     - CocoaLumberjack
     - DACircularProgress
     - DZNEmptyDataSet
+    - FLAnimatedImage
     - IDMPhotoBrowser
     - MarqueeLabel
     - MBProgressHUD
@@ -76,6 +79,7 @@ SPEC CHECKSUMS:
   CocoaLumberjack: 543c79c114dadc3b1aba95641d8738b06b05b646
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
+  FLAnimatedImage: 8f3e854ebf9680b71f0b6e700939687fc4d82b4b
   IDMPhotoBrowser: 4bb459b1faffc228e92bccdf7c54ad6d6b7e8c37
   MarqueeLabel: 00cc0bcd087111dca575878b3531af980559707d
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
@@ -89,6 +93,6 @@ SPEC CHECKSUMS:
   sqlite3: d115522c740c457b805c018b0296b5ba003da280
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
 
-PODFILE CHECKSUM: d641d28489e261aa34b77717aa8a8a7cd70e0ef1
+PODFILE CHECKSUM: 128d6369324cc7e9530cd8beb85b34a1cafa57a2
 
 COCOAPODS: 1.11.3

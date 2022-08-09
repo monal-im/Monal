@@ -21,6 +21,7 @@ def monal
   pod 'DZNEmptyDataSet'
   pod 'TOCropViewController'
   pod 'NotificationBannerSwift', '~> 3.1.0'
+  pod 'FLAnimatedImage', '~> 1.0'
 end
 
 def monalxmpp

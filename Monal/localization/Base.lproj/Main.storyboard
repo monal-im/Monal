@@ -757,6 +757,7 @@
                                             <outlet property="dayTop" destination="Bqr-m5-ifW" id="OGu-K8-vMx"/>
                                             <outlet property="dividerDate" destination="h9a-ua-MIo" id="Q9G-tH-NFa"/>
                                             <outlet property="dividerHeight" destination="b2n-TS-d4M" id="r3Y-BD-k2L"/>
+                                            <outlet property="imageWidth" destination="ypT-uw-per" id="AII-N1-3Cn"/>
                                             <outlet property="imageHeight" destination="T8s-TI-xbm" id="RII-N1-3Cn"/>
                                             <outlet property="lockImage" destination="vGy-8U-lGI" id="B7B-Gh-pEV"/>
                                             <outlet property="name" destination="1wW-PP-jdj" id="cEt-sh-dVc"/>

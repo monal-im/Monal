@@ -2542,6 +2542,9 @@
                             </constraints>
                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
                             <state key="normal" image="mic" catalog="system"/>
+                            <connections>
+                                <action selector="record:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="8Vw-VD-VgI"/>
+                            </connections>
                         </button>
                         <collectionView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="DZg-BI-mVA" userLabel="UploadMenuView">
                             <rect key="frame" x="8" y="0.0" width="398" height="145"/>

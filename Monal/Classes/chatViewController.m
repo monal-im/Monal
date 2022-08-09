@@ -55,6 +55,7 @@
     monal_void_block_t _cancelTypingNotification;
     monal_void_block_t _cancelLastInteractionTimer;
     NSMutableDictionary<NSString*, MLContact*>* _localMLContactCache;
+    BOOL _isRecording;
 }
 
 @property (nonatomic, strong) MLContact* contact;
@@ -1051,35 +1052,53 @@ enum msgSentState {
     [self resignTextView];
 }
 
+-(IBAction) record:(id) sender
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogInfo(@"Record button pressed...");
+        [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+            if(granted)
+            {
+                if(!self->_isRecording)
+                {
+                    DDLogInfo(@"Starting to record audio...");
+                    [[MLAudioRecoderManager sharedInstance] setRecoderManagerDelegate:self];
+                    [[MLAudioRecoderManager sharedInstance] start];
+                    self->_isRecording = YES;
+                }
+                else
+                {
+                    DDLogInfo(@"Stopping audio recording...");
+                    [[MLAudioRecoderManager sharedInstance] stop:YES];
+                    self->_isRecording = NO;
+                }
+            }
+            else
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Please Allow Audio Access", @"") message:NSLocalizedString(@"If you want to use audio message you will need to allow access in Settings-> Privacy-> Microphone.", @"") preferredStyle:UIAlertControllerStyleAlert];
+
+                    UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+
+                    }];
+
+                    [messageAlert addAction:closeAction];
+                    [self presentViewController:messageAlert animated:YES completion:nil];
+                });
+            }
+        }];
+    });
+}
+
 -(void) recordMessageAudio:(UILongPressGestureRecognizer*) gestureRecognizer
 {
-    [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
-        if (granted)
-        {
-            if (gestureRecognizer.state == UIGestureRecognizerStateBegan)
-            {
-                [[MLAudioRecoderManager sharedInstance] setRecoderManagerDelegate:self];
-                [[MLAudioRecoderManager sharedInstance] start];
-            }
-            else if (gestureRecognizer.state == UIGestureRecognizerStateEnded)
-            {
-                [[MLAudioRecoderManager sharedInstance] stop];
-            }
-        }
-        else
-        {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Please Allow Audio Access", @"") message:NSLocalizedString(@"If you want to use audio message you will need to allow access in Settings-> Privacy-> Microphone.", @"") preferredStyle:UIAlertControllerStyleAlert];
-
-                UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-
-                }];
-
-                [messageAlert addAction:closeAction];
-                [self presentViewController:messageAlert animated:YES completion:nil];
-            });
-        }
-    }];
+    DDLogInfo(@"Gesture recognizer called...");
+    if(gestureRecognizer.state == UIGestureRecognizerStateBegan && _isRecording)
+    {
+        DDLogInfo(@"Long press began, aborting audio recording...");
+        [[MLAudioRecoderManager sharedInstance] stop:NO];
+        _isRecording = NO;
+    }
 }
 
 -(BOOL) shouldPerformSegueWithIdentifier:(NSString*) identifier sender:(id) sender
@@ -2971,15 +2990,24 @@ enum msgSentState {
         [audioTimeInfoLabel setText:NSLocalizedString(@"Recording audio", @"")];
         [self.audioRecoderInfoView addSubview:audioTimeInfoLabel];
         [self.inputContainerView addSubview:self.audioRecoderInfoView];
+        
+        [self.audioButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+        [self.audioButton setTitleColor:[UIColor redColor] forState:UIControlStateHighlighted];
+        [self.audioButton setTitleColor:[UIColor redColor] forState:UIControlStateSelected];
     });
 }
 
--(void) notifyStop:(NSURL*) fileURL
+-(void) notifyStop:(NSURL* _Nullable) fileURL
 {
     dispatch_async(dispatch_get_main_queue(), ^{
+        self->_isRecording = NO;
         [self.audioRecoderInfoView removeFromSuperview];
+        [self.audioButton setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
+        [self.audioButton setTitleColor:[UIColor blueColor] forState:UIControlStateHighlighted];
+        [self.audioButton setTitleColor:[UIColor blueColor] forState:UIControlStateSelected];
 
-        [self showUploadHUD];
+        if(fileURL != nil)
+            [self showUploadHUD];
     });
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
@@ -3014,7 +3042,7 @@ enum msgSentState {
     for (UIView* subview in self.audioRecoderInfoView.subviews) {
         if([subview isKindOfClass:[UILabel class]]){
             UILabel *infoLabel = (UILabel*)subview;
-            [infoLabel setText:[NSString stringWithFormat:@"%02d:%02d", durationMinutes, durationSeconds]];
+            [infoLabel setText:[NSString stringWithFormat:NSLocalizedString(@"%02d:%02d (long press to abort)", @""), durationMinutes, durationSeconds]];
             [infoLabel setTextColor:[UIColor blackColor]];
         }
     }
@@ -3022,22 +3050,25 @@ enum msgSentState {
 
 -(void) notifyResult:(BOOL)isSuccess error:(NSString*) errorMsg
 {
-    NSString* alertTitle = @"";
-    if(isSuccess) {
-        alertTitle = NSLocalizedString(@"Recode Success", @"");
-    } else {
-        alertTitle = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Recode Fail:", @""), errorMsg];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self->_isRecording = NO;
+        NSString* alertTitle = @"";
+        if(isSuccess) {
+            alertTitle = NSLocalizedString(@"Recode Success", @"");
+        } else {
+            alertTitle = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Recode Fail:", @""), errorMsg];
+        }
 
-    UIAlertController* audioRecoderAlert = [UIAlertController alertControllerWithTitle:alertTitle
-                                                                        message:@"" preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController* audioRecoderAlert = [UIAlertController alertControllerWithTitle:alertTitle
+                                                                            message:@"" preferredStyle:UIAlertControllerStyleAlert];
 
-    [self presentViewController:audioRecoderAlert animated:YES completion:^{
-        dispatch_queue_t queue = dispatch_get_main_queue();
-        dispatch_after(1.0, queue, ^{
-            [audioRecoderAlert dismissViewControllerAnimated:YES completion:nil];
-        });
-    }];
+        [self presentViewController:audioRecoderAlert animated:YES completion:^{
+            dispatch_queue_t queue = dispatch_get_main_queue();
+            dispatch_after(2.0, queue, ^{
+                [audioRecoderAlert dismissViewControllerAnimated:YES completion:nil];
+            });
+        }];
+    });
 }
 
 # pragma mark - Upload Queue (Backend)

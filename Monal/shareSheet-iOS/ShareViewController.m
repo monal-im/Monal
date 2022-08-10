@@ -31,6 +31,7 @@
 
 @end
 
+//TODO: use this approach, but with swiftui: https://diamantidis.github.io/2020/01/11/share-extension-custom-ui
 @implementation ShareViewController
 
 +(void) initialize
@@ -129,16 +130,27 @@
     NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
     DDLogVerbose(@"Attachments = %@", item.attachments);
 
-    //we curently are only able to handle exactly one shared item (see plist file)
-    if([item.attachments count] != 1)
+    NSItemProvider* provider;
+    for(NSItemProvider* attachment in item.attachments)
     {
-        DDLogError(@"We currently are only able to handle exactly one shared item, ignoring this multi-item share!");
-        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
-        return;
+        if([attachment hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
+            ;   //ignore plaintext, already displayed in contentText (e.g. comment)
+        else if(provider == nil)
+            provider = attachment;
+        else
+        {
+            DDLogError(@"We currently are only able to handle exactly one shared item, ignoring this multi-item share!");
+            UIAlertController* multiItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Multi-item share detected", @"")
+                                                                        message:NSLocalizedString(@"We currently are only able to handle exactly one shared item, ignoring this multi-item share!", @"") preferredStyle:UIAlertControllerStyleAlert];
+            [multiItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                [multiItemWarning dismissViewControllerAnimated:YES completion:nil];
+                [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+            }]];
+            [self presentViewController:multiItemWarning animated:YES completion:nil];
+            return;
+        }
     }
     
-    NSItemProvider* provider = item.attachments.firstObject;
-        
     NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
     payload[@"account_id"] = self.recipient.accountId;
     payload[@"recipient"] = self.recipient.contactJid;
@@ -238,7 +250,13 @@
     else
     {
         DDLogError(@"Could not save payload");
-        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+        UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                    message:NSLocalizedString(@"Monal was not able to send your attachment!", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
+            [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+        }]];
+        [self presentViewController:unknownItemWarning animated:YES completion:nil];
     }
 }
 

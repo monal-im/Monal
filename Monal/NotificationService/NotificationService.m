@@ -18,9 +18,6 @@
 #import "MLFiletransfer.h"
 #import "xmpp.h"
 
-static NSString* kBackgroundProcessingTask = @"im.monal.process";
-static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
-
 @interface NotificationService ()
 +(BOOL) getAppexCleanShutdownStatus;
 +(void) setAppexCleanShutdownStatus:(BOOL) shutdownStatus;

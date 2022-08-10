@@ -44,8 +44,6 @@
 #define BGPROCESS_GRACEFUL_TIMEOUT  60.0
 
 typedef void (^pushCompletion)(UIBackgroundFetchResult result);
-static NSString* kBackgroundProcessingTask = @"im.monal.process";
-static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
 
 @interface MonalAppDelegate()
 {
@@ -172,7 +170,7 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
     //do MLFiletransfer cleanup tasks (do this in a new thread to parallelize it with our ping to the appex and don't slow down app startup)
     //this will also migrate our old image cache to new MLFiletransfer cache
     //BUT: don't do this if we are sending the sharesheet outbox
-    if(launchOptions[UIApplicationLaunchOptionsURLKey] == nil || ![launchOptions[UIApplicationLaunchOptionsURLKey] isEqual:[NSURL URLWithString:@"monalOpen://"]])
+    if(launchOptions[UIApplicationLaunchOptionsURLKey] == nil || ![launchOptions[UIApplicationLaunchOptionsURLKey] isEqual:kMonalOpenURL])
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [MLFiletransfer doStartupCleanup];
         });
@@ -573,13 +571,13 @@ static NSString* kBackgroundRefreshingTask = @"im.monal.refresh";
         [self handleXMPPURL:url];
         return YES;
     }
-    else if([url.scheme isEqualToString:@"monalOpen"])      //app opened via sharesheet
+    else if([url.scheme isEqualToString:kMonalOpenURL.scheme])      //app opened via sharesheet
     {
         //make sure our outbox content is sent (if the mainapp is still connected and also was in foreground while the sharesheet was used)
         //and open the chat the newest outbox entry was sent to
         //make sure activechats ui is properly initialized when calling this
         createQueuedTimer(0.5, dispatch_get_main_queue(), (^{
-            DDLogInfo(@"Got monalOpen:// url, trying to send all outboxes...");
+            DDLogInfo(@"Got %@ url, trying to send all outboxes...", kMonalOpenURL);
             [self sendAllOutboxes];
         }));
         return YES;

@@ -2214,6 +2214,9 @@ enum msgSentState {
                 DDLogVerbose(@"Trying to open link in chat cell");
                 [(MLChatCell *)cell openlink:self];
             } else  {
+                //TODO: fork swiftui image viewer (https://github.com/Jake-Short/swiftui-image-viewer),
+                //TODO: add support for FLAnimatedImage (https://github.com/Flipboard/FLAnimatedImage) using NSViewRepresentable
+                //TODO: or this so answer using quartz: https://stackoverflow.com/a/70369611/3528174
                 self.photos = [[NSMutableArray alloc] init];
                 MLChatImageCell* imageCell = (MLChatImageCell *) cell;
                 IDMPhoto* photo = [IDMPhoto photoWithImage:[imageCell getDisplayedImage]];

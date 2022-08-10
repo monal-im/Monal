@@ -1,6 +1,6 @@
 # Monal for XMPP
 ## A cross platform, modern XMPP client for iOS and macOS
-[![Alpha build status](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml/badge.svg?branch=alpha.build)](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml)
+[![Alpha build status](https://github.com/monal-im/Monal/actions/workflows/develop-push.yml/badge.svg)](https://github.com/monal-im/Monal/actions/workflows/develop-push.yml)
 [![Translation status](https://hosted.weblate.org/widgets/monal/-/svg-badge.svg)](https://hosted.weblate.org/engage/monal/?utm_source=widget)
 
 This is the Monal XMPP client as found in the app store. 

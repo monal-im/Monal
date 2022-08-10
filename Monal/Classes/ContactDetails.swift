@@ -58,6 +58,9 @@ struct ContactDetails: View {
                         Text("Resources")
                     }
                 }
+                
+                //TODO: files exchanged with this contact
+                //--> open file app in documents dir, see: https://nemecek.be/blog/145/open-your-apps-documents-folder-programmatically-in-files-app
             }
 
             Section { // the destructive section...

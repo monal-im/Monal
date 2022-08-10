@@ -1504,7 +1504,7 @@ myround(LDOUBLE value)
 {
 	UINTMAX_T intpart = cast(value);
 
-	return ((value -= intpart) < 0.5) ? intpart : intpart + 1;
+	return ((value - intpart) < 0.5) ? intpart : intpart + 1;
 }
 
 static LDOUBLE

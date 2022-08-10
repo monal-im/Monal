@@ -19,9 +19,16 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 //configure app group constants
 #ifdef IS_ALPHA
     #define kAppGroup @"group.monalalpha"
+    #define kMonalOpenURL [NSURL URLWithString:@"monalAlphaOpen://"]
+    #define kBackgroundProcessingTask @"im.monal.alpha.process"
+    #define kBackgroundRefreshingTask @"im.monal.alpha.refresh"
 #else
     #define kAppGroup @"group.monal"
+    #define kMonalOpenURL [NSURL URLWithString:@"monalOpen://"]
+    #define kBackgroundProcessingTask @"im.monal.process"
+    #define kBackgroundRefreshingTask @"im.monal.refresh"
 #endif
+
 #define kMonalKeychainName @"Monal"
 
 //this is in seconds

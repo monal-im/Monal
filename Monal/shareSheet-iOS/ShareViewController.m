@@ -355,8 +355,8 @@
 
 -(void) openMainApp:(NSString*) recipient
 {
-    DDLogInfo(@"Now opening mainapp...");
-    NSURL* mainAppUrl = [NSURL URLWithString:@"monalOpen://"];
+    DDLogInfo(@"Now opening mainapp via %@...", kMonalOpenURL);
+    NSURL* mainAppUrl = kMonalOpenURL;
     [self openURL:mainAppUrl];
 }
 

@@ -16,9 +16,9 @@ PODS:
     - SnapKit (~> 5.0.1)
   - pop (1.0.12)
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.12.6):
-    - SDWebImage/Core (= 5.12.6)
-  - SDWebImage/Core (5.12.6)
+  - SDWebImage (5.13.2):
+    - SDWebImage/Core (= 5.13.2)
+  - SDWebImage/Core (5.13.2)
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
@@ -36,7 +36,6 @@ DEPENDENCIES:
   - MBProgressHUD (~> 1.2.0)
   - NotificationBannerSwift (~> 3.1.0)
   - SAMKeychain
-  - SDWebImage (~> 5.12.5)
   - SignalProtocolC (from `https://github.com/monal-im/libsignal-protocol-c`, branch `master`)
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
   - sqlite3/perf-threadsafe
@@ -86,13 +85,13 @@ SPEC CHECKSUMS:
   NotificationBannerSwift: 49912a48b37e2f55d1cef4e8a38f15394f66a70a
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: a47aea9e3d8816015db4e523daff50cfd294499d
+  SDWebImage: 72f86271a6f3139cc7e4a89220946489d4b9a866
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   sqlite3: d115522c740c457b805c018b0296b5ba003da280
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
 
-PODFILE CHECKSUM: 128d6369324cc7e9530cd8beb85b34a1cafa57a2
+PODFILE CHECKSUM: 33074315d7aebe23823e40ec45b7330fde6026cb
 
 COCOAPODS: 1.11.3

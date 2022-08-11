@@ -17,7 +17,6 @@ def monal
   inhibit_all_warnings!
   pod 'MBProgressHUD', '~> 1.2.0'
   pod 'IDMPhotoBrowser'
-  pod 'SDWebImage', '~> 5.12.5'
   pod 'DZNEmptyDataSet'
   pod 'TOCropViewController'
   pod 'NotificationBannerSwift', '~> 3.1.0'

@@ -25,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class UNNotificationRequest;
 
 void logException(NSException* exception);
+void swizzle(Class c, SEL orig, SEL new);
 
 @interface HelperTools : NSObject
 

@@ -3288,7 +3288,6 @@ enum msgSentState {
         else
         {
             unreachable();
-            return nil;
         }
         // https://developer.apple.com/documentation/uikit/uicollectionview/1618063-dequeuereusablecellwithreuseiden?language=objc?
     }

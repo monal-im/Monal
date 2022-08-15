@@ -1078,6 +1078,9 @@ NSString* const kStanza = @"stanza";
         [self closeSocket];
         [self accountStatusChanged];
         self->_disconnectInProgres = NO;
+        
+        //make sure our idle state is rechecked
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNotIdle object:self];
     }];
 }
 
@@ -3950,10 +3953,18 @@ NSString* const kStanza = @"stanza";
             }
             */
             
-            //check accountState to make sure we don't swallow any errors thrown while [self connect] was already called, but the _reconnectInProgress flag not reset yet
+            //check accountState to make sure we don't swallow any errors thrown while [self connect] was already called,
+            //but the _reconnectInProgress flag not reset yet
             if(_reconnectInProgress && self.accountState<kStateReconnecting)
             {
                 DDLogInfo(@"Ignoring error in %@: already waiting for reconnect...", stream);
+                break;
+            }
+            
+            //don't display errors while disconnecting
+            if(_disconnectInProgres)
+            {
+                DDLogInfo(@"Ignoring stream error in %@: already disconnecting...", stream);
                 break;
             }
             
@@ -3997,6 +4008,11 @@ NSString* const kStanza = @"stanza";
         
         case NSStreamEventEndEncountered:
         {
+            if(_disconnectInProgres)
+            {
+                DDLogInfo(@"Ignoring stream eof in %@: already disconnecting...", stream);
+                break;
+            }
             DDLogInfo(@"%@ Stream %@ encountered eof, trying to reconnect via parse queue in 1 second", [stream class], stream);
             //use a timer to make sure the incoming data was pushed *through* the MLPipe and reached the parseQueue
             //already when pushing our reconnect block onto the parseQueue
@@ -4465,6 +4481,27 @@ NSString* const kStanza = @"stanza";
     [displayedNode setDisplayed:msg.messageId];
     [displayedNode setStoreHint];
     [self send:displayedNode];
+}
+
+-(void) removeFromServerWithCompletion:(void (^)(NSString* _Nullable error)) completion
+{
+    XMPPIQ* remove = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [remove addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:register" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"remove"]
+    ] andData:nil]];
+    [self sendIq:remove withResponseHandler:^(XMPPIQ* result) {
+        //disconnect account (without force) and throw away everything waiting to be processed
+        //(for example the stream close coming from the server after removing the account on the server)
+        [self disconnect];      //this is needed to not show spurious errors on delete
+        [[MLXMPPManager sharedInstance] removeAccountForAccountNo:self.accountNo];
+        completion(nil);        //signal success to UI
+    } andErrorHandler:^(XMPPIQ* error) {
+        if(error != nil)        //don't report iq invalidation on disconnect as error
+        {
+            NSString* errorStr = [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Server does not support account removal", @"")];
+            completion(errorStr);   //signal error to UI
+        }
+    }];
 }
 
 -(void) publishRosterName:(NSString* _Nullable) rosterName

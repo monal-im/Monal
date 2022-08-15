@@ -20,6 +20,7 @@
 @import Network;
 @import MobileCoreServices;
 @import SAMKeychain;
+@import Intents;
 
 static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
 #define FIRST_LOGIN_TIMEOUT 30.0
@@ -691,8 +692,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) removeAccountForAccountNo:(NSNumber*) accountNo
 {
-    [[MLXMPPManager sharedInstance] disconnectAccount:accountNo];
+    [self disconnectAccount:accountNo];
     [[DataLayer sharedInstance] removeAccount:accountNo];
+    [SAMKeychain deletePasswordForService:kMonalKeychainName account:accountNo.stringValue];
+    [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
+        if(error != nil)
+            DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+    }];
     // trigger UI removal
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 }

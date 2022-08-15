@@ -988,7 +988,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     DDLogInfo(@"### SOME ACCOUNT CHANGED TO NON-IDLE STATE ###");
     //show spinner (dispatch *async* to main queue to allow for ui changes)
     dispatch_async(dispatch_get_main_queue(), ^{
-        if(!([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle]))
+        if(([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle]))
+            [self.activeChats.spinner stopAnimating];
+        else
             [self.activeChats.spinner startAnimating];
     });
 }

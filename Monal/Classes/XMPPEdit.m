@@ -67,6 +67,7 @@ enum kSettingsAdvancedRows {
 enum kSettingsEditRows {
     SettingsClearOmemoSessionRow,
     SettingsClearHistoryRow,
+    SettingsRemoveAccountRow,
     SettingsDeleteAccountRow,
     SettingsEditRowsCnt
 };
@@ -447,38 +448,84 @@ enum DummySettingsRows {
     });
 }
 
-- (IBAction) deleteAccountClicked: (id) sender
+- (IBAction) removeAccountClicked: (id) sender
 {
     UIAlertController* questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account", @"") message:NSLocalizedString(@"This will remove this account and the associated data from this device.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
     UIAlertAction* noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         //do nothing when "no" was pressed
     }];
     UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
-        DDLogVerbose(@"Deleting accountNo %@", self.accountNo);
-        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
-        [self.db removeAccount:self.accountNo];
-        [SAMKeychain deletePasswordForService:kMonalKeychainName account:self.accountNo.stringValue];
-        
-        [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
-            if(error != nil)
-                DDLogError(@"Could not delete all SiriKit interactions: %@", error);
-        }];
+        DDLogVerbose(@"Removing accountNo %@", self.accountNo);
+        [[MLXMPPManager sharedInstance] removeAccountForAccountNo:self.accountNo];
 
         MBProgressHUD* hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;
         hud.removeFromSuperViewOnHide = YES;
         hud.label.text = NSLocalizedString(@"Success", @"");
-        hud.detailsLabel.text = NSLocalizedString(@"The account has been deleted", @"");
+        hud.detailsLabel.text = NSLocalizedString(@"The account has been removed", @"");
         UIImage* image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         hud.customView = [[UIImageView alloc] initWithImage:image];
         [hud hideAnimated:YES afterDelay:1.0f];
         
-        // trigger UI removal
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [self dismissViewControllerAnimated:YES completion:nil];
         });
+    }];
+    [questionAlert addAction:noAction];
+    [questionAlert addAction:yesAction];
+    questionAlert.popoverPresentationController.sourceView = sender;
+
+    [self presentViewController:questionAlert animated:YES completion:nil];
+}
+
+-(IBAction) deleteAccountClicked:(id) sender
+{
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(xmppAccount.accountState < kStateBound)
+    {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error Removing Account", @"")
+                                                                        message:NSLocalizedString(@"Your account must be enabled and connected, to be removed from the server!", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return;
+    }
+    
+    UIAlertController* questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account", @"") message:NSLocalizedString(@"This will delete this account and the associated data from the server and this device. Data might still be retained on other devices, though.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction* noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+        //do nothing when "no" was pressed
+    }];
+    UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
+        DDLogVerbose(@"Deleting account on server: %@", xmppAccount);
+        [xmppAccount removeFromServerWithCompletion:^(NSString* error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(error != nil)
+                {
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error Removing Account", @"")
+                                                                        message:error preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                }
+                else
+                {
+                    MBProgressHUD* hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                    hud.mode = MBProgressHUDModeCustomView;
+                    hud.removeFromSuperViewOnHide = YES;
+                    hud.label.text = NSLocalizedString(@"Success", @"");
+                    hud.detailsLabel.text = NSLocalizedString(@"The account has been deleted", @"");
+                    UIImage* image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+                    hud.customView = [[UIImageView alloc] initWithImage:image];
+                    [hud hideAnimated:YES afterDelay:1.0f];
+                    
+                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                        [self dismissViewControllerAnimated:YES completion:nil];
+                    });
+                }
+            });
+        }];
     }];
     [questionAlert addAction:noAction];
     [questionAlert addAction:yesAction];
@@ -674,10 +721,19 @@ enum DummySettingsRows {
                 buttonCell.tag = SettingsClearHistoryRow;
                 return buttonCell;
             }
+            case SettingsRemoveAccountRow:
+            {
+                MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+                buttonCell.buttonText.text = NSLocalizedString(@"Remove Account from this Device", @"");
+                buttonCell.buttonText.textColor = [UIColor redColor];
+                buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
+                buttonCell.tag = SettingsRemoveAccountRow;
+                return buttonCell;
+            }
             case SettingsDeleteAccountRow:
             {
                 MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-                buttonCell.buttonText.text = NSLocalizedString(@"Delete Account", @"");
+                buttonCell.buttonText.text = NSLocalizedString(@"Delete Account on Server", @"");
                 buttonCell.buttonText.textColor = [UIColor redColor];
                 buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
                 buttonCell.tag = SettingsDeleteAccountRow;
@@ -811,6 +867,9 @@ enum DummySettingsRows {
             }
             case SettingsClearHistoryRow:
                 [self clearHistoryClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
+                break;
+            case SettingsRemoveAccountRow:
+                [self removeAccountClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
                 break;
             case SettingsDeleteAccountRow:
                 [self deleteAccountClicked:[tableView cellForRowAtIndexPath:newIndexPath]];

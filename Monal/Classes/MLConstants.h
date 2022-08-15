@@ -132,6 +132,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalUpdateBundleFetchStatus @"kMonalUpdateBundleFetchStatus"
 #define kMonalIdle @"kMonalIdle"
 #define kMonalFiletransfersIdle @"kMonalFiletransfersIdle"
+#define kMonalNotIdle @"kMonalNotIdle"
 
 #define kMonalBackgroundChanged @"kMonalBackgroundChanged"
 

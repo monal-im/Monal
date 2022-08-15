@@ -431,16 +431,29 @@ NSString* const kStanza = @"stanza";
             //thrown because the sqlite3_busy_timeout triggers after 8 seconds.
             
             BOOL lastState = self->_lastIdleState;
-            //only send out idle notifications if we changed from non-idle to idle state
-            //but only do so if the receive queue is not currently suspended (e.g. account frozen)
-            if(!_receiveQueue.suspended && self.idle && !lastState)
+            //only send out idle state notifications if the receive queue is not currently suspended (e.g. account frozen)
+            if(!_receiveQueue.suspended)
             {
-                DDLogVerbose(@"Adding idle state notification to receive queue...");
-                [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                    if(self.idle)       //make sure we are still idle, even if in receive queue now
-                        //don't queue this notification because it should be handled INLINE inside the receive queue
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
-                }]] waitUntilFinished:NO];
+                //only send out idle notifications if we changed from non-idle to idle state
+                if(self.idle && !lastState)
+                {
+                    DDLogVerbose(@"Adding idle state notification to receive queue...");
+                    [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                        if(self.idle)       //make sure we are still idle, even if in receive queue now
+                            //don't queue this notification because it should be handled INLINE inside the receive queue
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
+                    }]] waitUntilFinished:NO];
+                }
+                //only send out not-idle notifications if we changed from idle to non-idle state
+                if(!self.idle && lastState)
+                {
+                    DDLogVerbose(@"Sending out non-idle state notification via background queue...");
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+                        //don't queue this notification because it should be handled INLINE
+                        //(and we don't need to queue anything while in a background thread anyways)
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNotIdle object:self];
+                    });
+                }
             }
         }
     }

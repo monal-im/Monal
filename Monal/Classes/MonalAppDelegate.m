@@ -200,6 +200,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleScheduleBackgroundTaskNotification:) name:kScheduleBackgroundTask object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowNotIdle:) name:kMonalNotIdle object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalNewMessageNotice object:nil];
@@ -981,6 +982,16 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 }
 
 #pragma mark - background tasks
+
+-(void) nowNotIdle:(NSNotification*) notification
+{
+    DDLogInfo(@"### SOME ACCOUNT CHANGED TO NON-IDLE STATE ###");
+    //show spinner (dispatch *async* to main queue to allow for ui changes)
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(!([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle]))
+            [self.activeChats.spinner startAnimating];
+    });
+}
 
 -(void) nowIdle:(NSNotification*) notification
 {

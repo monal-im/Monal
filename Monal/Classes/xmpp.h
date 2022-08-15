@@ -236,6 +236,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 -(void) addReconnectionHandler:(MLHandler*) handler;
 
+-(void) removeFromServerWithCompletion:(void (^)(NSString* _Nullable error)) completion;
+
 @end
 
 NS_ASSUME_NONNULL_END

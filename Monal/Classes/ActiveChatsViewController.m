@@ -149,6 +149,7 @@ static NSMutableSet* _smacksWarningDisplayed;
             [self.chatListTable endUpdates];
         }];
         [CATransaction commit];
+        [self.chatListTable reloadEmptyDataSet];
 
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
         [appDelegate updateUnread];
@@ -187,9 +188,10 @@ static NSMutableSet* _smacksWarningDisplayed;
             // reload contact entry if we found it
             if(indexPath)
             {
-                    DDLogDebug(@"Reloading row at %@", indexPath);
-                    [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                DDLogDebug(@"Reloading row at %@", indexPath);
+                [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
             }
+            [self.chatListTable reloadEmptyDataSet];
         });
     }
 }
@@ -679,7 +681,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(BOOL) emptyDataSetShouldDisplay:(UIScrollView*) scrollView
 {
-    BOOL toreturn = (self.unpinnedContacts.count == 0 && self.pinnedContacts == 0) ? YES : NO;
+    BOOL toreturn = (self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0) ? YES : NO;
     if(toreturn)
     {
         // A little trick for removing the cell separators

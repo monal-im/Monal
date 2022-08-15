@@ -228,7 +228,7 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(void) setXMLNS:(NSString*) xmlns
 {
-    [_attributes setObject:[xmlns copy] forKey:kXMLNS];
+    [_attributes setObject:[xmlns copy] forKey:@"xmlns"];
 }
 
 -(MLXMLNode*) addChildNode:(MLXMLNode*) child

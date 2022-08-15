@@ -280,7 +280,7 @@ NSString* const kiqErrorType = @"error";
     MLXMLNode* blockNode = [[MLXMLNode alloc] initWithElement:(blocked ? @"block" : @"unblock") andNamespace:@"urn:xmpp:blocking"];
     
     MLXMLNode* itemNode = [[MLXMLNode alloc] initWithElement:@"item"];
-    [itemNode.attributes setObject:blockedJid forKey:kJid];
+    [itemNode.attributes setObject:blockedJid forKey:@"jid"];
     [blockNode addChildNode:itemNode];
     
     [self addChildNode:blockNode];

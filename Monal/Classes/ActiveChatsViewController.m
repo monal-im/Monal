@@ -381,12 +381,14 @@ static NSMutableSet* _smacksWarningDisplayed;
         return;
     }
     // display quick start if the user never seen it or if there are 0 enabled accounts
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"] || [[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
+    {
         UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
         [self presentViewController:loginViewController animated:YES completion:^{}];
         return;
     }
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
+    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"])
+    {
         [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
         return;
     }

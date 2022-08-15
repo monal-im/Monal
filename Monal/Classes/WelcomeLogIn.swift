@@ -241,7 +241,6 @@ struct WelcomeLogIn: View {
                     DispatchQueue.main.async {
                         currentTimeout = nil // <- disable timeout on successful connection
                         self.errorObserverEnabled = false
-                        HelperTools.defaultsDB().set(true, forKey: "HasSeenLogin")
                         showLoadingOverlay(overlay, headline:NSLocalizedString("Loading contact list", comment: ""))
                     }
                 }

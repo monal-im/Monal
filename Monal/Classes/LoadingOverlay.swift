@@ -78,8 +78,8 @@ func hideLoadingOverlay(_ overlay: LoadingOverlayState) {
 }
 
 struct LoadingOverlay_Previews: PreviewProvider {
-    @StateObject static var overlay1 = LoadingOverlayState(enabled:true, headline:AnyView(Text("Loading")), description:AnyView(Text("More info?")))
-    @StateObject static var overlay2 = LoadingOverlayState(enabled:true, headline:AnyView(Text("Loading")), description:AnyView(HStack {
+    @ObservedObject static var overlay1 = LoadingOverlayState(enabled:true, headline:AnyView(Text("Loading")), description:AnyView(Text("More info?")))
+    @ObservedObject static var overlay2 = LoadingOverlayState(enabled:true, headline:AnyView(Text("Loading")), description:AnyView(HStack {
         Image(systemName: "checkmark")
         Text("Doing a lot of work...")
     }))

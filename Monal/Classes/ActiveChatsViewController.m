@@ -473,44 +473,19 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(BOOL) shouldPerformSegueWithIdentifier:(NSString*) identifier sender:(id) sender
 {
-    if([identifier isEqualToString:@"showDetails"])
-    {
-        //don't show contact details for mucs (they will get their own muc details later on)
-        if(((MLContact*)sender).isGroup)
-            return NO;
-    }
     return YES;
 }
 
 //this is needed to prevent segues invoked programmatically
 -(void) performSegueWithIdentifier:(NSString*) identifier sender:(id) sender
 {
-    if([self shouldPerformSegueWithIdentifier:identifier sender:sender] == NO)
-    {
-        if([identifier isEqualToString:@"showDetails"])
-        {
-            // Display warning
-            UIAlertController* groupDetailsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Groupchat/channel details", @"")
-                                                                                message:NSLocalizedString(@"Groupchat/channel details are currently not implemented in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [groupDetailsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                [groupDetailsWarning dismissViewControllerAnimated:YES completion:nil];
-            }]];
-            [self presentViewController:groupDetailsWarning animated:YES completion:nil];
-        }
-        return;
-    }
     [super performSegueWithIdentifier:identifier sender:sender];
 }
 
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
-    if([segue.identifier isEqualToString:@"showRegister"])
-    {
-        UIViewController* registerViewController = [[SwiftuiInterface new] makeAccountRegistration:(NSDictionary*)sender];
-        [self presentViewController:registerViewController animated:YES completion:^{}];
-    }
-    else if([segue.identifier isEqualToString:@"showConversation"])
+    if([segue.identifier isEqualToString:@"showConversation"])
     {
         UINavigationController* nav = segue.destinationViewController;
         chatViewController* chatVC = (chatViewController*)nav.topViewController;
@@ -722,14 +697,15 @@ static NSMutableSet* _smacksWarningDisplayed;
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
-        [self performSegueWithIdentifier:@"showRegister" sender:@{
+        UIViewController* registerViewController = [[SwiftuiInterface new] makeAccountRegistration:@{
             @"host": nilWrapper(host),
             @"username": nilWrapper(username),
             @"token": nilWrapper(token),
-            @"completion": nilDefault(callback, ^(id accountNo){
+            @"completion": nilDefault(callback, (^(id accountNo) {
                 DDLogWarn(@"Dummy reg completion called for accountNo: %@", accountNo);
-            }),
+            })),
         }];
+        [self presentViewController:registerViewController animated:YES completion:^{}];
     }];
 }
 

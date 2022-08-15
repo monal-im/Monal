@@ -627,11 +627,16 @@ static NSMutableSet* _smacksWarningDisplayed;
     [self presentChatWithContact:selected];
 }
 
-- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
+-(void) tableView:(UITableView*) tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath*) indexPath
 {
-    NSDictionary* contactDic = [self.unpinnedContacts objectAtIndex:indexPath.row];
-
-    [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
+    MLContact* selected = nil;
+    if(indexPath.section == pinnedChats) {
+        selected = self.pinnedContacts[indexPath.row];
+    } else {
+        selected = self.unpinnedContacts[indexPath.row];
+    }
+    UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:selected];
+    [self presentViewController:detailsViewController animated:YES completion:^{}];
 }
 
 
@@ -714,7 +719,10 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) showDetails
 {
     if([MLNotificationManager sharedInstance].currentContact != nil)
-        [self performSegueWithIdentifier:@"showDetails" sender:[MLNotificationManager sharedInstance].currentContact];
+    {
+        UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:[MLNotificationManager sharedInstance].currentContact];
+        [self presentViewController:detailsViewController animated:YES completion:^{}];
+    }
 }
 
 -(void) deleteConversation
@@ -728,6 +736,7 @@ static NSMutableSet* _smacksWarningDisplayed;
             if([rowContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
             {
                 [self tableView:self.chatListTable commitEditingStyle:UITableViewCellEditingStyleDelete forRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:section]];
+                [self openConversationPlaceholder:nil];
                 return;
             }
         }];

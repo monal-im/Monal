@@ -175,11 +175,16 @@ struct UIKitWorkaround<Content: View>: View {
         if(UIDevice.current.userInterfaceIdiom == .phone) {
             build().navigationBarTitleDisplayMode(.inline)
         } else {
+#if targetEnvironment(macCatalyst)
+            build().navigationBarTitleDisplayMode(.inline)
+#else
             NavigationView {
                 build()
                 .navigationBarTitleDisplayMode(.automatic)
             }
             .navigationViewStyle(.stack)
+
+#endif
         }
     }
 }

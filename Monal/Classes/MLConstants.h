@@ -95,16 +95,12 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 }
 
 //some xmpp related constants
-#define kRegServer @"yax.im"
 #define kMessageDeletedBody @"eu.siacs.conversations.message_deleted"
 
-#define kXMLNS @"xmlns"
 #define kId @"id"
-#define kJid @"jid"
 #define kMessageId @"kMessageId"
 
 #define kRegisterNameSpace @"jabber:iq:register"
-#define kDataNameSpace @"jabber:x:data"
 
 //all other constants needed
 #define kMonalWillBeFreezed @"kMonalWillBeFreezed"
@@ -135,17 +131,9 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalNotIdle @"kMonalNotIdle"
 
 #define kMonalBackgroundChanged @"kMonalBackgroundChanged"
-
-#define kMonalPresentChat @"kMonalPresentChat"
-
 #define kMLMAMPref @"kMLMAMPref"
 
-
-#define kMonalCallStartedNotice @"kMonalCallStartedNotice"
-#define kMonalCallRequestNotice @"kMonalCallRequestNotice"
-
 #define kMonalAccountStatusChanged @"kMonalAccountStatusChanged"
-#define kMonalAccountAuthRequest @"kMonalAccountAuthRequest"
 
 #define kMonalRefresh @"kMonalRefresh"
 #define kMonalContactRefresh @"kMonalContactRefresh"

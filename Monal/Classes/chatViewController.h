@@ -22,7 +22,7 @@
 #import "MLFileTransferTextCell.h"
 #import "MLFileTransferFileViewController.h"
 #import "MLAudioRecoderManager.h"
-#import "MLUploadQueueBaseCell.h"
+#import "MLUploadQueueCell.h"
 
 @interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, UICollectionViewDataSource, CLLocationManagerDelegate, SearchResultDelegate, OpenFileDelegate, AudioRecoderManagerDelegate, MLUploadQueueCellDelegate, UIDropInteractionDelegate, PHPickerViewControllerDelegate>
 {

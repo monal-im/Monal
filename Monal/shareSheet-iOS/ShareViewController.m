@@ -150,114 +150,35 @@
             return;
         }
     }
+    MLAssert(provider != nil, @"provider should never be nil!");
     
-    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-    payload[@"account_id"] = self.recipient.accountId;
-    payload[@"recipient"] = self.recipient.contactJid;
-    payload[@"comment"] = self.contentText;
-    
-    //for a list of types, see UTCoreTypes.h in MobileCoreServices framework
-    DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
-    if([provider hasItemConformingToTypeIdentifier:@"com.apple.mapkit.map-item"])
-    {
-        // convert map item to geo:
-        [provider loadItemForTypeIdentifier:@"com.apple.mapkit.map-item" options:nil completionHandler:^(NSData*  _Nullable item, NSError * _Null_unspecified error) {
-            NSError* err;
-            MKMapItem* mapItem = [NSKeyedUnarchiver unarchivedObjectOfClass:[MKMapItem class] fromData:item error:&err];
-            if(err != nil)
-                DDLogError(@"Error extracting mapkit item: %@", err);
-            else
+    [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* payload) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(payload == nil || payload[@"error"] != nil)
             {
-                DDLogInfo(@"Got mapkit item: %@", item);
-                payload[@"type"] = @"geo";
-                payload[@"data"] = [NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude];
-                [self savePayloadMsgAndComplete:payload];
+                DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
+                NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
+                if(payload[@"error"] != nil)
+                    message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
+                UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                            message:message preferredStyle:UIAlertControllerStyleAlert];
+                [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                    [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
+                    [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+                }]];
+                [self presentViewController:unknownItemWarning animated:YES completion:nil];
+                return;
             }
-        }];
-    }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeImage])
-    {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(NSURL*  _Nullable item, NSError * _Null_unspecified error) {
-            if(error != nil)
-            {
-                DDLogWarn(@"Got error, retrying with UIImage: %@", error);
-                [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(UIImage*  _Nullable item, NSError * _Null_unspecified error) {
-                    DDLogInfo(@"Got memory image item: %@", item);
-                    payload[@"type"] = @"image";
-                    payload[@"data"] = [MLFiletransfer prepareUIImageUpload:item];
-                    [self savePayloadMsgAndComplete:payload];
-                }];
-            }
-            else
-            {
-                DDLogInfo(@"Got image item: %@", item);
-                payload[@"type"] = @"image";
-                payload[@"data"] = [MLFiletransfer prepareFileUpload:item];
-                [self savePayloadMsgAndComplete:payload];
-            }
-        }];
-    }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeAudiovisualContent])
-    {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeAudiovisualContent options:nil completionHandler:^(NSURL*  _Nullable item, NSError * _Null_unspecified error) {
-            DDLogInfo(@"Got audiovisual item: %@", item);
-            payload[@"type"] = @"audiovisual";
-            payload[@"data"] = [MLFiletransfer prepareFileUpload:item];
+            
+            payload[@"account_id"] = self.recipient.accountId;
+            payload[@"recipient"] = self.recipient.contactJid;
+            payload[@"comment"] = self.contentText;
+            //don't use the comment field for text shares (they already contain the comment text as shared item)
+            if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
+                payload[@"comment"] = @"";
             [self savePayloadMsgAndComplete:payload];
-        }];
-    }
-    /*else if([provider hasItemConformingToTypeIdentifier:(NSString*)])
-    {
-    }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)])
-    {
-    }*/
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeContact])
-    {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeContact options:nil completionHandler:^(NSURL*  _Nullable item, NSError * _Null_unspecified error) {
-            DDLogInfo(@"Got contact item: %@", item);
-            payload[@"type"] = @"contact";
-            payload[@"data"] = [MLFiletransfer prepareFileUpload:item];
-            [self savePayloadMsgAndComplete:payload];
-        }];
-    }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeFileURL])
-    {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeFileURL options:nil completionHandler:^(NSURL*  _Nullable item, NSError * _Null_unspecified error) {
-            DDLogInfo(@"Got file url item: %@", item);
-            payload[@"type"] = @"file";
-            payload[@"data"] = [MLFiletransfer prepareFileUpload:item];
-            [self savePayloadMsgAndComplete:payload];
-        }];
-    }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeURL])
-    {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeURL options:nil completionHandler:^(NSURL*  _Nullable item, NSError * _Null_unspecified error) {
-            DDLogInfo(@"Got internet url item: %@", item);
-            payload[@"type"] = @"url";
-            payload[@"data"] = item.absoluteString;
-            [self savePayloadMsgAndComplete:payload];
-        }];
-    }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
-    {
-        DDLogInfo(@"Got direct text item: %@", self.contentText);
-        payload[@"type"] = @"text";
-        payload[@"data"] = self.contentText;
-        payload[@"comment"] = @"";
-        [self savePayloadMsgAndComplete:payload];
-    }
-    else
-    {
-        DDLogError(@"Could not save payload");
-        UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
-                                                                    message:NSLocalizedString(@"Monal was not able to send your attachment!", @"") preferredStyle:UIAlertControllerStyleAlert];
-        [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-            [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
-            [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
-        }]];
-        [self presentViewController:unknownItemWarning animated:YES completion:nil];
-    }
+        });
+    }];
 }
 
 -(void) savePayloadMsgAndComplete:(NSDictionary*) payload

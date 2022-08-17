@@ -3859,6 +3859,21 @@ NSString* const kStanza = @"stanza";
     [iq getRegistrationFields];
 
     [self sendIq:iq withResponseHandler:^(XMPPIQ* result) {
+        if(!(
+            ([result check:@"{jabber:iq:register}query/username"] && [result check:@"{jabber:iq:register}query/password"]) ||
+            [result check:@"{jabber:iq:register}query/\\{jabber:iq:register}form\\"]
+        ))
+        {
+            //dispatch completion handler outside of the receiveQueue
+            if(self->_regFormErrorCompletion)
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    if([result check:@"{jabber:iq:register}query/instructions"])
+                        self->_regFormErrorCompletion(NO, [NSString stringWithFormat:@"Could not request registration form: %@", [result findFirst:@"{jabber:iq:register}query/instructions#"]]);
+                    else
+                        self->_regFormErrorCompletion(NO, @"Could not request registration form: unknown error");
+                });
+            return;
+        }
         //dispatch completion handler outside of the receiveQueue
         if(self->_regFormCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{

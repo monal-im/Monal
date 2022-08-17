@@ -2559,33 +2559,7 @@
                                 <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                             </collectionViewFlowLayout>
                             <cells>
-                                <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="UploadQueueImageCell" id="uaC-hS-lLp" userLabel="UploadQueueImageCell" customClass="MLUploadQueueImageCell">
-                                    <rect key="frame" x="0.0" y="8.5" width="129" height="128"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="Eb4-5C-Zca">
-                                        <rect key="frame" x="0.0" y="0.0" width="129" height="128"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <subviews>
-                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xUd-1b-tVK">
-                                                <rect key="frame" x="0.0" y="-1" width="129" height="128"/>
-                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            </imageView>
-                                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FUb-45-FS7">
-                                                <rect key="frame" x="109" y="-0.5" width="20" height="22"/>
-                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                <state key="normal" image="xmark.circle.fill" catalog="system"/>
-                                                <connections>
-                                                    <action selector="closeButtonAction" destination="uaC-hS-lLp" eventType="touchUpInside" id="sR6-qv-II1"/>
-                                                </connections>
-                                            </button>
-                                        </subviews>
-                                    </collectionViewCellContentView>
-                                    <connections>
-                                        <outlet property="ImagePreview" destination="xUd-1b-tVK" id="Jd1-Dh-u6w"/>
-                                        <outlet property="closeButton" destination="FUb-45-FS7" id="hLE-US-KEz"/>
-                                    </connections>
-                                </collectionViewCell>
-                                <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="UploadQueueDocumentCell" id="VCP-J6-XZX" customClass="MLUploadQueueDocumentCell">
+                                <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="UploadQueueCell" id="VCP-J6-XZX" customClass="MLUploadQueueCell">
                                     <rect key="frame" x="139" y="8.5" width="129" height="128"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="GOq-WM-04c">

@@ -12,9 +12,7 @@
 #import "MLChatMapsCell.h"
 #import "MLLinkCell.h"
 #import "MLReloadCell.h"
-#import "MLUploadQueueDocumentCell.h"
-#import "MLUploadQueueImageCell.h"
-#import "MLUploadQueueItem.h"
+#import "MLUploadQueueCell.h"
 
 #import "AESGcm.h"
 #import "DataLayer.h"
@@ -99,7 +97,7 @@
 @property (nonatomic, strong) NSMutableArray* searchResultMessageList;
 
 // Upload Queue
-@property (nonatomic, strong) NSMutableOrderedSet<MLUploadQueueItem*>* uploadQueue;
+@property (nonatomic, strong) NSMutableOrderedSet<NSDictionary*>* uploadQueue;
 @property (nonatomic, strong) NSLayoutConstraint* uploadMenuConstraint;
 
 @property (nonatomic, strong) void (^editingCallback)(NSString* newBody);
@@ -229,7 +227,7 @@ enum msgSentState {
     [self.messageTable setRefreshControl:refreshControl];
     self.moreMessagesAvailable = YES;
 
-    self.uploadQueue = [[NSMutableOrderedSet<MLUploadQueueItem*> alloc] init];
+    self.uploadQueue = [[NSMutableOrderedSet<NSDictionary*> alloc] init];
 
     [self.messageTable addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
     [self.inputContainerView addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
@@ -1128,7 +1126,7 @@ enum msgSentState {
 
 
 #pragma mark - doc picker
--(IBAction) attachfile:(id)sender
+-(IBAction) attachfile:(id) sender
 {
     [self stopEditing];
     [self.chatInput resignFirstResponder];
@@ -1138,19 +1136,29 @@ enum msgSentState {
     return;
 }
 
--(void) documentPicker:(UIDocumentPickerViewController*) controller didPickDocumentsAtURLs:(NSArray<NSURL*>*)urls
+-(void) documentPicker:(UIDocumentPickerViewController*) controller didPickDocumentsAtURLs:(NSArray<NSURL*>*) urls
 {
     if(urls.count == 0)
         return;
 
-    [self addDocumentsToQueue:urls];
+    NSMutableArray* entries = [[NSMutableArray alloc] init];
+    for(NSURL* url in urls)
+        [entries addObject:@{
+            @"type": @"file",
+            @"filename": [url lastPathComponent],
+            @"data": [MLFiletransfer prepareFileUpload:url],
+        }];
+    [self addToUIQueue:entries];
 }
 
 #pragma mark  - location delegate
--(void) locationManagerDidChangeAuthorization:(CLLocationManager*) manager {
+-(void) locationManagerDidChangeAuthorization:(CLLocationManager*) manager
+{
     CLAuthorizationStatus gpsStatus = [manager authorizationStatus];
-    if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
-        if(self.sendLocation) {
+    if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse)
+    {
+        if(self.sendLocation)
+        {
             self.sendLocation = NO;
             [self.locationManager requestLocation];
         }
@@ -1286,68 +1294,68 @@ enum msgSentState {
             [self attachfile:sender];
         }];
 
-        [fileAction setValue:[[UIImage imageNamed:@"file-attatchment"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        [fileAction setValue:[[UIImage systemImageNamed:@"doc"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         [actionControll addAction:fileAction];
 #else
         UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
         mediaPicker.delegate = self;
 
         UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action __unused) {
-            mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-            mediaPicker.mediaTypes = @[(NSString*)kUTTypeImage, (NSString*)kUTTypeMovie];
+            @try {
+                mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+                mediaPicker.mediaTypes = @[(NSString*)kUTTypeImage, (NSString*)kUTTypeMovie];
 
-            switch ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo])
-            {
-                case AVAuthorizationStatusAuthorized:
+                switch ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo])
                 {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self presentViewController:mediaPicker animated:YES completion:nil];
-                    });
-                    break;
-                }
-                case AVAuthorizationStatusNotDetermined:
-                {
-                    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted)
+                    case AVAuthorizationStatusAuthorized:
                     {
-                        if(granted == YES)
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self presentViewController:mediaPicker animated:YES completion:nil];
+                        });
+                        break;
+                    }
+                    case AVAuthorizationStatusNotDetermined:
+                    {
+                        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted)
                         {
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                                [self presentViewController:mediaPicker animated:YES completion:nil];
-                            });
-                        }
-                        else
-                            DDLogWarn(@"Camera access not granted. AV Permissions now set to denied");
-                    }];
-                    break;
+                            if(granted == YES)
+                            {
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    [self presentViewController:mediaPicker animated:YES completion:nil];
+                                });
+                            }
+                            else
+                                DDLogWarn(@"Camera access not granted. AV Permissions now set to denied");
+                        }];
+                        break;
+                    }
+                    case AVAuthorizationStatusDenied:
+                    case AVAuthorizationStatusRestricted:
+                    {
+                        DDLogWarn(@"Camera access denied");
+                        [self showCameraPermissionWarning];
+                        break;
+                    }
                 }
-                case AVAuthorizationStatusDenied:
-                case AVAuthorizationStatusRestricted:
-                {
-                    DDLogWarn(@"Camera access denied");
-                    [self showCameraPermissionWarning];
-                    break;
-                }
+            } @catch(id ex) {
+                DDLogError(@"catched exception while opening camera: %@", ex);
+                [self showCameraPermissionWarning];
             }
         }];
 
         UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action __unused) {
-            if(@available(iOS 14, *)) {
-                [self presentViewController:[self generatePHPickerViewController] animated:YES completion:nil];
-            } else {
-                mediaPicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-                mediaPicker.allowsEditing = NO;
-                [self presentViewController:mediaPicker animated:YES completion:nil];
-            }
+            [self presentViewController:[self generatePHPickerViewController] animated:YES completion:nil];
         }];
 
         UIAlertAction* fileAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"File", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [self presentViewController:self.filePicker animated:YES completion:nil];
+            [self attachfile:sender];
         }];
 
         // Set image
         [cameraAction setValue:[[UIImage systemImageNamed:@"camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         [photosAction setValue:[[UIImage systemImageNamed:@"photo"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
-        [fileAction setValue:[[UIImage imageNamed:@"file-attatchment"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        [fileAction setValue:[[UIImage systemImageNamed:@"doc"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        
         [actionControll addAction:cameraAction];
         [actionControll addAction:photosAction];
         [actionControll addAction:fileAction];
@@ -1411,72 +1419,59 @@ enum msgSentState {
 -(void) picker:(PHPickerViewController*) picker didFinishPicking:(NSArray<PHPickerResult*>*) results
 {
     [self dismissViewControllerAnimated:YES completion:nil];
-    for(PHPickerResult* userSelection in results) {
+    for(PHPickerResult* userSelection in results)
+    {
+        DDLogDebug(@"Handling asset with identifier: %@", userSelection.assetIdentifier);
         NSItemProvider* provider = userSelection.itemProvider;
         MLAssert(provider != nil, @"Expected a NSItemProvider");
-        if([provider hasItemConformingToTypeIdentifier:@"com.apple.quicktime-movie"] == YES)
-        {
-            [provider loadItemForTypeIdentifier:@"com.apple.quicktime-movie" options:nil completionHandler:^(NSURL* path, NSError* error)
-             {
-                if(error != nil)
-                    DDLogInfo(@"Error while parsing video provider: %@", error);
-                if(path == nil)
-                    DDLogInfo(@"Video provider passed empty path");
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self addImagesToQueue:@[path]];
-                });
-            }];
-        }
-        else if([provider hasItemConformingToTypeIdentifier:@"public.mpeg-4"] == YES)
-        {
-            [provider loadItemForTypeIdentifier:@"public.mpeg-4" options:nil completionHandler:^(NSURL* path, NSError* error)
-             {
-                if(error != nil)
-                    DDLogInfo(@"Error while parsing video provider: %@", error);
-                if(path == nil)
-                    DDLogInfo(@"Video provider passed empty path");
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self addImagesToQueue:@[path]];
-                });
-            }];
-        }
-        else
-        {
-            [provider loadObjectOfClass:[UIImage class] completionHandler:^(__kindof id<NSItemProviderReading>  _Nullable object, NSError * _Nullable error) {
-#ifdef TARGET_OS_SIMULATOR
-                if(NSStringFromClass([object class]) == nil) {
-                    DDLogError(@"Could not add user-selected image to the upload queue! This is a known issue for iOS Simulator when trying to load HDR images, see https://developer.apple.com/forums/thread/665265");
-                    return;
+        [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* payload) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(payload == nil || payload[@"error"] != nil)
+                {
+                    DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
+                    NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
+                    if(payload[@"error"] != nil)
+                        message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
+                    UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                                message:message preferredStyle:UIAlertControllerStyleAlert];
+                    [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                        [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
+                        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+                    }]];
+                    [self presentViewController:unknownItemWarning animated:YES completion:nil];
                 }
-#endif
-                MLAssert([object isKindOfClass: [UIImage class]], @"document picker did not pick an object of type UIImage");
-                UIImage* image = (UIImage*)object;
-
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self addRawImagesToQueue:@[image]];
-                });
-            }];
-        }
+                else
+                    [self addToUIQueue:@[payload]];
+            });
+        }];
     }
 }
 
 -(void) imagePickerController:(UIImagePickerController*) picker didFinishPickingMediaWithInfo:(NSDictionary<NSString*, id>*) info
 {
     [self dismissViewControllerAnimated:YES completion:nil];
-
     if(info[UIImagePickerControllerMediaType] == nil)
         return;
-    else if([info[UIImagePickerControllerMediaType] isEqualToString:(NSString*)kUTTypeImage])
+    
+    if([info[UIImagePickerControllerMediaType] isEqualToString:(NSString*)kUTTypeImage])
     {
         UIImage* selectedImage = info[UIImagePickerControllerEditedImage];
         if(!selectedImage)
             selectedImage = info[UIImagePickerControllerOriginalImage];
-        [self addRawImagesToQueue:@[selectedImage]];
+        [self addToUIQueue:@[@{
+            @"type": @"image",
+            @"preview": selectedImage,
+            @"data": [MLFiletransfer prepareUIImageUpload:selectedImage],
+        }]];
     }
     else if([info[UIImagePickerControllerMediaType] isEqualToString:(NSString*)kUTTypeMovie])
     {
-        MLAssert(info[UIImagePickerControllerMediaURL] != nil, @"Expected video url");
-        [self addImagesToQueue:@[info[UIImagePickerControllerMediaURL]]];
+        NSURL* url = info[UIImagePickerControllerMediaURL];
+        [self addToUIQueue:@[@{
+            @"type": @"audiovisual",
+            @"filename": [url lastPathComponent],
+            @"data": [MLFiletransfer prepareFileUpload:url],
+        }]];
     }
     else
     {
@@ -1485,7 +1480,7 @@ enum msgSentState {
     }
 }
 
-- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+-(void) imagePickerControllerDidCancel:(UIImagePickerController*) picker
 {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -3075,47 +3070,6 @@ enum msgSentState {
 }
 
 # pragma mark - Upload Queue (Backend)
--(void) addDocumentsToQueue:(NSArray<NSURL*>*) urls
-{
-    NSMutableArray<MLUploadQueueItem*>* newItems = [[NSMutableArray<MLUploadQueueItem*> alloc] init];
-    for(NSUInteger i = 0; i < urls.count; i++)
-    {
-        [newItems addObject:[[MLUploadQueueItem alloc] initWithURL:urls[i]]];
-    }
-    [self addToUIQueue:newItems];
-}
-
--(void) addImagesToQueue:(NSArray<NSURL*>*) urls
-{
-    NSMutableArray<MLUploadQueueItem*>* newItems = [[NSMutableArray<MLUploadQueueItem*> alloc] init];
-    for(NSUInteger i = 0; i < urls.count; i++)
-    {
-        UIImage* image = [UIImage imageWithData:[NSData dataWithContentsOfURL:urls[i]]];
-        if(image == nil) { // FIXME Fallback to generic document for unsupported file? Some NSURLs may be invalid
-            /*NSError* error = nil;
-            if([urls[i] checkResourceIsReachableAndReturnError:&error] == NO)
-            {
-                DDLogError(@"Fallback to image URL did not work! Error: %@", error.localizedDescription);
-                return;
-            }*/
-            [newItems addObject:[[MLUploadQueueItem alloc] initWithURL:urls[i]]];
-        } else {
-            [newItems addObject:[[MLUploadQueueItem alloc] initWithImage:image imageUrl:urls[i]]];
-        }
-    }
-    [self addToUIQueue:newItems];
-}
-
-// raw image -> no URL info to check duplicates
--(void) addRawImagesToQueue:(NSArray<UIImage*>*) images
-{
-    NSMutableArray<MLUploadQueueItem*>* newItems = [[NSMutableArray<MLUploadQueueItem*> alloc] init];
-    for(NSUInteger i = 0; i < images.count; i++)
-    {
-        [newItems addObject:[[MLUploadQueueItem alloc] initWithImage:images[i]]];
-    }
-    [self addToUIQueue:newItems];
-}
 
 -(void) handleMediaUploadCompletion:(NSString*) url withMime:(NSString*) mimeType withSize:(NSNumber*) size withError:(NSError*) error
 {
@@ -3158,39 +3112,20 @@ enum msgSentState {
     MLAssert(self.uploadQueue.count >= 1, @"upload queue contains less than 1 element");
     [self showUploadHUD];
 
+    NSDictionary* payload = self.uploadQueue.firstObject;
+    MLAssert([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"contact"] || [payload[@"type"] isEqualToString:@"audiovisual"], @"Payload type must be of type image, file contact or audiovisual!", payload);
+    
     DDLogVerbose(@"start dispatch");
-    MLUploadQueueItem* uploadItem = self.uploadQueue.firstObject;
-    if([uploadItem getType] == UPLOAD_QUEUE_TYPE_RAW_IMAGE || [uploadItem getType] == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL)
-    {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            DDLogVerbose(@"Uploading image");
-            [MLFiletransfer uploadUIImage:[uploadItem getImage] onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-                dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        $call(payload[@"data"], $ID(account, self.xmppAccount), $BOOL(encrypted, self.contact.isEncrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(error != nil)
+                    [self handleMediaUploadCompletion:nil withMime:nil withSize:nil withError:error];
+                else
                     [self handleMediaUploadCompletion:url withMime:mimeType withSize:size withError:error];
-                });
-            }];
-        });
-    }
-    else if([uploadItem getType] == UPLOAD_QUEUE_TYPE_URL)
-    {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
-            DDLogVerbose(@"Uploading file at URL '%@'", [uploadItem getURL]);
-            NSError* error;
-            [coordinator coordinateReadingItemAtURL:[uploadItem getURL] options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL * _Nonnull newURL) {
-                DDLogDebug(@"NSFileCoordinator called accessor");
-                [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self handleMediaUploadCompletion:url withMime:mimeType withSize:size withError:error];
-                    });
-                }];
-            }];
-            if(error)
-                DDLogError(@"NSFileCoordinator error: %@", error);
-        });
-    } else {
-        unreachable();
-    }
+            });
+        })));
+    });
 }
 
 # pragma mark - Upload Queue (UI)
@@ -3217,7 +3152,7 @@ enum msgSentState {
     [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:index inSection:0]]];
 }
 
--(void) addToUIQueue:(NSArray<MLUploadQueueItem*>*) newItems;
+-(void) addToUIQueue:(NSArray<NSDictionary*>*) newItems
 {
     if(self.uploadQueue.count == 0 && newItems.count > 0) // Queue was previously empty but will be filled now
     {
@@ -3233,7 +3168,7 @@ enum msgSentState {
                 newInd[i] = [NSIndexPath indexPathForItem:i inSection:0];
             }
             [self.uploadMenuView insertItemsAtIndexPaths:newInd];
-        } completion:^(BOOL finished){
+        } completion:^(BOOL finished) {
             [CATransaction commit];
             [UIView setAnimationsEnabled:YES];
             [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
@@ -3253,58 +3188,42 @@ enum msgSentState {
                 newInd[i] = [NSIndexPath indexPathForItem:start + i + 1 inSection:0];
             }
             [self.uploadMenuView insertItemsAtIndexPaths:newInd];
-        } completion:^(BOOL finished)
-        {
+        } completion:^(BOOL finished) {
             [self.uploadMenuView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.uploadQueue.count inSection:0] atScrollPosition:UICollectionViewScrollPositionRight animated:YES];
             [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
         }];
     }
 }
 
-- (nonnull __kindof UICollectionViewCell*) collectionView:(nonnull UICollectionView*) collectionView cellForItemAtIndexPath:(nonnull NSIndexPath*) indexPath
+-(nonnull __kindof UICollectionViewCell*) collectionView:(nonnull UICollectionView*) collectionView cellForItemAtIndexPath:(nonnull NSIndexPath*) indexPath
 {
+    // the '+' tile
     if((NSUInteger)indexPath.item == self.uploadQueue.count)
-    { // the '+' tile
         return [self.uploadMenuView dequeueReusableCellWithReuseIdentifier:@"addToUploadQueueCell" forIndexPath:indexPath];
-    }
     else
-    { // some image in the queue
+    {
         MLAssert(self.uploadQueue.count >= (NSUInteger)indexPath.item, @"index path is greater than count in upload queue");
-        MLUploadQueueItem* uploadItem = self.uploadQueue[indexPath.item];
-        if([uploadItem getType] == UPLOAD_QUEUE_TYPE_RAW_IMAGE || [uploadItem getType] == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL)
-        {
-            MLUploadQueueImageCell* cell = (MLUploadQueueImageCell*) [self.uploadMenuView dequeueReusableCellWithReuseIdentifier:@"UploadQueueImageCell" forIndexPath:indexPath];
-            [cell initCellWithImage:[uploadItem getImage] index:indexPath.item];
-            [cell setUploadQueueDelegate:self];
-            return cell;
-        }
-        else if ([uploadItem getType] == UPLOAD_QUEUE_TYPE_URL)
-        {
-            MLUploadQueueDocumentCell* cell = (MLUploadQueueDocumentCell*) [self.uploadMenuView dequeueReusableCellWithReuseIdentifier:@"UploadQueueDocumentCell" forIndexPath:indexPath];
-            [cell initCellWithURL:[uploadItem getURL] index:indexPath.item];
-            [cell setUploadQueueDelegate:self];
-            return cell;
-        }
-        else
-        {
-            unreachable();
-        }
+        NSDictionary* uploadItem = self.uploadQueue[indexPath.item];
         // https://developer.apple.com/documentation/uikit/uicollectionview/1618063-dequeuereusablecellwithreuseiden?language=objc?
+        MLUploadQueueCell* cell = (MLUploadQueueCell*) [self.uploadMenuView dequeueReusableCellWithReuseIdentifier:@"UploadQueueCell" forIndexPath:indexPath];
+        [cell initCellWithPreviewImage:uploadItem[@"preview"] filename:uploadItem[@"filename"] index:indexPath.item];
+        [cell setUploadQueueDelegate:self];
+        return cell;
     }
 }
 
-- (NSInteger) numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+-(NSInteger) numberOfSectionsInCollectionView:(UICollectionView*) collectionView
 {
     return 1;
 }
 
-- (NSInteger)collectionView:(nonnull UICollectionView*) collectionView numberOfItemsInSection:(NSInteger)section
+-(NSInteger)collectionView:(nonnull UICollectionView*) collectionView numberOfItemsInSection:(NSInteger) section
 {
     MLAssert(section == 0, @"section is only allowed to be zero");
     return self.uploadQueue.count == 0 ? 0 : self.uploadQueue.count + 1;
 }
 
-- (void) notifyUploadQueueRemoval:(NSUInteger) index
+-(void) notifyUploadQueueRemoval:(NSUInteger) index
 {
     MLAssert(index < self.uploadQueue.count, @"index is only allowed to be smaller than uploadQueue.count");
     [self.uploadMenuView performBatchUpdates:^{
@@ -3313,7 +3232,7 @@ enum msgSentState {
         // Fix all indices accordingly
         for(NSUInteger i = 0; i < self.uploadQueue.count; i++)
         {
-            MLUploadQueueBaseCell* tmp = (MLUploadQueueImageCell*)[self.uploadMenuView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection: 0]];
+            MLUploadQueueCell* tmp = (MLUploadQueueCell*)[self.uploadMenuView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection: 0]];
             tmp.index = i;
         }
 
@@ -3325,39 +3244,42 @@ enum msgSentState {
     }];
 }
 
-- (IBAction)addImageToUploadQueue
+-(IBAction) addImageToUploadQueue
 {
-    if (@available(iOS 14, *)) {
-        [self presentViewController:[self generatePHPickerViewController] animated:YES completion:nil];
-    } else {
-        UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
-        mediaPicker.delegate = self;
-        mediaPicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-        mediaPicker.allowsEditing = NO;
-        [self presentViewController:mediaPicker animated:YES completion:nil];
-    }
+    [self presentViewController:[self generatePHPickerViewController] animated:YES completion:nil];
 }
 
-- (void) dropInteraction:(UIDropInteraction*) interaction performDrop:(id<UIDropSession>)session
+-(void) dropInteraction:(UIDropInteraction*) interaction performDrop:(id<UIDropSession>) session
 {
     for(UIDragItem* item in session.items)
     {
         NSItemProvider* provider = item.itemProvider;
         MLAssert(provider != nil, @"provider must not be nil");
-        MLAssert([provider hasItemConformingToTypeIdentifier:(NSString*) kUTTypeItem], @"provider must supply item conforming to kUTTypeItem");
-        [provider loadItemForTypeIdentifier:(NSString*) kUTTypeItem options:nil completionHandler:^(id <NSSecureCoding> urlItem, NSError *error)
-        {
-            if ([(NSObject*)urlItem isKindOfClass: [NSURL class]])
-            {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self addDocumentsToQueue:@[(NSURL*) urlItem]];
-                });
-            }
+        MLAssert([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeItem], @"provider must supply item conforming to kUTTypeItem");
+        [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* _Nullable payload) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(payload == nil || payload[@"error"] != nil)
+                {
+                    DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
+                    NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
+                    if(payload[@"error"] != nil)
+                        message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
+                    UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                                message:message preferredStyle:UIAlertControllerStyleAlert];
+                    [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                        [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
+                        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+                    }]];
+                    [self presentViewController:unknownItemWarning animated:YES completion:nil];
+                }
+                else
+                    [self addToUIQueue:@[payload]];
+            });
         }];
     }
 }
 
-- (UIDropProposal*) dropInteraction:(UIDropInteraction *)interaction sessionDidUpdate:(id<UIDropSession>)session
+-(UIDropProposal*) dropInteraction:(UIDropInteraction*) interaction sessionDidUpdate:(id<UIDropSession>) session
 {
     return [[UIDropProposal alloc] initWithDropOperation:UIDropOperationCopy];
 }

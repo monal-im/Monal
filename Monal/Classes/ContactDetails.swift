@@ -44,7 +44,7 @@ struct ContactDetails: View {
 
                 if(contact.obj.isGroup && contact.obj.mucType == "group") {
                     NavigationLink(destination: LazyClosureView(MemberList(mucContact: contact))) {
-                        Text("Members")
+                        Text("Group Members")
                     }
                 }
 #if !DISABLE_OMEMO

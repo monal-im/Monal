@@ -130,68 +130,66 @@
     NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
     DDLogVerbose(@"Attachments = %@", item.attachments);
 
-    NSItemProvider* provider;
-    for(int try=0; try<2 && provider==nil; try++)
-    {
-        for(NSItemProvider* attachment in item.attachments)
-        {
-            //only ignore on try #0
-            if(try == 0 && ([attachment hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText] && self.contentText && ![self.contentText isEqualToString:@""]))
-                ;   //ignore plaintext, already displayed in contentText (e.g. comment)
-            else if(provider == nil)
-                provider = attachment;
-            else
-            {
-                DDLogError(@"We currently are only able to handle exactly one shared item, ignoring this multi-item share!");
-                UIAlertController* multiItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Multi-item share detected", @"")
-                                                                            message:NSLocalizedString(@"We currently are only able to handle exactly one shared item, ignoring this multi-item share!", @"") preferredStyle:UIAlertControllerStyleAlert];
-                [multiItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                    [multiItemWarning dismissViewControllerAnimated:YES completion:nil];
-                    [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
-                }]];
-                [self presentViewController:multiItemWarning animated:YES completion:nil];
-                return;
-            }
-        }
-    }
-    MLAssert(provider != nil, @"provider should never be nil!");
+    //don't use the comment field for text shares (they already contain the comment text as shared item)
+    //if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
     
-    [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* payload) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if(payload == nil || payload[@"error"] != nil)
+    __block uint32_t loading = 0;       //no need for @synchronized etc., because we access this var exclusively from the main thread
+    monal_void_block_t checkIfDone = ^{
+        if(loading == 0)
+        {
+            if(self.contentText && [self.contentText length] > 0)
             {
-                DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
-                NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
-                if(payload[@"error"] != nil)
-                    message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
-                UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
-                                                                            message:message preferredStyle:UIAlertControllerStyleAlert];
-                [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                    [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
-                    [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
-                }]];
-                [self presentViewController:unknownItemWarning animated:YES completion:nil];
-                return;
-            }
-            
-            payload[@"account_id"] = self.recipient.accountId;
-            payload[@"recipient"] = self.recipient.contactJid;
-            payload[@"comment"] = self.contentText;
-            //don't use the comment field for text shares (they already contain the comment text as shared item)
-            if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
+                NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+                payload[@"account_id"] = self.recipient.accountId;
+                payload[@"recipient"] = self.recipient.contactJid;
+                payload[@"type"] = @"text";
+                payload[@"data"] = self.contentText;
                 payload[@"comment"] = @"";
-            [self savePayloadMsgAndComplete:payload];
-        });
-    }];
-}
-
--(void) savePayloadMsgAndComplete:(NSDictionary*) payload
-{
-    DDLogDebug(@"Saving payload dictionary to outbox: %@", payload);
-    [[DataLayer sharedInstance] addShareSheetPayload:payload];
-    [self.extensionContext completeRequestReturningItems:@[] completionHandler:^(BOOL expired __unused) {
-        [self openMainApp:payload[@"recipient"]];
-    }];
+                DDLogDebug(@"Adding shareSheet comment payload: %@", payload);
+                [[DataLayer sharedInstance] addShareSheetPayload:payload];
+            }
+            [self.extensionContext completeRequestReturningItems:@[] completionHandler:^(BOOL expired __unused) {
+                [self openMainApp];
+            }];
+        }
+    };
+    for(NSItemProvider* provider in item.attachments)
+    {
+        if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
+            continue;
+        DDLogVerbose(@"handling(%ud) %@", loading, provider);
+        loading++;
+        [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* payload) {
+            DDLogVerbose(@"Got handleUploadItemProvider callback with payload: %@", payload);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(payload == nil || payload[@"error"] != nil)
+                {
+                    DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
+                    NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
+                    if(payload[@"error"] != nil)
+                        message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
+                    UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                                message:message preferredStyle:UIAlertControllerStyleAlert];
+                    [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                        [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
+                        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+                    }]];
+                    [self presentViewController:unknownItemWarning animated:YES completion:nil];
+                    loading--;
+                    return;
+                }
+                
+                payload[@"account_id"] = self.recipient.accountId;
+                payload[@"recipient"] = self.recipient.contactJid;
+                payload[@"comment"] = @"";
+                loading--;
+                DDLogDebug(@"Adding shareSheet payload(%ud): %@", loading, payload);
+                [[DataLayer sharedInstance] addShareSheetPayload:payload];
+                checkIfDone();
+            });
+        }];
+    }
+    checkIfDone();
 }
 
 -(NSArray*) configurationItems
@@ -278,7 +276,7 @@
         }
 }
 
--(void) openMainApp:(NSString*) recipient
+-(void) openMainApp
 {
     DDLogInfo(@"Now opening mainapp via %@...", kMonalOpenURL);
     NSURL* mainAppUrl = kMonalOpenURL;

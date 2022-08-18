@@ -3073,6 +3073,21 @@ enum msgSentState {
 
 -(void) handleMediaUploadCompletion:(NSString*) url withMime:(NSString*) mimeType withSize:(NSNumber*) size withError:(NSError*) error
 {
+    monal_void_block_t handleNextUpload = ^{
+        if(self.uploadQueue.count > 0)
+        {
+            [self.uploadMenuView performBatchUpdates:^{
+                [self deleteQueueItemAtIndex:0];
+            } completion:^(BOOL finished){
+                [self emptyUploadQueue];
+            }];
+        }
+        else
+        {
+            [self hideUploadQueue];
+            [self hideUploadHUD];
+        }
+    };
     DDLogVerbose(@"Now in upload completion");
     [self showPotentialError:error];
     if(!error)
@@ -3082,23 +3097,12 @@ enum msgSentState {
         [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
             DDLogInfo(@"File upload sent to contact...");
             [MLFiletransfer hardlinkFileForMessage:msg];        //hardlink cache file if possible
-            
-            if(self.uploadQueue.count > 0)
-            {
-                [self.uploadMenuView performBatchUpdates:^{
-                    [self deleteQueueItemAtIndex:0];
-                } completion:^(BOOL finished){
-                    [self emptyUploadQueue];
-                }];
-            }
-            else
-            {
-                [self hideUploadQueue];
-                [self hideUploadHUD];
-            }
+            handleNextUpload();
         }];
         DDLogInfo(@"upload done");
     }
+    else
+        handleNextUpload();
 }
 
 -(void) emptyUploadQueue

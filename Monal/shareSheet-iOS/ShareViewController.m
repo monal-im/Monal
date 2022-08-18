@@ -131,23 +131,27 @@
     DDLogVerbose(@"Attachments = %@", item.attachments);
 
     NSItemProvider* provider;
-    for(NSItemProvider* attachment in item.attachments)
+    for(int try=0; try<2 && provider==nil; try++)
     {
-        if([attachment hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
-            ;   //ignore plaintext, already displayed in contentText (e.g. comment)
-        else if(provider == nil)
-            provider = attachment;
-        else
+        for(NSItemProvider* attachment in item.attachments)
         {
-            DDLogError(@"We currently are only able to handle exactly one shared item, ignoring this multi-item share!");
-            UIAlertController* multiItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Multi-item share detected", @"")
-                                                                        message:NSLocalizedString(@"We currently are only able to handle exactly one shared item, ignoring this multi-item share!", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [multiItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                [multiItemWarning dismissViewControllerAnimated:YES completion:nil];
-                [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
-            }]];
-            [self presentViewController:multiItemWarning animated:YES completion:nil];
-            return;
+            //only ignore on try #0
+            if(try == 0 && ([attachment hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText] && self.contentText && ![self.contentText isEqualToString:@""]))
+                ;   //ignore plaintext, already displayed in contentText (e.g. comment)
+            else if(provider == nil)
+                provider = attachment;
+            else
+            {
+                DDLogError(@"We currently are only able to handle exactly one shared item, ignoring this multi-item share!");
+                UIAlertController* multiItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Multi-item share detected", @"")
+                                                                            message:NSLocalizedString(@"We currently are only able to handle exactly one shared item, ignoring this multi-item share!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                [multiItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                    [multiItemWarning dismissViewControllerAnimated:YES completion:nil];
+                    [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+                }]];
+                [self presentViewController:multiItemWarning animated:YES completion:nil];
+                return;
+            }
         }
     }
     MLAssert(provider != nil, @"provider should never be nil!");

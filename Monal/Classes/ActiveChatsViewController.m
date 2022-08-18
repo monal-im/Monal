@@ -420,6 +420,16 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion
 {
+    // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
+    if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
+    {
+        // make sure the already open chat is reloaded and return
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+        if(completion != nil)
+            completion(@YES);
+        return;
+    }
+    
     // clear old chat before opening a new one (but not for splitView == YES)
     if([HelperTools deviceUsesSplitView] == NO)
         [self.navigationController popViewControllerAnimated:NO];
@@ -439,15 +449,6 @@ static NSMutableSet* _smacksWarningDisplayed;
         [self openConversationPlaceholder:nil];
         if(completion != nil)
             completion(@NO);
-        return;
-    }
-    // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
-    if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
-    {
-        // make sure the already open chat is reloaded and return
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-        if(completion != nil)
-            completion(@YES);
         return;
     }
 

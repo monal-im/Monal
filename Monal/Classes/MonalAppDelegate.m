@@ -1543,6 +1543,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         return;
     }
     
+    //open the destination chat only once
+    BOOL alreadyOpen = NO;
     for(NSDictionary* payload in [[DataLayer sharedInstance] getShareSheetPayload])
     {
         DDLogInfo(@"Sending outbox entry: %@", payload);
@@ -1563,28 +1565,18 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
         //don't use [self openChatOfContact:withCompletion:] because it's asynchronous and can only handle one contact at a time (e.g. until the asynchronous execution finished)
         //we can invoke the activeChats interface directly instead, because we already did the necessary preparations ourselves
-        [(ActiveChatsViewController*)self.activeChats presentChatWithContact:contact andCompletion:^(NSNumber* _Nonnull status) {
-            //this should always succeed (@NO is only returned if contact is nil or the contact is not an active buddy
-            //if([status boolValue] && self.activeChats.currentChatViewController != nil)
-            
-            monal_id_block_t sendCommentAndCleanup = ^(NSDictionary* payload) {
-                if([payload[@"comment"] length] > 0)
-                {
-                    MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
-                    BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
-                    [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"comment"] toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                        DDLogInfo(@"SHARESHEET_SEND_COMMENT success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
-                        [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
-                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-                        if(self.activeChats.currentChatViewController != nil)
-                        {
-                            [self.activeChats.currentChatViewController scrollToBottom];
-                            [self.activeChats.currentChatViewController hideUploadHUD];
-                        }
-                    }];
-                }
-                else
-                {
+        if(!alreadyOpen)
+        {
+            [(ActiveChatsViewController*)self.activeChats presentChatWithContact:contact];
+            alreadyOpen = YES;
+        }
+        monal_id_block_t sendCommentAndCleanup = ^(NSDictionary* payload) {
+            if([payload[@"comment"] length] > 0)
+            {
+                MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
+                BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
+                [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"comment"] toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                    DDLogInfo(@"SHARESHEET_SEND_COMMENT success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
                     [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
                     if(self.activeChats.currentChatViewController != nil)
@@ -1592,48 +1584,58 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         [self.activeChats.currentChatViewController scrollToBottom];
                         [self.activeChats.currentChatViewController hideUploadHUD];
                     }
-                }
-            };
-            
-            BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
-            if([payload[@"type"] isEqualToString:@"geo"] || [payload[@"type"] isEqualToString:@"url"] || [payload[@"type"] isEqualToString:@"text"])
-            {
-                [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                    DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
-                    sendCommentAndCleanup(payload);
                 }];
             }
-            else if([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"contact"] || [payload[@"type"] isEqualToString:@"audiovisual"])
-            {
-                DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
-                [self.activeChats.currentChatViewController showUploadHUD];
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                    $call(payload[@"data"], $ID(account), $BOOL(encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            if(error != nil)
-                            {
-                                DDLogError(@"Failed to upload outbox file: %@", error);
-                                NSMutableDictionary* payloadCopy = [NSMutableDictionary dictionaryWithDictionary:payload];
-                                payloadCopy[@"comment"] = @"";      //make sure we don't send any comment in sendCommentAndCleanup() if uploading the file failed
-                                sendCommentAndCleanup(payloadCopy);
-                                
-                                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Failed to share file", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Error: %@", @""), error] preferredStyle:UIAlertControllerStyleAlert];
-                                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                                }]];
-                                [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
-                            }
-                            else
-                                [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                                    DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
-                                    sendCommentAndCleanup(payload);
-                                }];
-                        });
-                    })));
-                });
-            }
             else
-                MLAssert(NO, @"Outbox payload type unknown", payload);
-        }];
+            {
+                [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                if(self.activeChats.currentChatViewController != nil)
+                {
+                    [self.activeChats.currentChatViewController scrollToBottom];
+                    [self.activeChats.currentChatViewController hideUploadHUD];
+                }
+            }
+        };
+        
+        BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
+        if([payload[@"type"] isEqualToString:@"geo"] || [payload[@"type"] isEqualToString:@"url"] || [payload[@"type"] isEqualToString:@"text"])
+        {
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                sendCommentAndCleanup(payload);
+            }];
+        }
+        else if([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"contact"] || [payload[@"type"] isEqualToString:@"audiovisual"])
+        {
+            DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
+            [self.activeChats.currentChatViewController showUploadHUD];
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                $call(payload[@"data"], $ID(account), $BOOL(encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if(error != nil)
+                        {
+                            DDLogError(@"Failed to upload outbox file: %@", error);
+                            NSMutableDictionary* payloadCopy = [NSMutableDictionary dictionaryWithDictionary:payload];
+                            payloadCopy[@"comment"] = @"";      //make sure we don't send any comment in sendCommentAndCleanup() if uploading the file failed
+                            sendCommentAndCleanup(payloadCopy);
+                            
+                            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Failed to share file", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Error: %@", @""), error] preferredStyle:UIAlertControllerStyleAlert];
+                            [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                            }]];
+                            [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
+                        }
+                        else
+                            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                                sendCommentAndCleanup(payload);
+                            }];
+                    });
+                })));
+            });
+        }
+        else
+            MLAssert(NO, @"Outbox payload type unknown", payload);
     }
 }
 

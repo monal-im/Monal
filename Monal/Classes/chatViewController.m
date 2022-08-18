@@ -196,7 +196,7 @@ enum msgSentState {
     self.tableviewBottom.constant += 20;
 #endif
     self.filePicker = [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[UTTypeItem]];
-    self.filePicker.allowsMultipleSelection = NO;
+    self.filePicker.allowsMultipleSelection = YES;
     self.filePicker.delegate = self;
 
     // Set max height of the chatInput (The chat should be still readable while the HW-Keyboard is active
@@ -1138,17 +1138,19 @@ enum msgSentState {
 
 -(void) documentPicker:(UIDocumentPickerViewController*) controller didPickDocumentsAtURLs:(NSArray<NSURL*>*) urls
 {
+    DDLogDebug(@"Picked files at urls: %@", urls);
     if(urls.count == 0)
         return;
-
-    NSMutableArray* entries = [[NSMutableArray alloc] init];
     for(NSURL* url in urls)
-        [entries addObject:@{
+    {
+        [url startAccessingSecurityScopedResource];
+        [self addToUIQueue:@[@{
             @"type": @"file",
             @"filename": [url lastPathComponent],
             @"data": [MLFiletransfer prepareFileUpload:url],
-        }];
-    [self addToUIQueue:entries];
+        }]];
+        [url stopAccessingSecurityScopedResource];
+    }
 }
 
 #pragma mark  - location delegate

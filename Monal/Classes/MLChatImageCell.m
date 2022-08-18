@@ -15,7 +15,9 @@
 @import QuartzCore;
 @import UIKit;
 
-@interface MLChatImageCell()
+@interface MLChatImageCell() {
+    FLAnimatedImageView* _animatedImageView;
+}
 
 @property (nonatomic, weak) IBOutlet UIImageView* thumbnailImage;
 @property (nonatomic, weak) IBOutlet UIActivityIndicatorView* spinner;
@@ -26,7 +28,7 @@
 
 @implementation MLChatImageCell
 
--(void)awakeFromNib
+-(void) awakeFromNib
 {
     [super awakeFromNib];
     
@@ -38,11 +40,11 @@
 // init a image cell if needed
 -(void) initCellWithMLMessage:(MLMessage*) message
 {
+    if(_animatedImageView != nil)
+        [_animatedImageView removeFromSuperview];
     // reset image view if we open a new message
     if(self.messageHistoryId != message.messageDBId)
-    {
         self.thumbnailImage.image = nil;
-    }
     // init base cell
     [super initCell:message];
     // load image and display it in the UI if needed
@@ -52,6 +54,8 @@
 /// Load the image from messageText (link) and display it in the UI
 -(void) loadImage:(MLMessage*) msg
 {
+    if(_animatedImageView != nil)
+        [_animatedImageView removeFromSuperview];
     if(msg.messageText && self.thumbnailImage.image == nil)
     {
         [self.spinner startAnimating];
@@ -63,7 +67,7 @@
             FLAnimatedImage* image = [FLAnimatedImage animatedImageWithGIFData:[NSData dataWithContentsOfFile:info[@"cacheFile"]]];
             if(!image)
                 return;
-            FLAnimatedImageView* imageView = [[FLAnimatedImageView alloc] init];
+            _animatedImageView = [[FLAnimatedImageView alloc] init];
             DDLogVerbose(@"image: %fx%f", image.size.height, image.size.width);
             CGFloat wi = image.size.width;
             CGFloat hi = image.size.height;
@@ -72,13 +76,13 @@
             CGFloat ri = wi / hi;
             CGFloat rs = ws / hs;
             if(rs > ri)
-                imageView.frame = CGRectMake(0.0, 0.0, wi * hs/hi, hs);
+                _animatedImageView.frame = CGRectMake(0.0, 0.0, wi * hs/hi, hs);
             else
-                imageView.frame = CGRectMake(0.0, 0.0, ws, hi * ws/wi);
-            self.imageWidth.constant = imageView.frame.size.width;
-            self.imageHeight.constant = imageView.frame.size.height;
-            imageView.animatedImage = image;
-            [self.thumbnailImage addSubview:imageView];
+                _animatedImageView.frame = CGRectMake(0.0, 0.0, ws, hi * ws/wi);
+            self.imageWidth.constant = _animatedImageView.frame.size.width;
+            self.imageHeight.constant = _animatedImageView.frame.size.height;
+            _animatedImageView.animatedImage = image;
+            [self.thumbnailImage addSubview:_animatedImageView];
             self.thumbnailImage.contentMode = UIViewContentModeScaleAspectFit;
         }
         else if(info && [info[@"mimeType"] hasPrefix:@"image/"])
@@ -88,7 +92,6 @@
             UIImage* image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
             if(!image)
                 return;
-            FLAnimatedImageView* imageView = [[FLAnimatedImageView alloc] init];
             DDLogVerbose(@"image: %fx%f", image.size.height, image.size.width);
             CGFloat wi = image.size.width;
             CGFloat hi = image.size.height;
@@ -97,11 +100,11 @@
             CGFloat ri = wi / hi;
             CGFloat rs = ws / hs;
             if(rs > ri)
-                imageView.frame = CGRectMake(0.0, 0.0, wi * hs/hi, hs);
+                self.thumbnailImage.frame = CGRectMake(0.0, 0.0, wi * hs/hi, hs);
             else
-                imageView.frame = CGRectMake(0.0, 0.0, ws, hi * ws/wi);
-            self.imageWidth.constant = imageView.frame.size.width;
-            self.imageHeight.constant = imageView.frame.size.height;
+                self.thumbnailImage.frame = CGRectMake(0.0, 0.0, ws, hi * ws/wi);
+            self.imageWidth.constant = self.thumbnailImage.frame.size.width;
+            self.imageHeight.constant = self.thumbnailImage.frame.size.height;
             [self.thumbnailImage setImage:image];
         }
         else
@@ -137,6 +140,8 @@
     [super prepareForReuse];
     self.imageHeight.constant = 200;
     [self.spinner stopAnimating];
+    if(_animatedImageView != nil)
+        [_animatedImageView removeFromSuperview];
 }
 
 

@@ -17,23 +17,26 @@ struct MemberList: View {
     var body: some View {
         List {
             Section(header: Text(self.groupName)) {
-                ForEach(self.memberList, id: \.self.obj) { contact in
-                    NavigationLink(destination: LazyClosureView(ContactDetails(delegate: SheetDismisserProtocol(), contact: contact)), label: {
-                        ZStack(alignment: .topLeading) {
-                            HStack(alignment: .center) {
-                                Image(uiImage: contact.obj.avatar)
-                                    .resizable()
-                                    .frame(width: 40, height: 40, alignment: .center)
-                                Text(contact.contactDisplayName as String)
+                ForEach(self.memberList, id: \.self.obj) {
+                    contact in
+                    if contact.obj.contactJid != self.account?.connectionProperties.identity.jid {
+                        NavigationLink(destination: LazyClosureView(ContactDetails(delegate: SheetDismisserProtocol(), contact: contact)), label: {
+                            ZStack(alignment: .topLeading) {
+                                HStack(alignment: .center) {
+                                    Image(uiImage: contact.obj.avatar)
+                                        .resizable()
+                                        .frame(width: 40, height: 40, alignment: .center)
+                                    Text(contact.contactDisplayName as String)
+                                }
+                                /*Button(action: {
+                                }, label: {
+                                    Image(systemName: "xmark.circle.fill").foregroundColor(.red)
+                                })
+                                .buttonStyle(.borderless)
+                                .offset(x: -7, y: -7)*/
                             }
-                            /*Button(action: {
-                            }, label: {
-                                Image(systemName: "xmark.circle.fill").foregroundColor(.red)
-                            })
-                            .buttonStyle(.borderless)
-                            .offset(x: -7, y: -7)*/
-                        }
-                    })
+                        })
+                    }
                 }
             }
         }

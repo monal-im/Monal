@@ -130,7 +130,7 @@
     NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
     DDLogVerbose(@"Attachments = %@", item.attachments);
 
-    //don't use the comment field for text shares (they already contain the comment text as shared item)
+    //text shares are also shared via comment field, so ignore them
     //if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
     
     __block uint32_t loading = 0;       //no need for @synchronized etc., because we access this var exclusively from the main thread
@@ -155,6 +155,7 @@
     };
     for(NSItemProvider* provider in item.attachments)
     {
+        //text shares are also shared via comment field, so ignore them
         if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
             continue;
         DDLogVerbose(@"handling(%ud) %@", loading, provider);

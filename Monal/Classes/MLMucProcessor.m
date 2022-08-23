@@ -275,9 +275,7 @@
                 [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:_account.accountNo];
 #ifndef DISABLE_OMEMO
                 if(isTypeGroup == YES)
-                {
                     [_account.omemo checkIfSessionIsStillNeeded:item[@"jid"] isMuc:NO];
-                }
 #endif// DISABLE_OMEMO
             }
             else
@@ -285,9 +283,7 @@
                 [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:_account.accountNo];
 #ifndef DISABLE_OMEMO
                 if(isTypeGroup == YES)
-                {
                     [_account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:item[@"jid"]];
-                }
 #endif// DISABLE_OMEMO
             }
         }

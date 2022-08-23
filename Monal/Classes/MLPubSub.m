@@ -79,6 +79,11 @@ static NSDictionary* _defaultOptions;
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
         return;
     }
+    if(jid != nil)
+    {
+        NSDictionary* splitJid = [HelperTools splitJid:jid];
+        MLAssert(splitJid[@"resource"] == nil, @"Jid MUST be a bare jid, not full jid!");
+    }
     
     //build list of items to query (empty list means all items)
     if(!itemsList)
@@ -111,6 +116,11 @@ static NSDictionary* _defaultOptions;
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
         return;
     }
+    if(jid != nil)
+    {
+        NSDictionary* splitJid = [HelperTools splitJid:jid];
+        MLAssert(splitJid[@"resource"] == nil, @"Jid MUST be a bare jid, not full jid!");
+    }
     
     //build subscription request
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType to:jid];
@@ -137,6 +147,12 @@ static NSDictionary* _defaultOptions;
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
         return;
     }
+    if(jid != nil)
+    {
+        NSDictionary* splitJid = [HelperTools splitJid:jid];
+        MLAssert(splitJid[@"resource"] == nil, @"Jid MUST be a bare jid, not full jid!");
+    }
+    
     //build subscription request
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType to:jid];
     [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[

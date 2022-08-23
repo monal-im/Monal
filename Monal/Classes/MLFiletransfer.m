@@ -517,6 +517,37 @@ $$
     }
 }
 
++(MLHandler*) prepareDataUpload:(NSData*) data
+{
+    return [self prepareDataUpload:data withFileExtension:@"dat"];
+}
+
++(MLHandler*) prepareDataUpload:(NSData*) data withFileExtension:(NSString*) fileExtension
+{
+    DDLogInfo(@"Preparing for upload of NSData object: %@", data);
+    
+    //save file data to our document cache (temporary filename because the upload url is unknown yet)
+    NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
+    NSError* error;
+    NSString* file = [_documentCacheDir stringByAppendingPathComponent:tempname];
+    DDLogDebug(@"Tempstoring data at %@", file);
+    [data writeToFile:file options:NSDataWritingFileProtectionCompleteUntilFirstUserAuthentication error:&error];
+    if(error)
+    {
+        [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+        DDLogError(@"Failed to save NSData to file: %@", error);
+        return $newHandler(self, errorCompletion, $ID(error));
+    }
+    [HelperTools configureFileProtectionFor:file];
+    
+    NSString* userFacingFilename = [NSString stringWithFormat:@"%@.%@", [[NSUUID UUID] UUIDString], fileExtension];
+    return $newHandler(self, internalTmpFileUploadHandler,
+        $ID(file),
+        $ID(userFacingFilename),
+        $ID(mimeType, [self getMimeTypeOfOriginalFile:userFacingFilename])
+    );
+}
+
 +(MLHandler*) prepareFileUpload:(NSURL*) fileUrl
 {
     DDLogInfo(@"Preparing for upload of file stored at %@", [fileUrl path]);

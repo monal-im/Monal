@@ -300,17 +300,46 @@ void swizzle(Class c, SEL orig, SEL new)
             }
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:@"com.compuserve.gif"])
+    //the apple-private autoloop gif type has a bug that does not allow to load this as normal gif --> try audiovisual content below
+    else if([provider hasItemConformingToTypeIdentifier:@"com.compuserve.gif"] && ![provider hasItemConformingToTypeIdentifier:@"com.apple.private.auto-loop-gif"])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        /*
+        [provider loadDataRepresentationForTypeIdentifier:@"com.compuserve.gif" completionHandler:^(NSData* data, NSError* error) {
+            if(error != nil || data == nil)
+            {
+                DDLogError(@"Error extracting gif image from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            DDLogInfo(@"Got gif image data: %@", data);
+            payload[@"type"] = @"file";
+            payload[@"data"] = [MLFiletransfer prepareDataUpload:data withFileExtension:@"gif"];
+            return addPreview(nil);
+        }];
+        */
+        [provider loadInPlaceFileRepresentationForTypeIdentifier:@"com.compuserve.gif" completionHandler:^(NSURL*  _Nullable item, BOOL isInPlace, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting gif image from NSItemProvider: %@", error);
                 payload[@"error"] = error;
                 return completion(payload);
             }
-            DDLogInfo(@"Got gif image item: %@", item);
+            DDLogInfo(@"Got %@ gif image item: %@", isInPlace ? @"(in place)" : @"(copied)", item);
             payload[@"type"] = @"file";
+            return prepareFile(item);
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeAudiovisualContent])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeAudiovisualContent options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+            if(error != nil || item == nil)
+            {
+                DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            DDLogInfo(@"Got audiovisual item: %@", item);
+            payload[@"type"] = @"audiovisual";
             return prepareFile(item);
         }];
     }
@@ -320,7 +349,7 @@ void swizzle(Class c, SEL orig, SEL new)
             if(error != nil || item == nil)
             {
                 DDLogWarn(@"Got error, retrying with UIImage: %@", error);
-                [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(UIImage*  _Nullable item, NSError* _Null_unspecified error) {
+                [provider loadObjectOfClass:[UIImage class] completionHandler:^(UIImage*  _Nullable item, NSError* _Null_unspecified error) {
                     if(error != nil || item == nil)
                     {
                         DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -339,33 +368,22 @@ void swizzle(Class c, SEL orig, SEL new)
             {
                 DDLogInfo(@"Got image item: %@", item);
                 payload[@"type"] = @"image";
+                [item startAccessingSecurityScopedResource];
                 [[[NSFileCoordinator alloc] init] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
                     DDLogDebug(@"NSFileCoordinator called accessor for image: %@", newURL);
                     //use prepareUIImageUpload to resize the image to the configured quality (instead of just uploading the raw image file)
                     payload[@"data"] = [MLFiletransfer prepareUIImageUpload:[UIImage imageWithContentsOfFile:[newURL path]]];
+                    [item stopAccessingSecurityScopedResource];
                     return addPreview(newURL);
                 }];
                 if(error != nil)
                 {
                     DDLogError(@"Error preparing file coordinator: %@", error);
                     payload[@"error"] = error;
+                    [item stopAccessingSecurityScopedResource];
                     return completion(payload);
                 }
             }
-        }];
-    }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeAudiovisualContent])
-    {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeAudiovisualContent options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
-            if(error != nil || item == nil)
-            {
-                DDLogError(@"Error extracting item from NSItemProvider: %@", error);
-                payload[@"error"] = error;
-                return completion(payload);
-            }
-            DDLogInfo(@"Got audiovisual item: %@", item);
-            payload[@"type"] = @"audiovisual";
-            return prepareFile(item);
         }];
     }
     /*else if([provider hasItemConformingToTypeIdentifier:(NSString*)])

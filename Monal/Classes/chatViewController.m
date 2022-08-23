@@ -1244,7 +1244,7 @@ enum msgSentState {
     });
 }
 
--(PHPickerViewController*)generatePHPickerViewController API_AVAILABLE(ios(14))
+-(PHPickerViewController*) generatePHPickerViewController
 {
     PHPickerConfiguration* phConf = [[PHPickerConfiguration alloc] init];
     phConf.selectionLimit = 0;

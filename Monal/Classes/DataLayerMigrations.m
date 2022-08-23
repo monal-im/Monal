@@ -953,6 +953,11 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:5.302 withBlock:^{
             //dummy upgrade to make sure all state gets invalidated, we want to be sure push gets correctly enabled
         }];
+        
+        //remove unused sharesheet outbox column "comment"
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.303 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE sharesheet_outbox DROP COLUMN comment;"];
+        }];
 
         // check if db version changed
         NSNumber* newdbversion = [self readDBVersion:db];

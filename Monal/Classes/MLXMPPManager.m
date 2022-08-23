@@ -578,7 +578,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 #pragma mark -  XMPP commands
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
+-(void) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {
     NSString* msgid = [[NSUUID UUID] UUIDString];
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
@@ -586,10 +586,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     MLAssert(message != nil, @"Message should not be nil");
     MLAssert(account != nil, @"Account should not be nil");
     MLAssert(contact != nil, @"Contact should not be nil");
-    
-    NSString* messageType = kMessageTypeText;
-    if(uploadInfo != nil)
-        messageType = kMessageTypeFiletransfer;
+    MLAssert(uploadInfo == nil || messageType == kMessageTypeFiletransfer, @"You must use message type = filetransfer if you supply an uploadInfo!");
     
     // Save message to history
     NSNumber* messageDBId = [[DataLayer sharedInstance]

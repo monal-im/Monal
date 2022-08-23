@@ -393,7 +393,6 @@ static NSDateFormatter* dbFormatter;
         
         BOOL encrypt = NO;
 #ifndef DISABLE_OMEMO
-        // omemo for non group MUCs is disabled once the type of the muc is set
         encrypt = [[HelperTools defaultsDB] boolForKey:@"OMEMODefaultOn"];
 #endif// DISABLE_OMEMO
         
@@ -927,7 +926,14 @@ static NSDateFormatter* dbFormatter;
         MLAssert(nick != nil, @"Could not determine muc nick when adding muc");
         
         [self cleanupMembersAndParticipantsListFor:room forAccountId:accountNo];
-        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', 'muc_nick') VALUES(?, ?, 1, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET muc=1, muc_nick=?;" andArguments:@[accountNo, room, mucNick ? mucNick : @"", mucNick ? mucNick : @""]];
+        
+        BOOL encrypt = NO;
+#ifndef DISABLE_OMEMO
+        // omemo for non group MUCs is disabled once the type of the muc is set
+        encrypt = [[HelperTools defaultsDB] boolForKey:@"OMEMODefaultOn"];
+#endif// DISABLE_OMEMO
+        
+        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', 'muc_nick', 'encrypt') VALUES(?, ?, 1, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET muc=1, muc_nick=?;" andArguments:@[accountNo, room, mucNick ? mucNick : @"", @(encrypt), mucNick ? mucNick : @""]];
     }];
 }
 

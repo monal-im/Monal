@@ -88,6 +88,7 @@ const int KEY_SIZE = 16;
 
 -(void) loggedIn:(NSNotification*) notification
 {
+#ifndef DISABLE_OMEMO
     xmpp* notiAccount = notification.object;
     if(!notiAccount || !self.account)
         return;
@@ -98,10 +99,12 @@ const int KEY_SIZE = 16;
         // rebuild broken omemo session after catchup
         [self rebuildSessions];
     }
+#endif
 }
 
 -(void) catchupDone:(NSNotification*) notification
 {
+#ifndef DISABLE_OMEMO
     xmpp* notiAccount = notification.object;
     if(!notiAccount || !self.account)
         return;
@@ -113,15 +116,18 @@ const int KEY_SIZE = 16;
             [self catchupAndOmemoDone];
         }
     }
+#endif
 }
 
 -(void) handleContactRemoved:(NSNotification*) notification
 {
+#ifndef DISABLE_OMEMO
     MLContact* removedContact = notification.userInfo[@"contact"];
     if(removedContact == nil || removedContact.accountId.intValue != self.account.accountNo.intValue)
        return;
 
     [self checkIfSessionIsStillNeeded:removedContact.contactJid isMuc:removedContact.isGroup];
+#endif
 }
 
 -(void) catchupAndOmemoDone
@@ -766,7 +772,7 @@ $$
     if(isMuc == YES)
         danglingJids = [[NSMutableSet alloc] initWithSet:[self.monalSignalStore removeDanglingMucSessions]];
     else if([self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid] == NO)
-            [danglingJids addObject:buddyJid];
+        [danglingJids addObject:buddyJid];
 
     [self unsubscribeFromDanglingJids:danglingJids];
 }
@@ -774,9 +780,7 @@ $$
 -(void) unsubscribeFromDanglingJids:(NSSet<NSString*>*) danglingJids
 {
     for(NSString* jid in danglingJids)
-    {
         [self.account.pubsub unsubscribeFromNode:@"eu.siacs.conversations.axolotl.devicelist" forJid:jid withHandler:$newHandler(self, handleDevicelistUnsubscribe)];
-    }
 }
 
 -(void) rebuildSessions
@@ -1088,11 +1092,6 @@ $$
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.accountJid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
-}
-
--(void) cleanup {
-    NSSet<NSString*>* danglingJids = [self.monalSignalStore removeDanglingMucSessions];
-    [self unsubscribeFromDanglingJids:danglingJids];
 }
 
 @end

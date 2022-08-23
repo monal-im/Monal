@@ -1930,12 +1930,11 @@ static NSDateFormatter* dbFormatter;
     if(payload[@"type"] == nil || payload[@"data"] == nil)
         return;
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"INSERT INTO sharesheet_outbox (account_id, recipient, type, data, comment) VALUES(?, ?, ?, ?, ?);" andArguments:@[
+        [self.db executeNonQuery:@"INSERT INTO sharesheet_outbox (account_id, recipient, type, data) VALUES(?, ?, ?, ?);" andArguments:@[
             payload[@"account_id"],
             payload[@"recipient"],
             payload[@"type"],
             [HelperTools serializeObject:payload[@"data"]],
-            payload[@"comment"],
         ]];
     }];
 }

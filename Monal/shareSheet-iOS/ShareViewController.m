@@ -127,6 +127,7 @@
 
 -(void) didSelectPost
 {
+    DDLogVerbose(@"input items: %@", self.extensionContext.inputItems);
     NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
     DDLogVerbose(@"Attachments = %@", item.attachments);
 
@@ -144,7 +145,6 @@
                 payload[@"recipient"] = self.recipient.contactJid;
                 payload[@"type"] = @"text";
                 payload[@"data"] = self.contentText;
-                payload[@"comment"] = @"";
                 DDLogDebug(@"Adding shareSheet comment payload: %@", payload);
                 [[DataLayer sharedInstance] addShareSheetPayload:payload];
             }
@@ -158,7 +158,7 @@
         //text shares are also shared via comment field, so ignore them
         if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
             continue;
-        DDLogVerbose(@"handling(%ud) %@", loading, provider);
+        DDLogVerbose(@"handling(%u) %@", loading, provider);
         loading++;
         [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* payload) {
             DDLogVerbose(@"Got handleUploadItemProvider callback with payload: %@", payload);
@@ -182,9 +182,8 @@
                 
                 payload[@"account_id"] = self.recipient.accountId;
                 payload[@"recipient"] = self.recipient.contactJid;
-                payload[@"comment"] = @"";
                 loading--;
-                DDLogDebug(@"Adding shareSheet payload(%ud): %@", loading, payload);
+                DDLogDebug(@"Adding shareSheet payload(%u): %@", loading, payload);
                 [[DataLayer sharedInstance] addShareSheetPayload:payload];
                 checkIfDone();
             });

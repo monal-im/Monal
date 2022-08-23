@@ -258,15 +258,18 @@ void swizzle(Class c, SEL orig, SEL new)
     };
     void (^prepareFile)(NSURL*) = ^(NSURL* item) {
         NSError* error;
+        [item startAccessingSecurityScopedResource];
         [[[NSFileCoordinator alloc] init] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
             DDLogDebug(@"NSFileCoordinator called accessor: %@", newURL);
             payload[@"data"] = [MLFiletransfer prepareFileUpload:newURL];
+            [item stopAccessingSecurityScopedResource];
             return addPreview(newURL);
         }];
         if(error != nil)
         {
             DDLogError(@"Error preparing file coordinator: %@", error);
             payload[@"error"] = error;
+            [item stopAccessingSecurityScopedResource];
             return completion(payload);
         }
     };

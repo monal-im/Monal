@@ -208,6 +208,9 @@ static NSMutableDictionary* _typingNotifications;
             NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo];
             participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
         }
+        //make sure this is not the full jid
+        if(participantJid != nil)
+            participantJid = [HelperTools splitJid:participantJid][@"user"];
         DDLogInfo(@"Extracted participantJid: %@", participantJid);
     }
     

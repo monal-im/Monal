@@ -636,7 +636,7 @@ $$
 
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact
 {
-    MLAssert(self.signalContext != nil, @"signalContext should be inited.");
+    MLAssert(self.signalContext != nil, @"signalContext should be initiated.");
 
     if(message)
         [messageNode setBody:@"[This message is OMEMO encrypted]"];
@@ -663,6 +663,12 @@ $$
     NSMutableDictionary<NSString*, NSArray<NSNumber*>*>* contactDeviceMap = [[NSMutableDictionary alloc] init];
     for(NSString* recipient in recipients)
     {
+        if(recipient != nil)
+        {
+            NSDictionary* splitJid = [HelperTools splitJid:recipient];
+            MLAssert(splitJid[@"resource"] == nil, @"Jid MUST be a bare jid, not full jid!");
+        }
+        
         //contactDeviceMap
         NSArray<NSNumber*>* recipientDevices = [self.monalSignalStore knownDevicesForAddressName:recipient];
         if(recipientDevices && recipientDevices.count > 0)
@@ -808,6 +814,11 @@ $$
 
 -(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid
 {
+    if(mucParticipantJid != nil)
+    {
+        NSDictionary* splitJid = [HelperTools splitJid:mucParticipantJid];
+        MLAssert(splitJid[@"resource"] == nil, @"Jid MUST be a bare jid, not full jid!");
+    }
     if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
     {
         DDLogDebug(@"DecryptMessage called but the message has no encryption header");

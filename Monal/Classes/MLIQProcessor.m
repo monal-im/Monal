@@ -421,6 +421,12 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
             [account sendIq:mamQuery withHandler:$newHandler(self, handleMamResponseWithLatestId)];
         }
     }
+    else
+    {
+        //we don't support MAM --> tell the system to finish the catchup without MAM
+        DDLogError(@"Server does not support MAM, marking mam catchup as 'finished' for jid %@", account.connectionProperties.identity.jid);
+        [account mamFinishedFor:account.connectionProperties.identity.jid];
+    }
     
     account.connectionProperties.accountDiscoDone = YES;
 $$

@@ -340,6 +340,8 @@ $$
             if(![contactObj.nickName isEqualToString:[contact objectForKey:@"name"]])
                 [[MLImageManager sharedInstance] purgeCacheForContact:contact[@"jid"] andAccount:account.accountNo];
             
+            //TODO: save roster groups to new db table
+            
             //send out kMonalContactRefresh notification
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo]

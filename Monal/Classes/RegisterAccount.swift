@@ -41,6 +41,7 @@ struct RegisterAccount: View {
 
     @State private var username: String = ""
     @State private var password: String = ""
+    @State private var repeatedPassword: String = ""
     @State private var registerToken: String?
     @State private var completionHandler:((AnyObject?)->Void)?
 
@@ -104,6 +105,12 @@ struct RegisterAccount: View {
         alertPrompt.message = Text("Please make sure you have entered a username, password.")
         return credentialsEntered
     }
+    
+    private var passwordsMatchAlert: Bool {
+        alertPrompt.title = Text("Passwords don't match!")
+        alertPrompt.message = Text("Please make sure you have entered the same password in both password fields.")
+        return passwordsMatch
+    }
 
     private var credentialsFaultyAlert: Bool {
         alertPrompt.title = Text("Invalid Username!")
@@ -151,6 +158,10 @@ struct RegisterAccount: View {
     private var credentialsEntered: Bool {
         return !username.isEmpty && !password.isEmpty
     }
+    
+    private var passwordsMatch: Bool {
+        return password == repeatedPassword
+    }
 
     private var credentialsFaulty: Bool {
         return username.range(of: RegisterAccount.credFaultyPattern, options: .regularExpression) != nil
@@ -161,7 +172,7 @@ struct RegisterAccount: View {
     }
 
     private var buttonColor: Color {
-        return (!serverSelected && (!serverProvided || xmppServerFaulty)) || (!credentialsEntered || credentialsFaulty || credentialsExist) ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
+        return (!serverSelected && (!serverProvided || xmppServerFaulty)) || (!credentialsEntered || !passwordsMatch || credentialsFaulty || credentialsExist) ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
     }
 
     private func createXMPPInstance() -> xmpp {
@@ -319,6 +330,8 @@ struct RegisterAccount: View {
                         .disableAutocorrection(true)
                     
                     SecureField("Password", text: $password)
+                    SecureField("Password (repeated)", text: $repeatedPassword)
+                    
                     if(self.captchaImg != nil) {
                         HStack {
                             self.captchaImg
@@ -336,7 +349,7 @@ struct RegisterAccount: View {
                     }
 
                     Button(action: {
-                        showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert)
+                        showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || !passwordsMatchAlert || credentialsFaultyAlert || credentialsExistAlert)
 
                         if(!showAlert) {
                             self.errorObserverEnabled = true

@@ -647,7 +647,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 - (UIImage*)imageForEmptyDataSet:(UIScrollView*)scrollView
 {
-    return nil;
+    return [UIImage imageNamed:@"chat"];
 }
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *) scrollView

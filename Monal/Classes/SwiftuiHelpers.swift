@@ -327,6 +327,8 @@ class SwiftuiInterface : NSObject {
                 host.rootView = AnyView(UIKitWorkaround(WelcomeLogIn(delegate:delegate)))
             case "ContactRequests":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactRequestsMenu(delegate: delegate)))
+            case "ChatPlaceholder":
+                host.rootView = AnyView(ChatPlaceholder())
             default:
                 assert(false, "unreachable"); // TODO port unreachable macro to swift
         }

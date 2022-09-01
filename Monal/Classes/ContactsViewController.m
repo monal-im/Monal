@@ -16,13 +16,21 @@
 #import <Monal-Swift.h>
 #import "HelperTools.h"
 
+@interface DZNEmptyDataSetView
+@property (atomic, strong) UIView* contentView;
+@property (atomic, strong) UIImageView* imageView;
+@property (atomic, strong) UILabel* titleLabel;
+@property (atomic, strong) UILabel* detailLabel;
+@end
+
+@interface UIScrollView () <UIGestureRecognizerDelegate>
+@property (nonatomic, readonly) DZNEmptyDataSetView* emptyDataSetView;
+@end
+
 @interface ContactsViewController ()
-
 @property (nonatomic, strong) UISearchController* searchController;
-
 @property (nonatomic, strong) NSMutableArray<MLContact*>* contacts;
 @property (nonatomic, strong) MLContact* lastSelectedContact;
-
 @end
 
 @implementation ContactsViewController
@@ -84,8 +92,6 @@
     self.searchController.obscuresBackgroundDuringPresentation = NO;
     self.definesPresentationContext = YES;
     
-    self.navigationItem.searchController = self.searchController;
-    
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
 
@@ -98,12 +104,21 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactUpdate) name:kMonalContactRemoved object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactUpdate) name:kMonalContactRefresh object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeviceRotation) name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
 -(void) handleContactUpdate
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self reloadTable];
+    });
+}
+
+-(void) handleDeviceRotation
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self imageForEmptyDataSet:nil];
     });
 }
 
@@ -120,7 +135,12 @@
     [self refreshDisplay];
 
     if(self.contacts.count == 0)
+    {
+        self.navigationItem.searchController = nil;
         [self reloadTable];
+    }
+    else
+        self.navigationItem.searchController = self.searchController;
 }
 
 
@@ -336,7 +356,31 @@
 
 -(UIImage*) imageForEmptyDataSet:(UIScrollView*) scrollView
 {
-    return nil;
+    DZNEmptyDataSetView* emptyDataSetView = self.tableView.emptyDataSetView;
+    CGRect headerFrame = self.navigationController.navigationBar.frame;
+    CGRect tableFrame = self.tableView.frame;
+    //CGRect contentFrame = emptyDataSetView.contentView.frame;
+    //DDLogError(@"headerFrame: %@", NSStringFromCGRect(headerFrame));
+    //DDLogError(@"tableFrame: %@", NSStringFromCGRect(tableFrame));
+    //DDLogError(@"contentFrame: %@", NSStringFromCGRect(contentFrame));
+    //emptyDataSetView.contentView.frame = tableFrame;
+    tableFrame.size.height *= 0.5;
+    tableFrame.origin.y -= headerFrame.size.height;
+    emptyDataSetView.imageView.frame = tableFrame;
+    [emptyDataSetView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[imageView]-(64@750)-[titleLabel]-(16@750)-[detailLabel]|" options:0 metrics:nil views:@{
+        @"imageView": emptyDataSetView.imageView,
+        @"titleLabel": emptyDataSetView.titleLabel,
+        @"detailLabel": emptyDataSetView.detailLabel,
+    }]];
+    emptyDataSetView.imageView.translatesAutoresizingMaskIntoConstraints = YES;
+    if(self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark)
+        return [UIImage imageNamed:@"friends_dark"];
+    return [UIImage imageNamed:@"friends"];
+}
+
+-(CGFloat) spaceHeightForEmptyDataSet:(UIScrollView*) scrollView
+{
+    return 48.0f;
 }
 
 -(NSAttributedString*) titleForEmptyDataSet:(UIScrollView*) scrollView
@@ -344,7 +388,7 @@
     NSString* text = NSLocalizedString(@"You need friends for this ride", @"");
     
     NSDictionary* attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
-                                 NSForegroundColorAttributeName: [UIColor darkGrayColor]};
+                                 NSForegroundColorAttributeName: (self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark ? [UIColor whiteColor] : [UIColor blackColor])};
     
     return [[NSAttributedString alloc] initWithString:text attributes:attributes];
 }
@@ -358,7 +402,7 @@
     paragraph.alignment = NSTextAlignmentCenter;
     
     NSDictionary* attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14.0f],
-                                 NSForegroundColorAttributeName: [UIColor lightGrayColor],
+                                 NSForegroundColorAttributeName: (self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark ? [UIColor whiteColor] : [UIColor blackColor]),
                                  NSParagraphStyleAttributeName: paragraph};
     
     return [[NSAttributedString alloc] initWithString:text attributes:attributes];

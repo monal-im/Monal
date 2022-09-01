@@ -22,7 +22,22 @@
 
 @import QuartzCore.CATransaction;
 
-@interface ActiveChatsViewController()
+@interface DZNEmptyDataSetView
+@property (atomic, strong) UIView* contentView;
+@property (atomic, strong) UIImageView* imageView;
+@property (atomic, strong) UILabel* titleLabel;
+@property (atomic, strong) UILabel* detailLabel;
+@end
+
+@interface UIScrollView () <UIGestureRecognizerDelegate>
+@property (nonatomic, readonly) DZNEmptyDataSetView* emptyDataSetView;
+@end
+
+@interface ActiveChatsViewController() {
+    int _startedOrientation;
+    double _portraitTop;
+    double _landscapeTop;
+}
 @property (atomic, strong) NSMutableArray* unpinnedContacts;
 @property (atomic, strong) NSMutableArray* pinnedContacts;
 @end
@@ -65,6 +80,8 @@ static NSMutableSet* _smacksWarningDisplayed;
 {
     [super viewDidLoad];
     
+    _startedOrientation = 0;
+    
     self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
     self.spinner.hidesWhenStopped = YES;
     
@@ -88,6 +105,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
+    [nc addObserver:self selector:@selector(handleDeviceRotation) name:UIDeviceOrientationDidChangeNotification object:nil];
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"ContactCell"];
     
@@ -108,6 +126,14 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void) handleDeviceRotation
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self imageForEmptyDataSet:nil];
+        [self.chatListTable setNeedsDisplay];
+    });
 }
 
 -(void) refreshDisplay
@@ -331,6 +357,8 @@ static NSMutableSet* _smacksWarningDisplayed;
         [self refreshDisplay];      // load contacts
     // only check if the login screens have been shown if there are no active chats
     [self segueToIntroScreensIfNeeded];
+    // open placeholder
+    [self presentChatWithContact:nil];
 }
 
 -(void) viewWillDisappear:(BOOL) animated
@@ -423,7 +451,11 @@ static NSMutableSet* _smacksWarningDisplayed;
 {
     // only show placeholder if we use a split view
     if([HelperTools deviceUsesSplitView] == YES)
-        [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
+    {
+        DDLogVerbose(@"Presenting Chat Placeholder...");
+        UIViewController* detailsViewController = [[SwiftuiInterface new] makeViewWithName:@"ChatPlaceholder"];
+        [self showDetailViewController:detailsViewController sender:self];
+    }
 }
 
 -(void) showPrivacySettings
@@ -643,7 +675,10 @@ static NSMutableSet* _smacksWarningDisplayed;
         [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         // removeActiveBuddy in db
         [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
+        // remove contact from activechats table
         [self refreshDisplay];
+        // open placeholder
+        [self presentChatWithContact:nil];
     }
 }
 
@@ -673,17 +708,113 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 #pragma mark - empty data set
 
-- (UIImage*)imageForEmptyDataSet:(UIScrollView*)scrollView
+-(void) viewWillTransitionToSize:(CGSize) size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>) coordinator
 {
-    return nil;
+    //DDLogError(@"Transitioning to size: %@", NSStringFromCGSize(size));
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 
-- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *) scrollView
+
+-(UIImage*) imageForEmptyDataSet:(UIScrollView*) scrollView
+{
+    int orientation;
+    if(self.tableView.frame.size.height > self.tableView.frame.size.width)
+    {
+        orientation = 1;        //portrait
+        _portraitTop = self.navigationController.navigationBar.frame.size.height;
+    }
+    else
+    {
+        orientation = 2;        //landscape
+        _landscapeTop = self.navigationController.navigationBar.frame.size.height;
+    }
+    if(_startedOrientation == 0)
+        _startedOrientation = orientation;
+
+    //DDLogError(@"started orientation: %@", _startedOrientation == 1 ? @"portrait" : @"landscape");
+    //DDLogError(@"current orientation: %@", orientation == 1 ? @"portrait" : @"landscape");
+    
+    DZNEmptyDataSetView* emptyDataSetView = self.tableView.emptyDataSetView;
+    CGRect headerFrame = self.navigationController.navigationBar.frame;
+    CGRect tableFrame = self.tableView.frame;
+    //CGRect contentFrame = emptyDataSetView.contentView.frame;
+    //DDLogError(@"headerFrame: %@", NSStringFromCGRect(headerFrame));
+    //DDLogError(@"tableFrame: %@", NSStringFromCGRect(tableFrame));
+    //DDLogError(@"contentFrame: %@", NSStringFromCGRect(contentFrame));
+    tableFrame.size.height *= 0.5;
+    
+    //started in landscape, moved to portrait
+    if(_startedOrientation == 2 && orientation == 1)
+    {
+        tableFrame.origin.y += headerFrame.size.height - _landscapeTop - _portraitTop;
+    }
+    //started in portrait, moved to landscape
+    else if(_startedOrientation == 1 && orientation == 2)
+    {
+        tableFrame.origin.y += (_portraitTop + _landscapeTop * 2);
+        tableFrame.size.height -= _portraitTop;
+    }
+    //sarted in any orientation, moved to same orientation (or just started)
+    else
+    {
+        tableFrame.origin.y += headerFrame.size.height;
+    }
+    
+    emptyDataSetView.contentView.frame = tableFrame;
+    emptyDataSetView.imageView.frame = tableFrame;
+    [emptyDataSetView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[imageView]-(32@750)-[titleLabel]-(16@750)-[detailLabel]|" options:0 metrics:nil views:@{
+        @"imageView": emptyDataSetView.imageView,
+        @"titleLabel": emptyDataSetView.titleLabel,
+        @"detailLabel": emptyDataSetView.detailLabel,
+    }]];
+    emptyDataSetView.imageView.translatesAutoresizingMaskIntoConstraints = YES;
+    if(self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark)
+        return [UIImage imageNamed:@"chat_dark"];
+    return [UIImage imageNamed:@"chat"];
+    
+    /*
+    DZNEmptyDataSetView* emptyDataSetView = self.chatListTable.emptyDataSetView;
+    CGRect headerFrame = self.navigationController.navigationBar.frame;
+    CGRect tableFrame = self.chatListTable.frame;
+    CGRect contentFrame = emptyDataSetView.contentView.frame;
+    DDLogError(@"headerFrame: %@", NSStringFromCGRect(headerFrame));
+    DDLogError(@"tableFrame: %@", NSStringFromCGRect(tableFrame));
+    DDLogError(@"contentFrame: %@", NSStringFromCGRect(contentFrame));
+    if(tableFrame.size.height > tableFrame.size.width)
+    {
+        DDLogError(@"height is bigger");
+        tableFrame.size.height *= 0.5;
+        tableFrame.origin.y += headerFrame.size.height;
+    }
+    else
+    {
+        DDLogError(@"width is bigger");
+        tableFrame.size.height *= 2.0;
+    }
+    //tableFrame.size.height *= (tableFrame.size.width / tableFrame.size.height);
+    emptyDataSetView.imageView.frame = tableFrame;
+    emptyDataSetView.contentView.frame = tableFrame;
+    [emptyDataSetView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[imageView]-(48@750)-[titleLabel]-(16@750)-[detailLabel]|" options:0 metrics:nil views:@{
+        @"imageView": emptyDataSetView.imageView,
+        @"titleLabel": emptyDataSetView.titleLabel,
+        @"detailLabel": emptyDataSetView.detailLabel,
+    }]];
+    emptyDataSetView.imageView.translatesAutoresizingMaskIntoConstraints = YES;
+    return [UIImage imageNamed:@"chat"];
+    */
+}
+
+-(CGFloat) spaceHeightForEmptyDataSet:(UIScrollView*) scrollView
+{
+    return 480.0f;
+}
+
+-(NSAttributedString*) titleForEmptyDataSet:(UIScrollView*) scrollView
 {
     NSString* text = NSLocalizedString(@"No one is here", @"");
     
     NSDictionary* attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
-                                 NSForegroundColorAttributeName: [UIColor darkGrayColor]};
+                                 NSForegroundColorAttributeName: (self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark ? [UIColor whiteColor] : [UIColor blackColor])};
     
     return [[NSAttributedString alloc] initWithString:text attributes:attributes];
 }
@@ -697,7 +828,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     paragraph.alignment = NSTextAlignmentCenter;
     
     NSDictionary* attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14.0f],
-                                 NSForegroundColorAttributeName: [UIColor lightGrayColor],
+                                 NSForegroundColorAttributeName: (self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark ? [UIColor whiteColor] : [UIColor blackColor]),
                                  NSParagraphStyleAttributeName: paragraph};
     
     return [[NSAttributedString alloc] initWithString:text attributes:attributes];
@@ -772,7 +903,10 @@ static NSMutableSet* _smacksWarningDisplayed;
             if([rowContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
             {
                 [self tableView:self.chatListTable commitEditingStyle:UITableViewCellEditingStyleDelete forRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:section]];
-                [self openConversationPlaceholder:nil];
+                // remove contact from activechats table
+                [self refreshDisplay];
+                // open placeholder
+                [self presentChatWithContact:nil];
                 return;
             }
         }];

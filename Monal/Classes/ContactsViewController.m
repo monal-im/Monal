@@ -302,7 +302,7 @@
 
 -(UIImage*) imageForEmptyDataSet:(UIScrollView*) scrollView
 {
-    return nil;
+    return [UIImage imageNamed:@"friends"];
 }
 
 -(NSAttributedString*) titleForEmptyDataSet:(UIScrollView*) scrollView

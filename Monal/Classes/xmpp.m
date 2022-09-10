@@ -1533,6 +1533,10 @@ NSString* const kStanza = @"stanza";
             [self postError:message withIsSevere:NO];
             MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
+                [[MLXMLNode alloc] initWithElement:@"handled-count-too-high" andNamespace:@"urn:xmpp:sm:3" withAttributes:@{
+                    @"h": hvalue,
+                    @"send-count": self.lastOutboundStanza,
+                } andChildren:@[] andData:nil],
                 [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
             ] andData:nil];
             [self reconnectWithStreamError:streamError];

@@ -5,7 +5,7 @@
     <name>Monal</name>
     <short-name>Monal</short-name>
 
-    <shortdesc xml:lang="en">iOS and MacOS XMPP chat client</shortdesc>
+    <shortdesc xml:lang="en">Modern iOS and MacOS XMPP chat client</shortdesc>
     <description xml:lang="en">
     There has never been a better time to get into XMPP, a free public chat network that no one controls or owns. 
     Monal is a fast and user friendly way to use the decentral XMPP protocol (known as Jabber). Just download the app, login or register and you are ready 
@@ -16,6 +16,8 @@
     <bug-database rdf:resource="https://github.com/monal-im/Monal/issues" />
     <license rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/develop/LICENSE" />
     <schema:documentation rdf:resource="https://github.com/monal-im/Monal/wiki"/>
+    <category rdf:resource="https://linkmauve.fr/ns/xmpp-doap#category-client"/>
+    <category rdf:resource="http://api.gnome.org/doap-extensions#apps"/>
     <schema:logo rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/develop/Art/monal.svg"/>
     
     <programming-language>Objective C</programming-language>
@@ -96,8 +98,8 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0054.html" />
-        <xmpp:status>partial</xmpp:status>
-        <xmpp:note>XEP-0054: vcard-temp (implemented only for MUCs)</xmpp:note>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:note>XEP-0054: vcard-temp (implemented only for MUC profiles)</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -193,8 +195,8 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0153.html" />
-        <xmpp:status>partial</xmpp:status>
-        <xmpp:note>XEP-0153: vCard-Based Avatars (implemented only for MUCs)</xmpp:note>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:note>XEP-0153: vCard-Based Avatars (implemented only for MUC profiles)</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -464,7 +466,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0384.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>
-        <xmpp:note>XEP-0384: OMEMO Encryption (currently only in 1:1 chats, not MUCs)</xmpp:note>
+        <xmpp:note>XEP-0384: OMEMO Encryption</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -505,6 +507,13 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0398.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:note>XEP-0398: User Avatar to vCard-Based Avatars Conversion</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0402.html" />
         <xmpp:status>planned</xmpp:status>
         <xmpp:note>XEP-0402: PEP Native Bookmarks</xmpp:note>
@@ -528,7 +537,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0420.html" />
-        <xmpp:status>wontfix</xmpp:status>
+        <xmpp:status>planned</xmpp:status>
         <xmpp:note>XEP-0420: Stanza Content Encryption</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
@@ -545,6 +554,14 @@
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>
         <xmpp:note>XEP-0441: Message Archive Management Preferences</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0445.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>5.2</xmpp:since>
+        <xmpp:note>XEP-0445: Pre-Authenticated In-Band Registration</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>

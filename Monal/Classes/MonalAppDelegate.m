@@ -826,17 +826,19 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         }
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            if(loadingHUD != nil)
-                loadingHUD.hidden = YES;
-            
-            //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-            
             //cancel already running background timer, we are now foregrounded again
             [self stopBackgroundTimer];
             
             [self addBackgroundTask];
             [[MLXMPPManager sharedInstance] nowForegrounded];           //NOTE: this will unfreeze all queues in our accounts
+            
+            if(loadingHUD != nil)
+                loadingHUD.hidden = YES;
+            
+            //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
+            //this must be done *after* [[MLXMPPManager sharedInstance] nowForegrounded] to make sure an already open chat view
+            //knows it is now foregrounded (we obviously don't mark messages as read if a chat view is in background while still loaded/"visible")
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
         });
     });
 }

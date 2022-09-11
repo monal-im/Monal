@@ -823,7 +823,8 @@ NSString* const kStanza = @"stanza";
     [self dispatchAsyncOnReceiveQueue: ^{
         [self->_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas from old connections
         [self unfreezeParseQueue];                        //make sure the parse queue is operational again
-        [self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
+        //we don't want to loose outgoing messages by throwing away their receiveQueue operation adding them to the smacks queue etc.
+        //[self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
         
         //sanity check
         if(self.accountState >= kStateReconnecting)
@@ -4482,16 +4483,25 @@ NSString* const kStanza = @"stanza";
 -(void) sendDisplayMarkerForMessage:(MLMessage*) msg
 {
     if(![[HelperTools defaultsDB] boolForKey:@"SendDisplayedMarkers"])
+    {
+        DDLogVerbose(@"Not sending chat marker, configured to not do so...");
         return;
+    }
     
     //don't send chatmarkers in channels
     if(msg.isMuc && [@"channel" isEqualToString:msg.mucType])
+    {
+        DDLogVerbose(@"Not sending chat marker in channel...");
         return;
+    }
     
     MLContact* contact = [MLContact createContactFromJid:msg.buddyName andAccountNo:msg.accountId];
     //don't send chatmarkers to 1:1 chats with users in our contact list that did not subscribe us (e.g. are not allowed to see us)
     if(!contact.isGroup && !contact.isSubscribedFrom)
+    {
+        DDLogVerbose(@"Not sending chat marker, we are not subscribed from this contact...");
         return;
+    }
     
     XMPPMessage* displayedNode = [[XMPPMessage alloc] init];
     //the message type is needed so that the store hint is accepted by the server
@@ -4499,6 +4509,7 @@ NSString* const kStanza = @"stanza";
     displayedNode.attributes[@"to"] = msg.inbound ? msg.buddyName : self.connectionProperties.identity.jid;
     [displayedNode setDisplayed:msg.messageId];
     [displayedNode setStoreHint];
+    DDLogVerbose(@"Sending display marker: %@", displayedNode);
     [self send:displayedNode];
 }
 

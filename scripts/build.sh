@@ -34,7 +34,7 @@ echo ""
 echo "*******************************************"
 echo "*     Update localizations submodules     *"
 echo "*******************************************"
-git submodule update --remote --init --merge
+git submodule update -f --init --remote
 
 echo ""
 echo "***************************************"

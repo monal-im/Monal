@@ -42,7 +42,9 @@ jobs:
           cd ../../../..
       - name: save changelog
         run: |
-          echo '${{github.event.commits}}' > changes.txt
+          echo 'ID: ${{github.event.head_commit.id}}' > changes.txt
+          echo 'Timestamp: ${{github.event.head_commit.timestamp}}' >> changes.txt
+          echo '${{github.event.head_commit.message}}' >> changes.txt
       - name: Uploading to alpha site
         run: ./scripts/uploadAlpha.sh
       - name: Notarize catalyst

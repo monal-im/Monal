@@ -241,7 +241,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         ];
     }
     UNNotificationCategory* messageCategory;
-    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings;
 #if TARGET_OS_MACCATALYST
     authOptions |= UNAuthorizationOptionProvisional;
 #endif

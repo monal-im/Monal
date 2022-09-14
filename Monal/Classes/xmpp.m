@@ -3866,7 +3866,8 @@ NSString* const kStanza = @"stanza";
     [self sendIq:iq withResponseHandler:^(XMPPIQ* result) {
         if(!(
             ([result check:@"{jabber:iq:register}query/username"] && [result check:@"{jabber:iq:register}query/password"]) ||
-            [result check:@"{jabber:iq:register}query/\\{jabber:iq:register}form\\"]
+            [result check:@"{jabber:iq:register}query/\\{jabber:iq:register}form\\"] ||
+            [result check:@"{jabber:iq:register}query/\\{urn:xmpp:captcha}form\\"]
         ))
         {
             //dispatch completion handler outside of the receiveQueue

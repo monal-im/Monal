@@ -2276,7 +2276,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -2632,7 +2632,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				COPY_PHASE_STRIP = YES;
@@ -3221,7 +3221,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -3614,7 +3614,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";

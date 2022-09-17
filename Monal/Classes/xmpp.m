@@ -2054,6 +2054,10 @@ NSString* const kStanza = @"stanza";
         {
             XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
             
+            //openfire compatibility: remove iq-to of bind
+            if([self.connectionProperties.serverIdentity isEqualToString:@"http://www.process-one.net/en/ejabberd/"] && [iqNode check:@"/{jabber:client}iq<type=result>/{urn:ietf:params:xml:ns:xmpp-bind}bind"])
+                iqNode.to = nil;
+            
             //sanity: check if iq from and to attributes are valid and throw it away if not
             if([@"" isEqualToString:iqNode.from] || [@"" isEqualToString:iqNode.to])
             {

@@ -205,10 +205,11 @@ enum MLServerDetailsSections {
         [self.channelBindingTypes addObject:@{@"Title": NSLocalizedString(@"None", @""), @"Description":NSLocalizedString(@"This server does not support any modern channel-binding to secure against MITM attacks on the TLS layer.", @""), @"Color":@"Red"}];
         return;
     }
+    NSArray* supportedChannelBindingTypes = self.xmppAccount.supportedChannelBindingTypes;
     for(NSString* type in [connection.channelBindingTypes.allKeys sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"self" ascending:YES]]])
     {
         BOOL used = [connection.channelBindingTypes[type] boolValue];
-        BOOL supported = [[SCRAM supportedChannelBindingTypes] containsObject:type];
+        BOOL supported = [supportedChannelBindingTypes containsObject:type];
         NSString* description = NSLocalizedString(@"Unknown channel-binding type", @"");
         if([type isEqualToString:@"tls-exporter"])
             description = NSLocalizedString(@"Secure channel-binding defined for TLS1.3 and some TLS1.2 connections.", @"");

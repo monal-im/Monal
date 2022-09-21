@@ -166,16 +166,21 @@ enum MLServerDetailsSections {
 {
     DDLogVerbose(@"saslMethods: %@", connection.saslMethods);
     if(connection.saslMethods == nil)
+    {
+        [self.saslMethods addObject:@{@"Title": NSLocalizedString(@"None", @""), @"Description":NSLocalizedString(@"This server does not support modern SASL2 authentication.", @""), @"Color":@"Red"}];
         return;
+    }
     for(NSString* method in [connection.saslMethods.allKeys sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"self" ascending:YES]]])
     {
         BOOL used = [connection.saslMethods[method] boolValue];
         BOOL supported = [[SCRAM supportedMechanismsIncludingChannelBinding:YES] containsObject:method] || [@[@"PLAIN"] containsObject:method];
         NSString* description = NSLocalizedString(@"Unknown authentication method", @"");
         if([method isEqualToString:@"PLAIN"])
-            description = NSLocalizedString(@"Sends password in cleartext (only encrypted by TLS)", @"");
+            description = NSLocalizedString(@"Sends password in cleartext (only encrypted by TLS), not very secure", @"");
         else if([method isEqualToString:@"EXTERNAL"])
             description = NSLocalizedString(@"Uses TLS client certificates for authentication", @"");
+        else if([method hasPrefix:@"SCRAM-"] && [method hasSuffix:@"-PLUS"])
+            description = NSLocalizedString(@"Salted Challenge Response Authentication Mechanism using the given Hash Method additionally secured by Channel-Binding", @"");
         else if([method hasPrefix:@"SCRAM-"])
             description = NSLocalizedString(@"Salted Challenge Response Authentication Mechanism using the given Hash Method", @"");
         [self.saslMethods addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Method: %@", @""), method], @"Description":description, @"Color":(used ? @"Green" : (!supported ? @"Yellow" : @"None"))}];
@@ -249,7 +254,7 @@ enum MLServerDetailsSections {
     } else if(section == SRV_RECORS_SECTION) {
         return NSLocalizedString(@"These are SRV resource records found for your domain.", @"");
     } else if(section == SASL_SECTION) {
-        return NSLocalizedString(@"These are the SASL methods your server supports.", @"");
+        return NSLocalizedString(@"These are the SASL2 methods your server supports.", @"");
     }
     return @"";
 }

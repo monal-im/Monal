@@ -13,7 +13,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SCRAM : NSObject
 +(NSArray*) supportedMechanismsIncludingChannelBinding:(BOOL) include;
-+(NSArray*) supportedChannelBindingTypes;
 -(instancetype) initWithUsername:(NSString*) username password:(NSString*) password andMethod:(NSString*) method;
 
 -(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType;

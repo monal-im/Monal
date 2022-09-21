@@ -44,6 +44,12 @@
     return @[@"SCRAM-SHA-512", @"SCRAM-SHA-256", @"SCRAM-SHA-1"];
 }
 
+//list supported channel-binding types (highest security first!)
++(NSArray*) supportedChannelBindingTypes
+{
+    return @[@"tls-exporter"];
+}
+
 -(instancetype) initWithUsername:(NSString*) username password:(NSString*) password andMethod:(NSString*) method
 {
     self = [super init];

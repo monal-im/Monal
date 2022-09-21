@@ -2308,45 +2308,6 @@ NSString* const kStanza = @"stanza";
             
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
-            NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
-            
-            //only parse and validate scram response, if we are in scram mode (e.g. not sasl plain)
-            if(self->_scramHandler != nil)
-            {
-                NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}success#|base64"] encoding:NSUTF8StringEncoding];
-                if(![self->_scramHandler parseServerFinalMessage:innerSASLData])
-                {
-                    DDLogError(@"SCRAM says this server final message was wrong!");
-                    
-                    //clear pipeline cache to make sure we have a fresh restart next time
-                    _pipeliningState = kPipelinedNothing;
-                    _cachedStreamFeaturesBeforeAuth = nil;
-                    _cachedStreamFeaturesAfterAuth = nil;
-                    
-                    //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-                    [HelperTools postError:NSLocalizedString(@"Error handling SASL authentication of server, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
-                    [self disconnect];
-                    
-                    return;
-                }
-                else
-                    DDLogDebug(@"SCRAM says this server final message was correct");
-                
-                //build mechanism list displayed in ui (mark _scramHandler.method as used)
-                for(NSString* mechanism in _supportedSaslMechanisms)
-                    mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
-                
-                self->_scramHandler = nil;
-                self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
-            }
-            else
-            {
-                //build mechanism list displayed in ui (mark PLAIN as used)
-                for(NSString* mechanism in _supportedSaslMechanisms)
-                    mechanismList[mechanism] = @([@"PLAIN" isEqualToString:mechanism]);
-            }
-            DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
-            self.connectionProperties.saslMethods = mechanismList;
             
             self->_accountState = kStateLoggedIn;
             _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
@@ -2462,6 +2423,22 @@ NSString* const kStanza = @"stanza";
             //...but don't try again if it's really the password, that's wrong
             else
             {
+                //display sasl mechanism list and list of channel-binding types even if SASL2 failed
+                NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
+                
+                //build mechanism list displayed in ui (mark _scramHandler.method as used)
+                for(NSString* mechanism in _supportedSaslMechanisms)
+                    mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
+                DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
+                self.connectionProperties.saslMethods = mechanismList;
+                
+                //build channel-binding list displayed in ui (mark [self channelBindingUsable] as used)
+                for(NSString* cbType in _supportedChannelBindings)
+                    channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingUsable]]);
+                DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
+                self.connectionProperties.channelBindingTypes = channelBindings;
+                
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
                 [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES];
                 [self disconnect];
@@ -2480,6 +2457,7 @@ NSString* const kStanza = @"stanza";
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL2 Success");
             NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
             
             //only parse and validate scram response, if we are in scram mode (should always be the case)
             MLAssert(self->_scramHandler != nil, @"self->_scramHandler should NEVER be nil when using SASL2!");
@@ -2515,6 +2493,12 @@ NSString* const kStanza = @"stanza";
                 mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
             DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
             self.connectionProperties.saslMethods = mechanismList;
+            
+            //build channel-binding list displayed in ui (mark [self channelBindingUsable] as used)
+            for(NSString* cbType in _supportedChannelBindings)
+                channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingUsable]]);
+            DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
+            self.connectionProperties.channelBindingTypes = channelBindings;
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
@@ -2880,10 +2864,9 @@ NSString* const kStanza = @"stanza";
     if(!(self.connectionProperties.server.isDirectTLS && ((MLStream*)self->_oStream).isTLS13))
         return nil;
     
-    if([_supportedChannelBindings containsObject:@"tls-exporter"])
-        return @"tls-exporter";
-    if([_supportedChannelBindings containsObject:@"tls-server-end-point"])
-        return @"tls-server-end-point";
+    for(NSString* type in [SCRAM supportedChannelBindingTypes])
+        if([_supportedChannelBindings containsObject:type])
+            return type;
     
     //TODO: implement "tls-server-end-point" channel-binding type!!
     DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory!");

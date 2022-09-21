@@ -266,6 +266,8 @@
         //these two must be disabled for channel binding (you should never reuse the same channel binding data)
         sec_protocol_options_set_tls_resumption_enabled(options, 0);
         sec_protocol_options_set_tls_tickets_enabled(options, 0);
+        //tls-exporter channel-binding is only usable if DHE is used instead of RSA key exchange
+        sec_protocol_options_append_tls_ciphersuite_group(options, tls_ciphersuite_group_ats);
     }, ^(nw_protocol_options_t tcp_options) {
         nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
         //nw_tcp_options_set_no_delay(tcp_options, YES);              //disable nagle's algorithm
@@ -474,6 +476,33 @@
         error = self.shared_state.error;
     }
     return error;
+}
+
+//list supported channel-binding types (highest security first!)
+-(NSArray*) supportedChannelBindingTypes
+{
+    //we made sure we only use PFS based ciphers for which tls-exporter can safely be used even with TLS1.2
+    /*
+    //tls-exporter channel binding is only supported with TLS >= 1.3 due to rfc requirement
+    if(!self.isTLS13)
+        return @[];
+    */
+    
+    //TODO: implement "tls-server-end-point" channel-binding type!!
+    return @[@"tls-exporter"];
+}
+
+-(NSData* _Nullable) channelBindingDataForType:(NSString* _Nullable) type
+{
+    //don't log a warning in this special case
+    if(type == nil)
+        return nil;
+    
+    if([@"tls-exporter" isEqualToString:type])
+        return [self channelBindingData_TLSExporter];
+    
+    DDLogWarn(@"Trying to use unknown channel-binding type '%@'...", type);
+    return nil;
 }
 
 -(BOOL) isTLS13

@@ -2363,11 +2363,7 @@ NSString* const kStanza = @"stanza";
                 return;
             }
             
-            NSString* channelBindingToUse = [self channelBindingUsable];
-            NSData* channelBindingData;
-            if([channelBindingToUse isEqualToString:@"tls-exporter"])
-                channelBindingData = ((MLStream*)self->_oStream).channelBindingData_TLSExporter;
-            
+            NSData* channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:[self channelBindingToUse]];            
             MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFinalMessageWithChannelBindingData:channelBindingData]]];
             [self send:responseXML];
             
@@ -2433,9 +2429,9 @@ NSString* const kStanza = @"stanza";
                 DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
                 self.connectionProperties.saslMethods = mechanismList;
                 
-                //build channel-binding list displayed in ui (mark [self channelBindingUsable] as used)
+                //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
                 for(NSString* cbType in _supportedChannelBindings)
-                    channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingUsable]]);
+                    channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
                 DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
                 self.connectionProperties.channelBindingTypes = channelBindings;
                 
@@ -2494,9 +2490,9 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
             self.connectionProperties.saslMethods = mechanismList;
             
-            //build channel-binding list displayed in ui (mark [self channelBindingUsable] as used)
+            //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
             for(NSString* cbType in _supportedChannelBindings)
-                channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingUsable]]);
+                channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
             DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
             self.connectionProperties.channelBindingTypes = channelBindings;
             
@@ -2712,7 +2708,7 @@ NSString* const kStanza = @"stanza";
                 DDLogWarn(@"Server supports SASL2 PLAIN, ignoring because this is insecure!");
             
             //check for supported scram mechanisms (highest security first!)
-            for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:[self channelBindingUsable] != nil])
+            for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:[self channelBindingToUse] != nil])
                 if([self->_supportedSaslMechanisms containsObject:mechanism])
                 {
                     self->_scramHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:mechanism];
@@ -2721,7 +2717,7 @@ NSString* const kStanza = @"stanza";
                         andNamespace:@"urn:xmpp:sasl:2"
                         withAttributes:@{@"mechanism": mechanism}
                         andChildren:@[
-                            [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithChannelBinding:[self channelBindingUsable]]]]
+                            [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithChannelBinding:[self channelBindingToUse]]]]
                         ]
                         andData:nil
                     ]];
@@ -2857,20 +2853,29 @@ NSString* const kStanza = @"stanza";
         [self bindResource:self.connectionProperties.identity.resource];
 }
 
--(NSString* _Nullable) channelBindingUsable
+-(NSString* _Nullable) channelBindingToUse
 {
-    //we only support channel-binding if using direct TLS and TLS1.3 because we only support the tls-exporter channel-binding type for now
-    //--> tls-exporter channel binding is only supported for direct tls due to dependency on network framework and TLS >= 1.3 due to rfc requirement
-    if(!(self.connectionProperties.server.isDirectTLS && ((MLStream*)self->_oStream).isTLS13))
+    //channel binding is only supported for direct tls due to dependency on network framework
+    if(!self.connectionProperties.server.isDirectTLS)
         return nil;
     
-    for(NSString* type in [SCRAM supportedChannelBindingTypes])
+    NSArray* typesList = [((MLStream*)self->_oStream) supportedChannelBindingTypes];
+    if(typesList == nil || typesList.count == 0)
+        return nil;     //we don't support any channel-binding for this TLS connection
+    for(NSString* type in typesList)
         if([_supportedChannelBindings containsObject:type])
             return type;
     
-    //TODO: implement "tls-server-end-point" channel-binding type!!
     DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory!");
-    return @"_no_supported_binding_mitm_possible_";     //this will make the authentication fail
+    return @"_no_supported_binding_mitm_possible_";     //this will make sure the authentication fails
+}
+
+//proxy this to ostream if directTLS is used
+-(NSArray* _Nullable) supportedChannelBindingTypes
+{
+    if(!self.connectionProperties.server.isDirectTLS)
+        return nil;
+    return [((MLStream*)self->_oStream) supportedChannelBindingTypes];
 }
 
 #pragma mark stanza handling

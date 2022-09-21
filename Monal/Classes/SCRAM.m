@@ -144,6 +144,13 @@
     return YES;
 }
 
+-(NSString*) method
+{
+    if(_usingChannelBinding)
+        return [NSString stringWithFormat:@"%@-PLUS", _method];
+    return _method;
+}
+
 
 -(NSData*) hmacForKey:(NSData*) key andData:(NSData*) data
 {

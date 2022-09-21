@@ -38,7 +38,6 @@ typedef NS_ENUM (NSInteger, xmppRegistrationState) {
 typedef NS_ENUM (NSInteger, xmppPipeliningState) {
     kPipelinedNothing = -1,
     kPipelinedAuth,
-    kPipelinedStreamRestart,
     kPipelinedResumeOrBind
 };
 

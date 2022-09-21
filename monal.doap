@@ -550,6 +550,14 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0440.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>5.4</xmpp:since>
+        <xmpp:note>XEP-0440: SASL Channel-Binding Type Capability</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0441.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>

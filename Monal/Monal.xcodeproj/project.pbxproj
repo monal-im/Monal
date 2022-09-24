@@ -692,6 +692,10 @@
 		C1E4655E24EE520F00CA5AAF /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = external/cs.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C1E4655F24EE520F00CA5AAF /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = external/el.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C1E4656024EE520F00CA5AAF /* fa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fa; path = external/fa.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C1E856A628DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/Main.strings; sourceTree = "<group>"; };
+		C1E856A728DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/Settings.strings; sourceTree = "<group>"; };
+		C1E856A828DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/iosShare.strings; sourceTree = "<group>"; };
+		C1E856A928DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C1F0AD15288BCE6F00BB0182 /* Alpha.Monal.ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Alpha.Monal.ios.entitlements; sourceTree = "<group>"; };
 		C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactSoftwareVersionInfo.h; sourceTree = "<group>"; };
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
@@ -1625,6 +1629,7 @@
 				"zh-Hans",
 				pa,
 				ko,
+				eu,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			packageReferences = (
@@ -2140,6 +2145,7 @@
 				C13CF81D261A00FE005452E5 /* zh-Hans */,
 				C132EA9B26C92E9000BB9A67 /* pa */,
 				C15A4E5F279D2AC80055CD11 /* ko */,
+				C1E856A828DECF5F00B104E9 /* eu */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2180,6 +2186,7 @@
 				C13CF81B261A00FD005452E5 /* zh-Hans */,
 				C132EA9626C92DD900BB9A67 /* pa */,
 				C15A4E5D279D2AC70055CD11 /* ko */,
+				C1E856A728DECF5F00B104E9 /* eu */,
 			);
 			name = Settings.storyboard;
 			sourceTree = "<group>";
@@ -2220,6 +2227,7 @@
 				C13CF819261A00D0005452E5 /* zh-Hans */,
 				C132EA9426C92DD900BB9A67 /* pa */,
 				C15A4E5B279D2AC60055CD11 /* ko */,
+				C1E856A628DECF5F00B104E9 /* eu */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -2259,6 +2267,7 @@
 				C13CF81E261A00FE005452E5 /* zh-Hans */,
 				C132EA9926C92DDA00BB9A67 /* pa */,
 				C15A4E60279D2AC80055CD11 /* ko */,
+				C1E856A928DECF5F00B104E9 /* eu */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

@@ -154,7 +154,7 @@
         if([self checkIfStillBookmarked:presenceNode.fromUser])
             [self deleteMuc:presenceNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
-        [self handleError:NSLocalizedString(@"Groupchat error", @"") forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:YES];
+        [self handleError:NSLocalizedString(@"Group/Channel error", @"") forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:YES];
         return;
     }
     
@@ -336,7 +336,7 @@
                         //muc got destroyed
                         if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
                         {
-                            [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Muc got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                            [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                             [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                         }
                         else
@@ -676,7 +676,7 @@ $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, 
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Publishing avatar for muc '%@' returned error: %@", iqNode.fromUser, [iqNode findFirst:@"error"]);
-        [HelperTools postError:NSLocalizedString(@"Failed to publish avatar image for groupchat %@", @"") withNode:iqNode andAccount:_account andIsSevere:YES];
+        [HelperTools postError:NSLocalizedString(@"Failed to publish avatar image for group/channel %@", @"") withNode:iqNode andAccount:_account andIsSevere:YES];
         return;
     }
     DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);
@@ -705,7 +705,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         //make sure to update remote bookmarks, even if updateBookmarks == NO
         //keep buddy list entry to allow users to read the last messages before the muc got deleted
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Muc not available anymore: %@", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:iqNode andIsSevere:YES];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel not available anymore: %@", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:iqNode andIsSevere:YES];
         [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
         return;
@@ -725,7 +725,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         //--> allow users to read the last messages before the muc got broken
         
         //only display an error banner, no notification (this is only temporary)
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Temporary failure to enter groupchat: %@", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:NO];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Temporary failure to enter Group/Channel: %@", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:NO];
         return;
     }
     else if([iqNode check:@"/<type=error>"])
@@ -740,7 +740,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         //keep buddy list entry to allow users to read the last messages before the muc got deleted/broken
         [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:YES];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter Group/Channel %@", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:YES];
         return;
     }
     
@@ -758,7 +758,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         //AND: to not auto-delete contact list entries via malicious xmpp:?join links
         [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
     
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@: This is not a groupchat!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andIsSevere:YES];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter Group/Channel %@: This is not a Group/Channel!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andIsSevere:YES];
         return;
     }
     
@@ -867,7 +867,7 @@ $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $$ID(xmp
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
-        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query newest stanzaid for groupchat %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query newest stanzaid for Group/Channel %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
         return;
     }
     DDLogVerbose(@"Got latest muc stanza id to prime database with: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
@@ -898,7 +898,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
         }
         else
         {
-            [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for groupchat %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
+            [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for Group/Channel %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
             [_account mamFinishedFor:iqNode.fromUser];
         }
         return;

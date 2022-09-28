@@ -348,8 +348,9 @@ void swizzle(Class c, SEL orig, SEL new)
         [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
+                //for example: image shared directly from screenshots
                 DDLogWarn(@"Got error, retrying with UIImage: %@", error);
-                [provider loadObjectOfClass:[UIImage class] completionHandler:^(UIImage*  _Nullable item, NSError* _Null_unspecified error) {
+                [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(UIImage*  _Nullable item, NSError* _Null_unspecified error) {
                     if(error != nil || item == nil)
                     {
                         DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -371,8 +372,10 @@ void swizzle(Class c, SEL orig, SEL new)
                 [item startAccessingSecurityScopedResource];
                 [[[NSFileCoordinator alloc] init] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
                     DDLogDebug(@"NSFileCoordinator called accessor for image: %@", newURL);
+                    UIImage* image = [UIImage imageWithContentsOfFile:[newURL path]];
+                    DDLogDebug(@"Created UIImage: %@", image);
                     //use prepareUIImageUpload to resize the image to the configured quality (instead of just uploading the raw image file)
-                    payload[@"data"] = [MLFiletransfer prepareUIImageUpload:[UIImage imageWithContentsOfFile:[newURL path]]];
+                    payload[@"data"] = [MLFiletransfer prepareUIImageUpload:image];
                     [item stopAccessingSecurityScopedResource];
                     return addPreview(newURL);
                 }];

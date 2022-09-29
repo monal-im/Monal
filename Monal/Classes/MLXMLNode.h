@@ -26,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString* _Nullable) data;
 -(id) initWithElement:(NSString*) element withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString* _Nullable) data;
 -(id) initWithElement:(NSString*) element andData:(NSString* _Nullable) data;
+-(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns andData:(NSString* _Nullable) data;
 
 /**
  Query for text contents, elementNames, attributes or child elements

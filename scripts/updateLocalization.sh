@@ -1,5 +1,7 @@
 #/bin/bash
 
+set -e
+
 cd "$(dirname "$0")"
 cd ../Monal
 
@@ -17,7 +19,7 @@ git submodule update --init --recursive --remote
     echo "Git remote is now:"
     git remote --verbose
     git checkout main
-    git pull
+    git reset --hard origin/main
 )
 #subshell to not leak from "cd $folder"
 (
@@ -30,7 +32,7 @@ git submodule update --init --recursive --remote
     echo "Git remote is now:"
     git remote --verbose
     git checkout main
-    git pull
+    git reset --hard origin/main
 )
 
 # Run bartycrouch
@@ -40,6 +42,7 @@ if which bartycrouch > /dev/null; then
     bartycrouch lint -x
 else
     echo "warning: BartyCrouch not installed, download it from https://github.com/Flinesoft/BartyCrouch"
+    exit 1
 fi
 
 for folder in "localization/external" "shareSheet-iOS/localization/external"; do

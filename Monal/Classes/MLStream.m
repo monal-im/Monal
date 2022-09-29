@@ -263,14 +263,14 @@
         sec_protocol_options_set_tls_ocsp_enabled(options, 1);
         sec_protocol_options_set_tls_false_start_enabled(options, 1);
         sec_protocol_options_set_min_tls_protocol_version(options, tls_protocol_version_TLSv12);
-        //these two must be disabled for channel binding (you should never reuse the same channel binding data)
-        sec_protocol_options_set_tls_resumption_enabled(options, 0);
-        sec_protocol_options_set_tls_tickets_enabled(options, 0);
+        sec_protocol_options_set_tls_resumption_enabled(options, 1);
+        sec_protocol_options_set_tls_tickets_enabled(options, 1);
+        sec_protocol_options_set_tls_renegotiation_enabled(options, 0);
         //tls-exporter channel-binding is only usable if DHE is used instead of RSA key exchange
         sec_protocol_options_append_tls_ciphersuite_group(options, tls_ciphersuite_group_ats);
     }, ^(nw_protocol_options_t tcp_options) {
         nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
-        //nw_tcp_options_set_no_delay(tcp_options, YES);              //disable nagle's algorithm
+        //nw_tcp_options_set_no_delay(tcp_options, YES);            //disable nagle's algorithm
     });
     //not needed, will be done by apple's tls implementation automatically (only needed for plain tcp and manual sending of idempotent data)
     //nw_parameters_set_fast_open_enabled(parameters, YES);

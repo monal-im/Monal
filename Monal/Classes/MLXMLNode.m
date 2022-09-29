@@ -166,6 +166,13 @@ static NSRegularExpression* attributeFilterRegex;
     return self;
 }
 
+-(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns andData:(NSString* _Nullable) data
+{
+    self = [self initWithElement:element withAttributes:@{} andChildren:@[] andData:data];
+    [self setXMLNS:xmlns];
+    return self;
+}
+
 -(void) dealloc
 {
 /*

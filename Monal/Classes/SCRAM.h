@@ -19,8 +19,10 @@ NS_ASSUME_NONNULL_BEGIN
 -(BOOL) parseServerFirstMessage:(NSString*) str;
 -(NSString*) clientFinalMessageWithChannelBindingData:(NSData* _Nullable) channelBindingData;
 -(BOOL) parseServerFinalMessage:(NSString*) str;
+-(NSData*) hashPasswordWithSalt:(NSData*) salt andIterationCount:(uint32_t) iterationCount;
 
 @property (nonatomic, readonly) NSString* method;
+@property (nonatomic, readonly) BOOL finishedSuccessfully;
 @end
 
 NS_ASSUME_NONNULL_END

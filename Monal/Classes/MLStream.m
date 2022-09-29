@@ -501,8 +501,7 @@
     if([@"tls-exporter" isEqualToString:type])
         return [self channelBindingData_TLSExporter];
     
-    DDLogWarn(@"Trying to use unknown channel-binding type '%@'...", type);
-    return nil;
+    MLAssert(NO, @"Trying to use unknown channel-binding type!", (@{@"type":type}));
 }
 
 -(BOOL) isTLS13

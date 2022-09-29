@@ -478,6 +478,13 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0388.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:note>XEP-0388: Extensible SASL Profile</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0390.html" />
         <xmpp:status>wontfix</xmpp:status>
         <xmpp:note>XEP-0390: Entity Capabilities 2.0</xmpp:note>

@@ -56,6 +56,7 @@
     _username = username;
     _password = password;
     _nonce = [NSUUID UUID].UUIDString;
+    _finishedSuccessfully = NO;
     return self;
 }
 
@@ -97,18 +98,7 @@
     if(channelBindingData != nil)
         [gssHeaderWithChannelBindingData appendData:channelBindingData];
     
-    //calculate saltedPassword (e.g. Hi(Normalize(password), salt, i))
-    uint32_t i = htonl(1);
-    NSMutableData* salti = [NSMutableData dataWithData:_salt];
-    [salti appendData:[NSData dataWithBytes:&i length:sizeof(i)]];
-    NSData* passwordData = [_password dataUsingEncoding:NSUTF8StringEncoding];
-    NSData* saltedPasswordIntermediate = [self hmacForKey:passwordData andData:salti];
-    NSData* saltedPassword = saltedPasswordIntermediate;
-    for(long i = 1; i < _iterationCount; i++)
-    {
-        saltedPasswordIntermediate = [self hmacForKey:passwordData andData:saltedPasswordIntermediate];
-        saltedPassword = [HelperTools XORData:saltedPassword withData:saltedPasswordIntermediate];
-    }
+    NSData* saltedPassword = [self hashPasswordWithSalt:_salt andIterationCount:_iterationCount];
     
     //calculate clientKey (e.g. HMAC(SaltedPassword, "Client Key"))
     NSData* clientKey = [self hmacForKey:saltedPassword andData:[@"Client Key" dataUsingEncoding:NSUTF8StringEncoding]];
@@ -141,7 +131,25 @@
     NSDictionary* msg = [self parseScramString:str];
     if(![_expectedServerSignature isEqualToString:msg[@"v"]])
         return NO;
+    _finishedSuccessfully = YES;
     return YES;
+}
+
+-(NSData*) hashPasswordWithSalt:(NSData*) salt andIterationCount:(uint32_t) iterationCount
+{
+    //calculate saltedPassword (e.g. Hi(Normalize(password), salt, i))
+    uint32_t i = htonl(1);
+    NSMutableData* salti = [NSMutableData dataWithData:salt];
+    [salti appendData:[NSData dataWithBytes:&i length:sizeof(i)]];
+    NSData* passwordData = [_password dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* saltedPasswordIntermediate = [self hmacForKey:passwordData andData:salti];
+    NSData* saltedPassword = saltedPasswordIntermediate;
+    for(long i = 1; i < iterationCount; i++)
+    {
+        saltedPasswordIntermediate = [self hmacForKey:passwordData andData:saltedPasswordIntermediate];
+        saltedPassword = [HelperTools XORData:saltedPassword withData:saltedPasswordIntermediate];
+    }
+    return saltedPassword;
 }
 
 -(NSString*) method

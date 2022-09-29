@@ -132,6 +132,7 @@ NSString* const kStanza = @"stanza";
     NSSet* _supportedSaslMechanisms;
     NSSet* _supportedChannelBindings;
     monal_void_block_t _blockToCallOnTCPOpen;
+    NSString* _upgradeTask;
 }
 
 @property (nonatomic, assign) BOOL smacksRequestInFlight;
@@ -2284,17 +2285,9 @@ NSString* const kStanza = @"stanza";
             if(oldPipeliningState != kPipelinedNothing)
                 [self reconnect];
             //...but don't try again if it's really the password, that's wrong
+            //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
             else
-            {
-                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-                [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES];
-                [self disconnect];
-                
-                //make sure we don't try this again even when the mainapp/appex gets restarted
-                NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:self.accountNo] copyItems:YES];
-                accountDic[kEnabled] = @NO;
-                [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
-            }
+                [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}challenge"])
         {
@@ -2363,7 +2356,7 @@ NSString* const kStanza = @"stanza";
                 return;
             }
             
-            NSData* channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:[self channelBindingToUse]];            
+            NSData* channelBindingData = [self channelBindingDataForType:[self channelBindingToUse]];            
             MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFinalMessageWithChannelBindingData:channelBindingData]]];
             [self send:responseXML];
             
@@ -2420,29 +2413,23 @@ NSString* const kStanza = @"stanza";
             else
             {
                 //display sasl mechanism list and list of channel-binding types even if SASL2 failed
-                NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
-                NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
                 
                 //build mechanism list displayed in ui (mark _scramHandler.method as used)
+                NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
                 for(NSString* mechanism in _supportedSaslMechanisms)
                     mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
                 DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
                 self.connectionProperties.saslMethods = mechanismList;
                 
                 //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
+                NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
                 for(NSString* cbType in _supportedChannelBindings)
                     channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
                 DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
                 self.connectionProperties.channelBindingTypes = channelBindings;
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-                [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES];
-                [self disconnect];
-                
-                //make sure we don't try this again even when the mainapp/appex gets restarted
-                NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:self.accountNo] copyItems:YES];
-                accountDic[kEnabled] = @NO;
-                [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
+                [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES  andDisableAccount:YES];
             }
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}success"])
@@ -2450,32 +2437,23 @@ NSString* const kStanza = @"stanza";
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
             
-            //perform logic to handle sasl success
-            DDLogInfo(@"Got SASL2 Success");
+            //check server-final message for correctness if needed
+            if(!self->_scramHandler.finishedSuccessfully)
+                [self handleScramInSuccessOrContinue:parsedStanza];
+            
+            //build mechanism list displayed in ui (mark _scramHandler.method as used)
             NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
+            for(NSString* mechanism in _supportedSaslMechanisms)
+                mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
+            DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
+            self.connectionProperties.saslMethods = mechanismList;
+            
+            //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
             NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
-            
-            //only parse and validate scram response, if we are in scram mode (should always be the case)
-            MLAssert(self->_scramHandler != nil, @"self->_scramHandler should NEVER be nil when using SASL2!");
-            
-            NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"additional-data#|base64"] encoding:NSUTF8StringEncoding];
-            if(![self->_scramHandler parseServerFinalMessage:innerSASLData])
-            {
-                DDLogError(@"SCRAM says this server-final message was wrong!");
-                
-                //clear pipeline cache to make sure we have a fresh restart next time
-                _pipeliningState = kPipelinedNothing;
-                _cachedStreamFeaturesBeforeAuth = nil;
-                _cachedStreamFeaturesAfterAuth = nil;
-                
-                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-                [HelperTools postError:NSLocalizedString(@"Error authenticating server using SASL2, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
-                [self disconnect];
-                
-                return;
-            }
-            else
-                DDLogDebug(@"SCRAM says this server final message was correct");
+            for(NSString* cbType in _supportedChannelBindings)
+                channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
+            DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
+            self.connectionProperties.channelBindingTypes = channelBindings;
             
             //update user identity using authorization-identifier, including support for fullJids (as specified by BIND2)
             NSString* authid = [parsedStanza findFirst:@"authorization-identifier#"];
@@ -2483,18 +2461,6 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.identity.jid = authidParts[@"user"];
             if(authidParts[@"user"] != nil)
                 self.connectionProperties.identity.resource = authidParts[@"resource"];
-            
-            //build mechanism list displayed in ui (mark _scramHandler.method as used)
-            for(NSString* mechanism in _supportedSaslMechanisms)
-                mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
-            DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
-            self.connectionProperties.saslMethods = mechanismList;
-            
-            //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
-            for(NSString* cbType in _supportedChannelBindings)
-                channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
-            DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
-            self.connectionProperties.channelBindingTypes = channelBindings;
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
@@ -2513,8 +2479,46 @@ NSString* const kStanza = @"stanza";
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}continue"])
         {
-            //TODO: implement SASL2 upgrade tasks
-            MLAssert(NO, @"SASL2 tasks not implemented yet!");
+            if(self.accountState >= kStateLoggedIn)
+                return [self invalidXMLError];
+            
+            //check server-final message for correctness
+            [self handleScramInSuccessOrContinue:parsedStanza];
+            
+            NSArray* tasks = [parsedStanza find:@"tasks/task#"];
+            if(tasks.count == 0)
+            {
+                [HelperTools postError:NSLocalizedString(@"Server implementation error: SASL2 tasks empty, account disabled!", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+                return;
+            }
+            
+            if(tasks.count != 1)
+            {
+                [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"We don't support any task requested by the server, account disabled: %@", @""), tasks] withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+                return;
+            }
+            
+            if(![tasks[0] isEqualToString:_upgradeTask])
+            {
+                [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"We don't support the single task requested by the server, account disabled: %@", @""), tasks] withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+                return;
+            }
+            
+            [self send:[[MLXMLNode alloc] initWithElement:@"next" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{
+                @"task": _upgradeTask
+            } andChildren:@[] andData:nil]];
+        }
+        else if([parsedStanza check:@"/{urn:xmpp:sasl:2}parameters"])
+        {
+            NSData* salt = [parsedStanza findFirst:@"salt#|base64"];
+            uint32_t iterations = (uint32_t)[[parsedStanza findFirst:@"iterations#"] integerValue];
+            
+            NSString* scramMechanism = [_upgradeTask substringWithRange:NSMakeRange(5, _upgradeTask.length-5)];
+            DDLogInfo(@"Upgrading password using SCRAM mechanism: %@", scramMechanism);
+            SCRAM* scramUpgradeHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:scramMechanism];
+            NSData* saltedPassword = [scramUpgradeHandler hashPasswordWithSalt:salt andIterationCount:iterations];
+            
+            [self send:[[MLXMLNode alloc] initWithElement:@"hash" andNamespace:@"urn:xmpp:sasl:2" andData:[HelperTools encodeBase64WithData:saltedPassword]]];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
         {
@@ -2662,13 +2666,7 @@ NSString* const kStanza = @"stanza";
         else
         {
             //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-            [HelperTools postError:NSLocalizedString(@"No supported auth mechanism found, disabling account!", @"") withNode:nil andAccount:self andIsSevere:YES];
-            [self disconnect];
-            
-            //make sure we don't try this again even when the mainapp/appex gets restarted
-            NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:self.accountNo] copyItems:YES];
-            accountDic[kEnabled] = @NO;
-            [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
+            [HelperTools postError:NSLocalizedString(@"No supported auth mechanism found, disabling account!", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
         }
     };
     
@@ -2707,19 +2705,41 @@ NSString* const kStanza = @"stanza";
             if([self->_supportedSaslMechanisms containsObject:@"PLAIN"])
                 DDLogWarn(@"Server supports SASL2 PLAIN, ignoring because this is insecure!");
             
+            //create list of upgradable scram mechanisms and pick the first one (highest security) the server and we support
+            self->_upgradeTask = nil;
+            NSSet* upgradesOffered = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/upgrade#"]];
+            for(NSString* method in [SCRAM supportedMechanismsIncludingChannelBinding:NO])
+                if([upgradesOffered containsObject:[NSString stringWithFormat:@"UPGR-%@", method]])
+                {
+                    self->_upgradeTask = [NSString stringWithFormat:@"UPGR-%@", method];
+                    break;
+                }
+            
             //check for supported scram mechanisms (highest security first!)
             for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:[self channelBindingToUse] != nil])
                 if([self->_supportedSaslMechanisms containsObject:mechanism])
                 {
                     self->_scramHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:mechanism];
+                    //NSString* deviceName = [NSString stringWithFormat:@"%@ (%@)", [[UIDevice currentDevice] name], [[UIDevice currentDevice] model]];
                     [self send:[[MLXMLNode alloc]
                         initWithElement:@"authenticate"
                         andNamespace:@"urn:xmpp:sasl:2"
-                        withAttributes:@{@"mechanism": mechanism}
-                        andChildren:@[
-                            [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithChannelBinding:[self channelBindingToUse]]]]
-                        ]
-                        andData:nil
+                        //only allow SCRAM upgrades if we are using channel-binding to make sure the saltedPassword isn't intercepted
+                        withAttributes:(self->_upgradeTask != nil && [self channelBindingToUse] != nil ? @{
+                            @"mechanism": mechanism,
+                            @"upgrade": self->_upgradeTask, 
+                        } : @{
+                            @"mechanism": mechanism,
+                        }) andChildren:@[
+                            [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithChannelBinding:[self channelBindingToUse]]]],
+                            [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
+                                @"id":[[[UIDevice currentDevice] identifierForVendor] UUIDString],
+                            } andChildren:@[
+                                [[MLXMLNode alloc] initWithElement:@"software" andData:@"Monal IM"],
+                                [[MLXMLNode alloc] initWithElement:@"device" andData:[[UIDevice currentDevice] name]],
+                            ] andData:nil],
+                            
+                        ] andData:nil
                     ]];
                     return;
                 }
@@ -2729,7 +2749,7 @@ NSString* const kStanza = @"stanza";
         };
         
         //extract menchanisms presented
-        _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
+        _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
         
         //extract supported channel-binding types
         _supportedChannelBindings = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl-cb:0}sasl-channel-binding/channel-binding@type"]];
@@ -2853,13 +2873,37 @@ NSString* const kStanza = @"stanza";
         [self bindResource:self.connectionProperties.identity.resource];
 }
 
+-(void) handleScramInSuccessOrContinue:(MLXMLNode*) parsedStanza
+{
+    //perform logic to handle sasl success
+    DDLogInfo(@"Got SASL2 Success/Continue");
+    
+    //only parse and validate scram response, if we are in scram mode (should always be the case)
+    MLAssert(self->_scramHandler != nil, @"self->_scramHandler should NEVER be nil when using SASL2!");
+    
+    NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"additional-data#|base64"] encoding:NSUTF8StringEncoding];
+    if(![self->_scramHandler parseServerFinalMessage:innerSASLData])
+    {
+        DDLogError(@"SCRAM says this server-final message was wrong!");
+        
+        //clear pipeline cache to make sure we have a fresh restart next time
+        _pipeliningState = kPipelinedNothing;
+        _cachedStreamFeaturesBeforeAuth = nil;
+        _cachedStreamFeaturesAfterAuth = nil;
+        
+        //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+        [HelperTools postError:NSLocalizedString(@"Error authenticating server using SASL2, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
+        [self disconnect];
+        
+        return;
+    }
+    else
+        DDLogDebug(@"SCRAM says this server-final message was correct");
+}
+
 -(NSString* _Nullable) channelBindingToUse
 {
-    //channel binding is only supported for direct tls due to dependency on network framework
-    if(!self.connectionProperties.server.isDirectTLS)
-        return nil;
-    
-    NSArray* typesList = [((MLStream*)self->_oStream) supportedChannelBindingTypes];
+    NSArray* typesList = [self supportedChannelBindingTypes];
     if(typesList == nil || typesList.count == 0)
         return nil;     //we don't support any channel-binding for this TLS connection
     for(NSString* type in typesList)
@@ -2873,9 +2917,19 @@ NSString* const kStanza = @"stanza";
 //proxy this to ostream if directTLS is used
 -(NSArray* _Nullable) supportedChannelBindingTypes
 {
+    //channel binding is only supported for direct tls due to dependency on network framework
     if(!self.connectionProperties.server.isDirectTLS)
         return nil;
     return [((MLStream*)self->_oStream) supportedChannelBindingTypes];
+}
+
+//proxy this to ostream if directTLS is used
+-(NSData* _Nullable) channelBindingDataForType:(NSString*) type
+{
+    //channel binding is only supported for direct tls due to dependency on network framework
+    if(!self.connectionProperties.server.isDirectTLS)
+        return nil;
+    return [((MLStream*)self->_oStream) channelBindingDataForType:type];
 }
 
 #pragma mark stanza handling

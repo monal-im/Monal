@@ -214,7 +214,7 @@ enum MLServerDetailsSections {
         if([type isEqualToString:@"tls-exporter"])
             description = NSLocalizedString(@"Secure channel-binding defined for TLS1.3 and some TLS1.2 connections.", @"");
         else if([type isEqualToString:@"tls-server-end-point"])
-            description = NSLocalizedString(@"Weakest channel-binding type, not securing agains stolen certs/keys, but detects wrongly issued certs.", @"");
+            description = NSLocalizedString(@"Weakest channel-binding type, not securing against stolen certs/keys, but detects wrongly issued certs.", @"");
         [self.channelBindingTypes addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Type: %@", @""), type], @"Description":description, @"Color":(used ? @"Green" : (!supported ? @"Yellow" : @"None"))}];
     }
 }

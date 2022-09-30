@@ -538,7 +538,7 @@ enum DummySettingsRows {
 {
     DDLogVerbose(@"Clearing own omemo session as request by account settings");
 
-    UIAlertController* questionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Clear OMEMO session", @"") message:NSLocalizedString(@"This will clear the your own omemo session for debugging purposes", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertController* questionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Clear OMEMO session", @"") message:NSLocalizedString(@"This will clear your own omemo session for debugging purposes", @"") preferredStyle:UIAlertControllerStyleActionSheet];
     UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         //do nothing when "no" was pressed
     }];

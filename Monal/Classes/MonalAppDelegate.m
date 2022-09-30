@@ -251,6 +251,10 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         intentIdentifiers:@[]
         options:UNNotificationCategoryOptionAllowAnnouncement
     ];
+    
+    [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
+        DDLogInfo(@"Current notification settings: %@", settings);
+    }];
 
     //request auth to show notifications and register our notification categories created above
     [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError* error) {

@@ -43,7 +43,7 @@ xcrun xcodebuild \
     -workspace "Monal.xcworkspace" \
     -scheme "Monal" \
     -sdk macosx \
-    -configuration Alpha \
+    -configuration $BUILD_TYPE \
     -destination 'generic/platform=macOS,variant=Mac Catalyst,name=Any Mac' \
     -archivePath "build/macos_Monal.xcarchive" \
     -allowProvisioningUpdates \
@@ -108,6 +108,7 @@ xcodebuild \
     -archivePath "build/ios_$APP_NAME.xcarchive" \
     -exportPath "build/ipa" \
     -exportOptionsPlist $EXPORT_OPTIONS_IOS \
+    -configuration $BUILD_TYPE \
     -allowProvisioningUpdates \
     -allowProvisioningDeviceRegistration
 

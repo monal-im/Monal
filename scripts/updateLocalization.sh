@@ -59,7 +59,10 @@ for folder in "localization/external" "shareSheet-iOS/localization/external"; do
         git diff
         if [[ $1 != "NOCOMMIT" ]]; then
             git add -u
+            # empty commits should not abort this script
+            set +e
             git commit -m "Updated translations via BartyCrouch"
+            set -e
             git log -n 2
             git remote --verbose
             git push

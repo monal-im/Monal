@@ -20,7 +20,7 @@ jobs:
       APP_DIR: "Monal.app"
       BUILD_TYPE: "AppStore"
       EXPORT_OPTIONS_CATALYST_APPSTORE: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
-      #EXPORT_OPTIONS_CATALYST_APP_EXPORT: "./scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
+      EXPORT_OPTIONS_CATALYST_APP_EXPORT: "./scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
       EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Stable_iOS_ExportOptions.plist"
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -53,6 +53,17 @@ jobs:
           git push origin Build_iOS_$buildNumber
       - name: Publish ios to appstore connect
         run: xcrun altool --upload-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
+      - name: Notarize catalyst
+        run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
+      - name: staple
+        run: |
+          cd Monal/build/app/tar_release/
+          xcrun stapler staple "$APP_DIR"
+          stapler validate "$APP_DIR"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"
+          cd ../../../..
+      - name: upload new catalyst stable to monal-im.org
+        run: ./scripts/uploadNonAlpha.sh stable
       - name: Publish catalyst to appstore connect
         run: xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
       - name: Update xmpp.org client list with new timestamp

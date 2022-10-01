@@ -103,6 +103,14 @@ struct NotificationSettings: View {
                     }
                 }
             }
+#if DEBUG
+            Section(header: Text("Debugging").font(.title3)) {
+                Button("Reregister push token") {
+                    UIApplication.shared.unregisterForRemoteNotifications()
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
+#endif
         }
         .navigationBarTitle(Text("Notifications"))
         .onAppear(perform: {

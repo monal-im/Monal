@@ -586,9 +586,16 @@ $$instance_handler(handleFetch, account.pubsub, $$ID(xmpp*, account), $$ID(XMPPI
     
     NSString* first = [iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/first#"];
     NSString* last = [iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/last#"];
+    NSUInteger index = [[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/first@index|int"] unsignedIntegerValue];
+    NSUInteger total_count = [[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/count#|int"] unsignedIntegerValue];
+    NSUInteger items_count = [[iqNode find:@"{http://jabber.org/protocol/pubsub}pubsub/items/item"] count];
     //check for rsm paging
-    if(!last || [last isEqualToString:first])       //no rsm at all or reached end of rsm --> process data *and* inform handlers of new data
-    {
+    if(
+        !last ||                                //no rsm at all
+        [last isEqualToString:first] ||         //reached end of rsm (only one element, e.g. last==first)
+        index + items_count == total_count      //reached end of rsm per rsm xep (this is a SHOULD)
+    ) {
+        //--> process data *and* inform handlers of new data
         [self handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser withData:data];
         //call fetch callback (if given)
         $call(handler,

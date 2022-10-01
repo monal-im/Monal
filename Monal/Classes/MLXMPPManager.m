@@ -871,4 +871,15 @@ $$
         for(xmpp* xmppAccount in [self connectedXMPP])
             [xmppAccount enablePush];
 }
+
+-(void) removeToken
+{
+    DDLogWarn(@"APNS removing push token");
+
+    [[HelperTools defaultsDB] removeObjectForKey:@"pushToken"];
+    self.hasAPNSToken = NO;
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        [xmppAccount disablePush];
+}
+
 @end

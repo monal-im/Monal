@@ -136,7 +136,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
 -(void) application:(UIApplication*) application didFailToRegisterForRemoteNotificationsWithError:(NSError*) error
 {
-    DDLogError(@"push reg error %@", error);
+    DDLogError(@"APNS push reg error %@", error);
+    [[MLXMPPManager sharedInstance] removeToken];
 }
 
 #pragma mark - notification actions

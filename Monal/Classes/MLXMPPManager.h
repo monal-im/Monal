@@ -142,6 +142,7 @@ Sends a message to a specified contact in account. Calls completion handler on s
 -(void) getEntitySoftWareVersionForContact:(MLContact*) contact andResource:(NSString*) resource;
 
 -(void) setPushToken:(NSString* _Nullable) token;
+-(void) removeToken;
 
 @end
 

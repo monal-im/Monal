@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1220"
+   LastUpgradeVersion = "1400"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -33,7 +33,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C1850EB425F38A2D003D506A"
-               BuildableName = "MonalUITests.xctest"
+               BuildableName = ".xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C1850EB425F38A2D003D506A"
-               BuildableName = "MonalUITests.xctest"
+               BuildableName = ".xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
@@ -53,7 +53,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C1850EB425F38A2D003D506A"
-               BuildableName = "MonalUITests.xctest"
+               BuildableName = ".xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
@@ -63,7 +63,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C1850EB425F38A2D003D506A"
-               BuildableName = "MonalUITests.xctest"
+               BuildableName = ".xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>

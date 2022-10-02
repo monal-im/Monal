@@ -20,6 +20,9 @@ struct WebView: UIViewRepresentable {
  
     func updateUIView(_ webView: WKWebView, context: Context) {
         let request = URLRequest(url: url)
+        if #available(iOS 16.1, macCatalyst 16.1, *) {
+            request.requiresDNSSECValidation = YES
+        }
         webView.load(request)
     }
 }

@@ -2784,6 +2784,8 @@ enum msgSentState {
     if(row.url)
     {
         NSMutableURLRequest* headRequest = [[NSMutableURLRequest alloc] initWithURL: row.url];
+        if(@available(iOS 16.1, macCatalyst 16.1, *))
+            headRequest.requiresDNSSECValidation = YES;
         headRequest.HTTPMethod = @"HEAD";
         headRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
 
@@ -2833,6 +2835,8 @@ enum msgSentState {
      facebookexternalhit/1.1
      */
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:row.url];
+    if(@available(iOS 16.1, macCatalyst 16.1, *))
+        request.requiresDNSSECValidation = YES;
     [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on some sites for og tags e.g. youtube
     request.timeoutInterval = 10;
     [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error)

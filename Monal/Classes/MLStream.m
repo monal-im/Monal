@@ -272,6 +272,10 @@
         nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
         //nw_tcp_options_set_no_delay(tcp_options, YES);            //disable nagle's algorithm
     });
+    //enable dnssec validation, if possible
+    if(@available(iOS 16.0, macCatalyst 16.0, *))
+        nw_parameters_set_requires_dnssec_validation(parameters, YES);
+    
     //not needed, will be done by apple's tls implementation automatically (only needed for plain tcp and manual sending of idempotent data)
     //nw_parameters_set_fast_open_enabled(parameters, YES);
     

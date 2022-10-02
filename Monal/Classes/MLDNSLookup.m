@@ -45,7 +45,7 @@ static NSMutableDictionary* _RRCache;
     NSString* serviceDiscoveryString = [NSString stringWithFormat:@"_xmpp%@-client._tcp.%@", secure ? @"s" : @"", domain];
     res = DNSServiceQueryRecord(
         &sdRef,
-        kDNSServiceFlagsReturnIntermediates,
+        kDNSServiceFlagsReturnIntermediates | kDNSServiceFlagsValidate,
         0,
         [serviceDiscoveryString UTF8String],
         kDNSServiceType_SRV,
@@ -246,6 +246,8 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
     (void)ttl;
     (void)_context;
     
+    NSDictionary* context = (__bridge NSDictionary*)_context;
+    
     //just ignore errors (don't fill anything into the discoveredServers array)
     if(errorCode)
     {
@@ -253,7 +255,12 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
         return;
     }
     
-    NSDictionary* context = (__bridge NSDictionary*)_context;
+    if(flags & kDNSServiceFlagsValidate && flags & kDNSServiceFlagsBogus)
+    {
+        DDLogWarn(@"DNSSEC result is bogus, ignoring result for context: %@", context);
+        return;
+    }
+    
     BOOL isSecure = [context[@"isSecure"] boolValue];
     MLDNSLookup* caller = (MLDNSLookup*)context[@"caller"];
 

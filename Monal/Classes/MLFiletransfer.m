@@ -75,6 +75,8 @@ static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
         NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
         request.HTTPMethod = @"HEAD";
         request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
+        if(@available(iOS 16.1, macCatalyst 16.1, *))
+            request.requiresDNSSECValidation = YES;
 
         NSURLSession* session = [NSURLSession sharedSession];
         [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data __unused, NSURLResponse* _Nullable response, NSError* _Nullable error __unused) {
@@ -169,10 +171,15 @@ static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
             return;
         }
         
+        NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
+        request.HTTPMethod = @"GET";
+        request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
+        if(@available(iOS 16.1, macCatalyst 16.1, *))
+            request.requiresDNSSECValidation = YES;
+        
         NSURLSession* session = [NSURLSession sharedSession];
-        // set app defined description for download size checks
         [session setSessionDescription:url];
-        NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+        NSURLSessionDownloadTask* task = [session downloadTaskWithRequest:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
             if(error)
             {
                 DDLogError(@"File download failed: %@", error);

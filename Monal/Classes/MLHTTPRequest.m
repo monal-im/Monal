@@ -48,6 +48,8 @@
     NSMutableURLRequest *theRequest=[NSMutableURLRequest requestWithURL:[NSURL URLWithString:path]
                                                             cachePolicy:NSURLRequestReloadIgnoringCacheData
                                                         timeoutInterval:60.0];
+    if(@available(iOS 16.1, macCatalyst 16.1, *))
+        theRequest.requiresDNSSECValidation = YES;
     [theRequest setHTTPMethod:verb];
     
     NSData *dataToSubmit=postedData;

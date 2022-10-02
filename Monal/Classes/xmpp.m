@@ -2423,10 +2423,14 @@ NSString* const kStanza = @"stanza";
                 
                 //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
                 NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
-                for(NSString* cbType in _supportedChannelBindings)
-                    channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
+                if(_supportedChannelBindings != nil)
+                    for(NSString* cbType in _supportedChannelBindings)
+                        channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
                 DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
                 self.connectionProperties.channelBindingTypes = channelBindings;
+                
+                //record SDDP support
+                self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
                 [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES  andDisableAccount:YES];
@@ -2450,8 +2454,9 @@ NSString* const kStanza = @"stanza";
             
             //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
             NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
-            for(NSString* cbType in _supportedChannelBindings)
-                channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
+            if(_supportedChannelBindings != nil)
+                for(NSString* cbType in _supportedChannelBindings)
+                    channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
             DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
             self.connectionProperties.channelBindingTypes = channelBindings;
             
@@ -2461,6 +2466,9 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.identity.jid = authidParts[@"user"];
             if(authidParts[@"user"] != nil)
                 self.connectionProperties.identity.resource = authidParts[@"resource"];
+            
+            //record SDDP support
+            self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
@@ -2720,6 +2728,9 @@ NSString* const kStanza = @"stanza";
                 if([self->_supportedSaslMechanisms containsObject:mechanism])
                 {
                     self->_scramHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:mechanism];
+                    //set ssdp data for downgrade protection
+                    //_supportedChannelBindings will be nil, if XEP-0440 is not supported by our server
+                    [self->_scramHandler setSSDPMechanisms:[self->_supportedSaslMechanisms allObjects] andChannelBindingTypes:[self->_supportedChannelBindings allObjects]];
                     //NSString* deviceName = [NSString stringWithFormat:@"%@ (%@)", [[UIDevice currentDevice] name], [[UIDevice currentDevice] model]];
                     [self send:[[MLXMLNode alloc]
                         initWithElement:@"authenticate"
@@ -2752,7 +2763,10 @@ NSString* const kStanza = @"stanza";
         _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
         
         //extract supported channel-binding types
-        _supportedChannelBindings = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl-cb:0}sasl-channel-binding/channel-binding@type"]];
+        if([parsedStanza check:@"{urn:xmpp:sasl-cb:0}sasl-channel-binding"])
+            _supportedChannelBindings = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl-cb:0}sasl-channel-binding/channel-binding@type"]];
+        else
+            _supportedChannelBindings = nil;
         
         //check if the server supports *any* scram method and wait for TLS connection establishment if so
         BOOL supportsScram = NO;
@@ -2907,7 +2921,7 @@ NSString* const kStanza = @"stanza";
     if(typesList == nil || typesList.count == 0)
         return nil;     //we don't support any channel-binding for this TLS connection
     for(NSString* type in typesList)
-        if([_supportedChannelBindings containsObject:type])
+        if(_supportedChannelBindings != nil && [_supportedChannelBindings containsObject:type])
             return type;
     
     DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory!");

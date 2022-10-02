@@ -129,8 +129,16 @@
 -(BOOL) parseServerFinalMessage:(NSString*) str
 {
     NSDictionary* msg = [self parseScramString:str];
+    //wrong v-value
     if(![_expectedServerSignature isEqualToString:msg[@"v"]])
         return NO;
+    //server sent a SCRAM error
+    if(msg[@"e"] != nil)
+    {
+        DDLogError(@"SCRAM error: '%@'", msg[@"e"]);
+        return NO;
+    }
+    //everything was successful
     _finishedSuccessfully = YES;
     return YES;
 }

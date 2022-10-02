@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SCRAM : NSObject
 +(NSArray*) supportedMechanismsIncludingChannelBinding:(BOOL) include;
 -(instancetype) initWithUsername:(NSString*) username password:(NSString*) password andMethod:(NSString*) method;
+-(void) setSSDPMechanisms:(NSArray<NSString*>*) mechanisms andChannelBindingTypes:(NSArray<NSString*>* _Nullable) cbTypes;
 
 -(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType;
 -(BOOL) parseServerFirstMessage:(NSString*) str;
@@ -23,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) NSString* method;
 @property (nonatomic, readonly) BOOL finishedSuccessfully;
+@property (nonatomic, readonly) BOOL ssdpSupported;
 @end
 
 NS_ASSUME_NONNULL_END

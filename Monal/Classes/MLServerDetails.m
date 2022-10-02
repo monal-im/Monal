@@ -133,6 +133,14 @@ enum MLServerDetailsSections {
         @"Description":NSLocalizedString(@"This specification defines semantics for using the XMPP publish-subscribe protocol to broadcast state change events associated with an instant messaging and presence account.", @""),
         @"Color": connection.supportsPubSub ? @"Green" : @"Red"
     }];
+    
+    // supportsSSDP
+    [self.serverCaps addObject:@{
+        // see MLIQProcessor.m multiple xep required for pubsub
+        @"Title":NSLocalizedString(@"XEP-xxxx: SASL SCRAM Downgrade Protection", @""),
+        @"Description":NSLocalizedString(@"This specification provides a way to secure the SASL and SASL2 handshakes against method and channel-binding downgrades.", @""),
+        @"Color": connection.supportsSSDP ? @"Green" : @"Red"
+    }];
 }
 
 -(void) convertSRVRecordsToReadable

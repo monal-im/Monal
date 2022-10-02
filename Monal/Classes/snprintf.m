@@ -1165,6 +1165,7 @@ fmtflt(char *str, size_t *len, size_t size, LDOUBLE fvalue, int width,
 			iconvert[ipos++] = sign;
 		while (*infnan != '\0')
 			iconvert[ipos++] = *infnan++;
+        iconvert[ipos++] = '\0';
 		fmtstr(str, len, size, iconvert, width, ipos, flags);
 		return;
 	}

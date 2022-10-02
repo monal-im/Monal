@@ -134,7 +134,7 @@
     }
 }
 
-- (void)doNextAction
+-(void) doNextAction
 {
     self.isGoingUp = NO;
     if (!self.isLoadingHistory)
@@ -143,13 +143,14 @@
         if (self.curIdxHistory > self.searchResultMessageList.count - 1)
             self.curIdxHistory = (int) self.searchResultMessageList.count - 1;
         
-        if([self getMessageIndexPathForDBId:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId])
+        if([self getMessageIndexPathForDBId:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId] != nil)
         {
             [self setResultIndicatorTitle:@"" onlyHint:NO];
             [self.searchResultDelegate doGoSearchResultAction:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId];
         }
         else
-        {//Load old message
+        {
+            //Load old message
             self.isLoadingHistory = YES;
             self.curIdxHistory -= 1;            
             [self.searchResultDelegate doReloadHistoryForSearch];
@@ -157,12 +158,10 @@
         }
     }
     else
-    {
         [self setResultIndicatorTitle:NSLocalizedString(@"Loading more Messages from Server", @"") onlyHint:YES];
-    }
 }
 
-- (void)doPreviousAction
+-(void) doPreviousAction
 {
     self.isGoingUp = YES;
     if(!self.isLoadingHistory)
@@ -171,13 +170,14 @@
         if (self.curIdxHistory <= 0)
             self.curIdxHistory = 0;
         
-        if([self getMessageIndexPathForDBId:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId])
+        if([self getMessageIndexPathForDBId:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId] != nil)
         {
             [self setResultIndicatorTitle:@"" onlyHint:NO];
             [self.searchResultDelegate doGoSearchResultAction:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId];
         }
         else
-        {//Load old message
+        {
+            //Load old message
             self.curIdxHistory += 1;
             self.isLoadingHistory = YES;
             [self.searchResultDelegate doReloadHistoryForSearch];
@@ -185,9 +185,7 @@
         }
     }
     else
-    {
         [self setResultIndicatorTitle:NSLocalizedString(@"Loading more Messages from Server", @"") onlyHint:YES];
-    }
 }
 
 - (void)setResultIndicatorTitle:(NSString*)title onlyHint:(BOOL)isOnlyHint

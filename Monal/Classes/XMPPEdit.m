@@ -346,7 +346,7 @@ enum DummySettingsRows {
             {
                 DDLogVerbose(@"Creating account: %@", dic);
                 NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
-                if(accountID)
+                if(accountID != nil)
                 {
                     self.accountNo = accountID;
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];

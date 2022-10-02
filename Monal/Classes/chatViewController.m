@@ -405,18 +405,14 @@ enum msgSentState {
 
 -(void) doSetMsgPathIdx:(NSInteger) pathIdx withDBId:(NSNumber *) messageDBId
 {
-    if(messageDBId)
-    {
+    if(messageDBId != nil)
         [self.searchController setMessageIndexPath:[NSNumber numberWithInteger:pathIdx] withDBId:messageDBId];
-    }
 }
 
 -(BOOL) isContainKeyword:(NSNumber *) messageDBId
 {
-    if ([self.searchController getMessageIndexPathForDBId:messageDBId])
-    {
+    if([self.searchController getMessageIndexPathForDBId:messageDBId] != nil)
         return YES;
-    }
     return NO;
 }
 
@@ -503,7 +499,8 @@ enum msgSentState {
 
 -(void) updateUIElements
 {
-    if(!self.contact.accountId) return;
+    if(self.contact.accountId == nil)
+        return;
 
     NSString* jidLabelText = nil;
     BOOL sendButtonEnabled = NO;
@@ -614,8 +611,8 @@ enum msgSentState {
     [super viewWillAppear:animated];
 
     //throw on empty contacts
-    MLAssert(self.contact.contactJid, @"can not open chat for empty contact jid");
-    MLAssert(self.contact.accountId, @"can not open chat for empty account id");
+    MLAssert(self.contact.contactJid != nil, @"can not open chat for empty contact jid");
+    MLAssert(self.contact.accountId != nil, @"can not open chat for empty account id");
 
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -1506,7 +1503,7 @@ enum msgSentState {
     }
 
     NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryTo:to forAccount:self.contact.accountId withMessage:message actuallyFrom:(self.contact.isGroup ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.contact.isEncrypted messageType:messageType mimeType:mimeType size:size];
-    if(messageDBId)
+    if(messageDBId != nil)
     {
         DDLogVerbose(@"added message");
         NSArray* msgList = [[DataLayer sharedInstance] messagesForHistoryIDs:@[messageDBId]];
@@ -1927,6 +1924,7 @@ enum msgSentState {
 
     //cut text after kMonalChatMaxAllowedTextLen chars to make the message cell work properly (too big texts don't render the text in the cell at all)
     NSString* messageText = row.messageText;
+    MLAssert(messageText != nil, @"Message text must not be nil!", (@{@"row": nilWrapper(row)}));
     if([messageText length] > kMonalChatMaxAllowedTextLen)
         messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:kMonalChatMaxAllowedTextLen]];
     BOOL inboundDir = row.inbound;
@@ -2288,7 +2286,7 @@ enum msgSentState {
         DDLogError(@"Attempt to access beyond bounds");
         return [UISwipeActionsConfiguration configurationWithActions:@[]];
     }
-    if(!message.messageDBId)
+    if(message.messageDBId == nil)
         return [UISwipeActionsConfiguration configurationWithActions:@[]];
 
     //configure swipe actions

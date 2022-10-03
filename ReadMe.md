@@ -45,7 +45,7 @@ Monal always supports the two latest MacOS and iOS major releases.
 
 ### Supported XEPs
 
-Take a look at this list to get information on [supported XEPs by Monal](https://github.com/monal-im/Monal/blob/develop/XEPsupport.md).
+Take a look at this list to get information on [supported XEPs by Monal](https://monal-im.org/install/#implemented-xeps).
 
 ### iOS Screenshots
 <p float="left">

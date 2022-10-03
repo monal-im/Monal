@@ -480,6 +480,7 @@
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0388.html" />
         <xmpp:status>complete</xmpp:status>
+        <xmpp:since>5.4</xmpp:since>
         <xmpp:note>XEP-0388: Extensible SASL Profile</xmpp:note>
       </xmpp:SupportedXep>
     </implements>

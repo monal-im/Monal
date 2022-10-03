@@ -19,6 +19,7 @@
     NSString* _username;
     NSString* _password;
     NSString* _nonce;
+    NSString* _ssdpString;
     
     NSString* _clientFirstMessageBare;
     NSString* _gssHeader;
@@ -56,8 +57,20 @@
     _username = username;
     _password = password;
     _nonce = [NSUUID UUID].UUIDString;
+    _ssdpString = nil;
     _finishedSuccessfully = NO;
     return self;
+}
+
+-(void) setSSDPMechanisms:(NSArray<NSString*>*) mechanisms andChannelBindingTypes:(NSArray<NSString*>* _Nullable) cbTypes
+{
+    NSMutableString* _ssdpString = [[NSMutableString alloc] init];
+    [_ssdpString appendString:[[mechanisms sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
+    if(cbTypes != nil)
+    {
+        [_ssdpString appendString:@"|"];
+        [_ssdpString appendString:[[cbTypes sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
+    }
 }
 
 -(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType
@@ -86,6 +99,7 @@
     _nonce = msg[@"r"];     //from now on use the full nonce
     _salt = [HelperTools dataWithBase64EncodedString:msg[@"s"]];
     _iterationCount = (uint32_t)[msg[@"i"] integerValue];
+    _ssdpSupported = [@"ssdp" isEqualToString:msg[@"d"]];
     return YES;
 }
 
@@ -106,8 +120,13 @@
     //calculate storedKey (e.g. H(ClientKey))
     NSData* storedKey = [self hash:clientKey];
     
+    //calculate base64 encoded SSDP hash, if provided
+    NSString* ssdpAttribute = @"";
+    if(_ssdpString != nil)
+        ssdpAttribute = [NSString stringWithFormat:@",d=%@", [HelperTools encodeBase64WithData:[self hash:[_ssdpString dataUsingEncoding:NSUTF8StringEncoding]]]];
+    
     //calculate authMessage (e.g. client-first-message-bare + "," + server-first-message + "," + client-final-message-without-proof)
-    NSString* clientFinalMessageWithoutProof = [NSString stringWithFormat:@"c=%@,r=%@", [HelperTools encodeBase64WithData:gssHeaderWithChannelBindingData], _nonce];
+    NSString* clientFinalMessageWithoutProof = [NSString stringWithFormat:@"c=%@,r=%@%@", [HelperTools encodeBase64WithData:gssHeaderWithChannelBindingData], _nonce, ssdpAttribute];
     NSString* authMessage = [NSString stringWithFormat:@"%@,%@,%@", _clientFirstMessageBare, _serverFirstMessage, clientFinalMessageWithoutProof];
     
     //calculate clientSignature (e.g. HMAC(StoredKey, AuthMessage))
@@ -129,8 +148,16 @@
 -(BOOL) parseServerFinalMessage:(NSString*) str
 {
     NSDictionary* msg = [self parseScramString:str];
+    //wrong v-value
     if(![_expectedServerSignature isEqualToString:msg[@"v"]])
         return NO;
+    //server sent a SCRAM error
+    if(msg[@"e"] != nil)
+    {
+        DDLogError(@"SCRAM error: '%@'", msg[@"e"]);
+        return NO;
+    }
+    //everything was successful
     _finishedSuccessfully = YES;
     return YES;
 }

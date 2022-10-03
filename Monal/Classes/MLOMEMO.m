@@ -64,7 +64,12 @@ const int KEY_SIZE = 16;
 
     [self setupSignal];
     self.brokenSessions = [[NSMutableDictionary alloc] init];
-    NSArray<NSNumber*>* ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];
+    NSArray<NSNumber*>* ownCachedDevices = [[NSArray alloc] init];
+    if([self createLocalIdentiyKeyPairIfNeeded:[[NSSet alloc] init]] == NO)
+    {
+        // local keys were already present
+        ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];
+    }
     self.ownReceivedDeviceList = [[NSMutableSet alloc] initWithArray:ownCachedDevices];
     self.openPreKeySession = [[NSMutableSet alloc] init];
 
@@ -83,6 +88,7 @@ const int KEY_SIZE = 16;
 
 -(void) loggedIn:(NSNotification*) notification
 {
+#ifndef DISABLE_OMEMO
     xmpp* notiAccount = notification.object;
     if(!notiAccount || !self.account)
         return;
@@ -93,10 +99,12 @@ const int KEY_SIZE = 16;
         // rebuild broken omemo session after catchup
         [self rebuildSessions];
     }
+#endif
 }
 
 -(void) catchupDone:(NSNotification*) notification
 {
+#ifndef DISABLE_OMEMO
     xmpp* notiAccount = notification.object;
     if(!notiAccount || !self.account)
         return;
@@ -108,15 +116,18 @@ const int KEY_SIZE = 16;
             [self catchupAndOmemoDone];
         }
     }
+#endif
 }
 
 -(void) handleContactRemoved:(NSNotification*) notification
 {
+#ifndef DISABLE_OMEMO
     MLContact* removedContact = notification.userInfo[@"contact"];
     if(removedContact == nil || removedContact.accountId.intValue != self.account.accountNo.intValue)
        return;
 
     [self checkIfSessionIsStillNeeded:removedContact.contactJid isMuc:removedContact.isGroup];
+#endif
 }
 
 -(void) catchupAndOmemoDone
@@ -140,8 +151,6 @@ const int KEY_SIZE = 16;
 
     // init MLPubSub handler
     [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:$newHandler(self, devicelistHandler)];
-
-    [self createLocalIdentiyKeyPairIfNeeded:[[NSSet alloc] init]];
 }
 
 -(BOOL) createLocalIdentiyKeyPairIfNeeded:(NSSet<NSNumber*>*) ownDeviceIds
@@ -311,13 +320,7 @@ $$
 
 -(void) queryOMEMODevices:(NSString*) jid
 {
-    //TODO: I don't know if that ever gets triggered (new incoming message stanzas add the contact to our list before handing off the message to omemo for decryption)
-    //TODO: if it's the other way round and a new jid gets added by the monal user, the contact will be in our list, too
-    //TODO: if the monal user uses another device to write to a non-roster user, the non-roster contact is created before handing off the message to omemo for decryption, too
-    if([[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo] == NO)
-    {
-        [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandler(self, handleDevicelistSubscribe)];
-    }
+    [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandler(self, handleDevicelistSubscribe)];
     // fetch newest devicelist
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
 }
@@ -428,6 +431,12 @@ $$
             {
                 // save own receivedDevices for catchupDone handling
                 [self.ownReceivedDeviceList setSet:receivedDevices];
+            }
+            else
+            {
+                // list was empty -> remove all devices from local list
+                // next if will ensure that eventually our device id is published
+                [self.ownReceivedDeviceList removeAllObjects];
             }
             if(self.omemoLoginState == CatchupDone)
             {
@@ -633,7 +642,7 @@ $$
 
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact
 {
-    MLAssert(self.signalContext != nil, @"signalContext should be inited.");
+    MLAssert(self.signalContext != nil, @"signalContext should be initiated.");
 
     if(message)
         [messageNode setBody:@"[This message is OMEMO encrypted]"];
@@ -660,6 +669,12 @@ $$
     NSMutableDictionary<NSString*, NSArray<NSNumber*>*>* contactDeviceMap = [[NSMutableDictionary alloc] init];
     for(NSString* recipient in recipients)
     {
+        if(recipient != nil)
+        {
+            NSDictionary* splitJid = [HelperTools splitJid:recipient];
+            MLAssert(splitJid[@"resource"] == nil, @"Jid MUST be a bare jid, not full jid!");
+        }
+        
         //contactDeviceMap
         NSArray<NSNumber*>* recipientDevices = [self.monalSignalStore knownDevicesForAddressName:recipient];
         if(recipientDevices && recipientDevices.count > 0)
@@ -742,7 +757,7 @@ $$
 
 
 // called after a new MUC member was added
--(void) checkIfMucMemberHasExistingSession:(NSString*) buddyJid
+-(void) subscribeAndFetchDevicelistIfNoSessionExistsForJid:(NSString*) buddyJid
 {
     if([self.monalSignalStore sessionsExistForBuddy:buddyJid] == NO)
     {
@@ -757,7 +772,7 @@ $$
     if(isMuc == YES)
         danglingJids = [[NSMutableSet alloc] initWithSet:[self.monalSignalStore removeDanglingMucSessions]];
     else if([self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid] == NO)
-            [danglingJids addObject:buddyJid];
+        [danglingJids addObject:buddyJid];
 
     [self unsubscribeFromDanglingJids:danglingJids];
 }
@@ -765,9 +780,7 @@ $$
 -(void) unsubscribeFromDanglingJids:(NSSet<NSString*>*) danglingJids
 {
     for(NSString* jid in danglingJids)
-    {
         [self.account.pubsub unsubscribeFromNode:@"eu.siacs.conversations.axolotl.devicelist" forJid:jid withHandler:$newHandler(self, handleDevicelistUnsubscribe)];
-    }
 }
 
 -(void) rebuildSessions
@@ -805,6 +818,11 @@ $$
 
 -(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid
 {
+    if(mucParticipantJid != nil)
+    {
+        NSDictionary* splitJid = [HelperTools splitJid:mucParticipantJid];
+        MLAssert(splitJid[@"resource"] == nil, @"Jid MUST be a bare jid, not full jid!");
+    }
     if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
     {
         DDLogDebug(@"DecryptMessage called but the message has no encryption header");
@@ -854,12 +872,9 @@ $$
 #endif
     }
 
-    NSString* deviceKeyPath = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
-    NSString* deviceKeyPathPreKey = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid];
-
-    NSData* messageKey = [messageNode findFirst:deviceKeyPath];
-    BOOL devicePreKey = [[messageNode findFirst:deviceKeyPathPreKey] boolValue];
-    DDLogVerbose(@"Decrypting using:\n%@ --> %@\n%@ --> %@", deviceKeyPath, messageKey, deviceKeyPathPreKey, devicePreKey ? @"YES" : @"NO");
+    NSData* messageKey = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
+    BOOL devicePreKey = [[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid] boolValue];
+    DDLogVerbose(@"Decrypting using:\nrid=%u --> messageKey=%@\nrid=%u --> isPreKey=%@", self.monalSignalStore.deviceid, messageKey, self.monalSignalStore.deviceid, devicePreKey ? @"YES" : @"NO");
 
     if(!messageKey && isKeyTransportElement)
     {
@@ -876,6 +891,9 @@ $$
     }
     else
     {
+        // subscribe to remote devicelist if no session exists yet
+        [self subscribeAndFetchDevicelistIfNoSessionExistsForJid:senderJid];
+
         SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
         SignalCiphertextType messagetype;
 
@@ -1074,11 +1092,6 @@ $$
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.accountJid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
-}
-
--(void) cleanup {
-    NSSet<NSString*>* danglingJids = [self.monalSignalStore removeDanglingMucSessions];
-    [self unsubscribeFromDanglingJids:danglingJids];
 }
 
 @end

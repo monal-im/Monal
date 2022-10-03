@@ -28,9 +28,9 @@
 -(void) incomingDarwinNotification:(NSString*) name;
 @end
 
-static NSMutableDictionary* _responseHandlers;
-static IPC* _sharedInstance;
-static CFNotificationCenterRef _darwinNotificationCenterRef;
+static volatile NSMutableDictionary* _responseHandlers;
+static volatile IPC* _sharedInstance;
+static volatile CFNotificationCenterRef _darwinNotificationCenterRef;
 
 //forward notifications to the IPC instance that is waiting (the instance running the server thread)
 void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, void* observer, CFNotificationName name, const void* object __unused, CFDictionaryRef userInfo __unused)
@@ -43,7 +43,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
 +(void) initializeForProcess:(NSString*) processName
 {
     @synchronized(self) {
-        NSAssert(_responseHandlers==nil, @"Please don't call [IPC initialize:@\"processName\" twice!");
+        MLAssert(_sharedInstance == nil, @"Please don't call [IPC initialize:@\"processName\" twice!");
         _responseHandlers = [[NSMutableDictionary alloc] init];
         _darwinNotificationCenterRef = CFNotificationCenterGetDarwinNotifyCenter();
         _sharedInstance = [[self alloc] initWithProcessName:processName];       //has to be last because it starts the thread which needs those global vars
@@ -53,7 +53,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
 +(id) sharedInstance
 {
     @synchronized(self) {
-        NSAssert(_responseHandlers!=nil, @"Please call [IPC initialize:@\"processName\"] first!");
+        MLAssert(_sharedInstance!=nil, @"Please call [IPC initialize:@\"processName\"] first!");
         return _sharedInstance;
     }
 }

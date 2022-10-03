@@ -38,7 +38,6 @@ typedef NS_ENUM (NSInteger, xmppRegistrationState) {
 typedef NS_ENUM (NSInteger, xmppPipeliningState) {
     kPipelinedNothing = -1,
     kPipelinedAuth,
-    kPipelinedStreamRestart,
     kPipelinedResumeOrBind
 };
 
@@ -95,6 +94,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, strong, readonly) MLXMLNode* capsIdentity;
 @property (nonatomic, strong, readonly) NSSet* capsFeatures;
 @property (nonatomic, strong, readonly) NSString* capsHash;
+@property (nullable, nonatomic, strong, readonly) NSArray* supportedChannelBindingTypes;
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSNumber*) accountNo;
 
@@ -235,6 +235,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) updateIqHandlerTimeouts;
 
 -(void) addReconnectionHandler:(MLHandler*) handler;
+
+-(void) removeFromServerWithCompletion:(void (^)(NSString* _Nullable error)) completion;
 
 @end
 

@@ -16,8 +16,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property(readonly) NSStreamStatus streamStatus;
 @property(nullable, readonly, copy) NSError* streamError;
 
-+(void) connectWithSNIDomain:(NSString*) SNIDomain connectHost:(NSString*) host connectPort:(NSNumber*) port inputStream:(NSInputStream* _Nullable * _Nonnull) inputStream  outputStream:(NSOutputStream* _Nullable * _Nonnull) outputStream;
+@property(nullable, readonly) NSArray* supportedChannelBindingTypes;
+@property(readonly) BOOL isTLS13;
 
++(void) connectWithSNIDomain:(NSString*) SNIDomain connectHost:(NSString*) host connectPort:(NSNumber*) port inputStream:(NSInputStream* _Nullable * _Nonnull) inputStream  outputStream:(NSOutputStream* _Nullable * _Nonnull) outputStream;
+-(NSData* _Nullable) channelBindingDataForType:(NSString* _Nullable) type;
 @end
 
 @interface MLInputStream : MLStream

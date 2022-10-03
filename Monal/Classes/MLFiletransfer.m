@@ -21,8 +21,7 @@
 static NSFileManager* _fileManager;
 static NSString* _documentCacheDir;
 static NSMutableSet* _currentlyTransfering;
-
-NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
+static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 
 @implementation MLFiletransfer
 
@@ -43,8 +42,7 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 
 +(BOOL) isIdle
 {
-    @synchronized(_currentlyTransfering)
-    {
+    @synchronized(_currentlyTransfering) {
         return [_currentlyTransfering count] == 0;
     }
 }
@@ -59,16 +57,12 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
         return;
     }
     url = [self genCanonicalUrl:msg.messageText];
-    @synchronized(_expectedDownloadSizes)
-    {
-        if(_expectedDownloadSizes[url] == NULL)
-        {
+    @synchronized(_expectedDownloadSizes) {
+        if(_expectedDownloadSizes[url] == nil)
             _expectedDownloadSizes[url] = msg.filetransferSize;
-        }
     }
     //make sure we don't check or download this twice
-    @synchronized(_currentlyTransfering)
-    {
+    @synchronized(_currentlyTransfering) {
         if([_currentlyTransfering containsObject:historyId])
         {
             DDLogDebug(@"Already checking/downloading this content, ignoring");
@@ -112,7 +106,10 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = contentLength;
             xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
+            if(account != nil)      //don't send out update notices for already deleted accounts
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
+            else
+                return;             //abort here without autodownloading if account was already deleted
             
             //try to autodownload if sizes match
             long autodownloadMaxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersWifiMaxSize"];
@@ -266,7 +263,10 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:filetransferSize];
             //send out update notification (using our directly update MLMessage object instead of reloading it from db after updating the db)
             xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
+            if(account != nil)      //don't send out update notices for already deleted accounts
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
+            else
+                [_fileManager removeItemAtPath:cacheFile error:nil];
             
             //download done, remove from "currently checking/downloading list"
             [self markAsComplete:historyId];
@@ -277,23 +277,20 @@ NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 
 -(void) URLSession:(NSURLSession*) session downloadTask:(NSURLSessionDownloadTask*) downloadTask didWriteData:(int64_t) bytesWritten totalBytesWritten:(int64_t) totalBytesWritten totalBytesExpectedToWrite:(int64_t) totalBytesExpectedToWrite
 {
-    @synchronized(_expectedDownloadSizes)
-    {
+    @synchronized(_expectedDownloadSizes) {
         NSNumber* expectedSize = _expectedDownloadSizes[session.sessionDescription];
-        if(expectedSize == NULL) {
+        if(expectedSize == nil)                                                 //don't allow downloads of files without size in http header
             [downloadTask cancel];
-        } else if(totalBytesWritten >= expectedSize.intValue + 1024 * 1000 * 1000) {
+        else if(totalBytesWritten >= expectedSize.intValue + 512 * 1024)        //allow for a maximum of 512KiB of extra data
             [downloadTask cancel];
-        } else {
-            // everything is ok
-        }
+        else                                                                    // everything is ok
+            ;
     }
 }
 
 -(void) URLSession:(nonnull NSURLSession*) session downloadTask:(nonnull NSURLSessionDownloadTask*) downloadTask didFinishDownloadingToURL:(nonnull NSURL*) location
 {
-    @synchronized(_expectedDownloadSizes)
-    {
+    @synchronized(_expectedDownloadSizes) {
         [_expectedDownloadSizes removeObjectForKey:session.sessionDescription];
     }
 }
@@ -399,6 +396,8 @@ $$
 {
     NSDictionary* fileInfo = [self getFileInfoForMessage:msg];
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
+    if(account == nil)
+        return;
     
     NSString* groupDisplayName = nil;
     NSString* fromDisplayName = nil;
@@ -518,6 +517,37 @@ $$
     }
 }
 
++(MLHandler*) prepareDataUpload:(NSData*) data
+{
+    return [self prepareDataUpload:data withFileExtension:@"dat"];
+}
+
++(MLHandler*) prepareDataUpload:(NSData*) data withFileExtension:(NSString*) fileExtension
+{
+    DDLogInfo(@"Preparing for upload of NSData object: %@", data);
+    
+    //save file data to our document cache (temporary filename because the upload url is unknown yet)
+    NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
+    NSError* error;
+    NSString* file = [_documentCacheDir stringByAppendingPathComponent:tempname];
+    DDLogDebug(@"Tempstoring data at %@", file);
+    [data writeToFile:file options:NSDataWritingFileProtectionCompleteUntilFirstUserAuthentication error:&error];
+    if(error)
+    {
+        [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+        DDLogError(@"Failed to save NSData to file: %@", error);
+        return $newHandler(self, errorCompletion, $ID(error));
+    }
+    [HelperTools configureFileProtectionFor:file];
+    
+    NSString* userFacingFilename = [NSString stringWithFormat:@"%@.%@", [[NSUUID UUID] UUIDString], fileExtension];
+    return $newHandler(self, internalTmpFileUploadHandler,
+        $ID(file),
+        $ID(userFacingFilename),
+        $ID(mimeType, [self getMimeTypeOfOriginalFile:userFacingFilename])
+    );
+}
+
 +(MLHandler*) prepareFileUpload:(NSURL*) fileUrl
 {
     DDLogInfo(@"Preparing for upload of file stored at %@", [fileUrl path]);
@@ -591,13 +621,21 @@ $$
 
 +(void) doStartupCleanup
 {
-    //delete leftover tmp files
+    //delete leftover tmp files older than 1 day
+    NSDate* now = [NSDate date];
     NSArray* directoryContents = [_fileManager contentsOfDirectoryAtPath:_documentCacheDir error:nil];
     NSPredicate* filter = [NSPredicate predicateWithFormat:@"self ENDSWITH '.tmp'"];
     for(NSString* file in [directoryContents filteredArrayUsingPredicate:filter])
     {
-        DDLogInfo(@"Deleting leftover tmp file at %@", [_documentCacheDir stringByAppendingPathComponent:file]);
-        [_fileManager removeItemAtPath:[_documentCacheDir stringByAppendingPathComponent:file] error:nil];
+        NSURL* fileUrl = [NSURL fileURLWithPath:file];
+        NSDate* fileDate;
+        NSError* error;
+        [fileUrl getResourceValue:&fileDate forKey:NSURLContentModificationDateKey error:&error];
+        if(!error && [now timeIntervalSinceDate:fileDate]/86400 > 1)
+        {
+            DDLogInfo(@"Deleting leftover tmp file at %@", [_documentCacheDir stringByAppendingPathComponent:file]);
+            [_fileManager removeItemAtPath:[_documentCacheDir stringByAppendingPathComponent:file] error:nil];
+        }
     }
     
     //*** migrate old image store to new fileupload store if needed***
@@ -828,7 +866,17 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
                                         [HelperTools hexadecimalString:[encryptedPayload.key subdataWithRange:NSMakeRange(0, 32)]]];
                 url = urlComponents.string;
             }
-
+            
+            //ignore upload if account was already removed
+            if([[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo] == nil)
+            {
+                NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to upload file: account was removed", @"")}];
+                [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+                [self markAsComplete:file];
+                DDLogError(@"File upload failed: %@", error);
+                return completion(nil, nil, nil, error);
+            }
+            
             //move the tempfile to our cache location
             NSString* cacheFile = [self calculateCacheFileForNewUrl:url andMimeType:mimeType];
             DDLogInfo(@"Moving (possibly encrypted) file to our document cache at %@", cacheFile);
@@ -860,8 +908,7 @@ $$
 
 +(void) markAsComplete:(id) obj
 {
-    @synchronized(_currentlyTransfering)
-    {
+    @synchronized(_currentlyTransfering) {
         [_currentlyTransfering removeObject:obj];
     }
     if(self.isIdle)
@@ -872,9 +919,7 @@ $$
 +(BOOL) isFileforHistoryIdInTransfer:(NSNumber*) historyId
 {
     if([_currentlyTransfering containsObject:historyId])
-    {
         return YES;
-    }
     return NO;
 }
 @end

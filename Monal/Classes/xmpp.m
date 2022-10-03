@@ -25,7 +25,7 @@
 #import "HelperTools.h"
 #import "MLXMPPManager.h"
 #import "MLNotificationQueue.h"
-
+#import "SCRAM.h"
 #import "MLImageManager.h"
 
 //XMPP objects
@@ -69,6 +69,7 @@ NSString* const kStanza = @"stanza";
 -(void) resetForNewSession;
 @end
 
+
 @interface xmpp()
 {
     //network (stream) related stuff
@@ -96,6 +97,7 @@ NSString* const kStanza = @"stanza";
     monal_void_block_t _cancelLoginTimer;
     monal_void_block_t _cancelPingTimer;
     monal_void_block_t _cancelReconnectTimer;
+    NSMutableArray* _timersToCancelOnDisconnect;
     NSMutableArray* _smacksAckHandler;
     NSMutableDictionary* _iqHandlers;
     NSMutableArray* _reconnectionHandlers;
@@ -124,6 +126,13 @@ NSString* const kStanza = @"stanza";
     MLXMLNode* _cachedStreamFeaturesBeforeAuth;
     MLXMLNode* _cachedStreamFeaturesAfterAuth;
     xmppPipeliningState _pipeliningState;
+    
+    //scram related stuff
+    SCRAM* _scramHandler;
+    NSSet* _supportedSaslMechanisms;
+    NSSet* _supportedChannelBindings;
+    monal_void_block_t _blockToCallOnTCPOpen;
+    NSString* _upgradeTask;
 }
 
 @property (nonatomic, assign) BOOL smacksRequestInFlight;
@@ -168,7 +177,7 @@ NSString* const kStanza = @"stanza";
 
 @implementation xmpp
 
--(id) initWithServer:(nonnull MLXMPPServer *) server andIdentity:(nonnull MLXMPPIdentity *)identity andAccountNo:(NSNumber*) accountNo
+-(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSNumber*) accountNo
 {
     //initialize ivars depending on provided arguments
     self = [super init];
@@ -246,6 +255,7 @@ NSString* const kStanza = @"stanza";
     _pipeliningState = kPipelinedNothing;
     _cachedStreamFeaturesBeforeAuth = nil;
     _cachedStreamFeaturesAfterAuth = nil;
+    _timersToCancelOnDisconnect = [[NSMutableArray alloc] init];
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
@@ -429,16 +439,29 @@ NSString* const kStanza = @"stanza";
             //thrown because the sqlite3_busy_timeout triggers after 8 seconds.
             
             BOOL lastState = self->_lastIdleState;
-            //only send out idle notifications if we changed from non-idle to idle state
-            //but only do so if the receive queue is not currently suspended (e.g. account frozen)
-            if(!_receiveQueue.suspended && self.idle && !lastState)
+            //only send out idle state notifications if the receive queue is not currently suspended (e.g. account frozen)
+            if(!_receiveQueue.suspended)
             {
-                DDLogVerbose(@"Adding idle state notification to receive queue...");
-                [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                    if(self.idle)       //make sure we are still idle, even if in receive queue now
-                        //don't queue this notification because it should be handled INLINE inside the receive queue
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
-                }]] waitUntilFinished:NO];
+                //only send out idle notifications if we changed from non-idle to idle state
+                if(self.idle && !lastState)
+                {
+                    DDLogVerbose(@"Adding idle state notification to receive queue...");
+                    [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                        if(self.idle)       //make sure we are still idle, even if in receive queue now
+                            //don't queue this notification because it should be handled INLINE inside the receive queue
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
+                    }]] waitUntilFinished:NO];
+                }
+                //only send out not-idle notifications if we changed from idle to non-idle state
+                if(!self.idle && lastState)
+                {
+                    DDLogVerbose(@"Sending out non-idle state notification via background queue...");
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+                        //don't queue this notification because it should be handled INLINE
+                        //(and we don't need to queue anything while in a background thread anyways)
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNotIdle object:self];
+                    });
+                }
             }
         }
     }
@@ -597,6 +620,18 @@ NSString* const kStanza = @"stanza";
         [self createStreams];
         return NO;
     }
+    
+    //already tried to connect once (e.g. _SRVDiscoveryDone==YES) and either all SRV records were tried or we didn't discovered any
+    if(_SRVDiscoveryDone && [_usableServersList count] == 0)
+    {
+        //in this condition, the registration failed
+        if(_registration || _registrationSubmission)
+        {
+            DDLogWarn(@"Could not connect for registering, publishing error...");
+            [self postError:[NSString stringWithFormat:NSLocalizedString(@"Server for domain '%@' not responding!", @""), self.connectionProperties.identity.domain] withIsSevere:NO];
+            return YES;
+        }
+    }
 
     // do DNS discovery if it hasn't already been set
     if(!_SRVDiscoveryDone)
@@ -621,7 +656,8 @@ NSString* const kStanza = @"stanza";
         if(![[row objectForKey:@"isEnabled"] boolValue])
         {
             DDLogInfo(@"SRV entry prohibits XMPP connection for server %@", self.connectionProperties.identity.domain);
-            [self postError:[NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for domain %@", @""), self.connectionProperties.identity.domain] withIsSevere:YES];
+            //this is not severe on registration, but severe otherwise
+            [self postError:[NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for domain %@", @""), self.connectionProperties.identity.domain] withIsSevere:!(_registration || _registrationSubmission)];
             return YES;
         }
     }
@@ -774,7 +810,7 @@ NSString* const kStanza = @"stanza";
     self->_cancelLoginTimer = createTimer(CONNECT_TIMEOUT, (^{
         [self dispatchAsyncOnReceiveQueue: ^{
             self->_cancelLoginTimer = nil;
-            DDLogInfo(@"login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
+            DDLogInfo(@"Login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
             [self reconnect];
         }];
     }));
@@ -795,7 +831,8 @@ NSString* const kStanza = @"stanza";
     [self dispatchAsyncOnReceiveQueue: ^{
         [self->_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas from old connections
         [self unfreezeParseQueue];                        //make sure the parse queue is operational again
-        [self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
+        //we don't want to loose outgoing messages by throwing away their receiveQueue operation adding them to the smacks queue etc.
+        //[self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
         
         //sanity check
         if(self.accountState >= kStateReconnecting)
@@ -835,6 +872,10 @@ NSString* const kStanza = @"stanza";
         
         [self cleanupSendQueue];
         
+        DDLogVerbose(@"Removing scramHandler...");
+        self->_scramHandler = nil;
+        self->_blockToCallOnTCPOpen = nil;
+        
         //(re)read persisted state and start connection
         [self readState];
         if([self connectionTask])
@@ -843,10 +884,6 @@ NSString* const kStanza = @"stanza";
             self->_accountState = kStateDisconnected;
             return;
         }
-        
-        //return here if we are just registering a new account (we don't want to time out while registering)
-        if(self->_registration || self->_registrationSubmission)
-            return;
         
         [self reinitLoginTimer];
     }];
@@ -888,6 +925,15 @@ NSString* const kStanza = @"stanza";
         if(self->_cancelReconnectTimer)
             self->_cancelReconnectTimer();
         self->_cancelReconnectTimer = nil;
+        @synchronized(self->_timersToCancelOnDisconnect) {
+            for(monal_void_block_t timer in self->_timersToCancelOnDisconnect)
+                timer();
+            [self->_timersToCancelOnDisconnect removeAllObjects];
+        }
+        
+        DDLogVerbose(@"Removing scramHandler...");
+        self->_scramHandler = nil;
+        self->_blockToCallOnTCPOpen = nil;
         
         if(self->_accountState<kStateReconnecting)
         {
@@ -1049,6 +1095,9 @@ NSString* const kStanza = @"stanza";
         [self closeSocket];
         [self accountStatusChanged];
         self->_disconnectInProgres = NO;
+        
+        //make sure our idle state is rechecked
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNotIdle object:self];
     }];
 }
 
@@ -1125,10 +1174,6 @@ NSString* const kStanza = @"stanza";
 
 -(void) reconnectWithStreamError:(MLXMLNode* _Nullable) streamError andWaitingTime:(double) wait
 {
-    //we never want to reconnect while registering
-    if(_registration || _registrationSubmission)
-        return;
-
     if(_reconnectInProgress)
     {
         DDLogInfo(@"Ignoring reconnect while one already in progress");
@@ -1327,11 +1372,14 @@ NSString* const kStanza = @"stanza";
         MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"__xml"];
         [self send:xmlOpening];
     }
-    MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"stream:stream" andNamespace:@"jabber:client"];
-    [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
-    [stream.attributes setObject:@"1.0" forKey:@"version"];
-    if(self.connectionProperties.identity.domain)
-        [stream.attributes setObject:self.connectionProperties.identity.domain forKey:@"to"];
+    MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"stream:stream" andNamespace:@"jabber:client" withAttributes:@{
+        @"xmlns:stream": @"http://etherx.jabber.org/streams",
+        @"version": @"1.0",
+        @"to": self.connectionProperties.identity.domain,
+    } andChildren:@[] andData:nil];
+    //only set from-attribute if TLS is already established
+    if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
+        stream.attributes[@"from"] = self.connectionProperties.identity.jid;
     [self send:stream];
 }
 
@@ -1368,10 +1416,12 @@ NSString* const kStanza = @"stanza";
         else if([self->_parseQueue operationCount] > 4)
         {
             DDLogWarn(@"parseQueue overflow, delaying ping by 10 seconds.");
-            createTimer(10.0, (^{
-                DDLogDebug(@"ping delay expired, retrying ping.");
-                [self sendPing:timeout];
-            }));
+            @synchronized(self->_timersToCancelOnDisconnect) {
+                [self->_timersToCancelOnDisconnect addObject:createTimer(10.0, (^{
+                    DDLogDebug(@"ping delay expired, retrying ping.");
+                    [self sendPing:timeout];
+                }))];
+            }
         }
         else
         {
@@ -1503,6 +1553,10 @@ NSString* const kStanza = @"stanza";
             [self postError:message withIsSevere:NO];
             MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
+                [[MLXMLNode alloc] initWithElement:@"handled-count-too-high" andNamespace:@"urn:xmpp:sm:3" withAttributes:@{
+                    @"h": hvalue,
+                    @"send-count": self.lastOutboundStanza,
+                } andChildren:@[] andData:nil],
                 [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
             ] andData:nil];
             [self reconnectWithStreamError:streamError];
@@ -2019,6 +2073,10 @@ NSString* const kStanza = @"stanza";
         {
             XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
             
+            //openfire compatibility: remove iq-to of bind
+            if([self.connectionProperties.serverIdentity isEqualToString:@"https://www.igniterealtime.org/projects/openfire/"] && [iqNode check:@"/{jabber:client}iq<type=result>/{urn:ietf:params:xml:ns:xmpp-bind}bind"])
+                iqNode.to = nil;
+            
             //sanity: check if iq from and to attributes are valid and throw it away if not
             if([@"" isEqualToString:iqNode.from] || [@"" isEqualToString:iqNode.to])
             {
@@ -2035,7 +2093,7 @@ NSString* const kStanza = @"stanza";
                 iqNode.to = self.connectionProperties.identity.fullJid;
             
             //sanity: check if iq id and type attributes are present and toUser points to us and throw it away if not
-            //use parsedStanza instead of iqNode to be sure we get the raw values even if ids etc. get added automaticaly to iq stanzas if accessed as XMPPIQ* object
+            //use parsedStanza instead of iqNode to be sure we get the raw values even if ids etc. get added automatically to iq stanzas if accessed as XMPPIQ* object
             if(![parsedStanza check:@"/@id"] || ![parsedStanza check:@"/@type"] || ![self.connectionProperties.identity.jid isEqualToString:iqNode.toUser])
             {
                 DDLogError(@"sanity check failed for iq node, ignoring iq: %@", iqNode);
@@ -2201,6 +2259,7 @@ NSString* const kStanza = @"stanza";
             //init session and query disco, roster etc.
             [self initSession];
         }
+#pragma mark - SASL1
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}failure"])
         {
             NSString* message = [parsedStanza findFirst:@"text#"];;
@@ -2214,56 +2273,35 @@ NSString* const kStanza = @"stanza";
                 if(!message)
                     message = NSLocalizedString(@"There was a SASL error on the server.", @"");
             }
+            message = [NSString stringWithFormat:NSLocalizedString(@"Login error, account disabled: %@", @""), message];
             
             //clear pipeline cache to make sure we have a fresh restart next time
+            xmppPipeliningState oldPipeliningState = _pipeliningState;
             _pipeliningState = kPipelinedNothing;
             _cachedStreamFeaturesBeforeAuth = nil;
             _cachedStreamFeaturesAfterAuth = nil;
             
+            //don't report error but reconnect if we pipelined stuff that is not correct anymore...
+            if(oldPipeliningState != kPipelinedNothing)
+                [self reconnect];
+            //...but don't try again if it's really the password, that's wrong
             //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-            [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES];
-            [self disconnect];
+            else
+                [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}challenge"])
         {
-            if(self.accountState >= kStateLoggedIn)
-                return [self invalidXMLError];
-            if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
-            {
-                MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:ietf:params:xml:ns:xmpp-sasl"];
-                //TODO: implement SCRAM SHA1 and SHA256 based auth
-                [self send:responseXML];
-                
-                //pipeline stream restart
-                /*
-                 * WARNING: this can not be done, because pipelining a stream restart will break the local parser:
-                 *          1. the <?xml ...?> "tag" confuses the parser if its coming in an already established stream (e.g. if it sees it twice)
-                 *          2. the parser can not be reset after receiving the sasl <success/> because the old parser could have already swallowed everything
-                 *             coming after the <success/> (e.g. the new stream opening and stream features and possibly even the smacks resumption data)
-                 *          3. making the used parser (NSXMLParser) ignore subsequent <?xml ...?> headers does not seem possible
-                 *          4. switching to a new parser (maybe written in rust) can solve this and would save us 1 RTT more in every sasl scheme (even challenge-response ones)
-                DDLogDebug(@"Pipelining stream restart after response to auth challenge...");
-                _pipeliningState = kPipelinedStreamRestart;
-                [self startXMPPStreamWithXMLOpening:NO];
-                
-                //pipeline stream resume/bind after auth onto our stream header if we have cached stream features available
-                if(_cachedStreamFeaturesAfterAuth != nil)
-                {
-                    DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", _cachedStreamFeaturesAfterAuth);
-                    _pipeliningState = kPipelinedResumeOrBind;
-                    [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
-                }
-                */
-                
-                return;
-            }
+            //we don't support any challenge-response SASL mechanism for SASL1
+            return [self invalidXMLError];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}success"])
         {
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
+            
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
+            
             self->_accountState = kStateLoggedIn;
             _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
             if(_cancelLoginTimer)
@@ -2276,12 +2314,8 @@ NSString* const kStanza = @"stanza";
             //after sasl success a new stream will be started --> reset parser to accommodate this
             [self prepareXMPPParser:NO];
             
-            //only send new stream header if not already done via pipelining
-            if(_pipeliningState < kPipelinedStreamRestart)
-            {
-                DDLogDebug(@"Sending NOT-pipelined stream restart...");
-                [self startXMPPStreamWithXMLOpening:YES];                   //could possibly be with or without XML opening (old behaviour was with opening, so keep that)
-            }
+            DDLogDebug(@"Sending NOT-pipelined stream restart...");
+            [self startXMPPStreamWithXMLOpening:YES];                   //could possibly be with or without XML opening (old behaviour was with opening, so keep that)
             
             //only pipeline stream resume/bind if not already done
             if(_pipeliningState < kPipelinedResumeOrBind)
@@ -2294,6 +2328,205 @@ NSString* const kStanza = @"stanza";
                     [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
                 }
             }
+        }
+#pragma mark - SASL2
+        else if([parsedStanza check:@"/{urn:xmpp:sasl:2}challenge"])
+        {
+            if(self.accountState >= kStateLoggedIn)
+                return [self invalidXMLError];
+            
+            //only allow challenge handling, if we are in scram mode (e.g. we selected a SCRAM-XXX auth method)
+            if(!self->_scramHandler)
+                return [self invalidXMLError];
+            
+            NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"/{urn:xmpp:sasl:2}challenge#|base64"] encoding:NSUTF8StringEncoding];
+            if(![self->_scramHandler parseServerFirstMessage:innerSASLData])
+            {
+                DDLogError(@"SCRAM says this server-first message was wrong!");
+                
+                //clear pipeline cache to make sure we have a fresh restart next time
+                _pipeliningState = kPipelinedNothing;
+                _cachedStreamFeaturesBeforeAuth = nil;
+                _cachedStreamFeaturesAfterAuth = nil;
+                
+                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+                [HelperTools postError:NSLocalizedString(@"Error handling SASL challenge of server, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
+                [self disconnect];
+                
+                return;
+            }
+            
+            NSData* channelBindingData = [self channelBindingDataForType:[self channelBindingToUse]];            
+            MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFinalMessageWithChannelBindingData:channelBindingData]]];
+            [self send:responseXML];
+            
+            //pipeline stream restart
+            /*
+            * WARNING: this can not be done, because pipelining a stream restart will break the local parser:
+            *          1. the <?xml ...?> "tag" confuses the parser if its coming in an already established stream (e.g. if it sees it twice)
+            *          2. the parser can not be reset after receiving the sasl <success/> because the old parser could have already swallowed everything
+            *             coming after the <success/> (e.g. the new stream opening and stream features and possibly even the smacks resumption data)
+            *          3. making the used parser (NSXMLParser) ignore subsequent <?xml ...?> headers does not seem possible
+            *          4. switching to a new parser (maybe written in rust) can solve this and would save us 1 RTT more in every sasl scheme (even challenge-response ones)
+            * TODO SOLUTION: SASL2 supports the <inline/> element instead, to "pipeline" smacks-resume and/or bind2 onto the SASL2 authentication
+            
+            DDLogDebug(@"Pipelining stream restart after response to auth challenge...");
+            _pipeliningState = kPipelinedStreamRestart;
+            [self startXMPPStreamWithXMLOpening:NO];
+            
+            //pipeline stream resume/bind after auth onto our stream header if we have cached stream features available
+            if(_cachedStreamFeaturesAfterAuth != nil)
+            {
+                DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", _cachedStreamFeaturesAfterAuth);
+                _pipeliningState = kPipelinedResumeOrBind;
+                [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
+            }
+            */
+        }
+        else if([parsedStanza check:@"/{urn:xmpp:sasl:2}failure"])
+        {
+            NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
+            NSString* message = [parsedStanza findFirst:@"text#"];
+            DDLogWarn(@"Got SASL2 %@: %@", errorReason, message);
+            if([errorReason isEqualToString:@"not-authorized"])
+            {
+                if(!message)
+                    message = NSLocalizedString(@"Not Authorized. Please check your credentials.", @"");
+            }
+            else
+            {
+                if(!message)
+                    message = [NSString stringWithFormat:NSLocalizedString(@"Server returned SASL2 error '%@'.", @""), errorReason];
+            }
+            message = [NSString stringWithFormat:NSLocalizedString(@"Login error, account disabled: %@", @""), message];
+            
+            //clear pipeline cache to make sure we have a fresh restart next time
+            xmppPipeliningState oldPipeliningState = _pipeliningState;
+            _pipeliningState = kPipelinedNothing;
+            _cachedStreamFeaturesBeforeAuth = nil;
+            _cachedStreamFeaturesAfterAuth = nil;
+            
+            //don't report error but reconnect if we pipelined stuff that is not correct anymore...
+            if(oldPipeliningState != kPipelinedNothing)
+                [self reconnect];
+            //...but don't try again if it's really the password, that's wrong
+            else
+            {
+                //display sasl mechanism list and list of channel-binding types even if SASL2 failed
+                
+                //build mechanism list displayed in ui (mark _scramHandler.method as used)
+                NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
+                for(NSString* mechanism in _supportedSaslMechanisms)
+                    mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
+                DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
+                self.connectionProperties.saslMethods = mechanismList;
+                
+                //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
+                NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
+                if(_supportedChannelBindings != nil)
+                    for(NSString* cbType in _supportedChannelBindings)
+                        channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
+                DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
+                self.connectionProperties.channelBindingTypes = channelBindings;
+                
+                //record SDDP support
+                self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
+                
+                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+                [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES  andDisableAccount:YES];
+            }
+        }
+        else if([parsedStanza check:@"/{urn:xmpp:sasl:2}success"])
+        {
+            if(self.accountState >= kStateLoggedIn)
+                return [self invalidXMLError];
+            
+            //check server-final message for correctness if needed
+            if(!self->_scramHandler.finishedSuccessfully)
+                [self handleScramInSuccessOrContinue:parsedStanza];
+            
+            //build mechanism list displayed in ui (mark _scramHandler.method as used)
+            NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
+            for(NSString* mechanism in _supportedSaslMechanisms)
+                mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
+            DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
+            self.connectionProperties.saslMethods = mechanismList;
+            
+            //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
+            NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
+            if(_supportedChannelBindings != nil)
+                for(NSString* cbType in _supportedChannelBindings)
+                    channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
+            DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
+            self.connectionProperties.channelBindingTypes = channelBindings;
+            
+            //update user identity using authorization-identifier, including support for fullJids (as specified by BIND2)
+            NSString* authid = [parsedStanza findFirst:@"authorization-identifier#"];
+            NSDictionary* authidParts = [HelperTools splitJid:authid];
+            self.connectionProperties.identity.jid = authidParts[@"user"];
+            if(authidParts[@"user"] != nil)
+                self.connectionProperties.identity.resource = authidParts[@"resource"];
+            
+            //record SDDP support
+            self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
+            
+            self->_scramHandler = nil;
+            self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
+            self->_accountState = kStateLoggedIn;
+            _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
+            if(_cancelLoginTimer)
+            {
+                _cancelLoginTimer();        //we are now logged in --> cancel running login timer
+                _cancelLoginTimer = nil;
+            }
+            self->_loggedInOnce = YES;
+            
+            //NOTE: we don't have any stream restart when using SASL2
+            //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
+            _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
+        }
+        else if([parsedStanza check:@"/{urn:xmpp:sasl:2}continue"])
+        {
+            if(self.accountState >= kStateLoggedIn)
+                return [self invalidXMLError];
+            
+            //check server-final message for correctness
+            [self handleScramInSuccessOrContinue:parsedStanza];
+            
+            NSArray* tasks = [parsedStanza find:@"tasks/task#"];
+            if(tasks.count == 0)
+            {
+                [HelperTools postError:NSLocalizedString(@"Server implementation error: SASL2 tasks empty, account disabled!", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+                return;
+            }
+            
+            if(tasks.count != 1)
+            {
+                [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"We don't support any task requested by the server, account disabled: %@", @""), tasks] withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+                return;
+            }
+            
+            if(![tasks[0] isEqualToString:_upgradeTask])
+            {
+                [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"We don't support the single task requested by the server, account disabled: %@", @""), tasks] withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+                return;
+            }
+            
+            [self send:[[MLXMLNode alloc] initWithElement:@"next" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{
+                @"task": _upgradeTask
+            } andChildren:@[] andData:nil]];
+        }
+        else if([parsedStanza check:@"/{urn:xmpp:sasl:2}parameters"])
+        {
+            NSData* salt = [parsedStanza findFirst:@"salt#|base64"];
+            uint32_t iterations = (uint32_t)[[parsedStanza findFirst:@"iterations#"] integerValue];
+            
+            NSString* scramMechanism = [_upgradeTask substringWithRange:NSMakeRange(5, _upgradeTask.length-5)];
+            DDLogInfo(@"Upgrading password using SCRAM mechanism: %@", scramMechanism);
+            SCRAM* scramUpgradeHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:scramMechanism];
+            NSData* saltedPassword = [scramUpgradeHandler hashPasswordWithSalt:salt andIterationCount:iterations];
+            
+            [self send:[[MLXMLNode alloc] initWithElement:@"hash" andNamespace:@"urn:xmpp:sasl:2" andData:[HelperTools encodeBase64WithData:saltedPassword]]];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
         {
@@ -2323,7 +2556,7 @@ NSString* const kStanza = @"stanza";
                     [self handleFeaturesAfterAuth:parsedStanza];
                 }
                 else
-                    DDLogDebug(@"Stream features (after auth) already read from cache, ignoring incoming stream features (but refreshing cache)...");
+                    DDLogDebug(@"Stream features (after auth) already read from cache, ignoring incoming stream features (but refreshing cache).\n Cached: %@\nIncoming: %@", _cachedStreamFeaturesAfterAuth, parsedStanza);
                 _cachedStreamFeaturesAfterAuth = parsedStanza;
             }
         }
@@ -2355,13 +2588,21 @@ NSString* const kStanza = @"stanza";
             NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
             NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
             DDLogWarn(@"Got *INSECURE* XMPP stream error %@: %@", errorReason, errorText);
-//this error could be a mitm or some other network problem caused by an active attacker, just ignore it since we are not in a tls context here
-#ifdef IS_ALPHA
+            
             NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
                 message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
-            [self postError:message withIsSevere:NO];
+            
+            //don't ignore this error when trying to register, even though it could be a mitm etc.
+            if(_registration || _registrationSubmission)
+                [self postError:message withIsSevere:NO];
+            else
+            {
+//this error could be a mitm or some other network problem caused by an active attacker, just ignore it since we are not in a tls context here
+#ifdef IS_ALPHA
+                [self postError:message withIsSevere:NO];
 #endif
+            }
             [self reconnect];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -2417,6 +2658,26 @@ NSString* const kStanza = @"stanza";
 
 -(void) handleFeaturesBeforeAuth:(MLXMLNode*) parsedStanza
 {
+    //called below, if neither SASL1 nor SASL2 could be used to negotiate a valid SASL mechanism
+    monal_void_block_t noAuthSupported = ^{
+        //no supported auth mechanism
+        DDLogWarn(@"No supported auth mechanism!");
+        
+        //clear pipeline cache to make sure we have a fresh restart next time
+        xmppPipeliningState oldPipeliningState = self->_pipeliningState;
+        self->_pipeliningState = kPipelinedNothing;
+        self->_cachedStreamFeaturesBeforeAuth = nil;
+        self->_cachedStreamFeaturesAfterAuth = nil;
+        
+        if(oldPipeliningState != kPipelinedNothing)
+            [self reconnect];
+        else
+        {
+            //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+            [HelperTools postError:NSLocalizedString(@"No supported auth mechanism found, disabling account!", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+        }
+    };
+    
     if([parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
     {
         DDLogInfo(@"Server supports Pre-Authenticated IBR");
@@ -2425,11 +2686,6 @@ NSString* const kStanza = @"stanza";
     
     if(_registration)
     {
-        //make sure this does not time out while the user is filling out the registration form
-        //but still have a timeout for the connection until this point
-        if(self->_cancelLoginTimer)
-            self->_cancelLoginTimer();
-        self->_cancelLoginTimer = nil;
         if(_registrationToken && self.connectionProperties.supportsPreauthIbr)
         {
             DDLogInfo(@"Registration: Calling submitRegToken");
@@ -2446,7 +2702,95 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"Registration: Calling submitRegForm");
         [self submitRegForm];
     }
-    else
+#ifdef IS_ALPHA
+    //prefer SASL2 over SASL1
+    else if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"])
+    {
+        weakify(self);
+        _blockToCallOnTCPOpen = ^{
+            strongify(self);
+            
+            if([self->_supportedSaslMechanisms containsObject:@"PLAIN"])
+                DDLogWarn(@"Server supports SASL2 PLAIN, ignoring because this is insecure!");
+            
+            //create list of upgradable scram mechanisms and pick the first one (highest security) the server and we support
+            self->_upgradeTask = nil;
+            NSSet* upgradesOffered = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/upgrade#"]];
+            for(NSString* method in [SCRAM supportedMechanismsIncludingChannelBinding:NO])
+                if([upgradesOffered containsObject:[NSString stringWithFormat:@"UPGR-%@", method]])
+                {
+                    self->_upgradeTask = [NSString stringWithFormat:@"UPGR-%@", method];
+                    break;
+                }
+            
+            //check for supported scram mechanisms (highest security first!)
+            for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:[self channelBindingToUse] != nil])
+                if([self->_supportedSaslMechanisms containsObject:mechanism])
+                {
+                    self->_scramHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:mechanism];
+                    //set ssdp data for downgrade protection
+                    //_supportedChannelBindings will be nil, if XEP-0440 is not supported by our server
+                    [self->_scramHandler setSSDPMechanisms:[self->_supportedSaslMechanisms allObjects] andChannelBindingTypes:[self->_supportedChannelBindings allObjects]];
+                    //NSString* deviceName = [NSString stringWithFormat:@"%@ (%@)", [[UIDevice currentDevice] name], [[UIDevice currentDevice] model]];
+                    [self send:[[MLXMLNode alloc]
+                        initWithElement:@"authenticate"
+                        andNamespace:@"urn:xmpp:sasl:2"
+                        //only allow SCRAM upgrades if we are using channel-binding to make sure the saltedPassword isn't intercepted
+                        withAttributes:(self->_upgradeTask != nil && [self channelBindingToUse] != nil ? @{
+                            @"mechanism": mechanism,
+                            @"upgrade": self->_upgradeTask, 
+                        } : @{
+                            @"mechanism": mechanism,
+                        }) andChildren:@[
+                            [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithChannelBinding:[self channelBindingToUse]]]],
+                            [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
+                                @"id":[[[UIDevice currentDevice] identifierForVendor] UUIDString],
+                            } andChildren:@[
+                                [[MLXMLNode alloc] initWithElement:@"software" andData:@"Monal IM"],
+                                [[MLXMLNode alloc] initWithElement:@"device" andData:[[UIDevice currentDevice] name]],
+                            ] andData:nil],
+                            
+                        ] andData:nil
+                    ]];
+                    return;
+                }
+            
+            //could not find any matching SASL2 mechanism (we do NOT support PLAIN)
+            noAuthSupported();
+        };
+        
+        //extract menchanisms presented
+        _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
+        
+        //extract supported channel-binding types
+        if([parsedStanza check:@"{urn:xmpp:sasl-cb:0}sasl-channel-binding"])
+            _supportedChannelBindings = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl-cb:0}sasl-channel-binding/channel-binding@type"]];
+        else
+            _supportedChannelBindings = nil;
+        
+        //check if the server supports *any* scram method and wait for TLS connection establishment if so
+        BOOL supportsScram = NO;
+        for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:YES])
+            if([_supportedSaslMechanisms containsObject:mechanism])
+                supportsScram = YES;
+        
+        //directly call our continuation block if SCRAM is not supported, because _blockToCallOnTCPOpen() will throw an error then
+        //(we currently only support SCRAM for SASL2)
+        //pipelining can also be done immediately if we are sure we don't use channel binding (e.g. we're not in direct tls mode)
+        //and if we are not pipelining the auth, we can call the block immediately, too
+        //(because the TLS connection was obviously already established and that made us receive the non-cached stream features used here)
+        //if we don't call it here, the continuation block will be called automatically once the TLS connection got established
+        if(!supportsScram || !self.connectionProperties.server.isDirectTLS || _pipeliningState < kPipelinedAuth)
+        {
+            _blockToCallOnTCPOpen();
+            _blockToCallOnTCPOpen = nil;     //don't call this twice
+        }
+        else
+            DDLogWarn(@"Waiting until TLS stream is connected before pipelining the auth element due to channel binding...");
+    }
+#endif
+    //SASL1 is fallback only if SASL2 isn't supported
+    else if([parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"])
     {
         //extract menchanisms presented
         NSSet* supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
@@ -2469,6 +2813,7 @@ NSString* const kStanza = @"stanza";
              *             coming after the <success/> (e.g. the new stream opening and stream features and possibly even the smacks resumption data)
              *          3. making the used parser (NSXMLParser) ignore subsequent <?xml ...?> headers does not seem possible
              *          4. switching to a new parser (maybe written in rust) can solve this and would save us 1 RTT more in every sasl scheme (even challenge-response ones)
+             * TODO SOLUTION: SASL2 supports the <inline/> element instead, to "pipeline" smacks-resume and/or bind2 onto the SASL2 authentication
             DDLogDebug(@"Pipelining stream restart after auth...");
             _pipeliningState = kPipelinedStreamRestart;
             [self startXMPPStreamWithXMLOpening:NO];
@@ -2483,21 +2828,7 @@ NSString* const kStanza = @"stanza";
             */
         }
         else
-        {
-            //TODO: implement SCRAM SHA1 and SHA256 based auth
-            
-            //no supported auth mechanism
-            DDLogInfo(@"no supported auth mechanism, disconnecting!");
-            
-            //clear pipeline cache to make sure we have a fresh restart next time
-            _pipeliningState = kPipelinedNothing;
-            _cachedStreamFeaturesBeforeAuth = nil;
-            _cachedStreamFeaturesAfterAuth = nil;
-            
-            //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-            [HelperTools postError:NSLocalizedString(@"No supported auth mechanism found, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
-            [self disconnect];
-        }
+            noAuthSupported();
     }
 }
 
@@ -2554,6 +2885,65 @@ NSString* const kStanza = @"stanza";
         [self send:resumeNode];
     else
         [self bindResource:self.connectionProperties.identity.resource];
+}
+
+-(void) handleScramInSuccessOrContinue:(MLXMLNode*) parsedStanza
+{
+    //perform logic to handle sasl success
+    DDLogInfo(@"Got SASL2 Success/Continue");
+    
+    //only parse and validate scram response, if we are in scram mode (should always be the case)
+    MLAssert(self->_scramHandler != nil, @"self->_scramHandler should NEVER be nil when using SASL2!");
+    
+    NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"additional-data#|base64"] encoding:NSUTF8StringEncoding];
+    if(![self->_scramHandler parseServerFinalMessage:innerSASLData])
+    {
+        DDLogError(@"SCRAM says this server-final message was wrong!");
+        
+        //clear pipeline cache to make sure we have a fresh restart next time
+        _pipeliningState = kPipelinedNothing;
+        _cachedStreamFeaturesBeforeAuth = nil;
+        _cachedStreamFeaturesAfterAuth = nil;
+        
+        //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+        [HelperTools postError:NSLocalizedString(@"Error authenticating server using SASL2, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
+        [self disconnect];
+        
+        return;
+    }
+    else
+        DDLogDebug(@"SCRAM says this server-final message was correct");
+}
+
+-(NSString* _Nullable) channelBindingToUse
+{
+    NSArray* typesList = [self supportedChannelBindingTypes];
+    if(typesList == nil || typesList.count == 0)
+        return nil;     //we don't support any channel-binding for this TLS connection
+    for(NSString* type in typesList)
+        if(_supportedChannelBindings != nil && [_supportedChannelBindings containsObject:type])
+            return type;
+    
+    DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory!");
+    return @"_no_supported_binding_mitm_possible_";     //this will make sure the authentication fails
+}
+
+//proxy this to ostream if directTLS is used
+-(NSArray* _Nullable) supportedChannelBindingTypes
+{
+    //channel binding is only supported for direct tls due to dependency on network framework
+    if(!self.connectionProperties.server.isDirectTLS)
+        return nil;
+    return [((MLStream*)self->_oStream) supportedChannelBindingTypes];
+}
+
+//proxy this to ostream if directTLS is used
+-(NSData* _Nullable) channelBindingDataForType:(NSString*) type
+{
+    //channel binding is only supported for direct tls due to dependency on network framework
+    if(!self.connectionProperties.server.isDirectTLS)
+        return nil;
+    return [((MLStream*)self->_oStream) channelBindingDataForType:type];
 }
 
 #pragma mark stanza handling
@@ -2630,11 +3020,13 @@ NSString* const kStanza = @"stanza";
         )
         {
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+#ifndef TARGET_OS_SIMULATOR
                 if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
                     DDLogDebug(@"SEND: redacted sasl element: %@", [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
                 else if([stanza check:@"/{jabber:client}iq<type=set>/{jabber:iq:register}query"])
                     DDLogDebug(@"SEND: redacted register/change password iq");
                 else
+#endif
                     DDLogDebug(@"SEND: %@", stanza);
                 [self->_outputQueue addObject:stanza];
                 [self writeFromQueue];      // try to send if there is space
@@ -3768,6 +4160,7 @@ NSString* const kStanza = @"stanza";
 {
     //this is a registration request
     _registration = YES;
+    _registrationSubmission = NO;
     _registrationToken = token;
     _regFormCompletion = completion;
     _regFormErrorCompletion = errorCompletion;
@@ -3818,6 +4211,22 @@ NSString* const kStanza = @"stanza";
     [iq getRegistrationFields];
 
     [self sendIq:iq withResponseHandler:^(XMPPIQ* result) {
+        if(!(
+            ([result check:@"{jabber:iq:register}query/username"] && [result check:@"{jabber:iq:register}query/password"]) ||
+            [result check:@"{jabber:iq:register}query/\\{jabber:iq:register}form\\"] ||
+            [result check:@"{jabber:iq:register}query/\\{urn:xmpp:captcha}form\\"]
+        ))
+        {
+            //dispatch completion handler outside of the receiveQueue
+            if(self->_regFormErrorCompletion)
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    if([result check:@"{jabber:iq:register}query/instructions"])
+                        self->_regFormErrorCompletion(NO, [NSString stringWithFormat:@"Could not request registration form: %@", [result findFirst:@"{jabber:iq:register}query/instructions#"]]);
+                    else
+                        self->_regFormErrorCompletion(NO, @"Could not request registration form: unknown error");
+                });
+            return;
+        }
         //dispatch completion handler outside of the receiveQueue
         if(self->_regFormCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -3857,7 +4266,7 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark - nsstream delegate
 
-- (void)stream:(NSStream*) stream handleEvent:(NSStreamEvent) eventCode
+-(void)stream:(NSStream*) stream handleEvent:(NSStreamEvent) eventCode
 {
     DDLogDebug(@"Stream %@ has event %lu", stream, (unsigned long)eventCode);
     switch(eventCode)
@@ -3873,6 +4282,14 @@ NSString* const kStanza = @"stanza";
                 //restart logintimer when our output stream becomes readable (don't do anything without a running timer)
                 if(_cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
                     [self reinitLoginTimer];
+                
+                if(_blockToCallOnTCPOpen != nil)
+                {
+                    [self dispatchAsyncOnReceiveQueue:^{
+                        self->_blockToCallOnTCPOpen();
+                        self->_blockToCallOnTCPOpen = nil;     //don't call this twice
+                    }];
+                }
             }
             break;
         }
@@ -3912,10 +4329,18 @@ NSString* const kStanza = @"stanza";
             }
             */
             
-            //check accountState to make sure we don't swallow any errors thrown while [self connect] was already called, but the _reconnectInProgress flag not reset yet
+            //check accountState to make sure we don't swallow any errors thrown while [self connect] was already called,
+            //but the _reconnectInProgress flag not reset yet
             if(_reconnectInProgress && self.accountState<kStateReconnecting)
             {
                 DDLogInfo(@"Ignoring error in %@: already waiting for reconnect...", stream);
+                break;
+            }
+            
+            //don't display errors while disconnecting
+            if(_disconnectInProgres)
+            {
+                DDLogInfo(@"Ignoring stream error in %@: already disconnecting...", stream);
                 break;
             }
             
@@ -3959,15 +4384,23 @@ NSString* const kStanza = @"stanza";
         
         case NSStreamEventEndEncountered:
         {
+            if(_disconnectInProgres)
+            {
+                DDLogInfo(@"Ignoring stream eof in %@: already disconnecting...", stream);
+                break;
+            }
             DDLogInfo(@"%@ Stream %@ encountered eof, trying to reconnect via parse queue in 1 second", [stream class], stream);
-            //use a timer to make sure the incoming data was pushed *through* the MLPipe and reached the parseQueue already when pushng our reconnct block onto the parseQueue
-            createTimer(1.0, (^{
-                //add this to parseQueue to make sure we completely handle everything that came in before the connection was closed, before handling the close event itself
-                [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                    DDLogInfo(@"Inside parseQueue: %@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
-                    [self reconnect];
-                }]] waitUntilFinished:NO];
-            }));
+            //use a timer to make sure the incoming data was pushed *through* the MLPipe and reached the parseQueue
+            //already when pushing our reconnect block onto the parseQueue
+            @synchronized(self->_timersToCancelOnDisconnect) {
+                [self->_timersToCancelOnDisconnect addObject:createTimer(1.0, (^{
+                    //add this to parseQueue to make sure we completely handle everything that came in before the connection was closed, before handling the close event itself
+                    [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                        DDLogInfo(@"Inside parseQueue: %@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
+                        [self reconnect];
+                    }]] waitUntilFinished:NO];
+                }))];
+            }
             break;
         }
     }
@@ -4406,11 +4839,25 @@ NSString* const kStanza = @"stanza";
 -(void) sendDisplayMarkerForMessage:(MLMessage*) msg
 {
     if(![[HelperTools defaultsDB] boolForKey:@"SendDisplayedMarkers"])
+    {
+        DDLogVerbose(@"Not sending chat marker, configured to not do so...");
         return;
+    }
     
     //don't send chatmarkers in channels
     if(msg.isMuc && [@"channel" isEqualToString:msg.mucType])
+    {
+        DDLogVerbose(@"Not sending chat marker in channel...");
         return;
+    }
+    
+    MLContact* contact = [MLContact createContactFromJid:msg.buddyName andAccountNo:msg.accountId];
+    //don't send chatmarkers to 1:1 chats with users in our contact list that did not subscribe us (e.g. are not allowed to see us)
+    if(!contact.isGroup && !contact.isSubscribedFrom)
+    {
+        DDLogVerbose(@"Not sending chat marker, we are not subscribed from this contact...");
+        return;
+    }
     
     XMPPMessage* displayedNode = [[XMPPMessage alloc] init];
     //the message type is needed so that the store hint is accepted by the server
@@ -4418,7 +4865,29 @@ NSString* const kStanza = @"stanza";
     displayedNode.attributes[@"to"] = msg.inbound ? msg.buddyName : self.connectionProperties.identity.jid;
     [displayedNode setDisplayed:msg.messageId];
     [displayedNode setStoreHint];
+    DDLogVerbose(@"Sending display marker: %@", displayedNode);
     [self send:displayedNode];
+}
+
+-(void) removeFromServerWithCompletion:(void (^)(NSString* _Nullable error)) completion
+{
+    XMPPIQ* remove = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [remove addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:register" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"remove"]
+    ] andData:nil]];
+    [self sendIq:remove withResponseHandler:^(XMPPIQ* result) {
+        //disconnect account (without force) and throw away everything waiting to be processed
+        //(for example the stream close coming from the server after removing the account on the server)
+        [self disconnect];      //this is needed to not show spurious errors on delete
+        [[MLXMPPManager sharedInstance] removeAccountForAccountNo:self.accountNo];
+        completion(nil);        //signal success to UI
+    } andErrorHandler:^(XMPPIQ* error) {
+        if(error != nil)        //don't report iq invalidation on disconnect as error
+        {
+            NSString* errorStr = [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Server does not support account removal", @"")];
+            completion(errorStr);   //signal error to UI
+        }
+    }];
 }
 
 -(void) publishRosterName:(NSString* _Nullable) rosterName

@@ -80,7 +80,11 @@ const long NotificationPrivacyOptionCnt = 3;
     switch (section) {
         case 0:
         {
+#ifdef DISABLE_OMEMO
             return 10 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
+#else// DISABLE_OMEMO
+            return 11 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
+#endif// DISABLE_OMEMO
         }
         default:
         {
@@ -175,6 +179,14 @@ const long NotificationPrivacyOptionCnt = 3;
                     [cell initCell:NSLocalizedString(@"Autodelete all messages after 3 days", @"") withToggleDefaultsKey:@"AutodeleteAllMessagesAfter3Days"];
                     break;
                 }
+                case 13:
+                {
+//flow into default case for non-omemo builds
+#ifndef DISABLE_OMEMO
+                    [cell initCell:NSLocalizedString(@"Enable OMEMO per default", @"") withToggleDefaultsKey:@"OMEMODefaultOn"];
+                    break;
+#endif// DISABLE_OMEMO
+                }
                 default:
                     unreachable();
                     break;
@@ -227,6 +239,7 @@ const long NotificationPrivacyOptionCnt = 3;
                     break;
                 }
                 case 12:
+                case 13:
                     break;
             }
             break;

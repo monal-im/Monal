@@ -20,8 +20,10 @@
 @import Network;
 @import MobileCoreServices;
 @import SAMKeychain;
+@import Intents;
 
 static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
+#define FIRST_LOGIN_TIMEOUT 30.0
 
 @interface MLXMPPManager()
 {
@@ -60,7 +62,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerKey"];
 
         [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"DefaulsMigratedToAppGroup"];
         [[HelperTools defaultsDB] synchronize];
     }
 
@@ -91,6 +92,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //upgrade message autodeletion
     [self upgradeBoolUserSettingsIfUnset:@"AutodeleteAllMessagesAfter3Days" toDefault:NO];
 
+    //upgrade default omemo on
+    [self upgradeBoolUserSettingsIfUnset:@"OMEMODefaultOn" toDefault:YES];
+    
     // upgrade udp logger
     [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerHostname" toDefault:@""];
@@ -278,7 +282,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored (will be ignored in appex)");
                 //this will automatically start the app if connectivity gets restored (force as soon as possible if !wasIdle)
                 //don't queue this notification because it should be handled immediately
-                [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundFetchingTask object:nil userInfo:@{@"force": @(!wasIdle)}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @(!wasIdle)}];
             }
         }
     });
@@ -287,9 +291,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //trigger iq invalidations from a background thread because timeouts aren't time critical
     //we use this to decrement the timeout value of an iq handler every second until it reaches zero
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
+        while(YES) {
+            for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
                 [account updateIqHandlerTimeouts];
-        [NSThread sleepForTimeInterval:1];
+            [NSThread sleepForTimeInterval:1];
+        }
     });
     
     return self;
@@ -433,14 +439,34 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
 
     NSError* error;
-    NSString *password = [SAMKeychain passwordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] error:&error];
-    error = nil;
+    NSString* jid = [NSString stringWithFormat:@"%@@%@", account[kUsername], account[kDomain]];
+    NSString* password = [SAMKeychain passwordForService:kMonalKeychainName account:((NSNumber*)account[kAccountID]).stringValue error:&error];
     if(error)
     {
-        DDLogError(@"Keychain error: %@", [NSString stringWithFormat:@"%@", error]);
-        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+        DDLogError(@"Keychain error: %@", error);
+        
+        // Disable account because login will not be possible
+        [[DataLayer sharedInstance] disableAccountForPasswordMigration:account[kAccountID]];
+        [self disconnectAccount:account[kAccountID]];
+        
+        //show notifications for disabled accounts to warn user if in appex
+        if([HelperTools isAppExtension])
+        {
+            UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+            content.title = NSLocalizedString(@"Account disabled", @"");;
+            content.subtitle = jid;
+            content.body = NSLocalizedString(@"You restored an iCloud backup of Monal, please open the app to reenable this account.", @"");
+            content.sound = [UNNotificationSound defaultSound];
+            content.categoryIdentifier = @"simple";
+            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"disabled::%@", jid] content:content trigger:nil];
+            error = [HelperTools postUserNotificationRequest:request];
+            if(error)
+                DDLogError(@"Error posting account disabled notification: %@", error);
+        }
+        
+        return;
     }
-    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@", [account objectForKey:kUsername], [account objectForKey:kDomain]] password:password andResource:[account objectForKey:kResource]];
+    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:jid password:password andResource:[account objectForKey:kResource]];
     MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
     xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[account objectForKey:kAccountID]];
     xmppAccount.statusMessage = [account objectForKey:@"statusMessage"];
@@ -554,18 +580,15 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 #pragma mark -  XMPP commands
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
+-(void) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {
     NSString* msgid = [[NSUUID UUID] UUIDString];
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
 
-    NSAssert(message, @"Message should not be nil");
-    NSAssert(account, @"Account should not be nil");
-    NSAssert(contact, @"Contact should not be nil");
-    
-    NSString* messageType = kMessageTypeText;
-    if(uploadInfo != nil)
-        messageType = kMessageTypeFiletransfer;
+    MLAssert(message != nil, @"Message should not be nil");
+    MLAssert(account != nil, @"Account should not be nil");
+    MLAssert(contact != nil, @"Contact should not be nil");
+    MLAssert(uploadInfo == nil || messageType == kMessageTypeFiletransfer, @"You must use message type = filetransfer if you supply an uploadInfo!");
     
     // Save message to history
     NSNumber* messageDBId = [[DataLayer sharedInstance]
@@ -620,6 +643,65 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [account sendChatState:isTyping toJid:jid];
 }
 
+#pragma mark - login/register
+
+-(NSNumber*) login:(NSString*) jid password:(NSString*) password
+{
+    //if it is a JID
+    NSArray* elements = [jid componentsSeparatedByString:@"@"];
+    MLAssert([elements count] > 1, @"Got invalid jid", (@{@"jid": nilWrapper(jid), @"elements": elements}));
+
+    NSString* domain;
+    NSString* user;
+    user = [elements objectAtIndex:0];
+    domain = [elements objectAtIndex:1];
+
+    if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString])
+    {
+        [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:nil userInfo:@{
+            @"title": NSLocalizedString(@"Duplicate Account", @""),
+            @"description": NSLocalizedString(@"This account already exists on this instance", @"")
+        }];
+        return nil;
+    }
+
+    NSMutableDictionary* dic  = [[NSMutableDictionary alloc] init];
+    [dic setObject:domain.lowercaseString forKey:kDomain];
+    [dic setObject:user.lowercaseString forKey:kUsername];
+    [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
+    [dic setObject:@YES forKey:kEnabled];
+    [dic setObject:@NO forKey:kDirectTLS];
+
+    NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
+    if(accountNo == nil)
+        return nil;
+    [self addNewAccountToKeychainAndConnectWithPassword:password andAccountNo:accountNo];
+    return accountNo;
+}
+
+-(void) addNewAccountToKeychainAndConnectWithPassword:(NSString*) password andAccountNo:(NSNumber*) accountNo
+{
+    if(accountNo != nil && password != nil)
+    {
+        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+        [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo.stringValue];
+        [self connectAccount:accountNo];
+    }
+}
+
+-(void) removeAccountForAccountNo:(NSNumber*) accountNo
+{
+    [self disconnectAccount:accountNo];
+    [[DataLayer sharedInstance] removeAccount:accountNo];
+    [SAMKeychain deletePasswordForService:kMonalKeychainName account:accountNo.stringValue];
+    [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
+        if(error != nil)
+            DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+    }];
+    // trigger UI removal
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+}
+
 #pragma mark - getting details
 
 -(NSString*) getAccountNameForConnectedRow:(NSUInteger) row
@@ -662,6 +744,7 @@ $$
         }
         //remove from DB
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
+        [contact removeShareInteractions];
         // notify the UI
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contact}];
     }

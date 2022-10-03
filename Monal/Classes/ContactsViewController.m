@@ -16,6 +16,7 @@
 #import "UIColor+Theme.h"
 #import "xmpp.h"
 #import <Monal-Swift.h>
+#import "HelperTools.h"
 
 @interface ContactsViewController ()
 
@@ -131,12 +132,6 @@
 
 -(BOOL) shouldPerformSegueWithIdentifier:(NSString*) identifier sender:(id) sender
 {
-    if([identifier isEqualToString:@"showDetails"])
-    {
-        //don't show contact details for mucs (they will get their own muc details later on)
-        if(((MLContact*)sender).isGroup)
-            return NO;
-    }
     return YES;
 }
 
@@ -144,17 +139,11 @@
 -(void) performSegueWithIdentifier:(NSString*) identifier sender:(id) sender
 {
     if([self shouldPerformSegueWithIdentifier:identifier sender:sender] == NO)
+        return;
+    if([identifier isEqualToString:@"showDetails"])
     {
-        if([identifier isEqualToString:@"showDetails"])
-        {
-            // Display warning
-            UIAlertController* groupDetailsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Groupchat/channel details", @"")
-                                                                                message:NSLocalizedString(@"Groupchat/channel details are currently not implemented in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [groupDetailsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action __unused) {
-                [groupDetailsWarning dismissViewControllerAnimated:YES completion:nil];
-            }]];
-            [self presentViewController:groupDetailsWarning animated:YES completion:nil];
-        }
+        UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];
+        [self presentViewController:detailsViewController animated:YES completion:^{}];
         return;
     }
     [super performSegueWithIdentifier:identifier sender:sender];
@@ -162,12 +151,7 @@
 
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
-    if([segue.identifier isEqualToString:@"showDetails"])
-    {
-        UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];
-        [self presentViewController:detailsViewController animated:YES completion:^{}];
-    }
-    else if([segue.identifier isEqualToString:@"showNewMenu"])
+    if([segue.identifier isEqualToString:@"showNewMenu"])
     {
         MLNewViewController* newView = segue.destinationViewController;
         newView.selectContact = self.selectContact;
@@ -236,7 +220,7 @@
 
 -(NSString*) tableView:(UITableView*) tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath*) indexPath
 {
-    NSAssert(indexPath.section == 0, @"Wrong section");
+    MLAssert(indexPath.section == 0, @"Wrong section");
     MLContact* contact = self.contacts[indexPath.row];
     if(contact.isGroup == YES)
         return NSLocalizedString(@"Remove Conversation", @"");

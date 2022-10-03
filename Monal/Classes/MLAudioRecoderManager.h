@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(void) notifyResult:(BOOL) isSuccess error:(NSString* _Nullable) errorMsg;
 -(void) notifyStart;
--(void) notifyStop:(NSURL*) fileURL;
+-(void) notifyStop:(NSURL* _Nullable) fileURL;
 -(void) updateCurrentTime:(NSTimeInterval) audioDuration;
 @end
 
@@ -27,8 +27,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (MLAudioRecoderManager* _Nonnull)sharedInstance;
 
--(void)start;
--(void)stop;
+-(void) start;
+-(void) stop:(BOOL) shouldSend;
 
 @property (nonatomic) NSString* currentPlayFilePath;
 

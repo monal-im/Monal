@@ -11,9 +11,13 @@
 #include <mach/mach_error.h>
 #include <mach/mach_traps.h>
 #include <os/proc.h>
+#include <objc/runtime.h> 
+#include <objc/message.h>
 
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
+#import <MapKit/MapKit.h>
+#import <MobileCoreServices/MobileCoreServices.h>
 #import "HelperTools.h"
 #import "MLXMPPManager.h"
 #import "MLPubSub.h"
@@ -29,6 +33,8 @@
 #import "MLNotificationQueue.h"
 #import "MLContact.h"
 #import "MLMessage.h"
+#import "MLFiletransfer.h"
+#import "DataLayer.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -52,17 +58,35 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
-+(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
+void swizzle(Class c, SEL orig, SEL new)
 {
-    if(!check)
-    {
-        NSString* fileStr = [NSString stringWithFormat:@"%s", file];
-        NSArray* filePathComponents = [fileStr pathComponents];
-        if([filePathComponents count]>1)
-            fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
-        DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
-        @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
-    }
+    Method origMethod = class_getInstanceMethod(c, orig);
+    Method newMethod = class_getInstanceMethod(c, new);
+    if(class_addMethod(c, orig, method_getImplementation(newMethod), method_getTypeEncoding(newMethod)))
+        class_replaceMethod(c, new, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
+    else
+    method_exchangeImplementations(origMethod, newMethod);
+}
+
++(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
+{
+    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
+    NSArray* filePathComponents = [fileStr pathComponents];
+    if([filePathComponents count]>1)
+        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+    DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
+    @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
+}
+
++(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount
+{
+    [self postError:description withNode:node andAccount:account andIsSevere:isSevere];
+    [account disconnect];
+    
+    //make sure we don't try this again even when the mainapp/appex gets restarted
+    NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:YES];
+    accountDic[kEnabled] = @NO;
+    [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
 }
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
@@ -114,20 +138,15 @@ void logException(NSException* exception)
 
 +(NSDictionary<NSString*, NSString*>*) getAvailablePushServers
 {
-#ifdef IS_ALPHA
-    return @{
-        @"alpha.push.monal-im.org": @"Europe - Alpha",
-        @"alpha2.push.monal-im.org": @"Disabled - Alpha Test",
-    };
-#else
     return @{
         @"us.prod.push.monal-im.org": @"US",
         @"eu.prod.push.monal-im.org": @"Europe",
-    };
+        @"alpha.push.monal-im.org": @"Alpha/Debug (more Logging)",
+#ifdef IS_ALPHA
+        @"alpha2.push.monal-im.org": @"Disabled - Alpha Test",
 #endif
+    };
 }
-
-// on push
 
 +(NSData*) serializeObject:(id) obj
 {
@@ -179,7 +198,7 @@ void logException(NSException* exception)
         [condition signal];
         [condition unlock];
     }));
-    [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+    [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:request withCompletionHandler:^(NSError* _Nullable error) {
         if(error)
             DDLogError(@"Error posting notification: %@", error);
         retval = error;
@@ -192,6 +211,287 @@ void logException(NSException* exception)
     cancelTimeout();
     return retval;
 }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcompletion-handler"
++(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion
+{
+    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+    //for a list of types, see UTCoreTypes.h in MobileCoreServices framework
+    DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
+    if(provider.suggestedName != nil)
+        payload[@"filename"] = provider.suggestedName;
+    void (^addPreview)(NSURL* _Nullable) = ^(NSURL* url) {
+        if(url != nil)
+        {
+            NSError* error;
+            NSDictionary* thumbnails = nil;
+            BOOL success = [url getResourceValue:&thumbnails forKey:NSThumbnail1024x1024SizeKey error:&error];
+            if(success == YES && thumbnails.count > 0)
+            {
+                NSArray<UIImage*>* values = [thumbnails allValues];
+                payload[@"preview"] = values.firstObject;
+                return completion(payload);
+            }
+            else
+            {
+                DDLogVerbose(@"Extracting thumbnail from document failed: %@", error);
+                UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
+                if(result != nil)
+                {
+                    payload[@"preview"] = result;
+                    return completion(payload);
+                }
+                else
+                {
+                    DDLogVerbose(@"Thumbnail generation not successful - reverting to generic image for file: %@", error);
+                    UIDocumentInteractionController* imgCtrl = [UIDocumentInteractionController interactionControllerWithURL:url];
+                    if(imgCtrl != nil && imgCtrl.icons.count > 0)
+                    {
+                        payload[@"preview"] = imgCtrl.icons.firstObject;
+                        return completion(payload);
+                    }
+                }
+            }
+        }
+        [provider loadPreviewImageWithOptions:nil completionHandler:^(UIImage*  _Nullable previewImage, NSError* _Null_unspecified error) {
+            if(error != nil || previewImage == nil)
+            {
+                if(url == nil)
+                {
+                    DDLogWarn(@"Error creating preview image via item provider, ignoring: %@", error);
+                    payload[@"preview"] = [UIImage systemImageNamed:@"doc"];
+                }
+            }
+            else
+                payload[@"preview"] = previewImage;
+            return completion(payload);
+        }];
+    };
+    void (^prepareFile)(NSURL*) = ^(NSURL* item) {
+        NSError* error;
+        [item startAccessingSecurityScopedResource];
+        [[[NSFileCoordinator alloc] init] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
+            DDLogDebug(@"NSFileCoordinator called accessor: %@", newURL);
+            payload[@"data"] = [MLFiletransfer prepareFileUpload:newURL];
+            [item stopAccessingSecurityScopedResource];
+            return addPreview(newURL);
+        }];
+        if(error != nil)
+        {
+            DDLogError(@"Error preparing file coordinator: %@", error);
+            payload[@"error"] = error;
+            [item stopAccessingSecurityScopedResource];
+            return completion(payload);
+        }
+    };
+    if([provider hasItemConformingToTypeIdentifier:@"com.apple.mapkit.map-item"])
+    {
+        // convert map item to geo:
+        [provider loadItemForTypeIdentifier:@"com.apple.mapkit.map-item" options:nil completionHandler:^(NSData*  _Nullable item, NSError* _Null_unspecified error) {
+            if(error != nil || item == nil)
+            {
+                DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            NSError* err;
+            MKMapItem* mapItem = [NSKeyedUnarchiver unarchivedObjectOfClass:[MKMapItem class] fromData:item error:&err];
+            if(err != nil || mapItem == nil)
+            {
+                DDLogError(@"Error extracting mapkit item: %@", err);
+                payload[@"error"] = err;
+                return completion(payload);
+            }
+            else
+            {
+                DDLogInfo(@"Got mapkit item: %@", item);
+                payload[@"type"] = @"geo";
+                payload[@"data"] = [NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude];
+                return addPreview(nil);
+            }
+        }];
+    }
+    //the apple-private autoloop gif type has a bug that does not allow to load this as normal gif --> try audiovisual content below
+    else if([provider hasItemConformingToTypeIdentifier:@"com.compuserve.gif"] && ![provider hasItemConformingToTypeIdentifier:@"com.apple.private.auto-loop-gif"])
+    {
+        /*
+        [provider loadDataRepresentationForTypeIdentifier:@"com.compuserve.gif" completionHandler:^(NSData* data, NSError* error) {
+            if(error != nil || data == nil)
+            {
+                DDLogError(@"Error extracting gif image from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            DDLogInfo(@"Got gif image data: %@", data);
+            payload[@"type"] = @"file";
+            payload[@"data"] = [MLFiletransfer prepareDataUpload:data withFileExtension:@"gif"];
+            return addPreview(nil);
+        }];
+        */
+        [provider loadInPlaceFileRepresentationForTypeIdentifier:@"com.compuserve.gif" completionHandler:^(NSURL*  _Nullable item, BOOL isInPlace, NSError* _Null_unspecified error) {
+            if(error != nil || item == nil)
+            {
+                DDLogError(@"Error extracting gif image from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            DDLogInfo(@"Got %@ gif image item: %@", isInPlace ? @"(in place)" : @"(copied)", item);
+            payload[@"type"] = @"file";
+            return prepareFile(item);
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeAudiovisualContent])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeAudiovisualContent options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+            if(error != nil || item == nil)
+            {
+                DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            DDLogInfo(@"Got audiovisual item: %@", item);
+            payload[@"type"] = @"audiovisual";
+            return prepareFile(item);
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeImage])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+            if(error != nil || item == nil)
+            {
+                //for example: image shared directly from screenshots
+                DDLogWarn(@"Got error, retrying with UIImage: %@", error);
+                [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(UIImage*  _Nullable item, NSError* _Null_unspecified error) {
+                    if(error != nil || item == nil)
+                    {
+                        DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                        payload[@"error"] = error;
+                        return completion(payload);
+                    }
+                    DDLogInfo(@"Got memory image item: %@", item);
+                    payload[@"type"] = @"image";
+                    //use prepareUIImageUpload to resize the image to the configured quality
+                    payload[@"data"] = [MLFiletransfer prepareUIImageUpload:item];
+                    payload[@"preview"] = item;
+                    return completion(payload);
+                }];
+            }
+            else
+            {
+                DDLogInfo(@"Got image item: %@", item);
+                payload[@"type"] = @"image";
+                [item startAccessingSecurityScopedResource];
+                [[[NSFileCoordinator alloc] init] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
+                    DDLogDebug(@"NSFileCoordinator called accessor for image: %@", newURL);
+                    UIImage* image = [UIImage imageWithContentsOfFile:[newURL path]];
+                    DDLogDebug(@"Created UIImage: %@", image);
+                    //use prepareUIImageUpload to resize the image to the configured quality (instead of just uploading the raw image file)
+                    payload[@"data"] = [MLFiletransfer prepareUIImageUpload:image];
+                    [item stopAccessingSecurityScopedResource];
+                    return addPreview(newURL);
+                }];
+                if(error != nil)
+                {
+                    DDLogError(@"Error preparing file coordinator: %@", error);
+                    payload[@"error"] = error;
+                    [item stopAccessingSecurityScopedResource];
+                    return completion(payload);
+                }
+            }
+        }];
+    }
+    /*else if([provider hasItemConformingToTypeIdentifier:(NSString*)])
+    {
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)])
+    {
+    }*/
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeContact])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeContact options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+            if(error != nil || item == nil)
+            {
+                DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            DDLogInfo(@"Got contact item: %@", item);
+            payload[@"type"] = @"contact";
+            return prepareFile(item);
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeFileURL])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeFileURL options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+            if(error != nil || item == nil)
+            {
+                DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            DDLogInfo(@"Got file url item: %@", item);
+            payload[@"type"] = @"file";
+            return prepareFile(item);
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)@"com.apple.finder.node"])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*) kUTTypeItem options:nil completionHandler:^(id <NSSecureCoding> item, NSError* _Null_unspecified error) {
+            if(error != nil || item == nil)
+            {
+                DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            if([(NSObject*)item isKindOfClass:[NSURL class]])
+            {
+                DDLogInfo(@"Got finder file url item: %@", item);
+                payload[@"type"] = @"file";
+                return prepareFile((NSURL*)item);
+            }
+            else
+            {
+                DDLogError(@"Could not extract finder item");
+                payload[@"error"] = NSLocalizedString(@"Could not access Finder item!", @"");
+                return completion(payload);
+            }
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeURL])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeURL options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+            if(error != nil || item == nil)
+            {
+                DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            DDLogInfo(@"Got internet url item: %@", item);
+            payload[@"type"] = @"url";
+            payload[@"data"] = item.absoluteString;
+            return addPreview(nil);
+        }];
+    }
+    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
+    {
+        [provider loadItemForTypeIdentifier:(NSString*)kUTTypePlainText options:nil completionHandler:^(NSString*  _Nullable item, NSError* _Null_unspecified error) {
+            if(error != nil || item == nil)
+            {
+                DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                payload[@"error"] = error;
+                return completion(payload);
+            }
+            DDLogInfo(@"Got direct text item: %@", item);
+            payload[@"type"] = @"text";
+            payload[@"data"] = item;
+            return addPreview(nil);
+        }];
+    }
+    else
+        return completion(nil);
+}
+#pragma clang diagnostic pop
 
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length
 {
@@ -902,6 +1202,27 @@ void logException(NSException* exception)
     return resource;
 }
 
++(NSString*) appBuildVersionInfo
+{
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+#ifdef IS_ALPHA
+        NSString* versionTxt = [NSString stringWithFormat:@"Alpha %@ (%s: %s UTC)", [infoDict objectForKey:@"CFBundleShortVersionString"], __DATE__, __TIME__];
+#else
+        NSString* versionTxt = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
+#endif
+    return  versionTxt;
+}
+
++(NSNumber*) currentTimestampInSeconds
+{
+    return [HelperTools dateToNSNumberSeconds:[NSDate date]];
+}
+
++(NSNumber*) dateToNSNumberSeconds:(NSDate*) date
+{
+    return [NSNumber numberWithUnsignedLong:(unsigned long)date.timeIntervalSince1970];
+}
+
 #pragma mark Hashes
 
 +(NSData*) sha1:(NSData*) data
@@ -918,6 +1239,22 @@ void logException(NSException* exception)
 +(NSString*) stringSha1:(NSString*) data
 {
     return [self hexadecimalString:[self sha1:[data dataUsingEncoding:NSUTF8StringEncoding]]];
+}
+
++(NSData*) sha1HmacForKey:(NSData*) key andData:(NSData*) data
+{
+    if(!key || !data)
+        return nil;
+	unsigned char digest[CC_SHA1_DIGEST_LENGTH];
+	CCHmac(kCCHmacAlgSHA1, [key bytes], (UInt32)[key length], [data bytes], (UInt32)[data length], digest);
+    return [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
+}
+
++(NSString*) stringSha1HmacForKey:(NSString*) key andData:(NSString*) data
+{
+    if(!key || !data)
+        return nil;
+	return [self hexadecimalString:[self sha1HmacForKey:[key dataUsingEncoding:NSUTF8StringEncoding] andData:[data dataUsingEncoding:NSUTF8StringEncoding]]];
 }
 
 +(NSData*) sha256:(NSData*) data
@@ -952,8 +1289,39 @@ void logException(NSException* exception)
 	return [self hexadecimalString:[self sha256HmacForKey:[key dataUsingEncoding:NSUTF8StringEncoding] andData:[data dataUsingEncoding:NSUTF8StringEncoding]]];
 }
 
++(NSData*) sha512:(NSData*) data
+{
+    if(!data)
+        return nil;
+    NSData* hashed;
+    unsigned char digest[CC_SHA512_DIGEST_LENGTH];
+    if(CC_SHA512([data bytes], (UInt32)[data length], digest))
+        hashed = [NSData dataWithBytes:digest length:CC_SHA512_DIGEST_LENGTH];
+    return hashed;
+}
 
-#pragma mark Base64
++(NSString*) stringSha512:(NSString*) data
+{
+    return [self hexadecimalString:[self sha512:[data dataUsingEncoding:NSUTF8StringEncoding]]];
+}
+
++(NSData*) sha512HmacForKey:(NSData*) key andData:(NSData*) data
+{
+    if(!key || !data)
+        return nil;
+	unsigned char digest[CC_SHA512_DIGEST_LENGTH];
+	CCHmac(kCCHmacAlgSHA512, [key bytes], (UInt32)[key length], [data bytes], (UInt32)[data length], digest);
+    return [NSData dataWithBytes:digest length:CC_SHA512_DIGEST_LENGTH];
+}
+
++(NSString*) stringSha512HmacForKey:(NSString*) key andData:(NSString*) data
+{
+    if(!key || !data)
+        return nil;
+	return [self hexadecimalString:[self sha512HmacForKey:[key dataUsingEncoding:NSUTF8StringEncoding] andData:[data dataUsingEncoding:NSUTF8StringEncoding]]];
+}
+
+#pragma mark base64, hex and other data formats
 
 +(NSString*) encodeBase64WithString:(NSString*) strData
 {
@@ -989,7 +1357,6 @@ void logException(NSException* exception)
     return [NSString stringWithString:hexString];
 }
 
-
 +(NSData*) dataWithHexString:(NSString*) hex
 {
     char buf[3];
@@ -1015,6 +1382,22 @@ void logException(NSException* exception)
     return [NSData dataWithBytesNoCopy:bytes length:[hex length]/2 freeWhenDone:YES];
 }
 
+//see https://stackoverflow.com/a/29911397/3528174
++(NSData*) XORData:(NSData*) data1 withData:(NSData*) data2
+{
+    const char* data1Bytes = [data1 bytes];
+    const char* data2Bytes = [data2 bytes];
+    // Mutable data that individual xor'd bytes will be added to
+    NSMutableData* xorData = [[NSMutableData alloc] init];
+    for(NSUInteger i = 0; i < data1.length; i++)
+    {
+        const char xorByte = data1Bytes[i] ^ data2Bytes[i];
+        [xorData appendBytes:&xorByte length:1];
+    }
+    return xorData;
+}
+
+#pragma mark omemo stuff
 
 +(NSString *)signalHexKeyWithData:(NSData*) data
 {
@@ -1040,6 +1423,7 @@ void logException(NSException* exception)
     return hex.uppercaseString;
 }
 
+#pragma mark ui stuff
 
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title
 {
@@ -1075,17 +1459,6 @@ void logException(NSException* exception)
     return qrCode.outputImage;
 }
 
-+(NSString*) appBuildVersionInfo
-{
-    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-#ifdef IS_ALPHA
-        NSString* versionTxt = [NSString stringWithFormat:@"Alpha %@ (%s: %s UTC)", [infoDict objectForKey:@"CFBundleShortVersionString"], __DATE__, __TIME__];
-#else
-        NSString* versionTxt = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
-#endif
-    return  versionTxt;
-}
-
 +(BOOL) deviceUsesSplitView
 {
 #if TARGET_OS_MACCATALYST
@@ -1102,16 +1475,6 @@ void logException(NSException* exception)
             return NO;
     }
 #endif
-}
-
-+(NSNumber*) currentTimestampInSeconds
-{
-    return [HelperTools dateToNSNumberSeconds:[NSDate date]];
-}
-
-+(NSNumber*) dateToNSNumberSeconds:(NSDate*) date
-{
-    return [NSNumber numberWithUnsignedLong:(unsigned long)date.timeIntervalSince1970];
 }
 
 @end

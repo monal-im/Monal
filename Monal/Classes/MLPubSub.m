@@ -79,6 +79,11 @@ static NSDictionary* _defaultOptions;
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
         return;
     }
+    if(jid != nil)
+    {
+        NSDictionary* splitJid = [HelperTools splitJid:jid];
+        MLAssert(splitJid[@"resource"] == nil, @"Jid MUST be a bare jid, not full jid!");
+    }
     
     //build list of items to query (empty list means all items)
     if(!itemsList)
@@ -111,6 +116,11 @@ static NSDictionary* _defaultOptions;
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
         return;
     }
+    if(jid != nil)
+    {
+        NSDictionary* splitJid = [HelperTools splitJid:jid];
+        MLAssert(splitJid[@"resource"] == nil, @"Jid MUST be a bare jid, not full jid!");
+    }
     
     //build subscription request
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType to:jid];
@@ -137,6 +147,12 @@ static NSDictionary* _defaultOptions;
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
         return;
     }
+    if(jid != nil)
+    {
+        NSDictionary* splitJid = [HelperTools splitJid:jid];
+        MLAssert(splitJid[@"resource"] == nil, @"Jid MUST be a bare jid, not full jid!");
+    }
+    
     //build subscription request
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType to:jid];
     [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
@@ -491,7 +507,7 @@ $$instance_handler(handleSubscribe, account.pubsub, $$ID(xmpp*, account), $$ID(X
     
     if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/subscription<node=%@><jid=%@><subscription=subscribed>", node, account.connectionProperties.identity.jid])
     {
-        DDLogDebug(@"Successfully subscribed to node '%@' on jid '%@'...", node, iqNode.fromUser);
+        DDLogDebug(@"Successfully subscribed to node '%@' on jid '%@' for '%@'...", node, iqNode.fromUser, account.connectionProperties.identity.jid);
         
         //call subscribe callback (if given)
         $call(handler,
@@ -502,7 +518,7 @@ $$instance_handler(handleSubscribe, account.pubsub, $$ID(xmpp*, account), $$ID(X
     }
     else
     {
-        DDLogError(@"Could not subscribe to node '%@' on jid '%@': %@", node, iqNode.fromUser, iqNode);
+        DDLogError(@"Could not subscribe to node '%@' on jid '%@' for '%@': %@", node, iqNode.fromUser, account.connectionProperties.identity.jid, iqNode);
         
         //call subscribe callback (if given) with error iq node
         $call(handler,
@@ -570,9 +586,16 @@ $$instance_handler(handleFetch, account.pubsub, $$ID(xmpp*, account), $$ID(XMPPI
     
     NSString* first = [iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/first#"];
     NSString* last = [iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/last#"];
+    NSUInteger index = [[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/first@index|int"] unsignedIntegerValue];
+    NSUInteger total_count = [[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/count#|int"] unsignedIntegerValue];
+    NSUInteger items_count = [[iqNode find:@"{http://jabber.org/protocol/pubsub}pubsub/items/item"] count];
     //check for rsm paging
-    if(!last || [last isEqualToString:first])       //no rsm at all or reached end of rsm --> process data *and* inform handlers of new data
-    {
+    if(
+        !last ||                                //no rsm at all
+        [last isEqualToString:first] ||         //reached end of rsm (only one element, e.g. last==first)
+        index + items_count == total_count      //reached end of rsm per rsm xep (this is a SHOULD)
+    ) {
+        //--> process data *and* inform handlers of new data
         [self handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser withData:data];
         //call fetch callback (if given)
         $call(handler,

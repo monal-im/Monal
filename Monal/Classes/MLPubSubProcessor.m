@@ -18,6 +18,7 @@
 #import "MLNotificationQueue.h"
 #import "MLMucProcessor.h"
 #import "XMPPIQ.h"
+#import "HelperTools.h"
 
 @interface MLPubSubProcessor()
 
@@ -230,6 +231,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
                     //make sure we update our favorites table right away, to counter any race conditions when joining multiple mucs with one bookmarks update
                     if(nick == nil)
                         nick = [account.mucProcessor calculateNickForMuc:room];
+                    //this will record the desired nickname: the mucProcessor will pick that up and use it to join the muc
                     [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];
                     //try to join muc, but don't perform a bookmarks update (this muc came in through a bookmark already)
                     [account.mucProcessor sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:NO];
@@ -507,7 +509,7 @@ $$
 
 +(void) handleErrorWithDescription:(NSString*) description andAccount:(xmpp*) account andErrorIq:(XMPPIQ*) errorIq andErrorReason:(NSString*) errorReason andIsSevere:(BOOL) isSevere
 {
-    NSAssert(errorIq || errorReason, @"at least one of errorIq or errorReason must be set when calling error handler!");
+    MLAssert(errorIq || errorReason, @"at least one of errorIq or errorReason must be set when calling error handler!");
     if(errorIq)
         [HelperTools postError:description withNode:errorIq andAccount:account andIsSevere:isSevere];
     else if(errorReason)

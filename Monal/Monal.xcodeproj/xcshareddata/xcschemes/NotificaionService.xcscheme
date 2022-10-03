@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1220"
+   LastUpgradeVersion = "1400"
    wasCreatedForAppExtension = "YES"
    version = "1.3">
    <BuildAction
@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "260773BF232FC4E800BFD50F"
-               BuildableName = "NotificaionService.appex"
-               BlueprintName = "NotificaionService"
+               BuildableName = "NotificationService.appex"
+               BlueprintName = "NotificationService"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -47,8 +47,8 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C1850E7225F383F3003D506A"
-               BuildableName = "MonalUITests.xctest"
+               BlueprintIdentifier = "C1850EB425F38A2D003D506A"
+               BuildableName = ".xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
@@ -70,8 +70,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "260773BF232FC4E800BFD50F"
-            BuildableName = "NotificaionService.appex"
-            BlueprintName = "NotificaionService"
+            BuildableName = "NotificationService.appex"
+            BlueprintName = "NotificationService"
             ReferencedContainer = "container:Monal.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

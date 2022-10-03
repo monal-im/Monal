@@ -6,6 +6,7 @@
 //  Copyright © 2017 Monal.im. All rights reserved.
 //
 
+#import "FLAnimatedImage.h"
 #import "MLChatImageCell.h"
 #import "MLImageManager.h"
 #import "MLFiletransfer.h"
@@ -14,17 +15,20 @@
 @import QuartzCore;
 @import UIKit;
 
-@interface MLChatImageCell()
+@interface MLChatImageCell() {
+    FLAnimatedImageView* _animatedImageView;
+}
 
 @property (nonatomic, weak) IBOutlet UIImageView* thumbnailImage;
 @property (nonatomic, weak) IBOutlet UIActivityIndicatorView* spinner;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint* imageWidth;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* imageHeight;
 
 @end
 
 @implementation MLChatImageCell
 
--(void)awakeFromNib
+-(void) awakeFromNib
 {
     [super awakeFromNib];
     
@@ -36,11 +40,11 @@
 // init a image cell if needed
 -(void) initCellWithMLMessage:(MLMessage*) message
 {
+    if(_animatedImageView != nil)
+        [_animatedImageView removeFromSuperview];
     // reset image view if we open a new message
     if(self.messageHistoryId != message.messageDBId)
-    {
         self.thumbnailImage.image = nil;
-    }
     // init base cell
     [super initCell:message];
     // load image and display it in the UI if needed
@@ -50,23 +54,61 @@
 /// Load the image from messageText (link) and display it in the UI
 -(void) loadImage:(MLMessage*) msg
 {
+    if(_animatedImageView != nil)
+        [_animatedImageView removeFromSuperview];
     if(msg.messageText && self.thumbnailImage.image == nil)
     {
         [self.spinner startAnimating];
         NSDictionary* info = [MLFiletransfer getFileInfoForMessage:msg];
-        if(info && [info[@"mimeType"] hasPrefix:@"image/"])
+        if(info && [info[@"mimeType"] hasPrefix:@"image/gif"])
         {
+            self.link = msg.messageText;
+            // uses cached file if the file was already downloaded
+            FLAnimatedImage* image = [FLAnimatedImage animatedImageWithGIFData:[NSData dataWithContentsOfFile:info[@"cacheFile"]]];
+            if(!image)
+                return;
+            _animatedImageView = [[FLAnimatedImageView alloc] init];
+            DDLogVerbose(@"image: %fx%f", image.size.height, image.size.width);
+            CGFloat wi = image.size.width;
+            CGFloat hi = image.size.height;
+            CGFloat ws = 225.0;
+            CGFloat hs = 200.0;
+            CGFloat ri = wi / hi;
+            CGFloat rs = ws / hs;
+            if(rs > ri)
+                _animatedImageView.frame = CGRectMake(0.0, 0.0, wi * hs/hi, hs);
+            else
+                _animatedImageView.frame = CGRectMake(0.0, 0.0, ws, hi * ws/wi);
+            self.imageWidth.constant = _animatedImageView.frame.size.width;
+            self.imageHeight.constant = _animatedImageView.frame.size.height;
+            _animatedImageView.animatedImage = image;
+            [self.thumbnailImage addSubview:_animatedImageView];
+            self.thumbnailImage.contentMode = UIViewContentModeScaleAspectFit;
+        }
+        else if(info && [info[@"mimeType"] hasPrefix:@"image/"])
+        {
+            self.link = msg.messageText;
             // uses cached file if the file was already downloaded
             UIImage* image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
+            if(!image)
+                return;
+            DDLogVerbose(@"image: %fx%f", image.size.height, image.size.width);
+            CGFloat wi = image.size.width;
+            CGFloat hi = image.size.height;
+            CGFloat ws = 225.0;
+            CGFloat hs = 200.0;
+            CGFloat ri = wi / hi;
+            CGFloat rs = ws / hs;
+            if(rs > ri)
+                self.thumbnailImage.frame = CGRectMake(0.0, 0.0, wi * hs/hi, hs);
+            else
+                self.thumbnailImage.frame = CGRectMake(0.0, 0.0, ws, hi * ws/wi);
+            self.imageWidth.constant = self.thumbnailImage.frame.size.width;
+            self.imageHeight.constant = self.thumbnailImage.frame.size.height;
             [self.thumbnailImage setImage:image];
-            self.link = msg.messageText;
-            if(image && image.size.height > image.size.width)
-                self.imageHeight.constant = 360;
         }
         else
-        {
             unreachable();
-        }
         [self.spinner stopAnimating];
     }
 }
@@ -98,6 +140,8 @@
     [super prepareForReuse];
     self.imageHeight.constant = 200;
     [self.spinner stopAnimating];
+    if(_animatedImageView != nil)
+        [_animatedImageView removeFromSuperview];
 }
 
 

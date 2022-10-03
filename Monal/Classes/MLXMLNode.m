@@ -6,6 +6,8 @@
 //
 //
 
+#include <stdarg.h>
+
 #import "MLXMLNode.h"
 
 #import "HelperTools.h"
@@ -13,6 +15,11 @@
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
 #import "XMPPDataForm.h"
+
+//#define DEBUG_XMLQueryLanguage 1
+
+//this is the required prototype from Holger's snprintf.c
+int rpl_vasprintf(char **, const char *, va_list *);
 
 
 //weak container holding an object as weak pointer (needed to not create retain circles in NSCache
@@ -159,6 +166,13 @@ static NSRegularExpression* attributeFilterRegex;
     return self;
 }
 
+-(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns andData:(NSString* _Nullable) data
+{
+    self = [self initWithElement:element withAttributes:@{} andChildren:@[] andData:data];
+    [self setXMLNS:xmlns];
+    return self;
+}
+
 -(void) dealloc
 {
 /*
@@ -221,7 +235,7 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(void) setXMLNS:(NSString*) xmlns
 {
-    [_attributes setObject:[xmlns copy] forKey:kXMLNS];
+    [_attributes setObject:[xmlns copy] forKey:@"xmlns"];
 }
 
 -(MLXMLNode*) addChildNode:(MLXMLNode*) child
@@ -307,7 +321,7 @@ static NSRegularExpression* attributeFilterRegex;
 {
     va_list args;
     va_start(args, queryString);
-    NSArray* retval = [self find:queryString arguments:args];
+    NSArray* retval = [self find:queryString arguments:&args];
     va_end(args);
     return retval;
 }
@@ -317,7 +331,7 @@ static NSRegularExpression* attributeFilterRegex;
 {
     va_list args;
     va_start(args, queryString);
-    id retval = [self find:queryString arguments:args].firstObject;
+    id retval = [self find:queryString arguments:&args].firstObject;
     va_end(args);
     return retval;
 }
@@ -327,26 +341,34 @@ static NSRegularExpression* attributeFilterRegex;
 {
     va_list args;
     va_start(args, queryString);
-    BOOL retval = [self find:queryString arguments:args].firstObject != nil ? YES : NO;
+    BOOL retval = [self find:queryString arguments:&args].firstObject != nil ? YES : NO;
     va_end(args);
     return retval;
 }
 
--(NSArray*) find:(NSString* _Nonnull) queryString arguments:(va_list) args
+-(NSArray*) find:(NSString* _Nonnull) queryString arguments:(va_list*) args
 {
     //return our own node if the query string is empty (this makes queries like "/.." possible which will return the parent node
     if(!queryString || [queryString isEqualToString:@""])
         return @[self];
     
     va_list cacheKeyArgs;
-    va_copy(cacheKeyArgs, args);
+    va_copy(cacheKeyArgs, *args);
     NSString* cacheKey = [NSString stringWithFormat:@"%@§§%@", queryString, [[NSString alloc] initWithFormat:queryString arguments:cacheKeyArgs]];
     va_end(cacheKeyArgs);
+#ifdef DEBUG_XMLQueryLanguage
+    DDLogVerbose(@"Cache key: %@", cacheKey);
+#endif
     
     //return results from cache if possible
     WeakContainer* cacheEntryContainer = [self.cache objectForKey:cacheKey];
     if(cacheEntryContainer != nil && cacheEntryContainer.obj != nil)
+    {
+#ifdef DEBUG_XMLQueryLanguage
+        DDLogVerbose(@"Returning cached result: %@", (NSArray*)cacheEntryContainer.obj);
+#endif
         return (NSArray*)cacheEntryContainer.obj;
+    }
     
 #ifdef QueryStatistics
     @synchronized(statistics) {
@@ -377,7 +399,7 @@ static NSRegularExpression* attributeFilterRegex;
     return results;
 }
 
--(NSArray*) find:(NSString* _Nonnull) queryString inNodeList:(NSArray* _Nonnull) nodesToCheck arguments:(va_list) args
+-(NSArray*) find:(NSString* _Nonnull) queryString inNodeList:(NSArray* _Nonnull) nodesToCheck arguments:(va_list*) args
 {
     //shortcut for empty nodesToCheck
     if(![nodesToCheck count])
@@ -610,15 +632,26 @@ static NSRegularExpression* attributeFilterRegex;
         return string;
 }
 
--(NSMutableDictionary*) parseQueryEntry:(NSString* _Nonnull) entry arguments:(va_list) args
+-(NSMutableDictionary*) parseQueryEntry:(NSString* _Nonnull) entry arguments:(va_list*) args
 {
     va_list cacheKeyArgs;
-    va_copy(cacheKeyArgs, args);
+    va_copy(cacheKeyArgs, *args);
     NSString* cacheKey = [NSString stringWithFormat:@"%@§§%@", entry, [[NSString alloc] initWithFormat:entry arguments:cacheKeyArgs]];
     va_end(cacheKeyArgs);
+#ifdef DEBUG_XMLQueryLanguage
+    DDLogVerbose(@"Cache key: %@", cacheKey);
+#endif
+    
+    //return results from cache if possible
     NSDictionary* cacheEntry = [self.queryEntryCache objectForKey:cacheKey];
     if(cacheEntry != nil)
+    {
+#ifdef DEBUG_XMLQueryLanguage
+        DDLogDebug(@"Returning cached result: %@", cacheEntry);
+#endif
         return [cacheEntry mutableCopy];
+    }
+    
     NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
     NSArray* matches = [componentParserRegex matchesInString:entry options:0 range:NSMakeRange(0, [entry length])];
     if(![matches count])
@@ -640,6 +673,9 @@ static NSRegularExpression* attributeFilterRegex;
     {
         retval[@"attributeFilters"] = [[NSMutableArray alloc] init];
         NSString* attributeFilters = [entry substringWithRange:attributeFilterRange];
+#ifdef DEBUG_XMLQueryLanguage
+        DDLogDebug(@"Extracting attribute filters: '%@'...", attributeFilters);
+#endif
         NSArray* attributeFilterMatches = [attributeFilterRegex matchesInString:attributeFilters options:0 range:NSMakeRange(0, [attributeFilters length])];
         for(NSTextCheckingResult* attributeFilterMatch in attributeFilterMatches)
         {
@@ -660,10 +696,24 @@ static NSRegularExpression* attributeFilterRegex;
             NSString* attributeFilterValueRegexPattern;
             if(attributeFilterType == '=')      //verbatim comparison using format string interpolation
             {
-                //substitute format string specifiers inside of our attribute filter string
-                NSString* unescapedAttributeFilterValue = [[NSString alloc] initWithFormat:attributeFilterValue arguments:args];
+                //substitute format string specifiers inside of our attribute filter string.
+                //use Holger's vsnprintf() which got pimped up to support %@ format specifier.
+                //use va_list* everywhere to make sure we move the same va_list pointer in every invocation here
+                //instead of starting with a fresh copy (which would always extract only the first variadic argument
+                //regardless of the position in the format string we are at).
+                char* dest = NULL;
+                rpl_vasprintf(&dest, [attributeFilterValue UTF8String], args);
+                MLAssert(dest != NULL, @"dest should *never* be NULL!");
+                NSString* unescapedAttributeFilterValue = [NSString stringWithUTF8String:dest];
+                free(dest);
+                
                 NSString* escapedAttributeFilterValue = [NSRegularExpression escapedPatternForString:unescapedAttributeFilterValue];
                 attributeFilterValueRegexPattern = [NSString stringWithFormat:@"^%@$", escapedAttributeFilterValue];
+#ifdef DEBUG_XMLQueryLanguage
+                DDLogDebug(@"unescapedAttributeFilterValue: '%@'", unescapedAttributeFilterValue);
+                DDLogDebug(@"escapedAttributeFilterValue: '%@'", escapedAttributeFilterValue);
+                DDLogDebug(@"attributeFilterValueRegexPattern: '%@'", attributeFilterValueRegexPattern);
+#endif
             }
             else if(attributeFilterType == '~')      //raw regex comparison *without* format string interpolation
                 //you will have to include sring-start and string-end markers yourself as well as all other regex stuff
@@ -691,6 +741,9 @@ static NSRegularExpression* attributeFilterRegex;
                     @"error": error
                 }];
         }
+#ifdef DEBUG_XMLQueryLanguage
+        DDLogDebug(@"Done extracting, attributeFilters are now: %@", retval[@"attributeFilters"]);
+#endif
     }
     if(extractionCommandRange.location != NSNotFound)
     {

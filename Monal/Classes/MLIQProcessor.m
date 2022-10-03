@@ -286,10 +286,16 @@ $$
             continue;
         contact[@"jid"] = [[NSString stringWithFormat:@"%@", contact[@"jid"]] lowercaseString];
         MLContact* contactObj = [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo];
-        if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove] && !contactObj.isGroup)
+        if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
-            [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
+            if(contactObj.isGroup)
+                DDLogWarn(@"Got roster remove request for MUC, ignoring it (possibly even triggered by us).");
+            else
+            {
+                [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
+                [contactObj removeShareInteractions];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
+            }
         }
         else
         {
@@ -307,6 +313,7 @@ $$
             {
                 DDLogWarn(@"Removing muc '%@' from contactlist, got 'normal' roster entry!", contact[@"jid"]);
                 [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
+                [contactObj removeShareInteractions];
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contactObj}];
                 contactObj = [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo];
             }
@@ -315,6 +322,13 @@ $$
             [[DataLayer sharedInstance] addContact:contact[@"jid"]
                                         forAccount:account.accountNo
                                           nickname:[contact objectForKey:@"name"] ? [contact objectForKey:@"name"] : @""];
+#ifndef DISABLE_OMEMO
+            if(contactObj.isGroup == NO)
+            {
+                // Request omemo devicelist
+                [account.omemo queryOMEMODevices:contactObj.contactJid];
+            }
+#endif// DISABLE_OMEMO
             
             DDLogVerbose(@"Setting subscription status '%@' (ask=%@) for contact %@", contact[@"subscription"], contact[@"ask"], contact[@"jid"]);
             [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
@@ -325,6 +339,8 @@ $$
             //regenerate avatar if the nickame has changed
             if(![contactObj.nickName isEqualToString:[contact objectForKey:@"name"]])
                 [[MLImageManager sharedInstance] purgeCacheForContact:contact[@"jid"] andAccount:account.accountNo];
+            
+            //TODO: save roster groups to new db table
             
             //send out kMonalContactRefresh notification
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
@@ -404,6 +420,12 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
             [mamQuery setMAMQueryForLatestId];
             [account sendIq:mamQuery withHandler:$newHandler(self, handleMamResponseWithLatestId)];
         }
+    }
+    else
+    {
+        //we don't support MAM --> tell the system to finish the catchup without MAM
+        DDLogError(@"Server does not support MAM, marking mam catchup as 'finished' for jid %@", account.connectionProperties.identity.jid);
+        [account mamFinishedFor:account.connectionProperties.identity.jid];
     }
     
     account.connectionProperties.accountDiscoDone = YES;
@@ -579,22 +601,22 @@ $$
     
     MLContactSoftwareVersionInfo* versionDBInfo = [[DataLayer sharedInstance] getSoftwareVersionInfoForContact:iqNode.fromUser resource:iqNode.fromResource andAccount:account.accountNo];
     
-    if (versionDBInfo != nil) {
-        if (!([versionDBInfo.appName isEqualToString:iqAppName] &&
-            [versionDBInfo.appVersion isEqualToString:iqAppVersion] &&
-            [versionDBInfo.platformOs isEqualToString:iqPlatformOS]))
-        {
-            MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS];
+    if(versionDBInfo == nil || !(
+        [versionDBInfo.appName isEqualToString:iqAppName] &&
+        [versionDBInfo.appVersion isEqualToString:iqAppVersion] &&
+        [versionDBInfo.platformOs isEqualToString:iqPlatformOS]
+    )) {
+        DDLogVerbose(@"Updating software version info for %@", iqNode.from);
+        MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS];
 
-            [[DataLayer sharedInstance] setSoftwareVersionInfoForContact:iqNode.fromUser
-                                                                resource:iqNode.fromResource
-                                                              andAccount:account.accountNo
-                                                        withSoftwareInfo:newSoftwareVersionInfo];
-            
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh            
-                                                                object:account
-                                                              userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
-        }
+        [[DataLayer sharedInstance] setSoftwareVersionInfoForContact:iqNode.fromUser
+                                                            resource:iqNode.fromResource
+                                                            andAccount:account.accountNo
+                                                    withSoftwareInfo:newSoftwareVersionInfo];
+        
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh            
+                                                            object:account
+                                                            userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
     }
 }
 

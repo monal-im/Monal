@@ -78,13 +78,21 @@ NSURL *audioFileURL = nil;
     updateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(updateTimeInfo) userInfo:nil repeats:YES];
 }
 
--(void) stop
+-(void) stop:(BOOL) shouldSend
 {
+    self.audioRecorder.delegate = nil;
+    if(shouldSend)
+        self.audioRecorder.delegate = self;
     [self.audioRecorder stop];
-    
     [updateTimer invalidate];
     updateTimer = nil;
-    [self.recoderManagerDelegate notifyStop:audioFileURL];
+    [self.recoderManagerDelegate notifyStop:shouldSend ? audioFileURL : nil];
+    if(!shouldSend)
+    {
+        NSFileManager* fileManager = [NSFileManager defaultManager];
+        [fileManager removeItemAtURL:audioFileURL error:nil];
+        [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Aborted recording audio", @"")];
+    }
 }
 
 -(void) updateTimeInfo

@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet href="https://monal.im/files/doap-style.xsl" type="text/xsl"?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-        xmlns:xmpp="https://linkmauve.fr/ns/xmpp-doap#"
-        xmlns="http://usefulinc.com/ns/doap#"
-        xmlns:schema="https://schema.org/">
+<rdf:RDF xmlns="http://usefulinc.com/ns/doap#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xmpp="https://linkmauve.fr/ns/xmpp-doap#" xmlns:schema="https://schema.org/" xmlns:foaf="http://xmlns.com/foaf/0.1/">
   <Project>
 
-    <name>Monal</name>
+    <name>Monal IM</name>
     <short-name>Monal</short-name>
 
-    <shortdesc xml:lang="en">iOS and MacOS XMPP chat client</shortdesc>
+    <shortdesc xml:lang="en">Modern iOS and MacOS XMPP chat client</shortdesc>
     <description xml:lang="en">
     There has never been a better time to get into XMPP, a free public chat network that no one controls or owns. 
     Monal is a fast and user friendly way to use the decentral XMPP protocol (known as Jabber). Just download the app, login or register and you are ready 
     to chat in minutes. Monal attempts to create a decent chat experience with XMPP in the Apple ecosystem.
     </description>
 
-    <homepage rdf:resource="https://monal.im/" />
+    <homepage rdf:resource="https://monal-im.org" />
     <bug-database rdf:resource="https://github.com/monal-im/Monal/issues" />
     <license rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/develop/LICENSE" />
     <schema:documentation rdf:resource="https://github.com/monal-im/Monal/wiki"/>
+    <category rdf:resource="https://linkmauve.fr/ns/xmpp-doap#category-client"/>
+    <category rdf:resource="http://api.gnome.org/doap-extensions#apps"/>
     <schema:logo rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/develop/Art/monal.svg"/>
     
     <programming-language>Objective C</programming-language>
@@ -92,9 +90,16 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0054.html" />
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0049.html" />
         <xmpp:status>wontfix</xmpp:status>
-        <xmpp:note>XEP-0054: vcard-temp</xmpp:note>
+        <xmpp:note>XEP-0049: Private XML Storage</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0054.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:note>XEP-0054: vcard-temp (implemented only for MUC profiles)</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -190,8 +195,8 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0153.html" />
-        <xmpp:status>planned</xmpp:status>
-        <xmpp:note>XEP-0153: vCard-Based Avatars (planned only for MUCs)</xmpp:note>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:note>XEP-0153: vCard-Based Avatars (implemented only for MUC profiles)</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -304,6 +309,13 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0260.html" />
+        <xmpp:status>wontfix</xmpp:status>
+        <xmpp:note>XEP-0260: Jingle SOCKS5 Bytestreams Transport Method</xmpp:note> 
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0261.html" />
         <xmpp:status>wontfix</xmpp:status>
         <xmpp:note>XEP-0261: Jingle In-Band Bytestreams Transport Method</xmpp:note> 
@@ -371,6 +383,13 @@
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.7</xmpp:since>
         <xmpp:note>XEP-0352: Client State Indication</xmpp:note> 
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0353.html" />
+        <xmpp:status>planned</xmpp:status>
+        <xmpp:note>XEP-0353: Jingle Message Initiation</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -447,7 +466,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0384.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>
-        <xmpp:note>XEP-0384: OMEMO Encryption (currently only in 1:1 chats, not MUCs)</xmpp:note>
+        <xmpp:note>XEP-0384: OMEMO Encryption</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -455,6 +474,14 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0386.html" />
         <xmpp:status>wontfix</xmpp:status>
         <xmpp:note>XEP-0386: Bind 2.0</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0388.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>5.4</xmpp:since>
+        <xmpp:note>XEP-0388: Extensible SASL Profile</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -488,6 +515,13 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0398.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:note>XEP-0398: User Avatar to vCard-Based Avatars Conversion</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0402.html" />
         <xmpp:status>planned</xmpp:status>
         <xmpp:note>XEP-0402: PEP Native Bookmarks</xmpp:note>
@@ -511,7 +545,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0420.html" />
-        <xmpp:status>wontfix</xmpp:status>
+        <xmpp:status>planned</xmpp:status>
         <xmpp:note>XEP-0420: Stanza Content Encryption</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
@@ -524,10 +558,26 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0440.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>5.4</xmpp:since>
+        <xmpp:note>XEP-0440: SASL Channel-Binding Type Capability</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0441.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>
         <xmpp:note>XEP-0441: Message Archive Management Preferences</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0445.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>5.2</xmpp:since>
+        <xmpp:note>XEP-0445: Pre-Authenticated In-Band Registration</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>

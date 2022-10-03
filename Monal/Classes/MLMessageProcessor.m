@@ -208,6 +208,9 @@ static NSMutableDictionary* _typingNotifications;
             NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo];
             participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
         }
+        //make sure this is not the full jid
+        if(participantJid != nil)
+            participantJid = [HelperTools splitJid:participantJid][@"user"];
         DDLogInfo(@"Extracted participantJid: %@", participantJid);
     }
     
@@ -402,7 +405,12 @@ static NSMutableDictionary* _typingNotifications;
                 {
                     MLContact* contact = [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo];
                     //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)
-                    if(!contact.isGroup || ([contact.mucType isEqualToString:@"group"] && messageNode.fromResource))
+                    if(
+                        //1:1 with user in our contact list that subscribed us (e.g. is allowed to see us)
+                        (!contact.isGroup  && contact.isSubscribedFrom) ||
+                        //muc group message from a user of this group
+                        ([contact.mucType isEqualToString:@"group"] && messageNode.fromResource)
+                    )
                     {
                         XMPPMessage* receiptNode = [[XMPPMessage alloc] init];
                         //the message type is needed so that the store hint is accepted by the server --> mirror the incoming type

@@ -31,6 +31,7 @@ NSString* const kAccountState = @"account_state";
 //used for account rows
 NSString *const kDomain = @"domain";
 NSString *const kEnabled = @"enabled";
+NSString *const kNeedsPasswordMigration = @"needs_password_migration";
 
 NSString *const kServer = @"server";
 NSString *const kPort = @"other_port";
@@ -52,38 +53,11 @@ static NSDateFormatter* dbFormatter;
 
 +(void) initialize
 {
-    NSError* error;
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     NSString* writableDBPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
-    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString* oldDBPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"sworim.sqlite"];
     
-    //database move is incomplete --> start from scratch
-    //this can happen if the notification extension was run after the app upgrade but before the main app was opened
-    //in this scenario the db doesn't get copyed but created from the default file (e.g. it is empty)
-    if([fileManager fileExistsAtPath:oldDBPath] && [fileManager fileExistsAtPath:writableDBPath])
-    {
-        DDLogInfo(@"initialize: old AND new db files present, delete new one and start from scratch");
-        [fileManager removeItemAtPath:writableDBPath error:&error];
-        if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-    }
-    
-    //old install is being upgraded --> copy old database to new app group path
-    if([fileManager fileExistsAtPath:oldDBPath] && ![fileManager fileExistsAtPath:writableDBPath])
-    {
-        DDLogInfo(@"initialize: copying existing DB from OLD path to new app group one: %@ --> %@", oldDBPath, writableDBPath);
-        [fileManager copyItemAtPath:oldDBPath toPath:writableDBPath error:&error];
-        if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-        DDLogInfo(@"initialize: removing old DB at: %@", oldDBPath);
-        [fileManager removeItemAtPath:oldDBPath error:&error];
-        if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-    }
-    
-    //the file still does not exist (e.g. fresh install) --> copy default database to app group path
+    //the file does not exist (e.g. fresh install) --> copy default database to app group path
     if(![fileManager fileExistsAtPath:writableDBPath])
     {
         DDLogInfo(@"initialize: copying default DB to: %@", writableDBPath);
@@ -147,6 +121,36 @@ static NSDateFormatter* dbFormatter;
 -(void) createTransaction:(monal_void_block_t) block
 {
     [self.db voidWriteTransaction:block];
+}
+
+-(void) version
+{
+    // checking db version and upgrading if necessary
+    DDLogInfo(@"Database version check");
+
+    //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
+    //this is a special case because it can not be done while in a transaction!!!
+    [self.db enableWAL];
+
+    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
+    [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+    [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
+
+    // Vacuum after db updates
+    if([DataLayerMigrations migrateDB:self.db withDataLayer:self])
+    {
+        [self.db vacuum];
+        DDLogInfo(@"Database Vacuum complete");
+    }
+
+    //turn foreign keys on again
+    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
+    [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+    
+    DDLogInfo(@"Database version check completed");
+    return;
 }
 
 #pragma mark account commands
@@ -249,7 +253,8 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) updateAccounWithDictionary:(NSDictionary*) dictionary
 {
     return [self.db boolWriteTransaction:^{
-        NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=? WHERE account_id=?;";
+        DDLogVerbose(@"Updating account with: %@", dictionary);
+        NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=?, needs_password_migration=? WHERE account_id=?;";
         NSString* server = (NSString*)[dictionary objectForKey:kServer];
         NSString* port = (NSString*)[dictionary objectForKey:kPort];
         NSArray* params = @[
@@ -262,7 +267,8 @@ static NSDateFormatter* dbFormatter;
             [dictionary objectForKey:kDirectTLS],
             [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
             [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
-            [dictionary objectForKey:kAccountID]
+            [dictionary objectForKey:kNeedsPasswordMigration],
+            [dictionary objectForKey:kAccountID],
         ];
         return (BOOL)[self.db executeNonQuery:query andArguments:params];
     }];
@@ -318,10 +324,17 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) disableEnabledAccount:(NSNumber*) accountNo
+-(BOOL) disableAccountForPasswordMigration:(NSNumber*) accountNo
 {
     return [self.db boolWriteTransaction:^{
-        return [self.db executeNonQuery:@"UPDATE account SET enabled=0 WHERE account_id=?;" andArguments:@[accountNo]];
+        return [self.db executeNonQuery:@"UPDATE account SET enabled=0, needs_password_migration=1 WHERE account_id=?;" andArguments:@[accountNo]];
+    }];
+}
+
+-(NSArray*) accountListNeedingPasswordMigration
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeReader:@"SELECT * FROM account WHERE NOT enabled AND needs_password_migration ORDER BY account_id ASC;"];
     }];
 }
 
@@ -378,7 +391,12 @@ static NSDateFormatter* dbFormatter;
         else
             toPass = cleanNickName;
         
-        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick') VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;" andArguments:@[accountNo, contact, @"", toPass, @0, @"", toPass]];
+        BOOL encrypt = NO;
+#ifndef DISABLE_OMEMO
+        encrypt = [[HelperTools defaultsDB] boolForKey:@"OMEMODefaultOn"];
+#endif// DISABLE_OMEMO
+        
+        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick', 'encrypt') VALUES(?, ?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;" andArguments:@[accountNo, contact, @"", toPass, @0, @"", @(encrypt), toPass]];
     }];
 }
 
@@ -386,7 +404,7 @@ static NSDateFormatter* dbFormatter;
 {
     [self.db voidWriteTransaction:^{
         //clean up logs...
-        [self messageHistoryClean:buddy forAccount:accountNo];
+        [self clearMessagesWithBuddy:buddy onAccount:accountNo];
         //...and delete contact
         [self.db executeNonQuery:@"DELETE FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
     }];
@@ -905,10 +923,17 @@ static NSDateFormatter* dbFormatter;
         NSString* nick = mucNick;
         if(!nick)
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
-        NSAssert(nick, @"Could not determine muc nick when adding muc");
+        MLAssert(nick != nil, @"Could not determine muc nick when adding muc");
         
         [self cleanupMembersAndParticipantsListFor:room forAccountId:accountNo];
-        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', 'muc_nick') VALUES(?, ?, 1, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET muc=1, muc_nick=?;" andArguments:@[accountNo, room, mucNick ? mucNick : @"", mucNick ? mucNick : @""]];
+        
+        BOOL encrypt = NO;
+#ifndef DISABLE_OMEMO
+        // omemo for non group MUCs is disabled once the type of the muc is set
+        encrypt = [[HelperTools defaultsDB] boolForKey:@"OMEMODefaultOn"];
+#endif// DISABLE_OMEMO
+        
+        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', 'muc_nick', 'encrypt') VALUES(?, ?, 1, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET muc=1, muc_nick=?;" andArguments:@[accountNo, room, mucNick ? mucNick : @"", @(encrypt), mucNick ? mucNick : @""]];
     }];
 }
 
@@ -1003,7 +1028,7 @@ static NSDateFormatter* dbFormatter;
         NSString* nick = mucNick;
         if(!nick)
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
-        NSAssert(nick, @"Could not determine muc nick when adding muc");
+        MLAssert(nick != nil, @"Could not determine muc nick when adding muc");
         
         [self.db executeNonQuery:@"INSERT INTO muc_favorites (room, nick, account_id) VALUES(?, ?, ?) ON CONFLICT(room, account_id) DO UPDATE SET nick=?;" andArguments:@[room, nick, accountNo, nick]];
     }];
@@ -1104,6 +1129,11 @@ static NSDateFormatter* dbFormatter;
 {
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"UPDATE buddylist SET muc_type=? WHERE account_id=? AND buddy_name=?;" andArguments:@[type, accountNo, room]];
+        if([type isEqualToString:@"group"] == NO)
+        {
+            // non group type MUCs do not support encryption
+            [self.db executeNonQuery:@"UPDATE buddylist SET encrypt=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, room]];
+        }
     }];
 }
 
@@ -1361,18 +1391,21 @@ static NSDateFormatter* dbFormatter;
 -(void) clearMessages:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=?;" andArguments:@[kMessageTypeFiletransfer, accountNo]];
         for(NSNumber* historyId in messageHistoryIDs)
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=?;" andArguments:@[accountNo]];
         
         [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=?;" andArguments:@[accountNo]];
+        [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
 }
 
 -(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=?;" andArguments:@[kMessageTypeFiletransfer, accountNo, buddy]];
         for(NSNumber* historyId in messageHistoryIDs)
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
@@ -1380,6 +1413,7 @@ static NSDateFormatter* dbFormatter;
         
         //better UX without deleting the active chat
         //[self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
+        [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
 }
 
@@ -1387,6 +1421,7 @@ static NSDateFormatter* dbFormatter;
 -(void) autodeleteAllMessagesAfter3Days
 {
     [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         //3 days before now
         NSString* pastDate = [dbFormatter stringFromDate:[[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay value:-3 toDate:[NSDate date] options:0]];
         //delete all transferred files old enough
@@ -1397,16 +1432,19 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE timestamp<?;" andArguments:@[pastDate]];
         //delete all chats with empty history from active chats list
         [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
+        [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
 }
 
 -(void) deleteMessageHistory:(NSNumber*) messageNo
 {
     [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         MLMessage* msg = [self messageForHistoryID:messageNo];
         if([msg.messageType isEqualToString:kMessageTypeFiletransfer])
             [MLFiletransfer deleteFileForMessage:msg];
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE message_history_id=?;" andArguments:@[messageNo]];
+        [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
 }
 
@@ -1469,16 +1507,6 @@ static NSDateFormatter* dbFormatter;
         eligible &= editAllowed.intValue == 1;
         eligible &= [msg.messageType isEqualToString:kMessageTypeText];
         return eligible;
-    }];
-}
-
--(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo
-{
-    return [self.db boolWriteTransaction:^{
-        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=?;" andArguments:@[kMessageTypeFiletransfer, accountNo, buddy]];
-        for(NSNumber* historyId in messageHistoryIDs)
-            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
-        return [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
     }];
 }
 
@@ -1830,36 +1858,6 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) version
-{
-    // checking db version and upgrading if necessary
-    DDLogInfo(@"Database version check");
-
-    //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
-    //this is a special case because it can not be done while in a transaction!!!
-    [self.db enableWAL];
-
-    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
-    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
-    [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
-    [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
-
-    // Vacuum after db updates
-    if([DataLayerMigrations migrateDB:self.db withDataLayer:self])
-    {
-        [self.db vacuum];
-        DDLogInfo(@"Database Vacuum complete");
-    }
-
-    //turn foreign keys on again
-    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
-    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
-    [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
-    
-    DDLogInfo(@"Database version check completed");
-    return;
-}
-
 -(void) deleteDelayedMessageStanzasForAccount:(NSString*) accountNo
 {
     [self.db voidWriteTransaction:^{
@@ -1932,20 +1930,19 @@ static NSDateFormatter* dbFormatter;
     if(payload[@"type"] == nil || payload[@"data"] == nil)
         return;
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"INSERT INTO sharesheet_outbox (account_id, recipient, type, data, comment) VALUES(?, ?, ?, ?, ?);" andArguments:@[
+        [self.db executeNonQuery:@"INSERT INTO sharesheet_outbox (account_id, recipient, type, data) VALUES(?, ?, ?, ?);" andArguments:@[
             payload[@"account_id"],
             payload[@"recipient"],
             payload[@"type"],
             [HelperTools serializeObject:payload[@"data"]],
-            payload[@"comment"],
         ]];
     }];
 }
 
--(NSArray*) getShareSheetPayloadForAccountNo:(NSNumber*) accountNo
+-(NSArray*) getShareSheetPayload
 {
     return [self.db idWriteTransaction:^{
-        NSArray* payloadList = [self.db executeReader:@"SELECT * FROM sharesheet_outbox WHERE account_id=? ORDER BY id ASC;" andArguments:@[accountNo]];
+        NSArray* payloadList = [self.db executeReader:@"SELECT * FROM sharesheet_outbox ORDER BY id ASC;"];
         NSMutableArray* retval = [[NSMutableArray alloc] init];
         for(NSDictionary* entry_ in payloadList)
         {
@@ -2237,8 +2234,8 @@ static NSDateFormatter* dbFormatter;
 
 -(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSNumber* _Nonnull) accountNo
 {
-    NSAssert(jid, @"jid should not be null");
-    NSAssert(accountNo != NULL, @"accountNo should not be null");
+    MLAssert(jid != nil, @"jid should not be null");
+    MLAssert(accountNo != nil, @"accountNo should not be null");
 
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT lastInteraction FROM buddylist WHERE account_id=? AND buddy_name=?;";
@@ -2254,8 +2251,8 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSNumber* _Nonnull) accountNo
 {
-    NSAssert(jid, @"jid should not be null");
-    NSAssert(accountNo != NULL, @"accountNo should not be null");
+    MLAssert(jid != nil, @"jid should not be null");
+    MLAssert(accountNo != nil, @"accountNo should not be null");
 
     NSNumber* timestamp = @0;       //default value for "online" or "unknown"
     if(lastInteractionTime)

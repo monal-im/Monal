@@ -17,7 +17,18 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 
 
 //configure app group constants
-#define kAppGroup @"group.monal"
+#ifdef IS_ALPHA
+    #define kAppGroup @"group.monalalpha"
+    #define kMonalOpenURL [NSURL URLWithString:@"monalAlphaOpen://"]
+    #define kBackgroundProcessingTask @"im.monal.alpha.process"
+    #define kBackgroundRefreshingTask @"im.monal.alpha.refresh"
+#else
+    #define kAppGroup @"group.monal"
+    #define kMonalOpenURL [NSURL URLWithString:@"monalOpen://"]
+    #define kBackgroundProcessingTask @"im.monal.process"
+    #define kBackgroundRefreshingTask @"im.monal.refresh"
+#endif
+
 #define kMonalKeychainName @"Monal"
 
 //this is in seconds
@@ -52,10 +63,10 @@ typedef enum NotificationPrivacySettingOption {
 //some useful macros
 #define weakify(var)                        __weak __typeof__(var) AHKWeak_##var = var
 #define strongify(var)                      _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
-#define nilWrapper(var)                     (var == nil           ? (id)[NSNull null] : (id)var)
-#define nilExtractor(var)                   (var == [NSNull null] ? nil           : var)
-#define nilDefault(var, def)                (var == nil ? def : var)
-#define emptyDefault(var, eq, def)          (var == nil || [var isEqual:eq] ? def : var)
+#define nilWrapper(var)                     (var == nil ? (id)[NSNull null] : (id)var)
+#define nilExtractor(var)                   ((id)var == [NSNull null] ? nil : var)
+#define nilDefault(var, def)                (var == nil || (id)var == [NSNull null] ? def : var)
+#define emptyDefault(var, eq, def)          (var == nil || (id)var == [NSNull null] || [var isEqual:eq] ? def : var)
 #define updateIfIdNotEqual(a, b)            if(a != b && ![a isEqual:b]) a = b
 #define updateIfPrimitiveNotEqual(a, b)     if(a != b) a = b
 
@@ -70,16 +81,11 @@ typedef enum NotificationPrivacySettingOption {
     #define __VAN__ISH
 #endif
 
-#if defined(IS_ALPHA) || defined(DEBUG)
-    #define unreachable() { \
-        DDLogError(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
-        NSAssert(NO, @"unreachable"); \
-    }
-#else
-    #define unreachable() { \
-        DDLogError(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
-    }
-#endif
+#define unreachable() { \
+    DDLogError(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
+    NSAssert(NO, @"unreachable"); \
+    while(1); \
+}
 
 // https://clang-analyzer.llvm.org/faq.html#unlocalized_string
 __attribute__((annotate("returns_localized_nsstring")))
@@ -89,16 +95,12 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 }
 
 //some xmpp related constants
-#define kRegServer @"yax.im"
 #define kMessageDeletedBody @"eu.siacs.conversations.message_deleted"
 
-#define kXMLNS @"xmlns"
 #define kId @"id"
-#define kJid @"jid"
 #define kMessageId @"kMessageId"
 
 #define kRegisterNameSpace @"jabber:iq:register"
-#define kDataNameSpace @"jabber:x:data"
 
 //all other constants needed
 #define kMonalWillBeFreezed @"kMonalWillBeFreezed"
@@ -117,7 +119,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalMessageErrorNotice @"kMonalMessageErrorNotice"
 #define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
 #define kXMPPError @"kXMPPError"
-#define kScheduleBackgroundFetchingTask @"kScheduleBackgroundFetchingTask"
+#define kScheduleBackgroundTask @"kScheduleBackgroundTask"
 #define kMonalUpdateUnread @"kMonalUpdateUnread"
 
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
@@ -126,19 +128,12 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalUpdateBundleFetchStatus @"kMonalUpdateBundleFetchStatus"
 #define kMonalIdle @"kMonalIdle"
 #define kMonalFiletransfersIdle @"kMonalFiletransfersIdle"
+#define kMonalNotIdle @"kMonalNotIdle"
 
 #define kMonalBackgroundChanged @"kMonalBackgroundChanged"
-
-#define kMonalPresentChat @"kMonalPresentChat"
-
 #define kMLMAMPref @"kMLMAMPref"
 
-
-#define kMonalCallStartedNotice @"kMonalCallStartedNotice"
-#define kMonalCallRequestNotice @"kMonalCallRequestNotice"
-
 #define kMonalAccountStatusChanged @"kMonalAccountStatusChanged"
-#define kMonalAccountAuthRequest @"kMonalAccountAuthRequest"
 
 #define kMonalRefresh @"kMonalRefresh"
 #define kMonalContactRefresh @"kMonalContactRefresh"

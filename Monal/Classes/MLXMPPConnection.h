@@ -56,6 +56,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL accountDiscoDone;
 
+@property (nonatomic, strong) NSDictionary* saslMethods;
+@property (nonatomic, strong) NSDictionary* channelBindingTypes;
+@property (nonatomic, assign) BOOL supportsSSDP;
 
 -(id) initWithServer:(MLXMPPServer*) server andIdentity:(MLXMPPIdentity*) identity;
 

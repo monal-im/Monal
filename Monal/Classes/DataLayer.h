@@ -21,6 +21,7 @@ extern NSString* const kAccountID;
 extern NSString* const kAccountState;
 extern NSString* const kDomain;
 extern NSString* const kEnabled;
+extern NSString* const kNeedsPasswordMigration;
 
 extern NSString* const kServer;
 extern NSString* const kPort;
@@ -150,9 +151,10 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) removeAccount:(NSNumber*) accountNo;
 
 /**
- disables account
+ password migration
  */
--(BOOL) disableEnabledAccount:(NSNumber*) accountNo;
+-(BOOL) disableAccountForPasswordMigration:(NSNumber*) accountNo;
+-(NSArray*) accountListNeedingPasswordMigration;
 
 -(NSMutableDictionary* _Nullable) readStateForAccount:(NSNumber*) accountNo;
 -(void) persistState:(NSDictionary*) state forAccount:(NSNumber*) accountNo;
@@ -213,8 +215,6 @@ extern NSString* const kMessageTypeFiletransfer;
 -(MLMessage*) lastMessageForContact:(NSString*) contact forAccount:(NSNumber*) accountNo;
 -(NSString*) lastStanzaIdForAccount:(NSNumber*) accountNo;
 -(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSNumber*) accountNo;
-
--(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
 -(NSArray<MLMessage*>*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSNumber*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
@@ -294,7 +294,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(MLXMLNode* _Nullable) getNextDelayedMessageStanzaForArchiveJid:(NSString*) archiveJid andAccountNo:(NSNumber*) accountNo;
 
 -(void) addShareSheetPayload:(NSDictionary*) payload;
--(NSArray*) getShareSheetPayloadForAccountNo:(NSNumber*) accountNo;
+-(NSArray*) getShareSheetPayload;
 -(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId;
 
 @end

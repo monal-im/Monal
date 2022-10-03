@@ -15,7 +15,7 @@
 #define createQueuedTimer(timeout, queue, handler, ...)						metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue])(_createQueuedTimer(timeout, queue, handler, __VA_ARGS__))
 #define _createQueuedTimer(timeout, queue, handler, cancelHandler, ...)		[HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue]
 
-#define MLAssert(check, text, ...)                                          metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools MLAssert:check withText:text andUserData:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])([HelperTools MLAssert:check withText:text andUserData:metamacro_head(__VA_ARGS__) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])
+#define MLAssert(check, text, ...)                                          do { if(!(check)) { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools MLAssertWithText:text andUserData:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__];)([HelperTools MLAssertWithText:text andUserData:metamacro_head(__VA_ARGS__) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__];) while(YES); } } while(0)
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -25,10 +25,12 @@ NS_ASSUME_NONNULL_BEGIN
 @class UNNotificationRequest;
 
 void logException(NSException* exception);
+void swizzle(Class c, SEL orig, SEL new);
 
 @interface HelperTools : NSObject
 
-+(void) MLAssert:(BOOL) check withText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(char*) file andLine:(int) line andFunc:(char*) func;
++(void) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(char*) file andLine:(int) line andFunc:(char*) func;
++(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 
@@ -39,6 +41,7 @@ void logException(NSException* exception);
 +(NSData*) serializeObject:(id) obj;
 +(id) unserializeData:(NSData*) data;
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request;
++(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void (^)(NSMutableDictionary* _Nullable)) completion;
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length;
 +(double) report_memory;
 +(UIColor*) generateColorFromJid:(NSString*) jid;
@@ -66,18 +69,27 @@ void logException(NSException* exception);
 +(NSDate*) parseDateTimeString:(NSString*) datetime;
 +(NSString*) generateDateTimeString:(NSDate*) datetime;
 +(NSString*) encodeRandomResource;
+
 +(NSData* _Nullable) sha1:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha1:(NSString* _Nullable) data;
++(NSData* _Nullable) sha1HmacForKey:(NSData* _Nullable) key andData:(NSData* _Nullable) data;
++(NSString* _Nullable) stringSha1HmacForKey:(NSString* _Nullable) key andData:(NSString* _Nullable) data;
 +(NSData* _Nullable) sha256:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha256:(NSString* _Nullable) data;
 +(NSData* _Nullable) sha256HmacForKey:(NSData* _Nullable) key andData:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha256HmacForKey:(NSString* _Nullable) key andData:(NSString* _Nullable) data;
++(NSData* _Nullable) sha512:(NSData* _Nullable) data;
++(NSString* _Nullable) stringSha512:(NSString* _Nullable) data;
++(NSData* _Nullable) sha512HmacForKey:(NSData* _Nullable) key andData:(NSData* _Nullable) data;
++(NSString* _Nullable) stringSha512HmacForKey:(NSString* _Nullable) key andData:(NSString* _Nullable) data;
+
 +(NSString*) encodeBase64WithString:(NSString*) strData;
 +(NSString*) encodeBase64WithData:(NSData*) objData;
 +(NSData*) dataWithBase64EncodedString:(NSString*) string;
++(NSString*) hexadecimalString:(NSData*) data;
++(NSData*) dataWithHexString:(NSString*) hex;
++(NSData*) XORData:(NSData*) data1 withData:(NSData*) data2;
 
-+(NSString *)hexadecimalString:(NSData*) data;
-+(NSData *)dataWithHexString:(NSString *)hex;
 +(NSString *)signalHexKeyWithData:(NSData*) data;
 +(NSString *)signalHexKeyWithSpacesWithData:(NSData*) data;
 

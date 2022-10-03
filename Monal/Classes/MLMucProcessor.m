@@ -154,7 +154,7 @@
         if([self checkIfStillBookmarked:presenceNode.fromUser])
             [self deleteMuc:presenceNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
-        [self handleError:NSLocalizedString(@"Groupchat error", @"") forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:YES];
+        [self handleError:NSLocalizedString(@"Group/Channel error", @"") forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:YES];
         return;
     }
     
@@ -275,9 +275,7 @@
                 [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:_account.accountNo];
 #ifndef DISABLE_OMEMO
                 if(isTypeGroup == YES)
-                {
                     [_account.omemo checkIfSessionIsStillNeeded:item[@"jid"] isMuc:NO];
-                }
 #endif// DISABLE_OMEMO
             }
             else
@@ -285,9 +283,7 @@
                 [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:_account.accountNo];
 #ifndef DISABLE_OMEMO
                 if(isTypeGroup == YES)
-                {
-                    [_account.omemo checkIfMucMemberHasExistingSession:item[@"jid"]];
-                }
+                    [_account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:item[@"jid"]];
 #endif// DISABLE_OMEMO
             }
         }
@@ -339,7 +335,10 @@
                     {
                         //muc got destroyed
                         if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
+                        {
+                            [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                             [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                        }
                         else
                             ;           //ignore other non-joining self-presences for now
                     }
@@ -412,7 +411,7 @@
                     }
                 }
                 default:
-                    DDLogInfo(@"Got unhandled muc status code in presence from %@: %@", node.from, code);
+                    DDLogWarn(@"Got unhandled muc status code in presence from %@: %@", node.from, code);
             }
         
         //this is a self-presence marking the end of the presence flood, handle this code last because it resets _joining
@@ -437,6 +436,16 @@
                 [_noUpdateBookmarks removeObject:node.fromUser];
             }
             
+            if([[[DataLayer sharedInstance] getMucTypeOfRoom:node.fromUser andAccount:_account.accountNo] isEqualToString:@"group"])
+                DDLogInfo(@"Recorded members and participants of group %@: %@", node.fromUser, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:node.fromUser forAccountId:_account.accountNo]);
+            else
+            {
+//these lists can potentially get really long for public channels --> restrict logging them to alpha builds
+#ifdef IS_ALPHA
+            DDLogInfo(@"Recorded members and participants of channel %@: %@", node.fromUser, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:node.fromUser forAccountId:_account.accountNo]);
+#endif
+            }
+            
             monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
             if(uiHandler)
             {
@@ -448,16 +457,6 @@
                         @"account": self->_account
                     });
                 });
-            }
-      
-            if([[[DataLayer sharedInstance] getMucTypeOfRoom:node.fromUser andAccount:_account.accountNo] isEqualToString:@"group"])
-                DDLogInfo(@"Recorded members and participants of group %@: %@", node.fromUser, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:node.fromUser forAccountId:_account.accountNo]);
-            else
-            {
-//these lists can potentially get really long for public channels --> restrict logging them to alpha builds
-#ifdef IS_ALPHA
-            DDLogInfo(@"Recorded members and participants of channel %@: %@", node.fromUser, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:node.fromUser forAccountId:_account.accountNo]);
-#endif
             }
             
             //MAYBE TODO: send out notification indicating we joined that room
@@ -513,7 +512,7 @@
                     break;
                 }
                 default:
-                    DDLogInfo(@"Got unhandled muc status code in message from %@: %@", node.from, code);
+                    DDLogWarn(@"Got unhandled muc status code in message from %@: %@", node.from, code);
             }
     }
 }
@@ -555,7 +554,7 @@
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Room jid or account must not be nil!" userInfo:nil];
     roomJid = [roomJid lowercaseString];
     DDLogInfo(@"Querying disco for muc %@...", roomJid);
-    //mark room as "joining" as soon as possible to make sure we can handle join "aborts" (e.g. when processing bookmark pdates while a joining disco query is already in flight)
+    //mark room as "joining" as soon as possible to make sure we can handle join "aborts" (e.g. when processing bookmark updates while a joining disco query is already in flight)
     //this will fix race condition that makes us join a muc directly after it got removed from our favorites table and leaved through a bookmark update
     if(join)
     {
@@ -677,7 +676,7 @@ $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, 
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Publishing avatar for muc '%@' returned error: %@", iqNode.fromUser, [iqNode findFirst:@"error"]);
-        [HelperTools postError:NSLocalizedString(@"Failed to publish avatar image for groupchat %@", @"") withNode:iqNode andAccount:_account andIsSevere:YES];
+        [HelperTools postError:NSLocalizedString(@"Failed to publish avatar image for group/channel %@", @"") withNode:iqNode andAccount:_account andIsSevere:YES];
         return;
     }
     DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);
@@ -706,14 +705,32 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         //make sure to update remote bookmarks, even if updateBookmarks == NO
         //keep buddy list entry to allow users to read the last messages before the muc got deleted
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel not available anymore: %@", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:iqNode andIsSevere:YES];
         [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
         return;
     }
     
-    if([iqNode check:@"/<type=error>"])
+    if([iqNode check:@"/<type=error>/error<type=wait>"])
     {
-        DDLogError(@"Querying muc info returned an error: %@", [iqNode findFirst:@"error"]);
+        DDLogError(@"Querying muc info returned a temporary error: %@", [iqNode findFirst:@"error"]);
+        @synchronized(_stateLockObject) {
+            [_joining removeObject:iqNode.fromUser];
+        }
+        
+        //do nothing: the error is only temporary (a s2s problem etc.), a muc ping will retry the join
+        //this will keep the entry in local bookmarks table and remote bookmars
+        //--> retry the join on mucPing or full login without smacks resume
+        //this will also keep the buddy list entry
+        //--> allow users to read the last messages before the muc got broken
+        
+        //only display an error banner, no notification (this is only temporary)
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Temporary failure to enter Group/Channel: %@", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:NO];
+        return;
+    }
+    else if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Querying muc info returned a persistent error: %@", [iqNode findFirst:@"error"]);
         @synchronized(_stateLockObject) {
             [_joining removeObject:iqNode.fromUser];
         }
@@ -723,7 +740,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         //keep buddy list entry to allow users to read the last messages before the muc got deleted/broken
         [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:YES];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter Group/Channel %@", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:YES];
         return;
     }
     
@@ -741,7 +758,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         //AND: to not auto-delete contact list entries via malicious xmpp:?join links
         [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
     
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@: This is not a groupchat!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andIsSevere:YES];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter Group/Channel %@: This is not a Group/Channel!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andIsSevere:YES];
         return;
     }
     
@@ -850,7 +867,7 @@ $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $$ID(xmp
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
-        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query newest stanzaid for groupchat %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query newest stanzaid for Group/Channel %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
         return;
     }
     DDLogVerbose(@"Got latest muc stanza id to prime database with: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
@@ -881,7 +898,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
         }
         else
         {
-            [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for groupchat %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
+            [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for Group/Channel %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
             [_account mamFinishedFor:iqNode.fromUser];
         }
         return;
@@ -983,6 +1000,12 @@ $$
         //remove handler (it will only be called once)
         [self removeUIHandlerForMuc:room];
         
+        if(node == nil)
+        {
+            DDLogInfo(@"Could not extract UI error message. node == nil");
+            return;
+        }
+        
         //prepare data
         NSString* message = [HelperTools extractXMPPError:node withDescription:description];
         NSDictionary* data = @{
@@ -1031,6 +1054,7 @@ $$
     else
     {
         [[DataLayer sharedInstance] removeBuddy:room forAccount:_account.accountNo];
+        [[MLContact createContactFromJid:room andAccountNo:_account.accountNo] removeShareInteractions];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:_account userInfo:@{
             @"contact": [MLContact createContactFromJid:room andAccountNo:_account.accountNo]
         }];

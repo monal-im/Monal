@@ -41,16 +41,16 @@
 #import "chatViewController.h"
 
 #define GRACEFUL_TIMEOUT            20.0
-#define BGFETCH_GRACEFUL_TIMEOUT    60.0
+#define BGPROCESS_GRACEFUL_TIMEOUT  60.0
 
 typedef void (^pushCompletion)(UIBackgroundFetchResult result);
-static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 @interface MonalAppDelegate()
 {
     NSMutableDictionary* _wakeupCompletions;
     UIBackgroundTaskIdentifier _bgTask;
-    BGTask* _bgFetch;
+    BGTask* _bgProcessing;
+    BGTask* _bgRefreshing;
     monal_void_block_t _backgroundTimer;
     MLContact* _contactToOpen;
     monal_id_block_t _completionToCall;
@@ -68,9 +68,15 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         <stream:stream xmlns:stream='http://etherx.jabber.org/streams' version='1.0' xmlns='jabber:client' xml:lang='en' from='example.org' id='a344b8bb-518e-4456-9140-d15f66c1d2db'>\n\
         <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism></mechanisms></stream:features>\n\
         <iq id='18382ACA-EF9D-4BC9-8779-7901C63B6631' to='user1@example.org/Monal-iOS.ef313600' xmlns='jabber:client' type='result' from='luloku@conference.example.org'><query xmlns='http://jabber.org/protocol/disco#info'><feature var='http://jabber.org/protocol/muc#request'/><feature var='muc_hidden'/><feature var='muc_unsecured'/><feature var='muc_membersonly'/><feature var='muc_unmoderated'/><feature var='muc_persistent'/><identity type='text' name='testchat gruppe' category='conference'/><feature var='urn:xmpp:mam:2'/><feature var='urn:xmpp:sid:0'/><feature var='muc_nonanonymous'/><feature var='http://jabber.org/protocol/muc'/><feature var='http://jabber.org/protocol/muc#stable_id'/><feature var='http://jabber.org/protocol/muc#self-ping-optimization'/><feature var='jabber:iq:register'/><feature var='vcard-temp'/><x type='result' xmlns='jabber:x:data'><field type='hidden' var='FORM_TYPE'><value>http://jabber.org/protocol/muc#roominfo</value></field><field label='Description' var='muc#roominfo_description' type='text-single'><value/></field><field label='Number of occupants' var='muc#roominfo_occupants' type='text-single'><value>2</value></field><field label='Allow members to invite new members' var='{http://prosody.im/protocol/muc}roomconfig_allowmemberinvites' type='boolean'><value>0</value></field><field label='Allow users to invite other users' var='muc#roomconfig_allowinvites' type='boolean'><value>0</value></field><field label='Title' var='muc#roomconfig_roomname' type='text-single'><value>testchat gruppe</value></field><field type='boolean' var='muc#roomconfig_changesubject'/><field type='text-single' var='{http://modules.prosody.im/mod_vcard_muc}avatar#sha1'/><field type='text-single' var='muc#roominfo_lang'><value/></field></x></query></iq>\n\
-    ";
-    
+        <iq id='605818D4-4D16-4ACC-B003-BFA3E11849E1' to='test1@xmpp.eightysoft.de/Monal-iOS.15e153a8' xmlns='jabber:client' type='result' from='asdkjfhskdf@messaging.one'><pubsub xmlns='http://jabber.org/protocol/pubsub'><subscription node='eu.siacs.conversations.axolotl.devicelist' subid='6795F13596465' subscription='subscribed' jid='test1@xmpp.eightysoft.de'/></pubsub></iq>\n\
+";
+/*
+*/
     DDLogInfo(@"creating parser delegate");
+//yes, but this is not insecure because these are string literals boxed into an NSArray below rather than containing unchecked user input
+//see here: https://releases.llvm.org/13.0.0/tools/clang/docs/DiagnosticsReference.html#wformat-security
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-security"
     MLBasePaser* delegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
         if(parsedStanza != nil)
         {
@@ -83,8 +89,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 id result = [parsedStanza find:query];
                 DDLogDebug(@"Query: '%@', result: '%@'", query, result);
             }
+            NSString* specialQuery1 = @"/<type=%@>/{http://jabber.org/protocol/pubsub}pubsub/subscription<node=%@><subscription=%s><jid=%@>";
+            id result = [parsedStanza find:specialQuery1, @"result", @"eu.siacs.conversations.axolotl.devicelist", "subscribed", @"test1@xmpp.eightysoft.de"];
+            DDLogDebug(@"Query: '%@', result: '%@'", specialQuery1, result);
         }
     }];
+#pragma clang diagnostic pop
     
     //create xml parser, configure our delegate and feed it with data
     NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[xml dataUsingEncoding:NSUTF8StringEncoding]];
@@ -95,6 +105,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     DDLogInfo(@"calling parse");
     [xmlParser parse];     //blocking operation
     DDLogInfo(@"parse ended");
+    [DDLog flushLog];
+//make sure apple's code analyzer will not reject the app for the appstore because of our call to exit()
+#ifdef IS_ALPHA
+    exit(0);
+#endif
 }
 
 -(id) init
@@ -132,7 +147,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
     dispatch_async(dispatch_get_main_queue(), ^{
         NSInteger unread = 0;
-        if(unreadMsgCnt)
+        if(unreadMsgCnt != nil)
             unread = [unreadMsgCnt integerValue];
         DDLogInfo(@"Updating unread badge to: %ld", (long)unread);
         [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
@@ -143,25 +158,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(BOOL) application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
-    //migrate defaults db to shared app group
-    if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
-    {
-        DDLogInfo(@"Migrating [NSUserDefaults standardUserDefaults] to app group container...");
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"] forKey:@"ChatBackgrounds"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ShowGeoLocation"] forKey:@"ShowGeoLocation"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"] forKey:@"Sound"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"] forKey:@"SetDefaults"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"] forKey:@"HasSeenIntro"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"] forKey:@"HasSeenLogin"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ShowImages"] forKey:@"ShowImages"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"] forKey:@"HasUpgradedPushiOS13"];
-        [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"BackgroundImage"] forKey:@"BackgroundImage"];
-        [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"] forKey:@"AlertSoundFile"];
-        
-        [[HelperTools defaultsDB] setBool:YES forKey:@"DefaulsMigratedToAppGroup"];
-        [[HelperTools defaultsDB] synchronize];
-        DDLogInfo(@"Migration complete and written to disk");
-    }
     DDLogInfo(@"App launching with options: %@", launchOptions);
     
     //init IPC and ProcessLock
@@ -174,7 +170,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //do MLFiletransfer cleanup tasks (do this in a new thread to parallelize it with our ping to the appex and don't slow down app startup)
     //this will also migrate our old image cache to new MLFiletransfer cache
     //BUT: don't do this if we are sending the sharesheet outbox
-    if(launchOptions[UIApplicationLaunchOptionsURLKey] == nil || ![launchOptions[UIApplicationLaunchOptionsURLKey] isEqual:[NSURL URLWithString:@"monalOpen://"]])
+    if(launchOptions[UIApplicationLaunchOptionsURLKey] == nil || ![launchOptions[UIApplicationLaunchOptionsURLKey] isEqual:kMonalOpenURL])
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [MLFiletransfer doStartupCleanup];
         });
@@ -201,9 +197,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //this will use the cached values in defaultsDB, if possible
     [[MLXMPPManager sharedInstance] setPushToken:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleScheduleBackgroundFetchingTaskNotification:) name:kScheduleBackgroundFetchingTask object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleScheduleBackgroundTaskNotification:) name:kScheduleBackgroundTask object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowNotIdle:) name:kMonalNotIdle object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalNewMessageNotice object:nil];
@@ -244,7 +241,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         ];
     }
     UNNotificationCategory* messageCategory;
-    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings;
 #if TARGET_OS_MACCATALYST
     authOptions |= UNAuthorizationOptionProvisional;
 #endif
@@ -254,6 +251,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         intentIdentifiers:@[]
         options:UNNotificationCategoryOptionAllowAnnouncement
     ];
+    
+    [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
+        DDLogInfo(@"Current notification settings: %@", settings);
+    }];
 
     //request auth to show notifications and register our notification categories created above
     [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError* error) {
@@ -315,8 +316,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [MLNotificationManager sharedInstance];
     
     //register BGTask
-    DDLogInfo(@"calling MonalAppDelegate configureBackgroundFetchingTask");
-    [self configureBackgroundFetchingTask];
+    DDLogInfo(@"calling MonalAppDelegate configureBackgroundTasks");
+    [self configureBackgroundTasks];
     
     // Play audio even if phone is in silent mode
     NSError* audioSessionError;
@@ -415,6 +416,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) setActiveChats:(UIViewController*) activeChats
 {
+    DDLogDebug(@"Active chats did load...");
     _activeChats = (ActiveChatsViewController*)activeChats;
     [self openChatOfContact:_contactToOpen withCompletion:_completionToCall];
 }
@@ -492,9 +494,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                     username = @"";         //roster does not specify a predefined username for the new account, register does (optional)
                 
                 weakify(self);
-                [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^{
+                [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^(NSNumber* accountNo) {
                     strongify(self);
-                    xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+                    DDLogVerbose(@"Got accountNo for newly registered account: %@", accountNo);
+                    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+                    DDLogInfo(@"Got newly registered account: %@", account);
                     
                     //this should never happen
                     MLAssert(account != nil, @"Can not use account after register!", (@{
@@ -506,6 +510,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                     if(account != nil)      //silence memory warning despite assertion above
                     {
                         MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                        DDLogInfo(@"Adding contact to roster: %@", contact);
                         //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
                         [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
                         [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
@@ -518,6 +523,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             if(isRoster && account)
             {
                 MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                DDLogInfo(@"Adding contact to roster: %@", contact);
                 //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
                 [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
                 [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
@@ -570,12 +576,15 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [self handleXMPPURL:url];
         return YES;
     }
-    else if([url.scheme isEqualToString:@"monalOpen"])      //app opened via sharesheet
+    else if([url.scheme isEqualToString:kMonalOpenURL.scheme])      //app opened via sharesheet
     {
         //make sure our outbox content is sent (if the mainapp is still connected and also was in foreground while the sharesheet was used)
         //and open the chat the newest outbox entry was sent to
-        DDLogInfo(@"Got monalOpen:// url, trying to send all outboxes...");
-        [self sendAllOutboxes];
+        //make sure activechats ui is properly initialized when calling this
+        createQueuedTimer(0.5, dispatch_get_main_queue(), (^{
+            DDLogInfo(@"Got %@ url, trying to send all outboxes...", kMonalOpenURL);
+            [self sendAllOutboxes];
+        }));
         return YES;
     }
     return NO;
@@ -608,18 +617,25 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
     {
         DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
+        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
+        MLAssert(fromContact, @"fromContact should not be nil");
+        NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
+        MLAssert(messageId, @"messageId should not be nil");
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
+        //this can happen if that account got disabled
+        if(account == nil)
+        {
+            //call completion handler directly (we did not handle anything and no connectIfNecessary was called)
+            if(completionHandler)
+                completionHandler();
+            return;
+        }
         
         //add our completion handler to handler queue
         [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
             completionHandler();
         }];
         
-        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
-        NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
-        NSAssert(fromContact, @"fromContact should not be nil");
-        NSAssert(messageId, @"messageId should not be nil");
-        NSAssert(account, @"account should not be nil");
         
         //make sure we have an active buddy for this chat
         [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountId];
@@ -649,7 +665,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             }];
             
             BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:fromContact.contactJid andAccountNo:fromContact.accountId];
-            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText toContact:fromContact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText havingType:kMessageTypeText toContact:fromContact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
                 DDLogInfo(@"REPLY_ACTION success=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", messageIdSentObject);
             }];
         }
@@ -814,17 +830,19 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         }
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            if(loadingHUD != nil)
-                loadingHUD.hidden = YES;
-            
-            //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-            
             //cancel already running background timer, we are now foregrounded again
             [self stopBackgroundTimer];
             
             [self addBackgroundTask];
             [[MLXMPPManager sharedInstance] nowForegrounded];           //NOTE: this will unfreeze all queues in our accounts
+            
+            if(loadingHUD != nil)
+                loadingHUD.hidden = YES;
+            
+            //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
+            //this must be done *after* [[MLXMPPManager sharedInstance] nowForegrounded] to make sure an already open chat view
+            //knows it is now foregrounded (we obviously don't mark messages as read if a chat view is in background while still loaded/"visible")
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
         });
     });
 }
@@ -867,7 +885,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogVerbose(@"Setting _shutdownPending to YES...");
         _shutdownPending = YES;
         DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
-        [self scheduleBackgroundFetchingTask:YES];        //make sure delivery will be attempted, if needed (force as soon as possible)
+        [self scheduleBackgroundTask:YES];        //make sure delivery will be attempted, if needed (force as soon as possible)
         DDLogInfo(@"|~~| 20%% |~~|");
         [self updateUnread];
         DDLogInfo(@"|~~| 40%% |~~|");
@@ -971,6 +989,18 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 #pragma mark - background tasks
 
+-(void) nowNotIdle:(NSNotification*) notification
+{
+    DDLogInfo(@"### SOME ACCOUNT CHANGED TO NON-IDLE STATE ###");
+    //show spinner (dispatch *async* to main queue to allow for ui changes)
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle]))
+            [self.activeChats.spinner stopAnimating];
+        else
+            [self.activeChats.spinner startAnimating];
+    });
+}
+
 -(void) nowIdle:(NSNotification*) notification
 {
     DDLogInfo(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
@@ -1022,11 +1052,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 DDLogVerbose(@"Setting _shutdownPending to YES...");
                 _shutdownPending = YES;
                 [[MLXMPPManager sharedInstance] disconnectAll];     //disconnect all accounts to prevent TCP buffer leaking
-                [self scheduleBackgroundFetchingTask:NO];           //request bg fetch execution in BGFETCH_DEFAULT_INTERVAL seconds
+                [self scheduleBackgroundTask:NO];           //request bg fetch execution in BGFETCH_DEFAULT_INTERVAL seconds
                 [HelperTools dispatchSyncReentrant:^{
                     BOOL stopped = NO;
                     //make sure this will be done only once, even if we have an uikit bgtask and a bg fetch running simultaneously
-                    if(self->_bgTask != UIBackgroundTaskInvalid || self->_bgFetch != nil)
+                    if(self->_bgTask != UIBackgroundTaskInvalid || self->_bgProcessing != nil || self->_bgRefreshing != nil)
                     {
                         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                         DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1041,12 +1071,21 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         [[UIApplication sharedApplication] endBackgroundTask:task];
                         stopped = YES;
                     }
-                    if(self->_bgFetch != nil)
+                    if(self->_bgProcessing != nil)
                     {
-                        DDLogDebug(@"stopping backgroundFetchingTask");
+                        DDLogDebug(@"stopping backgroundProcessingTask");
                         [DDLog flushLog];
-                        BGTask* task = self->_bgFetch;
-                        self->_bgFetch = nil;
+                        BGTask* task = self->_bgProcessing;
+                        self->_bgProcessing = nil;
+                        [task setTaskCompletedWithSuccess:YES];
+                        stopped = YES;
+                    }
+                    if(self->_bgRefreshing != nil)
+                    {
+                        DDLogDebug(@"stopping backgroundRefreshingTask");
+                        [DDLog flushLog];
+                        BGTask* task = self->_bgRefreshing;
+                        self->_bgRefreshing = nil;
                         [task setTaskCompletedWithSuccess:YES];
                         stopped = YES;
                     }
@@ -1067,10 +1106,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //log both cases if present
         if(self->_bgTask != UIBackgroundTaskInvalid)
             DDLogVerbose(@"Not starting UIKit background task, already running: %d", (int)self->_bgTask);
-        if(self->_bgFetch != nil)
-            DDLogVerbose(@"Not starting UIKit background task, bg fetch already running: %@", self->_bgFetch);
+        if(self->_bgProcessing != nil)
+            DDLogVerbose(@"Not starting UIKit background task, bg task already running: %@", self->_bgProcessing);
+        if(self->_bgRefreshing != nil)
+            DDLogVerbose(@"Not starting UIKit background task, bg task already running: %@", self->_bgRefreshing);
         //don't start uikit bg task if it's already running or a bg fetch is running already
-        if(self->_bgTask == UIBackgroundTaskInvalid && self->_bgFetch == nil)
+        if(self->_bgTask == UIBackgroundTaskInvalid && self->_bgProcessing == nil && self->_bgRefreshing == nil)
         {
             DDLogInfo(@"Starting UIKit background task...");
             //indicate we want to do work even if the app is put into background
@@ -1079,13 +1120,13 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 [DDLog flushLog];
                 
                 @synchronized(self) {
-                    //ui background tasks expire at the same time as background fetching tasks
-                    //--> we have to check if a background fetching task is running and don't disconnect, if so
-                    if(self->_bgFetch == nil)
+                    //ui background tasks expire at the same time as background processing/refreshing tasks
+                    //--> we have to check if a background processing/refreshing task is running and don't disconnect, if so
+                    if(self->_bgProcessing == nil && self->_bgRefreshing == nil)
                     {
                         DDLogVerbose(@"Setting _shutdownPending to YES...");
                         self->_shutdownPending = YES;
-                        DDLogDebug(@"_bgFetch == nil --> disconnecting and ending background task");
+                        DDLogDebug(@"_bgProcessing == nil && _bgRefreshing == nil --> disconnecting and ending background task");
                         
                         //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
                         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
@@ -1095,14 +1136,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         
                         //schedule a BGProcessingTaskRequest to process this further as soon as possible
                         //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                        [self scheduleBackgroundFetchingTask:YES];      //force as soon as possible
+                        [self scheduleBackgroundTask:YES];      //force as soon as possible
                         
                         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                         DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                     }
                     else
-                        DDLogDebug(@"_bgFetch != nil --> not disconnecting");
+                        DDLogDebug(@"_bgProcessing != nil || _bgRefreshing != nil --> not disconnecting");
                     
                     DDLogDebug(@"stopping UIKit _bgTask");
                     [DDLog flushLog];
@@ -1115,15 +1156,15 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     } onQueue:dispatch_get_main_queue()];
 }
 
--(void) handleBackgroundFetchingTask:(BGTask*) task
+-(void) handleBackgroundProcessingTask:(BGTask*) task
 {
-    DDLogInfo(@"RUNNING BGTASK SETUP HANDLER");
+    DDLogInfo(@"RUNNING BGPROCESSING SETUP HANDLER");
     
-    _bgFetch = task;
+    _bgProcessing = task;
     weakify(task);
     task.expirationHandler = ^{
         strongify(task);
-        DDLogWarn(@"*** BGTASK EXPIRED ***");
+        DDLogWarn(@"*** BGPROCESSING EXPIRED ***");
         [DDLog flushLog];
         
         BOOL background = [HelperTools isInBackground];
@@ -1147,7 +1188,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 
                 //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                 //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                [self scheduleBackgroundFetchingTask:YES];      //force as soon as possible
+                [self scheduleBackgroundTask:YES];      //force as soon as possible
                 
                 //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                 DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1156,9 +1197,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             else
                 DDLogDebug(@"_bgTask != UIBackgroundTaskInvalid --> not disconnecting");
             
-            DDLogDebug(@"stopping backgroundFetchingTask");
+            DDLogDebug(@"stopping backgroundProcessingTask: %@", task);
             [DDLog flushLog];
-            self->_bgFetch = nil;
+            self->_bgProcessing = nil;
             //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
             [task setTaskCompletedWithSuccess:!background];
         }
@@ -1176,7 +1217,103 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     if(self->_bgTask != UIBackgroundTaskInvalid)
     {
-        DDLogDebug(@"stopping UIKit _bgTask, not needed when running a bg fetch");
+        DDLogDebug(@"stopping UIKit _bgTask, not needed when running a bg task");
+        [DDLog flushLog];
+        UIBackgroundTaskIdentifier task = self->_bgTask;
+        self->_bgTask = UIBackgroundTaskInvalid;
+        [[UIApplication sharedApplication] endBackgroundTask:task];
+    }
+    
+    if(self->_bgRefreshing != nil)
+    {
+        DDLogDebug(@"stopping bg refreshing task, not needed when running a (longer running) bg processing task");
+        [DDLog flushLog];
+        BGTask* refreshingTask = self->_bgRefreshing;
+        self->_bgRefreshing = nil;
+        [refreshingTask setTaskCompletedWithSuccess:YES];
+    }
+    
+    if([[MLXMPPManager sharedInstance] hasConnectivity])
+    {
+        [self startBackgroundTimer:BGPROCESS_GRACEFUL_TIMEOUT];
+        @synchronized(self) {
+            DDLogVerbose(@"Setting _shutdownPending to NO...");
+            _shutdownPending = NO;
+        }
+        //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg task
+        [[MLXMPPManager sharedInstance] connectIfNecessary];
+    }
+    else
+        DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
+    
+    //request another execution in BGFETCH_DEFAULT_INTERVAL seconds
+    [self scheduleBackgroundTask:NO];
+    
+    DDLogInfo(@"BGPROCESSING SETUP HANDLER COMPLETED SUCCESSFULLY...");
+}
+
+-(void) handleBackgroundRefreshingTask:(BGTask*) task
+{
+    DDLogInfo(@"RUNNING BGREFRESHING SETUP HANDLER");
+    
+    _bgRefreshing = task;
+    weakify(task);
+    task.expirationHandler = ^{
+        strongify(task);
+        DDLogWarn(@"*** BGREFRESHING EXPIRED ***");
+        [DDLog flushLog];
+        
+        BOOL background = [HelperTools isInBackground];
+        
+        DDLogVerbose(@"Waiting for @synchronized(self)...");
+        @synchronized(self) {
+            DDLogVerbose(@"Now entered @synchronized(self) block...");
+            //ui background tasks expire at the same time as background fetching tasks
+            //--> we have to check if an ui bg task is running and don't disconnect, if so
+            if(background && self->_bgTask == UIBackgroundTaskInvalid)
+            {
+                DDLogVerbose(@"Setting _shutdownPending to YES...");
+                self->_shutdownPending = YES;
+                DDLogDebug(@"_bgTask == UIBackgroundTaskInvalid --> disconnecting and ending background task");
+                
+                //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
+                [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+                
+                //disconnect all accounts to prevent TCP buffer leaking
+                [[MLXMPPManager sharedInstance] disconnectAll];
+                
+                //schedule a new BGProcessingTaskRequest to process this further as soon as possible
+                //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
+                [self scheduleBackgroundTask:YES];      //force as soon as possible
+                
+                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+            }
+            else
+                DDLogDebug(@"_bgTask != UIBackgroundTaskInvalid --> not disconnecting");
+            
+            DDLogDebug(@"stopping backgroundProcessingTask: %@", task);
+            [DDLog flushLog];
+            self->_bgRefreshing = nil;
+            //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
+            [task setTaskCompletedWithSuccess:!background];
+        }
+    };
+    
+    //only proceed with our BGTASK if the NotificationServiceExtension is not running
+    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+    {
+        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
+            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        }];
+    }
+    
+    if(self->_bgTask != UIBackgroundTaskInvalid)
+    {
+        DDLogDebug(@"stopping UIKit _bgTask, not needed when running a bg task");
         [DDLog flushLog];
         UIBackgroundTaskIdentifier task = self->_bgTask;
         self->_bgTask = UIBackgroundTaskInvalid;
@@ -1185,69 +1322,121 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     if([[MLXMPPManager sharedInstance] hasConnectivity])
     {
-        [self startBackgroundTimer:BGFETCH_GRACEFUL_TIMEOUT];
+        [self startBackgroundTimer:GRACEFUL_TIMEOUT];
         @synchronized(self) {
             DDLogVerbose(@"Setting _shutdownPending to NO...");
             _shutdownPending = NO;
         }
-        //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg fetch
+        //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg task
         [[MLXMPPManager sharedInstance] connectIfNecessary];
     }
     else
         DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
     
     //request another execution in BGFETCH_DEFAULT_INTERVAL seconds
-    [self scheduleBackgroundFetchingTask:NO];
+    [self scheduleBackgroundTask:NO];
     
-    DDLogInfo(@"BGTASK SETUP HANDLER COMPLETED SUCCESSFULLY...");
+    DDLogInfo(@"BGREFRESHING SETUP HANDLER COMPLETED SUCCESSFULLY...");
 }
 
--(void) configureBackgroundFetchingTask
+-(void) configureBackgroundTasks
 {
-    [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0) launchHandler:^(BGTask *task) {
-        DDLogDebug(@"RUNNING BGTASK LAUNCH HANDLER");
+    [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundProcessingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0) launchHandler:^(BGTask *task) {
+        DDLogDebug(@"RUNNING BGPROCESSING LAUNCH HANDLER");
         DDLogInfo(@"BG time available: %f", [UIApplication sharedApplication].backgroundTimeRemaining);
         if(![HelperTools isInBackground])
         {
             DDLogDebug(@"Already in foreground, stopping bgtask");
-            [self->_bgFetch setTaskCompletedWithSuccess:YES];
+            [task setTaskCompletedWithSuccess:YES];
+            return;
         }
-        else
-            [self handleBackgroundFetchingTask:task];
+        @synchronized(self) {
+            if(self->_bgProcessing != nil)
+            {
+                DDLogDebug(@"Already running a bg processing task, stopping second bg processing task");
+                [task setTaskCompletedWithSuccess:YES];
+                return;
+            }
+        }
+        [self handleBackgroundProcessingTask:task];
+    }];
+    
+    [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundRefreshingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0) launchHandler:^(BGTask *task) {
+        DDLogDebug(@"RUNNING BGREFRESHING LAUNCH HANDLER");
+        DDLogInfo(@"BG time available: %f", [UIApplication sharedApplication].backgroundTimeRemaining);
+        if(![HelperTools isInBackground])
+        {
+            DDLogDebug(@"Already in foreground, stopping bgtask");
+            [task setTaskCompletedWithSuccess:YES];
+            return;
+        }
+        @synchronized(self) {
+            if(self->_bgProcessing != nil)
+            {
+                DDLogDebug(@"Already running bg processing task, stopping new bg refreshing task");
+                [task setTaskCompletedWithSuccess:YES];
+                return;
+            }
+        }
+        @synchronized(self) {
+            if(self->_bgRefreshing != nil)
+            {
+                DDLogDebug(@"Already running a bg refreshing task, stopping second bg refreshing task");
+                [task setTaskCompletedWithSuccess:YES];
+                return;
+            }
+        }
+        [self handleBackgroundRefreshingTask:task];
     }];
 }
 
--(void) handleScheduleBackgroundFetchingTaskNotification:(NSNotification*) notification
+-(void) handleScheduleBackgroundTaskNotification:(NSNotification*) notification
 {
     BOOL force = YES;
     if(notification.userInfo)
         force = [notification.userInfo[@"force"] boolValue];
-    [self scheduleBackgroundFetchingTask:force];
+    [self scheduleBackgroundTask:force];
 }
 
--(void) scheduleBackgroundFetchingTask:(BOOL) force
+-(void) scheduleBackgroundTask:(BOOL) force
 {
-    DDLogInfo(@"Scheduling new BackgroundFetchingTask with force=%s...", force ? "yes" : "no");
+    DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");
     [HelperTools dispatchSyncReentrant:^{
-        NSError *error = NULL;
-        // cancel existing task (if any)
-        [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
-        // new task
-        //BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-        BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-        //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-        request.requiresNetworkConnectivity = YES;
-        request.requiresExternalPower = NO;
+        NSError* error;
         if(force)
-            request.earliestBeginDate = nil;
+        {
+            // cancel existing task (if any)
+            //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundProcessingTask];
+            // new task
+            BGProcessingTaskRequest* processingRequest = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundProcessingTask];
+            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+            processingRequest.earliestBeginDate = nil;
+            processingRequest.requiresNetworkConnectivity = YES;
+            processingRequest.requiresExternalPower = NO;
+            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:processingRequest error:&error])
+            {
+                // Errorcodes https://stackoverflow.com/a/58224050/872051
+                DDLogError(@"Failed to submit BGTask request %@: %@", processingRequest, error);
+            }
+            else
+                DDLogVerbose(@"Success submitting BGTask request %@", processingRequest);
+        }
         else
-            request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
-        BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
-        if(!success) {
-            // Errorcodes https://stackoverflow.com/a/58224050/872051
-            DDLogError(@"Failed to submit BGTask request: %@", error);
-        } else {
-            DDLogVerbose(@"Success submitting BGTask request %@", request);
+        {
+            // cancel existing task (if any)
+            //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
+            // new task
+            BGAppRefreshTaskRequest* refreshingRequest = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundRefreshingTask];
+            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+            refreshingRequest.earliestBeginDate = nil;
+            //refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
+            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:refreshingRequest error:&error])
+            {
+                // Errorcodes https://stackoverflow.com/a/58224050/872051
+                DDLogError(@"Failed to submit BGTask request %@: %@", refreshingRequest, error);
+            }
+            else
+                DDLogVerbose(@"Success submitting BGTask request %@", refreshingRequest);
         }
     } onQueue:dispatch_get_main_queue()];
 }
@@ -1270,14 +1459,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         completionHandler(UIBackgroundFetchResultNoData);
         return;
     }
-    //we need the wakeup completion handling even if a bgtask or bgfetch is running because we want to keep
+    //we need the wakeup completion handling even if a uikit bgtask or bgprocessing or bgrefreshing is running because we want to keep
     //the connection for a few seconds to allow message receipts to come in instead of triggering the appex
-    /*else if(self->_bgTask == UIBackgroundTaskInvalid || self->_bgFetch == nil)
-    {
-        DDLogWarn(@"Ignoring incomingWakeupWithCompletionHandler: because of (self->_bgTask == UIBackgroundTaskInvalid || self->_bgFetch == nil)");
-        completionHandler(UIBackgroundFetchResultNoData);
-        return;
-    }*/
     
     NSString* completionId = [[NSUUID UUID] UUIDString];
     DDLogInfo(@"got incomingWakeupWithCompletionHandler with ID %@", completionId);
@@ -1307,12 +1490,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         DDLogInfo(@"Handling wakeup completion %@", completionId);
                         BOOL background = [HelperTools isInBackground];
                         
-                        //we have to check if an ui bg task or background fetching task is running and don't disconnect, if so
-                        if(background && self->_bgTask == UIBackgroundTaskInvalid && self->_bgFetch == nil)
+                        //we have to check if an ui bg task or background processing/refreshing task is running and don't disconnect, if so
+                        if(background && self->_bgTask == UIBackgroundTaskInvalid && self->_bgProcessing == nil && self->_bgRefreshing == nil)
                         {
                             DDLogVerbose(@"Setting _shutdownPending to YES...");
                             self->_shutdownPending = YES;
-                            DDLogDebug(@"background && _bgTask == UIBackgroundTaskInvalid && _bgFetch == nil --> disconnecting and feeding wakeup completion");
+                            DDLogDebug(@"background && _bgTask == UIBackgroundTaskInvalid && _bgProcessing == nil && _bgRefreshing == nil --> disconnecting and feeding wakeup completion");
                             
                             //this has to be before account disconnects, to detect which accounts are/are not idle (e.g. don't have/have a sync error)
                             BOOL wasIdle = [[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle];
@@ -1323,14 +1506,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                             
                             //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
                             //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                            [self scheduleBackgroundFetchingTask:!wasIdle];
+                            [self scheduleBackgroundTask:!wasIdle];
                             
                             //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                             DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
                         }
                         else
-                            DDLogDebug(@"NOT (background && _bgTask == UIBackgroundTaskInvalid && _bgFetch == nil) --> not disconnecting");
+                            DDLogDebug(@"NOT (background && _bgTask == UIBackgroundTaskInvalid && _bgProcessing == nil && _bgRefreshing == nil) --> not disconnecting");
                         
                         //call completion (should be done *after* the idle state check because it could freeze the app)
                         DDLogInfo(@"Calling wakeup completion handler...");
@@ -1339,7 +1522,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         completionHandler(UIBackgroundFetchResultFailed);
                         
                         //trigger disconnect if we are idle and no timer is blocking us now
-                        if(self->_bgTask != UIBackgroundTaskInvalid || self->_bgFetch != nil)
+                        if(self->_bgTask != UIBackgroundTaskInvalid || self->_bgProcessing != nil || self->_bgRefreshing != nil)
                             dispatch_async(dispatch_get_main_queue(), ^{
                                 [self checkIfBackgroundTaskIsStillNeeded];
                             });
@@ -1354,94 +1537,107 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 #pragma mark - share sheet added
 
+//send all sharesheet outboxes (this method will be called by AppDelegate if opened via monalOpen:// url)
 -(void) sendAllOutboxes
 {
-    //send all sharesheet outboxes (this method will be called by AppDelegate if opened via monalOpen:// url)
-    MLContact* lastRecipientContact = nil;
-    for(xmpp* xmppAccount in [MLXMPPManager sharedInstance].connectedXMPP)
+    //delay outbox sending until we have an active chats ui
+    if(self.activeChats == nil)
     {
-        DDLogVerbose(@"Trying to send outbox for account %@...", xmppAccount);
-        MLContact* recipientContact = [self sendOutboxForAccount:xmppAccount];
-        if(recipientContact != nil)
-            lastRecipientContact = recipientContact;
+        createQueuedTimer(0.5, dispatch_get_main_queue(), (^{
+            [self sendAllOutboxes];
+        }));
+        return;
     }
-    DDLogVerbose(@"Trying to open chat of outbox receiver: %@", lastRecipientContact);
-    MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
-    [appDelegate openChatOfContact:lastRecipientContact withCompletion:^(NSNumber* _Nonnull status){
-        if([status boolValue] && appDelegate.activeChats.currentChatViewController != nil)
-            [appDelegate.activeChats.currentChatViewController showUploadHUD];
-    }];
-}
-
--(MLContact*) sendOutboxForAccount:(xmpp*) account
-{
-    MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
-    MLContact* recipientContact = nil;
-    monal_id_block_t sendCommentOrCleanup = ^(NSDictionary* payload) {
-        if([payload[@"comment"] length] > 0)
-        {
-            MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
-            BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
-            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"comment"] toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                DDLogInfo(@"SHARESHEET_SEND_COMMENT success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
-                [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-                    if(appDelegate.activeChats.currentChatViewController != nil)
-                    {
-                        [appDelegate.activeChats.currentChatViewController scrollToBottom];
-                        [appDelegate.activeChats.currentChatViewController hideUploadHUD];
-                    }
-                });
-            }];
-        }
-        else
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-                if(appDelegate.activeChats.currentChatViewController != nil)
-                {
-                    [appDelegate.activeChats.currentChatViewController scrollToBottom];
-                    [appDelegate.activeChats.currentChatViewController hideUploadHUD];
-                }
-            });
-    };
-    for(NSDictionary* payload in [[DataLayer sharedInstance] getShareSheetPayloadForAccountNo:account.accountNo])
+    
+    //open the destination chat only once
+    BOOL alreadyOpen = NO;
+    for(NSDictionary* payload in [[DataLayer sharedInstance] getShareSheetPayload])
     {
         DDLogInfo(@"Sending outbox entry: %@", payload);
-        MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
-        recipientContact = contact;     //save last used contact
-        BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
-        if([payload[@"type"] isEqualToString:@"geo"] || [payload[@"type"] isEqualToString:@"url"] || [payload[@"type"] isEqualToString:@"text"])
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:payload[@"account_id"]];
+        if(account == nil)
         {
-            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
-            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Sharing failed", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Cannot share something with disabled/deleted account, destination: %@, internal account id: %@", @""), payload[@"recipient"], payload[@"account_id"]] preferredStyle:UIAlertControllerStyleAlert];
+            [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+            }]];
+            [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
+            [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+            continue;
+        }
+        MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
+        
+        DDLogVerbose(@"Trying to open chat of outbox receiver: %@", contact);
+        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+        //don't use [self openChatOfContact:withCompletion:] because it's asynchronous and can only handle one contact at a time (e.g. until the asynchronous execution finished)
+        //we can invoke the activeChats interface directly instead, because we already did the necessary preparations ourselves
+        if(!alreadyOpen)
+        {
+            [(ActiveChatsViewController*)self.activeChats presentChatWithContact:contact];
+            alreadyOpen = YES;
+        }
+        
+        monal_id_block_t cleanup = ^(NSDictionary* payload) {
+            [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+            if(self.activeChats.currentChatViewController != nil)
+            {
+                [self.activeChats.currentChatViewController scrollToBottom];
+                [self.activeChats.currentChatViewController hideUploadHUD];
+            }
+        };
+        
+        BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
+        if([payload[@"type"] isEqualToString:@"text"])
+        {
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeText toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
                 DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
-                sendCommentOrCleanup(payload);
+                cleanup(payload);
+            }];
+        }
+        else if([payload[@"type"] isEqualToString:@"url"])
+        {
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeUrl toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                cleanup(payload);
+            }];
+        }
+        else if([payload[@"type"] isEqualToString:@"geo"])
+        {
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeGeo toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                cleanup(payload);
             }];
         }
         else if([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"contact"] || [payload[@"type"] isEqualToString:@"audiovisual"])
         {
             DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
-            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
-            $call(payload[@"data"], $ID(account), $BOOL(encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-                if(error != nil)
-                {
-                    DDLogError(@"Failed to upload outbox file: %@", error);
-                    [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
-                }
-                else
+            [self.activeChats.currentChatViewController showUploadHUD];
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                $call(payload[@"data"], $ID(account), $BOOL(encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                            DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
-                            sendCommentOrCleanup(payload);
-                        }];
+                        if(error != nil)
+                        {
+                            DDLogError(@"Failed to upload outbox file: %@", error);
+                            NSMutableDictionary* payloadCopy = [NSMutableDictionary dictionaryWithDictionary:payload];
+                            cleanup(payloadCopy);
+                            
+                            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Failed to share file", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Error: %@", @""), error] preferredStyle:UIAlertControllerStyleAlert];
+                            [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                            }]];
+                            [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
+                        }
+                        else
+                            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url havingType:kMessageTypeFiletransfer toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                                cleanup(payload);
+                            }];
                     });
-            })));
+                })));
+            });
         }
         else
             MLAssert(NO, @"Outbox payload type unknown", payload);
     }
-    return recipientContact;
 }
 
 @end

@@ -22,7 +22,7 @@
 #import "MLFileTransferTextCell.h"
 #import "MLFileTransferFileViewController.h"
 #import "MLAudioRecoderManager.h"
-#import "MLUploadQueueBaseCell.h"
+#import "MLUploadQueueCell.h"
 
 @interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, UICollectionViewDataSource, CLLocationManagerDelegate, SearchResultDelegate, OpenFileDelegate, AudioRecoderManagerDelegate, MLUploadQueueCellDelegate, UIDropInteractionDelegate, PHPickerViewControllerDelegate>
 {
@@ -37,6 +37,7 @@
 @property (nonatomic, weak) IBOutlet UILabel* placeHolderText;
 @property (nonatomic, weak) IBOutlet UIButton* sendButton;
 @property (nonatomic, weak) IBOutlet UIButton* plusButton;
+@property (nonatomic, weak) IBOutlet UIButton* audioButton;
 @property (weak, nonatomic) IBOutlet UICollectionView* uploadMenuView;
 
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;

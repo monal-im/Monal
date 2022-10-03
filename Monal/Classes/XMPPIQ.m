@@ -65,7 +65,19 @@ NSString* const kiqErrorType = @"error";
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
         @"jid": jid,
         @"node": node
-    } andChildren:@[] andData:nil]];
+    } andChildren:@[
+        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:@{
+#ifdef IS_ALPHA
+            @"pushModule": @"monalAlpha"
+#else //IS_ALPHA
+#if TARGET_OS_MACCATALYST
+            @"pushModule": @"monalProdCatalyst"
+#else //TARGET_OS_MACCATALYST
+            @"pushModule": @"monalProdiOS"
+#endif //NOT TARGET_OS_MACCATALYST
+#endif //NOT IS_ALPHA
+        }]
+    ] andData:nil]];
 }
 
 -(void) setPushDisable:(NSString*) node onPushServer:(NSString*) pushServer
@@ -251,14 +263,15 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setVersion
 {
+    NSOperatingSystemVersion osVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"name" andData:@"Monal"],
 #if TARGET_OS_MACCATALYST
-        [[MLXMLNode alloc] initWithElement:@"os" andData:@"macOS"],
+        [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"macOS %lu.%lu.%lu", osVersion.majorVersion, osVersion.minorVersion, osVersion.patchVersion]],
 #else
-        [[MLXMLNode alloc] initWithElement:@"os" andData:@"iOS"],
+        [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"iOS %lu.%lu.%lu", osVersion.majorVersion, osVersion.minorVersion, osVersion.patchVersion]],
 #endif
-        [[MLXMLNode alloc] initWithElement:@"version" andData:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]],
+        [[MLXMLNode alloc] initWithElement:@"version" andData:[HelperTools appBuildVersionInfo]]
     ] andData:nil]];
 }
 
@@ -267,7 +280,7 @@ NSString* const kiqErrorType = @"error";
     MLXMLNode* blockNode = [[MLXMLNode alloc] initWithElement:(blocked ? @"block" : @"unblock") andNamespace:@"urn:xmpp:blocking"];
     
     MLXMLNode* itemNode = [[MLXMLNode alloc] initWithElement:@"item"];
-    [itemNode.attributes setObject:blockedJid forKey:kJid];
+    [itemNode.attributes setObject:blockedJid forKey:@"jid"];
     [blockNode addChildNode:itemNode];
     
     [self addChildNode:blockNode];

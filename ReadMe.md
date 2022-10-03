@@ -1,18 +1,18 @@
 # Monal for XMPP
 ## A cross platform, modern XMPP client for iOS and macOS
-[![Alpha build status](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml/badge.svg?branch=alpha.build)](https://github.com/monal-im/Monal/actions/workflows/alpha.build-push.yml)
+[![Alpha build status](https://github.com/monal-im/Monal/actions/workflows/develop-push.yml/badge.svg)](https://github.com/monal-im/Monal/actions/workflows/develop-push.yml)
 [![Translation status](https://hosted.weblate.org/widgets/monal/-/svg-badge.svg)](https://hosted.weblate.org/engage/monal/?utm_source=widget)
 
 This is the Monal XMPP client as found in the app store. 
 If you want to  use the latest stable versions, search for Monal in the iOS or OSX app store.
-[Visit the blog to read about the development](https://monal.im)!
+[Visit the blog to read about the development](https://monal-im.org)!
 
 ## Releases
-|        | iOS                                                      | macOS                                                    | macOS (homebrew)                            |
-|--------|----------------------------------------------------------|----------------------------------------------------------|---------------------------------------------|
-| Stable | [App Store](https://apps.apple.com/app/id317711500)      | [App Store](https://apps.apple.com/app/id1499227291)     |                                             |
-| Beta   | [Testflight](https://testflight.apple.com/join/RjIlyvqa) | [Testflight](https://testflight.apple.com/join/nBWaZryI) | brew install --cask monal                   |
-| Alpha  |                                                          |                                                          | brew tap monal-im/homebrew-monal-alpha<br>brew install --cask monal-alpha |
+|        | iOS                                                           | macOS                                                    | macOS (homebrew)                                                          |
+|--------|---------------------------------------------------------------|----------------------------------------------------------|---------------------------------------------------------------------------|
+| Stable | [App Store](https://apps.apple.com/app/id317711500)           | [App Store](https://apps.apple.com/app/id1499227291)     |                                                                           |
+| Beta   | [Testflight](https://testflight.apple.com/join/lLLlgHpB)      | [Testflight](https://testflight.apple.com/join/tGH2m5vf) | brew install --cask monal                                                 |
+| Alpha  | upon request to [info@monal-im.org](mailto:info@monal-im.org) |                                                          | brew tap monal-im/homebrew-monal-alpha<br>brew install --cask monal-alpha |
 
 
 ## Support Chat (MUC) and Wiki
@@ -41,7 +41,7 @@ We host and manage translations via [Weblate](https://hosted.weblate.org/engage/
 
 ### Platform information
 
-Monal requires at least iOS 12 and macOS 10.15 (Catalina)
+Monal always supports the two latest MacOS and iOS major releases.
 
 ### Supported XEPs
 

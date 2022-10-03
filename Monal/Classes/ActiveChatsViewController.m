@@ -13,7 +13,6 @@
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
 #import "MLImageManager.h"
-#import "MLRegisterViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
 #import "MLXEPSlashMeHandler.h"
@@ -150,6 +149,7 @@ static NSMutableSet* _smacksWarningDisplayed;
             [self.chatListTable endUpdates];
         }];
         [CATransaction commit];
+        [self.chatListTable reloadEmptyDataSet];
 
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
         [appDelegate updateUnread];
@@ -188,9 +188,10 @@ static NSMutableSet* _smacksWarningDisplayed;
             // reload contact entry if we found it
             if(indexPath)
             {
-                    DDLogDebug(@"Reloading row at %@", indexPath);
-                    [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                DDLogDebug(@"Reloading row at %@", indexPath);
+                [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
             }
+            [self.chatListTable reloadEmptyDataSet];
         });
     }
 }
@@ -365,28 +366,34 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
 }
 
--(void) segueToIntroScreensIfNeeded
-{
-    // display quick start if the user never seen it or if there are 0 enabled accounts
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"] || [[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
-#ifdef IS_ALPHA
-        UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
-        [self presentViewController:loginViewController animated:YES completion:^{}];
-#else
-        [self performSegueWithIdentifier:@"showLogin" sender:self];
-#endif
-        return;
-    }
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
-        [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
-        return;
-    }
-}
-
 -(void) didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void) segueToIntroScreensIfNeeded
+{
+    //open password migration if needed
+    NSArray* needingMigration = [[DataLayer sharedInstance] accountListNeedingPasswordMigration];
+    if(needingMigration.count > 0)
+    {
+        UIViewController* passwordMigration = [[SwiftuiInterface new] makePasswordMigration:needingMigration];
+        [self presentViewController:passwordMigration animated:YES completion:^{}];
+        return;
+    }
+    // display quick start if the user never seen it or if there are 0 enabled accounts
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
+    {
+        UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
+        [self presentViewController:loginViewController animated:YES completion:^{}];
+        return;
+    }
+    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"])
+    {
+        [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+        return;
+    }
 }
 
 -(void) openConversationPlaceholder:(MLContact*) contact
@@ -413,6 +420,16 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion
 {
+    // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
+    if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
+    {
+        // make sure the already open chat is reloaded and return
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+        if(completion != nil)
+            completion(@YES);
+        return;
+    }
+    
     // clear old chat before opening a new one (but not for splitView == YES)
     if([HelperTools deviceUsesSplitView] == NO)
         [self.navigationController popViewControllerAnimated:NO];
@@ -432,15 +449,6 @@ static NSMutableSet* _smacksWarningDisplayed;
         [self openConversationPlaceholder:nil];
         if(completion != nil)
             completion(@NO);
-        return;
-    }
-    // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
-    if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
-    {
-        // make sure the already open chat is reloaded and return
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-        if(completion != nil)
-            completion(@YES);
         return;
     }
 
@@ -470,53 +478,19 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(BOOL) shouldPerformSegueWithIdentifier:(NSString*) identifier sender:(id) sender
 {
-    if([identifier isEqualToString:@"showDetails"])
-    {
-        //don't show contact details for mucs (they will get their own muc details later on)
-        if(((MLContact*)sender).isGroup)
-            return NO;
-    }
     return YES;
 }
 
 //this is needed to prevent segues invoked programmatically
 -(void) performSegueWithIdentifier:(NSString*) identifier sender:(id) sender
 {
-    if([self shouldPerformSegueWithIdentifier:identifier sender:sender] == NO)
-    {
-        if([identifier isEqualToString:@"showDetails"])
-        {
-            // Display warning
-            UIAlertController* groupDetailsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Groupchat/channel details", @"")
-                                                                                message:NSLocalizedString(@"Groupchat/channel details are currently not implemented in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [groupDetailsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                [groupDetailsWarning dismissViewControllerAnimated:YES completion:nil];
-            }]];
-            [self presentViewController:groupDetailsWarning animated:YES completion:nil];
-        }
-        return;
-    }
     [super performSegueWithIdentifier:identifier sender:sender];
 }
 
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
-    if([segue.identifier isEqualToString:@"showRegister"])
-    {
-        UINavigationController* navigationController = (UINavigationController*)segue.destinationViewController;
-        MLRegisterViewController* reg = (MLRegisterViewController*)navigationController.visibleViewController;
-        NSDictionary* registerData = (NSDictionary*)sender;
-        if(registerData)
-        {
-            DDLogDebug(@"Feeding MLRegisterViewController withdata: %@", registerData);
-            reg.registerServer = nilExtractor(registerData[@"host"]);
-            reg.registerUsername = nilExtractor(registerData[@"username"]);
-            reg.registerToken = nilExtractor(registerData[@"token"]);
-            reg.completionHandler = nilExtractor(registerData[@"completion"]);
-        }
-    }
-    else if([segue.identifier isEqualToString:@"showConversation"])
+    if([segue.identifier isEqualToString:@"showConversation"])
     {
         UINavigationController* nav = segue.destinationViewController;
         chatViewController* chatVC = (chatViewController*)nav.topViewController;
@@ -656,11 +630,16 @@ static NSMutableSet* _smacksWarningDisplayed;
     [self presentChatWithContact:selected];
 }
 
-- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
+-(void) tableView:(UITableView*) tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath*) indexPath
 {
-    NSDictionary* contactDic = [self.unpinnedContacts objectAtIndex:indexPath.row];
-
-    [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
+    MLContact* selected = nil;
+    if(indexPath.section == pinnedChats) {
+        selected = self.pinnedContacts[indexPath.row];
+    } else {
+        selected = self.unpinnedContacts[indexPath.row];
+    }
+    UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:selected];
+    [self presentViewController:detailsViewController animated:YES completion:^{}];
 }
 
 
@@ -703,7 +682,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(BOOL) emptyDataSetShouldDisplay:(UIScrollView*) scrollView
 {
-    BOOL toreturn = (self.unpinnedContacts.count == 0 && self.pinnedContacts == 0) ? YES : NO;
+    BOOL toreturn = (self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0) ? YES : NO;
     if(toreturn)
     {
         // A little trick for removing the cell separators
@@ -724,23 +703,29 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 //we can not call this var "completion" because then some dumb comiler check kicks in and tells us "completion handler is never called" which ich plainly wrong
 //callback doesn't seem to be a word in the objc compiler's "bad words" dictionary, so this makes it compile again
--(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_void_block_t) callback
+-(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_id_block_t) callback
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
-        [self performSegueWithIdentifier:@"showRegister" sender:@{
+        UIViewController* registerViewController = [[SwiftuiInterface new] makeAccountRegistration:@{
             @"host": nilWrapper(host),
             @"username": nilWrapper(username),
             @"token": nilWrapper(token),
-            @"completion": nilDefault(callback, ^{}),
+            @"completion": nilDefault(callback, (^(id accountNo) {
+                DDLogWarn(@"Dummy reg completion called for accountNo: %@", accountNo);
+            })),
         }];
+        [self presentViewController:registerViewController animated:YES completion:^{}];
     }];
 }
 
 -(void) showDetails
 {
     if([MLNotificationManager sharedInstance].currentContact != nil)
-        [self performSegueWithIdentifier:@"showDetails" sender:[MLNotificationManager sharedInstance].currentContact];
+    {
+        UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:[MLNotificationManager sharedInstance].currentContact];
+        [self presentViewController:detailsViewController animated:YES completion:^{}];
+    }
 }
 
 -(void) deleteConversation
@@ -754,6 +739,7 @@ static NSMutableSet* _smacksWarningDisplayed;
             if([rowContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
             {
                 [self tableView:self.chatListTable commitEditingStyle:UITableViewCellEditingStyleDelete forRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:section]];
+                [self openConversationPlaceholder:nil];
                 return;
             }
         }];

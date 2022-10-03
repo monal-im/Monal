@@ -1,5 +1,5 @@
 # Explain why existing APIs are not adequate for your app.
-I'm a co-developer of the App Monal (see https://github.com/anurodhp/Monal and my fork here https://github.com/tmolitor-stud-tu/Monal/commits/develop )
+I'm a co-developer of the App Monal (see https://github.com/monal-im/Monal.
 I'm using this dev-account to do an adhoc distribution of alpha-versions before my changes hit the betatesters via the main repo.
 
 The app is an xmpp instant messaging app, needing the ability to silence incoming pushes that hit the NotificationServiceExtension is essential, mainly because:

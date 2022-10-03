@@ -86,6 +86,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 -(NSDate *) connectedTimeFor:(NSNumber*) accountNo;
 
+-(NSNumber* _Nullable) login:(NSString*) jid password:(NSString*) password;
+-(void) removeAccountForAccountNo:(NSNumber*) accountNo;
+-(void) addNewAccountToKeychainAndConnectWithPassword:(NSString*) password andAccountNo:(NSNumber*) accountNo;
+
 /**
  update the password in the keychan and update memory cache
  */
@@ -98,7 +102,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
 Sends a message to a specified contact in account. Calls completion handler on success or failure.
  */
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
+-(void) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
 -(void)sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
 -(void) sendChatState:(BOOL) isTyping fromAccount:(NSNumber*) accountNo toJid:(NSString*) jid;
 

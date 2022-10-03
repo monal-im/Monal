@@ -23,6 +23,7 @@
 @import MobileCoreServices;
 @import AVFoundation;
 @import UniformTypeIdentifiers.UTCoreTypes;
+@import Intents;
 
 enum kSettingSection {
     kSettingSectionAvatar,
@@ -66,6 +67,7 @@ enum kSettingsAdvancedRows {
 enum kSettingsEditRows {
     SettingsClearOmemoSessionRow,
     SettingsClearHistoryRow,
+    SettingsRemoveAccountRow,
     SettingsDeleteAccountRow,
     SettingsEditRowsCnt
 };
@@ -256,6 +258,7 @@ enum DummySettingsRows {
 
 -(IBAction) save:(id) sender
 {
+    NSError* error;
     [self.currentTextField resignFirstResponder];
 
     DDLogVerbose(@"Saving");
@@ -276,7 +279,21 @@ enum DummySettingsRows {
         [self alertWithTitle:NSLocalizedString(@"Username missing", @"") andMsg:NSLocalizedString(@"Your entered XMPP ID is missing the username", @"")];
         return;
     }
-
+    
+    //check if our keychain contains a password
+    if(self.enabled && self.password.length == 0)
+    {
+        [SAMKeychain passwordForService:kMonalKeychainName account:self.accountNo.stringValue error:&error];
+        if(error != nil)
+        {
+            DDLogError(@"Keychain error: %@", error);
+            self.enabled = NO;
+            [self.tableView reloadData];
+            [self alertWithTitle:NSLocalizedString(@"Password missing", @"") andMsg:NSLocalizedString(@"Please enter a password below before activating this account.", @"")];
+            return;
+        }
+    }
+    
     NSArray* elements = [self.jid componentsSeparatedByString:@"@"];
 
     //if it is a JID
@@ -325,15 +342,18 @@ enum DummySettingsRows {
         else
         {
             BOOL accountExists = [[DataLayer sharedInstance] doesAccountExistUser:user andDomain:domain];
-            if(!accountExists) {
+            if(!accountExists)
+            {
+                DDLogVerbose(@"Creating account: %@", dic);
                 NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
-                if(accountID) {
+                if(accountID != nil)
+                {
                     self.accountNo = accountID;
-                    self.editMode = YES;
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
                     [SAMKeychain setPassword:self.password forService:kMonalKeychainName account:self.accountNo.stringValue];
                     if(self.enabled)
                     {
+                        DDLogVerbose(@"Now connecting newly created account: %@", self.accountNo);
                         [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
                         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
                         [account publishStatusMessage:self.statusMessage];
@@ -341,23 +361,39 @@ enum DummySettingsRows {
                         [account publishAvatar:self.selectedAvatarImage];
                     }
                     else
+                    {
+                        DDLogVerbose(@"Making sure newly created account is not connected and deleting all SiriKit interactions: %@", self.accountNo);
                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+                        [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
+                            if(error != nil)
+                                DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+                        }];
+                    }
                     //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
                     [self showSuccessHUD];
                 }
-            } else {
-                [self alertWithTitle:NSLocalizedString(@"Account Exists", @"") andMsg:NSLocalizedString(@"This account already exists in Monal.", @"")];
             }
+            else
+                [self alertWithTitle:NSLocalizedString(@"Account Exists", @"") andMsg:NSLocalizedString(@"This account already exists in Monal.", @"")];
         }
     }
     else
     {
+        [dic setObject:[NSNumber numberWithBool:NO] forKey:kNeedsPasswordMigration];
+        DDLogVerbose(@"Updating existing account: %@", dic);
         BOOL updatedAccount = [[DataLayer sharedInstance] updateAccounWithDictionary:dic];
-        if(updatedAccount) {
-            [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountNo];
+        if(updatedAccount)
+        {
+            DDLogVerbose(@"DB update succeeded: %@", self.accountNo);
+            if(self.password.length)
+            {
+                DDLogVerbose(@"Now setting password for account %@ in SAMKeychain: '%@'", self.accountNo, self.password);
+                [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountNo];
+            }
             if(self.enabled)
             {
+                DDLogVerbose(@"Account is still enabled, updating in-memory structures to reflect new settings: %@", self.accountNo);
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
                 xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
                 //it is okay to only update the server settings here:
@@ -379,7 +415,14 @@ enum DummySettingsRows {
                     [account publishAvatar:self.selectedAvatarImage];
             }
             else
+            {
+                DDLogVerbose(@"Account is not enabled anymore, deleting all SiriKit interactions and making sure it's disconnected: %@", self.accountNo);
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+                [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
+                    if(error != nil)
+                        DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+                }];
+            }
             //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             [self showSuccessHUD];
@@ -405,34 +448,84 @@ enum DummySettingsRows {
     });
 }
 
-- (IBAction) deleteAccountClicked: (id) sender
+- (IBAction) removeAccountClicked: (id) sender
 {
     UIAlertController* questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account", @"") message:NSLocalizedString(@"This will remove this account and the associated data from this device.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
     UIAlertAction* noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         //do nothing when "no" was pressed
     }];
     UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
-        DDLogVerbose(@"Deleting accountNo %@", self.accountNo);
-        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-        [self.db removeAccount:self.accountNo];
-        [SAMKeychain deletePasswordForService:kMonalKeychainName account:self.accountNo.stringValue];
+        DDLogVerbose(@"Removing accountNo %@", self.accountNo);
+        [[MLXMPPManager sharedInstance] removeAccountForAccountNo:self.accountNo];
 
         MBProgressHUD* hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;
         hud.removeFromSuperViewOnHide = YES;
         hud.label.text = NSLocalizedString(@"Success", @"");
-        hud.detailsLabel.text = NSLocalizedString(@"The account has been deleted", @"");
+        hud.detailsLabel.text = NSLocalizedString(@"The account has been removed", @"");
         UIImage* image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         hud.customView = [[UIImageView alloc] initWithImage:image];
         [hud hideAnimated:YES afterDelay:1.0f];
         
-        // trigger UI removal
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [self dismissViewControllerAnimated:YES completion:nil];
         });
+    }];
+    [questionAlert addAction:noAction];
+    [questionAlert addAction:yesAction];
+    questionAlert.popoverPresentationController.sourceView = sender;
+
+    [self presentViewController:questionAlert animated:YES completion:nil];
+}
+
+-(IBAction) deleteAccountClicked:(id) sender
+{
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(xmppAccount.accountState < kStateBound)
+    {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error Removing Account", @"")
+                                                                        message:NSLocalizedString(@"Your account must be enabled and connected, to be removed from the server!", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return;
+    }
+    
+    UIAlertController* questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account", @"") message:NSLocalizedString(@"This will delete this account and the associated data from the server and this device. Data might still be retained on other devices, though.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction* noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+        //do nothing when "no" was pressed
+    }];
+    UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
+        DDLogVerbose(@"Deleting account on server: %@", xmppAccount);
+        [xmppAccount removeFromServerWithCompletion:^(NSString* error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(error != nil)
+                {
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error Removing Account", @"")
+                                                                        message:error preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                }
+                else
+                {
+                    MBProgressHUD* hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                    hud.mode = MBProgressHUDModeCustomView;
+                    hud.removeFromSuperViewOnHide = YES;
+                    hud.label.text = NSLocalizedString(@"Success", @"");
+                    hud.detailsLabel.text = NSLocalizedString(@"The account has been deleted", @"");
+                    UIImage* image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+                    hud.customView = [[UIImageView alloc] initWithImage:image];
+                    [hud hideAnimated:YES afterDelay:1.0f];
+                    
+                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                        [self dismissViewControllerAnimated:YES completion:nil];
+                    });
+                }
+            });
+        }];
     }];
     [questionAlert addAction:noAction];
     [questionAlert addAction:yesAction];
@@ -445,7 +538,7 @@ enum DummySettingsRows {
 {
     DDLogVerbose(@"Clearing own omemo session as request by account settings");
 
-    UIAlertController* questionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Clear OMEMO session", @"") message:NSLocalizedString(@"This will clear the your own omemo session for debugging purposes", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertController* questionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Clear OMEMO session", @"") message:NSLocalizedString(@"This will clear your own omemo session for debugging purposes", @"") preferredStyle:UIAlertControllerStyleActionSheet];
     UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
         //do nothing when "no" was pressed
     }];
@@ -628,10 +721,19 @@ enum DummySettingsRows {
                 buttonCell.tag = SettingsClearHistoryRow;
                 return buttonCell;
             }
+            case SettingsRemoveAccountRow:
+            {
+                MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+                buttonCell.buttonText.text = NSLocalizedString(@"Remove Account from this Device", @"");
+                buttonCell.buttonText.textColor = [UIColor redColor];
+                buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
+                buttonCell.tag = SettingsRemoveAccountRow;
+                return buttonCell;
+            }
             case SettingsDeleteAccountRow:
             {
                 MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-                buttonCell.buttonText.text = NSLocalizedString(@"Delete Account", @"");
+                buttonCell.buttonText.text = NSLocalizedString(@"Delete Account on Server", @"");
                 buttonCell.buttonText.textColor = [UIColor redColor];
                 buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
                 buttonCell.tag = SettingsDeleteAccountRow;
@@ -765,6 +867,9 @@ enum DummySettingsRows {
             }
             case SettingsClearHistoryRow:
                 [self clearHistoryClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
+                break;
+            case SettingsRemoveAccountRow:
+                [self removeAccountClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
                 break;
             case SettingsDeleteAccountRow:
                 [self deleteAccountClicked:[tableView cellForRowAtIndexPath:newIndexPath]];

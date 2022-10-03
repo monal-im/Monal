@@ -7,6 +7,7 @@
 //
 
 #import "MLEncryptedPayload.h"
+#import "HelperTools.h"
 
 @interface MLEncryptedPayload ()
 @property (nonatomic, strong) NSData* body;
@@ -19,10 +20,10 @@
 
 -(MLEncryptedPayload *) initWithBody:(NSData *) body key:(NSData *) key iv:(NSData *) iv authTag:(NSData *) authTag
 {
-    assert(body != nil);
-    assert(key != nil);
-    assert(iv != nil);
-    assert(authTag != nil);
+    MLAssert(body != nil, @"body must not be nil");
+    MLAssert(key != nil, @"key must not be nil");
+    MLAssert(iv != nil, @"iv must not be nil");
+    MLAssert(authTag != nil, @"authTag must not be nil");
 
     self = [super init];
     self.body = body;
@@ -34,8 +35,8 @@
 
 -(MLEncryptedPayload *) initWithKey:(NSData *) key iv:(NSData *) iv
 {
-    assert(key != nil);
-    assert(iv != nil);
+    MLAssert(key != nil, @"key must not be nil");
+    MLAssert(iv != nil, @"iv must not be nil");
 
     self = [super init];
     self.body = nil;

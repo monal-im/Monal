@@ -4,6 +4,8 @@
 <dict>
 	<key>aps-environment</key>
 	<string>production</string>
+	<key>com.apple.developer.usernotifications.filtering</key>
+	<true/>
 	<key>com.apple.developer.usernotifications.communication</key>
 	<true/>
 	<key>com.apple.security.app-sandbox</key>
@@ -24,7 +26,7 @@
 	<true/>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)G7YU7X7KRJ.SworIM</string>
+		<string>$(AppIdentifierPrefix)org.monal-im.prod.catalyst.monal</string>
 	</array>
 </dict>
 </plist>

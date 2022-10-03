@@ -50,234 +50,24 @@
         }
         else
             DDLogVerbose(@"dbversion table already migrated");
+        
+        //make sure we don't try to operate on a database we can't upgrade from
+        NSNumber* dbversion = [self readDBVersion:db];
+        if(dbversion.doubleValue < 4.78)
+        {
+            DDLogError(@"Got *TOO OLD* db version %@", dbversion);
+            NSFileManager* fileManager = [NSFileManager defaultManager];
+            NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
+            NSString* writableDBPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
+            for(NSString* suffix in @[@"", @"-wal", @"-shm"])
+                [fileManager removeItemAtPath:[NSString stringWithFormat:@"%@%@", writableDBPath, suffix] error:nil];
+            @throw [NSException exceptionWithName:@"OLD_DB_DETECTED" reason:@"Detected too old DB version, deleted file and crashing now!" userInfo:nil];
+        }
     }];
 
     return [db boolWriteTransaction:^{
         NSNumber* dbversion = [self readDBVersion:db];
         DDLogInfo(@"Got db version %@", dbversion);
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:2.0 withBlock:^{
-            [db executeNonQuery:@"drop table muc_favorites"];
-            [db executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool, account_id int);"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:2.1 withBlock:^{
-            [db executeNonQuery:@"alter table message_history add column received bool;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:2.2 withBlock:^{
-            [db executeNonQuery:@"alter table buddylist add column synchPoint datetime;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:2.3 withBlock:^{
-            [db executeNonQuery:@"UPDATE account SET resource=?;" andArguments:@[[HelperTools encodeRandomResource]]];
-        }];
-
-        //OMEMO begins below
-        [self updateDB:db withDataLayer:dataLayer toVersion:3.1 withBlock:^{
-            [db executeNonQuery:@"CREATE TABLE signalIdentity (deviceid int NOT NULL PRIMARY KEY, account_id int NOT NULL unique,identityPublicKey BLOB,identityPrivateKey BLOB)"];
-            [db executeNonQuery:@"CREATE TABLE signalSignedPreKey (account_id int NOT NULL,signedPreKeyId int not null,signedPreKey BLOB);"];
-
-            [db executeNonQuery:@"CREATE TABLE signalPreKey (account_id int NOT NULL,prekeyid int not null,preKey BLOB);"];
-
-            [db executeNonQuery:@"CREATE TABLE signalContactIdentity ( account_id int NOT NULL,contactName text,contactDeviceId int not null,identity BLOB,trusted boolean);"];
-
-            [db executeNonQuery:@"CREATE TABLE signalContactKey (account_id int NOT NULL,contactName text,contactDeviceId int not null, groupId text,senderKey BLOB);"];
-
-            [db executeNonQuery:@"  CREATE TABLE signalContactSession (account_id int NOT NULL, contactName text, contactDeviceId int not null, recordData BLOB)"];
-            [db executeNonQuery:@"alter table message_history add column encrypted bool;"];
-
-            [db executeNonQuery:@"alter table message_history add column previewText text;"];
-            [db executeNonQuery:@"alter table message_history add column previewImage text;"];
-
-            [db executeNonQuery:@"alter table buddylist add column backgroundImage text;"];
-        }];
-
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:3.2 withBlock:^{
-            [db executeNonQuery:@"CREATE TABLE muteList (jid varchar(50));"];
-            [db executeNonQuery:@"CREATE TABLE blockList (jid varchar(50));"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:3.3 withBlock:^{
-            [db executeNonQuery:@"alter table buddylist add column encrypt bool;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:3.4 withBlock:^{
-            [db executeNonQuery:@"alter table activechats add COLUMN lastMessageTime datetime "];
-
-            //iterate current active and set their times
-            NSArray* active = [db executeReader:@"select distinct buddy_name, account_id from activeChats"];
-            for(NSDictionary* row in active)
-            {
-                //get max
-                NSNumber* max = (NSNumber *)[db executeScalar:@"select max(TIMESTAMP) from message_history where (message_to=? or message_from=?) and account_id=?" andArguments:@[[row objectForKey:@"buddy_name"],[row objectForKey:@"buddy_name"], [row objectForKey:@"account_id"]]];
-                if(max != nil) {
-                    [db executeNonQuery:@"update activechats set lastMessageTime=? where buddy_name=? and account_id=?" andArguments:@[max,[row objectForKey:@"buddy_name"], [row objectForKey:@"account_id"]]];
-                } else  {
-
-                }
-            }
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:3.5 withBlock:^{
-            [db executeNonQuery:@"CREATE UNIQUE INDEX uniqueContact on buddylist (buddy_name, account_id);"];
-            [db executeNonQuery:@"delete from buddy_resources"];
-            [db executeNonQuery:@"CREATE UNIQUE INDEX uniqueResource on buddy_resources (buddy_id, resource);"];
-        }];
-
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:3.6 withBlock:^{
-            [db executeNonQuery:@"CREATE TABLE imageCache (url varchar(255), path varchar(255) );"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:3.7 withBlock:^{
-            [db executeNonQuery:@"alter table message_history add column stanzaid text;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:3.8 withBlock:^{
-            [db executeNonQuery:@"alter table account add column airdrop bool;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:3.9 withBlock:^{
-            [db executeNonQuery:@"alter table account add column rosterVersion varchar(50);"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.0 withBlock:^{
-            [db executeNonQuery:@"alter table message_history add column errorType varchar(50);"];
-            [db executeNonQuery:@"alter table message_history add column errorReason varchar(50);"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.1 withBlock:^{
-            [db executeNonQuery:@"CREATE TABLE subscriptionRequests(requestid integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50) collate nocase, UNIQUE(account_id,buddy_name))"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.2 withBlock:^{
-            NSArray* contacts = [db executeReader:@"select distinct account_id, buddy_name, lastMessageTime from activechats;"];
-            [db executeNonQuery:@"delete from activechats;"];
-            for(NSDictionary* obj in contacts)
-            {
-                [db executeNonQuery:@"insert into activechats (account_id, buddy_name, lastMessageTime) values (?,?,?);"
-                        andArguments:@[
-                        [obj objectForKey:@"account_id"],
-                        [obj objectForKey:@"buddy_name"],
-                        [obj objectForKey:@"lastMessageTime"]
-                        ]];
-            }
-            NSArray *dupeMessageids= [db executeReader:@"select * from (select messageid, count(messageid) as c from message_history   group by messageid) where c>1"];
-
-            for(NSDictionary* obj in dupeMessageids)
-            {
-                    NSArray* dupeMessages = [db executeReader:@"select * from message_history where messageid=? order by message_history_id asc " andArguments:@[[obj objectForKey:@"messageid"]]];
-                //hopefully this is quick and doesnt grow..
-                [dupeMessages enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull message, NSUInteger idx, BOOL * _Nonnull stop __unused) {
-                    //keep first one
-                    if(idx > 0) {
-                        [db executeNonQuery:@"delete from message_history where message_history_id=?" andArguments:@[[message objectForKey:@"message_history_id"]]];
-                    }
-                }];
-            }
-            [db executeNonQuery:@"CREATE UNIQUE INDEX ux_account_messageid ON message_history(account_id, messageid)"];
-
-            [db executeNonQuery:@"alter table activechats add column lastMesssage blob;"];
-            [db executeNonQuery:@"CREATE UNIQUE INDEX ux_account_buddy ON activechats(account_id, buddy_name)"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.3 withBlock:^{
-
-            [db executeNonQuery:@"alter table buddylist add column subscription varchar(50)"];
-            [db executeNonQuery:@"alter table buddylist add column ask varchar(50)"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.4 withBlock:^{
-
-            [db executeNonQuery:@"update account set rosterVersion='0';"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.5 withBlock:^{
-
-            [db executeNonQuery:@"alter table account add column state blob;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.6 withBlock:^{
-
-            [db executeNonQuery:@"alter table buddylist add column messageDraft text;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.7 withBlock:^{
-
-            // Delete column password,account_name from account, set default value for rosterVersion to 0, increased varchar size
-            [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
-            [db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'protocol_id' integer NOT NULL, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
-            [db executeNonQuery:@"INSERT INTO account (account_id, protocol_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state) SELECT account_id, protocol_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state from _accountTMP;"];
-            [db executeNonQuery:@"UPDATE account SET rosterVersion='0' WHERE rosterVersion is NULL;"];
-            [db executeNonQuery:@"DROP TABLE _accountTMP;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.71 withBlock:^{
-
-            // Only reset server to '' when server == domain
-            [db executeNonQuery:@"UPDATE account SET server='' where server=domain;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.72 withBlock:^{
-
-            // Delete column protocol_id from account and drop protocol table
-            [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
-            [db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
-            [db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state from _accountTMP;"];
-            [db executeNonQuery:@"DROP TABLE _accountTMP;"];
-            [db executeNonQuery:@"DROP TABLE protocol;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.73 withBlock:^{
-
-            // Delete column oauth from account
-            [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
-            [db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
-            [db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state from _accountTMP;"];
-            [db executeNonQuery:@"DROP TABLE _accountTMP;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.74 withBlock:^{
-            // Rename column oldstyleSSL to directTLS
-            [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
-            [db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
-            [db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state from _accountTMP;"];
-            [db executeNonQuery:@"DROP TABLE _accountTMP;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.75 withBlock:^{
-            // Delete column secure from account
-            [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
-            [db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
-            [db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state from _accountTMP;"];
-            [db executeNonQuery:@"DROP TABLE _accountTMP;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.76 withBlock:^{
-            // Add column for the last interaction of a contact
-            [db executeNonQuery:@"alter table buddylist add column lastInteraction INTEGER NOT NULL DEFAULT 0;"];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.77 withBlock:^{
-            // drop legacy caps tables
-            [db executeNonQuery:@"DROP TABLE IF EXISTS legacy_caps;"];
-            [db executeNonQuery:@"DROP TABLE IF EXISTS buddy_resources_legacy_caps;"];
-            //recreate capabilities cache to make a fresh start
-            [db executeNonQuery:@"DROP TABLE IF EXISTS ver_info;"];
-            [db executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));"];
-            [db executeNonQuery:@"CREATE TABLE ver_timestamp (ver VARCHAR(32), timestamp INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ver));"];
-            [db executeNonQuery:@"CREATE INDEX timeindex ON ver_timestamp(timestamp);" ];
-        }];
-
-        [self updateDB:db withDataLayer:dataLayer toVersion:4.78 withBlock:^{
-            // drop airdrop column
-            [db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
-            [db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
-            [db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state from _accountTMP;"];
-            [db executeNonQuery:@"DROP TABLE _accountTMP;"];
-        }];
 
         [self updateDB:db withDataLayer:dataLayer toVersion:4.80 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE ipc(id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);"];
@@ -1154,10 +944,23 @@
                     ) \
             ;"];
         }];
+        
+        //add needs_password_migration field to accounts db
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.301 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE account ADD COLUMN needs_password_migration BOOL DEFAULT false;"];
+        }];
+        
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.302 withBlock:^{
+            //dummy upgrade to make sure all state gets invalidated, we want to be sure push gets correctly enabled
+        }];
+        
+        //remove unused sharesheet outbox column "comment"
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.303 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE sharesheet_outbox DROP COLUMN comment;"];
+        }];
 
         // check if db version changed
         NSNumber* newdbversion = [self readDBVersion:db];
-
         if([dbversion isEqualToNumber:newdbversion] == NO)
         {
             // invalidate account state if the database has changed
@@ -1167,7 +970,7 @@
         }
         else
         {
-            DDLogInfo(@"Database: no migration needed version %@", newdbversion);
+            DDLogInfo(@"Database: no migration needed, version: %@", newdbversion);
             return NO;
         }
     }];

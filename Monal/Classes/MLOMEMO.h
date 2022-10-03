@@ -50,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(void) queryOMEMODevices:(NSString*) jid;
 
--(void) checkIfMucMemberHasExistingSession:(NSString*) buddyJid;
+-(void) subscribeAndFetchDevicelistIfNoSessionExistsForJid:(NSString*) buddyJid;
 -(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid isMuc:(BOOL) isMuc;
 
 -(void) sendLocalDevicesIfNeeded;
@@ -58,7 +58,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(void) clearAllSessionsForJid:(NSString*) jid;
 -(void) unsubscribeFromDanglingJids:(NSSet<NSString*>*) danglingJids;
--(void) cleanup;
 @end
 
 NS_ASSUME_NONNULL_END

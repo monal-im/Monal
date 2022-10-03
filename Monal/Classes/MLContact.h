@@ -30,8 +30,9 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 +(NSString*) ownDisplayNameForAccount:(xmpp*) account;
 
--(BOOL) isSubscribed;
 -(BOOL) isInRoster;
+-(BOOL) isSubscribedTo;
+-(BOOL) isSubscribedFrom;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
 -(BOOL) isEqualToMessage:(MLMessage*) message;
@@ -104,6 +105,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(void) removeFromRoster;
 -(void) addToRoster;
 -(void) clearHistory;
+-(void) removeShareInteractions;
 
 @end
 

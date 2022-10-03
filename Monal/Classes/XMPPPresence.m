@@ -28,7 +28,7 @@
 {
     self = [self init];
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"c" andNamespace:@"http://jabber.org/protocol/caps" withAttributes:@{
-        @"node": @"http://monal.im/",
+        @"node": @"http://monal-im.org/",
         @"hash": @"sha-1",
         @"ver": version
     } andChildren:@[] andData:nil]];

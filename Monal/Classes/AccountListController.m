@@ -9,6 +9,7 @@
 #import "AccountListController.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
+#import "HelperTools.h"
 
 @interface AccountListController ()
 @property (nonatomic, strong) NSDateFormatter* uptimeFormatter;
@@ -59,7 +60,7 @@
 -(NSNumber*) getAccountNoByIndex:(NSUInteger) index
 {
     NSNumber* result = [[self.accountList objectAtIndex: index] objectForKey:@"account_id"];
-    assert(result != nil);
+    MLAssert(result != nil, @"getAccountNoByIndex, result should not be nil");
     return result;
 }
 
@@ -77,7 +78,7 @@
     [cell initTapCell:@"\n\n"];
     cell = [cell initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
     NSDictionary* account = [self.accountList objectAtIndex:accNo];
-    NSAssert(account != nil, @"Expected non nil account in row %lu", (unsigned long)accNo);
+    MLAssert(account != nil, ([NSString stringWithFormat:@"Expected non nil account in row %lu", (unsigned long)accNo]));
     if([(NSString*)[account objectForKey:@"domain"] length] > 0) {
         cell.textLabel.text = [NSString stringWithFormat:@"%@@%@", [[self.accountList objectAtIndex:accNo] objectForKey:@"username"],
                                 [[self.accountList objectAtIndex:accNo] objectForKey:@"domain"]];

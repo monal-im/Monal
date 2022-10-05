@@ -64,13 +64,16 @@
 
 -(void) setSSDPMechanisms:(NSArray<NSString*>*) mechanisms andChannelBindingTypes:(NSArray<NSString*>* _Nullable) cbTypes
 {
-    NSMutableString* _ssdpString = [[NSMutableString alloc] init];
-    [_ssdpString appendString:[[mechanisms sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
+    DDLogVerbose(@"Creating SDDP string: %@\n%@", mechanisms, cbTypes);
+    NSMutableString* ssdpString = [[NSMutableString alloc] init];
+    [ssdpString appendString:[[mechanisms sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
     if(cbTypes != nil)
     {
-        [_ssdpString appendString:@"|"];
-        [_ssdpString appendString:[[cbTypes sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
+        [ssdpString appendString:@"|"];
+        [ssdpString appendString:[[cbTypes sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
     }
+    _ssdpString = [ssdpString copy];
+    DDLogVerbose(@"SDDP string is now: %@", _ssdpString);
 }
 
 -(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType

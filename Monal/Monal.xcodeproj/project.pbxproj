@@ -1837,7 +1837,7 @@
 		C19CC5E028E85527007AD33E /* Fix catalyst aps-enviromnent */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			files = (
 			);
 			inputFileListPaths = (
@@ -1849,7 +1849,7 @@
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
 			shellScript = "# https://developer.apple.com/forums/thread/714011\nentry=$(/usr/libexec/PlistBuddy -c \"Print :aps-environment\" \"$TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\")\nif [ \"$entry\" == \"\" ]; then\n    /usr/libexec/PlistBuddy -c \"Add :aps-environment string production\" \"$TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\"\n    echo \"Added aps-environment in $TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\"\nelse\n    echo \"aps-environment was present in $TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\"\nfi\n";
 		};

@@ -2702,6 +2702,7 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"Registration: Calling submitRegForm");
         [self submitRegForm];
     }
+//TODO: implement SASL2 pinning to not allow downgrades to SASL1 once this ifdef gets removed!
 #ifdef IS_ALPHA
     //prefer SASL2 over SASL1
     else if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"])

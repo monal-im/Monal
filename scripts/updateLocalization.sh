@@ -47,11 +47,14 @@ fi
 
 for folder in "localization/external" "shareSheet-iOS/localization/external"; do
     for file in $folder/*.lproj/*.strings; do
-            # Remove empty lines
-            sed -i '' '/^$/d' $file
-            # Remove default comments that are not supported by weblate
-            sed -i '' '/^\/\* No comment provided by engineer\. \*\/$/d' $file
+        # Remove empty lines
+        sed -i '' '/^$/d' $file
+        # Remove default comments that are not supported by weblate
+        sed -i '' '/^\/\* No comment provided by engineer\. \*\/$/d' $file
+        # Fix empty RHS
+        sed -E -i '' 's|^(.*) = "";$|\1 = \1;|' $file
     done
+    
     #subshell to not leak from "cd $folder"
     (
         cd $folder

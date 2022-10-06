@@ -2715,14 +2715,19 @@ NSString* const kStanza = @"stanza";
                 DDLogWarn(@"Server supports SASL2 PLAIN, ignoring because this is insecure!");
             
             //create list of upgradable scram mechanisms and pick the first one (highest security) the server and we support
+            //but only do so, if we are using channel-binding for additional security
+            //(a MITM could passively intercept the new SCRAM hash which is roughly equivalent to intercepting the plaintext password)
             self->_upgradeTask = nil;
-            NSSet* upgradesOffered = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/upgrade#"]];
-            for(NSString* method in [SCRAM supportedMechanismsIncludingChannelBinding:NO])
-                if([upgradesOffered containsObject:[NSString stringWithFormat:@"UPGR-%@", method]])
-                {
-                    self->_upgradeTask = [NSString stringWithFormat:@"UPGR-%@", method];
-                    break;
-                }
+            if([self channelBindingToUse] != nil)
+            {
+                NSSet* upgradesOffered = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/upgrade#"]];
+                for(NSString* method in [SCRAM supportedMechanismsIncludingChannelBinding:NO])
+                    if([upgradesOffered containsObject:[NSString stringWithFormat:@"UPGR-%@", method]])
+                    {
+                        self->_upgradeTask = [NSString stringWithFormat:@"UPGR-%@", method];
+                        break;
+                    }
+            }
             
             //check for supported scram mechanisms (highest security first!)
             for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:[self channelBindingToUse] != nil])

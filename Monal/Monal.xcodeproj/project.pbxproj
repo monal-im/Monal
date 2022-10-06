@@ -93,6 +93,7 @@
 		3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */; };
 		3D7D352328626CB80042C5E5 /* LoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */; };
 		3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */; };
+		3DB71D1E28EF5908004BF04E /* AddContacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB71D1D28EF5908004BF04E /* AddContacts.swift */; };
 		3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */; };
 		43A92B80C8CD5E04074B5A3E /* Pods_MonalXMPPUnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
@@ -492,6 +493,7 @@
 		3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftuiHelpers.swift; sourceTree = "<group>"; };
 		3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingOverlay.swift; sourceTree = "<group>"; };
 		3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmemoQrCodeView.swift; sourceTree = "<group>"; };
+		3DB71D1D28EF5908004BF04E /* AddContacts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddContacts.swift; sourceTree = "<group>"; };
 		3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmemoKeys.swift; sourceTree = "<group>"; };
 		3EB7A7084FA9A8F68A3D251C /* Pods-MonalXMPPUnitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.debug.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.debug.xcconfig"; sourceTree = "<group>"; };
 		4049F81F60EA5B7A57A4E9C6 /* Pods-NotificationService.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.beta.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.beta.xcconfig"; sourceTree = "<group>"; };
@@ -1017,6 +1019,7 @@
 				264DCF9A23E11483004105CE /* MLNewViewController.h */,
 				264DCF9B23E11483004105CE /* MLNewViewController.m */,
 				84FC375828981A5600634E3E /* PasswordMigration.swift */,
+				3DB71D1D28EF5908004BF04E /* AddContacts.swift */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -1938,6 +1941,7 @@
 				C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */,
 				3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */,
 				C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */,
+				3DB71D1E28EF5908004BF04E /* AddContacts.swift in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				C1E1EC7D286A029C0097EC74 /* MLOgHtmlParser.swift in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,

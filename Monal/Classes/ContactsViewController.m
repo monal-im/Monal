@@ -37,6 +37,13 @@
 
 @implementation ContactsViewController
 
+-(void) openAddContactsMenu:(id)sender
+{
+    UIViewController* addContactsMenuView = [[SwiftuiInterface new] makeViewWithName:@"AddContacts"];
+    // [self showDetailViewController:addContactsMenuView sender:self];
+    [self presentViewController:addContactsMenuView animated:YES completion:^{}];
+}
+
 #pragma mark view life cycle
 
 -(void) viewDidLoad
@@ -70,9 +77,10 @@
     self.tableView.emptyDataSetDelegate = self;
 
     self.navigationItem.rightBarButtonItem.image = [UIImage systemImageNamed:@"plus"];
+    [self.navigationItem.rightBarButtonItem setAction:@selector(openAddContactsMenu:)];
+    // [self.navigationItem.rightBarButtonItem setTarget:@selector(openAddContactsMenu:)];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeviceRotation) name:UIDeviceOrientationDidChangeNotification object:nil];
-
 }
 
 -(void) handleDeviceRotation

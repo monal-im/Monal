@@ -10,8 +10,6 @@
 #import "MLContactCell.h"
 #import "DataLayer.h"
 #import "chatViewController.h"
-#import "addContact.h"
-#import "MLNewViewController.h"
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
 #import "xmpp.h"
@@ -28,6 +26,35 @@
 @end
 
 @implementation ContactsViewController
+
+-(void) openAddContacts:(id)sender
+{
+    UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self dismissViewControllerAnimated:YES completion:nil];
+            [self.parentViewController dismissViewControllerAnimated:YES completion:^{
+                if(self.selectContact)
+                    self.selectContact(newContact);
+            }];
+        });
+    }];
+    [self presentViewController:addContactMenuView animated:YES completion:^{}];
+}
+
+-(void) openContactRequests:(id)sender
+{
+    UIViewController* contactRequestsView = [[SwiftuiInterface new] makeViewWithName:@"ContactRequests"];
+    [self presentViewController:contactRequestsView animated:YES completion:^{}];
+}
+
+-(void) configureContactRequestsImage {
+    UIImage* requestsImage = [[UIImage systemImageNamed:@"questionmark.bubble.fill"] imageWithTintColor:UIColor.monalGreen];
+    UITapGestureRecognizer* requestsTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContactRequests:)];
+    self.navigationItem.rightBarButtonItems[1].customView = [HelperTools
+        buttonWithNotificationBadgeForImage:requestsImage
+        hasNotification:[[DataLayer sharedInstance] contactRequestsForAccount].count > 0
+        withTapHandler:requestsTapRecoginzer];
+}
 
 #pragma mark view life cycle
 
@@ -63,7 +90,12 @@
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
 
-    self.navigationItem.rightBarButtonItem.image = [UIImage systemImageNamed:@"plus"];
+    UIBarButtonItem* addContact = [[UIBarButtonItem alloc] init];
+    addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
+    [addContact setAction:@selector(openAddContacts:)];
+
+    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], nil];
+    [self configureContactRequestsImage];
 }
 
 -(void) dealloc
@@ -147,15 +179,6 @@
         return;
     }
     [super performSegueWithIdentifier:identifier sender:sender];
-}
-
--(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
-{
-    if([segue.identifier isEqualToString:@"showNewMenu"])
-    {
-        MLNewViewController* newView = segue.destinationViewController;
-        newView.selectContact = self.selectContact;
-    }
 }
 
 -(void) loadContactsWithFilter:(NSString*) filter

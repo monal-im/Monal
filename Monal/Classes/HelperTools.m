@@ -520,6 +520,34 @@ void swizzle(Class c, SEL orig, SEL new)
 }
 #pragma clang diagnostic pop
 
++(UIImage*) imageWithNotificationBadgeForImage:(UIImage*) image {
+    UIImage* finalImage;
+    UIImage* badge = [[UIImage systemImageNamed:@"circle.fill"] imageWithTintColor:UIColor.redColor];
+
+    UIGraphicsBeginImageContext(CGSizeMake(image.size.width, image.size.height));
+
+    CGRect imgSize = CGRectMake(0, 0, image.size.width, image.size.height);
+    CGRect dotSize = CGRectMake(image.size.width - 7, 0, 7, 7);
+    [image drawInRect:imgSize];
+    [badge drawInRect:dotSize blendMode:kCGBlendModeNormal alpha:1.0];
+
+    finalImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+
+    return finalImage;
+}
+
++(UIImageView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler {
+    UIImageView* result;
+    if(hasNotification)
+        result = [[UIImageView alloc] initWithImage:[self imageWithNotificationBadgeForImage:image]];
+    else
+        result = [[UIImageView alloc] initWithImage: image];
+
+    [result addGestureRecognizer:handler];
+    return result;
+}
+
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length
 {
     if(!image)

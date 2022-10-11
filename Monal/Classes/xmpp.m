@@ -2400,14 +2400,18 @@ NSString* const kStanza = @"stanza";
             }
             message = [NSString stringWithFormat:NSLocalizedString(@"Login error, account disabled: %@", @""), message];
             
+            //check if SSDP downgrade protection triggered
+            if([parsedStanza check:@"{urn:xmpp:ssdp:0}downgrade-detected"])
+                message = NSLocalizedString(@"SASL downgrade attack detected via SSDP, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @"");
+            
             //clear pipeline cache to make sure we have a fresh restart next time
             xmppPipeliningState oldPipeliningState = _pipeliningState;
             _pipeliningState = kPipelinedNothing;
             _cachedStreamFeaturesBeforeAuth = nil;
             _cachedStreamFeaturesAfterAuth = nil;
             
-            //don't report error but reconnect if we pipelined stuff that is not correct anymore...
-            if(oldPipeliningState != kPipelinedNothing)
+            //don't report error but reconnect if we pipelined stuff that is not correct anymore and no downgrade was detected...
+            if(oldPipeliningState != kPipelinedNothing && ![parsedStanza check:@"{urn:xmpp:ssdp:0}downgrade-detected"])
                 [self reconnect];
             //...but don't try again if it's really the password, that's wrong
             else
@@ -2433,7 +2437,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-                [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES  andDisableAccount:YES];
+                [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
             }
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}success"])
@@ -2765,6 +2769,11 @@ NSString* const kStanza = @"stanza";
             noAuthSupported();
         };
         
+        //pin sasl2 support for this account
+        //downgrading to SASL1 would mean PLAIN instead of SCRAM and no protocol agility for channel-bindings
+        //if XEP-0440 is not supported by server
+        [[DataLayer sharedInstance] pinSasl2ForAccount:self.accountNo];
+        
         //extract menchanisms presented
         _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
         
@@ -2796,7 +2805,7 @@ NSString* const kStanza = @"stanza";
     }
 #endif
     //SASL1 is fallback only if SASL2 isn't supported
-    else if([parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"])
+    else if([parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"] && ![[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo])
     {
         //extract menchanisms presented
         NSSet* supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
@@ -2835,6 +2844,18 @@ NSString* const kStanza = @"stanza";
         }
         else
             noAuthSupported();
+    }
+    else
+    {
+        //this is not a downgrade but something weird going on, report it as "no supported auth"
+        if(![parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && ![parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"])
+        {
+            noAuthSupported();
+            return;
+        }
+        
+        //if the above case didn't trigger, this is a downgrade attack downgrading from SASL2 to SASL1, report is as such
+        [HelperTools postError:NSLocalizedString(@"SASL2 to SASL1 downgrade attack detected, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
     }
 }
 

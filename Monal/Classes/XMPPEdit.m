@@ -112,6 +112,7 @@ enum DummySettingsRows {
 @property (nonatomic) BOOL avatarChanged;
 @property (nonatomic) BOOL rosterNameChanged;
 @property (nonatomic) BOOL statusMessageChanged;
+@property (nonatomic) BOOL sasl2Supported;
 @end
 
 @implementation XMPPEdit
@@ -204,6 +205,8 @@ enum DummySettingsRows {
         self.rosterName = [settings objectForKey:kRosterName];
         self.statusMessage = [settings objectForKey:@"statusMessage"];
         
+        self.sasl2Supported = [[settings objectForKey:kSupportsSasl2] boolValue];
+        
         //overwrite account section heading in edit mode
         self.sectionDictionary[@(kSettingSectionAccount)] = [NSString stringWithFormat:NSLocalizedString(@"Account (%@)", @""), self.jid];
     }
@@ -216,6 +219,7 @@ enum DummySettingsRows {
         self.rosterName = @"";
         self.statusMessage = @"";
         self.enabled = YES;
+        self.sasl2Supported = NO;
         //overwrite account section heading in new mode
         self.sectionDictionary[@(kSettingSectionAccount)] = NSLocalizedString(@"Account (new)", @"");
     }
@@ -329,6 +333,7 @@ enum DummySettingsRows {
         [dic setObject:self.rosterName forKey:kRosterName];
     if(self.statusMessage)
         [dic setObject:self.statusMessage forKey:@"statusMessage"];
+    [dic setObject:[NSNumber numberWithBool:self.sasl2Supported] forKey:kSupportsSasl2];
 
     if(!self.editMode)
     {

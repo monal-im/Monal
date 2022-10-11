@@ -958,8 +958,14 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:5.303 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE sharesheet_outbox DROP COLUMN comment;"];
         }];
+        
+        //add new column for SASL2 pinning
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.304 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE account ADD COLUMN supports_sasl2 BOOL DEFAULT false;"];
+        }];
+        
 
-        // check if db version changed
+        // check if db version changed and invalidate state, if so
         NSNumber* newdbversion = [self readDBVersion:db];
         if([dbversion isEqualToNumber:newdbversion] == NO)
         {

@@ -329,7 +329,7 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) disableAccountForPasswordMigration:(NSNumber*) accountNo
 {
     return [self.db boolWriteTransaction:^{
-        return [self.db executeNonQuery:@"UPDATE account SET enabled=0, needs_password_migration=1 WHERE account_id=?;" andArguments:@[accountNo]];
+        return [self.db executeNonQuery:@"UPDATE account SET enabled=0, needs_password_migration=1, resource=? WHERE account_id=?;" andArguments:@[[HelperTools encodeRandomResource], accountNo]];
     }];
 }
 

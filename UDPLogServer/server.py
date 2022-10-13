@@ -108,7 +108,8 @@ while True:
             logline += ": "
         logline += "counter jumped from %d to %d leaving out %d lines" % (last_counter, decoded["_counter"], decoded["_counter"] - last_counter - 1)
     if len(logline) != 0:
-        print(logline, file=logfd)
+        if logfd:
+            print(logline, file=logfd)
         print(colorize(logline, ansi=15, ansi_bg=0), flush=True)
     
     # deduce log color from loglevel
@@ -116,7 +117,8 @@ while True:
     
     # print original formatted log message
     logline = ("%s" % str(decoded["formattedMessage"])).rstrip()
-    print(logline, file=logfd)
+    if logfd:
+        print(logline, file=logfd)
     print(colorize(logline, **kwargs), flush=True)
     
     # update state

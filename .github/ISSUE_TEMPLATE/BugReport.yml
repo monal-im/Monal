@@ -150,5 +150,5 @@ body:
     attributes:
       label: Notifications-Menu
       options:
-        - label: I have checked that all checkboxes are ticked under Settings --> Notifications
+        - label: I have checked that all checkmarks are present under Settings --> Notifications
           required: true

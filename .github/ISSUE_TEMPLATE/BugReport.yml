@@ -118,6 +118,20 @@ body:
     validations:
       required: false
   - type: checkboxes
+    id: faq-checkbox
+    attributes:
+      label: FAQ
+      options:
+        - label: I have [checked the FAQ](https://github.com/monal-im/Monal/wiki/FAQ---Frequently-Asked-Questions) for my issue
+          required: true
+  - type: checkboxes
+    id: userconsiderations-checkbox
+    attributes:
+      label: Considerations for XMPP users
+      options:
+        - label: I have checked if my issue can be solved with [Considerations for XMPP users](https://github.com/monal-im/Monal/wiki/Considerations-for-XMPP-users) and [Considerations for XMPP server admins](https://github.com/monal-im/Monal/wiki/Considerations-for-XMPP-server-admins)
+          required: true
+  - type: checkboxes
     id: cross-check-checkbox
     attributes:
       label: Related Issues
@@ -129,7 +143,7 @@ body:
     attributes:
       label: XEP-Check
       options:
-        - label: I have checked that at least XEP-198, XEP-0280, XEP-0352, XEP-0357 and XEP-0163 are activated on my server and shown as 'green' under Settings --> Account--> (i) in advanced settings
+        - label: I have checked that at least XEP-198, XEP-0280, XEP-0352, XEP-0357, XEP-0313 and XEP-0163 are activated on my server and shown as 'green' under Settings --> Account--> (i) in advanced settings
           required: true
   - type: checkboxes
     id: notifications-checkbox

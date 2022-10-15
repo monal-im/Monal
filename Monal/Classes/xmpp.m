@@ -2262,6 +2262,15 @@ NSString* const kStanza = @"stanza";
 #pragma mark - SASL1
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}failure"])
         {
+            if(self.accountState >= kStateLoggedIn)
+                return [self invalidXMLError];
+            
+            //record TLS version (starttls is always TLS 1.2)
+            if(!self.connectionProperties.server.isDirectTLS)
+                self.connectionProperties.tlsVersion = @"1.2";
+            else
+                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            
             NSString* message = [parsedStanza findFirst:@"text#"];;
             if([parsedStanza check:@"not-authorized"])
             {
@@ -2299,6 +2308,12 @@ NSString* const kStanza = @"stanza";
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
             
+            //record TLS version (starttls is always TLS 1.2)
+            if(!self.connectionProperties.server.isDirectTLS)
+                self.connectionProperties.tlsVersion = @"1.2";
+            else
+                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
             
@@ -2314,8 +2329,9 @@ NSString* const kStanza = @"stanza";
             //after sasl success a new stream will be started --> reset parser to accommodate this
             [self prepareXMPPParser:NO];
             
+            //this could possibly be with or without XML opening (old behaviour was with opening, so keep that)
             DDLogDebug(@"Sending NOT-pipelined stream restart...");
-            [self startXMPPStreamWithXMLOpening:YES];                   //could possibly be with or without XML opening (old behaviour was with opening, so keep that)
+            [self startXMPPStreamWithXMLOpening:YES];
             
             //only pipeline stream resume/bind if not already done
             if(_pipeliningState < kPipelinedResumeOrBind)
@@ -2436,6 +2452,12 @@ NSString* const kStanza = @"stanza";
                 //record SDDP support
                 self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
                 
+                //record TLS version (starttls is always TLS 1.2)
+                if(!self.connectionProperties.server.isDirectTLS)
+                    self.connectionProperties.tlsVersion = @"1.2";
+                else
+                    self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+                
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
                 [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
             }
@@ -2473,6 +2495,12 @@ NSString* const kStanza = @"stanza";
             
             //record SDDP support
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
+            
+            //record TLS version (starttls is always TLS 1.2)
+            if(!self.connectionProperties.server.isDirectTLS)
+                self.connectionProperties.tlsVersion = @"1.2";
+            else
+                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary

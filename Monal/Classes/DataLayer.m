@@ -329,6 +329,7 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) disableAccountForPasswordMigration:(NSNumber*) accountNo
 {
     return [self.db boolWriteTransaction:^{
+        [self persistState:[xmpp invalidateState:[self readStateForAccount:accountNo]] forAccount:accountNo];
         return [self.db executeNonQuery:@"UPDATE account SET enabled=0, needs_password_migration=1, resource=? WHERE account_id=?;" andArguments:@[[HelperTools encodeRandomResource], accountNo]];
     }];
 }

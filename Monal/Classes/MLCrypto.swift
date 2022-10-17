@@ -8,6 +8,7 @@
 
 import UIKit
 import CryptoKit
+import ASN1Decoder
 
 @objcMembers
 public class MLCrypto: NSObject {
@@ -58,6 +59,18 @@ public class MLCrypto: NSObject {
         } catch {
             DDLogWarn("Could not decryptGCM. Returning nil instead")
             return nil;
+        }
+    }
+    
+    public func getSignatureAlgo(ofCert certData:Data) -> String?
+    {
+        do {
+            let x509 = try X509Certificate(data:certData)
+            DDLogVerbose("ASN1 decoded cert: \(x509.description)")
+            return x509.sigAlgOID
+        } catch {
+            DDLogError("ASN1 error: \(error)")
+            return nil
         }
     }
 }

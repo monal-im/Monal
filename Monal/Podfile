@@ -30,6 +30,7 @@ def monalxmpp
   pod 'SAMKeychain'
   pod 'CocoaLumberjack/Swift'
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
+  pod 'ASN1Decoder'
   signalDeps
 end
 

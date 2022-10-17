@@ -1,4 +1,5 @@
 PODS:
+  - ASN1Decoder (1.8.0)
   - CocoaLumberjack/Core (3.7.4)
   - CocoaLumberjack/Swift (3.7.4):
     - CocoaLumberjack/Core
@@ -29,6 +30,7 @@ PODS:
   - TOCropViewController (2.6.1)
 
 DEPENDENCIES:
+  - ASN1Decoder
   - CocoaLumberjack/Swift
   - DZNEmptyDataSet
   - FLAnimatedImage (~> 1.0)
@@ -43,6 +45,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - ASN1Decoder
     - CocoaLumberjack
     - DACircularProgress
     - DZNEmptyDataSet
@@ -75,6 +78,7 @@ CHECKOUT OPTIONS:
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
 
 SPEC CHECKSUMS:
+  ASN1Decoder: 6110fdeacfdb41559b1481457a1645be716610aa
   CocoaLumberjack: 543c79c114dadc3b1aba95641d8738b06b05b646
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
@@ -92,6 +96,6 @@ SPEC CHECKSUMS:
   sqlite3: 50117e9e063a9ef2b865f7bdf2f2601e5d368e9a
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
 
-PODFILE CHECKSUM: e668a2f6c79ceb9fb895b7342eda1633d6a5b2aa
+PODFILE CHECKSUM: 108e56861daa8a0996e430896bfe89cd51d06c86
 
 COCOAPODS: 1.11.3

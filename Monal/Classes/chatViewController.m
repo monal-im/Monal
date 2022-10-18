@@ -3158,45 +3158,47 @@ enum msgSentState {
 
 -(void) addToUIQueue:(NSArray<NSDictionary*>*) newItems
 {
-    if(self.uploadQueue.count == 0 && newItems.count > 0) // Queue was previously empty but will be filled now
-    {
-        // Force reload of view because this fails after the queue was emptied once otherwise. The '+' cell may also not be in the collection view yet when this function is called.
-        [CATransaction begin];
-        [UIView setAnimationsEnabled:NO];
-        [self showUploadQueue];
-        [self.uploadMenuView performBatchUpdates:^{
-            [self.uploadQueue addObjectsFromArray:newItems];
-            NSMutableArray<NSIndexPath*>* newInd = [[NSMutableArray<NSIndexPath*> alloc] initWithCapacity:newItems.count + 1];
-            for(NSUInteger i = 0; i <= newItems.count; i++)
-            {
-                newInd[i] = [NSIndexPath indexPathForItem:i inSection:0];
-            }
-            [self.uploadMenuView insertItemsAtIndexPaths:newInd];
-        } completion:^(BOOL finished) {
-            [CATransaction commit];
-            [UIView setAnimationsEnabled:YES];
-            [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
-        }];
-    }
-    else
-    {
-        [self.uploadMenuView performBatchUpdates:^{
-            // Add all new elements
-            NSUInteger start = self.uploadQueue.count;
-            [self.uploadMenuView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:start inSection:0]]];
-            [self.uploadQueue addObjectsFromArray:newItems];
-            NSUInteger newElementsInSet = self.uploadQueue.count - start;
-            NSMutableArray<NSIndexPath*>* newInd = [[NSMutableArray<NSIndexPath*> alloc] initWithCapacity:newElementsInSet];
-            for(NSUInteger i = 0; i < newElementsInSet; i++)
-            {
-                newInd[i] = [NSIndexPath indexPathForItem:start + i + 1 inSection:0];
-            }
-            [self.uploadMenuView insertItemsAtIndexPaths:newInd];
-        } completion:^(BOOL finished) {
-            [self.uploadMenuView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.uploadQueue.count inSection:0] atScrollPosition:UICollectionViewScrollPositionRight animated:YES];
-            [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
-        }];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(self.uploadQueue.count == 0 && newItems.count > 0) // Queue was previously empty but will be filled now
+        {
+            // Force reload of view because this fails after the queue was emptied once otherwise. The '+' cell may also not be in the collection view yet when this function is called.
+            [CATransaction begin];
+            [UIView setAnimationsEnabled:NO];
+            [self showUploadQueue];
+            [self.uploadMenuView performBatchUpdates:^{
+                [self.uploadQueue addObjectsFromArray:newItems];
+                NSMutableArray<NSIndexPath*>* newInd = [[NSMutableArray<NSIndexPath*> alloc] initWithCapacity:newItems.count + 1];
+                for(NSUInteger i = 0; i <= newItems.count; i++)
+                {
+                    newInd[i] = [NSIndexPath indexPathForItem:i inSection:0];
+                }
+                [self.uploadMenuView insertItemsAtIndexPaths:newInd];
+            } completion:^(BOOL finished) {
+                [CATransaction commit];
+                [UIView setAnimationsEnabled:YES];
+                [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
+            }];
+        }
+        else
+        {
+            [self.uploadMenuView performBatchUpdates:^{
+                // Add all new elements
+                NSUInteger start = self.uploadQueue.count;
+                [self.uploadMenuView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:start inSection:0]]];
+                [self.uploadQueue addObjectsFromArray:newItems];
+                NSUInteger newElementsInSet = self.uploadQueue.count - start;
+                NSMutableArray<NSIndexPath*>* newInd = [[NSMutableArray<NSIndexPath*> alloc] initWithCapacity:newElementsInSet];
+                for(NSUInteger i = 0; i < newElementsInSet; i++)
+                {
+                    newInd[i] = [NSIndexPath indexPathForItem:start + i + 1 inSection:0];
+                }
+                [self.uploadMenuView insertItemsAtIndexPaths:newInd];
+            } completion:^(BOOL finished) {
+                [self.uploadMenuView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.uploadQueue.count inSection:0] atScrollPosition:UICollectionViewScrollPositionRight animated:YES];
+                [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
+            }];
+        }
+    });
 }
 
 -(nonnull __kindof UICollectionViewCell*) collectionView:(nonnull UICollectionView*) collectionView cellForItemAtIndexPath:(nonnull NSIndexPath*) indexPath

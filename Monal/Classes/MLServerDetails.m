@@ -203,7 +203,7 @@ enum MLServerDetailsSections {
     for(NSString* method in [connection.saslMethods.allKeys sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"self" ascending:YES]]])
     {
         BOOL used = [connection.saslMethods[method] boolValue];
-        BOOL supported = [[SCRAM supportedMechanismsIncludingChannelBinding:YES] containsObject:method] || [@[@"PLAIN"] containsObject:method];
+        BOOL supported = [[SCRAM supportedMechanismsIncludingChannelBinding:YES] containsObject:method];    // || [@[@"PLAIN"] containsObject:method];
         NSString* description = NSLocalizedString(@"Unknown authentication method", @"");
         if([method isEqualToString:@"PLAIN"])
             description = NSLocalizedString(@"Sends password in cleartext (only encrypted by TLS), not very secure", @"");

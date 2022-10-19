@@ -13,6 +13,7 @@ import monalxmpp
 struct ContactDetailsHeader: View {
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     @State private var showingCannotEncryptAlert = false
+    @State private var showingShouldDisableEncryptionAlert = false
 
     var body: some View {
         VStack {
@@ -89,12 +90,34 @@ struct ContactDetailsHeader: View {
                 if(!contact.isGroup || (contact.isGroup && contact.mucType == "group")) {
                     Spacer().frame(width: 20)
                     Button(action: {
-                        showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
+                        if(contact.isEncrypted) {
+                            showingShouldDisableEncryptionAlert = true
+                        } else {
+                            showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
+                        }
                     }) {
                         Image(systemName: contact.isEncrypted ? "lock.fill" : "lock.open.fill")
                     }
                     .alert(isPresented: $showingCannotEncryptAlert) {
                         Alert(title: Text("No OMEMO keys found"), message: Text("This contact may not support OMEMO encrypted messages. Please try again in a few seconds."), dismissButton: .default(Text("Close")))
+                    }
+                    .actionSheet(isPresented: $showingShouldDisableEncryptionAlert) {
+                        ActionSheet(
+                            title: Text("Disable encryption?"),
+                            message: Text("Do you really want to disable encryption for this contact?"),
+                            buttons: [
+                                .cancel(
+                                    Text("No, keep encryption activated"),
+                                    action: { }
+                                ),
+                                .destructive(
+                                    Text("Yes, deactivate encryption"),
+                                    action: {
+                                        showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
+                                    }
+                                )
+                            ]
+                        )
                     }
                     .buttonStyle(BorderlessButtonStyle())
                 }

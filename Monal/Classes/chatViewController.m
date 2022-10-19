@@ -452,9 +452,25 @@ enum msgSentState {
 -(IBAction) toggleEncryption:(id)sender
 {
 #ifndef DISABLE_OMEMO
-    [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withSelf:self afterToggle:^() {
-        [self displayEncryptionStateInUI];
-    }];
+    if(self.contact.isEncrypted)
+    {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Disable encryption?", @"") message:NSLocalizedString(@"Do you really want to disable encryption for this contact?", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes, deactivate encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withSelf:self afterToggle:^() {
+                [self displayEncryptionStateInUI];
+            }];
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No, keep encryption activated", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        alert.popoverPresentationController.sourceView = sender;
+        [self presentViewController:alert animated:YES completion:nil];
+    }
+    else
+        [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withSelf:self afterToggle:^() {
+            [self displayEncryptionStateInUI];
+        }];
 #endif
 }
 

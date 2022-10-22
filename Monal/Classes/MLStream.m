@@ -6,10 +6,13 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 
-#include <Network/Network.h>
+#import <Network/Network.h>
 #import "MLConstants.h"
 #import "MLStream.h"
 #import "HelperTools.h"
+#import <monalxmpp/monalxmpp-Swift.h>
+
+@class MLCrypto;
 
 #define BUFFER_SIZE 4096
 
@@ -487,9 +490,7 @@
     if(!self.isTLS13)
         return @[];
     */
-    
-    //TODO: implement "tls-server-end-point" channel-binding type!!
-    return @[@"tls-exporter"];
+    return @[@"tls-exporter", @"tls-server-end-point"];
 }
 
 -(NSData* _Nullable) channelBindingDataForType:(NSString* _Nullable) type
@@ -500,6 +501,8 @@
     
     if([@"tls-exporter" isEqualToString:type])
         return [self channelBindingData_TLSExporter];
+    else if([@"tls-server-end-point" isEqualToString:type])
+        return [self channelBindingData_TLSServerEndPoint];
     
     MLAssert(NO, @"Trying to use unknown channel-binding type!", (@{@"type":type}));
 }
@@ -521,6 +524,72 @@
     sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
     //see https://www.rfc-editor.org/rfc/rfc9266.html
     return (NSData*)sec_protocol_metadata_create_secret(s_metadata, 24, "EXPORTER-Channel-Binding", 32);
+}
+
+-(NSData*) channelBindingData_TLSServerEndPoint
+{
+    MLAssert([self streamStatus] >= NSStreamStatusOpen && [self streamStatus] < NSStreamStatusClosed, @"Stream must be open to call this method!", (@{@"streamStatus": @([self streamStatus])}));
+    nw_protocol_metadata_t p_metadata = nw_connection_copy_protocol_metadata(self.shared_state.connection, nw_protocol_copy_tls_definition());
+    MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
+    sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
+    __block NSData* cert = nil;
+    sec_protocol_metadata_access_peer_certificate_chain(s_metadata, ^(sec_certificate_t certificate) {
+        if(cert == nil)
+            cert = (__bridge_transfer NSData*)SecCertificateCopyData(sec_certificate_copy_ref(certificate));
+    });
+    MLCrypto* crypto = [[MLCrypto alloc] init];
+    NSString* signatureAlgo = [crypto getSignatureAlgoOfCert:cert];
+    DDLogDebug(@"Signature algo OID: %@", signatureAlgo);
+    //OIDs taken from https://www.rfc-editor.org/rfc/rfc3279#section-2.2.3 and "Updated by" RFCs
+    if([@"1.2.840.113549.2.5" isEqualToString:signatureAlgo])               //md5WithRSAEncryption
+        return [HelperTools sha256:cert];       //use sha256 as per RFC 5929
+    else if([@"1.3.14.3.2.26" isEqualToString:signatureAlgo])               //sha1WithRSAEncryption
+        return [HelperTools sha256:cert];       //use sha256 as per RFC 5929
+    else if([@"1.2.840.113549.1.1.11" isEqualToString:signatureAlgo])       //sha256WithRSAEncryption
+        return [HelperTools sha256:cert];
+    else if([@"1.2.840.113549.1.1.12" isEqualToString:signatureAlgo])       //sha384WithRSAEncryption (not supported, return sha256, will fail cb)
+    {
+        DDLogError(@"Using sha256 for unsupported OID %@ (sha384WithRSAEncryption)", signatureAlgo);
+        return [HelperTools sha256:cert];
+    }
+    else if([@"1.2.840.113549.1.1.13" isEqualToString:signatureAlgo])       //sha512WithRSAEncryption
+        return [HelperTools sha512:cert];
+    else if([@"1.2.840.113549.1.1.14" isEqualToString:signatureAlgo])       //sha224WithRSAEncryption (not supported, return sha256, will fail cb)
+    {
+        DDLogError(@"Using sha256 for unsupported OID %@ (sha224WithRSAEncryption)", signatureAlgo);
+        return [HelperTools sha256:cert];
+    }
+    else if([@"1.2.840.10045.4.1" isEqualToString:signatureAlgo])           //ecdsa-with-SHA1
+        return [HelperTools sha256:cert];
+    else if([@"1.2.840.10045.4.3.1" isEqualToString:signatureAlgo])         //ecdsa-with-SHA224  (not supported, return sha256, will fail cb)
+    {
+        DDLogError(@"Using sha256 for unsupported OID %@ (ecdsa-with-SHA224)", signatureAlgo);
+        return [HelperTools sha256:cert];
+    }
+    else if([@"1.2.840.10045.4.3.2" isEqualToString:signatureAlgo])         //ecdsa-with-SHA256
+        return [HelperTools sha256:cert];
+    else if([@"1.2.840.10045.4.3.3" isEqualToString:signatureAlgo])         //ecdsa-with-SHA384  (not supported, return sha256, will fail cb)
+    {
+        DDLogError(@"Using sha256 for unsupported OID %@ (ecdsa-with-SHA384)", signatureAlgo);
+        return [HelperTools sha256:cert];
+    }
+    else if([@"1.2.840.10045.4.3.4" isEqualToString:signatureAlgo])         //ecdsa-with-SHA512
+        return [HelperTools sha256:cert];
+    else if([@"1.3.6.1.5.5.7.6.32" isEqualToString:signatureAlgo])          //id-ecdsa-with-shake128  (not supported, return sha256, will fail cb)
+    {
+        DDLogError(@"Using sha256 for unsupported OID %@ (id-ecdsa-with-shake128)", signatureAlgo);
+        return [HelperTools sha256:cert];
+    }
+    else if([@"1.3.6.1.5.5.7.6.33" isEqualToString:signatureAlgo])          //id-ecdsa-with-shake256  (not supported, return sha256, will fail cb)
+    {
+        DDLogError(@"Using sha256 for unsupported OID %@ (id-ecdsa-with-shake256)", signatureAlgo);
+        return [HelperTools sha256:cert];
+    }
+    else        //all other algos use sha256 (that most probably will fail cb)
+    {
+        DDLogError(@"Using sha256 for unknown/unsupported OID: %@", signatureAlgo);
+        return [HelperTools sha256:cert];
+    }
 }
 
 -(void) stream:(NSStream*) stream handleEvent:(NSStreamEvent) event

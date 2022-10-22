@@ -32,6 +32,7 @@ NSString* const kAccountState = @"account_state";
 NSString *const kDomain = @"domain";
 NSString *const kEnabled = @"enabled";
 NSString *const kNeedsPasswordMigration = @"needs_password_migration";
+NSString *const kSupportsSasl2 = @"supports_sasl2";
 
 NSString *const kServer = @"server";
 NSString *const kPort = @"other_port";
@@ -254,7 +255,7 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db boolWriteTransaction:^{
         DDLogVerbose(@"Updating account with: %@", dictionary);
-        NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=?, needs_password_migration=? WHERE account_id=?;";
+        NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=?, needs_password_migration=?, supports_sasl2=? WHERE account_id=?;";
         NSString* server = (NSString*)[dictionary objectForKey:kServer];
         NSString* port = (NSString*)[dictionary objectForKey:kPort];
         NSArray* params = @[
@@ -268,6 +269,7 @@ static NSDateFormatter* dbFormatter;
             [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
             [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
             [dictionary objectForKey:kNeedsPasswordMigration],
+            [dictionary objectForKey:kSupportsSasl2],
             [dictionary objectForKey:kAccountID],
         ];
         return (BOOL)[self.db executeNonQuery:query andArguments:params];
@@ -327,7 +329,8 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) disableAccountForPasswordMigration:(NSNumber*) accountNo
 {
     return [self.db boolWriteTransaction:^{
-        return [self.db executeNonQuery:@"UPDATE account SET enabled=0, needs_password_migration=1 WHERE account_id=?;" andArguments:@[accountNo]];
+        [self persistState:[xmpp invalidateState:[self readStateForAccount:accountNo]] forAccount:accountNo];
+        return [self.db executeNonQuery:@"UPDATE account SET enabled=0, needs_password_migration=1, resource=? WHERE account_id=?;" andArguments:@[[HelperTools encodeRandomResource], accountNo]];
     }];
 }
 
@@ -335,6 +338,24 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         return [self.db executeReader:@"SELECT * FROM account WHERE NOT enabled AND needs_password_migration ORDER BY account_id ASC;"];
+    }];
+}
+
+-(BOOL) pinSasl2ForAccount:(NSNumber*) accountNo
+{
+    return [self.db boolWriteTransaction:^{
+        return [self.db executeNonQuery:@"UPDATE account SET supports_sasl2=1 WHERE account_id=?;" andArguments:@[accountNo]];
+    }];
+}
+
+-(BOOL) isSasl2PinnedForAccount:(NSNumber*) accountNo
+{
+    return [self.db boolReadTransaction:^{
+        NSNumber* sasl2Pinned = (NSNumber*)[self.db executeScalar:@"SELECT supports_sasl2 FROM account WHERE account_id=?;" andArguments:@[accountNo]];
+        if(sasl2Pinned == nil)
+            return NO;
+        else
+            return [sasl2Pinned boolValue];
     }];
 }
 

@@ -14,6 +14,7 @@
 
 @property (nonatomic, strong) NSMutableArray* serverCaps;
 @property (nonatomic, strong) NSMutableArray* srvRecords;
+@property (nonatomic, strong) NSMutableArray* tlsVersions;
 @property (nonatomic, strong) NSMutableArray* saslMethods;
 @property (nonatomic, strong) NSMutableArray* channelBindingTypes;
 
@@ -24,6 +25,7 @@
 enum MLServerDetailsSections {
     SUPPORTED_SERVER_XEPS_SECTION,
     SRV_RECORS_SECTION,
+    TLS_SECTION,
     SASL_SECTION,
     CB_SECTION,
     ML_SERVER_DETAILS_SECTIONS_CNT
@@ -38,6 +40,7 @@ enum MLServerDetailsSections {
     [super viewWillAppear:animated];
     self.serverCaps = [[NSMutableArray alloc] init];
     self.srvRecords = [[NSMutableArray alloc] init];
+    self.tlsVersions = [[NSMutableArray alloc] init];
     self.saslMethods = [[NSMutableArray alloc] init];
     self.channelBindingTypes = [[NSMutableArray alloc] init];
 
@@ -46,6 +49,7 @@ enum MLServerDetailsSections {
 
     [self checkServerCaps:self.xmppAccount.connectionProperties];
     [self convertSRVRecordsToReadable];
+    [self checkTLSVersions:self.xmppAccount.connectionProperties];
     [self checkSASLMethods:self.xmppAccount.connectionProperties];
     [self checkChannelBindingTypes:self.xmppAccount.connectionProperties];
 }
@@ -180,6 +184,14 @@ enum MLServerDetailsSections {
     }
 }
 
+-(void) checkTLSVersions:(MLXMPPConnection*) connection
+{
+    DDLogVerbose(@"connection uses tls version: %@", connection.tlsVersion);
+    [self.tlsVersions addObject:@{@"Title": NSLocalizedString(@"TLS 1.2", @""), @"Description":NSLocalizedString(@"Older, slower, but still secure TLS version", @""), @"Color":([@"1.2" isEqualToString:connection.tlsVersion] ? @"Green" : @"None")}];
+    [self.tlsVersions addObject:@{@"Title": NSLocalizedString(@"TLS 1.3", @""), @"Description":NSLocalizedString(@"Newest TLS version which is faster than TLS 1.2", @""), @"Color":([@"1.3" isEqualToString:connection.tlsVersion] ? @"Green" : @"None")}];
+    DDLogVerbose(@"tls versions: %@", self.tlsVersions);
+}
+
 -(void) checkSASLMethods:(MLXMPPConnection*) connection
 {
     DDLogVerbose(@"saslMethods: %@", connection.saslMethods);
@@ -191,7 +203,7 @@ enum MLServerDetailsSections {
     for(NSString* method in [connection.saslMethods.allKeys sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"self" ascending:YES]]])
     {
         BOOL used = [connection.saslMethods[method] boolValue];
-        BOOL supported = [[SCRAM supportedMechanismsIncludingChannelBinding:YES] containsObject:method] || [@[@"PLAIN"] containsObject:method];
+        BOOL supported = [[SCRAM supportedMechanismsIncludingChannelBinding:YES] containsObject:method];    // || [@[@"PLAIN"] containsObject:method];
         NSString* description = NSLocalizedString(@"Unknown authentication method", @"");
         if([method isEqualToString:@"PLAIN"])
             description = NSLocalizedString(@"Sends password in cleartext (only encrypted by TLS), not very secure", @"");
@@ -240,6 +252,8 @@ enum MLServerDetailsSections {
         return self.serverCaps.count;
     else if(section == SRV_RECORS_SECTION)
         return self.srvRecords.count;
+    else if(section == TLS_SECTION)
+        return self.tlsVersions.count;
     else if(section == SASL_SECTION)
         return self.saslMethods.count;
     else if(section == CB_SECTION)
@@ -256,6 +270,8 @@ enum MLServerDetailsSections {
         dic = [self.serverCaps objectAtIndex:indexPath.row];
     else if(indexPath.section == SRV_RECORS_SECTION)
         dic = [self.srvRecords objectAtIndex:indexPath.row];
+    else if(indexPath.section == TLS_SECTION)
+        dic = [self.tlsVersions objectAtIndex:indexPath.row];
     else if(indexPath.section == SASL_SECTION)
         dic = [self.saslMethods objectAtIndex:indexPath.row];
     else if(indexPath.section == CB_SECTION)
@@ -290,6 +306,8 @@ enum MLServerDetailsSections {
         return NSLocalizedString(@"These are the modern XMPP capabilities Monal detected on your server after you have logged in.", @"");
     else if(section == SRV_RECORS_SECTION)
         return NSLocalizedString(@"These are SRV resource records found for your domain.", @"");
+    else if(section == TLS_SECTION)
+        return NSLocalizedString(@"These are the TLS versions supported by Monal, the one supported by your server will be green.", @"");
     else if(section == SASL_SECTION)
         return NSLocalizedString(@"These are the SASL2 methods your server supports.", @"");
     else if(section == CB_SECTION)

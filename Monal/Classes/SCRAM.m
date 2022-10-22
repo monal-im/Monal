@@ -103,6 +103,8 @@
     _salt = [HelperTools dataWithBase64EncodedString:msg[@"s"]];
     _iterationCount = (uint32_t)[msg[@"i"] integerValue];
     _ssdpSupported = [@"ssdp" isEqualToString:msg[@"d"]];
+    if(_iterationCount < 4096)
+        return NO;
     return YES;
 }
 

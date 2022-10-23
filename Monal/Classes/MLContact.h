@@ -30,9 +30,10 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 +(NSString*) ownDisplayNameForAccount:(xmpp*) account;
 
--(BOOL) isInRoster;
--(BOOL) isSubscribedTo;
--(BOOL) isSubscribedFrom;
+@property (nonatomic, assign) BOOL isInRoster;
+@property (nonatomic, assign) BOOL isSubscribedTo;
+@property (nonatomic, assign) BOOL isSubscribedFrom;
+@property (nonatomic, assign) BOOL hasIncomingContactRequest;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
 -(BOOL) isEqualToMessage:(MLMessage*) message;

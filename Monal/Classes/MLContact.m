@@ -365,6 +365,11 @@ NSString *const kAskSubscribe=@"subscribe";
         || [self.subscription isEqualToString:kSubFrom];
 }
 
+-(BOOL) hasIncomingContactRequest
+{
+    return [[DataLayer sharedInstance] hasContactRequestForAccount:self.accountId andBuddyName:self.contactJid];
+}
+
 // this will cache the unread count on first access
 -(NSInteger) unreadCount
 {

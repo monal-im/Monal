@@ -1776,6 +1776,12 @@ NSString* const kStanza = @"stanza";
                     DDLogVerbose(@"Got subscription request for contact %@ having subscription status: %@", presenceNode.fromUser, contactSub);
                     if(!contactSub || !([[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo] || [[contactSub objectForKey:@"subscription"] isEqualToString:kSubBoth])) {
                         [[DataLayer sharedInstance] addContactRequest:contact];
+                        //wait 1 sec for nickname and profile image to be processed, then send out kMonalContactRefresh notification
+                        createTimer(1.0, (^{
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+                                @"contact": contact
+                            }];
+                        }));
                     }
                     else if(contactSub && [[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo])
                         [self approveToRoster:presenceNode.fromUser];

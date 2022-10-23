@@ -223,6 +223,16 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         title:NSLocalizedString(@"Mark as read", @"")
         options:UNNotificationActionOptionNone
     ];
+    UNNotificationAction* approveSubscriptionAction = [UNNotificationAction
+        actionWithIdentifier:@"APPROVE_SUBSCRIPTION_ACTION"
+        title:NSLocalizedString(@"Approve new contact", @"")
+        options:UNNotificationActionOptionNone
+    ];
+    UNNotificationAction* denySubscriptionAction = [UNNotificationAction
+        actionWithIdentifier:@"DENY_SUBSCRIPTION_ACTION"
+        title:NSLocalizedString(@"Deny new contact", @"")
+        options:UNNotificationActionOptionNone
+    ];
     if(@available(iOS 15.0, macCatalyst 15.0, *))
     {
         replyAction = [UNTextInputNotificationAction
@@ -237,17 +247,34 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             actionWithIdentifier:@"MARK_AS_READ_ACTION"
             title:NSLocalizedString(@"Mark as read", @"")
             options:UNNotificationActionOptionNone
-            icon:[UNNotificationActionIcon iconWithSystemImageName:@"message"]
+            icon:[UNNotificationActionIcon iconWithSystemImageName:@"checkmark.bubble"]
+        ];
+        approveSubscriptionAction = [UNNotificationAction
+            actionWithIdentifier:@"APPROVE_SUBSCRIPTION_ACTION"
+            title:NSLocalizedString(@"Approve new contact", @"")
+            options:UNNotificationActionOptionNone
+            icon:[UNNotificationActionIcon iconWithSystemImageName:@"person.crop.circle.badge.checkmark"]
+        ];
+        denySubscriptionAction = [UNNotificationAction
+            actionWithIdentifier:@"DENY_SUBSCRIPTION_ACTION"
+            title:NSLocalizedString(@"Deny new contact", @"")
+            options:UNNotificationActionOptionNone
+            icon:[UNNotificationActionIcon iconWithSystemImageName:@"person.crop.circle.badge.xmark"]
         ];
     }
-    UNNotificationCategory* messageCategory;
     UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings;
 #if TARGET_OS_MACCATALYST
     authOptions |= UNAuthorizationOptionProvisional;
 #endif
-    messageCategory = [UNNotificationCategory
+    UNNotificationCategory* messageCategory = [UNNotificationCategory
         categoryWithIdentifier:@"message"
         actions:@[replyAction, markAsReadAction]
+        intentIdentifiers:@[]
+        options:UNNotificationCategoryOptionAllowAnnouncement
+    ];
+    UNNotificationCategory* subscriptionCategory = [UNNotificationCategory
+        categoryWithIdentifier:@"subscription"
+        actions:@[approveSubscriptionAction, denySubscriptionAction]
         intentIdentifiers:@[]
         options:UNNotificationCategoryOptionAllowAnnouncement
     ];
@@ -296,7 +323,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             }
         });
     }];
-    [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
+    [center setNotificationCategories:[NSSet setWithObjects:messageCategory, subscriptionCategory , nil]];
 
     UINavigationBarAppearance* appearance = [[UINavigationBarAppearance alloc] init];
     [appearance configureWithTransparentBackground];
@@ -692,6 +719,44 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": fromContact
             }];
+        }
+        else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
+            [self openChatOfContact:fromContact];
+    }
+    else if([response.notification.request.content.categoryIdentifier isEqualToString:@"subscription"])
+    {
+        DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
+        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
+        MLAssert(fromContact, @"fromContact should not be nil");
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
+        //this can happen if that account got disabled
+        if(account == nil)
+        {
+            //call completion handler directly (we did not handle anything and no connectIfNecessary was called)
+            if(completionHandler)
+                completionHandler();
+            return;
+        }
+        
+        //add our completion handler to handler queue
+        [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
+            completionHandler();
+        }];
+        
+        //make sure we have an active buddy for this chat
+        [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountId];
+        
+        //handle subscription actions
+        if([response.actionIdentifier isEqualToString:@"APPROVE_SUBSCRIPTION_ACTION"])
+        {
+            DDLogInfo(@"APPROVE_SUBSCRIPTION_ACTION triggered...");
+            [[MLXMPPManager sharedInstance] addContact:fromContact];
+            [self openChatOfContact:fromContact];
+        }
+        else if([response.actionIdentifier isEqualToString:@"DENY_SUBSCRIPTION_ACTION"])
+        {
+            DDLogInfo(@"DENY_SUBSCRIPTION_ACTION triggered...");
+            [[MLXMPPManager sharedInstance] rejectContact:fromContact];
         }
         else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
             [self openChatOfContact:fromContact];

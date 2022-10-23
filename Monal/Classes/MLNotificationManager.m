@@ -46,9 +46,35 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeletedMessage:) name:kMonalDeletedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDisplayedMessages:) name:kMonalDisplayedMessagesNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRefresh object:nil];
 
     self.notificationPrivacySetting = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
     return self;
+}
+
+-(void) handleContactRefresh:(NSNotification*) notification
+{
+    xmpp* xmppAccount = notification.object;
+    MLContact* contact = notification.userInfo[@"contact"];
+    
+    //only handle incoming contact requests here
+    if(!contact.hasIncomingContactRequest)
+        return;
+    
+    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    content.title = xmppAccount.connectionProperties.identity.jid;
+    content.body = [NSString stringWithFormat:NSLocalizedString(@"The user %@ (%@) wants to add you to his contact list", @""), contact.contactDisplayName, contact.contactJid];
+    content.threadIdentifier = [self threadIdentifierWithContact:contact];
+    content.categoryIdentifier = @"subscription";
+    //don't simply use contact directly to make sure we always use a freshly created up to date contact when unpacking the userInfo dict
+    content.userInfo = @{
+        @"fromContactJid": contact.contactJid,
+        @"fromContactAccountId": contact.accountId,
+    };
+    NSString* idval = [NSString stringWithFormat:@"subscription(%@, %@)", contact.accountId, contact.contactJid];
+    
+    DDLogDebug(@"Publishing notification with id %@", idval);
+    [self publishNotificationContent:content withID:idval];
 }
 
 -(void) handleXMPPError:(NSNotification*) notification
@@ -208,12 +234,17 @@
 
 -(NSString*) identifierWithMessage:(MLMessage*) message
 {
-    return [NSString stringWithFormat:@"%@_%@", [self threadIdentifierWithMessage:message], message.messageId];
+    return [NSString stringWithFormat:@"message(%@, %@)", [self threadIdentifierWithMessage:message], message.messageId];
 }
 
 -(NSString*) threadIdentifierWithMessage:(MLMessage*) message
 {
-    return [NSString stringWithFormat:@"%@_%@", message.accountId, message.buddyName];
+    return [NSString stringWithFormat:@"thread(%@, %@)", message.accountId, message.buddyName];
+}
+
+-(NSString*) threadIdentifierWithContact:(MLContact*) contact
+{
+    return [NSString stringWithFormat:@"thread(%@, %@)", contact.accountId, contact.contactJid];
 }
 
 -(UNMutableNotificationContent*) updateBadgeForContent:(UNMutableNotificationContent*) content
@@ -284,7 +315,7 @@
     INSendMessageAttachment* audioAttachment = nil;
     NSString* msgText = NSLocalizedString(@"Open app to see more", @"");
     
-    // only show msgText if allowed
+    //only show msgText if allowed
     if(self.notificationPrivacySetting == DisplayNameAndMessage)
     {
         //XEP-0245: The slash me Command
@@ -293,11 +324,12 @@
         else
             msgText = message.messageText;
         
-        // notification settings
+        //notification settings
         content.threadIdentifier = [self threadIdentifierWithMessage:message];
         content.categoryIdentifier = @"message";
         
-        // user info for answer etc.
+        //user info for answer etc.
+        //don't simply use contact directly to make sure we always use a freshly created up to date contact when unpacking the userInfo dict
         content.userInfo = @{
             @"fromContactJid": message.buddyName,
             @"fromContactAccountId": message.accountId,
@@ -648,7 +680,7 @@
     MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     NSString* idval = [self identifierWithMessage:message];
     
-    // Only show contact name if allowed
+    //Only show contact name if allowed
     if(self.notificationPrivacySetting <= DisplayOnlyName)
     {
         content.title = [contact contactDisplayName];
@@ -658,7 +690,7 @@
     else
         content.title = NSLocalizedString(@"New Message", @"");
 
-    // only show msgText if allowed
+    //only show msgText if allowed
     if(self.notificationPrivacySetting == DisplayNameAndMessage)
     {
         NSString* msgText = message.messageText;
@@ -670,6 +702,7 @@
         content.body = msgText;
         content.threadIdentifier = [self threadIdentifierWithMessage:message];
         content.categoryIdentifier = @"message";
+        //don't simply use contact directly to make sure we always use a freshly created up to date contact when unpacking the userInfo dict
         content.userInfo = @{
             @"fromContactJid": message.buddyName,
             @"fromContactAccountId": message.accountId,

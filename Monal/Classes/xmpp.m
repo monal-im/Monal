@@ -2548,17 +2548,19 @@ NSString* const kStanza = @"stanza";
                 @"task": _upgradeTask
             } andChildren:@[] andData:nil]];
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sasl:2}parameters"])
+        else if([parsedStanza check:@"/{urn:xmpp:sasl:2}task-data/{urn:xmpp:scram-upgrade:0}salt"])
         {
-            NSData* salt = [parsedStanza findFirst:@"salt#|base64"];
-            uint32_t iterations = (uint32_t)[[parsedStanza findFirst:@"iterations#"] integerValue];
+            NSData* salt = [parsedStanza findFirst:@"{urn:xmpp:scram-upgrade:0}salt#|base64"];
+            uint32_t iterations = (uint32_t)[[parsedStanza findFirst:@"{urn:xmpp:scram-upgrade:0}salt@iterations"] integerValue];
             
             NSString* scramMechanism = [_upgradeTask substringWithRange:NSMakeRange(5, _upgradeTask.length-5)];
             DDLogInfo(@"Upgrading password using SCRAM mechanism: %@", scramMechanism);
             SCRAM* scramUpgradeHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:scramMechanism];
             NSData* saltedPassword = [scramUpgradeHandler hashPasswordWithSalt:salt andIterationCount:iterations];
             
-            [self send:[[MLXMLNode alloc] initWithElement:@"hash" andNamespace:@"urn:xmpp:sasl:2" andData:[HelperTools encodeBase64WithData:saltedPassword]]];
+            [self send:[[MLXMLNode alloc] initWithElement:@"task-data" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"hash" andNamespace:@"urn:xmpp:sasl:2" andData:[HelperTools encodeBase64WithData:saltedPassword]]
+            ] andData:nil]];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
         {

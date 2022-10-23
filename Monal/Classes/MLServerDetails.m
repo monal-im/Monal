@@ -307,7 +307,7 @@ enum MLServerDetailsSections {
     else if(section == SRV_RECORS_SECTION)
         return NSLocalizedString(@"These are SRV resource records found for your domain.", @"");
     else if(section == TLS_SECTION)
-        return NSLocalizedString(@"These are the TLS versions supported by Monal, the one supported by your server will be green.", @"");
+        return NSLocalizedString(@"These are the TLS versions supported by Monal, the one used to connect to your server will be green.", @"");
     else if(section == SASL_SECTION)
         return NSLocalizedString(@"These are the SASL2 methods your server supports.", @"");
     else if(section == CB_SECTION)

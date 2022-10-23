@@ -964,12 +964,37 @@
             [db executeNonQuery:@"ALTER TABLE account ADD COLUMN supports_sasl2 BOOL DEFAULT false;"];
         }];
         
+        //add device id to flags table
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.305 withBlock:^{
+            [db executeNonQuery:@"INSERT INTO flags (name, value) VALUES('device_id', ?);" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
+        }];
 
-        // check if db version changed and invalidate state, if so
+
+        //check if device id changed and invalidate state, if so
+        NSString* stored_id = (NSString*)[db executeScalar:@"SELECT value FROM flags WHERE name='device_id';"];
+        NSString* current_id = UIDevice.currentDevice.identifierForVendor.UUIDString;
+        if(![current_id isEqualToString:stored_id])
+        {
+            //invalidate account state because the app was migrated to a new device
+            [dataLayer invalidateAllAccountStates];
+            //change resource because of app migration
+            for(NSMutableDictionary* accountDict in [[dataLayer accountList] mutableCopy])
+            {
+                accountDict[kResource] = [HelperTools encodeRandomResource];
+                [dataLayer updateAccounWithDictionary:accountDict];
+            }
+            //clean up signal store and generate new omemo keys (but don't change trust settings!)
+            [db executeNonQuery:@"DELETE FROM signalIdentity;"];
+            [db executeNonQuery:@"DELETE FROM signalContactSession;"];
+            //update device id in db
+            [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='device_id';" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
+        }
+        
+        //check if db version changed and invalidate state, if so
         NSNumber* newdbversion = [self readDBVersion:db];
         if([dbversion isEqualToNumber:newdbversion] == NO)
         {
-            // invalidate account state if the database has changed
+            //invalidate account state if the database has changed
             [dataLayer invalidateAllAccountStates];
             DDLogInfo(@"Database migrated from old version %@ to version %@", dbversion, newdbversion);
             return YES;

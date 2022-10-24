@@ -173,7 +173,11 @@ struct ContactDetails: View {
                     showingClearHistoryConfirmation = true
                 }) {
                     if(contact.isGroup) {
-                        Text("Clear chat history of this group")
+                        if(contact.obj.mucType == "group") {
+                            Text("Clear chat history of this group")
+                        } else {
+                            Text("Clear chat history of this channel")
+                        }
                     } else {
                         Text("Clear chat history of this contact")
                     }

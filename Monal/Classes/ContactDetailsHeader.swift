@@ -126,11 +126,23 @@ struct ContactDetailsHeader: View {
             }
                 .foregroundColor(.primary)
             
-            if((contact.statusMessage as String).count > 0) {
+            if(!contact.isGroup && (contact.statusMessage as String).count > 0) {
                 Spacer()
                     .frame(height: 20)
                 Text("Status message:")
                 Text(contact.statusMessage as String)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            if(contact.isGroup && (contact.groupSubject as String).count > 0) {
+                Spacer()
+                    .frame(height: 20)
+                if(contact.obj.mucType == "group") {
+                    Text("Group subject:")
+                } else {
+                    Text("Channel subject:")
+                }
+                Text(contact.groupSubject as String)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

@@ -372,10 +372,28 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - Connection related
 
+//this handler will simply retry the rejectContact: call
+$$class_handler(handleRejectContact, $$ID(MLContact*, contact))
+    [[MLXMPPManager sharedInstance] rejectContact:contact];
+$$
+
 -(void) rejectContact:(MLContact*) contact
 {
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
-    [account rejectFromRoster:contact.contactJid];
+    if(account)
+    {
+        //queue reject contact for execution once bound (e.g. on catchup done)
+        if(account.accountState < kStateBound)
+        {
+            [account addReconnectionHandler:$newHandler(self, handleRejectContact, $ID(contact))];
+            return;
+        }
+        
+        //delete existing contact request if exists
+        [[DataLayer sharedInstance] deleteContactRequest:contact];
+        //and reject contact
+        [account rejectFromRoster:contact.contactJid];
+    }
 }
 
 -(void) approveContact:(MLContact*) contact

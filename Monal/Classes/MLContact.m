@@ -196,6 +196,7 @@ NSString *const kAskSubscribe=@"subscribe";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLastInteractionTimeUpdate:) name:kMonalLastInteractionUpdatedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBlockListRefresh:) name:kMonalBlockListRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMucSubjectChange:) name:kMonalMucSubjectChanged object:nil];
     return self;
 }
 
@@ -243,6 +244,16 @@ NSString *const kAskSubscribe=@"subscribe";
             self.avatar = newAvatar;            //use self.avatar instead of _avatar to make sure KVO works properly
         }
     }
+}
+
+-(void) handleMucSubjectChange:(NSNotification*) notification
+{
+    xmpp* account = notification.object;
+    NSString* room = notification.userInfo[@"room"];
+    NSString* subject = notification.userInfo[@"subject"];
+    if(![self.contactJid isEqualToString:room] || self.accountId.intValue != account.accountNo.intValue)
+        return;     // ignore other accounts or contacts
+    self.groupSubject = nilDefault(subject, @"");
 }
 
 -(void) refresh
@@ -363,6 +374,11 @@ NSString *const kAskSubscribe=@"subscribe";
 {
     return [self.subscription isEqualToString:kSubBoth]
         || [self.subscription isEqualToString:kSubFrom];
+}
+
+-(BOOL) hasIncomingContactRequest
+{
+    return self.isGroup == NO && [[DataLayer sharedInstance] hasContactRequestForAccount:self.accountId andBuddyName:self.contactJid];
 }
 
 // this will cache the unread count on first access

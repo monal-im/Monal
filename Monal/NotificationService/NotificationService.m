@@ -161,23 +161,28 @@
 
 -(void) handleIncomingVoipCall:(NSNotification*) notification
 {
-    DDLogInfo(@"Got incoming VOIP call");
-    [self disconnectAndFeedAllWaitingHandlers];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        DDLogInfo(@"Got incoming VOIP call");
+        [self disconnectAndFeedAllWaitingHandlers];
     
-    if(@available(iOS 14.5, macCatalyst 14.5, *))
-    {
-        NSString* payload = [HelperTools encodeBase64WithData:[HelperTools serializeObject:notification.userInfo]];
-        [CXProvider reportNewIncomingVoIPPushPayload:@{@"base64Payload": payload} completion:^(NSError* _Nullable error) {
-            if(error != nil)
-                DDLogError(@"Got error for reportNewIncomingVoIPPushPayload: %@", error);
-            else
-                DDLogInfo(@"Successfully called reportNewIncomingVoIPPushPayload");
-        }];
-    }
-    else
-        DDLogError(@"iOS < 14.5 detected, ignoring incoming call!");
-    
-    [self killAppex];
+        DDLogInfo(@"Dispatching voip call to mainapp...");
+        if(@available(iOS 14.5, macCatalyst 14.5, *))
+        {
+            NSString* payload = [HelperTools encodeBase64WithData:[HelperTools serializeObject:notification.userInfo]];
+            [CXProvider reportNewIncomingVoIPPushPayload:@{@"base64Payload": payload} completion:^(NSError* _Nullable error) {
+                if(error != nil)
+                    DDLogError(@"Got error for reportNewIncomingVoIPPushPayload: %@", error);
+                else
+                    DDLogInfo(@"Successfully called reportNewIncomingVoIPPushPayload");
+                [self killAppex];
+            }];
+        }
+        else
+        {
+            DDLogError(@"iOS < 14.5 detected, ignoring incoming call!");
+            [self killAppex];
+        }
+    });
 }
 
 -(void) disconnectAndFeedAllWaitingHandlers

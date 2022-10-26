@@ -30,6 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSSet* _Nullable serverFeatures;
 
 @property (nonatomic, strong) NSMutableArray* _Nullable discoveredServices;
+@property (nonatomic, strong) NSMutableArray* _Nullable discoveredStunTurnServers;
 
 @property (nonatomic, strong) NSString* _Nullable conferenceServer;
 

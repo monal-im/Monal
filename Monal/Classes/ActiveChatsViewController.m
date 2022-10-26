@@ -22,6 +22,17 @@
 
 @import QuartzCore.CATransaction;
 
+@interface DZNEmptyDataSetView
+@property (atomic, strong) UIView* contentView;
+@property (atomic, strong) UIImageView* imageView;
+@property (atomic, strong) UILabel* titleLabel;
+@property (atomic, strong) UILabel* detailLabel;
+@end
+
+@interface UIScrollView () <UIGestureRecognizerDelegate>
+@property (nonatomic, readonly) DZNEmptyDataSetView* emptyDataSetView;
+@end
+
 @interface ActiveChatsViewController()
 @property (atomic, strong) NSMutableArray* unpinnedContacts;
 @property (atomic, strong) NSMutableArray* pinnedContacts;
@@ -79,6 +90,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
     [nc addObserver:self selector:@selector(handleBackgroundChanged) name:kMonalBackgroundChanged object:nil];
+    [nc addObserver:self selector:@selector(handleDeviceRotation) name:UIDeviceOrientationDidChangeNotification object:nil];
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"ContactCell"];
     
@@ -99,6 +111,14 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void) handleDeviceRotation
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self imageForEmptyDataSet:nil];
+        [self.chatListTable setNeedsDisplay];
+    });
 }
 
 -(void) refreshDisplay
@@ -645,12 +665,44 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 #pragma mark - empty data set
 
-- (UIImage*)imageForEmptyDataSet:(UIScrollView*)scrollView
+-(UIImage*) imageForEmptyDataSet:(UIScrollView*) scrollView
 {
-    return nil;
+    DZNEmptyDataSetView* emptyDataSetView = self.chatListTable.emptyDataSetView;
+    CGRect headerFrame = self.navigationController.navigationBar.frame;
+    CGRect tableFrame = self.chatListTable.frame;
+    CGRect contentFrame = emptyDataSetView.contentView.frame;
+    DDLogError(@"headerFrame: %@", NSStringFromCGRect(headerFrame));
+    DDLogError(@"tableFrame: %@", NSStringFromCGRect(tableFrame));
+    DDLogError(@"contentFrame: %@", NSStringFromCGRect(contentFrame));
+    if(tableFrame.size.height > tableFrame.size.width)
+    {
+        DDLogError(@"height is bigger");
+        tableFrame.size.height *= 0.5;
+        tableFrame.origin.y += headerFrame.size.height;
+    }
+    else
+    {
+        DDLogError(@"width is bigger");
+        tableFrame.size.height *= 2.0;
+    }
+    //tableFrame.size.height *= (tableFrame.size.width / tableFrame.size.height);
+    emptyDataSetView.imageView.frame = tableFrame;
+    emptyDataSetView.contentView.frame = tableFrame;
+    [emptyDataSetView.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[imageView]-(48@750)-[titleLabel]-(16@750)-[detailLabel]|" options:0 metrics:nil views:@{
+        @"imageView": emptyDataSetView.imageView,
+        @"titleLabel": emptyDataSetView.titleLabel,
+        @"detailLabel": emptyDataSetView.detailLabel,
+    }]];
+    emptyDataSetView.imageView.translatesAutoresizingMaskIntoConstraints = YES;
+    return [UIImage imageNamed:@"chat"];
 }
 
-- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *) scrollView
+-(CGFloat) spaceHeightForEmptyDataSet:(UIScrollView*) scrollView
+{
+    return 48.0f;
+}
+
+-(NSAttributedString*) titleForEmptyDataSet:(UIScrollView*) scrollView
 {
     NSString* text = NSLocalizedString(@"No one is here", @"");
     

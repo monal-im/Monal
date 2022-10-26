@@ -987,7 +987,7 @@
             [db executeNonQuery:@"DELETE FROM signalIdentity;"];
             [db executeNonQuery:@"DELETE FROM signalContactSession;"];
             //update device id in db
-            [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='device_id;" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
+            [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='device_id';" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
         }
         
         //check if db version changed and invalidate state, if so

@@ -3204,92 +3204,100 @@ NSString* const kStanza = @"stanza";
 
 -(void) realPersistState
 {
-    @synchronized(_stateLockObject) {
-        DDLogVerbose(@"%@ --> realPersistState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-        //state dictionary
-        NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
+    //make sure to create a transaction before locking the state object to prevent the following deadlock:
+    //thread 1 (for example: receiveQueue): holding write transaction and waiting for state lock object
+    //thread 2 (for example: urllib session): holding state lock object and waiting for write transaction
+    [[DataLayer sharedInstance] createTransaction:^{
+        @synchronized(self->_stateLockObject) {
+            DDLogVerbose(@"%@ --> realPersistState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+            //state dictionary
+            NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
 
-        //collect smacks state
-        [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
-        [values setValue:self.lastHandledOutboundStanza forKey:@"lastHandledOutboundStanza"];
-        [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
-        [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
-        [values setValue:self.streamID forKey:@"streamID"];
+            //collect smacks state
+            [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
+            [values setValue:self.lastHandledOutboundStanza forKey:@"lastHandledOutboundStanza"];
+            [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
+            [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
+            [values setValue:self.streamID forKey:@"streamID"];
 
-        NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
-        NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
-        @synchronized(_iqHandlers) {
-            for(NSString* iqid in _iqHandlers)
-                if(_iqHandlers[iqid][@"handler"] != nil)
-                {
-                    persistentIqHandlers[iqid] = _iqHandlers[iqid];
-                    persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", _iqHandlers[iqid][@"timeout"], _iqHandlers[iqid][@"handler"]];
-                }
+            NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
+            @synchronized(self->_iqHandlers) {
+                for(NSString* iqid in self->_iqHandlers)
+                    if(self->_iqHandlers[iqid][@"handler"] != nil)
+                    {
+                        persistentIqHandlers[iqid] = self->_iqHandlers[iqid];
+                        persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", self->_iqHandlers[iqid][@"timeout"], self->_iqHandlers[iqid][@"handler"]];
+                    }
+            }
+            [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
+            
+            @synchronized(self->_reconnectionHandlers) {
+                [values setObject:self->_reconnectionHandlers forKey:@"reconnectionHandlers"];
+            }
+
+            [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
+            if(self.connectionProperties.uploadServer)
+                [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
+            if(self.connectionProperties.conferenceServer)
+                [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
+            
+            [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
+            [values setObject:[self.mucProcessor getInternalState] forKey:@"mucState"];
+            [values setObject:self->_runningMamQueries forKey:@"runningMamQueries"];
+            [values setObject:[NSNumber numberWithBool:self->_loggedInOnce] forKey:@"loggedInOnce"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
+            [values setObject:[self->_inCatchup copy] forKey:@"inCatchup"];
+            if(self->_cachedStreamFeaturesBeforeAuth != nil)
+                [values setObject:self->_cachedStreamFeaturesBeforeAuth forKey:@"cachedStreamFeaturesBeforeAuth"];
+            if(self->_cachedStreamFeaturesAfterAuth != nil)
+                [values setObject:self->_cachedStreamFeaturesAfterAuth forKey:@"cachedStreamFeaturesAfterAuth"];
+            
+            if(self.connectionProperties.discoveredServices)
+                [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
+            
+            if(self.connectionProperties.discoveredStunTurnServers)
+                [values setObject:[self.connectionProperties.discoveredStunTurnServers copy] forKey:@"discoveredStunTurnServers"];
+
+            [values setObject:self->_lastInteractionDate forKey:@"lastInteractionDate"];
+            [values setValue:[NSDate date] forKey:@"stateSavedAt"];
+            [values setValue:@(STATE_VERSION) forKey:@"VERSION"];
+
+            //save state dictionary
+            [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
+
+            //debug output
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@",
+                self.accountNo,
+                values[@"stateSavedAt"],
+                self.lastHandledInboundStanza,
+                self.lastHandledOutboundStanza,
+                self.lastOutboundStanza,
+                self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
+                self.streamID,
+                self->_lastInteractionDate,
+                persistentIqHandlerDescriptions,
+                self.connectionProperties.supportsPush,
+                self.connectionProperties.supportsHTTPUpload,
+                self.connectionProperties.pushEnabled,
+                self.connectionProperties.supportsPubSub,
+                self.connectionProperties.supportsBlocking,
+                self.connectionProperties.supportsClientState,
+                self->_inCatchup
+            );
+            DDLogVerbose(@"%@ --> realPersistState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
-        [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
-        
-        @synchronized(self->_reconnectionHandlers) {
-            [values setObject:self->_reconnectionHandlers forKey:@"reconnectionHandlers"];
-        }
-
-        [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
-        if(self.connectionProperties.uploadServer)
-            [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
-        if(self.connectionProperties.conferenceServer)
-            [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
-        
-        [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
-        [values setObject:[self.mucProcessor getInternalState] forKey:@"mucState"];
-        [values setObject:_runningMamQueries forKey:@"runningMamQueries"];
-        [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
-        [values setObject:[_inCatchup copy] forKey:@"inCatchup"];
-        if(_cachedStreamFeaturesBeforeAuth != nil)
-            [values setObject:_cachedStreamFeaturesBeforeAuth forKey:@"cachedStreamFeaturesBeforeAuth"];
-        if(_cachedStreamFeaturesAfterAuth != nil)
-            [values setObject:_cachedStreamFeaturesAfterAuth forKey:@"cachedStreamFeaturesAfterAuth"];
-        
-        if(self.connectionProperties.discoveredServices)
-            [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
-
-        [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
-        [values setValue:[NSDate date] forKey:@"stateSavedAt"];
-        [values setValue:@(STATE_VERSION) forKey:@"VERSION"];
-
-        //save state dictionary
-        [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
-
-        //debug output
-        DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@",
-            self.accountNo,
-            values[@"stateSavedAt"],
-            self.lastHandledInboundStanza,
-            self.lastHandledOutboundStanza,
-            self.lastOutboundStanza,
-            self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
-            self.streamID,
-            _lastInteractionDate,
-            persistentIqHandlerDescriptions,
-            self.connectionProperties.supportsPush,
-            self.connectionProperties.supportsHTTPUpload,
-            self.connectionProperties.pushEnabled,
-            self.connectionProperties.supportsPubSub,
-            self.connectionProperties.supportsBlocking,
-            self.connectionProperties.supportsClientState,
-            _inCatchup
-        );
-        DDLogVerbose(@"%@ --> realPersistState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-    }
+    }];
 }
 
 -(void) readSmacksStateOnly

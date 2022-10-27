@@ -80,9 +80,7 @@ struct ContactDetailsHeader: View {
                 .buttonStyle(BorderlessButtonStyle())
                 
                 Spacer().frame(width: 20)
-                NavigationLink {
-                    LazyClosureView(AVPrototype(contact: contact))
-                } label: {
+                NavigationLink(destination: LazyClosureView(AVPrototype(contact: contact))) {
                     Label("Call", systemImage:"phone")
                 }
                 

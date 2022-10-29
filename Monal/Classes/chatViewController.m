@@ -2135,8 +2135,8 @@ enum msgSentState {
         {
             hideName = (priorRow != nil
                          && [priorRow.participantJid isEqualToString:row.participantJid]);
-            MLContact* groupContact = [self getMLContactForJid:row.participantJid andAccount:row.accountId];
-            cell.name.text = hideName == YES ? nil : [groupContact contactDisplayName];
+            //row.contactDisplayName will automatically use row.actualFrom as fallback if no roster name or XEP-0172 nickname could be found
+            cell.name.text = hideName == YES ? nil : row.contactDisplayName;
         }
         else {
             hideName = (priorRow != nil

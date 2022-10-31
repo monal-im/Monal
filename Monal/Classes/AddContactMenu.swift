@@ -81,8 +81,7 @@ struct AddContactMenu: View {
                     let success : Bool = (data as! NSDictionary)["success"] as! Bool;
                     hideLoadingOverlay(overlay)
                     if(success) {
-                        let contact = MLContact.createContact(fromJid: jid, andAccountNo: accountNo)
-                        
+                        MLContact.createContact(fromJid: jid, andAccountNo: accountNo) // FIXME Actually do something with it
                         successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined MUC %s!", jid)))
                     } else {
                         errorAlert(title: Text("Error entering group chat"))
@@ -180,7 +179,7 @@ struct AddContactMenu: View {
                     handleContact: { jid, fingerprints in
                         self.toAdd = jid
                         showQRCodeScanner = false
-                        self.scannedFingerprints = fingerprints // FIXME Actually do something with it
+                        self.scannedFingerprints = fingerprints
                         self.importScannedFingerprints = true
                     }, handleClose: {
                         self.showQRCodeScanner = false

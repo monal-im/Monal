@@ -10,8 +10,6 @@
 #import "MLContactCell.h"
 #import "DataLayer.h"
 #import "chatViewController.h"
-#import "addContact.h"
-#import "MLNewViewController.h"
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
 #import "xmpp.h"
@@ -214,15 +212,6 @@
         return;
     }
     [super performSegueWithIdentifier:identifier sender:sender];
-}
-
--(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
-{
-    if([segue.identifier isEqualToString:@"showNewMenu"])
-    {
-        MLNewViewController* newView = segue.destinationViewController;
-        newView.selectContact = self.selectContact;
-    }
 }
 
 -(void) loadContactsWithFilter:(NSString*) filter

@@ -21,3 +21,4 @@ FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 #import "MLSignalStore.h"
 #import "MLXMPPManager.h"
 #import "MLImageManager.h"
+#import "MLMucProcessor.h"

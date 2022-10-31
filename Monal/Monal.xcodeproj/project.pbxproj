@@ -88,12 +88,13 @@
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
 		389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
 		3D06A515281FFCC000DDAE90 /* NotificationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */; };
+		3D27D956290B0BB60014748B /* AddContactMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D27D955290B0BB60014748B /* AddContactMenu.swift */; };
+		3D27D958290B0BC80014748B /* ContactRequestsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */; };
 		3D5A91422842B4AE008CE57E /* MemberList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D5A91412842B4AE008CE57E /* MemberList.swift */; };
 		3D65B78D27234B74005A30F4 /* ContactDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D65B78C27234B74005A30F4 /* ContactDetails.swift */; };
 		3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */; };
 		3D7D352328626CB80042C5E5 /* LoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */; };
 		3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */; };
-		3DB71D1E28EF5908004BF04E /* AddContacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB71D1D28EF5908004BF04E /* AddContacts.swift */; };
 		3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */; };
 		43A92B80C8CD5E04074B5A3E /* Pods_MonalXMPPUnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
@@ -488,12 +489,13 @@
 		39B989B9775C0725A810D271 /* Pods-MonalUITests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		39DB4C9159DA578D1A34990D /* Pods-monalxmpp.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.alpha.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.alpha.xcconfig"; sourceTree = "<group>"; };
 		3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettings.swift; sourceTree = "<group>"; };
+		3D27D955290B0BB60014748B /* AddContactMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddContactMenu.swift; sourceTree = "<group>"; };
+		3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactRequestsMenu.swift; sourceTree = "<group>"; };
 		3D5A91412842B4AE008CE57E /* MemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberList.swift; sourceTree = "<group>"; };
 		3D65B78C27234B74005A30F4 /* ContactDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
 		3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftuiHelpers.swift; sourceTree = "<group>"; };
 		3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingOverlay.swift; sourceTree = "<group>"; };
 		3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmemoQrCodeView.swift; sourceTree = "<group>"; };
-		3DB71D1D28EF5908004BF04E /* AddContacts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddContacts.swift; sourceTree = "<group>"; };
 		3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmemoKeys.swift; sourceTree = "<group>"; };
 		3EB7A7084FA9A8F68A3D251C /* Pods-MonalXMPPUnitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.debug.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.debug.xcconfig"; sourceTree = "<group>"; };
 		4049F81F60EA5B7A57A4E9C6 /* Pods-NotificationService.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.beta.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.beta.xcconfig"; sourceTree = "<group>"; };
@@ -1019,7 +1021,8 @@
 				264DCF9A23E11483004105CE /* MLNewViewController.h */,
 				264DCF9B23E11483004105CE /* MLNewViewController.m */,
 				84FC375828981A5600634E3E /* PasswordMigration.swift */,
-				3DB71D1D28EF5908004BF04E /* AddContacts.swift */,
+				3D27D955290B0BB60014748B /* AddContactMenu.swift */,
+				3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -1941,7 +1944,6 @@
 				C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */,
 				3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */,
 				C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */,
-				3DB71D1E28EF5908004BF04E /* AddContacts.swift in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				C1E1EC7D286A029C0097EC74 /* MLOgHtmlParser.swift in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
@@ -1961,6 +1963,7 @@
 				384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */,
 				C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
+				3D27D956290B0BB60014748B /* AddContactMenu.swift in Sources */,
 				261A628B176C159000059090 /* AccountListController.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */,
@@ -1988,6 +1991,7 @@
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
 				2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */,
+				3D27D958290B0BC80014748B /* ContactRequestsMenu.swift in Sources */,
 				3D5A91422842B4AE008CE57E /* MemberList.swift in Sources */,
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,

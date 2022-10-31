@@ -37,14 +37,43 @@
 
 @implementation ContactsViewController
 
--(void) openAddContactsMenu:(id)sender
+-(void) openAddContacts:(id)sender
 {
-    UIViewController* addContactsMenuView = [[SwiftuiInterface new] makeViewWithName:@"AddContacts"];
-    // [self showDetailViewController:addContactsMenuView sender:self];
-    [self presentViewController:addContactsMenuView animated:YES completion:^{}];
+    UIViewController* addContactMenuView = [[SwiftuiInterface new] makeViewWithName:@"AddContact"];
+    [self presentViewController:addContactMenuView animated:YES completion:^{}];
+}
+
+-(void) openContactRequests:(id)sender
+{
+    UIViewController* contactRequestsView = [[SwiftuiInterface new] makeViewWithName:@"ContactRequests"];
+    [self presentViewController:contactRequestsView animated:YES completion:^{}];
 }
 
 #pragma mark view life cycle
+
+/*
+-(UIImage*) imageWithNotificationBadgeForImage:(UIImage*) image {
+    // float innerImageSize = 20;
+    UIImage* finalImage;
+
+    UIImage* badge = [[UIImage systemImageNamed:@"exclamationmark.circle.fill"] imageWithTintColor:UIColor.redColor];
+
+    // CGSize outerImageSize = image.size; CGSizeMake(40, 40); // Provide custom size or size of your actual image
+    UIGraphicsBeginImageContext(image.size);
+
+    //calculate areaSize for re-centered inner image
+    // CGRect areSize = CGRectMake(((image.size.width/2) - (innerImageSize/2)), ((outerImageSize.width/2) - (innerImageSize/2)), innerImageSize, innerImageSize);
+    CGRect imgSize = CGRectMake(0, 0, image.size.width, image.size.height);
+    CGRect dotSize = CGRectMake(0, image.size.width - 15, 15, 15);
+    [image drawInRect:imgSize];
+    [badge drawInRect:dotSize blendMode:kCGBlendModeNormal alpha:1.0];
+
+    finalImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+
+    return finalImage;
+}
+ */
 
 -(void) viewDidLoad
 {
@@ -76,9 +105,18 @@
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
 
-    self.navigationItem.rightBarButtonItem.image = [UIImage systemImageNamed:@"plus"];
-    [self.navigationItem.rightBarButtonItem setAction:@selector(openAddContactsMenu:)];
-    // [self.navigationItem.rightBarButtonItem setTarget:@selector(openAddContactsMenu:)];
+    UIBarButtonItem* addContact = [[UIBarButtonItem alloc] init];
+    addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
+    [addContact setAction:@selector(openAddContacts:)];
+    UIBarButtonItem* contactRequests = [[UIBarButtonItem alloc] init];
+    if([[DataLayer sharedInstance] contactRequestsForAccount].count == 0) {
+        contactRequests.image = [UIImage systemImageNamed:@"questionmark.bubble.fill"];
+    } else {
+        contactRequests.image = [UIImage systemImageNamed:@"exclamationmark.bubble.fill"];
+    }
+
+    [contactRequests setAction:@selector(openContactRequests:)];
+    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, contactRequests, nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeviceRotation) name:UIDeviceOrientationDidChangeNotification object:nil];
 }

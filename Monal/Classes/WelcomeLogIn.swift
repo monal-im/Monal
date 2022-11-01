@@ -254,7 +254,7 @@ struct WelcomeLogIn: View {
                         self.loginComplete = true
                         showSuccessAlert()
 #else
-                        showLoadingOverlay(overlay, headline:NSLocalizedString("Loading omemo bundles", comment: ""))
+                        showLoadingOverlay(overlay, headline:NSLocalizedString("Loading omemo bundles: 0 / 0", comment: ""))
 #endif
                     }
                 }

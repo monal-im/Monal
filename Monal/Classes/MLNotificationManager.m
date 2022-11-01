@@ -474,7 +474,6 @@
     
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionIncoming;
-    interaction.identifier = [NSString stringWithFormat:@"%@|%@", message.accountId, message.buddyName];
     
     NSError* error = nil;
     UNNotificationContent* updatedContent = [content contentByUpdatingWithProvider:intent error:&error];
@@ -541,15 +540,17 @@
             {
                 //use MLMessage's capability to calculate the fallback name using actualFrom
                 sender = [self makeINPersonWithContact:contact andDisplayName:message.contactDisplayName andAccount:account];
-                //this is needed to make iOS show the group name in notifications
+                //the next 2 lines are needed to make iOS show the group name in notifications
                 [recipients addObject:[self makeINPersonForOwnAccount:account]];
+                [recipients addObject:sender];
             }
             else
             {
-                //use MLMessage's capability to calculate the fallback name using actualFrom
-                [recipients addObject:[self makeINPersonWithContact:contact andDisplayName:message.contactDisplayName andAccount:account]];
                 //we always need a sender (that's us in the outgoing case)
                 sender = [self makeINPersonForOwnAccount:account];
+                //use MLMessage's capability to calculate the fallback name using actualFrom
+                [recipients addObject:[self makeINPersonWithContact:contact andDisplayName:message.contactDisplayName andAccount:account]];
+                [recipients addObject:sender];      //match the recipients array for the incoming case above
             }
         }
     }
@@ -568,6 +569,7 @@
         }
     }
     
+    DDLogDebug(@"Creating INSendMessageIntent with recipients=%@, speakableGroupName=%@, sender=%@", recipients, groupDisplayName, sender);
     INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:recipients
                                                               outgoingMessageType:(audioAttachment ? INOutgoingMessageTypeOutgoingMessageAudio : INOutgoingMessageTypeOutgoingMessageText)
                                                                           content:msgText
@@ -576,11 +578,12 @@
                                                                       serviceName:message.accountId.stringValue
                                                                            sender:sender
                                                                       attachments:(audioAttachment ? @[audioAttachment] : @[])];
+    DDLogDebug(@"Intent is now: %@", intent);
     if(message.isMuc)
     {
         if(contact.avatar != nil)
         {
-            DDLogDebug(@"Using muc avatar image...");
+            DDLogDebug(@"Using muc avatar image: %@", contact.avatar);
             [intent setImage:[INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)] forParameterNamed:@"speakableGroupName"];
         }
         else
@@ -625,7 +628,7 @@
     INImage* contactImage = nil;
     if(ownContact.avatar != nil)
     {
-        DDLogDebug(@"Using own avatar image...");
+        DDLogDebug(@"Using own avatar image: %@", ownContact.avatar);
         NSData* avatarData = UIImagePNGRepresentation(ownContact.avatar);
         contactImage = [INImage imageWithImageData:avatarData];
     }
@@ -653,7 +656,7 @@
     INImage* contactImage = nil;
     if(contact.avatar != nil)
     {
-        DDLogDebug(@"Using avatar image...");
+        DDLogDebug(@"Using avatar image: %@", contact.avatar);
         NSData* avatarData = UIImagePNGRepresentation(contact.avatar);
         contactImage = [INImage imageWithImageData:avatarData];
     }

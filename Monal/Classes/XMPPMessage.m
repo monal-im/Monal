@@ -25,8 +25,28 @@ NSString* const kMessageHeadlineType = @"headline";
     self = [super init];
     self.element = @"message";
     [self setXMLNS:@"jabber:client"];
-    self.id = [[NSUUID UUID] UUIDString];       //default value, can be overwritten later on
+    self.attributes[@"type"] = kMessageChatType;    //default value, can be overwritten later on
+    self.id = [[NSUUID UUID] UUIDString];           //default value, can be overwritten later on
     return self;
+}
+
+-(id) initWithType:(NSString*) type to:(NSString*) to
+{
+    self = [self init];
+    self.attributes[@"type"] = type;
+    self.attributes[@"to"] = to;
+}
+
+-(id) initTo:(NSString*) to
+{
+    self = [self init];
+    self.attributes[@"to"] = to;
+}
+
+-(id) initWithType:(NSString*) type
+{
+    self = [self init];
+    self.attributes[@"type"] = type;
 }
 
 -(id) initWithXMPPMessage:(XMPPMessage*) msg

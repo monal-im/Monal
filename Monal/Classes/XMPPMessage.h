@@ -17,6 +17,10 @@ FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
 
 @interface XMPPMessage : XMPPStanza
 
+-(id) init;
+-(id) initWithType:(NSString*) type to:(NSString*) to;
+-(id) initTo:(NSString*) to;
+-(id) initWithType:(NSString*) type;
 -(id) initWithXMPPMessage:(XMPPMessage*) msg;
 
 /**

@@ -8,7 +8,7 @@ ignoreEmptyStrings = true
 unstripped = false
 
 [update.code]
-codePaths = ["Classes", "shareSheet-iOS", "NotificaionService"]
+codePaths = ["Classes", "shareSheet-iOS", "NotificationService"]
 localizablePaths = ["localization", "shareSheet-iOS/localization"]
 defaultToKeys = true
 additive = true

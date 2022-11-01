@@ -6,6 +6,7 @@
 //  Copyright © 2018 Monal.im. All rights reserved.
 //
 
+#import "MLConstants.h"
 #import "MLSignalStore.h"
 #import "SignalProtocolObjC.h"
 #import "DataLayer.h"
@@ -61,21 +62,22 @@
         self.identityKeyPair = [[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:nil];
         if(error)
         {
-            NSLog(@"prekey error %@", error);
+            DDLogError(@"prekey error %@", error);
             return self;
         }
         
         self.signedPreKey = [[SignalSignedPreKey alloc] initWithSerializedData:[self loadSignedPreKeyWithId:1] error:&error];
-        
         if(error)
         {
-            NSLog(@"signed prekey error %@", error);
+            DDLogError(@"signed prekey error %@", error);
             return self;
         }
         // remove old keys that should no longer be available
         [self cleanupKeys];
         [self reloadCachedPrekeys];
     }
+    else
+        self.deviceid = 0;
 
     return self; 
 }

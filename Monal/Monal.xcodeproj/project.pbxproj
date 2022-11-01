@@ -83,9 +83,6 @@
 		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
 		26E8462224EABAD600ECE419 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462424EABAD600ECE419 /* Settings.storyboard */; };
 		26E8462824EABAED00ECE419 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462A24EABAED00ECE419 /* Main.storyboard */; };
-		26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D421968A4100EF5720 /* GLCapsuleView.m */; };
-		26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D821968A8600EF5720 /* GLRoundedView.m */; };
-		26F396DC2197507200EF5720 /* GLTintButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396DA2197506F00EF5720 /* GLTintButton.m */; };
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
 		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
 		384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */; };
@@ -467,12 +464,6 @@
 		26EC411217BDE39E0031304D /* MLImageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLImageManager.m; sourceTree = "<group>"; };
 		26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLNotificationManager.h; path = Classes/MLNotificationManager.h; sourceTree = "<group>"; };
 		26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLNotificationManager.m; path = Classes/MLNotificationManager.m; sourceTree = "<group>"; };
-		26F396D421968A4100EF5720 /* GLCapsuleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLCapsuleView.m; sourceTree = "<group>"; };
-		26F396D521968A4200EF5720 /* GLCapsuleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLCapsuleView.h; sourceTree = "<group>"; };
-		26F396D721968A8500EF5720 /* GLRoundedView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLRoundedView.h; sourceTree = "<group>"; };
-		26F396D821968A8600EF5720 /* GLRoundedView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLRoundedView.m; sourceTree = "<group>"; };
-		26F396DA2197506F00EF5720 /* GLTintButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTintButton.m; sourceTree = "<group>"; };
-		26F396DB2197507100EF5720 /* GLTintButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTintButton.h; sourceTree = "<group>"; };
 		26F9794C1ACAC73A0008E005 /* MLContactCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLContactCell.xib; sourceTree = "<group>"; };
 		26FC618B24EB2BEE0094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "external/zh-Hant.lproj/Main.strings"; sourceTree = "<group>"; };
 		26FC618E24EB2BF10094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "external/zh-Hant.lproj/Settings.strings"; sourceTree = "<group>"; };
@@ -1184,12 +1175,6 @@
 			children = (
 				54F0B81B282316F5003664BD /* RegisterAccount.swift */,
 				54F0B81828231690003664BD /* WelcomeLogIn.swift */,
-				26F396DB2197507100EF5720 /* GLTintButton.h */,
-				26F396DA2197506F00EF5720 /* GLTintButton.m */,
-				26F396D721968A8500EF5720 /* GLRoundedView.h */,
-				26F396D821968A8600EF5720 /* GLRoundedView.m */,
-				26F396D521968A4200EF5720 /* GLCapsuleView.h */,
-				26F396D421968A4100EF5720 /* GLCapsuleView.m */,
 				C12436122434AB5D00B8F074 /* MLAttributedLabel.h */,
 				C12436132434AB5D00B8F074 /* MLAttributedLabel.m */,
 			);
@@ -1964,7 +1949,6 @@
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
-				26F396DC2197507200EF5720 /* GLTintButton.m in Sources */,
 				384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */,
 				C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
@@ -1983,7 +1967,6 @@
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				C104915D2612FFBC0054AC9E /* addContact.m in Sources */,
-				26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */,
 				26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */,
 				26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
@@ -2000,7 +1983,6 @@
 				265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */,
 				3D5A91422842B4AE008CE57E /* MemberList.swift in Sources */,
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
-				26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */,
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,

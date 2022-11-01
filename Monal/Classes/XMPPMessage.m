@@ -20,7 +20,7 @@ NSString* const kMessageErrorType = @"error";
 NSString* const kMessageNormalType = @"normal";
 NSString* const kMessageHeadlineType = @"headline";
 
--(id) init
+-(XMPPMessage*) init
 {
     self = [super init];
     self.element = @"message";
@@ -30,26 +30,32 @@ NSString* const kMessageHeadlineType = @"headline";
     return self;
 }
 
--(id) initWithType:(NSString*) type to:(NSString*) to
+-(XMPPMessage*) initWithType:(NSString*) type to:(NSString*) to
 {
     self = [self init];
     self.attributes[@"type"] = type;
     self.attributes[@"to"] = to;
+
+    return self;
 }
 
--(id) initTo:(NSString*) to
+-(XMPPMessage*) initTo:(NSString*) to
 {
     self = [self init];
     self.attributes[@"to"] = to;
+
+    return self;
 }
 
--(id) initWithType:(NSString*) type
+-(XMPPMessage*) initWithType:(NSString*) type
 {
     self = [self init];
     self.attributes[@"type"] = type;
+
+    return self;
 }
 
--(id) initWithXMPPMessage:(XMPPMessage*) msg
+-(XMPPMessage*) initWithXMPPMessage:(XMPPMessage*) msg
 {
     self = [self initWithElement:msg.element withAttributes:msg.attributes andChildren:msg.children andData:msg.data];
     return self;

@@ -141,13 +141,12 @@
 		840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */; };
 		844EEC6D28E718DB00CB5EF9 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		848904A9289C82C30097E19C /* SCRAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 848904A8289C82C30097E19C /* SCRAM.m */; };
-		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
-		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
-		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
 		849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 849A53E3287135B2007E941A /* MLVoIPProcessor.m */; };
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
 		84F520E12865484A0068D1C1 /* AVPrototype.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F520E0286548490068D1C1 /* AVPrototype.swift */; };
-		A4CD17069281C209783314FD /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AF6D1CD4CB7FE955E330121 /* Pods_NotificaionService.framework */; };
+		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
+		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
+		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
 		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
 		C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490E22612F3D00054AC9E /* MLCrypto.swift */; };
@@ -561,13 +560,13 @@
 		840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueCell.h; sourceTree = "<group>"; };
 		848904A8289C82C30097E19C /* SCRAM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SCRAM.m; sourceTree = "<group>"; };
 		848904AA289C82DB0097E19C /* SCRAM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SCRAM.h; sourceTree = "<group>"; };
-		84FC37542897521400634E3E /* snprintf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = snprintf.m; sourceTree = "<group>"; };
-		84FC37562897523500634E3E /* metamacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
-		84FC375828981A5600634E3E /* PasswordMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordMigration.swift; sourceTree = "<group>"; };
 		849A53E3287135B2007E941A /* MLVoIPProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLVoIPProcessor.m; path = Classes/MLVoIPProcessor.m; sourceTree = SOURCE_ROOT; };
 		849A53E5287135D7007E941A /* MLVoIPProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLVoIPProcessor.h; path = Classes/MLVoIPProcessor.h; sourceTree = SOURCE_ROOT; };
 		84D31CE528653B83006D7926 /* WebRTCClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebRTCClient.swift; path = Classes/WebRTCClient.swift; sourceTree = SOURCE_ROOT; };
 		84F520E0286548490068D1C1 /* AVPrototype.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVPrototype.swift; path = Classes/AVPrototype.swift; sourceTree = SOURCE_ROOT; };
+		84FC37542897521400634E3E /* snprintf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = snprintf.m; sourceTree = "<group>"; };
+		84FC37562897523500634E3E /* metamacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
+		84FC375828981A5600634E3E /* PasswordMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordMigration.swift; sourceTree = "<group>"; };
 		86CF04FDE084C646CA14B774 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D1107310486CEB800E47090 /* Monal-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Monal-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
@@ -1604,7 +1603,6 @@
 					26CC579123A0867400ABB92A = {
 						CreatedOnToolsVersion = 11.2.1;
 						LastSwiftMigration = 1240;
-						ProvisioningStyle = Manual;
 					};
 					C1049185261301530054AC9E = {
 						CreatedOnToolsVersion = 12.4;
@@ -2610,6 +2608,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -2628,8 +2628,10 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 5.3.4;
-				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.monalxmpp;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.notificationService";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
@@ -2644,6 +2646,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -2661,8 +2665,10 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 5.3.4;
-				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.monalxmpp;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.notificationService";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
@@ -2677,6 +2683,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -2694,8 +2702,10 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 5.3.4;
-				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.monalxmpp;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.notificationService";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
@@ -3253,6 +3263,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -3270,8 +3282,10 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 5.3.4;
-				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.monalxmpp;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.notificationService";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
@@ -3577,9 +3591,11 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -3594,8 +3610,10 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 5.3.4;
-				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
+				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.NotificaionService;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.notificationService";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
 				SWIFT_OBJC_BRIDGING_HEADER = "";

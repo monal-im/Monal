@@ -28,7 +28,6 @@
 #import "MLOMEMO.h"
 #import "MLSearchViewController.h"
 #import "MLXEPSlashMeHandler.h"
-#import "MLXMPPActivityItem.h"
 #import "MonalAppDelegate.h"
 #import "xmpp.h"
 

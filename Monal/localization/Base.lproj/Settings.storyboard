@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="dgM-uB-Aap">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="dgM-uB-Aap">
     <device id="ipad12_9rounded" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -135,7 +135,7 @@
                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ftg-4N-wSq" id="ftg-4N-wSq">
-                                <rect key="frame" x="0.0" y="49.5" width="704" height="51.5"/>
+                                <rect key="frame" x="0.0" y="55.5" width="704" height="51.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ftg-4N-wSq" id="O1r-BS-K1x">
                                     <rect key="frame" x="0.0" y="0.0" width="704" height="51.5"/>
@@ -178,7 +178,7 @@
                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="serverCell" textLabel="rLQ-yk-GnZ" detailTextLabel="rF7-34-0sc" rowHeight="60" style="IBUITableViewCellStyleSubtitle" id="dnS-eI-Sql">
-                                <rect key="frame" x="0.0" y="49.5" width="704" height="60"/>
+                                <rect key="frame" x="0.0" y="55.5" width="704" height="60"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="dnS-eI-Sql" id="8qO-r0-VQV">
                                     <rect key="frame" x="0.0" y="0.0" width="704" height="60"/>
@@ -264,17 +264,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" editable="NO" text="log_placeholder" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="JYm-gw-Mhc">
-                                <rect key="frame" x="0.0" y="228.66666666666663" width="704" height="584.33333333333326"/>
-                                <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
-                                <color key="textColor" systemColor="labelColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                                <attributedString key="userComments">
-                                    <fragment content="#bc-ignore!"/>
-                                </attributedString>
-                            </textView>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="87s-YI-3sS">
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="87s-YI-3sS">
                                 <rect key="frame" x="0.0" y="901.5" width="704" height="44"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="NmH-31-tX0"/>
@@ -291,28 +281,10 @@
                                             <action selector="sqliteExportAction:" destination="v41-1Z-cuJ" id="wvo-wm-gE3"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="l48-at-NAu"/>
-                                    <barButtonItem systemItem="rewind" id="Itl-QC-MOb">
-                                        <connections>
-                                            <action selector="rewindButton:" destination="v41-1Z-cuJ" id="TAy-7J-xNv"/>
-                                        </connections>
-                                    </barButtonItem>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="Djz-pP-Ntv"/>
-                                    <barButtonItem systemItem="fastForward" id="EvC-j0-wsf">
-                                        <connections>
-                                            <action selector="fastForwardButton:" destination="v41-1Z-cuJ" id="26Y-Hn-3KL"/>
-                                        </connections>
-                                    </barButtonItem>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="bbT-e6-jf6"/>
-                                    <barButtonItem systemItem="refresh" id="Xb3-az-ikh">
-                                        <connections>
-                                            <action selector="refreshButton:" destination="v41-1Z-cuJ" id="C0v-wD-Qrb"/>
-                                        </connections>
-                                    </barButtonItem>
                                 </items>
                             </toolbar>
-                            <textField opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Hostname/IP of Logserver" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZMn-v1-NOh" userLabel="logHostname">
-                                <rect key="frame" x="8" y="64" width="174" height="34"/>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Hostname/IP of Logserver" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZMn-v1-NOh" userLabel="logHostname">
+                                <rect key="frame" x="8" y="64" width="195.5" height="34"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <accessibility key="accessibilityConfiguration" hint="UDP Log Hostname"/>
                                 <constraints>
@@ -324,8 +296,8 @@
                                     <fragment content="#bc-ignore!"/>
                                 </attributedString>
                             </textField>
-                            <textField opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Port of Logserver" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="IVO-3g-xoO" userLabel="logPort">
-                                <rect key="frame" x="190" y="64" width="140.33333333333337" height="34"/>
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Port of Logserver" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="IVO-3g-xoO" userLabel="logPort">
+                                <rect key="frame" x="211.5" y="64" width="140" height="34"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <accessibility key="accessibilityConfiguration" hint="UDP Log Port"/>
                                 <constraints>
@@ -348,8 +320,11 @@
                                 </attributedString>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="PLEASE MAKE SURE TO USE A KEY WITH PROPER ENTROPY!!" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" translatesAutoresizingMaskIntoConstraints="NO" id="SEe-lB-dT4" userLabel="logAESHint">
-                                <rect key="frame" x="8" y="180" width="688" height="40.666666666666657"/>
+                                <rect key="frame" x="8" y="142" width="688" height="40.5"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40.666666666666657" id="Wic-UR-fHY"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" systemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -358,27 +333,20 @@
                                 </attributedString>
                             </label>
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="Cu2-OK-XWy" userLabel="logSwitch">
-                                <rect key="frame" x="647" y="64" width="51" height="31"/>
+                                <rect key="frame" x="355.5" y="64" width="51" height="31"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </switch>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="ZMn-v1-NOh" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" constant="8" id="3GD-k0-pHL"/>
-                            <constraint firstItem="87s-YI-3sS" firstAttribute="trailing" secondItem="JYm-gw-Mhc" secondAttribute="trailing" id="5yw-SJ-WwJ"/>
                             <constraint firstItem="C84-JQ-3RM" firstAttribute="top" secondItem="ZMn-v1-NOh" secondAttribute="bottom" constant="8" id="7Jw-q3-ieY"/>
-                            <constraint firstItem="JYm-gw-Mhc" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" id="7OF-Xo-ZGa"/>
                             <constraint firstItem="ZMn-v1-NOh" firstAttribute="top" secondItem="pE0-Vj-loH" secondAttribute="bottom" constant="8" id="EbG-vD-JmE"/>
-                            <constraint firstItem="87s-YI-3sS" firstAttribute="leading" secondItem="JYm-gw-Mhc" secondAttribute="leading" id="NC1-15-YZv"/>
-                            <constraint firstItem="87s-YI-3sS" firstAttribute="bottom" secondItem="JYm-gw-Mhc" secondAttribute="bottom" id="Tl3-hY-90I"/>
-                            <constraint firstItem="JYm-gw-Mhc" firstAttribute="trailing" secondItem="Cu2-OK-XWy" secondAttribute="trailing" constant="8" id="XIc-I7-TLK"/>
-                            <constraint firstAttribute="trailing" secondItem="JYm-gw-Mhc" secondAttribute="trailing" id="XJd-3p-CJk"/>
                             <constraint firstItem="IVO-3g-xoO" firstAttribute="top" secondItem="ZMn-v1-NOh" secondAttribute="top" id="YcA-Gu-8XD"/>
                             <constraint firstItem="Cu2-OK-XWy" firstAttribute="top" secondItem="ZMn-v1-NOh" secondAttribute="top" id="Ylv-xX-nIH"/>
+                            <constraint firstItem="SEe-lB-dT4" firstAttribute="top" secondItem="C84-JQ-3RM" secondAttribute="bottom" constant="2" id="au8-Ye-C2y"/>
                             <constraint firstItem="87s-YI-3sS" firstAttribute="bottom" secondItem="EB3-va-n1E" secondAttribute="bottomMargin" id="eHG-WU-Fy0"/>
-                            <constraint firstItem="SEe-lB-dT4" firstAttribute="trailing" secondItem="JYm-gw-Mhc" secondAttribute="trailing" constant="-8" id="gqt-VM-Yx2"/>
                             <constraint firstItem="Cu2-OK-XWy" firstAttribute="leading" secondItem="IVO-3g-xoO" secondAttribute="trailing" constant="4" id="gsk-iy-FLv"/>
-                            <constraint firstItem="SEe-lB-dT4" firstAttribute="leading" secondItem="JYm-gw-Mhc" secondAttribute="leading" constant="8" id="sag-lv-irY"/>
                             <constraint firstItem="IVO-3g-xoO" firstAttribute="leading" secondItem="ZMn-v1-NOh" secondAttribute="trailing" constant="8" id="uCX-uh-gi6"/>
                             <constraint firstItem="C84-JQ-3RM" firstAttribute="trailing" secondItem="IVO-3g-xoO" secondAttribute="trailing" id="uRn-zX-fZ8"/>
                             <constraint firstItem="C84-JQ-3RM" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" constant="8" id="xQo-3m-Qhd"/>
@@ -398,7 +366,6 @@
                         <outlet property="logUDPHostname" destination="ZMn-v1-NOh" id="3qH-Tu-aDJ"/>
                         <outlet property="logUDPPort" destination="IVO-3g-xoO" id="JeJ-cN-gcZ"/>
                         <outlet property="logUDPSwitch" destination="Cu2-OK-XWy" id="zTe-dg-rRi"/>
-                        <outlet property="logView" destination="JYm-gw-Mhc" id="IRa-EC-O43"/>
                         <outlet property="navbar" destination="JXM-KH-RYJ" id="dEp-jS-4SQ"/>
                     </connections>
                 </viewController>
@@ -450,7 +417,7 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="Vlf-0Y-MzQ" id="Vlf-0Y-MzQ">
-                                <rect key="frame" x="0.0" y="44.5" width="704" height="51.5"/>
+                                <rect key="frame" x="0.0" y="50" width="704" height="51.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Vlf-0Y-MzQ" id="eVL-7l-CPF">
                                     <rect key="frame" x="0.0" y="0.0" width="704" height="51.5"/>
@@ -507,7 +474,7 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="1tW-Nf-ovP">
-                                <rect key="frame" x="0.0" y="44.5" width="1024" height="51.5"/>
+                                <rect key="frame" x="0.0" y="50" width="1024" height="51.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="1tW-Nf-ovP" id="OPZ-8v-S0G">
                                     <rect key="frame" x="0.0" y="0.0" width="1024" height="51.5"/>
@@ -568,7 +535,7 @@
                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="serverCell" textLabel="ivZ-8c-o6a" detailTextLabel="QNX-n9-Hbx" rowHeight="60" style="IBUITableViewCellStyleSubtitle" id="EOj-cn-5ku">
-                                <rect key="frame" x="0.0" y="49.5" width="704" height="60"/>
+                                <rect key="frame" x="0.0" y="55.5" width="704" height="60"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="EOj-cn-5ku" id="Gwc-zK-8IU">
                                     <rect key="frame" x="0.0" y="0.0" width="704" height="60"/>
@@ -619,7 +586,7 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="blockUser" id="OYh-Zu-JpF">
-                                <rect key="frame" x="0.0" y="44.5" width="704" height="51.5"/>
+                                <rect key="frame" x="0.0" y="50" width="704" height="51.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="OYh-Zu-JpF" id="CQf-ES-2Lb">
                                     <rect key="frame" x="0.0" y="0.0" width="704" height="51.5"/>
@@ -654,7 +621,7 @@
                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="MKv-dS-Fbn" id="MKv-dS-Fbn">
-                                <rect key="frame" x="0.0" y="49.5" width="1024" height="51.5"/>
+                                <rect key="frame" x="0.0" y="55.5" width="1024" height="51.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="MKv-dS-Fbn" id="BhH-GF-cmh">
                                     <rect key="frame" x="0.0" y="0.0" width="1024" height="51.5"/>
@@ -683,7 +650,7 @@
                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="soundCell" id="1e0-W2-8As">
-                                <rect key="frame" x="0.0" y="49.5" width="1024" height="51.5"/>
+                                <rect key="frame" x="0.0" y="55.5" width="1024" height="51.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="1e0-W2-8As" id="b1j-Dv-2a6">
                                     <rect key="frame" x="0.0" y="0.0" width="1024" height="51.5"/>
@@ -744,7 +711,7 @@
                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="addButton" id="aZf-Fg-Boo">
-                                <rect key="frame" x="0.0" y="49.5" width="704" height="51.5"/>
+                                <rect key="frame" x="0.0" y="55.5" width="704" height="51.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="aZf-Fg-Boo" id="5ai-yP-Edi">
                                     <rect key="frame" x="0.0" y="0.0" width="704" height="51.5"/>
@@ -837,7 +804,7 @@
     </inferredMetricsTieBreakers>
     <resources>
         <image name="AppLogo" width="341.33334350585938" height="341.33334350585938"/>
-        <image name="gearshape" catalog="system" width="128" height="121"/>
+        <image name="gearshape" catalog="system" width="128" height="123"/>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
@@ -845,7 +812,7 @@
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="labelColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

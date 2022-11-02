@@ -695,13 +695,15 @@ void swizzle(Class c, SEL orig, SEL new)
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid
 {
     //cache results
-    static NSMutableDictionary* cache;
+    static NSCache* cache;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        cache = [[NSMutableDictionary alloc] init];
+        cache = [NSCache new];
     });
-    if(cache[jid] != nil)
-        return cache[jid];
+    @synchronized(cache) {
+        if([cache objectForKey:jid] != nil)
+            return [cache objectForKey:jid];
+    }
     
     NSMutableDictionary<NSString*, NSString*>* retval = [[NSMutableDictionary alloc] init];
     NSArray* parts = [jid componentsSeparatedByString:@"/"];
@@ -731,7 +733,11 @@ void swizzle(Class c, SEL orig, SEL new)
     if([retval[@"resource"] isEqualToString:@""])
         [retval removeObjectForKey:@"resource"];
     
-    return cache[jid] = [retval copy];          //return immutable copy
+    //cache and return immutable copy
+    @synchronized(cache) {
+        [cache setObject:[retval copy] forKey:jid];
+    }
+    return [retval copy];
 }
 
 +(void) clearSyncErrorsOnAppForeground

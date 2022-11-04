@@ -35,6 +35,7 @@
 #import "MLMessage.h"
 #import "MLFiletransfer.h"
 #import "DataLayer.h"
+#import "OmemoState.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -196,6 +197,7 @@ void swizzle(Class c, SEL orig, SEL new)
         [MLContact class],
         [MLMessage class],
         [NSURL class],
+        [OmemoState class],
     ]] fromData:data error:&error];
     if(error)
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];

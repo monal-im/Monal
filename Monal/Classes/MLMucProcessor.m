@@ -154,7 +154,7 @@
         if([self checkIfStillBookmarked:presenceNode.fromUser])
             [self deleteMuc:presenceNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
-        [self handleError:NSLocalizedString(@"Group/Channel error", @"") forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:YES];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel error in %@", @""), presenceNode.fromUser] forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:YES];
         return;
     }
     

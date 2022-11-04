@@ -100,7 +100,6 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(void) toggleMute:(BOOL) mute;
 -(void) toggleMentionOnly:(BOOL) mentionOnly;
 -(BOOL) toggleEncryption:(BOOL) encrypt;
--(void) resetOmemoSession;
 -(void) togglePinnedChat:(BOOL) pinned;
 -(BOOL) toggleBlocked:(BOOL) block;
 -(void) removeFromRoster;

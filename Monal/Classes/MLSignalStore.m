@@ -473,6 +473,13 @@
     }];
 }
 
+-(void) markSessionAsFunctional:(SignalAddress*) address
+{
+    [self.sqliteDatabase voidWriteTransaction:^{
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=false WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    }];
+}
+
 -(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceId
 {
     return [self.sqliteDatabase boolReadTransaction:^{

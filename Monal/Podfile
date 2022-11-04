@@ -32,7 +32,7 @@ def monalxmpp
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
   pod 'ASN1Decoder'
   #pod 'GoogleWebRTC'
-  pod 'WebRTC-lib', git: 'https://github.com/monal-im/WebRTC', branch: 'tempfix'
+  pod 'WebRTC-lib'
   signalDeps
 end
 

@@ -1,7 +1,7 @@
 PODS:
   - ASN1Decoder (1.8.0)
-  - CocoaLumberjack/Core (3.7.4)
-  - CocoaLumberjack/Swift (3.7.4):
+  - CocoaLumberjack/Core (3.8.0)
+  - CocoaLumberjack/Swift (3.8.0):
     - CocoaLumberjack/Core
   - DACircularProgress (2.3.1)
   - DZNEmptyDataSet (1.8.1)
@@ -28,7 +28,7 @@ PODS:
   - sqlite3/perf-threadsafe (3.39.3):
     - sqlite3/common
   - TOCropViewController (2.6.1)
-  - WebRTC-lib (106.0.0)
+  - WebRTC-lib (107.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -43,7 +43,7 @@ DEPENDENCIES:
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
   - sqlite3/perf-threadsafe
   - TOCropViewController
-  - WebRTC-lib (from `https://github.com/monal-im/WebRTC`, branch `tempfix`)
+  - WebRTC-lib
 
 SPEC REPOS:
   trunk:
@@ -62,6 +62,7 @@ SPEC REPOS:
     - SnapKit
     - sqlite3
     - TOCropViewController
+    - WebRTC-lib
 
 EXTERNAL SOURCES:
   SignalProtocolC:
@@ -70,9 +71,6 @@ EXTERNAL SOURCES:
   SignalProtocolObjC:
     :branch: master
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
-  WebRTC-lib:
-    :branch: tempfix
-    :git: https://github.com/monal-im/WebRTC
 
 CHECKOUT OPTIONS:
   SignalProtocolC:
@@ -81,13 +79,10 @@ CHECKOUT OPTIONS:
   SignalProtocolObjC:
     :commit: e153e868c6737881a196da17612367ab9ecaae13
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
-  WebRTC-lib:
-    :commit: 5870c021cdaf0f0298e84c7c39e9c92a9afd7e0a
-    :git: https://github.com/monal-im/WebRTC
 
 SPEC CHECKSUMS:
   ASN1Decoder: 6110fdeacfdb41559b1481457a1645be716610aa
-  CocoaLumberjack: 543c79c114dadc3b1aba95641d8738b06b05b646
+  CocoaLumberjack: 78abfb691154e2a9df8ded4350d504ee19d90732
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
@@ -103,8 +98,8 @@ SPEC CHECKSUMS:
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   sqlite3: 50117e9e063a9ef2b865f7bdf2f2601e5d368e9a
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
-  WebRTC-lib: ea1a5c00487037bdf051ae77c9f7c1dd32b87927
+  WebRTC-lib: 56952c81f23b0e34ca86902938c0895d974279ff
 
-PODFILE CHECKSUM: b21a5b5d431ed14b94305903194370c9e06bf714
+PODFILE CHECKSUM: 7a09d276f6e87d71cc1ce2e4011b36b801f0282f
 
 COCOAPODS: 1.11.3

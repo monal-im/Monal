@@ -118,6 +118,7 @@ static NSMutableDictionary* _typingNotifications;
                 @"messageNode": messageNode,
                 @"accountNo": account.accountNo,
             };
+#ifdef IS_ALPHA
             if([HelperTools isAppExtension])
             {
                 DDLogInfo(@"Dispatching this stanza to mainapp...");
@@ -125,6 +126,9 @@ static NSMutableDictionary* _typingNotifications;
             }
             else
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:account userInfo:callData];
+#else
+            DDLogWarn(@"Ignoring incoming call, not in alpha!");
+#endif
         }
         else
             DDLogWarn(@"Ignoring incoming non-audio JMI call, not implemented yet");

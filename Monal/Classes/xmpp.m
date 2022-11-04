@@ -3266,9 +3266,6 @@ NSString* const kStanza = @"stanza";
             if(self.connectionProperties.discoveredServices)
                 [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
             
-            if(self.connectionProperties.discoveredStunTurnServers)
-                [values setObject:[self.connectionProperties.discoveredStunTurnServers copy] forKey:@"discoveredStunTurnServers"];
-
             [values setObject:self->_lastInteractionDate forKey:@"lastInteractionDate"];
             [values setValue:[NSDate date] forKey:@"stateSavedAt"];
             [values setValue:@(STATE_VERSION) forKey:@"VERSION"];

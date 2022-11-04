@@ -47,6 +47,7 @@
 #import "AESGcm.h"
 
 @import AVFoundation;
+@import WebRTC;
 
 #define STATE_VERSION 5
 #define CONNECT_TIMEOUT 12.0
@@ -3204,92 +3205,100 @@ NSString* const kStanza = @"stanza";
 
 -(void) realPersistState
 {
-    @synchronized(_stateLockObject) {
-        DDLogVerbose(@"%@ --> realPersistState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-        //state dictionary
-        NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
+    //make sure to create a transaction before locking the state object to prevent the following deadlock:
+    //thread 1 (for example: receiveQueue): holding write transaction and waiting for state lock object
+    //thread 2 (for example: urllib session): holding state lock object and waiting for write transaction
+    [[DataLayer sharedInstance] createTransaction:^{
+        @synchronized(self->_stateLockObject) {
+            DDLogVerbose(@"%@ --> realPersistState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+            //state dictionary
+            NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
 
-        //collect smacks state
-        [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
-        [values setValue:self.lastHandledOutboundStanza forKey:@"lastHandledOutboundStanza"];
-        [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
-        [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
-        [values setValue:self.streamID forKey:@"streamID"];
+            //collect smacks state
+            [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
+            [values setValue:self.lastHandledOutboundStanza forKey:@"lastHandledOutboundStanza"];
+            [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
+            [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
+            [values setValue:self.streamID forKey:@"streamID"];
 
-        NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
-        NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
-        @synchronized(_iqHandlers) {
-            for(NSString* iqid in _iqHandlers)
-                if(_iqHandlers[iqid][@"handler"] != nil)
-                {
-                    persistentIqHandlers[iqid] = _iqHandlers[iqid];
-                    persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", _iqHandlers[iqid][@"timeout"], _iqHandlers[iqid][@"handler"]];
-                }
+            NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
+            @synchronized(self->_iqHandlers) {
+                for(NSString* iqid in self->_iqHandlers)
+                    if(self->_iqHandlers[iqid][@"handler"] != nil)
+                    {
+                        persistentIqHandlers[iqid] = self->_iqHandlers[iqid];
+                        persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", self->_iqHandlers[iqid][@"timeout"], self->_iqHandlers[iqid][@"handler"]];
+                    }
+            }
+            [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
+            
+            @synchronized(self->_reconnectionHandlers) {
+                [values setObject:self->_reconnectionHandlers forKey:@"reconnectionHandlers"];
+            }
+
+            [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
+            if(self.connectionProperties.uploadServer)
+                [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
+            if(self.connectionProperties.conferenceServer)
+                [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
+            
+            [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
+            [values setObject:[self.mucProcessor getInternalState] forKey:@"mucState"];
+            [values setObject:self->_runningMamQueries forKey:@"runningMamQueries"];
+            [values setObject:[NSNumber numberWithBool:self->_loggedInOnce] forKey:@"loggedInOnce"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
+            [values setObject:[self->_inCatchup copy] forKey:@"inCatchup"];
+            if(self->_cachedStreamFeaturesBeforeAuth != nil)
+                [values setObject:self->_cachedStreamFeaturesBeforeAuth forKey:@"cachedStreamFeaturesBeforeAuth"];
+            if(self->_cachedStreamFeaturesAfterAuth != nil)
+                [values setObject:self->_cachedStreamFeaturesAfterAuth forKey:@"cachedStreamFeaturesAfterAuth"];
+            
+            if(self.connectionProperties.discoveredServices)
+                [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
+            
+            if(self.connectionProperties.discoveredStunTurnServers)
+                [values setObject:[self.connectionProperties.discoveredStunTurnServers copy] forKey:@"discoveredStunTurnServers"];
+
+            [values setObject:self->_lastInteractionDate forKey:@"lastInteractionDate"];
+            [values setValue:[NSDate date] forKey:@"stateSavedAt"];
+            [values setValue:@(STATE_VERSION) forKey:@"VERSION"];
+
+            //save state dictionary
+            [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
+
+            //debug output
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@",
+                self.accountNo,
+                values[@"stateSavedAt"],
+                self.lastHandledInboundStanza,
+                self.lastHandledOutboundStanza,
+                self.lastOutboundStanza,
+                self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
+                self.streamID,
+                self->_lastInteractionDate,
+                persistentIqHandlerDescriptions,
+                self.connectionProperties.supportsPush,
+                self.connectionProperties.supportsHTTPUpload,
+                self.connectionProperties.pushEnabled,
+                self.connectionProperties.supportsPubSub,
+                self.connectionProperties.supportsBlocking,
+                self.connectionProperties.supportsClientState,
+                self->_inCatchup
+            );
+            DDLogVerbose(@"%@ --> realPersistState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
-        [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
-        
-        @synchronized(self->_reconnectionHandlers) {
-            [values setObject:self->_reconnectionHandlers forKey:@"reconnectionHandlers"];
-        }
-
-        [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
-        if(self.connectionProperties.uploadServer)
-            [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
-        if(self.connectionProperties.conferenceServer)
-            [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
-        
-        [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
-        [values setObject:[self.mucProcessor getInternalState] forKey:@"mucState"];
-        [values setObject:_runningMamQueries forKey:@"runningMamQueries"];
-        [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
-        [values setObject:[_inCatchup copy] forKey:@"inCatchup"];
-        if(_cachedStreamFeaturesBeforeAuth != nil)
-            [values setObject:_cachedStreamFeaturesBeforeAuth forKey:@"cachedStreamFeaturesBeforeAuth"];
-        if(_cachedStreamFeaturesAfterAuth != nil)
-            [values setObject:_cachedStreamFeaturesAfterAuth forKey:@"cachedStreamFeaturesAfterAuth"];
-        
-        if(self.connectionProperties.discoveredServices)
-            [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
-
-        [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
-        [values setValue:[NSDate date] forKey:@"stateSavedAt"];
-        [values setValue:@(STATE_VERSION) forKey:@"VERSION"];
-
-        //save state dictionary
-        [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
-
-        //debug output
-        DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@",
-            self.accountNo,
-            values[@"stateSavedAt"],
-            self.lastHandledInboundStanza,
-            self.lastHandledOutboundStanza,
-            self.lastOutboundStanza,
-            self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
-            self.streamID,
-            _lastInteractionDate,
-            persistentIqHandlerDescriptions,
-            self.connectionProperties.supportsPush,
-            self.connectionProperties.supportsHTTPUpload,
-            self.connectionProperties.pushEnabled,
-            self.connectionProperties.supportsPubSub,
-            self.connectionProperties.supportsBlocking,
-            self.connectionProperties.supportsClientState,
-            _inCatchup
-        );
-        DDLogVerbose(@"%@ --> realPersistState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-    }
+    }];
 }
 
 -(void) readSmacksStateOnly
@@ -3425,6 +3434,7 @@ NSString* const kStanza = @"stanza";
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
             self.connectionProperties.discoveredServices = [dic objectForKey:@"discoveredServices"];
+            self.connectionProperties.discoveredStunTurnServers = [dic objectForKey:@"discoveredStunTurnServers"];
             
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
             self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
@@ -3634,6 +3644,33 @@ NSString* const kStanza = @"stanza";
     [self sendIq:accountInfo withHandler:$newHandler(MLIQProcessor, handleAccountDiscoInfo)];
 }
 
+-(void) queryExternalServicesOn:(NSString*) jid
+{
+    XMPPIQ* externalDisco = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [externalDisco setiqTo:jid];
+    [externalDisco addChildNode:[[MLXMLNode alloc] initWithElement:@"services" andNamespace:@"urn:xmpp:extdisco:2"]];
+    [self sendIq:externalDisco withHandler:$newHandler(MLIQProcessor, handleExternalDisco)];
+}
+
+-(void) queryExternalServiceCredentialsFor:(NSDictionary*) service completion:(monal_id_block_t) completion
+{
+    XMPPIQ* credentialsQuery = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [credentialsQuery setiqTo:service[@"directoryJid"]];
+    [credentialsQuery addChildNode:[[MLXMLNode alloc] initWithElement:@"credentials" andNamespace:@"urn:xmpp:extdisco:2" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"service"  withAttributes:@{
+            @"type": service[@"type"],
+            @"host": service[@"host"],
+            @"port": service[@"port"],
+        } andChildren:@[] andData:nil]
+    ] andData:nil]];
+    [self sendIq:credentialsQuery withResponseHandler:^(XMPPIQ* response) {
+        completion([response findFirst:@"{urn:xmpp:extdisco:2}credentials/service@@"]);
+    } andErrorHandler:^(XMPPIQ* error) {
+        DDLogWarn(@"Got error while quering for credentials of external service %@: %@", service, error);
+        completion(@{});
+    }];
+}
+
 -(void) purgeOfflineStorage
 {
     XMPPIQ* purgeIq = [[XMPPIQ alloc] initWithType:kiqSetType];
@@ -3710,6 +3747,7 @@ NSString* const kStanza = @"stanza";
     //(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
     self.connectionProperties.serverFeatures = nil;
     self.connectionProperties.discoveredServices = nil;
+    self.connectionProperties.discoveredStunTurnServers = [[NSMutableArray alloc] init];
     self.connectionProperties.uploadServer = nil;
     self.connectionProperties.conferenceServer = nil;
     self.connectionProperties.usingCarbons2 = NO;
@@ -3748,6 +3786,9 @@ NSString* const kStanza = @"stanza";
     //the offline messages will come in *after* we started to query mam, because the disco result comes in first (and this is what triggers mam catchup)
     //--> no holes in our history can be caused by these offline messages in conjunction with mam catchup,
     //    however all offline messages will be received twice (as offline message AND via mam catchup)
+    
+    //query external services to learn stun/turn servers
+    [self queryExternalServicesOn:self.connectionProperties.identity.domain];
     
     //send own csi state (this must be done *after* presences to not delay/filter incoming presence flood needed to prime our database
     [self sendCurrentCSIState];

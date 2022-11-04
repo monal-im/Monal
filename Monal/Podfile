@@ -1,6 +1,6 @@
 project 'Monal.xcodeproj'
 #source 'https://cdn.cocoapods.org/'
- 
+
 # Uncomment the next line to define a global platform for your project
 platform :ios, '14.0'
 
@@ -31,6 +31,8 @@ def monalxmpp
   pod 'CocoaLumberjack/Swift'
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
   pod 'ASN1Decoder'
+  #pod 'GoogleWebRTC'
+  pod 'WebRTC-lib', git: 'https://github.com/monal-im/WebRTC', branch: 'tempfix'
   signalDeps
 end
 
@@ -87,6 +89,11 @@ post_install do |installer|
       end
     end
   end
+
+  # see https://github.com/CocoaPods/CocoaPods/issues/11553
+  installer.pods_project.build_configurations.each do |config|
+    config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
+  end
 end
 
 # see https://github.com/CocoaPods/CocoaPods/issues/7314
@@ -95,14 +102,14 @@ def fix_deployment_target(pod_installer)
         return
     end
     puts "Make the pods deployment target version the same as our target"
-    
+
     project = pod_installer.pods_project
     deploymentMap = {}
     project.build_configurations.each do |config|
         deploymentMap[config.name] = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
     end
     # p deploymentMap
-    
+
     project.targets.each do |t|
         puts "  #{t.name}"
         t.build_configurations.each do |config|

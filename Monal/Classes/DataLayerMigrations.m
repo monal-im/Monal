@@ -984,8 +984,10 @@
                 [dataLayer updateAccounWithDictionary:accountDict];
             }
             //clean up signal store and generate new omemo keys (but don't change trust settings!)
-            [db executeNonQuery:@"DELETE FROM signalIdentity;"];
             [db executeNonQuery:@"DELETE FROM signalContactSession;"];
+            [db executeNonQuery:@"DELETE FROM signalIdentity;"];
+            [db executeNonQuery:@"DELETE FROM signalPreKey;"];
+            [db executeNonQuery:@"DELETE FROM signalSignedPreKey;"];
             //update device id in db
             [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='device_id';" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
         }

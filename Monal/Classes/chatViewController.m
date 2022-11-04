@@ -28,7 +28,6 @@
 #import "MLOMEMO.h"
 #import "MLSearchViewController.h"
 #import "MLXEPSlashMeHandler.h"
-#import "MLXMPPActivityItem.h"
 #import "MonalAppDelegate.h"
 #import "xmpp.h"
 
@@ -454,7 +453,11 @@ enum msgSentState {
 #ifndef DISABLE_OMEMO
     if(self.contact.isEncrypted)
     {
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Disable encryption?", @"") message:NSLocalizedString(@"Do you really want to disable encryption for this contact?", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+        NSInteger style = UIAlertControllerStyleActionSheet;
+#if TARGET_OS_MACCATALYST
+        style = UIAlertControllerStyleAlert;
+#endif
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Disable encryption?", @"") message:NSLocalizedString(@"Do you really want to disable encryption for this contact?", @"") preferredStyle:style];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes, deactivate encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withSelf:self afterToggle:^() {
                 [self displayEncryptionStateInUI];
@@ -2131,8 +2134,8 @@ enum msgSentState {
         {
             hideName = (priorRow != nil
                          && [priorRow.participantJid isEqualToString:row.participantJid]);
-            MLContact* groupContact = [self getMLContactForJid:row.participantJid andAccount:row.accountId];
-            cell.name.text = hideName == YES ? nil : [groupContact contactDisplayName];
+            //row.contactDisplayName will automatically use row.actualFrom as fallback if no roster name or XEP-0172 nickname could be found
+            cell.name.text = hideName == YES ? nil : row.contactDisplayName;
         }
         else {
             hideName = (priorRow != nil

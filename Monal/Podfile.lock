@@ -28,6 +28,7 @@ PODS:
   - sqlite3/perf-threadsafe (3.39.3):
     - sqlite3/common
   - TOCropViewController (2.6.1)
+  - WebRTC-lib (106.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -42,6 +43,7 @@ DEPENDENCIES:
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
   - sqlite3/perf-threadsafe
   - TOCropViewController
+  - WebRTC-lib (from `https://github.com/monal-im/WebRTC`, branch `tempfix`)
 
 SPEC REPOS:
   trunk:
@@ -68,6 +70,9 @@ EXTERNAL SOURCES:
   SignalProtocolObjC:
     :branch: master
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
+  WebRTC-lib:
+    :branch: tempfix
+    :git: https://github.com/monal-im/WebRTC
 
 CHECKOUT OPTIONS:
   SignalProtocolC:
@@ -76,6 +81,9 @@ CHECKOUT OPTIONS:
   SignalProtocolObjC:
     :commit: e153e868c6737881a196da17612367ab9ecaae13
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
+  WebRTC-lib:
+    :commit: 5870c021cdaf0f0298e84c7c39e9c92a9afd7e0a
+    :git: https://github.com/monal-im/WebRTC
 
 SPEC CHECKSUMS:
   ASN1Decoder: 6110fdeacfdb41559b1481457a1645be716610aa
@@ -95,7 +103,8 @@ SPEC CHECKSUMS:
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   sqlite3: 50117e9e063a9ef2b865f7bdf2f2601e5d368e9a
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
+  WebRTC-lib: ea1a5c00487037bdf051ae77c9f7c1dd32b87927
 
-PODFILE CHECKSUM: 108e56861daa8a0996e430896bfe89cd51d06c86
+PODFILE CHECKSUM: b21a5b5d431ed14b94305903194370c9e06bf714
 
 COCOAPODS: 1.11.3

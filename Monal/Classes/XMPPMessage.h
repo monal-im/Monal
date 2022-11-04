@@ -17,7 +17,11 @@ FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
 
 @interface XMPPMessage : XMPPStanza
 
--(id) initWithXMPPMessage:(XMPPMessage*) msg;
+-(XMPPMessage*) init;
+-(XMPPMessage*) initWithType:(NSString*) type to:(NSString*) to;
+-(XMPPMessage*) initTo:(NSString*) to;
+-(XMPPMessage*) initWithType:(NSString*) type;
+-(XMPPMessage*) initWithXMPPMessage:(XMPPMessage*) msg;
 
 /**
  Sets the body child element

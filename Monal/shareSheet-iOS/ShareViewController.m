@@ -55,6 +55,7 @@
     {
         INSendMessageIntent* intent = (INSendMessageIntent*)self.extensionContext.intent;
         self.intentContact = [HelperTools unserializeData:[intent.conversationIdentifier dataUsingEncoding:NSISOLatin1StringEncoding]];
+        [self.intentContact refresh];       //make sure we are up to date
     }
 }
 

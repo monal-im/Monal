@@ -91,13 +91,28 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
 {
-    NSString* message;
+    NSString* message = description;
     if(node)
         message = [HelperTools extractXMPPError:node withDescription:description];
-    else
-        message = description;
     DDLogError(@"Notifying user about %@ error: %@", isSevere ? @"SEVERE" : @"non-severe", message);
     [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@(isSevere)}];
+}
+
++(void) showErrorOnAlpha:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andFile:(char*) file andLine:(int) line andFunc:(char*) func
+{
+    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
+    NSArray* filePathComponents = [fileStr pathComponents];
+    if([filePathComponents count]>1)
+        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+    NSString* message = description;
+    if(node)
+        message = [HelperTools extractXMPPError:node withDescription:description];
+#ifdef IS_ALPHA
+    DDLogError(@"Notifying alpha user about error at %@:%d in %s: %@", fileStr, line, func, message);
+    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@YES}];
+#else
+    DDLogWarn(@"Ignoring alpha-only error at %@:%d in %s: %@", fileStr, line, func, message);
+#endif
 }
 
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString*) description

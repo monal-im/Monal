@@ -17,6 +17,9 @@
 
 #define MLAssert(check, text, ...)                                          do { if(!(check)) { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools MLAssertWithText:text andUserData:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__];)([HelperTools MLAssertWithText:text andUserData:metamacro_head(__VA_ARGS__) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__];) while(YES); } } while(0)
 
+#define showErrorOnAlpha(account, description, ...)                         do { [HelperTools showErrorOnAlpha:[NSString stringWithFormat:description, ##__VA_ARGS__] withNode:nil andAccount:account andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; } while(0)
+#define showXMLErrorOnAlpha(account, node, description, ...)                do { [HelperTools showErrorOnAlpha:[NSString stringWithFormat:description, ##__VA_ARGS__] withNode:node andAccount:account andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; } while(0)
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class MLXMLNode;
@@ -33,6 +36,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
++(void) showErrorOnAlpha:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 
 +(NSDictionary<NSString*, NSString*>*) getInvalidPushServers;
 +(NSString*) getSelectedPushServerBasedOnLocale;

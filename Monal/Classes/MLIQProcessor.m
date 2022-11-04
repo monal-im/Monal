@@ -214,12 +214,12 @@ $$class_handler(handleBind, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Binding our resource returned an error: %@", [iqNode findFirst:@"error"]);
-        if([iqNode check:@"/<type=cancel>"])
+        if([iqNode check:@"error<type=cancel>"])
         {
             [HelperTools postError:NSLocalizedString(@"XMPP Bind Error", @"") withNode:iqNode andAccount:account andIsSevere:YES];
             [account disconnect];
         }
-        else if([iqNode check:@"/<type=modify>"])
+        else if([iqNode check:@"error<type=modify>"])
             [account bindResource:[HelperTools encodeRandomResource]];      //try to bind a new resource
         else
             [account reconnect];        //just try to reconnect (wait error type and all other error types not expected for bind)
@@ -559,16 +559,19 @@ $$class_handler(handleBlocklist, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     if(!account.connectionProperties.supportsBlocking)
         return;
 
-    if([iqNode check:@"/<type=result>/{urn:xmpp:blocking}blocklist"])
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Blocklist fetch returned an error: %@", [iqNode findFirst:@"error"]);
+        [HelperTools postError:NSLocalizedString(@"Failed to load blocklist", @"") withNode:iqNode andAccount:account andIsSevere:NO];
+        return;
+    }
+    
+    if([iqNode check:@"{urn:xmpp:blocking}blocklist"])
     {
         NSMutableSet<NSString*>* blockedJids = [[NSMutableSet<NSString*> alloc] init];
-        for(NSDictionary* item in [iqNode find:@"/<type=result>/{urn:xmpp:blocking}blocklist/item@@"])
-        {
+        for(NSDictionary* item in [iqNode find:@"{urn:xmpp:blocking}blocklist/item@@"])
             if(item && item[@"jid"])
-            {
                 [blockedJids addObject:item[@"jid"]];
-            }
-        }
         [account updateLocalBlocklistCache:blockedJids];
         // notify the views
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];

@@ -65,7 +65,6 @@ enum kSettingsAdvancedRows {
 };
 
 enum kSettingsEditRows {
-    SettingsClearOmemoSessionRow,
     SettingsClearHistoryRow,
     SettingsRemoveAccountRow,
     SettingsDeleteAccountRow,
@@ -539,28 +538,6 @@ enum DummySettingsRows {
     [self presentViewController:questionAlert animated:YES completion:nil];
 }
 
-- (IBAction) clearOmemoSessionClicked: (id) sender
-{
-    DDLogVerbose(@"Clearing own omemo session as request by account settings");
-
-    UIAlertController* questionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Clear OMEMO session", @"") message:NSLocalizedString(@"This will clear your own omemo session for debugging purposes", @"") preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-        //do nothing when "no" was pressed
-    }];
-    UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
-
-        [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
-        MLContact* contact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountNo];
-        [contact resetOmemoSession];
-    }];
-
-    [questionAlert addAction:noAction];
-    [questionAlert addAction:yesAction];
-    questionAlert.popoverPresentationController.sourceView = sender;
-
-    [self presentViewController:questionAlert animated:YES completion:nil];
-}
-
 - (IBAction) clearHistoryClicked: (id) sender
 {
     DDLogVerbose(@"Deleting History");
@@ -709,14 +686,6 @@ enum DummySettingsRows {
     else if (indexPath.section == kSettingSectionEdit && self.editMode == YES)
     {
         switch (indexPath.row) {
-            case SettingsClearOmemoSessionRow: {
-                MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-                buttonCell.buttonText.text = NSLocalizedString(@"Clear own omemo session", @"DEBUG - XMPPEdit");
-                buttonCell.buttonText.textColor = [UIColor redColor];
-                buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
-                buttonCell.tag = SettingsClearOmemoSessionRow;
-                return buttonCell;
-            }
             case SettingsClearHistoryRow:
             {
                 MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
@@ -865,11 +834,6 @@ enum DummySettingsRows {
     {
         switch(newIndexPath.row)
         {
-            case SettingsClearOmemoSessionRow:
-            {
-                [self clearOmemoSessionClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
-                break;
-            }
             case SettingsClearHistoryRow:
                 [self clearHistoryClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
                 break;

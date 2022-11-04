@@ -21,6 +21,7 @@ struct OmemoKeysEntry: View {
     private let address: SignalAddress
     private let account: xmpp
     private let isOwnDevice: Bool
+    private let isBrokenSession: Bool
     
     init(account: xmpp, contactJid: String, deviceId: NSNumber, isOwnDevice: Bool) {
         self.contactJid = contactJid
@@ -30,6 +31,7 @@ struct OmemoKeysEntry: View {
         self.fingerprint = account.omemo.getIdentityFor(self.address)
         self.trustLevel = account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
         self.account = account
+        self.isBrokenSession = account.omemo.isSessionBroken(forJid:contactJid, andDeviceId:deviceId)
     }
     
     func setTrustLevel(_ enableTrust: Bool) {
@@ -151,6 +153,9 @@ struct OmemoKeysEntry: View {
                             .font(Font.init(
                                 UIFont.monospacedSystemFont(ofSize: 11.0, weight: .regular)
                             ))
+                        if(self.isBrokenSession) {
+                            Text("Encrypted session to this device broken beyond repair.").foregroundColor(.red)
+                        }
                     }
                 }
                 Spacer()
@@ -194,7 +199,7 @@ struct OmemoKeysForContact: View {
         self.ownKeys = (account.connectionProperties.identity.jid == contact.obj.contactJid)
         self.contactJid = contact.obj.contactJid
         self.account = account
-        self.deviceId = account.omemo.monalSignalStore.deviceid as NSNumber
+        self.deviceId = account.omemo.getDeviceId()
         self.deviceIds = OrderedSet(self.account.omemo.knownDevices(forAddressName: self.contactJid))
         self.selectedDeviceForDeletion = -1
     }
@@ -216,8 +221,7 @@ struct OmemoKeysForContact: View {
                     if(deviceId == -1) {
                         return // should be unreachable
                     }
-                    account.omemo.deleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion.uint32Value)
-                    account.omemo.sendDevice(withForce: true)
+                    account.omemo.deleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion)
                     self.deviceIds.remove(self.selectedDeviceForDeletion)
                 },
                 secondaryButton: .cancel(Text("Abort"))

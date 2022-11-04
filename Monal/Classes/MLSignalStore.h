@@ -43,6 +43,7 @@
 -(void) removeDeviceDeletedMark:(SignalAddress* _Nonnull) address;
 -(void) updateLastSuccessfulDecryptTime:(SignalAddress* _Nonnull) address;
 -(void) markSessionAsBroken:(SignalAddress* _Nonnull) address;
+-(void) markSessionAsFunctional:(SignalAddress* _Nonnull) address;
 -(BOOL) isSessionBrokenForJid:(NSString* _Nonnull) jid andDeviceId:(NSNumber* _Nonnull) deviceId;
 
 // MUC session management
@@ -58,5 +59,6 @@
 -(int) getHighestPreyKeyId;
 -(unsigned int) getPreKeyCount;
 
-
+-(void) cleanupKeys;
+-(void) reloadCachedPrekeys;
 @end

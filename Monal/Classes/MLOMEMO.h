@@ -43,7 +43,10 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid isMuc:(BOOL) isMuc;
 -(NSNumber*) getDeviceId;
 
--(void) untrustAllDevicesFrom:(NSString*)jid;
+-(void) untrustAllDevicesFrom:(NSString*) jid;
+
+//debug button in contactdetails ui
+-(void) clearAllSessionsForJid:(NSString*) jid;
 @end
 
 NS_ASSUME_NONNULL_END

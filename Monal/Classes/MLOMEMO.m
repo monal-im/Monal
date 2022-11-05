@@ -209,7 +209,7 @@ static const int KEY_SIZE = 16;
                 DDLogDebug(@"Replaying queuedKeyTransportElements: %@", self.state.queuedKeyTransportElements);
                 for(NSString* jid in self.state.queuedKeyTransportElements)
                     for(id rid in self.state.queuedKeyTransportElements[jid])
-                        [self sendKeyTransportElement:jid forRid:nilExtractor(rid)];
+                        [self sendKeyTransportElement:jid forRid:rid];
                 self.state.queuedKeyTransportElements = [NSMutableDictionary new];
             }
             
@@ -257,10 +257,16 @@ $$
 
 -(void) queryOMEMODevices:(NSString*) jid
 {
-    //don't fetch devicelist twice (could be triggered by multiple useractions in a row)
-    if(![self.state.openDevicelistSubscriptions containsObject:jid])
+    //don't subscribe devicelist twice (could be triggered by multiple useractions in a row)
+    if([self.state.openDevicelistSubscriptions containsObject:jid])
+        DDLogInfo(@"Deduplicated devicelist subscribe from %@", jid);
+    else
         [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandlerWithInvalidation(self, handleDevicelistSubscribe, handleDevicelistSubscribeInvalidation)];
-    if(![self.state.openDevicelistFetches containsObject:jid])
+    
+    //don't fetch devicelist twice (could be triggered by multiple useractions in a row)
+    if([self.state.openDevicelistFetches containsObject:jid])
+        DDLogInfo(@"Deduplicated devicelist fetches from %@", jid);
+    else
     {
         //fetch newest devicelist (this is needed even after a subscribe on at least prosody)
         [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation)];
@@ -350,17 +356,16 @@ $$
     }
     
     //remove devices from our signalStorage when they are no longer published
-    for(NSNumber* deviceId in existingDevices)
-        if(![receivedDevices containsObject:deviceId])
+    for(NSNumber* deviceId in removedDevices)
+    {
+        //only delete other devices from signal store but keep the entry for this device
+        if(![source isEqualToString:self.account.connectionProperties.identity.jid] || deviceId.unsignedIntValue != self.monalSignalStore.deviceid)
         {
-            //only delete other devices from signal store but keep the entry for this device
-            if(!([source isEqualToString:self.account.connectionProperties.identity.jid] && deviceId.unsignedIntValue == self.monalSignalStore.deviceid))
-            {
-                DDLogDebug(@"Removing device %@", deviceId);
-                SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:deviceId.unsignedIntValue];
-                [self.monalSignalStore markDeviceAsDeleted:address];
-            }
+            DDLogDebug(@"Removing device %@", deviceId);
+            SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:deviceId.unsignedIntValue];
+            [self.monalSignalStore markDeviceAsDeleted:address];
         }
+    }
         
     //remove deviceids from queuedSessionRepairs list if these devices are no longer available
     @synchronized(self.state.queuedSessionRepairs) {
@@ -419,7 +424,10 @@ $$
 {
     //don't fetch bundle twice (could be triggered by multiple devicelist pushes in a row)
     if(self.state.openBundleFetches[jid] != nil && [self.state.openBundleFetches[jid] containsObject:deviceid])
+    {
+        DDLogInfo(@"Deduplicated bundle fetches of deviceid %@ from %@", jid, deviceid);
         return;
+    }
     
     NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
@@ -589,10 +597,8 @@ $$
             continue;
         }
         
-        //found and imported a working key
-        //--> test if we need to rebuild a session for this device and send a key transport element to rebuild the session if needed
-        if([self.monalSignalStore isSessionBrokenForJid:jid andDeviceId:rid])
-            [self sendKeyTransportElement:jid forRid:rid];      //this will remove the queuedSessionRepairs entry
+        //found and imported a working key --> try to (re)build a new session proactively (or repair a broken one)
+        [self sendKeyTransportElement:jid forRid:rid];      //this will remove the queuedSessionRepairs entry, if any
         
         break;
     } while(++processedKeys < preKeyIds.count);
@@ -600,8 +606,8 @@ $$
 
 -(void) rebuildSessionWithJid:(NSString*) jid forRid:(NSNumber*) rid
 {
-    //don't rebuild session to ourselves (MUST be scoped by jid for omemo 2, MAY be scoped for omemo 1)
-    if(rid.unsignedIntValue == self.monalSignalStore.deviceid && [self.account.connectionProperties.identity.jid isEqualToString:jid])
+    //don't rebuild session to ourselves (MUST be scoped by jid for omemo 2)
+    if(rid.unsignedIntValue == self.monalSignalStore.deviceid)
         return;
     
     //mark session as broken
@@ -625,7 +631,7 @@ $$
     [self queryOMEMOBundleFrom:jid andDevice:rid];
 }
 
--(void) sendKeyTransportElement:(NSString*) jid forRid:(NSNumber* _Nullable) rid
+-(void) sendKeyTransportElement:(NSString*) jid forRid:(NSNumber*) rid
 {
     //queue all actions until the catchup was done
     if(!self.state.catchupDone)
@@ -633,7 +639,7 @@ $$
         @synchronized(self.state.queuedKeyTransportElements) {
             if(self.state.queuedKeyTransportElements[jid] == nil)
                 self.state.queuedKeyTransportElements[jid] = [NSMutableSet new];
-            [self.state.queuedKeyTransportElements[jid] addObject:nilWrapper(rid)];
+            [self.state.queuedKeyTransportElements[jid] addObject:rid];
         }
         return;
     }
@@ -654,20 +660,6 @@ $$
         {
             DDLogDebug(@"Removing deviceid %@ on jid %@ from queuedSessionRepairs...", rid, jid);
             [self.state.queuedSessionRepairs[jid] removeObject:rid];
-        }
-        
-        //even remove jid-rid combinations from queuedSessionRepairs, if no rid was given, but all queuedSessionRepairs rids are already known
-        //(that means we used these rids in our key-transport message above and can remove them from queuedSessionRepairs, too)
-        if(self.state.queuedSessionRepairs[jid] != nil)
-        {
-            NSArray<NSNumber*>* devices = [self.monalSignalStore knownDevicesForAddressName:jid];
-            if(devices)
-                for(NSNumber* opportunisticRid in devices)
-                    if(opportunisticRid.unsignedIntValue != rid.unsignedIntValue)       //don't remove this rid twice if any rid was given
-                    {
-                        DDLogDebug(@"Opportunisitcally removing deviceid %@ on jid %@ from queuedSessionRepairs...", opportunisticRid, jid);
-                        [self.state.queuedSessionRepairs[jid] removeObject:opportunisticRid];
-                    }
         }
     }
 }
@@ -829,8 +821,8 @@ $$
     //encrypt message for all given deviceids
     for(NSNumber* device in devices)
     {
-        //do not encrypt for our own device (MUST be scoped by jid for omemo 2, MAY be scoped for omemo 1)
-        if(device.unsignedIntValue == self.monalSignalStore.deviceid && [encryptForJid isEqualToString:self.account.connectionProperties.identity.jid])
+        //do not encrypt for our own device (MUST be scoped by jid for omemo 2)
+        if(device.unsignedIntValue == self.monalSignalStore.deviceid)
             continue;
         
         SignalAddress* address = [[SignalAddress alloc] initWithName:encryptForJid deviceId:(uint32_t)device.unsignedIntValue];
@@ -902,15 +894,6 @@ $$
     //don't try to decrypt our own messages (could be mirrored by MUC etc.)
     if([senderJid isEqualToString:self.account.connectionProperties.identity.jid] && sid.unsignedIntValue == self.monalSignalStore.deviceid)
         return nil;
-
-    if([self.monalSignalStore isSessionBrokenForJid:senderJid andDeviceId:sid])
-    {
-#ifdef IS_ALPHA
-        return @"Dedupl. broken session error";
-#else
-        return nil;
-#endif
-    }
 
     NSData* messageKey = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
     BOOL devicePreKey = [[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid] boolValue];
@@ -1125,6 +1108,17 @@ $$
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid.unsignedIntValue];
     [self.monalSignalStore deleteDeviceforAddress:address];
     [self.monalSignalStore deleteSessionRecordForAddress:address];
+}
+
+//debug button in contactdetails ui
+-(void) clearAllSessionsForJid:(NSString*) jid
+{
+    NSSet<NSNumber*>* devices = [self knownDevicesForAddressName:jid];
+    for(NSNumber* device in devices)
+        [self deleteDeviceForSource:jid andRid:device];
+    [self sendOMEMOBundle];
+    [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation)];
+    [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation)];
 }
 
 @end

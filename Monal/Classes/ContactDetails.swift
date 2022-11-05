@@ -199,6 +199,39 @@ struct ContactDetails: View {
                     )
                 }
             }
+            
+#if !DISABLE_OMEMO
+            //omemo debug stuff, should be removed in a few months
+            Section {
+                // only display omemo session reset button on 1:1 and private groups
+                if(contact.obj.isGroup == false || (contact.isGroup && contact.mucType == "group"))
+                {
+                    Button(action: {
+                        showingResetOmemoSessionConfirmation = true
+                    }) {
+                        Text("Reset OMEMO session")
+                            .foregroundColor(.red)
+                    }
+                    .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
+                        ActionSheet(
+                            title: Text("Reset OMEMO session"),
+                            message: Text("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!"),
+                            buttons: [
+                                .cancel(),
+                                .destructive(
+                                    Text("Yes"),
+                                    action: {
+                                        if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId) {
+                                            account.omemo.clearAllSessions(forJid:contact.contactJid);
+                                        }
+                                    }
+                                )
+                            ]
+                        )
+                    }
+                }
+            }
+#endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationBarTitle(contact.contactDisplayName as String, displayMode: .inline)

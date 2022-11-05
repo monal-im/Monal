@@ -343,7 +343,7 @@ $$
             if(contactObj.isGroup == NO)
             {
                 // Request omemo devicelist
-                [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:contactObj.contactJid];
+                [account.omemo queryOMEMODevices:contactObj.contactJid];
             }
 #endif// DISABLE_OMEMO
             

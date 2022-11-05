@@ -701,7 +701,7 @@ enum msgSentState {
     [super viewDidAppear:animated];
 #ifndef DISABLE_OMEMO
     if(self.xmppAccount) {
-        BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid].count > 0;
+        BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
         if(!omemoDeviceForContactFound) {
             if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo] && self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])
             {

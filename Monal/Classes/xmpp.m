@@ -191,20 +191,16 @@ NSString* const kStanza = @"stanza";
     //setup all other ivars
     [self setupObjects];
     
-    // don't init omemo on ibr account creation
-    if(accountNo.intValue >= 0)
-        self.omemo = [[MLOMEMO alloc] initWithAccount:self];
-    
     //read persisted state to make sure we never operate stateless
     //WARNING: pubsub node registrations should only be made *after* the first readState call
     [self readState];
     
-    //register devicelist and notification handler (MUSt be done *after* reading state
-    //[self readState] needs a valid self.omemo to load omemo state,
-    //but [self.omemo activate] needs a valid pubsub node registration loaded by [self readState]
-    //--> split "init" method into "init" and "activate" methods
-    if(self.omemo)
-        [self.omemo activate];
+    // don't init omemo on ibr account creation
+    if(accountNo.intValue >= 0)
+    {
+        // init omemo
+        self.omemo = [[MLOMEMO alloc] initWithAccount:self];
+    }
     
     //we want to get automatic avatar updates (XEP-0084)
     [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" withHandler:$newHandler(MLPubSubProcessor, avatarHandler)];
@@ -1334,7 +1330,6 @@ NSString* const kStanza = @"stanza";
                         [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
                     } onQueue:@"receiveQueue"];
                     DDLogVerbose(@"Flushed all queued notifications...");
-                    [self persistState];        //make sure to persist all state changes triggered by the events in the notification queue
                 }]] waitUntilFinished:YES];
             //we have to wait for the stanza/nonza to be handled before parsing the next one to not introduce race conditions
             //between the response to our pipelined stream restart and the parser reset in the sasl success handler
@@ -3279,14 +3274,11 @@ NSString* const kStanza = @"stanza";
             [values setValue:[NSDate date] forKey:@"stateSavedAt"];
             [values setValue:@(STATE_VERSION) forKey:@"VERSION"];
 
-            if(self.omemo != nil)
-                [values setObject:self.omemo.state forKey:@"omemoState"];
-            
             //save state dictionary
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@",
                 self.accountNo,
                 values[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -3302,8 +3294,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsPubSub,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
-                self->_inCatchup,
-                self.omemo.state
+                self->_inCatchup
             );
             DDLogVerbose(@"%@ --> realPersistState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
@@ -3540,11 +3531,8 @@ NSString* const kStanza = @"stanza";
             if([dic objectForKey:@"cachedStreamFeaturesAfterAuth"])
                 _cachedStreamFeaturesAfterAuth = [dic objectForKey:@"cachedStreamFeaturesAfterAuth"];
             
-            if([dic objectForKey:@"omemoState"] && self.omemo)
-                self.omemo.state = [dic objectForKey:@"omemoState"];
-            
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\t_inCatchup=%@",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -3552,7 +3540,7 @@ NSString* const kStanza = @"stanza";
                 self.lastOutboundStanza,
                 self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
                 self.streamID,
-                self->_lastInteractionDate,
+                _lastInteractionDate,
                 persistentIqHandlerDescriptions,
                 self.connectionProperties.supportsPush,
                 self.connectionProperties.supportsHTTPUpload,
@@ -3560,8 +3548,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsPubSub,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
-                self->_inCatchup,
-                self.omemo.state
+                _inCatchup
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -4898,7 +4885,6 @@ NSString* const kStanza = @"stanza";
         DDLogVerbose(@"Transaction for delayed stanza handling for jid %@ ended", archiveJid);
         [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
     } onQueue:@"delayedStanzaReplay"];
-    [self persistState];        //make sure to persist all state changes triggered by the events in the notification queue
 }
 
 -(void) mamFinishedFor:(NSString*) archiveJid

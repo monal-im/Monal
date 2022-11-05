@@ -815,7 +815,7 @@ $$
             }
 #ifndef DISABLE_OMEMO
             // Request omemo devicelist
-            [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:contact.contactJid];
+            [account.omemo queryOMEMODevices:contact.contactJid];
 #endif// DISABLE_OMEMO
         }
     }

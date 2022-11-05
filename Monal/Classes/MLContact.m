@@ -429,11 +429,11 @@ NSString *const kAskSubscribe=@"subscribe";
         return NO;
     if(self.isGroup == NO)
     {
-        NSSet* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
+        NSArray* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
         if(!self.isEncrypted && encrypt && knownDevices.count == 0)
         {
             // request devicelist again
-            [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:self.contactJid];
+            [account.omemo queryOMEMODevices:self.contactJid];
             return NO;
         }
     }
@@ -450,6 +450,16 @@ NSString *const kAskSubscribe=@"subscribe";
         [[DataLayer sharedInstance] disableEncryptForJid:self.contactJid andAccountNo:self.accountId];
     self.isEncrypted = encrypt;
     return YES;
+#endif
+}
+
+-(void) resetOmemoSession
+{
+#ifndef DISABLE_OMEMO
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    if(account == nil || account.omemo == nil)
+        return;
+    [account.omemo clearAllSessionsForJid:self.contactJid];
 #endif
 }
 

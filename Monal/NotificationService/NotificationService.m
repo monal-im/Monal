@@ -467,6 +467,7 @@ static BOOL warnUnclean = NO;
     [NotificationService setAppexCleanShutdownStatus:NO];
     
     DDLogInfo(@"Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    DDLogInfo(@"Images dir name: %@", NSLocalizedString(@"Received Images", @"directory for downloaded images"));
     [DDLog flushLog];
 }
 

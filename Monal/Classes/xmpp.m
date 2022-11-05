@@ -3571,11 +3571,23 @@ NSString* const kStanza = @"stanza";
     if(dic)
     {
         for(NSString* entry in toKeep)
-            newState[entry] = dic[entry];
-        
-        newState[@"stateSavedAt"] = [NSDate date];
-        newState[@"VERSION"] = @(STATE_VERSION);
+            if(dic[entry] != nil)
+                newState[entry] = dic[entry];
     }
+    
+    //set smacks state to sane defaults if not present in our old state at all (this are the values used by initSM3, too)
+    if(newState[@"lastHandledInboundStanza"] == nil)
+        newState[@"lastHandledInboundStanza"] = [NSNumber numberWithInteger:0];
+    if(newState[@"lastHandledOutboundStanza"] == nil)
+        newState[@"lastHandledOutboundStanza"] = [NSNumber numberWithInteger:0];
+    if(newState[@"lastOutboundStanza"] == nil)
+        newState[@"lastOutboundStanza"] = [NSNumber numberWithInteger:0];
+    if(newState[@"unAckedStanzas"] == nil)
+        newState[@"unAckedStanzas"] = [[NSMutableArray alloc] init];
+    
+    newState[@"stateSavedAt"] = [NSDate date];
+    newState[@"VERSION"] = @(STATE_VERSION);
+    
     return newState;
 }
 

@@ -208,7 +208,10 @@ static const int KEY_SIZE = 16;
             @synchronized(self.state.queuedKeyTransportElements) {
                 DDLogDebug(@"Replaying queuedKeyTransportElements: %@", self.state.queuedKeyTransportElements);
                 for(NSString* jid in self.state.queuedKeyTransportElements)
+                {
                     [self sendKeyTransportElement:jid forRids:self.state.queuedKeyTransportElements[jid]];
+                    [self.state.queuedKeyTransportElements removeAllObjects];       //this gets us better logging
+                }
                 self.state.queuedKeyTransportElements = [NSMutableDictionary new];
             }
             

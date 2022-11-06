@@ -138,6 +138,8 @@
 		8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */ = {isa = PBXBuildFile; fileRef = 8420EA9A2915E4FE0038FF40 /* OmemoState.h */; };
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
 		844EEC6D28E718DB00CB5EF9 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
+		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
+		845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		848904A9289C82C30097E19C /* SCRAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 848904A8289C82C30097E19C /* SCRAM.m */; };
 		849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 849A53E3287135B2007E941A /* MLVoIPProcessor.m */; };
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
@@ -1686,6 +1688,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				845EFFBD2918721800C1E03E /* Localizable.strings in Resources */,
 				C1D7D7B0283FB4E700401389 /* Media.xcassets in Resources */,
 				C1D7D7AF283FB4E500401389 /* Images.xcassets in Resources */,
 			);
@@ -1695,6 +1698,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */,
 				26AA70182146BBB900598605 /* iosShare.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

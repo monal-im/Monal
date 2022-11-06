@@ -569,7 +569,7 @@
         }
     }
     
-    DDLogDebug(@"Creating INSendMessageIntent with recipients=%@, speakableGroupName=%@, sender=%@", recipients, groupDisplayName, sender);
+    //DDLogDebug(@"Creating INSendMessageIntent with recipients=%@, speakableGroupName=%@, sender=%@", recipients, groupDisplayName, sender);
     INSendMessageIntent* intent = [[INSendMessageIntent alloc] initWithRecipients:recipients
                                                               outgoingMessageType:(audioAttachment ? INOutgoingMessageTypeOutgoingMessageAudio : INOutgoingMessageTypeOutgoingMessageText)
                                                                           content:msgText
@@ -578,7 +578,7 @@
                                                                       serviceName:message.accountId.stringValue
                                                                            sender:sender
                                                                       attachments:(audioAttachment ? @[audioAttachment] : @[])];
-    DDLogDebug(@"Intent is now: %@", intent);
+    //DDLogDebug(@"Intent is now: %@", intent);
     if(message.isMuc)
     {
         if(contact.avatar != nil)

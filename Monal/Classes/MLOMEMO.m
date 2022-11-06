@@ -241,7 +241,7 @@ $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(
     {
         MLXMLNode* publishedDevices = data[@"current"];
         if(publishedDevices != nil)
-            deviceIds = [[NSSet<NSNumber*> alloc] initWithArray:[publishedDevices find:@"{eu.siacs.conversations.axolotl}list/device@id|int"]];
+            deviceIds = [[NSSet<NSNumber*> alloc] initWithArray:[publishedDevices find:@"{eu.siacs.conversations.axolotl}list/device@id|uint"]];
     }
     
     //this will add our own deviceid if the devicelist is our own and our deviceid is missing
@@ -320,7 +320,7 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
         
         if(publishedDevices)
         {
-            NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"{eu.siacs.conversations.axolotl}list/device@id|int"];
+            NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"{eu.siacs.conversations.axolotl}list/device@id|uint"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
 
             [self processOMEMODevices:deviceSet from:jid];
@@ -541,7 +541,7 @@ $$
 
     //extract bundle data
     NSData* signedPreKeyPublic = [bundle findFirst:@"signedPreKeyPublic#|base64"];
-    NSNumber* signedPreKeyPublicId = [bundle findFirst:@"signedPreKeyPublic@signedPreKeyId|int"];
+    NSNumber* signedPreKeyPublicId = [bundle findFirst:@"signedPreKeyPublic@signedPreKeyId|uint"];
     NSData* signedPreKeySignature = [bundle findFirst:@"signedPreKeySignature#|base64"];
     NSData* identityKey = [bundle findFirst:@"identityKey#|base64"];
 
@@ -552,7 +552,7 @@ $$
     uint32_t deviceId = (uint32_t)rid.unsignedIntValue;
     SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:deviceId];
     SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
-    NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|int"];
+    NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|uint"];
 
     if(preKeyIds == nil || preKeyIds.count == 0)
     {
@@ -864,7 +864,7 @@ $$
     }
     BOOL isKeyTransportElement = ![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload"];
 
-    NSNumber* sid = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|int"];
+    NSNumber* sid = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"];
     NSString* senderJid = nil;
     if([messageNode check:@"/<type=groupchat>"])
     {

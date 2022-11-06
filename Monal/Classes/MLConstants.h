@@ -126,7 +126,8 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kScheduleBackgroundTask @"kScheduleBackgroundTask"
 #define kMonalUpdateUnread @"kMonalUpdateUnread"
 
-#define kMLHasConnectedNotice @"kMLHasConnectedNotice"
+#define kMLIsLoggedInNotice @"kMLIsLoggedInNotice"
+#define kMLResourceBoundNotice @"kMLResourceBoundNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"
 #define kMonalFinishedOmemoBundleFetch @"kMonalFinishedOmemoBundleFetch"
 #define kMonalUpdateBundleFetchStatus @"kMonalUpdateBundleFetchStatus"

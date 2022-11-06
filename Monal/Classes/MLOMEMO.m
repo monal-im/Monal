@@ -70,7 +70,8 @@ static const int KEY_SIZE = 16;
     
     //register notification handler
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRemoved:) name:kMonalContactRemoved object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleHasConnected:) name:kMLHasConnectedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleHasLoggedIn:) name:kMLIsLoggedInNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleResourceBound:) name:kMLResourceBoundNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleCatchupDone:) name:kMonalFinishedCatchup object:nil];
 }
 
@@ -133,7 +134,21 @@ static const int KEY_SIZE = 16;
 #endif
 }
 
--(void) handleHasConnected:(NSNotification*) notification
+-(void) handleHasLoggedIn:(NSNotification*) notification
+{
+    //this event will be called as soon as we are successfully authenticated, but BEFORE handleResourceBound: will be called
+    //handleResourceBound: won't be called for smacks resumptions at all
+#ifndef DISABLE_OMEMO
+    if(self.account.accountNo.intValue == ((xmpp*)notification.object).accountNo.intValue)
+    {
+        //mark catchup as running (will be smacks catchup or mam catchup)
+        //this will queue any session repair attempts and key transport elements
+        self.state.catchupDone = NO;
+    }
+#endif
+}
+
+-(void) handleResourceBound:(NSNotification*) notification
 {
     //this event will be called as soon as we are bound, but BEFORE mam catchup happens (it won't be called for smacks resumes!)
 #ifndef DISABLE_OMEMO
@@ -169,67 +184,58 @@ static const int KEY_SIZE = 16;
     //but it will only be called once after a non-smacks-resume login and not for smacks-resume catchups
     if(self.account.accountNo.intValue == ((xmpp*)notification.object).accountNo.intValue)
     {
-        if(self.state.catchupDone == YES)
+        DDLogInfo(@"Catchup done now, handling omemo stuff...");
+        DDLogVerbose(@"Current state: %@", self.state);
+        
+        //the catchup completed now
+        self.state.catchupDone = YES;
+        
+        //if we did not see our own devicelist until now that means the server does not have any devicelist stored
+        //(e.g. we are the first omemo capable client)
+        //--> publish devicelist by faking an empty server-sent devicelist
+        //self.state.hasSeenDeviceList will be set to YES once the published devicelist gets returned to us by a pubsub headline echo
+        //(e.g. once the devicelist was safely stored on our server)
+        if(self.state.hasSeenDeviceList == NO)
         {
-            MLAssert(self.state.queuedKeyTransportElements.count == 0, @"queuedKeyTransportElements should be empty for smacks-resume catchups!");
-            //queuedSessionRepairs could be nonempty if a smacks resume occurs when the replay was already triggered
-            //but not all responses received yet
+            DDLogInfo(@"We did not see any devicelist during catchup since last non-smacks-resume reconnect, adding our device to an otherwise empty devicelist and publishing this list...");
+            [self processOMEMODevices:[NSSet<NSNumber*> new] from:self.account.connectionProperties.identity.jid];
         }
         else
         {
-            DDLogInfo(@"Catchup done now, handling omemo stuff...");
-            DDLogVerbose(@"Current state: %@", self.state);
-            
-            //the catchup completed now
-            self.state.catchupDone = YES;
-            
-            //if we did not see our own devicelist until now that means the server does not have any devicelist stored
-            //(e.g. we are the first omemo capable client)
-            //--> publish devicelist by faking an empty server-sent devicelist
-            //self.state.hasSeenDeviceList will be set to YES once the published devicelist gets returned to us by a pubsub headline echo
-            //(e.g. once the devicelist was safely stored on our server)
-            if(self.state.hasSeenDeviceList == NO)
-            {
-                DDLogInfo(@"We did not see any devicelist during catchup since last non-smacks-resume reconnect, adding our device to an otherwise empty devicelist and publishing this list...");
-                [self processOMEMODevices:[NSSet<NSNumber*> new] from:self.account.connectionProperties.identity.jid];
-            }
-            else
-            {
-                //generate new prekeys if needed and publish them
-                [self generateNewKeysIfNeeded];
-            }
-            
-            //send all needed key transport elements now (added by incoming catchup messages)
-            //the queue is needed to make sure we won't send multiple key transport messages to a single contact/device
-            //only because we received multiple messages from this user in the catchup
-            //queuedKeyTransportElements will survive any smacks or non-smacks resumptions and eventually trigger key transport elements
-            //once the catchup could be finished (could take several smacks resumptions to finish the whole (mam) catchup)
-            //has to be synchronized because [xmpp sendMessage:] could be called from main thread
-            @synchronized(self.state.queuedKeyTransportElements) {
-                DDLogDebug(@"Replaying queuedKeyTransportElements: %@", self.state.queuedKeyTransportElements);
-                for(NSString* jid in self.state.queuedKeyTransportElements)
-                {
-                    [self sendKeyTransportElement:jid forRids:self.state.queuedKeyTransportElements[jid]];
-                    [self.state.queuedKeyTransportElements removeAllObjects];       //this gets us better logging
-                }
-                self.state.queuedKeyTransportElements = [NSMutableDictionary new];
-            }
-            
-            //handle all broken sessions now (e.g. reestablish them by fetching their bundles and sending key transport elements afterwards)
-            //the code handling the fetched bundle will check for an entry in queuedSessionRepairs and send
-            //a key transport element if such an entry can be found
-            //it removes the entry in queuedSessionRepairs afterwards, so no need to remove it here
-            //queuedSessionRepairs will survive a non-smacks relogin and trigger these dropped bundle fetches again to complete them
-            //has to be synchronized because [xmpp sendMessage:] could be called from main thread
-            @synchronized(self.state.queuedSessionRepairs) {
-                DDLogDebug(@"Replaying queuedSessionRepairs: %@", self.state.queuedSessionRepairs);
-                for(NSString* jid in self.state.queuedSessionRepairs)
-                    for(NSNumber* rid in self.state.queuedSessionRepairs[jid])
-                        [self queryOMEMOBundleFrom:jid andDevice:rid];
-            }
-            
-            DDLogVerbose(@"New state: %@", self.state);
+            //generate new prekeys if needed and publish them
+            [self generateNewKeysIfNeeded];
         }
+        
+        //send all needed key transport elements now (added by incoming catchup messages)
+        //the queue is needed to make sure we won't send multiple key transport messages to a single contact/device
+        //only because we received multiple messages from this user in the catchup
+        //queuedKeyTransportElements will survive any smacks or non-smacks resumptions and eventually trigger key transport elements
+        //once the catchup could be finished (could take several smacks resumptions to finish the whole (mam) catchup)
+        //has to be synchronized because [xmpp sendMessage:] could be called from main thread
+        @synchronized(self.state.queuedKeyTransportElements) {
+            DDLogDebug(@"Replaying queuedKeyTransportElements: %@", self.state.queuedKeyTransportElements);
+            for(NSString* jid in self.state.queuedKeyTransportElements)
+            {
+                [self sendKeyTransportElement:jid forRids:self.state.queuedKeyTransportElements[jid]];
+                [self.state.queuedKeyTransportElements removeAllObjects];       //this gets us better logging
+            }
+            self.state.queuedKeyTransportElements = [NSMutableDictionary new];
+        }
+        
+        //handle all broken sessions now (e.g. reestablish them by fetching their bundles and sending key transport elements afterwards)
+        //the code handling the fetched bundle will check for an entry in queuedSessionRepairs and send
+        //a key transport element if such an entry can be found
+        //it removes the entry in queuedSessionRepairs afterwards, so no need to remove it here
+        //queuedSessionRepairs will survive a non-smacks relogin and trigger these dropped bundle fetches again to complete them
+        //has to be synchronized because [xmpp sendMessage:] could be called from main thread
+        @synchronized(self.state.queuedSessionRepairs) {
+            DDLogDebug(@"Replaying queuedSessionRepairs: %@", self.state.queuedSessionRepairs);
+            for(NSString* jid in self.state.queuedSessionRepairs)
+                for(NSNumber* rid in self.state.queuedSessionRepairs[jid])
+                    [self queryOMEMOBundleFrom:jid andDevice:rid];
+        }
+        
+        DDLogVerbose(@"New state: %@", self.state);
     }
 #endif
 }

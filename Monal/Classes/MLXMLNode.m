@@ -66,8 +66,8 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
     
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
-    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|double|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
-    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|double|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
     attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~]+)([=~])([^>]+)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
 
 //     testcases for stanza
@@ -312,9 +312,10 @@ static NSRegularExpression* attributeFilterRegex;
 //extraction command "$" returns the name of the XML element (just like "#" returns its text content)
 //the argument "@" for extraction command "@" returns the full attribute dictionary of the XML element (full command: "@@")
 //we also added conversion commands that can be appended to a query string:
-//"|bool" --> convert xml string to bool (XMPP defines "1"/"true" to be true and "0"/"false" to be false)
-//"|int" --> convert xml string to NSNumber
-//"|double" --> convert xml string to NSNumber
+//"|bool" --> convert xml string to NSNumber containing bool (XMPP defines "1"/"true" to be true and "0"/"false" to be false)
+//"|int" --> convert xml string to NSNumber containing NSInteger
+//"|uint" --> convert xml string to NSNumber containing NSUInteger
+//"|double" --> convert xml string to NSNumber containing double
 //"|datetime" --> convert xml datetime string to NSDate
 //"|base64" --> convert base64 encoded xml string to NSData
 -(NSArray*) find:(NSString* _Nonnull) queryString, ... NS_FORMAT_FUNCTION(1, 2)
@@ -621,7 +622,9 @@ static NSRegularExpression* attributeFilterRegex;
             return @NO;     //no bool at all, return false
     }
     else if([command isEqualToString:@"int"])
-        return [NSNumber numberWithInteger:[string integerValue]];
+        return [NSNumber numberWithInteger:(NSInteger)[string integerValue]];
+    else if([command isEqualToString:@"uint"])
+        return [NSNumber numberWithUnsignedInteger:(NSUInteger)[string longLongValue]];
     else if([command isEqualToString:@"double"])
         return [NSNumber numberWithDouble:[string doubleValue]];
     else if([command isEqualToString:@"datetime"])

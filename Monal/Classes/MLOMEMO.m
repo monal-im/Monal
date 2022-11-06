@@ -459,6 +459,8 @@ $$instance_handler(handleBundleFetchInvalidation, account.omemo, $$ID(xmpp*, acc
     //mark bundle fetch as done
     if(self.state.openBundleFetches[jid] != nil && [self.state.openBundleFetches[jid] containsObject:rid])
         [self.state.openBundleFetches[jid] removeObject:rid];
+    if(self.state.openBundleFetches[jid] != nil && self.state.openBundleFetches[jid].count == 0)
+        [self.state.openBundleFetches removeObjectForKey:jid];
     
     //update bundle fetch status (this has to be done even in error cases!)
     [self decrementBundleFetchCount];
@@ -468,6 +470,8 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
     //mark bundle fetch as done
     if(self.state.openBundleFetches[jid] != nil && [self.state.openBundleFetches[jid] containsObject:rid])
         [self.state.openBundleFetches[jid] removeObject:rid];
+    if(self.state.openBundleFetches[jid] != nil && self.state.openBundleFetches[jid].count == 0)
+        [self.state.openBundleFetches removeObjectForKey:jid];
     
     if(!success)
     {

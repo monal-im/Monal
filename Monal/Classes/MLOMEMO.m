@@ -752,6 +752,9 @@ $$
     else
         [recipients addObject:toContact];
     
+    //remove own jid from recipients (our own devices get special treatment via myDevices NSSet below)
+    [recipients removeObject:self.account.connectionProperties.identity.jid];
+    
     NSMutableDictionary<NSString*, NSArray<NSNumber*>*>* contactDeviceMap = [[NSMutableDictionary alloc] init];
     for(NSString* recipient in recipients)
     {

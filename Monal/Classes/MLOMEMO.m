@@ -217,7 +217,7 @@ static const int KEY_SIZE = 16;
             for(NSString* jid in self.state.queuedKeyTransportElements)
             {
                 [self sendKeyTransportElement:jid forRids:self.state.queuedKeyTransportElements[jid]];
-                [self.state.queuedKeyTransportElements removeAllObjects];       //this gets us better logging
+                [self.state.queuedKeyTransportElements[jid] removeAllObjects];       //this gets us better logging while doing replay
             }
             self.state.queuedKeyTransportElements = [NSMutableDictionary new];
         }
@@ -378,7 +378,7 @@ $$
     //remove deviceids from queuedSessionRepairs list if these devices are no longer available
     @synchronized(self.state.queuedSessionRepairs) {
         if(self.state.queuedSessionRepairs[source] != nil)
-            for(NSNumber* brokenRid in self.state.queuedSessionRepairs[source])
+            for(NSNumber* brokenRid in [self.state.queuedSessionRepairs[source] copy])
                 if(![receivedDevices containsObject:brokenRid])
                 {
                     DDLogDebug(@"Removing deviceid %@ on jid %@ from queuedSessionRepairs...", brokenRid, source);

@@ -936,6 +936,12 @@ $$
         if(error != nil)
         {
             DDLogError(@"Could not decrypt to obtain key: %@", error);
+            //don't report error or try to rebuild session, if this was just a duplicated message
+            if([@"org.whispersystems.SignalProtocol" isEqualToString:error.domain] && error.code == 3)
+            {
+                DDLogDebug(@"Deduplicated %@ message via omemo...", isKeyTransportElement ? @"key transport" : @"normal");
+                return nil;
+            }
             [self rebuildSessionWithJid:senderJid forRid:sid];
 #ifdef IS_ALPHA
             if(isKeyTransportElement)

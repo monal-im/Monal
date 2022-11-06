@@ -140,6 +140,8 @@
 		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
 		840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */; };
 		844EEC6D28E718DB00CB5EF9 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
+		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
+		845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		848904A9289C82C30097E19C /* SCRAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 848904A8289C82C30097E19C /* SCRAM.m */; };
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
@@ -1680,6 +1682,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				845EFFBD2918721800C1E03E /* Localizable.strings in Resources */,
 				C1D7D7B0283FB4E700401389 /* Media.xcassets in Resources */,
 				C1D7D7AF283FB4E500401389 /* Images.xcassets in Resources */,
 			);
@@ -1689,6 +1692,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */,
 				26AA70182146BBB900598605 /* iosShare.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

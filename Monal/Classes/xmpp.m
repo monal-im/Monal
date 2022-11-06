@@ -2330,6 +2330,8 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"Got SASL Success");
             
             self->_accountState = kStateLoggedIn;
+            [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
+            
             _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
             if(_cancelLoginTimer)
             {
@@ -3796,7 +3798,7 @@ NSString* const kStanza = @"stanza";
     _accountState = kStateBound;
     
     //inform other parts of monal about our new state
-    [[MLNotificationQueue currentQueue] postNotificationName:kMLHasConnectedNotice object:self];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMLResourceBoundNotice object:self];
     [self accountStatusChanged];
     
     //now fetch roster, request disco and send initial presence

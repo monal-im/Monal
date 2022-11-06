@@ -54,7 +54,6 @@
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"Share Sheet Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
-    DDLogInfo(@"Images dir name: %@", NSLocalizedString(@"Received Images", @"directory for downloaded images"));
     [DDLog flushLog];
 }
 

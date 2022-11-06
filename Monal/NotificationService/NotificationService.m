@@ -537,8 +537,8 @@ static BOOL warnUnclean = NO;
     if(warnUnclean)
     {
         UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
-        errorContent.title = @"Unclean appex shutown";
-        errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
+        errorContent.title = NSLocalizedString(@"Unclean appex shutown", @"");
+        errorContent.body = NSLocalizedString(@"This should never happen, please contact the developers and provide a logfile!", @"");
         errorContent.sound = [UNNotificationSound defaultSound];
         UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:errorContent trigger:nil];
         NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
@@ -594,8 +594,8 @@ static BOOL warnUnclean = NO;
         {
             DDLogError(@"Feeding handler with error notification: %@", _handler);
             UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
-            errorContent.title = @"Unexpected appex expiration";
-            errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
+            errorContent.title = NSLocalizedString(@"Unexpected appex expiration", @"");
+            errorContent.body = NSLocalizedString(@"This should never happen, please contact the developers and provide a logfile!", @"");
             errorContent.sound = [UNNotificationSound defaultSound];
             _handler(errorContent);
         }

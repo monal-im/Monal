@@ -208,8 +208,7 @@ static const int KEY_SIZE = 16;
             @synchronized(self.state.queuedKeyTransportElements) {
                 DDLogDebug(@"Replaying queuedKeyTransportElements: %@", self.state.queuedKeyTransportElements);
                 for(NSString* jid in self.state.queuedKeyTransportElements)
-                    for(id rid in self.state.queuedKeyTransportElements[jid])
-                        [self sendKeyTransportElement:jid forRid:rid];
+                    [self sendKeyTransportElement:jid forRids:self.state.queuedKeyTransportElements[jid]];
                 self.state.queuedKeyTransportElements = [NSMutableDictionary new];
             }
             
@@ -598,7 +597,7 @@ $$
         }
         
         //found and imported a working key --> try to (re)build a new session proactively (or repair a broken one)
-        [self sendKeyTransportElement:jid forRid:rid];      //this will remove the queuedSessionRepairs entry, if any
+        [self sendKeyTransportElement:jid forRids:[NSSet setWithArray:@[rid]]];      //this will remove the queuedSessionRepairs entry, if any
         
         break;
     } while(++processedKeys < preKeyIds.count);
@@ -631,7 +630,7 @@ $$
     [self queryOMEMOBundleFrom:jid andDevice:rid];
 }
 
--(void) sendKeyTransportElement:(NSString*) jid forRid:(NSNumber*) rid
+-(void) sendKeyTransportElement:(NSString*) jid forRids:(NSSet<NSNumber*>*) rids
 {
     //queue all actions until the catchup was done
     if(!self.state.catchupDone)
@@ -639,7 +638,7 @@ $$
         @synchronized(self.state.queuedKeyTransportElements) {
             if(self.state.queuedKeyTransportElements[jid] == nil)
                 self.state.queuedKeyTransportElements[jid] = [NSMutableSet new];
-            [self.state.queuedKeyTransportElements[jid] addObject:rid];
+            [self.state.queuedKeyTransportElements[jid] unionSet:rids];
         }
         return;
     }
@@ -655,12 +654,13 @@ $$
     [self.account send:messageNode];
     
     @synchronized(self.state.queuedSessionRepairs) {
-        //remove this jid-rid combination from queuedSessionRepairs
-        if(rid != nil && self.state.queuedSessionRepairs[jid] != nil)
-        {
-            DDLogDebug(@"Removing deviceid %@ on jid %@ from queuedSessionRepairs...", rid, jid);
-            [self.state.queuedSessionRepairs[jid] removeObject:rid];
-        }
+        //remove this jid-rid combinations from queuedSessionRepairs
+        for(NSNumber* rid in rids)
+            if(rid != nil && self.state.queuedSessionRepairs[jid] != nil)
+            {
+                DDLogDebug(@"Removing deviceid %@ on jid %@ from queuedSessionRepairs...", rid, jid);
+                [self.state.queuedSessionRepairs[jid] removeObject:rid];
+            }
     }
 }
 
@@ -962,7 +962,7 @@ $$
             if(messagetype == SignalCiphertextTypePreKeyMessage)
             {
                 //(re)build session
-                [self sendKeyTransportElement:senderJid forRid:sid];
+                [self sendKeyTransportElement:senderJid forRids:[NSSet setWithArray:@[sid]]];
             }
             
             //save last successfull decryption time and remove possibly queued session repair

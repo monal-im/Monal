@@ -1704,13 +1704,14 @@ static NSDateFormatter* dbFormatter;
     return [self.db idReadTransaction:^{
         // count # of unread msgs in message table and ignore muted buddies and mentionOnly buddies without mention
         return [self.db executeScalar:@"SELECT Count(M.message_history_id) \
-                                        FROM   message_history AS M \
+                                        FROM message_history AS M \
                                         LEFT JOIN buddylist AS B \
                                                     ON M.account_id = B.account_id \
                                                         AND M.buddy_name = B.buddy_name \
                                         LEFT JOIN account AS A \
                                                     ON M.account_id = A.account_id \
-                                        WHERE   M.message_history_id > (SELECT Min(latest_read_message_history_id) FROM buddylist) \
+                                        WHERE M.message_history_id > (SELECT Min(latest_read_message_history_id) FROM buddylist) \
+                                            AND A.enabled \
                                             AND B.muted = 0 \
                                             AND M.inbound = 1 \
                                             AND M.unread = 1 \

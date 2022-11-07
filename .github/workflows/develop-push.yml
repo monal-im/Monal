@@ -41,10 +41,14 @@ jobs:
           tar -cf "../$APP_NAME.tar" "$APP_DIR"
           cd ../../../..
       - name: save changelog
+        env:
+          ID: ${{github.event.head_commit.id}}
+          TIMESTAMP: ${{github.event.head_commit.timestamp}}
+          MESSAGE: ${{github.event.head_commit.message}}
         run: |
-          echo 'ID: ${{github.event.head_commit.id}}' > changes.txt
-          echo 'Timestamp: ${{github.event.head_commit.timestamp}}' >> changes.txt
-          echo '${{github.event.head_commit.message}}' >> changes.txt
+          echo "ID: $ID" > changes.txt
+          echo "Timestamp: $TIMESTAMP" >> changes.txt
+          echo "$MESSAGE" >> changes.txt
       - name: Uploading to alpha site
         run: ./scripts/uploadAlpha.sh
       - name: Notarize catalyst

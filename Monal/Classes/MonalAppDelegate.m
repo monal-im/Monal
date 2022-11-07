@@ -411,6 +411,10 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             DDLogVerbose(@"Setting _shutdownPending to NO...");
             _shutdownPending = NO;
         }
+        
+        //cancel already running background timer, we are now foregrounded again
+        [self stopBackgroundTimer];
+            
         [self addBackgroundTask];
         [[MLXMPPManager sharedInstance] nowForegrounded];
     }
@@ -847,6 +851,33 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     if(_backgroundTimer)
         _backgroundTimer();
     _backgroundTimer = nil;
+    
+    //stop bg processing/refreshing tasks (we are foregrounded now)
+    //this will prevent scenarious where one of these tasks times out after the user puts the app into background again
+    //in this case a possible syncError notification would be suppressed in checkIfBackgroundTaskIsStillNeeded
+    //but since the user openend the app, we want these errors not being suppressed
+    @synchronized(self) {
+        if(self->_bgProcessing != nil)
+        {
+            DDLogDebug(@"Stopping bg processing task, we are foregrounded now");
+            [DDLog flushLog];
+            BGTask* task = self->_bgProcessing;
+            self->_bgProcessing = nil;
+            [task setTaskCompletedWithSuccess:YES];
+            return;
+        }
+    }
+    @synchronized(self) {
+        if(self->_bgRefreshing != nil)
+        {
+            DDLogDebug(@"Stopping bg refreshing task, we are foregrounded now");
+            [DDLog flushLog];
+            BGTask* task = self->_bgRefreshing;
+            self->_bgRefreshing = nil;
+            [task setTaskCompletedWithSuccess:YES];
+            return;
+        }
+    }
 }
 
 -(UIViewController*) getTopViewController
@@ -1096,7 +1127,10 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     if([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle])
     {
         DDLogInfo(@"### ALL ACCOUNTS IDLE AND FILETRANSFERS COMPLETE NOW ###");
-        [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+        
+        //if we used a bg fetch/processing task, that means we did not get a push informing us about a waiting message
+        //nor did the user interact with our app --> don't show possible sync warnings in this case (but delete old warnings if we are synced now)
+        [HelperTools updateSyncErrorsWithDeleteOnly:(self->_bgProcessing != nil || self->_bgRefreshing != nil) andWaitForCompletion:YES];
         
         //hide spinner
         [self.activeChats.spinner stopAnimating];
@@ -1266,7 +1300,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
             }
             else
-                DDLogDebug(@"_bgTask != UIBackgroundTaskInvalid --> not disconnecting");
+                DDLogDebug(@"!background || _bgTask != UIBackgroundTaskInvalid --> not disconnecting");
             
             DDLogDebug(@"stopping backgroundProcessingTask: %@", task);
             [DDLog flushLog];
@@ -1362,7 +1396,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
             }
             else
-                DDLogDebug(@"_bgTask != UIBackgroundTaskInvalid --> not disconnecting");
+                DDLogDebug(@"!background || _bgTask != UIBackgroundTaskInvalid --> not disconnecting");
             
             DDLogDebug(@"stopping backgroundProcessingTask: %@", task);
             [DDLog flushLog];

@@ -2933,9 +2933,6 @@ NSString* const kStanza = @"stanza";
     
     MLXMLNode* resumeNode = nil;
     @synchronized(_stateLockObject) {
-        //under rare circumstances/bugs the appex could have changed the smacks state *after* our connect method was called
-        //--> load newest saved smacks state to be up to date even in this case
-        [self readSmacksStateOnly];
         //test if smacks is supported and allows resume
         if(self.connectionProperties.supportsSM3 && self.streamID)
         {
@@ -3310,75 +3307,6 @@ NSString* const kStanza = @"stanza";
             DDLogVerbose(@"%@ --> realPersistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
     }];
-}
-
--(void) readSmacksStateOnly
-{
-    DDLogVerbose(@"%@ --> readSmacksStateOnly before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-    [self realReadSmacksStateOnly];
-    DDLogVerbose(@"%@ --> readSmacksStateOnly after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-}
-
--(void) realReadSmacksStateOnly
-{
-    @synchronized(_stateLockObject) {
-        DDLogVerbose(@"%@ --> realReadSmacksStateOnly before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-        NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
-        if(dic)
-        {
-            //check state version
-            if([dic[@"VERSION"] intValue] != STATE_VERSION)
-            {
-                DDLogWarn(@"Account state upgraded from %@ to %d, invalidating state...", dic[@"VERSION"], STATE_VERSION);
-                dic = [[self class] invalidateState:dic];
-            }
-            
-            //collect smacks state
-            self.lastHandledInboundStanza = [dic objectForKey:@"lastHandledInboundStanza"];
-            self.lastHandledOutboundStanza = [dic objectForKey:@"lastHandledOutboundStanza"];
-            self.lastOutboundStanza = [dic objectForKey:@"lastOutboundStanza"];
-            NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
-            self.unAckedStanzas = [stanzas mutableCopy];
-            self.streamID = [dic objectForKey:@"streamID"];
-            
-            @synchronized(_stateLockObject) {
-                //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
-                if(self.lastHandledInboundStanza == nil || self.lastHandledOutboundStanza == nil || self.lastOutboundStanza == nil || !self.unAckedStanzas)
-                {
-#ifndef IS_ALPHA
-                    [self initSM3];
-#else
-                    @throw [NSException exceptionWithName:@"RuntimeError" reason:@"corrupt smacks state" userInfo:dic];
-#endif
-                }
-            }
-            
-            //the list of mam queryids is closely coupled with smacks state (it records mam queryids of outgoing stanzas)
-            //--> load them even when loading smacks state only
-            if([dic objectForKey:@"runningMamQueries"])
-                _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
-            
-            //debug output
-            DDLogVerbose(@"%@ --> readSmacksStateOnly(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
-                self.accountNo,
-                dic[@"stateSavedAt"],
-                self.lastHandledInboundStanza,
-                self.lastHandledOutboundStanza,
-                self.lastOutboundStanza,
-                self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
-                self.streamID,
-                _lastInteractionDate
-            );
-            if(self.unAckedStanzas)
-                for(NSDictionary* dic in self.unAckedStanzas)
-                    DDLogDebug(@"readSmacksStateOnly unAckedStanza %@: %@", [dic objectForKey:kQueueID], [dic objectForKey:kStanza]);
-        }
-        //always reset handler and smacksRequestInFlight when loading smacks state
-        _smacksAckHandler = [[NSMutableArray alloc] init];
-        self.smacksRequestInFlight = NO;
-        
-        DDLogVerbose(@"%@ --> realReadSmacksStateOnly after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-    }
 }
 
 -(void) readState

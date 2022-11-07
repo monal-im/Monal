@@ -3444,8 +3444,8 @@ NSString* const kStanza = @"stanza";
             }
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
-            self.connectionProperties.discoveredServices = [dic objectForKey:@"discoveredServices"];
-            self.connectionProperties.discoveredStunTurnServers = [dic objectForKey:@"discoveredStunTurnServers"];
+            self.connectionProperties.discoveredServices = [[dic objectForKey:@"discoveredServices"] mutableCopy];
+            self.connectionProperties.discoveredStunTurnServers = [[dic objectForKey:@"discoveredStunTurnServers"] mutableCopy];
             
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
             self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];

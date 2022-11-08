@@ -63,7 +63,7 @@
     
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title = xmppAccount.connectionProperties.identity.jid;
-    content.body = [NSString stringWithFormat:NSLocalizedString(@"The user %@ (%@) wants to add you to his contact list", @""), contact.contactDisplayName, contact.contactJid];
+    content.body = [NSString stringWithFormat:NSLocalizedString(@"The user %@ (%@) wants to add you to their contact list", @""), contact.contactDisplayName, contact.contactJid];
     content.threadIdentifier = [self threadIdentifierWithContact:contact];
     content.categoryIdentifier = @"subscription";
     //don't simply use contact directly to make sure we always use a freshly created up to date contact when unpacking the userInfo dict

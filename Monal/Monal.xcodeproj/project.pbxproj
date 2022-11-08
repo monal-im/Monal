@@ -2337,6 +2337,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Classes/Monal-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -2363,6 +2364,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.notificationService";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Debug;
 		};
@@ -2386,6 +2388,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.notificationService";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Adhoc;
 		};
@@ -2409,6 +2412,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.notificationService";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = AppStore;
 		};
@@ -2522,6 +2526,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Classes/Monal-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -2544,6 +2549,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.shareSheet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Debug;
 		};
@@ -2563,6 +2569,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.shareSheet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Adhoc;
 		};
@@ -2582,6 +2589,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.shareSheet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = AppStore;
 		};
@@ -2612,6 +2620,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
@@ -2645,6 +2654,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
@@ -2678,6 +2688,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
@@ -2796,6 +2807,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Classes/Monal-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -3180,6 +3192,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Classes/Monal-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -3202,6 +3215,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.shareSheet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Beta;
 		};
@@ -3225,6 +3239,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.monal.notificationService";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Beta;
 		};
@@ -3254,6 +3269,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
@@ -3506,6 +3522,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Classes/Monal-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -3527,6 +3544,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Alpha;
 		};
@@ -3549,6 +3567,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Alpha;
 		};
@@ -3578,6 +3597,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";

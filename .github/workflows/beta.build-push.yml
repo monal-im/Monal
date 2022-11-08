@@ -32,10 +32,6 @@ jobs:
         run: git fetch --tags
       - name: Checkout submodules
         run: git submodule update -f --init --remote
-      - name: Update translations
-        run: |
-          chmod +x ./scripts/updateLocalization.sh
-          ./scripts/updateLocalization.sh BUILDSERVER
       - name: Get last build tag and increment it
         run: |
           oldBuildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
@@ -50,6 +46,11 @@ jobs:
         run: ./scripts/build.sh
       - name: validate ios app
         run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
+      - name: Update translations
+        run: |
+          chmod +x ./scripts/updateLocalization.sh
+          chmod +x ./scripts/xliff_extractor.py
+          ./scripts/updateLocalization.sh BUILDSERVER
       - name: push tag to beta repo
         run: |
           buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')

@@ -17,7 +17,7 @@ plistArguments = true
 
 [update.normalize]
 paths = ["."]
-sourceLocale = "en"
+sourceLocale = "base"
 harmonizeWithSource = true
 sortByKeys = true
 

@@ -10,6 +10,8 @@
 
 @interface LogViewController : UIViewController<UITextFieldDelegate>
 
+@property (nonatomic,weak) IBOutlet UITextView* logView;
+
 -(IBAction) reconnect:(id) sender;
 
 @end

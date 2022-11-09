@@ -16,7 +16,7 @@
 #import "XMPPMessage.h"
 #import "HelperTools.h"
 
-#define CURRENT_PUBSUB_DATA_VERSION @4
+#define CURRENT_PUBSUB_DATA_VERSION @5
 
 @interface MLPubSub ()
 {
@@ -53,7 +53,7 @@ static NSDictionary* _defaultOptions;
         if(!_registeredHandlers[node])
             _registeredHandlers[node] = [[NSMutableDictionary alloc] init];
         _registeredHandlers[node][handler.id] = handler;
-        [_account setPubSubNotificationsForNodes:[_registeredHandlers allKeys] persistState:YES];
+        [_account setPubSubNotificationsForNodes:[_registeredHandlers allKeys] persistState:NO];
     }
 }
 
@@ -65,7 +65,7 @@ static NSDictionary* _defaultOptions;
         if(!_registeredHandlers[node])
             return;
         [_registeredHandlers[node] removeObjectForKey:handler.id];
-        [_account setPubSubNotificationsForNodes:[_registeredHandlers allKeys] persistState:YES];
+        [_account setPubSubNotificationsForNodes:[_registeredHandlers allKeys] persistState:NO];
     }
 }
 
@@ -305,7 +305,7 @@ static NSDictionary* _defaultOptions;
     @synchronized(_registeredHandlers) {
         return @{
             @"version": CURRENT_PUBSUB_DATA_VERSION,
-            @"handlers": _registeredHandlers
+            //@"handlers": _registeredHandlers
         };
     }
 }
@@ -316,10 +316,10 @@ static NSDictionary* _defaultOptions;
     @synchronized(_registeredHandlers) {
         if(!data[@"version"] || ![data[@"version"] isEqualToNumber:CURRENT_PUBSUB_DATA_VERSION])
             return;     //ignore old data
-        _registeredHandlers = data[@"handlers"];
+        //_registeredHandlers = data[@"handlers"];
         //update caps hash according to our new _registeredHandlers dictionary
         //but don't persist state again (it was just read from persistent storage)
-        [_account setPubSubNotificationsForNodes:[_registeredHandlers allKeys] persistState:NO];
+        //[_account setPubSubNotificationsForNodes:[_registeredHandlers allKeys] persistState:NO];
     }
 }
 

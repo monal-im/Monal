@@ -11,7 +11,7 @@ import monalxmpp
 
 struct AddContactMenu: View {
     var delegate: SheetDismisserProtocol
-    static private let jidFaultyPattern = "^.+@.+\\..{2,}$"
+    static private let jidFaultyPattern = "^.+\\..{2,}$"
 
     @State private var connectedAccounts: [xmpp]
     @State private var selectedAccount: Int
@@ -105,34 +105,38 @@ struct AddContactMenu: View {
                 else
                 {
                     Section(header: Text(verbatim: "Contact and Channel Jids are usually in the format: name@domain.tld")) {
-                        Picker("Use account", selection: $selectedAccount) {
-                            ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
-                                Text(account.connectionProperties.identity.jid).tag(idx)
+                        if(connectedAccounts.count > 1) {
+                            Picker("Use account", selection: $selectedAccount) {
+                                ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
+                                    Text(account.connectionProperties.identity.jid).tag(idx)
+                                }
                             }
+                            .pickerStyle(.menu)
                         }
-                        .pickerStyle(.menu)
                         TextField("Contact or Channel Jid", text: $toAdd)
                             .autocorrectionDisabled()
                             .autocapitalization(.none)
                             .disabled(scannedFingerprints != nil)
                             .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
                     }
-                    if(scannedFingerprints != nil) {
+                    if(scannedFingerprints != nil && scannedFingerprints!.count > 1) {
                         Section(header: Text("A contact was scanned through the QR code scanner")) {
                             Toggle(isOn: $importScannedFingerprints, label: {
-                                Text("Import OMEMO fingerprints from QR code")
+                                Text("Import and trust OMEMO fingerprints from QR code")
                             })
+                        }
+                    }
+                    Section {
+                        if(scannedFingerprints != nil) {
                             Button(action: {
                                 toAdd = ""
                                 importScannedFingerprints = true
                                 scannedFingerprints = nil
                             }, label: {
-                                Text("Don't add scanned contact")
+                                Text("Clear scanned contact")
                                     .foregroundColor(.red)
                             })
                         }
-                    }
-                    Section {
                         Button(action: {
                             showAlert = toAddEmptyAlert || toAddInvalidAlert
 
@@ -147,7 +151,7 @@ struct AddContactMenu: View {
                                 addJid(jid: jidComponents["user"]!) // check if user entry exists in components?
                             }
                         }, label: {
-                            Text("Add Channel or Contact")
+                            scannedFingerprints == nil ? Text("Add Channel or Contact") : Text("Add scanned Channel or Contact")
                         })
                         .foregroundColor(buttonColor)
                         .alert(isPresented: $showAlert) {

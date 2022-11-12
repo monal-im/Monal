@@ -25,23 +25,26 @@ struct ContactRequestsMenuEntry: View {
         HStack {
             Text(contact.contactJid)
             Spacer()
-            Button {
-                // deny request
-                MLXMPPManager.sharedInstance().reject(contact)
-                DataLayer.sharedInstance().deleteContactRequest(contact)
-                self.delete()
-            } label: {
-                Image(systemName: "trash.circle")
-                    .accentColor(.red)
+            Group {
+                Button {
+                    // deny request
+                    MLXMPPManager.sharedInstance().reject(contact)
+                    DataLayer.sharedInstance().deleteContactRequest(contact)
+                    self.delete()
+                } label: {
+                    Image(systemName: "trash.circle")
+                        .accentColor(.red)
+                }
+                Button {
+                    // accept request
+                    MLXMPPManager.sharedInstance().add(contact)
+                    self.delete()
+                } label: {
+                    Image(systemName: "checkmark.circle")
+                        .accentColor(.green)
+                }
             }
-            Button {
-                // accept request
-                MLXMPPManager.sharedInstance().add(contact)
-                self.delete()
-            } label: {
-                Image(systemName: "checkmark.circle")
-                    .accentColor(.green)
-            }
+            .font(.largeTitle)
         }
     }
 }

@@ -47,6 +47,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(id) unserializeData:(NSData*) data;
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request;
 +(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void (^)(NSMutableDictionary* _Nullable)) completion;
++(UIImage*) imageWithNotificationBadgeForImage:(UIImage*) image;
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length;
 +(double) report_memory;
 +(UIColor*) generateColorFromJid:(NSString*) jid;

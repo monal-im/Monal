@@ -49,30 +49,6 @@
 
 #pragma mark view life cycle
 
-/*
--(UIImage*) imageWithNotificationBadgeForImage:(UIImage*) image {
-    // float innerImageSize = 20;
-    UIImage* finalImage;
-
-    UIImage* badge = [[UIImage systemImageNamed:@"exclamationmark.circle.fill"] imageWithTintColor:UIColor.redColor];
-
-    // CGSize outerImageSize = image.size; CGSizeMake(40, 40); // Provide custom size or size of your actual image
-    UIGraphicsBeginImageContext(image.size);
-
-    //calculate areaSize for re-centered inner image
-    // CGRect areSize = CGRectMake(((image.size.width/2) - (innerImageSize/2)), ((outerImageSize.width/2) - (innerImageSize/2)), innerImageSize, innerImageSize);
-    CGRect imgSize = CGRectMake(0, 0, image.size.width, image.size.height);
-    CGRect dotSize = CGRectMake(0, image.size.width - 15, 15, 15);
-    [image drawInRect:imgSize];
-    [badge drawInRect:dotSize blendMode:kCGBlendModeNormal alpha:1.0];
-
-    finalImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-
-    return finalImage;
-}
- */
-
 -(void) viewDidLoad
 {
     [super viewDidLoad];
@@ -106,12 +82,16 @@
     UIBarButtonItem* addContact = [[UIBarButtonItem alloc] init];
     addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
     [addContact setAction:@selector(openAddContacts:)];
+
     UIBarButtonItem* contactRequests = [[UIBarButtonItem alloc] init];
+    UIImage* requestsImage = [[UIImage systemImageNamed:@"questionmark.bubble.fill"] imageWithTintColor:UIColor.monalGreen];
     if([[DataLayer sharedInstance] contactRequestsForAccount].count == 0) {
-        contactRequests.image = [UIImage systemImageNamed:@"questionmark.bubble.fill"];
+        contactRequests.customView = [[UIImageView alloc] initWithImage: requestsImage];
     } else {
-        contactRequests.image = [UIImage systemImageNamed:@"exclamationmark.bubble.fill"];
+        contactRequests.customView = [[UIImageView alloc] initWithImage:[HelperTools imageWithNotificationBadgeForImage:requestsImage]];
     }
+    UITapGestureRecognizer* requestTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContactRequests:)];
+    [contactRequests.customView addGestureRecognizer:requestTapRecoginzer];
 
     [contactRequests setAction:@selector(openContactRequests:)];
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, contactRequests, nil];

@@ -54,27 +54,33 @@ extension View {
 }
 
 func showLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayState, headlineView headline: T1, descriptionView description: T2) {
-    overlay.headline = AnyView(headline)
-    overlay.description = AnyView(description)
-    overlay.enabled = true
-    //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
-    overlay.objectWillChange.send()
+    DispatchQueue.main.async {
+        overlay.headline = AnyView(headline)
+        overlay.description = AnyView(description)
+        overlay.enabled = true
+        //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
+        overlay.objectWillChange.send()
+    }
 }
 
 func showLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headline: T, description: T = "") {
-    overlay.headline = AnyView(Text(headline))
-    overlay.description = AnyView(Text(description))
-    overlay.enabled = true
-    //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
-    overlay.objectWillChange.send()
+    DispatchQueue.main.async {
+        overlay.headline = AnyView(Text(headline))
+        overlay.description = AnyView(Text(description))
+        overlay.enabled = true
+        //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
+        overlay.objectWillChange.send()
+    }
 }
 
 func hideLoadingOverlay(_ overlay: LoadingOverlayState) {
-    overlay.headline = AnyView(Text(""))
-    overlay.description = AnyView(Text(""))
-    overlay.enabled = false
-    //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
-    overlay.objectWillChange.send()
+    DispatchQueue.main.async {
+        overlay.headline = AnyView(Text(""))
+        overlay.description = AnyView(Text(""))
+        overlay.enabled = false
+        //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
+        overlay.objectWillChange.send()
+    }
 }
 
 struct LoadingOverlay_Previews: PreviewProvider {

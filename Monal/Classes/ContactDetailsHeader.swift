@@ -38,6 +38,10 @@ struct ContactDetailsHeader: View {
                 }
                 .buttonStyle(BorderlessButtonStyle())
             }
+            //only show account jid if more than one is configured
+            if MLXMPPManager.sharedInstance().connectedXMPP.count > 1 {
+                Text("Account: \(MLXMPPManager.sharedInstance().getConnectedAccount(forID:contact.accountId)!.connectionProperties.identity.jid)")
+            }
             
             Spacer()
                 .frame(height: 20)

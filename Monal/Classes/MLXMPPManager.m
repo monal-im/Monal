@@ -255,7 +255,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         DDLogDebug(@"*** nw_path_monitor: on 'mobile' --> %@", self->_onMobile ? @"YES" : @"NO");
         if(nw_path_get_status(path) == nw_path_status_satisfied && !self->_hasConnectivity)
         {
-            DDLogVerbose(@"reachable");
+            DDLogVerbose(@"reachable again");
             self->_hasConnectivity = YES;
             for(xmpp* xmppAccount in [self connectedXMPP])
             {
@@ -284,6 +284,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 //don't queue this notification because it should be handled immediately
                 [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @(!wasIdle)}];
             }
+        }
+        else
+        {
+            //when switching from wifi to mobile (or back) we sometimes don't have any unreachable state in between
+            //--> reconnect directly because switching from wifi to mobile will cut the connection a few seconds after the switch anyways
+            //wait for 1 sec before reconnecting to compensate for multiple nw_path updates in a row
+            for(xmpp* xmppAccount in [self connectedXMPP])
+                [xmppAccount reconnect:1];
         }
     });
     nw_path_monitor_start(_path_monitor);

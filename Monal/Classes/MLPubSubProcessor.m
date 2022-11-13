@@ -281,7 +281,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
     }
 $$
 
-$$class_handler(handleBookarks2FetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(!success)
     {
         //item-not-found means: no bookmarks in storage --> use an empty data dict

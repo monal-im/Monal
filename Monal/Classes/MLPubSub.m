@@ -584,13 +584,13 @@ $$instance_handler(handleUnsubscribe, account.pubsub, $$ID(xmpp*, account), $$ID
     }
 $$
 
-$$instance_handler(handleFetchInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSMutableArray*, queryItems), $$ID(NSMutableDictionary*, data), $$HANDLER(handler))
+$$instance_handler(handleFetchInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$HANDLER(handler))
     //invalidate user handler
     $invalidate(handler,
         $ID(account),
         $BOOL(success, NO),
         $ID(node),
-        $ID(jid, iqNode.fromUser)
+        $ID(jid)
     );
 $$
 

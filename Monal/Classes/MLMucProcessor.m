@@ -23,7 +23,7 @@
 #import "MLOMEMO.h"
 #import "MLImageManager.h"
 
-#define CURRENT_MUC_STATE_VERSION @4
+#define CURRENT_MUC_STATE_VERSION @5
 
 @interface MLMucProcessor()
 {
@@ -35,6 +35,7 @@
     NSMutableSet* _firstJoin;
     NSDate* _lastPing;
     NSMutableSet* _noUpdateBookmarks;
+    BOOL _hasFetchedBookmarks;
     //this won't be persisted because it is only for the ui
     NSMutableDictionary* _uiHandler;
 }
@@ -53,7 +54,16 @@
     _uiHandler = [[NSMutableDictionary alloc] init];
     _lastPing = [NSDate date];
     _noUpdateBookmarks = [[NSMutableSet alloc] init];
+    _hasFetchedBookmarks = NO;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleResourceBound:) name:kMLResourceBoundNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleCatchupDone:) name:kMonalFinishedCatchup object:nil];
     return self;
+}
+
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void) setInternalState:(NSDictionary*) state
@@ -69,6 +79,7 @@
         _firstJoin = [state[@"firstJoin"] mutableCopy];
         _lastPing = state[@"lastPing"];
         _noUpdateBookmarks = [state[@"noUpdateBookmarks"] mutableCopy];
+        _hasFetchedBookmarks = [state[@"hasFetchedBookmarks"] boolValue];
     }
 }
 
@@ -82,16 +93,35 @@
             @"firstJoin": _firstJoin,
             @"lastPing": _lastPing,
             @"noUpdateBookmarks": _noUpdateBookmarks,
+            @"hasFetchedBookmarks": @(_hasFetchedBookmarks),
         };
     }
 }
 
--(void) resetForNewSession
+-(void) handleResourceBound:(NSNotification*) notification
 {
-    _roomFeatures = [[NSMutableDictionary alloc] init];
-    _joining = [[NSMutableSet alloc] init];
-    //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
+    //this event will be called as soon as we are bound, but BEFORE mam catchup happens
+    //NOTE: this event won't be called for smacks resumes!
+    if(_account == ((xmpp*)notification.object))
+    {
+        _roomFeatures = [[NSMutableDictionary alloc] init];
+        _joining = [[NSMutableSet alloc] init];
+        //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
+        
+        //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
+        _hasFetchedBookmarks = NO;
+    }
+}
 
+-(void) handleCatchupDone:(NSNotification*) notification
+{
+    //this event will be called as soon as mam OR smacks catchup on our account is done, it does not wait for muc mam catchups!
+    if(_account == ((xmpp*)notification.object))
+    {
+        //fake incoming bookmarks push by pulling all bookmarks 2 items
+        if(!_hasFetchedBookmarks)
+            [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler, $ID(type, @"publish"))];
+    }
 }
 
 -(BOOL) isJoining:(NSString*) room
@@ -1028,7 +1058,7 @@ $$
 -(void) updateBookmarks
 {
     DDLogVerbose(@"Updating bookmarks on account %@", _account);
-    [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarks2FetchResult)];
+    [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookmarks2FetchResult)];
 }
 
 -(BOOL) checkIfStillBookmarked:(NSString*) room

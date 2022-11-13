@@ -137,7 +137,7 @@ static const int KEY_SIZE = 16;
 -(void) handleHasLoggedIn:(NSNotification*) notification
 {
     //this event will be called as soon as we are successfully authenticated, but BEFORE handleResourceBound: will be called
-    //handleResourceBound: won't be called for smacks resumptions at all
+    //NOTE: handleResourceBound: won't be called for smacks resumptions at all
 #ifndef DISABLE_OMEMO
     if(self.account.accountNo.intValue == ((xmpp*)notification.object).accountNo.intValue)
     {
@@ -150,7 +150,8 @@ static const int KEY_SIZE = 16;
 
 -(void) handleResourceBound:(NSNotification*) notification
 {
-    //this event will be called as soon as we are bound, but BEFORE mam catchup happens (it won't be called for smacks resumes!)
+    //this event will be called as soon as we are bound, but BEFORE mam catchup happens
+    //NOTE: this event won't be called for smacks resumes!
 #ifndef DISABLE_OMEMO
     if(self.account.accountNo.intValue == ((xmpp*)notification.object).accountNo.intValue)
     {
@@ -181,7 +182,6 @@ static const int KEY_SIZE = 16;
 {
 #ifndef DISABLE_OMEMO
     //this event will be called as soon as mam OR smacks catchup on our account is done, it does not wait for muc mam catchups!
-    //but it will only be called once after a non-smacks-resume login and not for smacks-resume catchups
     if(self.account.accountNo.intValue == ((xmpp*)notification.object).accountNo.intValue)
     {
         DDLogInfo(@"Catchup done now, handling omemo stuff...");

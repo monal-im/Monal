@@ -10,9 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <CommonCrypto/CommonDigest.h>
-#import <sys/socket.h>
-#import <arpa/inet.h>
-#import <netinet/in.h>
+#import <Network/Network.h>
 #import <zlib.h>
 #import "MLUDPLogger.h"
 #import "HelperTools.h"
@@ -24,7 +22,7 @@ static NSString* _processID;
 
 @interface MLUDPLogger ()
 {
-    CFSocketRef _cfsocketout;
+    nw_connection_t _connection;
     u_int64_t _counter;
 }
 @end
@@ -35,38 +33,29 @@ static NSString* _processID;
 +(void) initialize
 {
     u_int32_t i = arc4random();
-    _processID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
+    _processID = [HelperTools hexadecimalString:[NSData dataWithBytes:&i length:sizeof(i)]];
 }
 
 -(void) dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void) didAddLogger
 {
-    _cfsocketout = CFSocketCreate(
-        kCFAllocatorDefault,
-        PF_INET,
-        SOCK_DGRAM,
-        IPPROTO_UDP,
-        kCFSocketNoCallBack,
-        NULL,
-        NULL
-    );
-    
-    //register freeze handler
+    //register freeze handler (this will create a new connection once unfrozen)
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(prepareForFreeze:) name:kMonalWillBeFreezed object:nil];
 }
 
 -(void) willRemoveLogger
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 //code taken from here: https://stackoverflow.com/a/11389847/3528174
 -(NSData*) gzipDeflate:(NSData*) data
 {
-    if ([data length] == 0) return data;
+    if([data length] == 0)
+        return data;
 
     z_stream strm;
 
@@ -74,7 +63,7 @@ static NSString* _processID;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
     strm.total_out = 0;
-    strm.next_in=(Bytef *)[data bytes];
+    strm.next_in = (Bytef*)[data bytes];
     strm.avail_in = (unsigned int)[data length];
 
     // Compresssion Levels:
@@ -82,37 +71,39 @@ static NSString* _processID;
     //   Z_BEST_SPEED
     //   Z_BEST_COMPRESSION
     //   Z_DEFAULT_COMPRESSION
+    if(deflateInit2(&strm, Z_BEST_COMPRESSION, Z_DEFLATED, (15+16), 8, Z_DEFAULT_STRATEGY) != Z_OK)
+        return nil;
 
-    if (deflateInit2(&strm, Z_BEST_COMPRESSION, Z_DEFLATED, (15+16), 8, Z_DEFAULT_STRATEGY) != Z_OK) return nil;
-
-    NSMutableData *compressed = [NSMutableData dataWithLength:16384];  // 16K chunks for expansion
-
+    NSMutableData* compressed = [NSMutableData dataWithLength:16384];   // 16K chunks for expansion
     do {
-
-        if (strm.total_out >= [compressed length])
-            [compressed increaseLengthBy: 16384];
-
+        if(strm.total_out >= [compressed length])
+            [compressed increaseLengthBy:16384];
         strm.next_out = [compressed mutableBytes] + strm.total_out;
         strm.avail_out = (unsigned int)([compressed length] - strm.total_out);
-
         deflate(&strm, Z_FINISH);  
-
-    } while (strm.avail_out == 0);
-
+    } while(strm.avail_out == 0);
     deflateEnd(&strm);
 
-    [compressed setLength: strm.total_out];
-    return [NSData dataWithData:compressed];
+    [compressed setLength:strm.total_out];
+    return compressed;
 }
 
 -(void) prepareForFreeze:(NSNotification*) notification
 {
-    //invalidate socket when getting freezed
-    if(_cfsocketout != NULL && CFSocketIsValid(_cfsocketout))
-        CFSocketInvalidate(_cfsocketout);
-    if(_cfsocketout != NULL)
-        CFRelease(_cfsocketout);
-    _cfsocketout = NULL;
+    _connection = NULL;
+}
+
+-(void) createConnectionIfNeeded
+{
+    if(_connection == NULL)
+    {
+        nw_endpoint_t endpoint = nw_endpoint_create_host([[[HelperTools defaultsDB] stringForKey:@"udpLoggerHostname"] cStringUsingEncoding:NSUTF8StringEncoding], [[[HelperTools defaultsDB] stringForKey:@"udpLoggerPort"] cStringUsingEncoding:NSUTF8StringEncoding]);
+        nw_parameters_t parameters = nw_parameters_create_secure_udp(NW_PARAMETERS_DISABLE_PROTOCOL, NW_PARAMETERS_DEFAULT_CONFIGURATION);
+        
+        _connection = nw_connection_create(endpoint, parameters);
+        nw_connection_set_queue(_connection, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0));
+        nw_connection_start(_connection);
+    }
 }
 
 -(void) logMessage:(DDLogMessage*) logMessage
@@ -173,31 +164,16 @@ static NSString* _processID;
     [data appendData:payload.authTag];
     [data appendData:payload.body];
     
-    //calculate remote addr
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_len            = sizeof(addr);
-    addr.sin_family         = AF_INET;
-    addr.sin_port           = htons([[[HelperTools defaultsDB] stringForKey:@"udpLoggerPort"] integerValue]);
-    addr.sin_addr.s_addr    = inet_addr([[[HelperTools defaultsDB] stringForKey:@"udpLoggerHostname"] UTF8String]);
-    
-    if(_cfsocketout == NULL)
-    {
-        _cfsocketout = CFSocketCreate(
-            kCFAllocatorDefault,
-            PF_INET,
-            SOCK_DGRAM,
-            IPPROTO_UDP,
-            kCFSocketNoCallBack,
-            NULL,
-            NULL
-        );
-    }
-    
     //send log via udp
-    CFSocketError error = CFSocketSendData(_cfsocketout, (__bridge CFDataRef)[NSData dataWithBytes:(const UInt8*)&addr length:sizeof(addr)], (__bridge CFDataRef)data, 0);
-    if(error)
-        NSLog(@"MLUDPLogger CFSocketSendData error: %ld", (long)error);
+    [self createConnectionIfNeeded];
+    //the call to dispatch_get_main_queue() is a dummy because we are using DISPATCH_DATA_DESTRUCTOR_DEFAULT which is performed inline
+    nw_connection_send(_connection, dispatch_data_create(data.bytes, data.length, dispatch_get_main_queue(), DISPATCH_DATA_DESTRUCTOR_DEFAULT), NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, true, ^(nw_error_t  _Nullable error) {
+        if(error != NULL)
+        {
+            //NSError* st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(error));
+            NSLog(@"MLUDPLogger error: %@", error);
+        }
+    });
 }
 
 @end

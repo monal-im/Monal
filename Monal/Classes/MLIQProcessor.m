@@ -388,21 +388,25 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         //important xep-0060 support (aka basic support)
         // [features containsObject:@"http://jabber.org/protocol/pubsub#last-published"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#publish"] &&
-        // [features containsObject:@"http://jabber.org/protocol/pubsub#item-ids"] &&
+        [features containsObject:@"http://jabber.org/protocol/pubsub#item-ids"] &&
         // [features containsObject:@"http://jabber.org/protocol/pubsub#create-and-configure"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#create-nodes"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#delete-items"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#delete-nodes"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#persistent-items"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#retrieve-items"] &&
-        // [features containsObject:@"http://jabber.org/protocol/pubsub#config-node"] &&
-        [features containsObject:@"http://jabber.org/protocol/pubsub#auto-create"]
+        [features containsObject:@"http://jabber.org/protocol/pubsub#config-node"] &&
+        [features containsObject:@"http://jabber.org/protocol/pubsub#auto-create"] &&
         //needed for xep-0402 later
-        //[features containsObject:@"http://jabber.org/protocol/pubsub#multi-items"]
-    )
-    {
+        [features containsObject:@"http://jabber.org/protocol/pubsub#multi-items"] &&
+        YES
+    ) {
         DDLogInfo(@"Supports pubsub (pep)");
         account.connectionProperties.supportsPubSub = YES;
+        
+        account.connectionProperties.supportsPubSubMax = NO;
+        if([features containsObject:@"http://jabber.org/protocol/pubsub#config-node-max"])
+            account.connectionProperties.supportsPubSubMax = YES;
     }
     
     if([features containsObject:@"urn:xmpp:push:0"])

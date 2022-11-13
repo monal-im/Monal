@@ -48,7 +48,7 @@
 
 @import AVFoundation;
 
-#define STATE_VERSION 5
+#define STATE_VERSION 7
 #define CONNECT_TIMEOUT 12.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -207,8 +207,8 @@ NSString* const kStanza = @"stanza";
     //we want to get automatic roster name updates (XEP-0172)
     [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:$newHandler(MLPubSubProcessor, rosterNameHandler)];
     
-    //we want to get automatic bookmark updates (XEP-0048)
-    [self.pubsub registerForNode:@"storage:bookmarks" withHandler:$newHandler(MLPubSubProcessor, bookmarksHandler)];
+    //we now support the modern bookmarks protocol (XEP-0402)
+    [self.pubsub registerForNode:@"urn:xmpp:bookmarks:1" withHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler)];
     
     //autodelete messages old enough (first invocation)
     if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
@@ -3259,6 +3259,7 @@ NSString* const kStanza = @"stanza";
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSubMax] forKey:@"supportsPubSubMax"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
@@ -3281,7 +3282,7 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@",
                 self.accountNo,
                 values[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -3295,6 +3296,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
+                self.connectionProperties.supportsPubSubMax,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
                 self->_inCatchup
@@ -3483,6 +3485,12 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
             }
             
+            if([dic objectForKey:@"supportsPubSubMax"])
+            {
+                NSNumber* supportsPubSubMax = [dic objectForKey:@"supportsPubSubMax"];
+                self.connectionProperties.supportsPubSubMax = supportsPubSubMax.boolValue;
+            }
+            
             if([dic objectForKey:@"supportsHTTPUpload"])
             {
                 NSNumber* supportsHTTPUpload = [dic objectForKey:@"supportsHTTPUpload"];
@@ -3534,7 +3542,7 @@ NSString* const kStanza = @"stanza";
                 _cachedStreamFeaturesAfterAuth = [dic objectForKey:@"cachedStreamFeaturesAfterAuth"];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\t_inCatchup=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\t_inCatchup=%@",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -3548,6 +3556,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
+                self.connectionProperties.supportsPubSubMax,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
                 _inCatchup
@@ -3741,6 +3750,7 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.pushEnabled = NO;
     self.connectionProperties.supportsMam2 = NO;
     self.connectionProperties.supportsPubSub = NO;
+    self.connectionProperties.supportsPubSubMax = NO;
     self.connectionProperties.supportsHTTPUpload = NO;
     self.connectionProperties.supportsPing = NO;
     self.connectionProperties.supportsRosterPreApproval = NO;

@@ -189,6 +189,193 @@ $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
     }
 $$
 
+$$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    //type will be "publish", "retract", "purge" or "delete". "publish" and "retract" will have the data dictionary filled with id --> data pairs
+    //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
+    if(![jid isEqualToString:account.connectionProperties.identity.jid])
+    {
+        DDLogWarn(@"Ignoring bookmarks update not coming from our own jid");
+        return;
+    }
+    
+    NSMutableDictionary* ownFavorites = [[NSMutableDictionary alloc] init];
+    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
+        ownFavorites[entry[@"room"]] = entry;
+    
+    //new/updated bookmarks
+    if([type isEqualToString:@"publish"])
+    {
+        //iterate through all conference elements provided
+        for(NSString* itemId in data)
+        {
+            //we ignore the conference name (the name will be taken from the muc itself)
+            //NSString* name = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference@name"];
+            NSString* room = [itemId lowercaseString];
+            NSString* nick = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference/nick#"];
+            NSNumber* autojoin = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference@autojoin|bool"];
+            if(autojoin == nil)
+                autojoin = @NO;     //default value specified in xep
+            
+            //check if this is a new entry with autojoin=true
+            if(ownFavorites[room] == nil && [autojoin boolValue])
+            {
+                DDLogInfo(@"Entering muc '%@' on account %@ because it got added to bookmarks...", room, account.accountNo);
+                //make sure we update our favorites table right away, to counter any race conditions when joining multiple mucs with one bookmarks update
+                if(nick == nil)
+                    nick = [account.mucProcessor calculateNickForMuc:room];
+                //this will record the desired nickname: the mucProcessor will pick that up and use it to join the muc
+                [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];
+                //try to join muc, but don't perform a bookmarks update (this muc came in through a bookmark already)
+                [account.mucProcessor sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:NO];
+            }
+            //check if it is a known entry that changed autojoin to false
+            else if(ownFavorites[room] != nil && ![autojoin boolValue])
+            {
+                DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
+                //delete local favorites entry and leave room afterwards
+                [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+                [account.mucProcessor leave:room withBookmarksUpdate:NO];
+            }
+            //check for nickname changes
+            else if(ownFavorites[room] != nil && nick != nil)
+            {
+                NSString* oldNick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+                if(![nick isEqualToString:oldNick])
+                {
+                    DDLogInfo(@"Updating muc '%@' nick on account %@ in database to nick provided by bookmarks: '%@'...", room, account.accountNo, nick);
+                    
+                    //update muc nickname in database
+                    [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountNo];
+                    [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];        //this will upate the already existing favorites entry
+                    
+                    //rejoin the muc (e.g. change nick)
+                    //we don't have to do a full disco because we are sure this is a real muc and we are joined already
+                    //(only real mucs are part of our local favorites list and this list is joined automatically)
+                    [account.mucProcessor sendJoinPresenceFor:room];
+                }
+            }
+        }
+    }
+    else if([type isEqualToString:@"retract"])
+    {
+        for(NSString* itemId in data)
+        {
+            NSString* room = [itemId lowercaseString];
+            DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
+            //delete local favorites entry and leave room afterwards
+            [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+            [account.mucProcessor leave:room withBookmarksUpdate:NO];
+        }
+    }
+    else
+    {
+        //deleted/purged node (e.g. all bookmarks deleted)
+        //--> remove and leave all mucs
+        for(NSString* room in ownFavorites)
+        {
+            DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
+            //delete local favorites entry and leave room afterwards
+            [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+            [account.mucProcessor leave:room withBookmarksUpdate:NO];
+        }
+    }
+$$
+
+$$class_handler(handleBookarks2FetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    if(!success)
+    {
+        //item-not-found means: no bookmarks in storage --> use an empty data dict
+        if([errorIq check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+            data = @{};
+        else
+        {
+            DDLogWarn(@"Could not fetch bookmarks from pep prior to publishing!");
+            [self handleErrorWithDescription:NSLocalizedString(@"Failed to save groupchat bookmarks", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
+            return;
+        }
+    }
+    
+    NSString* max_items = @"255";       //fallback for servers not supporting "max"
+    if(account.connectionProperties.supportsPubSubMax)
+        max_items = @"max";
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    NSMutableDictionary* ownFavorites = [[NSMutableDictionary alloc] init];
+    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
+        ownFavorites[entry[@"room"]] = entry;
+    
+    for(NSString* itemId in data)
+    {
+        MLXMLNode* item = data[itemId];
+        
+        //we ignore the conference name (the name will be taken from the muc itself)
+        //NSString* name = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference@name"];
+        NSString* room = [itemId lowercaseString];
+        //NSString* nick = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference/nick#"];
+        NSNumber* autojoin = [item findFirst:@"{urn:xmpp:bookmarks:1}conference@autojoin|bool"];
+        if(autojoin == nil)
+            autojoin = @NO;     //default value specified in xep
+        
+        //check if the bookmark exists with autojoin==false and only update the autojoin and nick values, if true
+        if(ownFavorites[room] && ![autojoin boolValue])
+        {
+            DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountNo);
+            
+            //add or update nickname
+            if(![item check:@"nick"])
+                [item addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
+            ((MLXMLNode*)[item findFirst:@"nick"]).data = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+            
+            //update autojoin value to true
+            item.attributes[@"autojoin"] = @"true";
+            
+            //publish this bookmark item again
+            [account.pubsub publishItem:item onNode:@"urn:xmpp:bookmarks:1" withConfigOptions:@{
+                @"pubsub#persist_items": @"true",
+                @"pubsub#access_model": @"whitelist",
+                @"pubsub#max_items": max_items,
+            } andHandler:$newHandler(self, bookmarks2Published, $ID(room))];
+        }
+    }
+        
+    //add all mucs not yet listed in bookmarks
+    NSMutableSet* toAdd = [NSMutableSet setWithArray:[ownFavorites allKeys]];
+    [toAdd  minusSet:[NSSet setWithArray:[data allKeys]]];
+    for(NSString* room in toAdd)
+    {
+        DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
+        [account.pubsub publishItem:
+            [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": room} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"conference" andNamespace:@"urn:xmpp:bookmarks:1" withAttributes:@{
+                    @"autojoin": @"true",
+                } andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:[[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo]],
+                    [[MLXMLNode alloc] initWithElement:@"extensions" withAttributes:@{} andChildren:@[
+                        [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:xmpp:monal.im" withAttributes:@{
+                            @"name": @"Monal",
+                            @"version": infoDict[@"CFBundleShortVersionString"],
+                            @"build": infoDict[@"CFBundleVersion"],
+                        } andChildren:@[] andData:nil]
+                    ] andData:nil]
+                ]andData:nil]
+            ] andData:nil]
+        onNode:@"urn:xmpp:bookmarks:1" withConfigOptions:@{
+            @"pubsub#persist_items": @"true",
+            @"pubsub#access_model": @"whitelist",
+            @"pubsub#max_items": max_items,
+        } andHandler:$newHandler(self, bookmarks2Published, $ID(room))];
+    }
+    
+    //remove all mucs not listed in local favorites table
+    NSMutableSet* toRemove = [NSMutableSet setWithArray:[data allKeys]];
+    [toRemove  minusSet:[NSSet setWithArray:[ownFavorites allKeys]]];
+    for(NSString* room in toRemove)
+    {
+        DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountNo);
+        [account.pubsub retractItemWithId:room onNode:@"urn:xmpp:bookmarks:1" andHandler:$newHandler(self, bookmarks2Retracted, $ID(room))];
+    }
+$$
+
+/*
 $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(![jid isEqualToString:account.connectionProperties.identity.jid])
     {
@@ -289,7 +476,9 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
         [account.mucProcessor leave:room withBookmarksUpdate:NO];
     }
 $$
+*/
 
+/*
 $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(!success)
     {
@@ -417,7 +606,9 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
         @"pubsub#access_model": @"whitelist"
     } andHandler:$newHandler(self, bookmarksPublished)];
 $$
+*/
 
+/*
 $$class_handler(bookmarksPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
     if(!success)
     {
@@ -426,6 +617,27 @@ $$class_handler(bookmarksPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(
         return;
     }
     DDLogDebug(@"Published bookmarks to pep");
+$$
+*/
+
+$$class_handler(bookmarks2Published, $$ID(xmpp*, account), $$ID(NSString*, room), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(!success)
+    {
+        DDLogWarn(@"Could not publish bookmark for muc '%@' to pep!", room);
+        [self handleErrorWithDescription:[NSString stringWithFormat:NSLocalizedString(@"Failed to save bookmark for Group/Channel: %@", @""), room] andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
+        return;
+    }
+    DDLogDebug(@"Published bookmark for muc '%@' to pep", room);
+$$
+
+$$class_handler(bookmarks2Retracted, $$ID(xmpp*, account), $$ID(NSString*, room), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(!success)
+    {
+        DDLogWarn(@"Could not retract bookmark for muc '%@' from pep!", room);
+        [self handleErrorWithDescription:[NSString stringWithFormat:NSLocalizedString(@"Failed to remove bookmark for Group/Channel: %@", @""), room] andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
+        return;
+    }
+    DDLogDebug(@"Retracted bookmark for muc '%@' from pep", room);
 $$
 
 $$class_handler(rosterNamePublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))

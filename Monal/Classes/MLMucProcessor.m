@@ -1028,7 +1028,7 @@ $$
 -(void) updateBookmarks
 {
     DDLogVerbose(@"Updating bookmarks on account %@", _account);
-    [_account.pubsub fetchNode:@"storage:bookmarks" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
+    [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarks2FetchResult)];
 }
 
 -(BOOL) checkIfStillBookmarked:(NSString*) room

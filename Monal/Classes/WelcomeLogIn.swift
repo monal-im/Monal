@@ -246,21 +246,18 @@ struct WelcomeLogIn: View {
                 }
             }
         }
+#if DISABLE_OMEMO
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedCatchup")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
                 if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
                     DispatchQueue.main.async {
-#if DISABLE_OMEMO
                         self.loginComplete = true
                         showSuccessAlert()
-#else
-                        showLoadingOverlay(overlay, headline:NSLocalizedString("Loading omemo bundles: 0 / 0", comment: ""))
-#endif
                     }
                 }
             }
         }
-#if !DISABLE_OMEMO
+#else
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalUpdateBundleFetchStatus")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if(notificationAccountNo.intValue == newAccountNo.intValue) {

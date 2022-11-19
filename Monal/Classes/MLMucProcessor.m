@@ -68,9 +68,14 @@
 
 -(void) setInternalState:(NSDictionary*) state
 {
+    //DDLogVerbose(@"Setting MUC state to: %@", state);
+    
     //ignore state having wrong version code
     if(!state[@"version"] || ![state[@"version"] isEqual:CURRENT_MUC_STATE_VERSION])
+    {
+        DDLogDebug(@"Ignoring MUC state having wrong version: %@ != %@", state[@"version"], CURRENT_MUC_STATE_VERSION);
         return;
+    }
     
     //extract state
     @synchronized(_stateLockObject) {
@@ -86,7 +91,7 @@
 -(NSDictionary*) getInternalState
 {
     @synchronized(_stateLockObject) {
-        return @{
+        NSDictionary* state = @{
             @"version": CURRENT_MUC_STATE_VERSION,
             @"roomFeatures": _roomFeatures,
             @"joining": _joining,
@@ -95,6 +100,8 @@
             @"noUpdateBookmarks": _noUpdateBookmarks,
             @"hasFetchedBookmarks": @(_hasFetchedBookmarks),
         };
+        //DDLogVerbose(@"Returning MUC state: %@", state);
+        return state;
     }
 }
 
@@ -104,12 +111,18 @@
     //NOTE: this event won't be called for smacks resumes!
     if(_account == ((xmpp*)notification.object))
     {
-        _roomFeatures = [[NSMutableDictionary alloc] init];
-        _joining = [[NSMutableSet alloc] init];
-        //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
-        
-        //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
-        _hasFetchedBookmarks = NO;
+        @synchronized(_stateLockObject) {
+            _roomFeatures = [[NSMutableDictionary alloc] init];
+            _joining = [[NSMutableSet alloc] init];
+            //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
+            
+            //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
+            _hasFetchedBookmarks = NO;
+        }
+            
+        //join MUCs from (current) muc_favorites db, the pending bookmarks fetch will join the remaining currently unknown mucs
+        for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
+            [self join:entry[@"room"]];
     }
 }
 

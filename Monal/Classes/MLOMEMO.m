@@ -398,9 +398,9 @@ $$
     DDLogVerbose(@"Own devicelist for account %@ is now: %@", self.account, self.ownDeviceList);
     
     //make sure to add our own deviceid to the devicelist if it's not yet there
-    if(![self.ownDeviceList containsObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]])
+    if(![self.ownDeviceList containsObject:[NSNumber numberWithUnsignedInt:self.monalSignalStore.deviceid]])
     {
-        [self.ownDeviceList addObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]];
+        [self.ownDeviceList addObject:[NSNumber numberWithUnsignedInt:self.monalSignalStore.deviceid]];
         //generate new prekeys (piggyback the prekey refill onto the bundle push already needed because our device was unknown before)
         //publishing our prekey bundle must be done BEFORE publishing a new devicelist containing our deviceid
         DDLogDebug(@"Publishing own OMEMO bundle...");

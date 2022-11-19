@@ -3795,10 +3795,6 @@ NSString* const kStanza = @"stanza";
     }
     
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
-    
-    //join MUCs from muc_favorites db
-    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
-        [self.mucProcessor join:entry[@"room"]];
 }
 
 -(void) addReconnectionHandler:(MLHandler*) handler

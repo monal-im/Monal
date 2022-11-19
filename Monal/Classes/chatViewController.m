@@ -673,7 +673,7 @@ enum msgSentState {
     [self updateNavBarLastInteractionLabel:nil];
     [self displayEncryptionStateInUI];
 
-    [self updateBackground:NO];
+    [self handleBackgroundChanged];
 
     self.placeHolderText.text = [NSString stringWithFormat:NSLocalizedString(@"Message from %@", @""), self.jid];
     // Load message draft from db
@@ -798,28 +798,13 @@ enum msgSentState {
 
 -(void) handleBackgroundChanged
 {
-    [self updateBackground:YES];
-}
-
--(void) updateBackground:(BOOL) forceReload
-{
-    BOOL backgrounds = [[HelperTools defaultsDB] boolForKey:@"ChatBackgrounds"];
-
-    if(backgrounds){
-        self.backgroundImage.hidden = NO;
-        NSString* imageName = [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
-        if(imageName)
-        {
-            if([imageName isEqualToString:@"CUSTOM"])
-            {
-                self.backgroundImage.image = [[MLImageManager sharedInstance] getBackground:forceReload];
-            } else  {
-                self.backgroundImage.image = [UIImage imageNamed:imageName];
-            }
-        }
-    } else {
-        self.backgroundImage.hidden = YES;
-    }
+    DDLogVerbose(@"Loading background image for %@", self.contact);
+    self.backgroundImage.image = [[MLImageManager sharedInstance] getBackgroundFor:self.contact];
+    //use default background if this contact does not have its own
+    if(self.backgroundImage.image == nil)
+        self.backgroundImage.image = [[MLImageManager sharedInstance] getBackgroundFor:nil];
+    self.backgroundImage.hidden = self.backgroundImage.image == nil;
+    DDLogVerbose(@"Background is now: %@", self.backgroundImage.image);
 }
 
 #pragma mark rotation

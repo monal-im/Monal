@@ -68,9 +68,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     // on upgrade this one needs to be set to yes. Can be removed later.
     [self upgradeBoolUserSettingsIfUnset:@"ShowImages" toDefault:YES];
 
-    // upgrade ChatBackgrounds
-    [self upgradeBoolUserSettingsIfUnset:@"ChatBackgrounds" toDefault:NO];
-
     [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
 
     // upgrade ShowGeoLocation
@@ -99,12 +96,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerHostname" toDefault:@""];
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerPort" toDefault:@""];
-
-    // upgrade ASCII wallpaper name
-    if([[[HelperTools defaultsDB] stringForKey:@"BackgroundImage"] isEqualToString:@"Tie_My_Boat_by_Ray_García"] || [[HelperTools defaultsDB] stringForKey:@"BackgroundImage"] == nil) {
-        [[HelperTools defaultsDB] setObject:@"Tie_My_Boat_by_Ray_Garcia" forKey:@"BackgroundImage"];
-    }
-
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerKey" toDefault:@""];
 
     // upgrade Message Settings / Privacy
@@ -135,6 +126,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     // add default pushserver
     [self upgradeObjectUserSettingsIfUnset:@"selectedPushServer" toDefault:[HelperTools getSelectedPushServerBasedOnLocale]];
+    
+    //upgrade background image settings
+    NSString* bgImage = [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
+    //image was selected, but it was no custom image --> remove it
+    if(bgImage != nil && [@"CUSTOM" isEqualToString:bgImage])
+        [self removeObjectUserSettingsIfSet:@"BackgroundImage"];
+    [self removeObjectUserSettingsIfSet:@"ChatBackgrounds"];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

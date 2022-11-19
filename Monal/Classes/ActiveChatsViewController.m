@@ -78,7 +78,6 @@ static NSMutableSet* _smacksWarningDisplayed;
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
-    [nc addObserver:self selector:@selector(handleBackgroundChanged) name:kMonalBackgroundChanged object:nil];
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"ContactCell"];
     
@@ -249,13 +248,6 @@ static NSMutableSet* _smacksWarningDisplayed;
 
     // contact.statusMessage = newMessage;
     [self insertOrMoveContact:contact completion:nil];
-}
-
-// the chat background image is cached in the MLImageManager
-// on iphones all background change event will miss the chatView -> reset the image here
--(void) handleBackgroundChanged
-{
-    [[MLImageManager sharedInstance] resetBackgroundImage];
 }
 
 -(void) insertOrMoveContact:(MLContact*) contact completion:(void (^ _Nullable)(BOOL finished)) completion

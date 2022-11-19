@@ -75,6 +75,10 @@ struct ContactDetails: View {
                         }
                     }
                 }
+                
+                NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact, delegate:delegate))) {
+                    Text("Change Contact Background")
+                }
             }
 
             Section { // the destructive section...

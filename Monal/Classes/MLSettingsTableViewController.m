@@ -329,9 +329,11 @@ enum DummySettingsRows {
                     [self showDetailViewController:notificationSettingsController sender:self];
                     break;
                 }
-                case BackgroundsRow:
-                    [self performSegueWithIdentifier:@"showBackgrounds" sender:self];
+                case BackgroundsRow: {
+                    UIViewController* backgroundSettingsController = [[SwiftuiInterface new] makeBackgroundSettings:nil];
+                    [self showDetailViewController:backgroundSettingsController sender:self];
                     break;
+                }
                 case SoundsRow:
                     [self performSegueWithIdentifier:@"showSounds" sender:self];
                     break;

@@ -205,7 +205,7 @@
             }
             else if(avatarHash == nil && currentHash != nil && ![currentHash isEqualToString:@""])
             {
-                [[MLImageManager sharedInstance] setIconForContact:presenceNode.fromUser andAccount:_account.accountNo WithData:nil];
+                [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo] WithData:nil];
                 [[DataLayer sharedInstance] setAvatarHash:@"" forContact:presenceNode.fromUser andAccount:_account.accountNo];
                 //delete cache to make sure the image will be regenerated
                 [[MLImageManager sharedInstance] purgeCacheForContact:presenceNode.fromUser andAccount:_account.accountNo];
@@ -966,7 +966,7 @@ $$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, accoun
     
     if(deleteAvatar)
     {
-        [[MLImageManager sharedInstance] setIconForContact:iqNode.fromUser andAccount:_account.accountNo WithData:nil];
+        [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo] WithData:nil];
         [[DataLayer sharedInstance] setAvatarHash:@"" forContact:iqNode.fromUser andAccount:_account.accountNo];
         //delete cache to make sure the image will be regenerated
         [[MLImageManager sharedInstance] purgeCacheForContact:iqNode.fromUser andAccount:_account.accountNo];
@@ -993,7 +993,7 @@ $$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, accoun
         if(![HelperTools isAppExtension] || image.size.width * image.size.height < 600 * 600)
         {
             NSData* imageData = [HelperTools resizeAvatarImage:image withCircularMask:YES toMaxBase64Size:256000];
-            [[MLImageManager sharedInstance] setIconForContact:iqNode.fromUser andAccount:_account.accountNo WithData:imageData];
+            [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo] WithData:imageData];
             [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:iqNode.fromUser andAccount:_account.accountNo];
             //delete cache to make sure the image will be regenerated
             [[MLImageManager sharedInstance] purgeCacheForContact:iqNode.fromUser andAccount:_account.accountNo];

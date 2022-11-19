@@ -22,8 +22,6 @@
  */
 @property (nonatomic, strong) UIImage* _Nullable outboundImage;
 
-@property (nonatomic, strong) UIImage* _Nullable chatBackground;
-
 
 +(MLImageManager* _Nonnull) sharedInstance;
 -(void) cleanupHashes;
@@ -32,9 +30,7 @@
 /**
  Takes the string from the xmpp icon vcard info and stores it in an appropropriate place. 
  */
--(void) setIconForContact:(NSString* _Nonnull) contact andAccount:(NSNumber* _Nonnull) accountNo WithData:(NSData* _Nullable) data ;
-
--(BOOL) saveBackgroundImageData:(NSData* _Nonnull) data;
+-(void) setIconForContact:(MLContact* _Nonnull) contact WithData:(NSData* _Nullable) data ;
 
 /**
  retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
@@ -43,9 +39,8 @@
 -(UIImage* _Nullable) getIconForContact:(MLContact* _Nonnull) contact;
 +(UIImage* _Nonnull) circularImage:(UIImage* _Nonnull) image;
 
--(UIImage* _Nullable) getBackground:(BOOL) forceReload;
-
--(void) resetBackgroundImage;
+-(void) saveBackgroundImageData:(NSData* _Nullable) data forContact:(MLContact* _Nullable) contact;
+-(UIImage* _Nullable) getBackgroundFor:(MLContact* _Nullable) contact;
 
 /**
  Purge cache in the event of  a memory warning

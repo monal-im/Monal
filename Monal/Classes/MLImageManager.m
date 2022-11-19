@@ -16,6 +16,7 @@
 @interface MLImageManager()
 @property (nonatomic, strong) NSCache* iconCache;
 @property (nonatomic, strong) NSString* documentsDirectory;
+@property (nonatomic, strong) NSCache* backgroundCache;
 @end
 
 @implementation MLImageManager
@@ -75,6 +76,7 @@
 {
     self = [super init];
     self.iconCache = [[NSCache alloc] init];
+    self.backgroundCache = [[NSCache alloc] init];
     
     NSFileManager* fileManager = [NSFileManager defaultManager];
     
@@ -105,11 +107,13 @@
 -(void) purgeCache
 {
     [self.iconCache removeAllObjects];
+    [self.backgroundCache removeAllObjects];
 }
 
 -(void) purgeCacheForContact:(NSString*) contact andAccount:(NSNumber*) accountNo
 {
-    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@",accountNo, contact]];
+    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@", accountNo, contact]];
+    [self resetCachedBackgroundImageForContact:[MLContact createContactFromJid:contact andAccountNo:accountNo]];
 }
 
 -(void) cleanupHashes
@@ -121,7 +125,7 @@
     {
         NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
         writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
-        writablePath = [writablePath stringByAppendingPathComponent:[self fileNameforContact:contact.contactJid]];
+        writablePath = [writablePath stringByAppendingPathComponent:[self fileNameforContact:contact]];
         NSString* hash = [[DataLayer sharedInstance] getAvatarHashForContact:contact.contactJid andAccount:contact.accountId];
         BOOL hasHash = ![@"" isEqualToString:hash];
         
@@ -209,12 +213,12 @@
     }];
 }
 
--(NSString*) fileNameforContact:(NSString*) contact
+-(NSString*) fileNameforContact:(MLContact*) contact
 {
-    return [NSString stringWithFormat:@"%@.png", [contact lowercaseString]];;
+    return [NSString stringWithFormat:@"%@_%@.png", contact.accountId.stringValue, [contact.contactJid lowercaseString]];;
 }
 
--(void) setIconForContact:(NSString*) contact andAccount:(NSNumber*) accountNo WithData:(NSData* _Nullable) data
+-(void) setIconForContact:(MLContact*) contact WithData:(NSData* _Nullable) data
 {
     //documents directory/buddyicons/account no/contact
     
@@ -223,7 +227,7 @@
     NSFileManager* fileManager = [NSFileManager defaultManager];
     
     NSString *writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-    writablePath = [writablePath stringByAppendingPathComponent:accountNo.stringValue];
+    writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
     NSError* error;
     [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
     [HelperTools configureFileProtectionFor:writablePath];
@@ -244,7 +248,7 @@
     }
     
     //remove from cache if its there
-    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@", accountNo, contact]];
+    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@", contact.accountId, contact]];
     
 }
 
@@ -255,7 +259,7 @@
 
 -(UIImage*) getIconForContact:(MLContact*) contact withCompletion:(void (^)(UIImage *))completion
 {
-    NSString* filename = [self fileNameforContact:contact.contactJid];
+    NSString* filename = [self fileNameforContact:contact];
     
     __block UIImage* toreturn = nil;
     //get filname from DB
@@ -316,35 +320,80 @@
 }
 
 
--(BOOL) saveBackgroundImageData:(NSData*) data
+-(void) saveBackgroundImageData:(NSData* _Nullable) data forContact:(MLContact* _Nullable) contact
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSString* writablePath;
+    if(contact != nil)
+    {
+        NSString* filename = [self fileNameforContact:contact];
+        writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"backgrounds"];
+        
+        NSError* error;
+        [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
+        [HelperTools configureFileProtectionFor:writablePath];
+        
+        writablePath = [writablePath stringByAppendingPathComponent:filename];
+        if([fileManager fileExistsAtPath:writablePath])
+            [fileManager removeItemAtPath:writablePath error:nil];
+    }
+    else
+    {
+        writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
+        if([fileManager fileExistsAtPath:writablePath])
+            [fileManager removeItemAtPath:writablePath error:nil];
+    }
+    [self resetCachedBackgroundImageForContact:contact];
     
-    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString* documentsDirectory = [paths objectAtIndex:0];
-    NSString* writablePath = [documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
+    //file was deleted above, just don't create it again
+    if(data != nil)
+    {
+        DDLogVerbose(@"Writing background image data %@ for %@ to '%@'...", data, contact, writablePath);
+        [data writeToFile:writablePath atomically:YES];
+        [HelperTools configureFileProtectionFor:writablePath];
+    }
     
-    if([fileManager fileExistsAtPath:writablePath])
-        [fileManager removeItemAtPath:writablePath error:nil];
-    
-    return [data writeToFile:writablePath atomically:YES];
+    //don't queue this notification because it should be handled immediately
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalBackgroundChanged object:contact];
 }
 
--(UIImage*) getBackground:(BOOL) forceReload
+-(UIImage* _Nullable) getBackgroundFor:(MLContact* _Nullable) contact
 {
-    //use cached image if possible
-    if(self.chatBackground && forceReload == NO)
-        return self.chatBackground;
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSString* filename = @"background.jpg";
+    if(contact != nil)
+        filename = [self fileNameforContact:contact];
+    UIImage* img = [self.backgroundCache objectForKey:filename];
+    if(img != nil)
+        return img;
     
-    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString* documentsDirectory = [paths objectAtIndex:0];
-    NSString* writablePath = [documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
-    return self.chatBackground = [UIImage imageWithContentsOfFile:writablePath];
+    NSString* writablePath;
+    if(contact != nil)
+    {
+        writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"backgrounds"];
+        writablePath = [writablePath stringByAppendingPathComponent:filename];
+        if(![fileManager fileExistsAtPath:writablePath])
+            return nil;
+    }
+    else
+    {
+        writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
+        if(![fileManager fileExistsAtPath:writablePath])
+            return nil;
+    }
+    DDLogVerbose(@"Loading background image for %@ from '%@'...", contact, writablePath);
+    img = [UIImage imageWithContentsOfFile:writablePath];
+    DDLogVerbose(@"Got image: %@", img);
+    [self.backgroundCache setObject:img forKey:filename];
+    return img;
 }
 
--(void) resetBackgroundImage
+-(void) resetCachedBackgroundImageForContact:(MLContact* _Nullable) contact
 {
-    self.chatBackground = nil;
+    NSString* filename = @"background.jpg";
+    if(contact != nil)
+        filename = [self fileNameforContact:contact];
+    [self.backgroundCache removeObjectForKey:filename];
 }
 
 @end

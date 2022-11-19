@@ -42,7 +42,7 @@ $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(
             if(!avatarHash)     //the user disabled his avatar
             {
                 DDLogInfo(@"User '%@' disabled his avatar", jid);
-                [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:nil];
+                [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountNo:account.accountNo] WithData:nil];
                 [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
                 //delete cache to make sure the image will be regenerated
                 [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
@@ -77,7 +77,7 @@ $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(
     else
     {
         DDLogInfo(@"User %@ disabled his avatar", jid);
-        [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:nil];
+        [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountNo:account.accountNo] WithData:nil];
         [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
         //delete cache to make sure the image will be regenerated
         [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
@@ -115,7 +115,7 @@ $$class_handler(handleAvatarFetchResult, $$ID(xmpp*, account), $$ID(NSString*, j
         if(![HelperTools isAppExtension] || image.size.width * image.size.height < 600 * 600)
         {
             NSData* imageData = [HelperTools resizeAvatarImage:image withCircularMask:YES toMaxBase64Size:256000];
-            [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:imageData];
+            [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountNo:account.accountNo] WithData:imageData];
             [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
             //delete cache to make sure the image will be regenerated
             [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];

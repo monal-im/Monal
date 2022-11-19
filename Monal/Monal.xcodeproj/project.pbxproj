@@ -38,7 +38,6 @@
 		2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */; };
 		264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLSwitchCell.xib */; };
 		264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 264DCF9B23E11483004105CE /* MLNewViewController.m */; };
-		265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */; };
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
@@ -137,6 +136,7 @@
 		840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */; };
 		8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */ = {isa = PBXBuildFile; fileRef = 8420EA9A2915E4FE0038FF40 /* OmemoState.h */; };
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
+		8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8441EFF82921B53500E851E9 /* BackgroundSettings.swift */; };
 		844EEC6D28E718DB00CB5EF9 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
@@ -348,8 +348,6 @@
 		264DCF9B23E11483004105CE /* MLNewViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNewViewController.m; sourceTree = "<group>"; };
 		264E34591787BAB100BC7BD0 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		264E345A1787BAB100BC7BD0 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
-		265BD14E21A2D15600A59251 /* MLBackgroundSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBackgroundSettings.h; sourceTree = "<group>"; };
-		265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBackgroundSettings.m; sourceTree = "<group>"; };
 		2661100B238F08820030A4EE /* MLXMPPServer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPServer.h; sourceTree = "<group>"; };
 		2661100C238F08820030A4EE /* MLXMPPServer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLXMPPServer.m; sourceTree = "<group>"; };
 		26611010238F08980030A4EE /* MLXMPPIdentity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPIdentity.h; sourceTree = "<group>"; };
@@ -552,6 +550,7 @@
 		840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueCell.h; sourceTree = "<group>"; };
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
+		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
 		848904A8289C82C30097E19C /* SCRAM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SCRAM.m; sourceTree = "<group>"; };
 		848904AA289C82DB0097E19C /* SCRAM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SCRAM.h; sourceTree = "<group>"; };
 		849A53E3287135B2007E941A /* MLVoIPProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLVoIPProcessor.m; path = Classes/MLVoIPProcessor.m; sourceTree = SOURCE_ROOT; };
@@ -954,8 +953,6 @@
 				26B51C4718654D98002134C3 /* LogViewController.m */,
 				2644D4971FF29E5600F46AB5 /* MLSettingsTableViewController.h */,
 				2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */,
-				265BD14E21A2D15600A59251 /* MLBackgroundSettings.h */,
-				265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */,
 				26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */,
 				26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */,
 				3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */,
@@ -965,6 +962,7 @@
 				384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */,
 				E8CF9CBF26249640001A1952 /* MLSettingsAboutViewController.h */,
 				E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */,
+				8441EFF82921B53500E851E9 /* BackgroundSettings.swift */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -1986,10 +1984,10 @@
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
 				2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */,
-				265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */,
 				3D5A91422842B4AE008CE57E /* MemberList.swift in Sources */,
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
+				8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */,
 				840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */,

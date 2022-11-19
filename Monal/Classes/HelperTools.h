@@ -42,6 +42,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSString*) getSelectedPushServerBasedOnLocale;
 +(NSDictionary<NSString*, NSString*>*) getAvailablePushServers;
 
++(NSURL*) getFilemanagerURLForPathComponents:(NSArray*) components;
 +(NSData*) serializeObject:(id) obj;
 +(id) unserializeData:(NSData*) data;
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request;

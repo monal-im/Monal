@@ -65,14 +65,12 @@ struct ContactDetails: View {
                     }
                 }
                 
-                let documentsUrl = FileManager.default.urls(for:.documentDirectory, in:.userDomainMask).first!
-                if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID:contact.accountId), let sharedUrl = URL(string: "shareddocuments://\(documentsUrl.path)/\(account.connectionProperties.identity.jid)/\(contact.contactDisplayName as String)") {
-                    if UIApplication.shared.canOpenURL(sharedUrl) {
-                        Button(action: {
-                                UIApplication.shared.open(sharedUrl, options:[:])
-                        }) {
-                            Text("Show shared Media and Files")
-                        }
+                let sharedUrl = HelperTools.getFilemanagerURL(forPathComponents:[MLXMPPManager.sharedInstance().getConnectedAccount(forID:contact.accountId)!.connectionProperties.identity.jid, contact.contactDisplayName as String])
+                if UIApplication.shared.canOpenURL(sharedUrl) {
+                    Button(action: {
+                            UIApplication.shared.open(sharedUrl, options:[:])
+                    }) {
+                        Text("Show shared Media and Files")
                     }
                 }
                 

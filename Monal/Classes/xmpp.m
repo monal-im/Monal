@@ -1540,7 +1540,7 @@ NSString* const kStanza = @"stanza";
     }
 }
 
--(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
+-(BOOL) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
     NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
     @synchronized(_stateLockObject) {
@@ -1560,7 +1560,7 @@ NSString* const kStanza = @"stanza";
                 [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
             ] andData:nil];
             [self reconnectWithStreamError:streamError];
-            return;
+            return YES;
         }
         //stanza counting bugs on the server are fatal
         if([hvalue unsignedIntValue] < [self.lastHandledOutboundStanza unsignedIntValue])
@@ -1574,7 +1574,7 @@ NSString* const kStanza = @"stanza";
                 [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
             ] andData:nil];
             [self reconnectWithStreamError:streamError];
-            return;
+            return YES;
         }
         
         self.lastHandledOutboundStanza = hvalue;
@@ -1628,6 +1628,8 @@ NSString* const kStanza = @"stanza";
         DDLogVerbose(@"Now calling smacks ack handler: %@", dic);
         ((monal_void_block_t)dic[@"handler"])();
     }
+    
+    return NO;
 }
 
 -(void) requestSMAck:(BOOL) force
@@ -2241,6 +2243,7 @@ NSString* const kStanza = @"stanza";
         {
             //we landed here because smacks resume failed
             
+            __block BOOL error = NO;
             self.resuming = NO;
             @synchronized(_stateLockObject) {
                 //invalidate stream id
@@ -2249,13 +2252,17 @@ NSString* const kStanza = @"stanza";
                 NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
                 DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", h);
                 if(h!=nil)
-                    [self removeAckedStanzasFromQueue:h];
+                    error = [self removeAckedStanzasFromQueue:h];
                 //persist these changes
                 [self persistState];
             }
 
-            //bind  a new resource like normal on failed resume (supportsSM3 is still YES here but switches to NO on failed enable later on, if necessary)
-            [self bindResource:self.connectionProperties.identity.resource];
+            //don't try to bind, if removeAckedStanzasFromQueue returned an error (it will trigger a reconnect in these cases)
+            if(!error)
+            {
+                //bind  a new resource like normal on failed resume (supportsSM3 is still YES here but switches to NO on failed enable later on, if necessary)
+                [self bindResource:self.connectionProperties.identity.resource];
+            }
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound && !self.resuming)
         {

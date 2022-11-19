@@ -190,6 +190,12 @@ $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
 $$
 
 $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    if(!account.connectionProperties.supportsBookmarksCompat)
+    {
+        DDLogWarn(@"Ignoring new XEP-0402 bookmarks, server does not support syncing between XEP-0048 and XEP-0402!");
+        return;
+    }
+    
     //type will be "publish", "retract", "purge" or "delete". "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
     if(![jid isEqualToString:account.connectionProperties.identity.jid])
@@ -282,6 +288,12 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
 $$
 
 $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    if(!account.connectionProperties.supportsBookmarksCompat)
+    {
+        DDLogWarn(@"Ignoring new XEP-0402 bookmarks, server does not support syncing between XEP-0048 and XEP-0402!");
+        return;
+    }
+    
     if(!success)
     {
         //item-not-found means: no bookmarks in storage --> use an empty data dict
@@ -375,8 +387,45 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     }
 $$
 
-/*
+$$class_handler(bookmarks2Published, $$ID(xmpp*, account), $$ID(NSString*, room), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(!account.connectionProperties.supportsBookmarksCompat)
+    {
+        DDLogWarn(@"Ignoring new XEP-0402 bookmarks, server does not support syncing between XEP-0048 and XEP-0402!");
+        return;
+    }
+    
+    if(!success)
+    {
+        DDLogWarn(@"Could not publish bookmark for muc '%@' to pep!", room);
+        [self handleErrorWithDescription:[NSString stringWithFormat:NSLocalizedString(@"Failed to save bookmark for Group/Channel: %@", @""), room] andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
+        return;
+    }
+    DDLogDebug(@"Published bookmark for muc '%@' to pep", room);
+$$
+
+$$class_handler(bookmarks2Retracted, $$ID(xmpp*, account), $$ID(NSString*, room), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(!account.connectionProperties.supportsBookmarksCompat)
+    {
+        DDLogWarn(@"Ignoring new XEP-0402 bookmarks, server does not support syncing between XEP-0048 and XEP-0402!");
+        return;
+    }
+    
+    if(!success)
+    {
+        DDLogWarn(@"Could not retract bookmark for muc '%@' from pep!", room);
+        [self handleErrorWithDescription:[NSString stringWithFormat:NSLocalizedString(@"Failed to remove bookmark for Group/Channel: %@", @""), room] andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
+        return;
+    }
+    DDLogDebug(@"Retracted bookmark for muc '%@' from pep", room);
+$$
+
 $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    if(account.connectionProperties.supportsBookmarksCompat)
+    {
+        DDLogInfo(@"Ignoring old XEP-0048 bookmarks, server supports syncing between XEP-0048 and XEP-0402...");
+        return;
+    }
+    
     if(![jid isEqualToString:account.connectionProperties.identity.jid])
     {
         DDLogWarn(@"Ignoring bookmarks update not coming from our own jid");
@@ -476,10 +525,14 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
         [account.mucProcessor leave:room withBookmarksUpdate:NO];
     }
 $$
-*/
 
-/*
 $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    if(account.connectionProperties.supportsBookmarksCompat)
+    {
+        DDLogInfo(@"Ignoring old XEP-0048 bookmarks, server supports syncing between XEP-0048 and XEP-0402...");
+        return;
+    }
+    
     if(!success)
     {
         //item-not-found means: no bookmarks in storage --> use an empty data dict
@@ -606,10 +659,14 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
         @"pubsub#access_model": @"whitelist"
     } andHandler:$newHandler(self, bookmarksPublished)];
 $$
-*/
 
-/*
 $$class_handler(bookmarksPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(account.connectionProperties.supportsBookmarksCompat)
+    {
+        DDLogInfo(@"Ignoring old XEP-0048 bookmarks, server supports syncing between XEP-0048 and XEP-0402...");
+        return;
+    }
+    
     if(!success)
     {
         DDLogWarn(@"Could not publish bookmarks to pep!");
@@ -617,27 +674,6 @@ $$class_handler(bookmarksPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(
         return;
     }
     DDLogDebug(@"Published bookmarks to pep");
-$$
-*/
-
-$$class_handler(bookmarks2Published, $$ID(xmpp*, account), $$ID(NSString*, room), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
-    if(!success)
-    {
-        DDLogWarn(@"Could not publish bookmark for muc '%@' to pep!", room);
-        [self handleErrorWithDescription:[NSString stringWithFormat:NSLocalizedString(@"Failed to save bookmark for Group/Channel: %@", @""), room] andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
-        return;
-    }
-    DDLogDebug(@"Published bookmark for muc '%@' to pep", room);
-$$
-
-$$class_handler(bookmarks2Retracted, $$ID(xmpp*, account), $$ID(NSString*, room), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
-    if(!success)
-    {
-        DDLogWarn(@"Could not retract bookmark for muc '%@' from pep!", room);
-        [self handleErrorWithDescription:[NSString stringWithFormat:NSLocalizedString(@"Failed to remove bookmark for Group/Channel: %@", @""), room] andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
-        return;
-    }
-    DDLogDebug(@"Retracted bookmark for muc '%@' from pep", room);
 $$
 
 $$class_handler(rosterNamePublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))

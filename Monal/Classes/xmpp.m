@@ -48,7 +48,7 @@
 
 @import AVFoundation;
 
-#define STATE_VERSION 7
+#define STATE_VERSION 8
 #define CONNECT_TIMEOUT 12.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -205,6 +205,11 @@ NSString* const kStanza = @"stanza";
     
     //we want to get automatic roster name updates (XEP-0172)
     [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:$newHandler(MLPubSubProcessor, rosterNameHandler)];
+    
+    //we want to get automatic bookmark updates (XEP-0048)
+    //this will only be used/handled, if the account disco feature urn:xmpp:bookmarks:1#compat-pep is not set by the server and ignored otherwise
+    //(it will be automatically headline-pushed nevertheless --> TODO: remove this once all modern servers support XEP-0402 compat)
+    [self.pubsub registerForNode:@"storage:bookmarks" withHandler:$newHandler(MLPubSubProcessor, bookmarksHandler)];
     
     //we now support the modern bookmarks protocol (XEP-0402)
     [self.pubsub registerForNode:@"urn:xmpp:bookmarks:1" withHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler)];
@@ -3253,6 +3258,7 @@ NSString* const kStanza = @"stanza";
             [values setObject:self->_runningMamQueries forKey:@"runningMamQueries"];
             [values setObject:[NSNumber numberWithBool:self->_loggedInOnce] forKey:@"loggedInOnce"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBookmarksCompat] forKey:@"supportsBookmarksCompat"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
@@ -3281,7 +3287,7 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@",
                 self.accountNo,
                 values[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -3298,7 +3304,8 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsPubSubMax,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
-                self->_inCatchup
+                self.connectionProperties.supportsBookmarksCompat,
+                self->_inCatchup,
             );
             DDLogVerbose(@"%@ --> realPersistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
@@ -3454,6 +3461,12 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.usingCarbons2 = carbonsNumber.boolValue;
             }
             
+            if([dic objectForKey:@"supportsBookmarksCompat"])
+            {
+                NSNumber* compatNumber = [dic objectForKey:@"supportsBookmarksCompat"];
+                self.connectionProperties.supportsBookmarksCompat = compatNumber.boolValue;
+            }
+            
             if([dic objectForKey:@"supportsPush"])
             {
                 NSNumber* pushNumber = [dic objectForKey:@"supportsPush"];
@@ -3541,7 +3554,7 @@ NSString* const kStanza = @"stanza";
                 _cachedStreamFeaturesAfterAuth = [dic objectForKey:@"cachedStreamFeaturesAfterAuth"];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\t_inCatchup=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -3558,7 +3571,8 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsPubSubMax,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
-                _inCatchup
+                self.connectionProperties.supportsBookmarksCompat,
+                self->_inCatchup,
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -3743,6 +3757,7 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.conferenceServer = nil;
     self.connectionProperties.usingCarbons2 = NO;
     self.connectionProperties.supportsPush = NO;
+    self.connectionProperties.supportsBookmarksCompat = NO;
     self.connectionProperties.pushEnabled = NO;
     self.connectionProperties.supportsMam2 = NO;
     self.connectionProperties.supportsPubSub = NO;

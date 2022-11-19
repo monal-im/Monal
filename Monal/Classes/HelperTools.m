@@ -148,6 +148,16 @@ void swizzle(Class c, SEL orig, SEL new)
     };
 }
 
++(NSURL*) getFilemanagerURLForPathComponents:(NSArray*) components
+{
+    NSURL* sharedUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+    for(NSString* component in components)
+        sharedUrl = [sharedUrl URLByAppendingPathComponent:component];
+    NSURLComponents* urlComponents = [NSURLComponents componentsWithURL:sharedUrl resolvingAgainstBaseURL:NO];
+    urlComponents.scheme = @"shareddocuments";
+    return urlComponents.URL;
+}
+
 +(NSData*) serializeObject:(id) obj
 {
     NSError* error;

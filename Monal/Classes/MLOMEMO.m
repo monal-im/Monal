@@ -615,6 +615,15 @@ $$
         return;
     } while(++processedKeys < preKeyIds.count);
     DDLogError(@"Could not import a single prekey from bundle for rid %@ (tried %lu keys)", rid, processedKeys);
+    //TODO: should we blacklist this device id?
+    @synchronized(self.state.queuedSessionRepairs) {
+        //remove this jid-rid combinations from queuedSessionRepairs
+        if(self.state.queuedSessionRepairs[jid] != nil)
+        {
+            DDLogDebug(@"Removing deviceid %@ on jid %@ from queuedSessionRepairs...", rid, jid);
+            [self.state.queuedSessionRepairs[jid] removeObject:rid];
+        }
+    }
 }
 
 -(void) rebuildSessionWithJid:(NSString*) jid forRid:(NSNumber*) rid

@@ -131,8 +131,8 @@
     //this event will be called as soon as mam OR smacks catchup on our account is done, it does not wait for muc mam catchups!
     if(_account == ((xmpp*)notification.object))
     {
-        //fake incoming bookmarks push by pulling all bookmarks 2 items
-        if(!_hasFetchedBookmarks)
+        //fake incoming bookmarks push by pulling all bookmarks2 items (but only if we want to use bookmarks2 instead of old-style boommarks)
+        if(!_hasFetchedBookmarks && _account.connectionProperties.supportsBookmarksCompat)
             [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler, $ID(type, @"publish"))];
     }
 }
@@ -1071,7 +1071,12 @@ $$
 -(void) updateBookmarks
 {
     DDLogVerbose(@"Updating bookmarks on account %@", _account);
-    [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookmarks2FetchResult)];
+    //use bookmarks2, if server supports syncing between XEP-0048 and XEP-0402 bookmarks
+    //use old-style XEP-0048 bookmarks, if not
+    if(_account.connectionProperties.supportsBookmarksCompat)
+        [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookmarks2FetchResult)];
+    else
+        [_account.pubsub fetchNode:@"storage:bookmarks" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
 }
 
 -(BOOL) checkIfStillBookmarked:(NSString*) room

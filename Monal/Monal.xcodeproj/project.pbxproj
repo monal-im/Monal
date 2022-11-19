@@ -2487,7 +2487,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 5.3.4;
+				MARKETING_VERSION = 5.4;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
@@ -2620,7 +2620,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.3.4;
+				MARKETING_VERSION = 5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -2654,7 +2654,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.3.4;
+				MARKETING_VERSION = 5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -2688,7 +2688,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.3.4;
+				MARKETING_VERSION = 5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -2768,7 +2768,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 5.3.4;
+				MARKETING_VERSION = 5.4;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
@@ -2890,7 +2890,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 5.3.4;
+				MARKETING_VERSION = 5.4;
 				ONLY_ACTIVE_ARCH = YES;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -3151,7 +3151,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 5.3.4;
+				MARKETING_VERSION = 5.4;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
@@ -3269,7 +3269,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.3.4;
+				MARKETING_VERSION = 5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -3482,7 +3482,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 5.3.4;
+				MARKETING_VERSION = 5.4;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
@@ -3597,7 +3597,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.3.4;
+				MARKETING_VERSION = 5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

@@ -85,11 +85,10 @@
 
     UIBarButtonItem* contactRequests = [[UIBarButtonItem alloc] init];
     UIImage* requestsImage = [[UIImage systemImageNamed:@"questionmark.bubble.fill"] imageWithTintColor:UIColor.monalGreen];
-    if([[DataLayer sharedInstance] contactRequestsForAccount].count == 0) {
+    if([[DataLayer sharedInstance] contactRequestsForAccount].count == 0)
         contactRequests.customView = [[UIImageView alloc] initWithImage: requestsImage];
-    } else {
+    else
         contactRequests.customView = [[UIImageView alloc] initWithImage:[HelperTools imageWithNotificationBadgeForImage:requestsImage]];
-    }
     UITapGestureRecognizer* requestTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContactRequests:)];
     [contactRequests.customView addGestureRecognizer:requestTapRecoginzer];
 

@@ -11,7 +11,7 @@ import monalxmpp
 
 struct AddContactMenu: View {
     var delegate: SheetDismisserProtocol
-    static private let jidFaultyPattern = "^.+\\..{2,}$"
+    static private let jidFaultyPattern = "^([^@]+@)?.+\\..{2,}$"
 
     @State private var connectedAccounts: [xmpp]
     @State private var selectedAccount: Int
@@ -104,7 +104,7 @@ struct AddContactMenu: View {
                 }
                 else
                 {
-                    Section(header: Text(verbatim: "Contact and Channel Jids are usually in the format: name@domain.tld")) {
+                    Section(header: Text(verbatim: "Contact and Group/Channel Jids are usually in the format: name@domain.tld")) {
                         if(connectedAccounts.count > 1) {
                             Picker("Use account", selection: $selectedAccount) {
                                 ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
@@ -113,13 +113,13 @@ struct AddContactMenu: View {
                             }
                             .pickerStyle(.menu)
                         }
-                        TextField("Contact or Channel Jid", text: $toAdd)
+                        TextField("Contact or Group/Channel Jid", text: $toAdd)
                             .autocorrectionDisabled()
                             .autocapitalization(.none)
                             .disabled(scannedFingerprints != nil)
                             .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
                     }
-                    if(scannedFingerprints != nil && scannedFingerprints!.count > 1) {
+                    if(scannedFingerprints != nil && scannedFingerprints!.count > 0) {
                         Section(header: Text("A contact was scanned through the QR code scanner")) {
                             Toggle(isOn: $importScannedFingerprints, label: {
                                 Text("Import and trust OMEMO fingerprints from QR code")
@@ -151,7 +151,7 @@ struct AddContactMenu: View {
                                 addJid(jid: jidComponents["user"]!) // check if user entry exists in components?
                             }
                         }, label: {
-                            scannedFingerprints == nil ? Text("Add Channel or Contact") : Text("Add scanned Channel or Contact")
+                            scannedFingerprints == nil ? Text("Add Group/Channel or Contact") : Text("Add scanned Group/Channel or Contact")
                         })
                         .foregroundColor(buttonColor)
                         .alert(isPresented: $showAlert) {
@@ -166,7 +166,7 @@ struct AddContactMenu: View {
                 }
             }
         }
-        .navigationBarTitle("Add Contact or Channel", displayMode: .inline)
+        .navigationBarTitle("Add Contact or Group/Channel", displayMode: .inline)
         .navigationViewStyle(.stack)
         .toolbar(content: {
             ToolbarItem(placement: .navigationBarTrailing) {

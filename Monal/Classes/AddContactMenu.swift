@@ -146,7 +146,7 @@ struct AddContactMenu: View {
 
                             if(!showAlert) {
                                 let jidComponents = HelperTools.splitJid(toAdd)
-                                if(jidComponents["node"] == nil || jidComponents["host"] == nil || jidComponents["node"]!.isEmpty || jidComponents["host"]!.isEmpty) {
+                                if(jidComponents["host"] == nil || jidComponents["host"]!.isEmpty) {
                                     errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing the string..."))
                                     showAlert = true
                                     return

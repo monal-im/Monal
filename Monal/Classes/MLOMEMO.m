@@ -318,12 +318,13 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
     else
     {
         MLXMLNode* publishedDevices = [data objectForKey:@"current"];
-        if(!publishedDevices && data.count == 1)
+        if(publishedDevices == nil && data.count == 1)
         {
+            DDLogInfo(@"Client does not use 'current' as item id for it's bundle! keys=%@", [data allKeys]);
             //some clients do not use <item id="current">
             publishedDevices = [[data allValues] firstObject];
         }
-        else if(!publishedDevices && data.count > 1)
+        else if(publishedDevices == nil && data.count > 1)
             DDLogWarn(@"More than one devicelist item found from %@, ignoring all items!", jid);
         
         if(publishedDevices)
@@ -499,12 +500,13 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
     {
         //check that a corresponding buddy exists -> prevent foreign key errors
         MLXMLNode* receivedKeys = data[@"current"];
-        if(receivedKeys != nil && data.count == 1)
+        if(receivedKeys == nil && data.count == 1)
         {
+            DDLogInfo(@"Client does not use 'current' as item id for it's bundle! rid=%@, keys=%@", rid, [data allKeys]);
             //some clients do not use <item id="current">
             receivedKeys = [[data allValues] firstObject];
         }
-        else if(!receivedKeys && data.count > 1)
+        else if(receivedKeys == nil && data.count > 1)
             DDLogWarn(@"More than one bundle item found from %@ rid: %@, ignoring all items!", jid, rid);
         
         if(receivedKeys)

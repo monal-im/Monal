@@ -58,13 +58,16 @@ AVPlayer *avplayer;
     
     //some translations needed
     if([@"audio/mpeg" isEqualToString:mimeType])
+    {
+        DDLogDebug(@"Overwriting mimeType: '%@' with 'audio/mp4'...", mimeType);
         mimeType = @"audio/mp4";
+    }
     
     AVURLAsset* videoAsset = [[AVURLAsset alloc] initWithURL:videoFileUrl options:@{
         @"AVURLAssetOutOfBandMIMETypeKey": mimeType
     }];
     avplayer = [AVPlayer playerWithPlayerItem:[AVPlayerItem playerItemWithAsset:videoAsset]];
-    DDLogInfo(@"Created AVPlayer: %@", avplayer);
+    DDLogInfo(@"Created AVPlayer(%@): %@", mimeType, avplayer);
     avplayerVC.player = avplayer;
     
     [self.videoView addSubview:avplayerVC.view];

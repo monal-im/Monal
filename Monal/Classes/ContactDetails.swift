@@ -65,8 +65,14 @@ struct ContactDetails: View {
                     }
                 }
                 
-                //TODO: files exchanged with this contact
-                //--> open file app in documents dir, see: https://nemecek.be/blog/145/open-your-apps-documents-folder-programmatically-in-files-app
+                let sharedUrl = HelperTools.getFilemanagerURL(forPathComponents:[MLXMPPManager.sharedInstance().getConnectedAccount(forID:contact.accountId)!.connectionProperties.identity.jid, contact.contactDisplayName as String])
+                if UIApplication.shared.canOpenURL(sharedUrl) {
+                    Button(action: {
+                            UIApplication.shared.open(sharedUrl, options:[:])
+                    }) {
+                        Text("Show shared Media and Files")
+                    }
+                }
             }
 
             Section { // the destructive section...

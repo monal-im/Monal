@@ -48,7 +48,7 @@
 
 @import AVFoundation;
 
-#define STATE_VERSION 5
+#define STATE_VERSION 8
 #define CONNECT_TIMEOUT 12.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -66,7 +66,6 @@ NSString* const kStanza = @"stanza";
 -(id) initWithAccount:(xmpp*) account;
 -(NSDictionary*) getInternalState;
 -(void) setInternalState:(NSDictionary*) state;
--(void) resetForNewSession;
 @end
 
 
@@ -208,7 +207,12 @@ NSString* const kStanza = @"stanza";
     [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:$newHandler(MLPubSubProcessor, rosterNameHandler)];
     
     //we want to get automatic bookmark updates (XEP-0048)
+    //this will only be used/handled, if the account disco feature urn:xmpp:bookmarks:1#compat-pep is not set by the server and ignored otherwise
+    //(it will be automatically headline-pushed nevertheless --> TODO: remove this once all modern servers support XEP-0402 compat)
     [self.pubsub registerForNode:@"storage:bookmarks" withHandler:$newHandler(MLPubSubProcessor, bookmarksHandler)];
+    
+    //we now support the modern bookmarks protocol (XEP-0402)
+    [self.pubsub registerForNode:@"urn:xmpp:bookmarks:1" withHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler)];
     
     //autodelete messages old enough (first invocation)
     if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
@@ -1235,7 +1239,7 @@ NSString* const kStanza = @"stanza";
                 while([self->_parseQueue operationCount] > 50 && self.accountState >= kStateReconnecting)
                 {
                     double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries (used/vailable memory: %.3fMiB / %.3fMiB)...", waittime, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries (used/available memory: %.3fMiB / %.3fMiB)...", waittime, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
                     [NSThread sleepForTimeInterval:waittime];
                     wasSleeping = YES;
                 }
@@ -1540,7 +1544,7 @@ NSString* const kStanza = @"stanza";
     }
 }
 
--(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
+-(BOOL) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
     NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
     @synchronized(_stateLockObject) {
@@ -1560,7 +1564,7 @@ NSString* const kStanza = @"stanza";
                 [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
             ] andData:nil];
             [self reconnectWithStreamError:streamError];
-            return;
+            return YES;
         }
         //stanza counting bugs on the server are fatal
         if([hvalue unsignedIntValue] < [self.lastHandledOutboundStanza unsignedIntValue])
@@ -1574,7 +1578,7 @@ NSString* const kStanza = @"stanza";
                 [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:message],
             ] andData:nil];
             [self reconnectWithStreamError:streamError];
-            return;
+            return YES;
         }
         
         self.lastHandledOutboundStanza = hvalue;
@@ -1628,6 +1632,8 @@ NSString* const kStanza = @"stanza";
         DDLogVerbose(@"Now calling smacks ack handler: %@", dic);
         ((monal_void_block_t)dic[@"handler"])();
     }
+    
+    return NO;
 }
 
 -(void) requestSMAck:(BOOL) force
@@ -2241,6 +2247,7 @@ NSString* const kStanza = @"stanza";
         {
             //we landed here because smacks resume failed
             
+            __block BOOL error = NO;
             self.resuming = NO;
             @synchronized(_stateLockObject) {
                 //invalidate stream id
@@ -2249,13 +2256,17 @@ NSString* const kStanza = @"stanza";
                 NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
                 DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", h);
                 if(h!=nil)
-                    [self removeAckedStanzasFromQueue:h];
+                    error = [self removeAckedStanzasFromQueue:h];
                 //persist these changes
                 [self persistState];
             }
 
-            //bind  a new resource like normal on failed resume (supportsSM3 is still YES here but switches to NO on failed enable later on, if necessary)
-            [self bindResource:self.connectionProperties.identity.resource];
+            //don't try to bind, if removeAckedStanzasFromQueue returned an error (it will trigger a reconnect in these cases)
+            if(!error)
+            {
+                //bind  a new resource like normal on failed resume (supportsSM3 is still YES here but switches to NO on failed enable later on, if necessary)
+                [self bindResource:self.connectionProperties.identity.resource];
+            }
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound && !self.resuming)
         {
@@ -3197,9 +3208,9 @@ NSString* const kStanza = @"stanza";
 
 -(void) persistState
 {
-    DDLogVerbose(@"%@ --> persistState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    DDLogVerbose(@"%@ --> persistState before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
     [self realPersistState];
-    DDLogVerbose(@"%@ --> persistState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    DDLogVerbose(@"%@ --> persistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
 }
 
 -(void) realPersistState
@@ -3209,7 +3220,7 @@ NSString* const kStanza = @"stanza";
     //thread 2 (for example: urllib session): holding state lock object and waiting for write transaction
     [[DataLayer sharedInstance] createTransaction:^{
         @synchronized(self->_stateLockObject) {
-            DDLogVerbose(@"%@ --> realPersistState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+            DDLogVerbose(@"%@ --> realPersistState before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
             //state dictionary
             NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
 
@@ -3247,11 +3258,13 @@ NSString* const kStanza = @"stanza";
             [values setObject:self->_runningMamQueries forKey:@"runningMamQueries"];
             [values setObject:[NSNumber numberWithBool:self->_loggedInOnce] forKey:@"loggedInOnce"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBookmarksCompat] forKey:@"supportsBookmarksCompat"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSubMax] forKey:@"supportsPubSubMax"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
@@ -3274,7 +3287,7 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\t_inCatchup=%@",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@",
                 self.accountNo,
                 values[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -3288,26 +3301,28 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
+                self.connectionProperties.supportsPubSubMax,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
-                self->_inCatchup
+                self.connectionProperties.supportsBookmarksCompat,
+                self->_inCatchup,
             );
-            DDLogVerbose(@"%@ --> realPersistState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+            DDLogVerbose(@"%@ --> realPersistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
     }];
 }
 
 -(void) readSmacksStateOnly
 {
-    DDLogVerbose(@"%@ --> readSmacksStateOnly before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    DDLogVerbose(@"%@ --> readSmacksStateOnly before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
     [self realReadSmacksStateOnly];
-    DDLogVerbose(@"%@ --> readSmacksStateOnly after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    DDLogVerbose(@"%@ --> readSmacksStateOnly after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
 }
 
 -(void) realReadSmacksStateOnly
 {
     @synchronized(_stateLockObject) {
-        DDLogVerbose(@"%@ --> realReadSmacksStateOnly before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+        DDLogVerbose(@"%@ --> realReadSmacksStateOnly before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
         if(dic)
         {
@@ -3362,21 +3377,21 @@ NSString* const kStanza = @"stanza";
         _smacksAckHandler = [[NSMutableArray alloc] init];
         self.smacksRequestInFlight = NO;
         
-        DDLogVerbose(@"%@ --> realReadSmacksStateOnly after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+        DDLogVerbose(@"%@ --> realReadSmacksStateOnly after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
     }
 }
 
 -(void) readState
 {
-    DDLogVerbose(@"%@ --> readState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    DDLogVerbose(@"%@ --> readState before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
     [self realReadState];
-    DDLogVerbose(@"%@ --> readState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    DDLogVerbose(@"%@ --> readState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
 }
 
 -(void) realReadState
 {
     @synchronized(_stateLockObject) {
-        DDLogVerbose(@"%@ --> realReadState before: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+        DDLogVerbose(@"%@ --> realReadState before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
         if(dic)
         {
@@ -3446,6 +3461,12 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.usingCarbons2 = carbonsNumber.boolValue;
             }
             
+            if([dic objectForKey:@"supportsBookmarksCompat"])
+            {
+                NSNumber* compatNumber = [dic objectForKey:@"supportsBookmarksCompat"];
+                self.connectionProperties.supportsBookmarksCompat = compatNumber.boolValue;
+            }
+            
             if([dic objectForKey:@"supportsPush"])
             {
                 NSNumber* pushNumber = [dic objectForKey:@"supportsPush"];
@@ -3474,6 +3495,12 @@ NSString* const kStanza = @"stanza";
             {
                 NSNumber* supportsPubSub = [dic objectForKey:@"supportsPubSub"];
                 self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
+            }
+            
+            if([dic objectForKey:@"supportsPubSubMax"])
+            {
+                NSNumber* supportsPubSubMax = [dic objectForKey:@"supportsPubSubMax"];
+                self.connectionProperties.supportsPubSubMax = supportsPubSubMax.boolValue;
             }
             
             if([dic objectForKey:@"supportsHTTPUpload"])
@@ -3527,7 +3554,7 @@ NSString* const kStanza = @"stanza";
                 _cachedStreamFeaturesAfterAuth = [dic objectForKey:@"cachedStreamFeaturesAfterAuth"];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\t_inCatchup=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -3541,9 +3568,11 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
+                self.connectionProperties.supportsPubSubMax,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
-                _inCatchup
+                self.connectionProperties.supportsBookmarksCompat,
+                self->_inCatchup,
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -3554,7 +3583,7 @@ NSString* const kStanza = @"stanza";
         _smacksAckHandler = [[NSMutableArray alloc] init];
         self.smacksRequestInFlight = NO;
         
-        DDLogVerbose(@"%@ --> realReadState after: used/vailable memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+        DDLogVerbose(@"%@ --> realReadState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
     }
 }
 
@@ -3566,11 +3595,23 @@ NSString* const kStanza = @"stanza";
     if(dic)
     {
         for(NSString* entry in toKeep)
-            newState[entry] = dic[entry];
-        
-        newState[@"stateSavedAt"] = [NSDate date];
-        newState[@"VERSION"] = @(STATE_VERSION);
+            if(dic[entry] != nil)
+                newState[entry] = dic[entry];
     }
+    
+    //set smacks state to sane defaults if not present in our old state at all (this are the values used by initSM3, too)
+    if(newState[@"lastHandledInboundStanza"] == nil)
+        newState[@"lastHandledInboundStanza"] = [NSNumber numberWithInteger:0];
+    if(newState[@"lastHandledOutboundStanza"] == nil)
+        newState[@"lastHandledOutboundStanza"] = [NSNumber numberWithInteger:0];
+    if(newState[@"lastOutboundStanza"] == nil)
+        newState[@"lastOutboundStanza"] = [NSNumber numberWithInteger:0];
+    if(newState[@"unAckedStanzas"] == nil)
+        newState[@"unAckedStanzas"] = [[NSMutableArray alloc] init];
+    
+    newState[@"stateSavedAt"] = [NSDate date];
+    newState[@"VERSION"] = @(STATE_VERSION);
+    
     return newState;
 }
 
@@ -3705,9 +3746,6 @@ NSString* const kStanza = @"stanza";
         }
     }
     
-    //clear muc state
-    [self.mucProcessor resetForNewSession];
-    
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
     //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
@@ -3719,9 +3757,11 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.conferenceServer = nil;
     self.connectionProperties.usingCarbons2 = NO;
     self.connectionProperties.supportsPush = NO;
+    self.connectionProperties.supportsBookmarksCompat = NO;
     self.connectionProperties.pushEnabled = NO;
     self.connectionProperties.supportsMam2 = NO;
     self.connectionProperties.supportsPubSub = NO;
+    self.connectionProperties.supportsPubSubMax = NO;
     self.connectionProperties.supportsHTTPUpload = NO;
     self.connectionProperties.supportsPing = NO;
     self.connectionProperties.supportsRosterPreApproval = NO;
@@ -3770,10 +3810,6 @@ NSString* const kStanza = @"stanza";
     }
     
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
-    
-    //join MUCs from muc_favorites db
-    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
-        [self.mucProcessor join:entry[@"room"]];
 }
 
 -(void) addReconnectionHandler:(MLHandler*) handler

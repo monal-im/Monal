@@ -15,6 +15,7 @@
 #import "HelperTools.h"
 #import "DataLayer.h"
 #import "MLFiletransfer.h"
+#import "IPC.h"
 
 #import <MapKit/MapKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
@@ -37,11 +38,24 @@
 +(void) initialize
 {
     [HelperTools configureLogging];
+    [DDLog flushLog];
     
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
     
-    DDLogInfo(@"Initialized ShareViewController");
+    [HelperTools activityLog];
+    
+    //init IPC
+    [IPC initializeForProcess:@"ShareSheetExtension"];
+    
+    //log startup
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
+    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
+    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
+    DDLogInfo(@"Share Sheet Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    DDLogInfo(@"Images dir name: %@", NSLocalizedString(@"Received Images", @"directory for downloaded images"));
+    [DDLog flushLog];
 }
 
 -(void) viewDidLoad

@@ -43,6 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL supportsMam2;
 @property (nonatomic, assign) BOOL supportsSM3;
 @property (nonatomic, assign) BOOL supportsPush;
+@property (nonatomic, assign) BOOL supportsBookmarksCompat;
 @property (nonatomic, assign) BOOL pushEnabled;
 @property (nonatomic, assign) BOOL usingCarbons2;
 @property (nonatomic, assign) BOOL supportsRosterVersion;
@@ -52,6 +53,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL supportsBlocking;
 @property (nonatomic, assign) BOOL supportsPing;
 @property (nonatomic, assign) BOOL supportsPubSub;
+@property (nonatomic, assign) BOOL supportsPubSubMax;
 @property (nonatomic, assign) BOOL supportsPreauthIbr;
 
 @property (nonatomic, assign) BOOL accountDiscoDone;

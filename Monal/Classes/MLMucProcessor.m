@@ -23,7 +23,7 @@
 #import "MLOMEMO.h"
 #import "MLImageManager.h"
 
-#define CURRENT_MUC_STATE_VERSION @4
+#define CURRENT_MUC_STATE_VERSION @5
 
 @interface MLMucProcessor()
 {
@@ -35,6 +35,7 @@
     NSMutableSet* _firstJoin;
     NSDate* _lastPing;
     NSMutableSet* _noUpdateBookmarks;
+    BOOL _hasFetchedBookmarks;
     //this won't be persisted because it is only for the ui
     NSMutableDictionary* _uiHandler;
 }
@@ -53,14 +54,28 @@
     _uiHandler = [[NSMutableDictionary alloc] init];
     _lastPing = [NSDate date];
     _noUpdateBookmarks = [[NSMutableSet alloc] init];
+    _hasFetchedBookmarks = NO;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleResourceBound:) name:kMLHasConnectedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleCatchupDone:) name:kMonalFinishedCatchup object:nil];
     return self;
+}
+
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void) setInternalState:(NSDictionary*) state
 {
+    //DDLogVerbose(@"Setting MUC state to: %@", state);
+    
     //ignore state having wrong version code
     if(!state[@"version"] || ![state[@"version"] isEqual:CURRENT_MUC_STATE_VERSION])
+    {
+        DDLogDebug(@"Ignoring MUC state having wrong version: %@ != %@", state[@"version"], CURRENT_MUC_STATE_VERSION);
         return;
+    }
     
     //extract state
     @synchronized(_stateLockObject) {
@@ -69,29 +84,57 @@
         _firstJoin = [state[@"firstJoin"] mutableCopy];
         _lastPing = state[@"lastPing"];
         _noUpdateBookmarks = [state[@"noUpdateBookmarks"] mutableCopy];
+        _hasFetchedBookmarks = [state[@"hasFetchedBookmarks"] boolValue];
     }
 }
 
 -(NSDictionary*) getInternalState
 {
     @synchronized(_stateLockObject) {
-        return @{
+        NSDictionary* state = @{
             @"version": CURRENT_MUC_STATE_VERSION,
             @"roomFeatures": _roomFeatures,
             @"joining": _joining,
             @"firstJoin": _firstJoin,
             @"lastPing": _lastPing,
             @"noUpdateBookmarks": _noUpdateBookmarks,
+            @"hasFetchedBookmarks": @(_hasFetchedBookmarks),
         };
+        //DDLogVerbose(@"Returning MUC state: %@", state);
+        return state;
     }
 }
 
--(void) resetForNewSession
+-(void) handleResourceBound:(NSNotification*) notification
 {
-    _roomFeatures = [[NSMutableDictionary alloc] init];
-    _joining = [[NSMutableSet alloc] init];
-    //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
+    //this event will be called as soon as we are bound, but BEFORE mam catchup happens
+    //NOTE: this event won't be called for smacks resumes!
+    if(_account == ((xmpp*)notification.object))
+    {
+        @synchronized(_stateLockObject) {
+            _roomFeatures = [[NSMutableDictionary alloc] init];
+            _joining = [[NSMutableSet alloc] init];
+            //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
+            
+            //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
+            _hasFetchedBookmarks = NO;
+        }
+            
+        //join MUCs from (current) muc_favorites db, the pending bookmarks fetch will join the remaining currently unknown mucs
+        for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
+            [self join:entry[@"room"]];
+    }
+}
 
+-(void) handleCatchupDone:(NSNotification*) notification
+{
+    //this event will be called as soon as mam OR smacks catchup on our account is done, it does not wait for muc mam catchups!
+    if(_account == ((xmpp*)notification.object))
+    {
+        //fake incoming bookmarks push by pulling all bookmarks2 items (but only if we want to use bookmarks2 instead of old-style boommarks)
+        if(!_hasFetchedBookmarks && _account.connectionProperties.supportsBookmarksCompat)
+            [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler, $ID(type, @"publish"))];
+    }
 }
 
 -(BOOL) isJoining:(NSString*) room
@@ -1028,7 +1071,12 @@ $$
 -(void) updateBookmarks
 {
     DDLogVerbose(@"Updating bookmarks on account %@", _account);
-    [_account.pubsub fetchNode:@"storage:bookmarks" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
+    //use bookmarks2, if server supports syncing between XEP-0048 and XEP-0402 bookmarks
+    //use old-style XEP-0048 bookmarks, if not
+    if(_account.connectionProperties.supportsBookmarksCompat)
+        [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookmarks2FetchResult)];
+    else
+        [_account.pubsub fetchNode:@"storage:bookmarks" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
 }
 
 -(BOOL) checkIfStillBookmarked:(NSString*) room

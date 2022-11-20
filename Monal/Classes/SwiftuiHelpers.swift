@@ -18,6 +18,8 @@ typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
 let monalGreen = Color(UIColor(red:128.0/255, green:203.0/255, blue:182.0/255, alpha:1.0));
 let monalDarkGreen = Color(UIColor(red:20.0/255, green:138.0/255, blue:103.0/255, alpha:1.0));
 
+let swiftuiTranslationDummyString = Text("Dummy string to test SwiftUI translation support.")
+
 class SheetDismisserProtocol: ObservableObject {
     weak var host: UIHostingController<AnyView>? = nil
     func dismiss() {

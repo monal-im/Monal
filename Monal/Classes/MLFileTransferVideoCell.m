@@ -51,7 +51,10 @@ AVPlayer *avplayer;
 
     NSURL* videoFileUrl = [[NSURL alloc] initFileURLWithPath:fileUrlStr isDirectory:NO];
     if(videoFileUrl == nil)
+    {
+        DDLogWarn(@"Returning early in av player cell!");
         return;
+    }
     
     //some translations needed
     if([@"audio/mpeg" isEqualToString:mimeType])
@@ -61,6 +64,7 @@ AVPlayer *avplayer;
         @"AVURLAssetOutOfBandMIMETypeKey": mimeType
     }];
     avplayer = [AVPlayer playerWithPlayerItem:[AVPlayerItem playerItemWithAsset:videoAsset]];
+    DDLogInfo(@"Created AVPlayer: %@", avplayer);
     avplayerVC.player = avplayer;
     
     [self.videoView addSubview:avplayerVC.view];

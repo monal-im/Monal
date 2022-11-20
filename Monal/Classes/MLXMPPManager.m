@@ -264,7 +264,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                     [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
                 }
                 else
+                {
+                    //TODO: don't reconnect if appex has frozen our queues!
                     [xmppAccount reconnect:0];      //try to immediately reconnect, don't bother pinging
+                }
             }
         }
         else if(nw_path_get_status(path) != nw_path_status_satisfied && self->_hasConnectivity)
@@ -288,6 +291,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             //when switching from wifi to mobile (or back) we sometimes don't have any unreachable state in between
             //--> reconnect directly because switching from wifi to mobile will cut the connection a few seconds after the switch anyways
             //wait for 1 sec before reconnecting to compensate for multiple nw_path updates in a row
+            //TODO: don't reconnect if appex has frozen our queues!
             for(xmpp* xmppAccount in [self connectedXMPP])
                 [xmppAccount reconnect:1];
         }

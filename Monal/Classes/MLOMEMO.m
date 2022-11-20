@@ -509,6 +509,8 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
         
         if(receivedKeys)
             [self processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
+        else
+            DDLogWarn(@"Could not find any bundle in pubsub data from %@ rid: %@, data=%@", jid, rid, data);
     }
     
     //update bundle fetch status (this has to be done even in error cases!)
@@ -548,7 +550,10 @@ $$
     //strange "omemo loop" with a broken remote software
     NSArray* bundles = [item find:@"{eu.siacs.conversations.axolotl}bundle"];
     if([bundles count] != 1)
+    {
+        DDLogWarn(@"bundle count != 1, ignoring: %@", bundles);
         return;
+    }
     MLXMLNode* bundle = [bundles firstObject];
 
     //extract bundle data
@@ -559,7 +564,10 @@ $$
 
     //ignore bundles not conforming to the standard
     if(signedPreKeyPublic == nil || signedPreKeyPublicId == nil || signedPreKeySignature == nil || identityKey == nil)
+    {
+        DDLogWarn(@"Bundle not onforming to omemo standard, ignoring: signedPreKeyPublic=%@, signedPreKeyPublicId=%@, signedPreKeySignature=%@, identityKey=%@", signedPreKeyPublic, signedPreKeyPublicId, signedPreKeySignature, identityKey);
         return;
+    }
 
     uint32_t deviceId = (uint32_t)rid.unsignedIntValue;
     SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:deviceId];
@@ -568,7 +576,7 @@ $$
 
     if(preKeyIds == nil || preKeyIds.count == 0)
     {
-        DDLogWarn(@"Could not create array of preKeyIds");
+        DDLogWarn(@"Could not create array of preKeyIds, ignoring: preKeyIds=%@ %lu", preKeyIds, (unsigned long)preKeyIds.count);
         return;
     }
     

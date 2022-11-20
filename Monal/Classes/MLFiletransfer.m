@@ -454,6 +454,8 @@ $$
     NSString* fileBasename = [fileInfo[@"filename"] stringByDeletingPathExtension];
     [hardlinkPathComponents addObject:[[NSString stringWithFormat:@"%@_%@", fileBasename, randomID] stringByAppendingPathExtension:fileExtension]];
     
+    MLAssert(fileInfo[@"cacheFile"] != nil, @"cacheFile should never be empty here!", (@{@"fileInfo": fileInfo}));
+    
     MLHandler* handler = $newHandler(self, handleHardlinking, $ID(cacheFile, fileInfo[@"cacheFile"]), $ID(hardlinkPathComponents), $BOOL(direct, NO));
     if([HelperTools isAppExtension])
     {

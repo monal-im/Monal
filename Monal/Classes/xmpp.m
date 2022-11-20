@@ -3305,7 +3305,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
                 self.connectionProperties.supportsBookmarksCompat,
-                self->_inCatchup,
+                self->_inCatchup
             );
             DDLogVerbose(@"%@ --> realPersistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
@@ -3572,7 +3572,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
                 self.connectionProperties.supportsBookmarksCompat,
-                self->_inCatchup,
+                self->_inCatchup
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)

@@ -28,21 +28,25 @@ struct ContactRequestsMenuEntry: View {
             Group {
                 Button {
                     // deny request
+                    self.delete()       //update ui first because the array index can change afterwards
                     MLXMPPManager.sharedInstance().reject(contact)
-                    DataLayer.sharedInstance().deleteContactRequest(contact)
-                    self.delete()
                 } label: {
                     Image(systemName: "trash.circle")
                         .accentColor(.red)
                 }
+                //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952
+                .buttonStyle(BorderlessButtonStyle())
+                
                 Button {
                     // accept request
+                    self.delete()       //update ui first because the array index can change afterwards
                     MLXMPPManager.sharedInstance().add(contact)
-                    self.delete()
                 } label: {
                     Image(systemName: "checkmark.circle")
                         .accentColor(.green)
                 }
+                //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952
+                .buttonStyle(BorderlessButtonStyle())
             }
             .font(.largeTitle)
         }
@@ -66,19 +70,25 @@ struct ContactRequestsMenu: View {
                             contact: pendingRequests[idx],
                             doDelete: {
                                 self.pendingRequests.remove(at: idx)
-                        })
+                            }
+                        )
                     }
                 }
             }
-            
         }
         .navigationBarTitle("Contact Requests", displayMode: .inline)
         .navigationViewStyle(.stack)
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh")).receive(on: RunLoop.main)) { notification in
+            self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRemoved")).receive(on: RunLoop.main)) { notification in
+            self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
+        }
     }
 
     init(delegate: SheetDismisserProtocol) {
         self.delegate = delegate
-        self.pendingRequests = DataLayer.sharedInstance().contactRequestsForAccount() as! [MLContact]
+        self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
     }
 }
 

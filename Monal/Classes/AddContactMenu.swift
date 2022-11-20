@@ -122,6 +122,7 @@ struct AddContactMenu: View {
                             .autocapitalization(.none)
                             .disabled(scannedFingerprints != nil)
                             .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
+                            .addClearButton(text:$toAdd)
                     }
                     if(scannedFingerprints != nil && scannedFingerprints!.count > 0) {
                         Section(header: Text("A contact was scanned through the QR code scanner")) {
@@ -146,7 +147,7 @@ struct AddContactMenu: View {
 
                             if(!showAlert) {
                                 let jidComponents = HelperTools.splitJid(toAdd)
-                                if(jidComponents["node"] == nil || jidComponents["host"] == nil || jidComponents["node"]!.isEmpty || jidComponents["host"]!.isEmpty) {
+                                if(jidComponents["host"] == nil || jidComponents["host"]!.isEmpty) {
                                     errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing the string..."))
                                     showAlert = true
                                     return
@@ -157,7 +158,7 @@ struct AddContactMenu: View {
                         }, label: {
                             scannedFingerprints == nil ? Text("Add Group/Channel or Contact") : Text("Add scanned Group/Channel or Contact")
                         })
-                        .foregroundColor(buttonColor)
+                        .disabled(toAddEmpty || toAddInvalid)
                         .alert(isPresented: $showAlert) {
                             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton:.default(Text("Close"), action: {
                                 showAlert = false

@@ -47,12 +47,13 @@
     [self presentViewController:contactRequestsView animated:YES completion:^{}];
 }
 
--(void) configureContactRequestsImage {
+-(void) configureContactRequestsImage
+{
     UIImage* requestsImage = [[UIImage systemImageNamed:@"questionmark.bubble.fill"] imageWithTintColor:UIColor.monalGreen];
     UITapGestureRecognizer* requestsTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContactRequests:)];
     self.navigationItem.rightBarButtonItems[1].customView = [HelperTools
         buttonWithNotificationBadgeForImage:requestsImage
-        hasNotification:[[DataLayer sharedInstance] contactRequestsForAccount].count > 0
+        hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
         withTapHandler:requestsTapRecoginzer];
 }
 
@@ -96,10 +97,21 @@
 
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], nil];
     [self configureContactRequestsImage];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactUpdate) name:kMonalContactRemoved object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactUpdate) name:kMonalContactRefresh object:nil];
+}
+
+-(void) handleContactUpdate
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self reloadTable];
+    });
 }
 
 -(void) dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -146,8 +158,9 @@
 
 -(void) reloadTable
 {
-    if(self.contactsTable.hasUncommittedUpdates) return;
-    
+    [self configureContactRequestsImage];
+    if(self.contactsTable.hasUncommittedUpdates)
+        return;
     [self.contactsTable reloadData];
 }
 

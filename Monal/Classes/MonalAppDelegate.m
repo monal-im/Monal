@@ -753,15 +753,16 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             completionHandler();
         }];
         
-        //make sure we have an active buddy for this chat
-        [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountId];
-        
         //handle subscription actions
         if([response.actionIdentifier isEqualToString:@"APPROVE_SUBSCRIPTION_ACTION"])
         {
             DDLogInfo(@"APPROVE_SUBSCRIPTION_ACTION triggered...");
             [[MLXMPPManager sharedInstance] addContact:fromContact];
+            
+            //make sure we have an active buddy for this chat and open it
+            [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountId];
             [self openChatOfContact:fromContact];
+            
         }
         else if([response.actionIdentifier isEqualToString:@"DENY_SUBSCRIPTION_ACTION"])
         {

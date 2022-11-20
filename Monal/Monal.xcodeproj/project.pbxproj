@@ -15,7 +15,6 @@
 		2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */; };
 		26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26158AF11FFA6E4500E53BDC /* MLWebViewController.m */; };
 		26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */ = {isa = PBXBuildFile; fileRef = 26158AF31FFA8A6A00E53BDC /* opensource.html */; };
-		26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26189C8A238A526500EAD70C /* MLSubscriptionTableViewController.m */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		261A628B176C159000059090 /* AccountListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628A176C159000059090 /* AccountListController.m */; };
@@ -302,8 +301,6 @@
 		26158AF01FFA6E4500E53BDC /* MLWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLWebViewController.h; sourceTree = "<group>"; };
 		26158AF11FFA6E4500E53BDC /* MLWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLWebViewController.m; sourceTree = "<group>"; };
 		26158AF31FFA8A6A00E53BDC /* opensource.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = opensource.html; sourceTree = "<group>"; };
-		26189C89238A526500EAD70C /* MLSubscriptionTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSubscriptionTableViewController.h; sourceTree = "<group>"; };
-		26189C8A238A526500EAD70C /* MLSubscriptionTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSubscriptionTableViewController.m; sourceTree = "<group>"; };
 		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261A6283176C156500059090 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
@@ -1007,8 +1004,6 @@
 				26DB52121777EA5100B50353 /* Tab views */,
 				26158AF01FFA6E4500E53BDC /* MLWebViewController.h */,
 				26158AF11FFA6E4500E53BDC /* MLWebViewController.m */,
-				26189C89238A526500EAD70C /* MLSubscriptionTableViewController.h */,
-				26189C8A238A526500EAD70C /* MLSubscriptionTableViewController.m */,
 				26A78ED623C2B59400C7CF40 /* MLPlaceholderViewController.h */,
 				26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */,
 				84FC375828981A5600634E3E /* PasswordMigration.swift */,
@@ -1959,9 +1954,6 @@
 				3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
-				C104915D2612FFBC0054AC9E /* addContact.m in Sources */,
-				26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */,
-				26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */,
 				26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
 				C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */,

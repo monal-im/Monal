@@ -88,7 +88,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
 -(BOOL) hasContactRequestForAccount:(NSNumber*) accountNo andBuddyName:(NSString*) buddy;
--(NSMutableArray*) contactRequestsForAccount;
+-(NSMutableArray*) allContactRequests;
 -(void) addContactRequest:(MLContact *) requestor;
 -(void) deleteContactRequest:(MLContact *) requestor; 
 

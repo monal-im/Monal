@@ -157,7 +157,7 @@ struct ClearButton: ViewModifier {
     }
 }
 //this extension contains the easy-access view modifier
-extension View {    
+extension View {
     func addClearButton(text: Binding<String>) -> some View {
         modifier(ClearButton(text:text))
     }

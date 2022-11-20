@@ -47,6 +47,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDisplayedMessages:) name:kMonalDisplayedMessagesNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRemoved object:nil];
 
     self.notificationPrivacySetting = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
     return self;
@@ -56,10 +57,38 @@
 {
     xmpp* xmppAccount = notification.object;
     MLContact* contact = notification.userInfo[@"contact"];
+    NSString* idval = [NSString stringWithFormat:@"subscription(%@, %@)", contact.accountId, contact.contactJid];
     
-    //only handle incoming contact requests here
+    //remove contact requests notification once the contact request has been accepted
     if(!contact.hasIncomingContactRequest)
+    {
+        monal_void_block_t block = ^{
+            [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
+                for(UNNotificationRequest* request in requests)
+                    if([request.identifier isEqualToString:idval])
+                    {
+                        DDLogVerbose(@"Removing pending handled subscription request notification with identifier '%@'...", idval);
+                        [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[idval]];
+                    }
+            }];
+            [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
+                for(UNNotification* notification in notifications)
+                    if([notification.request.identifier isEqualToString:idval])
+                    {
+                        DDLogVerbose(@"Removing delivered handled subscription request notification with identifier '%@'...", idval);
+                        [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[idval]];
+                    }
+            }];
+        };
+        
+        //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
+        //but DON'T do this in the appex because this can try to mess with notifications after the parse queue was frozen (see appex code for explanation what this means)
+        if([HelperTools isAppExtension])
+            block();
+        else
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), block);
         return;
+    }
     
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title = xmppAccount.connectionProperties.identity.jid;
@@ -71,7 +100,6 @@
         @"fromContactJid": contact.contactJid,
         @"fromContactAccountId": contact.accountId,
     };
-    NSString* idval = [NSString stringWithFormat:@"subscription(%@, %@)", contact.accountId, contact.contactJid];
     
     DDLogDebug(@"Publishing notification with id %@", idval);
     [self publishNotificationContent:content withID:idval];
@@ -206,7 +234,7 @@
     };
     
     //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
-    //but DON'T do this in the appex because this can try to mess with notifications after the parse queue was freezed (see appex code for explanation what this means)
+    //but DON'T do this in the appex because this can try to mess with notifications after the parse queue was frozen (see appex code for explanation what this means)
     if([HelperTools isAppExtension])
         block();
     else

@@ -749,7 +749,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSMutableArray*) contactRequestsForAccount
+-(NSMutableArray*) allContactRequests
 {
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT account_id, buddy_name FROM subscriptionRequests;";

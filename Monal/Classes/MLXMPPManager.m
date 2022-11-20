@@ -403,6 +403,11 @@ $$
         [[DataLayer sharedInstance] deleteContactRequest:contact];
         //and reject contact
         [account rejectFromRoster:contact.contactJid];
+        
+        //notify the UI
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+            @"contact": [MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]
+        }];
     }
 }
 
@@ -773,8 +778,11 @@ $$
         //remove from DB
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
         [contact removeShareInteractions];
-        // notify the UI
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{@"contact": contact}];
+        
+        //notify the UI
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{
+            @"contact": [MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]
+        }];
     }
 }
 
@@ -827,6 +835,11 @@ $$
             // Request omemo devicelist
             [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:contact.contactJid];
 #endif// DISABLE_OMEMO
+            
+            //notify the UI
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+                @"contact": [MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]
+            }];
         }
     }
 }

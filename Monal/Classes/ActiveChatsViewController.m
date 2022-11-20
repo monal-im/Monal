@@ -51,13 +51,14 @@ static NSMutableSet* _smacksWarningDisplayed;
     return self;
 }
 
--(void) configureComposeButton {
+-(void) configureComposeButton
+{
     UIImage* composeImage = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];
     UITapGestureRecognizer* composeTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
     self.composeButton.customView = [HelperTools
-                                     buttonWithNotificationBadgeForImage:composeImage
-                                     hasNotification:[[DataLayer sharedInstance] contactRequestsForAccount].count > 0
-                                     withTapHandler:composeTapRecoginzer];
+                                    buttonWithNotificationBadgeForImage:composeImage
+                                    hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
+                                    withTapHandler:composeTapRecoginzer];
 }
 
 -(void) viewDidLoad
@@ -169,6 +170,11 @@ static NSMutableSet* _smacksWarningDisplayed;
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
     DDLogInfo(@"Refreshing contact %@ at %@: unread=%lu", contact.contactJid, contact.accountId, (unsigned long)contact.unreadCount);
     
+    //update red dot
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self configureComposeButton];
+    });
+    
     // if pinning changed we have to move the user to a other section
     if([notification.userInfo objectForKey:@"pinningChanged"])
         [self insertOrMoveContact:contact completion:nil];
@@ -221,6 +227,12 @@ static NSMutableSet* _smacksWarningDisplayed;
     {
         unreachable();
     }
+    
+    //update red dot
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self configureComposeButton];
+    });
+    
     // ignore all removals that aren't in foreground
     if([removedContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact] == NO)
         return;

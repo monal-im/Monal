@@ -37,7 +37,15 @@
 
 -(void) openAddContacts:(id)sender
 {
-    UIViewController* addContactMenuView = [[SwiftuiInterface new] makeViewWithName:@"AddContact"];
+    UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self dismissViewControllerAnimated:YES completion:nil];
+            [self.parentViewController dismissViewControllerAnimated:YES completion:^{
+                if(self.selectContact)
+                    self.selectContact(newContact);
+            }];
+        });
+    }];
     [self presentViewController:addContactMenuView animated:YES completion:^{}];
 }
 
@@ -45,6 +53,15 @@
 {
     UIViewController* contactRequestsView = [[SwiftuiInterface new] makeViewWithName:@"ContactRequests"];
     [self presentViewController:contactRequestsView animated:YES completion:^{}];
+}
+
+-(void) configureContactRequestsImage {
+    UIImage* requestsImage = [[UIImage systemImageNamed:@"questionmark.bubble.fill"] imageWithTintColor:UIColor.monalGreen];
+    UITapGestureRecognizer* requestsTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContactRequests:)];
+    self.navigationItem.rightBarButtonItems[1].customView = [HelperTools
+        buttonWithNotificationBadgeForImage:requestsImage
+        hasNotification:[[DataLayer sharedInstance] contactRequestsForAccount].count > 0
+        withTapHandler:requestsTapRecoginzer];
 }
 
 #pragma mark view life cycle
@@ -83,17 +100,8 @@
     addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
     [addContact setAction:@selector(openAddContacts:)];
 
-    UIBarButtonItem* contactRequests = [[UIBarButtonItem alloc] init];
-    UIImage* requestsImage = [[UIImage systemImageNamed:@"questionmark.bubble.fill"] imageWithTintColor:UIColor.monalGreen];
-    if([[DataLayer sharedInstance] contactRequestsForAccount].count == 0)
-        contactRequests.customView = [[UIImageView alloc] initWithImage: requestsImage];
-    else
-        contactRequests.customView = [[UIImageView alloc] initWithImage:[HelperTools imageWithNotificationBadgeForImage:requestsImage]];
-    UITapGestureRecognizer* requestTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContactRequests:)];
-    [contactRequests.customView addGestureRecognizer:requestTapRecoginzer];
-
-    [contactRequests setAction:@selector(openContactRequests:)];
-    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, contactRequests, nil];
+    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], nil];
+    [self configureContactRequestsImage];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeviceRotation) name:UIDeviceOrientationDidChangeNotification object:nil];
 }

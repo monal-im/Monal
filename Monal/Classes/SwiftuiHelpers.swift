@@ -296,6 +296,15 @@ class SwiftuiInterface : NSObject {
     }
 
     @objc
+    func makeAddContactView(dismisser: @escaping (MLContact) -> ()) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: AddContactMenu(delegate: delegate, dismissWithNewContact: dismisser)))
+        return host
+    }
+
+    @objc
     func makeView(name: String) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
@@ -307,8 +316,6 @@ class SwiftuiInterface : NSObject {
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate)))
             case "LogIn":
                 host.rootView = AnyView(UIKitWorkaround(WelcomeLogIn(delegate:delegate)))
-            case "AddContact":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: AddContactMenu(delegate: delegate)))
             case "ContactRequests":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactRequestsMenu(delegate: delegate)))
             default:

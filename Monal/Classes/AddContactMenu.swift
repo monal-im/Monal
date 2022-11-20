@@ -26,6 +26,9 @@ struct AddContactMenu: View {
 
     @State private var showQRCodeScanner = false
     @State private var success = false
+    @State private var newContact : MLContact?
+    
+    private let dismissWithNewContact: (MLContact) -> ()
 
     // FIXME duplicate code from WelcomeLogIn.swift, maybe move to SwiftuiHelpers
     private var toAddEmptyAlert: Bool {
@@ -72,6 +75,7 @@ struct AddContactMenu: View {
             if(type == "account") {
                 hideLoadingOverlay(overlay)
                 let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
+                self.newContact = contact;
                 MLXMPPManager.sharedInstance().add(contact)
                 successAlert(title: Text("Permission Requested"), message: Text("The new contact will be added to your contacts list when the person you've added has approved your request."))
             } else if(type == "muc") {
@@ -81,7 +85,7 @@ struct AddContactMenu: View {
                     let success : Bool = (data as! NSDictionary)["success"] as! Bool;
                     hideLoadingOverlay(overlay)
                     if(success) {
-                        MLContact.createContact(fromJid: jid, andAccountNo: accountNo) // FIXME Actually do something with it
+                        self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: accountNo)
                         successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined MUC %s!", jid)))
                     } else {
                         errorAlert(title: Text("Error entering group chat"))
@@ -157,8 +161,12 @@ struct AddContactMenu: View {
                         .alert(isPresented: $showAlert) {
                             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton:.default(Text("Close"), action: {
                                 showAlert = false
-                                if(self.success == true) {
-                                    self.delegate.dismiss()
+                                if self.success == true {
+                                    if self.newContact != nil {
+                                        self.dismissWithNewContact(newContact!)
+                                    } else {
+                                        self.delegate.dismiss()
+                                    }
                                 }
                             }))
                         }
@@ -205,8 +213,9 @@ struct AddContactMenu: View {
         }
     }
 
-    init(delegate: SheetDismisserProtocol) {
+    init(delegate: SheetDismisserProtocol, dismissWithNewContact: @escaping (MLContact) -> ()) {
         self.delegate = delegate
+        self.dismissWithNewContact = dismissWithNewContact;
         let connectedAccounts = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
         self.connectedAccounts = connectedAccounts
         self.selectedAccount = connectedAccounts.first != nil ? 0 : -1;
@@ -216,6 +225,7 @@ struct AddContactMenu: View {
 struct AddContactMenu_Previews: PreviewProvider {
     static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        AddContactMenu(delegate: delegate)
+        AddContactMenu(delegate: delegate, dismissWithNewContact: { c in
+        })
     }
 }

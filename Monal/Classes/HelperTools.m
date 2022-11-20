@@ -537,6 +537,17 @@ void swizzle(Class c, SEL orig, SEL new)
     return finalImage;
 }
 
++(UIImageView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler {
+    UIImageView* result;
+    if(hasNotification)
+        result = [[UIImageView alloc] initWithImage:[self imageWithNotificationBadgeForImage:image]];
+    else
+        result = [[UIImageView alloc] initWithImage: image];
+
+    [result addGestureRecognizer:handler];
+    return result;
+}
+
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length
 {
     if(!image)

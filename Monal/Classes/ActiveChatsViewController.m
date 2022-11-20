@@ -17,6 +17,7 @@
 #import "MLXEPSlashMeHandler.h"
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
+#import "UIColor+Theme.h"
 #import <Monal-Swift.h>
 
 @import QuartzCore.CATransaction;
@@ -61,6 +62,15 @@ static NSMutableSet* _smacksWarningDisplayed;
     return self;
 }
 
+-(void) configureComposeButton {
+    UIImage* composeImage = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];
+    UITapGestureRecognizer* composeTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
+    self.composeButton.customView = [HelperTools
+                                     buttonWithNotificationBadgeForImage:composeImage
+                                     hasNotification:[[DataLayer sharedInstance] contactRequestsForAccount].count > 0
+                                     withTapHandler:composeTapRecoginzer];
+}
+
 -(void) viewDidLoad
 {
     [super viewDidLoad];
@@ -97,8 +107,8 @@ static NSMutableSet* _smacksWarningDisplayed;
     self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
 #endif
     self.settingsButton.image = [UIImage systemImageNamed:@"gearshape.fill"];
-    self.composeButton.image = [UIImage systemImageNamed:@"person.2.fill"];
-    
+    [self configureComposeButton];
+
     UIBarButtonItem* spinnerButton = [[UIBarButtonItem alloc] initWithCustomView:self.spinner];
     [self.navigationItem setRightBarButtonItems:@[self.composeButton, spinnerButton] animated:NO];
     
@@ -735,6 +745,10 @@ static NSMutableSet* _smacksWarningDisplayed;
 }
 
 #pragma mark - mac menu
+
+-(void) showContacts:(id) sender { // function definition for @selector
+    [self showContacts];
+}
 
 -(void) showContacts
 {

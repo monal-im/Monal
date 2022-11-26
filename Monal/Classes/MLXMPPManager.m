@@ -265,8 +265,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 }
                 else
                 {
-                    //TODO: don't reconnect if appex has frozen our queues!
-                    [xmppAccount reconnect:0];      //try to immediately reconnect, don't bother pinging
+                    //don't reconnect if appex has frozen our queues!
+                    if(!xmppAccount.parseQueueFrozen)
+                        [xmppAccount reconnect:0];      //try to immediately reconnect, don't bother pinging
                 }
             }
         }
@@ -280,7 +281,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             {
                 BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
                 [self disconnectAll];
-                DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored (will be ignored in appex)");
+                DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
                 //this will automatically start the app if connectivity gets restored (force as soon as possible if !wasIdle)
                 //don't queue this notification because it should be handled immediately
                 [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @(!wasIdle)}];
@@ -290,10 +291,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         {
             //when switching from wifi to mobile (or back) we sometimes don't have any unreachable state in between
             //--> reconnect directly because switching from wifi to mobile will cut the connection a few seconds after the switch anyways
-            //wait for 1 sec before reconnecting to compensate for multiple nw_path updates in a row
-            //TODO: don't reconnect if appex has frozen our queues!
+            //NOTE: wait for 1 sec before reconnecting to compensate for multiple nw_path updates in a row
             for(xmpp* xmppAccount in [self connectedXMPP])
-                [xmppAccount reconnect:1];
+                //don't reconnect if appex has frozen our queues!
+                if(!xmppAccount.parseQueueFrozen)
+                    [xmppAccount reconnect:1];
         }
     });
     nw_path_monitor_start(_path_monitor);

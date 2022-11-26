@@ -715,6 +715,11 @@ NSString* const kStanza = @"stanza";
     return NO;
 }
 
+-(BOOL) parseQueueFrozen
+{
+    return _parseQueue.suspended == YES;
+}
+
 -(void) freezeParseQueue
 {
     //this has to be synchronous because we want to be sure no further stanzas are leaking from the parse queue

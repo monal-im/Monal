@@ -66,6 +66,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @interface xmpp : NSObject <NSStreamDelegate>
 
 @property (nonatomic, readonly) BOOL idle;
+@property (nonatomic, readonly) BOOL parseQueueFrozen;
 
 @property (nonatomic, strong) MLXMPPConnection* connectionProperties;
 

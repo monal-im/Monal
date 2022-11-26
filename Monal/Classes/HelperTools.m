@@ -800,7 +800,13 @@ void swizzle(Class c, SEL orig, SEL new)
     NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
     DDLogInfo(@"Clearing syncError notification states: %@", syncErrorsDisplayed);
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
+    {
         syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
+        //also remove pending or delivered sync error notifications
+        NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
+        [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[syncErrorIdentifier]];
+        [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
+    }
     [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
 }
 

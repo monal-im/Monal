@@ -268,6 +268,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                     //don't reconnect if appex has frozen our queues!
                     if(!xmppAccount.parseQueueFrozen)
                         [xmppAccount reconnect:0];      //try to immediately reconnect, don't bother pinging
+                    else
+                        DDLogDebug(@"Not trying to reconnect in 0s, parse queue frozen!");
                 }
             }
         }
@@ -296,6 +298,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 //don't reconnect if appex has frozen our queues!
                 if(!xmppAccount.parseQueueFrozen)
                     [xmppAccount reconnect:1];
+                else
+                    DDLogDebug(@"Not trying to reconnect in 1s, parse queue frozen!");
         }
     });
     nw_path_monitor_start(_path_monitor);

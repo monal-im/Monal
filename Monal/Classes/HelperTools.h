@@ -57,6 +57,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(void) configureFileProtectionFor:(NSString*) file;
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
 +(void) clearSyncErrorsOnAppForeground;
++(void) removePendingSyncErrorNotifications;
 +(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly andWaitForCompletion:(BOOL) waitForCompletion;
 
 +(BOOL) isInBackground;

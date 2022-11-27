@@ -239,6 +239,10 @@
                 DDLogDebug(@"Main app not in foreground anymore, handling first push now");
         }
         
+        //this will delay the delivery of such notifications until 60 seconds after our last sync attempt failed
+        //rather than being delivered 60 seconds after our first sync attempt failed
+        [HelperTools removePendingSyncErrorNotifications];
+        
         DDLogDebug(@"locking process and connecting accounts");
         [DDLog flushLog];
         [MLProcessLock lock];

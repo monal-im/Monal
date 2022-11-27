@@ -803,9 +803,34 @@ void swizzle(Class c, SEL orig, SEL new)
     {
         syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
         //also remove pending or delivered sync error notifications
+        //this will delay the delivery of such notifications until 60 seconds after the app moved into the background
+        //rather than being delivered  60 seconds after our first sync attempt failed (wether it was in the appex or mainapp)
         NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
         [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[syncErrorIdentifier]];
         [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
+    }
+    [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+}
+
++(void) removePendingSyncErrorNotifications
+{
+    NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
+    DDLogInfo(@"Removing pending syncError notifications, current state: %@", syncErrorsDisplayed);
+    for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
+    {
+        NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
+        [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
+            for(UNNotificationRequest* request in requests)
+                if([request.identifier isEqualToString:syncErrorIdentifier])
+                {
+                    //remove pending but not yet delivered sync error notifications and reset state to "not displayed yet"
+                    //this will delay the delivery of such notifications until 60 seconds after our last sync attempt failed
+                    //rather than being delivered 60 seconds after our first sync attempt failed
+                    //--> better UX
+                    syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
+                    [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[syncErrorIdentifier]];
+                }
+        }];
     }
     [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
 }

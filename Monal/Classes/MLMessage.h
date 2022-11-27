@@ -64,6 +64,8 @@ The of the message in the DB , should be int
 
 @property (nonatomic, copy) NSString* messageText;
 
+@property (nonatomic, assign) BOOL retracted;
+
 /**
  If the text was parsed into a URL. For message type url
  */
@@ -97,7 +99,6 @@ The of the message in the DB , should be int
  Whether a message was recieved by the device on the other end
  */
 @property (nonatomic, assign) BOOL hasBeenReceived;
-
 @property (nonatomic, assign) BOOL hasBeenDisplayed;
 
 /**
@@ -111,7 +112,6 @@ The of the message in the DB , should be int
  the message has not been marked as read in the db
  */
 @property (nonatomic, assign) BOOL unread;
-
 @property (nonatomic, assign) BOOL displayMarkerWanted;
 
 /**

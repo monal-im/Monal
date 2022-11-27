@@ -44,10 +44,8 @@
 -(NSMutableAttributedString*) attributedStringSlashMeWithMessage:(MLMessage*) msg andFont:(UIFont*) font
 {
     NSString* resultString = [self stringSlashMeWithMessage:msg];
-    
-    NSMutableAttributedString* replaceAttrMessageText = [[NSMutableAttributedString alloc] initWithString:resultString attributes:@{
-        NSFontAttributeName:font
-    }];
+    NSMutableAttributedString* replaceAttrMessageText = [[NSMutableAttributedString alloc] initWithString:resultString];
+    [replaceAttrMessageText addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, resultString.length)];
     return replaceAttrMessageText;
 }
 

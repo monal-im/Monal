@@ -230,7 +230,7 @@ static NSMutableDictionary* _typingNotifications;
     if(messageId == nil || !messageId.length)
     {
         if([messageNode check:@"body#"])
-            DDLogInfo(@"Message containing body has an empty stanza ID, using random UUID instead");
+            DDLogWarn(@"Message containing body has an empty stanza ID, using random UUID instead");
         else
             DDLogVerbose(@"Empty stanza ID, using random UUID instead");
         messageId = [[NSUUID UUID] UUIDString];
@@ -347,7 +347,64 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
-    if([messageNode check:@"body#"] || decrypted)
+    //handle message retraction (XEP-0424)
+    if([messageNode check:@"{urn:xmpp:fasten:0}apply-to/{urn:xmpp:message-retract:0}retract"])
+    {
+        NSString* originIdToRetract = [messageNode findFirst:@"{urn:xmpp:fasten:0}apply-to@id"];
+        //this checks if this message is from the same jid as the message it tries to retract for (e.g. inbound can only retract inbound and outbound only outbound)
+        NSNumber* historyIdToRetract = [[DataLayer sharedInstance] getHistoryIDForMessageId:originIdToRetract from:messageNode.fromUser andAccount:account.accountNo];
+        
+        if(historyIdToRetract != nil)
+        {
+            [[DataLayer sharedInstance] deleteMessageHistory:historyIdToRetract];
+            
+            //update ui
+            DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
+                @"message": [[[DataLayer sharedInstance] messagesForHistoryIDs:@[historyIdToRetract]] firstObject],
+                @"historyId": historyIdToRetract,
+                @"contact": [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo],
+            }];
+        }
+        else
+            DDLogWarn(@"Could not find history ID for originIdToRetract '%@' from '%@' on account %@", originIdToRetract, messageNode.fromUser, account.accountNo);
+    }
+    //handle retraction tombstone in MAM (XEP-0424)
+    else if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [messageNode check:@"{urn:xmpp:message-retract:0}retracted/{urn:xmpp:sid:0}origin-id@id"])
+    {
+        //first add an empty message into our history db...
+        NSString* retractedOriginId = [messageNode findFirst:@"{urn:xmpp:message-retract:0}retracted/{urn:xmpp:sid:0}origin-id@id"];
+        NSNumber* historyIdToRetract = [[DataLayer sharedInstance]
+                     addMessageToChatBuddy:buddyName
+                            withInboundDir:inbound
+                                forAccount:account.accountNo
+                                  withBody:@""
+                              actuallyfrom:actualFrom
+                            participantJid:participantJid
+                                      sent:YES
+                                    unread:NO
+                                 messageId:retractedOriginId
+                           serverMessageId:stanzaid
+                               messageType:kMessageTypeText
+                           andOverrideDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]
+                                 encrypted:NO
+                       displayMarkerWanted:NO
+                            usingHistoryId:historyIdToUse
+                        checkForDuplicates:[messageNode check:@"{urn:xmpp:sid:0}origin-id"] || (stanzaid != nil)
+        ];
+        
+        //...then retract this message (e.g. mark as retracted)
+        [[DataLayer sharedInstance] deleteMessageHistory:historyIdToRetract];
+        
+        //update ui
+        DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
+            @"message": [[[DataLayer sharedInstance] messagesForHistoryIDs:@[historyIdToRetract]] firstObject],
+            @"historyId": historyIdToRetract,
+            @"contact": [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo],
+        }];
+    }
+    else if([messageNode check:@"body#"] || decrypted)
     {
         BOOL unread = YES;
         BOOL showAlert = YES;
@@ -396,7 +453,6 @@ static NSMutableDictionary* _typingNotifications;
             NSNumber* historyId = nil;
             
             //handle LMC
-            BOOL deleteMessage = NO;
             if([messageNode check:@"{urn:xmpp:message-correct:0}replace"])
             {
                 NSString* messageIdToReplace = [messageNode findFirst:@"{urn:xmpp:message-correct:0}replace@id"];
@@ -405,18 +461,13 @@ static NSMutableDictionary* _typingNotifications;
                 //now check if the LMC is allowed (we use historyIdToUse for MLhistory mam queries to only check LMC for the 3 messages coming before this ID in this converastion)
                 //historyIdToUse will be nil, for messages going forward in time which means (check for the newest 3 messages in this conversation)
                 if(historyId != nil && [[DataLayer sharedInstance] checkLMCEligible:historyId encrypted:encrypted historyBaseID:historyIdToUse])
-                {
-                    if(![body isEqualToString:kMessageDeletedBody])
-                        [[DataLayer sharedInstance] updateMessageHistory:historyId withText:body];
-                    else
-                        deleteMessage = YES;
-                }
+                    [[DataLayer sharedInstance] updateMessageHistory:historyId withText:body];
                 else
                     historyId = nil;
             }
             
-            //handle normal messages or LMC messages that can not be found (but ignore deletion LMCs)
-            if(historyId == nil && ![body isEqualToString:kMessageDeletedBody])
+            //handle normal messages or LMC messages that can not be found
+            if(historyId == nil)
             {
                 historyId = [[DataLayer sharedInstance]
                              addMessageToChatBuddy:buddyName
@@ -492,33 +543,19 @@ static NSMutableDictionary* _typingNotifications;
                         }];
                 }
                 
-                if(deleteMessage)
-                {
-                    [[DataLayer sharedInstance] deleteMessageHistory:historyId];
-                    
-                    DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyId);
-                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
-                        @"message": message,
-                        @"historyId": historyId,
-                        @"contact": [MLContact createContactFromJid:message.buddyName andAccountNo:account.accountNo],
-                    }];
-                }
-                else
-                {
-                    [[DataLayer sharedInstance] addActiveBuddies:buddyName forAccount:account.accountNo];
-                    
-                    DDLogInfo(@"Sending out kMonalNewMessageNotice notification for historyId %@", historyId);
-                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
-                        @"message": message,
-                        @"historyId": historyId,
-                        @"showAlert": @(showAlert),
-                        @"contact": [MLContact createContactFromJid:message.buddyName andAccountNo:account.accountNo],
-                    }];
-                    
-                    //try to automatically determine content type of filetransfers
-                    if(messageType == kMessageTypeFiletransfer && [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"])
-                        [MLFiletransfer checkMimeTypeAndSizeForHistoryID:historyId];
-                }
+                [[DataLayer sharedInstance] addActiveBuddies:buddyName forAccount:account.accountNo];
+                
+                DDLogInfo(@"Sending out kMonalNewMessageNotice notification for historyId %@", historyId);
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
+                    @"message": message,
+                    @"historyId": historyId,
+                    @"showAlert": @(showAlert),
+                    @"contact": [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo],
+                }];
+                
+                //try to automatically determine content type of filetransfers
+                if(messageType == kMessageTypeFiletransfer && [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"])
+                    [MLFiletransfer checkMimeTypeAndSizeForHistoryID:historyId];
             }
         }
     }

@@ -95,8 +95,6 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 }
 
 //some xmpp related constants
-#define kMessageDeletedBody @"eu.siacs.conversations.message_deleted"
-
 #define kId @"id"
 #define kMessageId @"kMessageId"
 

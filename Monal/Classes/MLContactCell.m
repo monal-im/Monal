@@ -63,7 +63,12 @@
 
     if(lastMessage)
     {
-        if([lastMessage.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
+        if(lastMessage.retracted)
+        {
+            NSString* retractedStatus = NSLocalizedString(@"This message got retracted", @"");
+            [self showStatusTextItalic:retractedStatus withItalicRange:NSMakeRange(0, retractedStatus.length)];
+        }
+        else if([lastMessage.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
             [self showStatusText:NSLocalizedString(@"🔗 A Link", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
         else if([lastMessage.messageType isEqualToString:kMessageTypeFiletransfer])
         {
@@ -91,8 +96,7 @@
             if([lastMessage.messageText hasPrefix:@"/me "])
             {
                 NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithMessage:lastMessage];
-                NSRange replacedMsgAttrRange = NSMakeRange(0, replacedMessageText.length);
-                [self showStatusTextItalic:replacedMessageText withItalicRange:replacedMsgAttrRange];
+                [self showStatusTextItalic:replacedMessageText withItalicRange:NSMakeRange(0, replacedMessageText.length)];
             }
             else
             {
@@ -109,7 +113,7 @@
     }
     else
     {
-        [self showStatusText:nil inboundDir:lastMessage.inbound fromUser:nil];
+        [self showStatusText:nil inboundDir:NO fromUser:nil];
         DDLogWarn(@"Active chat but no messages found in history for %@.", contact.contactJid);
     }
 }

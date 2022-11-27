@@ -1464,6 +1464,18 @@ static NSDateFormatter* dbFormatter;
         MLMessage* msg = [self messageForHistoryID:messageNo];
         if([msg.messageType isEqualToString:kMessageTypeFiletransfer])
             [MLFiletransfer deleteFileForMessage:msg];
+        [self.db executeNonQuery:@"UPDATE message_history SET message='', messageType=?, filetransferMimeType='', filetransferSize=0, retracted=1 WHERE message_history_id=?;" andArguments:@[kMessageTypeText, messageNo]];
+        [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
+    }];
+}
+
+-(void) deleteMessageHistoryLocally:(NSNumber*) messageNo
+{
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
+        MLMessage* msg = [self messageForHistoryID:messageNo];
+        if([msg.messageType isEqualToString:kMessageTypeFiletransfer])
+            [MLFiletransfer deleteFileForMessage:msg];
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE message_history_id=?;" andArguments:@[messageNo]];
         [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];

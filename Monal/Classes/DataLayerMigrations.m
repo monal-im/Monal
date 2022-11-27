@@ -968,6 +968,11 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:5.305 withBlock:^{
             [db executeNonQuery:@"INSERT INTO flags (name, value) VALUES('device_id', ?);" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
         }];
+        
+        //add retracted flag to message history table
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.001 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN retracted BOOL DEFAULT false;"];
+        }];
 
 
         //check if device id changed and invalidate state, if so

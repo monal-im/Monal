@@ -558,6 +558,14 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0424.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:note>XEP-0424: Message Retraction</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0440.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>5.4</xmpp:since>

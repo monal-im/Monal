@@ -47,6 +47,8 @@
     message.filetransferMimeType = [dic objectForKey:@"filetransferMimeType"];
     message.filetransferSize = [dic objectForKey:@"filetransferSize"];
     
+    message.retracted = [(NSNumber*)[dic objectForKey:@"retracted"] boolValue];
+    
     return message;
 }
 
@@ -77,6 +79,7 @@
     self.errorReason = msg.errorReason;
     self.filetransferMimeType = msg.filetransferMimeType;
     self.filetransferSize = msg.filetransferSize;
+    self.retracted = msg.retracted;
 }
 
 -(NSString*) contactDisplayName
@@ -108,9 +111,9 @@
            [self.actualFrom isEqualToString:message.actualFrom] &&
            (
                // either the stanzaid is equal --> strong same message
-               // or the message id is equal --> weak same message (but together with the message text it should be sufficient)
+               // or the message id is equal (could be stanza id or origin id) --> weak same message, if stanza id
                [self.stanzaId isEqualToString:message.stanzaId] ||
-               ([self.messageId isEqualToString:message.messageId] && [self.messageText isEqualToString:message.messageText])
+               [self.messageId isEqualToString:message.messageId]
            );
 }
 
@@ -134,7 +137,14 @@
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@ {messageID: %@, stanzaID: %@} --> %@", self.accountId, self.participantJid ? self.participantJid : self.buddyName, self.messageId, self.stanzaId, self.messageDBId];
+    return [NSString stringWithFormat:@"%@: %@ {%@messageID: %@, stanzaID: %@} --> %@",
+        self.accountId,
+        self.participantJid ? self.participantJid : self.buddyName,
+        self.retracted ? @"retracted " : @"",
+        self.messageId,
+        self.stanzaId,
+        self.messageDBId
+    ];
 }
 
 @end

@@ -1077,7 +1077,8 @@ void swizzle(Class c, SEL orig, SEL new)
             @"http://jabber.org/protocol/chatstates",
             @"jabber:iq:version",
             @"urn:xmpp:chat-markers:0",
-            @"urn:xmpp:eme:0"
+            @"urn:xmpp:eme:0",
+            @"urn:xmpp:message-retract:0"
         ];
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });

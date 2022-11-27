@@ -1580,7 +1580,7 @@ enum msgSentState {
                     //update message in our list
                     [msgInList updateWithMessage:message];
 
-                    // Update table entry
+                    //update table entry
                     NSIndexPath* indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self->_messageTable beginUpdates];
@@ -1625,19 +1625,20 @@ enum msgSentState {
 
     DDLogDebug(@"Got deleted message notice for history id %ld and message id %@", (long)[msg.messageDBId intValue], msg.messageId);
 
-    NSIndexPath* indexPath;
     for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
     {
         // find msg that should be deleted
         MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
         if([msgInList.messageDBId intValue] == [msg.messageDBId intValue])
         {
-            // Remove table entry
-            indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
+            //update message in our list
+            [msgInList updateWithMessage:msg];
+            
+            //update table entry
+            NSIndexPath* indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->_messageTable beginUpdates];
-                [self.messageList removeObjectAtIndex:indexPath.row];
-                [self->_messageTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
+                [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 [self->_messageTable endUpdates];
             });
             break;
@@ -1683,7 +1684,7 @@ enum msgSentState {
 
             indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
 
-            // Update table entry
+            //update table entry
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->_messageTable beginUpdates];
                 [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
@@ -1737,7 +1738,7 @@ enum msgSentState {
             //update message in our list (this will copy filetransferMimeType and filetransferSize fields)
             [msgInList updateWithMessage:msg];
 
-            // Update table entry
+            //update table entry
             indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self->_messageTable beginUpdates];
@@ -2069,24 +2070,32 @@ enum msgSentState {
         }
         else // Default case
         {
-            if([MLEmoji containsEmojiWithText:messageText]) {
+            if(row.retracted)
+            {
+                NSString* stringToAttribute = NSLocalizedString(@"This message got retracted", @"");
+                UIFont* italicFont = [UIFont italicSystemFontOfSize:cell.messageBody.font.pointSize];
+                NSMutableAttributedString* attributedMsgString = [[NSMutableAttributedString alloc] initWithString:stringToAttribute];
+                [attributedMsgString addAttribute:NSFontAttributeName value:italicFont range:NSMakeRange(0, stringToAttribute.length)];
+                [cell.messageBody setAttributedText:attributedMsgString];
+            }
+            else if([MLEmoji containsEmojiWithText:messageText])
+            {
                 UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize*3];
                 [cell.messageBody setFont:originalFont];
 
                 [cell.messageBody setText:messageText];
                 cell.bubbleImage.hidden=YES;
             }
-            else
-            // Reset attributes
-            //XEP-0245: The slash me Command
-            if([messageText hasPrefix:@"/me "])
+            else if([messageText hasPrefix:@"/me "])
             {
                 UIFont* italicFont = [UIFont italicSystemFontOfSize:cell.messageBody.font.pointSize];
 
                 NSMutableAttributedString* attributedMsgString = [[MLXEPSlashMeHandler sharedInstance] attributedStringSlashMeWithMessage:row andFont:italicFont];
 
                 [cell.messageBody setAttributedText:attributedMsgString];
-            } else {
+            }
+            else
+            {
                 // Reset attributes
                 UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize];
                 [cell.messageBody setFont:originalFont];
@@ -2346,25 +2355,26 @@ enum msgSentState {
     quoteAction.backgroundColor = UIColor.systemGreenColor;
     quoteAction.image = [[[UIImage systemImageNamed:@"quote.bubble.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
-    UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        [self.xmppAccount sendMessage:kMessageDeletedBody toContact:self.contact isEncrypted:(self.contact.isEncrypted || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
+    UIContextualAction* retractAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Retract", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+        [self.xmppAccount retractMessage:message.messageId toContact:self.contact];
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
+        [message updateWithMessage:[[[DataLayer sharedInstance] messagesForHistoryIDs:@[message.messageDBId]] firstObject]];
 
+        //update table entry
         [self->_messageTable beginUpdates];
-        [self.messageList removeObjectAtIndex:indexPath.row];
-        [self->_messageTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
+        [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
         [self->_messageTable endUpdates];
-
+        
         //update active chats if necessary
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
 
         return completionHandler(YES);
     }];
-    LMCDeleteAction.backgroundColor = UIColor.systemRedColor;
-    LMCDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
+    retractAction.backgroundColor = UIColor.systemRedColor;
+    retractAction.image = [[[UIImage systemImageNamed:@"arrow.uturn.backward.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
+        [[DataLayer sharedInstance] deleteMessageHistoryLocally:message.messageDBId];
 
         [self->_messageTable beginUpdates];
         [self.messageList removeObjectAtIndex:indexPath.row];
@@ -2376,7 +2386,7 @@ enum msgSentState {
 
         return completionHandler(YES);
     }];
-    localDeleteAction.backgroundColor = UIColor.systemRedColor;
+    localDeleteAction.backgroundColor = UIColor.systemYellowColor;
     localDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     UIContextualAction* copyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Copy", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
@@ -2397,7 +2407,14 @@ enum msgSentState {
     if(!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted || self.contact.isEncrypted) historyBaseID:nil])
         return [UISwipeActionsConfiguration configurationWithActions:@[
             LMCEditAction,
-            LMCDeleteAction,
+            retractAction,
+            copyAction,
+            quoteAction
+        ]];
+    //only allow retraction for outgoing messages
+    else if(!message.inbound)
+        return [UISwipeActionsConfiguration configurationWithActions:@[
+            retractAction,
             copyAction,
             quoteAction
         ]];

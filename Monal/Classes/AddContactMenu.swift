@@ -122,66 +122,64 @@ struct AddContactMenu: View {
     }
 
     var body: some View {
-        NavigationView {
-            Form {
-                if(connectedAccounts.isEmpty) {
-                    Text("Please make sure at least one account has connected before trying to add a contact or channel.")
-                        .foregroundColor(.secondary)
+        Form {
+            if(connectedAccounts.isEmpty) {
+                Text("Please make sure at least one account has connected before trying to add a contact or channel.")
+                    .foregroundColor(.secondary)
+            }
+            else
+            {
+                Section(header: Text(verbatim: "Contact and Group/Channel Jids are usually in the format: name@domain.tld")) {
+                    if(connectedAccounts.count > 1) {
+                        Picker("Use account", selection: $selectedAccount) {
+                            ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
+                                Text(account.connectionProperties.identity.jid).tag(idx)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                    }
+                    TextField("Contact or Group/Channel Jid", text: $toAdd)
+                        .autocorrectionDisabled()
+                        .autocapitalization(.none)
+                        .disabled(scannedFingerprints != nil)
+                        .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
+                        .addClearButton(text:$toAdd)
                 }
-                else
-                {
-                    Section(header: Text(verbatim: "Contact and Group/Channel Jids are usually in the format: name@domain.tld")) {
-                        if(connectedAccounts.count > 1) {
-                            Picker("Use account", selection: $selectedAccount) {
-                                ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
-                                    Text(account.connectionProperties.identity.jid).tag(idx)
-                                }
-                            }
-                            .pickerStyle(.menu)
-                        }
-                        TextField("Contact or Group/Channel Jid", text: $toAdd)
-                            .autocorrectionDisabled()
-                            .autocapitalization(.none)
-                            .disabled(scannedFingerprints != nil)
-                            .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
-                            .addClearButton(text:$toAdd)
-                    }
-                    if(scannedFingerprints != nil && scannedFingerprints!.count > 0) {
-                        Section(header: Text("A contact was scanned through the QR code scanner")) {
-                            Toggle(isOn: $importScannedFingerprints, label: {
-                                Text("Import and trust OMEMO fingerprints from QR code")
-                            })
-                        }
-                    }
-                    Section {
-                        if(scannedFingerprints != nil) {
-                            Button(action: {
-                                toAdd = ""
-                                importScannedFingerprints = true
-                                scannedFingerprints = nil
-                            }, label: {
-                                Text("Clear scanned contact")
-                                    .foregroundColor(.red)
-                            })
-                        }
-                        Button(action: {
-                            showAlert = toAddEmptyAlert || toAddInvalidAlert
-
-                            if(!showAlert) {
-                                let jidComponents = HelperTools.splitJid(toAdd)
-                                if(jidComponents["host"] == nil || jidComponents["host"]!.isEmpty) {
-                                    errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing the string..."))
-                                    showAlert = true
-                                    return
-                                }
-                                // use the canonized jid from now on (lowercased, resource removed etc.)
-                                addJid(jid: jidComponents["user"]!) // check if user entry exists in components?
-                            }
-                        }, label: {
-                            scannedFingerprints == nil ? Text("Add Group/Channel or Contact") : Text("Add scanned Group/Channel or Contact")
+                if(scannedFingerprints != nil && scannedFingerprints!.count > 0) {
+                    Section(header: Text("A contact was scanned through the QR code scanner")) {
+                        Toggle(isOn: $importScannedFingerprints, label: {
+                            Text("Import and trust OMEMO fingerprints from QR code")
                         })
-                        .disabled(toAddEmpty || toAddInvalid)
                     }
+                }
+                Section {
+                    if(scannedFingerprints != nil) {
+                        Button(action: {
+                            toAdd = ""
+                            importScannedFingerprints = true
+                            scannedFingerprints = nil
+                        }, label: {
+                            Text("Clear scanned contact")
+                                .foregroundColor(.red)
+                        })
+                    }
+                    Button(action: {
+                        showAlert = toAddEmptyAlert || toAddInvalidAlert
+
+                        if(!showAlert) {
+                            let jidComponents = HelperTools.splitJid(toAdd)
+                            if(jidComponents["host"] == nil || jidComponents["host"]!.isEmpty) {
+                                errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing the string..."))
+                                showAlert = true
+                                return
+                            }
+                            // use the canonized jid from now on (lowercased, resource removed etc.)
+                            addJid(jid: jidComponents["user"]!) // check if user entry exists in components?
+                        }
+                    }, label: {
+                        scannedFingerprints == nil ? Text("Add Group/Channel or Contact") : Text("Add scanned Group/Channel or Contact")
+                    })
+                    .disabled(toAddEmpty || toAddInvalid)
                 }
             }
         }
@@ -197,6 +195,7 @@ struct AddContactMenu: View {
                 }
             }))
         }
+        .addLoadingOverlay(overlay)
         .navigationBarTitle("Add Contact or Group/Channel", displayMode: .inline)
         .navigationViewStyle(.stack)
         .toolbar(content: {

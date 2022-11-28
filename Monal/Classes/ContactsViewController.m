@@ -31,11 +31,8 @@
 {
     UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self dismissViewControllerAnimated:YES completion:nil];
-            [self.parentViewController dismissViewControllerAnimated:YES completion:^{
-                if(self.selectContact)
-                    self.selectContact(newContact);
-            }];
+            if(self.selectContact)
+                self.selectContact(newContact);
         });
     }];
     [self presentViewController:addContactMenuView animated:YES completion:^{}];

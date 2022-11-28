@@ -385,6 +385,16 @@ static NSMutableSet* _smacksWarningDisplayed;
     // Dispose of any resources that can be recreated.
 }
 
+-(void) showAddContactWithJid:(NSString*) jid andPreauthToken:(NSString* _Nullable) preauthToken
+{
+    UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewForJid:jid andPreauthToken:preauthToken withDismisser:^(MLContact* _Nonnull newContact) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self presentChatWithContact:newContact];
+        });
+    }];
+    [self presentViewController:addContactMenuView animated:YES completion:^{}];
+}
+
 -(void) segueToIntroScreensIfNeeded
 {
     //open password migration if needed
@@ -433,42 +443,45 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion
 {
-    // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
-    if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
-    {
-        // make sure the already open chat is reloaded and return
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
+        // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
+        if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
+        {
+            // make sure the already open chat is reloaded and return
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+            if(completion != nil)
+                completion(@YES);
+            return;
+        }
+        
+        // clear old chat before opening a new one (but not for splitView == YES)
+        if([HelperTools deviceUsesSplitView] == NO)
+            [self.navigationController popViewControllerAnimated:NO];
+        
+        // show placeholder if contact is nil, open chat otherwise
+        if(contact == nil)
+        {
+            [self openConversationPlaceholder:nil];
+            if(completion != nil)
+                completion(@NO);
+            return;
+        }
+        // check if the contact is a buddy
+        if([[DataLayer sharedInstance] isContactInList:contact.contactJid forAccount:contact.accountId] == NO)
+        {
+            DDLogError(@"Contact %@ unkown", contact.contactJid);
+            [self openConversationPlaceholder:nil];
+            if(completion != nil)
+                completion(@NO);
+            return;
+        }
+
+        // open chat
+        [self performSegueWithIdentifier:@"showConversation" sender:contact];
         if(completion != nil)
             completion(@YES);
-        return;
-    }
-    
-    // clear old chat before opening a new one (but not for splitView == YES)
-    if([HelperTools deviceUsesSplitView] == NO)
-        [self.navigationController popViewControllerAnimated:NO];
-    
-    // show placeholder if contact is nil, open chat otherwise
-    if(contact == nil)
-    {
-        [self openConversationPlaceholder:nil];
-        if(completion != nil)
-            completion(@NO);
-        return;
-    }
-    // check if the contact is a buddy
-    if([[DataLayer sharedInstance] isContactInList:contact.contactJid forAccount:contact.accountId] == NO)
-    {
-        DDLogError(@"Contact %@ unkown", contact.contactJid);
-        [self openConversationPlaceholder:nil];
-        if(completion != nil)
-            completion(@NO);
-        return;
-    }
-
-    // open chat
-    [self performSegueWithIdentifier:@"showConversation" sender:contact];
-    if(completion != nil)
-        completion(@YES);
+    }];
 }
 
 /*
@@ -718,8 +731,9 @@ static NSMutableSet* _smacksWarningDisplayed;
     [self performSegueWithIdentifier:@"showContacts" sender:self];
 }
 
-//we can not call this var "completion" because then some dumb comiler check kicks in and tells us "completion handler is never called" which ich plainly wrong
-//callback doesn't seem to be a word in the objc compiler's "bad words" dictionary, so this makes it compile again
+//we can not call this var "completion" because then some dumb comiler check kicks in and tells us "completion handler is never called"
+//which is plainly wrong. "callback" on the other hand doesn't seem to be a word in the objc compiler's "bad words" dictionary,
+//so this makes it compile again
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_id_block_t) callback
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];

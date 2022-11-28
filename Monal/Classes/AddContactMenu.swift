@@ -29,7 +29,20 @@ struct AddContactMenu: View {
     @State private var newContact : MLContact?
     
     private let dismissWithNewContact: (MLContact) -> ()
+    private let preauthToken: String?
 
+    init(delegate: SheetDismisserProtocol, dismissWithNewContact: @escaping (MLContact) -> (), prefillJid: String = "", preauthToken:String? = nil) {
+        self.delegate = delegate
+        self.dismissWithNewContact = dismissWithNewContact
+        //self.toAdd = State(wrappedValue: prefillJid)
+        self.toAdd = prefillJid
+        self.preauthToken = preauthToken
+        
+        let connectedAccounts = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
+        self.connectedAccounts = connectedAccounts
+        self.selectedAccount = connectedAccounts.first != nil ? 0 : -1;
+    }
+    
     // FIXME duplicate code from WelcomeLogIn.swift, maybe move to SwiftuiHelpers
     private var toAddEmptyAlert: Bool {
         alertPrompt.title = Text("No Empty Values!")
@@ -69,23 +82,32 @@ struct AddContactMenu: View {
     }
 
     func addJid(jid: String) {
-        showLoadingOverlay(overlay, headline: NSLocalizedString("Adding...", comment: ""))
         let account = self.connectedAccounts[selectedAccount]
+        let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
+        if contact.isInRoster {
+            self.newContact = contact
+            if self.connectedAccounts.count > 1 {
+                successAlert(title: Text("Already present"), message: Text("This contact is already in the contact list of the selected account"))
+            } else {
+                successAlert(title: Text("Already present"), message: Text("This contact is already in your contact list"))
+            }
+            return
+        }
+        showLoadingOverlay(overlay, headline: NSLocalizedString("Adding...", comment: ""))
         account.checkJidType(jid, withCompletion: { type, errorMsg in
             if(type == "account") {
                 hideLoadingOverlay(overlay)
                 let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
-                self.newContact = contact;
-                MLXMPPManager.sharedInstance().add(contact)
+                self.newContact = contact
+                MLXMPPManager.sharedInstance().add(contact, withPreauthToken:preauthToken)
                 successAlert(title: Text("Permission Requested"), message: Text("The new contact will be added to your contacts list when the person you've added has approved your request."))
             } else if(type == "muc") {
                 showLoadingOverlay(overlay, headline: NSLocalizedString("Adding MUC...", comment: ""))
-                let accountNo = account.accountNo;
                 account.mucProcessor.addUIHandler({data in
                     let success : Bool = (data as! NSDictionary)["success"] as! Bool;
                     hideLoadingOverlay(overlay)
                     if(success) {
-                        self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: accountNo)
+                        self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
                         successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined MUC %s!", jid)))
                     } else {
                         errorAlert(title: Text("Error entering group chat"))
@@ -159,21 +181,21 @@ struct AddContactMenu: View {
                             scannedFingerprints == nil ? Text("Add Group/Channel or Contact") : Text("Add scanned Group/Channel or Contact")
                         })
                         .disabled(toAddEmpty || toAddInvalid)
-                        .alert(isPresented: $showAlert) {
-                            Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton:.default(Text("Close"), action: {
-                                showAlert = false
-                                if self.success == true {
-                                    if self.newContact != nil {
-                                        self.dismissWithNewContact(newContact!)
-                                    } else {
-                                        self.delegate.dismiss()
-                                    }
-                                }
-                            }))
-                        }
                     }
                 }
             }
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton:.default(Text("Close"), action: {
+                showAlert = false
+                if self.success == true {
+                    if self.newContact != nil {
+                        self.dismissWithNewContact(newContact!)
+                    } else {
+                        self.delegate.dismiss()
+                    }
+                }
+            }))
         }
         .navigationBarTitle("Add Contact or Group/Channel", displayMode: .inline)
         .navigationViewStyle(.stack)
@@ -212,14 +234,6 @@ struct AddContactMenu: View {
                 })
             }
         }
-    }
-
-    init(delegate: SheetDismisserProtocol, dismissWithNewContact: @escaping (MLContact) -> ()) {
-        self.delegate = delegate
-        self.dismissWithNewContact = dismissWithNewContact;
-        let connectedAccounts = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
-        self.connectedAccounts = connectedAccounts
-        self.selectedAccount = connectedAccounts.first != nil ? 0 : -1;
     }
 }
 

@@ -303,6 +303,15 @@ class SwiftuiInterface : NSObject {
         host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: AddContactMenu(delegate: delegate, dismissWithNewContact: dismisser)))
         return host
     }
+    
+    @objc
+    func makeAddContactView(forJid jid:String, andPreauthToken preauthToken: String?, withDismisser dismisser: @escaping (MLContact) -> ()) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: AddContactMenu(delegate: delegate, dismissWithNewContact: dismisser, prefillJid: jid, preauthToken: preauthToken)))
+        return host
+    }
 
     @objc
     func makeView(name: String) -> UIViewController {

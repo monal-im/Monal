@@ -479,8 +479,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         while(self.activeChats == nil)
             usleep(100000);
         dispatch_async(dispatch_get_main_queue(), ^{
-            //TODO just uses fist enabled account. maybe change in the future
-            xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+            BOOL registerNeeded = [MLXMPPManager sharedInstance].connectedXMPP.count == 0;
             NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
             DDLogVerbose(@"URI path '%@'", components.path);
             DDLogVerbose(@"URI query '%@'", components.query);
@@ -522,7 +521,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 return;
             }
             
-            if(isRegister || (isRoster && account==nil && isIbr))
+            if(isRegister || (isRoster && isIbr && registerNeeded))
             {
                 NSString* username = nilDefault(jidParts[@"node"], @"");
                 NSString* host = jidParts[@"host"];
@@ -554,11 +553,60 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         [self openChatOfContact:contact];
                     }
                 }];
-                return;
+            }
+            else if(isRoster && registerNeeded)
+            {
+                //show register view and after register add contact as usual (e.g. call this method again)
+                weakify(self);
+                [self.activeChats showRegisterWithUsername:@"" onHost:@"" withToken:nil usingCompletion:^(NSNumber* accountNo) {
+                    strongify(self);
+                    DDLogVerbose(@"Got accountNo for newly registered account: %@", accountNo);
+                    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+                    DDLogInfo(@"Got newly registered account: %@", account);
+                    
+                    //this should never happen
+                    MLAssert(account != nil, @"Can not use account after register!", (@{
+                        @"components": components,
+                    }));
+                    
+                    [self handleXMPPURL:url];
+                }];
+            }
+            //I know this if is moot, but I wanted to preserve the different cases:
+            //either we already have one or more accounts and the xmpp: uri is of type subscription (ibr does not matter here,
+            //because we already have an account) or muc join
+            //OR the xmpp: uri is a normal xmpp uri having only a jid we should add as our new contact (preauthToken will be nil in this case)
+            else if((!registerNeeded && (isRoster || isGroupJoin)) || !registerNeeded)
+            {
+                if([MLXMPPManager sharedInstance].connectedXMPP.count == 1)
+                {
+                    xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+                    MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                    if(contact.isInRoster)
+                    {
+                        [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
+                        [self openChatOfContact:contact];
+                    }
+                    else
+                        [self.activeChats showAddContactWithJid:jid andPreauthToken:preauthToken];
+                }
+                else
+                    //the add contacts ui will check if the contact is already present on the selected account
+                    [self.activeChats showAddContactWithJid:jid andPreauthToken:preauthToken];
+            }
+            else
+            {
+                DDLogError(@"No account available to handel xmpp: uri!");
+                
+                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error adding contact or channel", @"") message:NSLocalizedString(@"No account available to handel 'xmpp:' URI!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                }]];
+                [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
             }
             
-            if(isRoster && account)
-            {
+            /*
+                
+                
                 MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
                 DDLogInfo(@"Adding contact to roster: %@", contact);
                 //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
@@ -567,8 +615,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 [self openChatOfContact:contact];
                 return;
             }
-            
-            if(isGroupJoin && account)
+            else if(!registerNeeded)
             {
                 MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
                 contact.isGroup = YES;                                  //this is a group --> tell addContact: to join this group
@@ -599,9 +646,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
                 MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
                 [self openChatOfContact:contact];
-            }
-            
-            DDLogError(@"No account available to handel xmpp: uri!");
+            }*/
         });
     });
 }

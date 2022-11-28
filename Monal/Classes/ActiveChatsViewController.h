@@ -33,6 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) showPrivacySettings;
 -(void) showDetails;
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString* _Nullable) token usingCompletion:(monal_id_block_t _Nullable) callback;
+-(void) showAddContactWithJid:(NSString*) jid andPreauthToken:(NSString* _Nullable) preauthToken;
 
 @end
 

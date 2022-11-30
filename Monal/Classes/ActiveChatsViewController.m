@@ -443,6 +443,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion
 {
+    DDLogVerbose(@"presenting chat with contact: %@", contact);
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
         // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
@@ -540,6 +541,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         UINavigationController* nav = segue.destinationViewController;
         ContactsViewController* contacts = (ContactsViewController*)nav.topViewController;
         contacts.selectContact = ^(MLContact* selectedContact) {
+            DDLogVerbose(@"Got selected contact from contactlist ui: %@", selectedContact);
             [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId];
             //no success may mean its already there
             [self insertOrMoveContact:selectedContact completion:^(BOOL finished __unused) {

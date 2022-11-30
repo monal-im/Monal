@@ -41,6 +41,8 @@ struct ContactRequestsMenuEntry: View {
                     // accept request
                     self.delete()       //update ui first because the array index can change afterwards
                     MLXMPPManager.sharedInstance().add(contact)
+                    let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+                    appDelegate.openChat(of:contact)
                 } label: {
                     Image(systemName: "checkmark.circle")
                         .accentColor(.green)

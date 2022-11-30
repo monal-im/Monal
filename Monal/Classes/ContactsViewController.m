@@ -31,6 +31,7 @@
 {
     UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
         dispatch_async(dispatch_get_main_queue(), ^{
+            DDLogVerbose(@"Calling block self.selectContact: %@", self.selectContact);
             if(self.selectContact)
                 self.selectContact(newContact);
         });

@@ -603,50 +603,6 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 }]];
                 [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
             }
-            
-            /*
-                
-                
-                MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-                DDLogInfo(@"Adding contact to roster: %@", contact);
-                //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
-                [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
-                [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
-                [self openChatOfContact:contact];
-                return;
-            }
-            else if(!registerNeeded)
-            {
-                MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-                contact.isGroup = YES;                                  //this is a group --> tell addContact: to join this group
-                //wait for join to finish before opening contact
-                NSNumber* accountNo = account.accountNo;                //needed because of retain cycle
-                [account.mucProcessor addUIHandler:^(id _data) {
-                    NSDictionary* data = (NSDictionary*)_data;
-                    if(![data[@"success"] boolValue])
-                    {
-                        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error entering groupchat", @"") message:data[@"errorMessage"] preferredStyle:UIAlertControllerStyleAlert];
-                        [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                        }]];
-                        [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
-                        [[MLXMPPManager sharedInstance] removeContact:contact];
-                        return;
-                    }
-                    [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:accountNo];
-                    [self openChatOfContact:contact];
-                } forMuc:jid];
-                [[MLXMPPManager sharedInstance] addContact:contact];    //will handle group joins and normal contacts transparently
-                return;
-            }
-            
-            //fallback: only add to local roster, but don't subscribe
-            //TODO: show toast in chatView that informs the user that this contact was not added to his contact list
-            if(account)
-            {
-                [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
-                MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-                [self openChatOfContact:contact];
-            }*/
         });
     });
 }

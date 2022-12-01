@@ -24,8 +24,8 @@ PODS:
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
   - SnapKit (5.0.1)
-  - sqlite3/common (3.39.3)
-  - sqlite3/perf-threadsafe (3.39.3):
+  - sqlite3/common (3.40.0)
+  - sqlite3/perf-threadsafe (3.40.0):
     - sqlite3/common
   - TOCropViewController (2.6.1)
   - WebRTC-lib (107.0.0)
@@ -96,7 +96,7 @@ SPEC CHECKSUMS:
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
-  sqlite3: 50117e9e063a9ef2b865f7bdf2f2601e5d368e9a
+  sqlite3: 88dd99ef4ac3945f5a15facdd752933c52fd93bf
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   WebRTC-lib: 56952c81f23b0e34ca86902938c0895d974279ff
 

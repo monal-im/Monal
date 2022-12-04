@@ -968,6 +968,11 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:5.305 withBlock:^{
             [db executeNonQuery:@"INSERT INTO flags (name, value) VALUES('device_id', ?);" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
         }];
+        
+        //invalidate state to make sure the pushservers are switched
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.306 withBlock:^{
+            [db executeNonQuery:@"INSERT INTO flags (name, value) VALUES('device_id', ?);" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
+        }];
 
 
         //check if device id changed and invalidate state, if so

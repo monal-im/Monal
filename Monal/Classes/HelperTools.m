@@ -115,8 +115,9 @@ void swizzle(Class c, SEL orig, SEL new)
 +(NSDictionary<NSString*, NSString*>*) getInvalidPushServers
 {
     return @{
-        @"ios13push.monal.im": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
-        @"push.monal.im": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
+        @"ios13push.monal.im": nilWrapper([[[UIDevice currentDevice] identifierForVendor] UUIDString]),
+        @"push.monal.im": nilWrapper([[[UIDevice currentDevice] identifierForVendor] UUIDString]),
+        @"us.prod.push.monal-im.org": nilWrapper(nil),
     };
 }
 
@@ -125,6 +126,8 @@ void swizzle(Class c, SEL orig, SEL new)
 #ifdef IS_ALPHA
     return @"alpha.push.monal-im.org";
 #else
+    return @"eu.prod.push.monal-im.org";
+    /*
     if([[[NSLocale currentLocale] countryCode] isEqualToString:@"US"])
     {
         return @"us.prod.push.monal-im.org";
@@ -132,18 +135,18 @@ void swizzle(Class c, SEL orig, SEL new)
     else
     {
         return @"eu.prod.push.monal-im.org";
-    }
+    }*/
 #endif
 }
 
 +(NSDictionary<NSString*, NSString*>*) getAvailablePushServers
 {
     return @{
-        @"us.prod.push.monal-im.org": @"US",
+        //@"us.prod.push.monal-im.org": @"US",
         @"eu.prod.push.monal-im.org": @"Europe",
         @"alpha.push.monal-im.org": @"Alpha/Debug (more Logging)",
 #ifdef IS_ALPHA
-        @"alpha2.push.monal-im.org": @"Disabled - Alpha Test",
+        @"disabled.push.monal-im.org": @"Disabled - Alpha Test",
 #endif
     };
 }

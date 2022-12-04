@@ -18,13 +18,15 @@ struct NotificationSettings: View {
                 description
             }, icon: {
                 Image(systemName: "checkmark.seal")
-            }).accentColor(.green)
+                    .foregroundColor(.green)
+            })
         } else {
             Label(title: {
                 description
             }, icon: {
                 Image(systemName: "xmark.seal")
-            }).accentColor(.red)
+                    .foregroundColor(.red)
+            })
         }
     }
 
@@ -95,7 +97,7 @@ struct NotificationSettings: View {
                     }
                 }.pickerStyle(.menu)//.menuStyle(.borderlessButton)
                 .onChange(of: selectedPushServer) { pushServerFqdn in
-                    print("Selected \(pushServerFqdn) as push server")
+                    DDLogDebug("Selected \(pushServerFqdn) as push server")
                     HelperTools.defaultsDB().setValue(pushServerFqdn, forKey: "selectedPushServer")
                     // enable push again to switch to the selected server
                     for account in self.xmppAccountInfo {

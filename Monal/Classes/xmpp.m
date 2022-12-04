@@ -4221,9 +4221,7 @@ NSString* const kStanza = @"stanza";
     [presence unsubscribeContact:contact];
     [self send:presence];
     
-    XMPPPresence* presence2 =[[XMPPPresence alloc] init];
-    [presence2 unsubscribedContact:contact];
-    [self send:presence2];
+    [self rejectFromRoster:contact];
 }
 
 -(void) rejectFromRoster:(NSString*) contact

@@ -4696,7 +4696,8 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
         return;
     }
-    if([MLXMPPManager sharedInstance].hasAPNSToken) {
+    if([MLXMPPManager sharedInstance].hasAPNSToken)
+    {
         BOOL needsDeregister = false;
         // check if the currently used push server is an old server that should no longer be used
         if([[HelperTools getInvalidPushServers] objectForKey:selectedPushServer] != nil)
@@ -4711,13 +4712,9 @@ NSString* const kStanza = @"stanza";
         // check if the last used push server (db) matches the currently selected server
         NSString* lastUsedPushServer = [[DataLayer sharedInstance] lastUsedPushServerForAccount:self.accountNo];
         if([lastUsedPushServer isEqualToString:selectedPushServer] == NO)
-        {
             [self disablePushOnOldAndAdditionalServers:lastUsedPushServer];
-        }
         else if(needsDeregister)
-        {
             [self disablePushOnOldAndAdditionalServers:nil];
-        }
         // push is now disabled on the existing server
         // enable push
         XMPPIQ* enablePushIq = [[XMPPIQ alloc] initWithType:kiqSetType];
@@ -4757,7 +4754,11 @@ NSString* const kStanza = @"stanza";
     {
         DDLogInfo(@"Disabling push on old pushserver: %@", server);
         XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
-        [disable setPushDisable:[oldServers objectForKey:server] onPushServer:server];
+        NSString* pushNode = nilExtractor([oldServers objectForKey:server]);
+        //use push token if the push node is nil (e.g. for fpush based servers)
+        if(pushNode == nil)
+            pushNode = [MLXMPPManager sharedInstance].pushToken;
+        [disable setPushDisable:pushNode onPushServer:server];
         [self send:disable];
     }
     // disable push on the last used server
@@ -4773,9 +4774,7 @@ NSString* const kStanza = @"stanza";
     for(NSString* availServer in [HelperTools getAvailablePushServers])
     {
         if([availServer isEqualToString:selectedNewPushServer] == YES)
-        {
             continue;
-        }
         XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
         [disable setPushDisable:[MLXMPPManager sharedInstance].pushToken onPushServer:availServer];
         [self send:disable];

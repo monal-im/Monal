@@ -23,7 +23,7 @@
 #import "MLOMEMO.h"
 #import "MLImageManager.h"
 
-#define CURRENT_MUC_STATE_VERSION @5
+#define CURRENT_MUC_STATE_VERSION @6
 
 @interface MLMucProcessor()
 {
@@ -31,7 +31,7 @@
     //persistent state
     NSObject* _stateLockObject;
     NSMutableDictionary* _roomFeatures;
-    NSMutableSet* _joining;
+    NSMutableDictionary* _joining;
     NSMutableSet* _firstJoin;
     NSDate* _lastPing;
     NSMutableSet* _noUpdateBookmarks;
@@ -49,7 +49,7 @@
     _account = account;
     _stateLockObject = [[NSObject alloc] init];
     _roomFeatures = [[NSMutableDictionary alloc] init];
-    _joining = [[NSMutableSet alloc] init];
+    _joining = [[NSMutableDictionary alloc] init];
     _firstJoin = [[NSMutableSet alloc] init];
     _uiHandler = [[NSMutableDictionary alloc] init];
     _lastPing = [NSDate date];
@@ -113,7 +113,7 @@
     {
         @synchronized(_stateLockObject) {
             _roomFeatures = [[NSMutableDictionary alloc] init];
-            _joining = [[NSMutableSet alloc] init];
+            _joining = [[NSMutableDictionary alloc] init];
             //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
             
             //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
@@ -140,7 +140,7 @@
 -(BOOL) isJoining:(NSString*) room
 {
     @synchronized(_stateLockObject) {
-        return [_joining containsObject:room];
+        return _joining[room] != nil;
     }
 }
 
@@ -178,9 +178,7 @@
         
         //try to join again
         DDLogInfo(@"Retrying muc join of %@ with new nick (appended underscore): %@", presenceNode.fromUser, nick);
-        @synchronized(_stateLockObject) {
-            [_joining removeObject:presenceNode.fromUser];
-        }
+        [self removeRoomFromJoining:presenceNode.fromUser];
         [self sendJoinPresenceFor:presenceNode.fromUser];
         return;
     }
@@ -189,9 +187,7 @@
     if([presenceNode findFirst:@"/<type=error>"])
     {
         DDLogError(@"got muc error presence of %@!", presenceNode.fromUser);
-        @synchronized(_stateLockObject) {
-            [_joining removeObject:presenceNode.fromUser];
-        }
+        [self removeRoomFromJoining:presenceNode.fromUser];
         
         //delete muc from favorites table and update bookmarks
         if([self checkIfStillBookmarked:presenceNode.fromUser])
@@ -394,9 +390,7 @@
                     if([nick isEqualToString:node.fromResource])
                     {
                         DDLogDebug(@"got banned from room %@", node.fromUser);
-                        @synchronized(_stateLockObject) {
-                            [_joining removeObject:node.fromUser];
-                        }
+                        [self removeRoomFromJoining:node.fromUser];
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
                 }
@@ -407,9 +401,7 @@
                     if([nick isEqualToString:node.fromResource])
                     {
                         DDLogDebug(@"got kicked from room %@", node.fromUser);
-                        @synchronized(_stateLockObject) {
-                            [_joining removeObject:node.fromUser];
-                        }
+                        [self removeRoomFromJoining:node.fromUser];
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
                 }
@@ -420,9 +412,7 @@
                     if([nick isEqualToString:node.fromResource])
                     {
                         DDLogDebug(@"got affiliation change for room %@", node.fromUser);
-                        @synchronized(_stateLockObject) {
-                            [_joining removeObject:node.fromUser];
-                        }
+                        [self removeRoomFromJoining:node.fromUser];
                         [self sendDiscoQueryFor:node.fromUser withJoin:YES andBookmarksUpdate:YES];
                     }
                 }
@@ -433,9 +423,7 @@
                     if([nick isEqualToString:node.fromResource])
                     {
                         DDLogDebug(@"got removed from members-only room %@", node.fromUser);
-                        @synchronized(_stateLockObject) {
-                            [_joining removeObject:node.fromUser];
-                        }
+                        [self removeRoomFromJoining:node.fromUser];
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                         [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                     }
@@ -447,9 +435,7 @@
                     if([nick isEqualToString:node.fromResource])
                     {
                         DDLogDebug(@"got removed from room %@ because of system shutdown", node.fromUser);
-                        @synchronized(_stateLockObject) {
-                            [_joining removeObject:node.fromUser];
-                        }
+                        [self removeRoomFromJoining:node.fromUser];
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
                 }
@@ -463,9 +449,7 @@
             DDLogInfo(@"Successfully joined muc %@...", node.fromUser);
             
             //we are joined now, remove from joining list
-            @synchronized(_stateLockObject) {
-                [_joining removeObject:node.fromUser];
-            }
+            [self removeRoomFromJoining:node.fromUser];
             
             //we joined successfully --> add muc to our favorites (this will use the already up to date nick from buddylist db table)
             //and update bookmarks if this was the first time we joined this muc
@@ -575,10 +559,10 @@
         return;
     }
     @synchronized(_stateLockObject) {
-        if([_joining containsObject:room])
+        if(_joining[room] != nil)
         {
             DDLogInfo(@"Aborting join of room '%@' on account %@", room, _account);
-            [_joining removeObject:room];
+            [self removeRoomFromJoining:room];
         }
     }
     DDLogInfo(@"Leaving room '%@' on account %@ using nick '%@'...", room, _account, nick);
@@ -603,12 +587,13 @@
     {
         @synchronized(_stateLockObject) {
             //don't join twice
-            if([_joining containsObject:roomJid])
+            if(_joining[roomJid] != nil)
             {
                 DDLogInfo(@"Already joining muc %@, not doing it twice", roomJid);
                 return;
             }
-            [_joining addObject:roomJid];       //add room to "currently joining" list
+            //add room to "currently joining" list (without any idle timer yet, because the iq handling will timeout the disco iq already)
+            _joining[roomJid] = @(-1);      //TODO
             //we don't need to force saving of our new state because once this outgoing iq query gets handled by smacks the whole state will be saved
         }
     }
@@ -634,9 +619,7 @@
     if(![[DataLayer sharedInstance] isBuddyMuc:roomJid forAccount:_account.accountNo])
     {
         DDLogWarn(@"Tried to muc-ping non-muc jid '%@', trying to join regularily with disco...", roomJid);
-        @synchronized(_stateLockObject) {
-            [_joining removeObject:roomJid];
-        }
+        [self removeRoomFromJoining:roomJid];
         //this will check if this jid really is not a muc and delete it fom favorites and bookmarks, if not (and join normally if it turns out is a muc after all)
         [self sendDiscoQueryFor:roomJid withJoin:YES andBookmarksUpdate:YES];
         return;
@@ -660,7 +643,7 @@
         {
             DDLogWarn(@"Ping failed with 'not-acceptable' --> we have to re-join %@", roomJid);
             @synchronized(self->_stateLockObject) {
-                [self->_joining removeObject:roomJid];
+                [self->_joining removeObjectForKey:roomJid];
             }
             //check if muc is still in our favorites table before we try to join it (could be deleted by a bookmarks update just after we sent out our ping)
             //this has to be done to avoid such a race condition that would otherwise re-add the muc back
@@ -691,7 +674,7 @@
         {
             DDLogWarn(@"Any other error happened: The client is probably not joined to %@ any more. It should perform a re-join. --> we have to re-join", roomJid);
             @synchronized(self->_stateLockObject) {
-                [self->_joining removeObject:roomJid];
+                [self->_joining removeObjectForKey:roomJid];
             }
             //check if muc is still in our favorites table before we try to join it (could be deleted by a bookmarks updae just after we sent out our ping)
             //this has to be done to avoid such a race condition that would otherwise re-add the muc back
@@ -727,9 +710,7 @@ $$
 
 $$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid))
     DDLogInfo(@"Removing muc '%@' from _joining...", roomJid);
-    @synchronized(_stateLockObject) {
-        [_joining removeObject:roomJid];
-    }
+    [self removeRoomFromJoining:roomJid];
 $$
 
 $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$BOOL(join), $$BOOL(updateBookmarks))
@@ -741,25 +722,21 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     if([iqNode check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}gone"])
     {
         DDLogError(@"Querying muc info returned this muc isn't available anymore: %@", [iqNode findFirst:@"error"]);
-        @synchronized(_stateLockObject) {
-            [_joining removeObject:iqNode.fromUser];
-        }
+        [self removeRoomFromJoining:iqNode.fromUser];
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         //make sure to update remote bookmarks, even if updateBookmarks == NO
         //keep buddy list entry to allow users to read the last messages before the muc got deleted
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel not available anymore: %@", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:iqNode andIsSevere:YES];
         [self deleteMuc:iqNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
         
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel not available anymore: %@", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:iqNode andIsSevere:YES];
         return;
     }
     
     if([iqNode check:@"/<type=error>/error<type=wait>"])
     {
         DDLogError(@"Querying muc info returned a temporary error: %@", [iqNode findFirst:@"error"]);
-        @synchronized(_stateLockObject) {
-            [_joining removeObject:iqNode.fromUser];
-        }
+        [self removeRoomFromJoining:iqNode.fromUser];
         
         //do nothing: the error is only temporary (a s2s problem etc.), a muc ping will retry the join
         //this will keep the entry in local bookmarks table and remote bookmars
@@ -774,9 +751,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     else if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Querying muc info returned a persistent error: %@", [iqNode findFirst:@"error"]);
-        @synchronized(_stateLockObject) {
-            [_joining removeObject:iqNode.fromUser];
-        }
+        [self removeRoomFromJoining:iqNode.fromUser];
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         //make sure to update remote bookmarks, even if updateBookmarks == NO
@@ -892,7 +867,12 @@ $$
     NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:_account.accountNo];
     DDLogInfo(@"Trying to join muc '%@' with nick '%@' on account %@...", room, nick, _account);
     @synchronized(_stateLockObject) {
-        [_joining addObject:room];       //add room to "currently joining" list
+        //add room to "currently joining" list (and remove any present idle timer for this room)
+        [[DataLayer sharedInstance] delIdleTimerWithId:_joining[room]];
+        //add idle timer to display error if we did not receive the reflected join presence after 30 idle seconds
+        //this will make sure the spinner ui will not spin indefinitely when adding a channel via ui
+        NSNumber* timerId = [[DataLayer sharedInstance] addIdleTimerWithTimeout:@30 andHandler:$newHandler(self, handleJoinTimeout, $ID(room)) onAccountNo:_account.accountNo];
+        _joining[room] = timerId;
         //we don't need to force saving of our new state because once this outgoing join presence gets handled by smacks the whole state will be saved
     }
     
@@ -900,6 +880,11 @@ $$
     [presence joinRoom:room withNick:nick];
     [_account send:presence];
 }
+
+$$instance_handler(handleJoinTimeout, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not join group/channel '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
+    //don't remove the muc, this could be a temporary (network induced) error
+$$
 
 $$instance_handler(handleMembersList, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
@@ -1119,6 +1104,14 @@ $$
         DDLogInfo(@"Using default nick '%@' for room %@ on account %@", nick, room, _account);
     }
     return nick;
+}
+
+-(void) removeRoomFromJoining:(NSString*) room
+{
+    @synchronized(_stateLockObject) {
+        [[DataLayer sharedInstance] delIdleTimerWithId:_joining[room]];
+        [_joining removeObjectForKey:room];
+    }
 }
 
 @end

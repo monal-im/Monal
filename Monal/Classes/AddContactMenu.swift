@@ -108,7 +108,7 @@ struct AddContactMenu: View {
                     hideLoadingOverlay(overlay)
                     if(success) {
                         self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
-                        successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined MUC %s!", jid)))
+                        successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined MUC %@!", jid)))
                     } else {
                         errorAlert(title: Text("Error entering group chat"))
                     }

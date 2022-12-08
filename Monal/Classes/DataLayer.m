@@ -18,6 +18,7 @@
 #import "MLFiletransfer.h"
 #import "DataLayerMigrations.h"
 #import "MLContactSoftwareVersionInfo.h"
+#import "MLXMPPManager.h"
 
 @interface DataLayer()
 @property (readonly, strong) MLSQLite* db;
@@ -2332,6 +2333,56 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"UPDATE buddylist SET encrypt=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, jid]];
     }];
     return;
+}
+
+-(NSNumber*) addIdleTimerWithTimeout:(NSNumber*) timeout andHandler:(MLHandler*) handler onAccountNo:(NSNumber*) accountNo
+{
+    return [self.db idWriteTransaction:^{
+        [self.db executeNonQuery:@"INSERT INTO idle_timers (timeout, account_id, handler) VALUES (?, ?, ?);" andArguments:@[timeout, accountNo, [HelperTools serializeObject:handler]]];
+        return [self.db lastInsertId];
+    }];
+}
+
+-(void) delIdleTimerWithId:(NSNumber* _Nullable) timerId
+{
+    if(timerId == nil)
+        return;
+    return [self.db voidWriteTransaction:^{
+        NSArray* timers = [self.db executeReader:@"SELECT * FROM idle_timers WHERE id=?;" andArguments:@[timerId]];
+        if(timers == nil || [timers count] != 1)
+            return;         //we could not find this timerId, ignore this call
+        NSDictionary* timer = timers[0];
+        //call invalidation of this timer's handler (will do nothing if this handler does not have any invalidation method)
+        //and delete the timer afterwards
+        //thanks to foreign keys deleting an account will automatically delete it's idle timers, too.
+        //therefore the following assertion only handles deactivated accounts
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:timer[@"account_id"]];
+        MLAssert(account != nil, @"Deleting an idle timer should not be done when an account is disabled!", (@{
+            @"timerId": timerId,
+            @"accountNo": nilWrapper(timer[@"account_id"])
+        }));
+        $invalidate([HelperTools unserializeData:timer[@"handler"]], $ID(account));
+        [self.db executeNonQuery:@"DELETE FROM idle_timers WHERE id=?;" andArguments:@[timerId]];
+    }];
+}
+
+//this method will only be called from our timer background thread also handling iq timeouts
+-(void) decrementIdleTimersForAccount:(xmpp*) account
+{
+    return [self.db voidWriteTransaction:^{
+        for(NSDictionary* timer in [self.db executeReader:@"SELECT * FROM idle_timers WHERE account_id=?;" andArguments:@[account.accountNo]])
+        {
+            if([timer[@"timeout"] unsignedIntegerValue] == 0)
+            {
+                //this timer expired --> call it's handler and delete the timer afterwards
+                $call([HelperTools unserializeData:timer[@"handler"]], $ID(account));
+                [self.db executeNonQuery:@"DELETE FROM idle_timers WHERE id=?;" andArguments:@[timer[@"id"]]];
+                continue;
+            }
+            //just decrease timeout of this timer (it will expire when reaching zero)
+            [self.db executeNonQuery:@"UPDATE idle_timers SET timeout=timeout-1 WHERE id=?;" andArguments:@[timer[@"id"]]];
+        }
+    }];
 }
 
 #pragma mark History Message Search (search keyword in message, buddy_name, messageType)

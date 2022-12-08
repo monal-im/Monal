@@ -4786,6 +4786,11 @@ NSString* const kStanza = @"stanza";
     if([_parseQueue operationCount] > 4 || _accountState < kStateBound || !_catchupDone)
         return;
     
+    //update idle timers, too
+    [[DataLayer sharedInstance] decrementIdleTimersForAccount:self];
+    
+    //update iq handlers
+    BOOL stateUpdated = NO;
     @synchronized(_iqHandlers) {
         //we are NOT mutating on iteration here, because we use dispatchAsyncOnReceiveQueue to handle timeouts
         for(NSString* iqid in _iqHandlers)
@@ -4797,6 +4802,9 @@ NSString* const kStanza = @"stanza";
             if([_iqHandlers[iqid][@"timeout"] doubleValue] < 0)
             {
                 DDLogWarn(@"Timeout of handler triggered: %@", _iqHandlers[iqid]);
+                //only force save state after calling a handler
+                //(timeout changes that don't make it to disk only extend the timeout by a few seconds but don't have any negative sideeffect)
+                stateUpdated = YES;
                 
                 //fake xmpp stanza error to make timeout handling transparent without the need for invalidation handler
                 //we need to fake the from, too (no from means own bare jid)
@@ -4837,6 +4845,10 @@ NSString* const kStanza = @"stanza";
             }
         }
     }
+    
+    //make sure all state is persisted as soon as possible (we could have called handlers and we don't want to execute them twice!)
+    if(stateUpdated)
+        [self persistState];
 }
 
 -(void) delayIncomingMessageStanzasForArchiveJid:(NSString*) archiveJid

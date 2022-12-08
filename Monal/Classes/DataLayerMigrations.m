@@ -973,6 +973,17 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:6.001 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN retracted BOOL DEFAULT false;"];
         }];
+        
+        //create idle timer table
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.002 withBlock:^{
+            [db executeNonQuery:@"CREATE TABLE 'idle_timers' ( \
+                'id' INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \
+                'timeout' INTEGER NOT NULL, \
+                'handler' BLOB NOT NULL, \
+                'account_id' INTEGER NOT NULL, \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE\
+            );"];
+        }];
 
 
         //check if device id changed and invalidate state, if so

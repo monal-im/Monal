@@ -302,6 +302,10 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSArray*) getShareSheetPayload;
 -(void) deleteShareSheetPayloadWithId:(NSNumber*) payloadId;
 
+-(NSNumber*) addIdleTimerWithTimeout:(NSNumber*) timeout andHandler:(MLHandler*) handler onAccountNo:(NSNumber*) accountNo;
+-(void) delIdleTimerWithId:(NSNumber* _Nullable) timerId;
+-(void) decrementIdleTimersForAccount:(xmpp*) account;
+
 @end
 
 NS_ASSUME_NONNULL_END

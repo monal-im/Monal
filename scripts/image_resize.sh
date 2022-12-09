@@ -5,7 +5,7 @@ if [[ "$1" == "" ]]; then
     exit 1
 fi
     
-for d in ./Images.xcassets/AlphaApp*set; do
+for d in ./Images.xcassets/*App*set; do
 	for png in $d/*.png; do
 		size="$(identify -format "%wx%h" "$png")"
 		echo "$png ($size)"

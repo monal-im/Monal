@@ -1524,9 +1524,8 @@ NSString* const kStanza = @"stanza";
         //It may also result in mutation on iteration
         [self.unAckedStanzas removeAllObjects];
         for(NSDictionary* dic in sendCopy)
-        {
             [self send:(XMPPStanza*)[dic objectForKey:kStanza]];
-        }
+        DDLogInfo(@"Done resending unacked stanzas...");
         [self persistState];
     }
 }

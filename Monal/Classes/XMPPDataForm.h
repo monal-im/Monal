@@ -24,18 +24,34 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic, strong) NSString* _Nullable title;
 @property (atomic, strong) NSString* _Nullable instructions;
 -(MLXMLNode*) setFieldWithDictionary:(NSDictionary*) field;
+-(MLXMLNode*) setFieldWithDictionary:(NSDictionary*) field atIndex:(NSNumber* _Nullable) index;
 -(MLXMLNode*) setField:(NSString*) name withValue:(NSString*) value;
+-(MLXMLNode*) setField:(NSString* _Nonnull) name withValue:(NSString* _Nonnull) value atIndex:(NSNumber* _Nullable) index;
 -(MLXMLNode*) setField:(NSString*) name withType:(NSString* _Nullable) type andValue:(NSString*) value;
+-(MLXMLNode*) setField:(NSString* _Nonnull) name withType:(NSString* _Nullable) type andValue:(NSString* _Nonnull) value atIndex:(NSNumber* _Nullable) index;
 -(NSDictionary* _Nullable) getField:(NSString*) name;
+-(NSDictionary* _Nullable) getField:(NSString* _Nonnull) name atIndex:(NSNumber* _Nullable) index;
 -(void) removeField:(NSString*) name;
+-(void) removeField:(NSString* _Nonnull) name atIndex:(NSNumber* _Nullable) index;
 @property (strong, readonly) NSString* description;
 
-//NSMutableDictionary interface (not complete, but nearly complete)
+//*** NSMutableArray interface (not complete, only indexed subscript access methods supported)
+
+-(id) objectAtIndexedSubscript:(NSInteger) idx;
+-(void) setObject:(id _Nullable) obj atIndexedSubscript:(NSInteger) idx;
+
+//*** NSMutableDictionary interface (not complete, but nearly complete)
+//for multi-item forms all of these methods will operate on the first item only, with one exception:
+//count will return the count of items for multi-item forms
+
+//will return the count of items for a multi-item form
 @property(readonly) NSUInteger count;
 @property(readonly, copy) NSArray* allKeys;
 @property(readonly, copy) NSArray* allValues;
 -(id _Nullable) objectForKeyedSubscript:(NSString*) key;
 -(void) setObject:(id _Nullable) obj forKeyedSubscript:(NSString*) key;
+//for multi-item forms it will only return the list of var names of the first item
+//(as according to XEP-0004 all items should have the same set of field nodes --> this should contain all var names possible in any item)
 -(NSArray*) allKeys;
 -(NSArray*) allValues;
 -(NSArray*) allKeysForObject:(id) anObject;

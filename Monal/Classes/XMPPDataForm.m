@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XMPPDataForm.h"
+#import "HelperTools.h"
 
 @interface MLXMLNode()
 @property (atomic, strong, readwrite) NSString* element;
@@ -20,7 +21,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 +(void) initialize
 {
-    dataFormQueryRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*)?(@[a-zA-Z0-9_:#-]+|%[a-zA-Z0-9_:#-]+)?" options:0 error:nil];
+    dataFormQueryRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*)?(\\[([0-9]+)\\])?(@[a-zA-Z0-9_:#-]+|%[a-zA-Z0-9_:#-]+)?" options:0 error:nil];
 }
 
 //this simple init is not public api because type and form type are mandatory in xep-0004
@@ -49,7 +50,12 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(MLXMLNode*) setFieldWithDictionary:(NSDictionary*) field
 {
-    MLXMLNode* fieldNode = [self setField:field[@"name"] withType:field[@"type"] andValue:[NSString stringWithFormat:@"%@", field[@"value"]]];
+    return [self setFieldWithDictionary:field atIndex:nil];
+}
+
+-(MLXMLNode*) setFieldWithDictionary:(NSDictionary*) field  atIndex:(NSNumber* _Nullable) index
+{
+    MLXMLNode* fieldNode = [self setField:field[@"name"] withType:field[@"type"] andValue:[NSString stringWithFormat:@"%@", field[@"value"]] atIndex:index];
     if(field[@"options"])
     {
         for(NSString* option in field[@"options"])
@@ -71,14 +77,34 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(MLXMLNode*) setField:(NSString* _Nonnull) name withValue:(NSString* _Nonnull) value
 {
-    return [self setField:name withType:nil andValue:value];
+    return [self setField:name withValue:value atIndex:nil];
+}
+
+-(MLXMLNode*) setField:(NSString* _Nonnull) name withValue:(NSString* _Nonnull) value atIndex:(NSNumber* _Nullable) index
+{
+    return [self setField:name withType:nil andValue:value atIndex:index];
 }
 
 -(MLXMLNode*) setField:(NSString* _Nonnull) name withType:(NSString* _Nullable) type andValue:(NSString* _Nonnull) value
 {
+    return [self setField:name withType:type andValue:value atIndex:nil];
+}
+
+-(MLXMLNode*) setField:(NSString* _Nonnull) name withType:(NSString* _Nullable) type andValue:(NSString* _Nonnull) value atIndex:(NSNumber* _Nullable) index
+{
+    MLXMLNode* operateAtNode = self;
+    if(index != nil)
+    {
+        NSArray<MLXMLNode*>* items = [self find:@"item"];
+        operateAtNode = items[[index unsignedIntegerValue]];
+    }
+    MLAssert(operateAtNode != nil, @"index out of bounds for multi-item form!", (@{
+        @"index": index,
+        @"dataform": self,
+    }));
     NSDictionary* attrs = type ? @{@"type": type, @"var": name} : @{@"var": name};
-    [self removeChildNode:[self findFirst:@"field<var=%@>", name]];
-    MLXMLNode* field = [self addChildNode:[[MLXMLNode alloc] initWithElement:@"field" withAttributes:attrs andChildren:@[
+    [operateAtNode removeChildNode:[operateAtNode findFirst:@"field<var=%@>", name]];
+    MLXMLNode* field = [operateAtNode addChildNode:[[MLXMLNode alloc] initWithElement:@"field" withAttributes:attrs andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:value]
     ] andData:nil]];
     [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
@@ -87,9 +113,28 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(NSDictionary* _Nullable) getField:(NSString* _Nonnull) name
 {
-    MLXMLNode* fieldNode = [self findFirst:@"field<var=%@>", name];
+    return [self getField:name atIndex:nil];
+}
+
+-(NSDictionary* _Nullable) getField:(NSString* _Nonnull) name atIndex:(NSNumber* _Nullable) index
+{
+    MLXMLNode* fieldNode;
+    MLXMLNode* descriptionNode;
+    if(index != nil)
+    {
+        descriptionNode = [self findFirst:@"reported/field<var=%@>", name];
+        NSArray<MLXMLNode*>* items = [self find:@"item"];
+        fieldNode = [items[[index unsignedIntegerValue]] findFirst:@"field<var=%@>", name];
+    }
+    else
+    {
+        fieldNode = [self findFirst:@"field<var=%@>", name];
+    }
     if(!fieldNode)
         return nil;
+    if(descriptionNode == nil)
+        descriptionNode = fieldNode;
+    
     NSMutableDictionary* options = [[NSMutableDictionary alloc] init];
     for(MLXMLNode* option in [fieldNode find:@"option"])
         options[[NSString stringWithFormat:@"%@", [option findFirst:@"value#"]]] = [NSString stringWithFormat:@"%@", ([option check:@"/@label"] ? [option findFirst:@"/@label"] : [option findFirst:@"value#"])];
@@ -97,10 +142,10 @@ static NSRegularExpression* dataFormQueryRegex;
     for(id value in [fieldNode find:@"value#"])
         if(value != nil)        //only safeguard, should never happen
             [allValues addObject:[NSString stringWithFormat:@"%@", value]];
-    if([fieldNode check:@"/@type"])
+    if([descriptionNode check:@"/@type"])
         return @{
             @"name": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"/@var"]],
-            @"type": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"/@type"]],
+            @"type": [NSString stringWithFormat:@"%@", [descriptionNode findFirst:@"/@type"]],
             @"value": [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"value#"]],
             @"allValues": [allValues copy],     //immutable copy
             @"options": [options copy],         //immutable copy
@@ -119,7 +164,18 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(void) removeField:(NSString* _Nonnull) name
 {
-    [self removeChildNode:[self findFirst:@"field<var=%@>", name]];
+    [self removeField:name atIndex:nil];
+}
+
+-(void) removeField:(NSString* _Nonnull) name atIndex:(NSNumber* _Nullable) index
+{
+    if(index != nil)
+    {
+        NSArray<MLXMLNode*>* items = [self find:@"item"];
+        [self removeChildNode:[items[[index unsignedIntegerValue]] findFirst:@"field<var=%@>", name]];
+    }
+    else
+        [self removeChildNode:[self findFirst:@"field<var=%@>", name]];
     [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 
@@ -179,7 +235,8 @@ static NSRegularExpression* dataFormQueryRegex;
     NSTextCheckingResult* match = matches.firstObject;
     NSRange formTypeRange = [match rangeAtIndex:2];
     NSRange typeRange = [match rangeAtIndex:3];
-    NSRange extractionCommandRange = [match rangeAtIndex:4];
+    NSRange indexRange = [match rangeAtIndex:5];
+    NSRange extractionCommandRange = [match rangeAtIndex:6];
     if(formTypeRange.location != NSNotFound)
         parsedQuery[@"formType"] = [query substringWithRange:formTypeRange];
     else
@@ -188,6 +245,8 @@ static NSRegularExpression* dataFormQueryRegex;
         parsedQuery[@"type"] = [query substringWithRange:typeRange];
     else
         parsedQuery[@"type"] = @"*";
+    if(indexRange.location != NSNotFound)
+        parsedQuery[@"index"] = [NSNumber numberWithUnsignedInteger:(NSUInteger)[[query substringWithRange:indexRange] longLongValue]];
     if(extractionCommandRange.location != NSNotFound)
     {
         NSString* extractionCommand = [query substringWithRange:extractionCommandRange];
@@ -200,10 +259,28 @@ static NSRegularExpression* dataFormQueryRegex;
         return nil;
     if(!([@"*" isEqualToString:parsedQuery[@"type"]] || (self.type != nil && [self.type isEqualToString:parsedQuery[@"type"]])))
         return nil;
+    
+    //handle non-item dataforms and queries with index out of bounds as nil result of our query
+    if(parsedQuery[@"index"] != nil)
+    {
+        if(![self check:@"item"])
+            return nil;
+        if([self count] < [parsedQuery[@"index"] unsignedIntegerValue])
+            return nil;
+    }
+        
     if([parsedQuery[@"extractionCommand"] isEqualToString:@"@"])
+    {
+        if(parsedQuery[@"index"] != nil)
+            return self[[parsedQuery[@"index"] unsignedIntegerValue]][parsedQuery[@"var"]];
         return self[parsedQuery[@"var"]];
+    }
     if([parsedQuery[@"extractionCommand"] isEqualToString:@"%"])
+    {
+        if(parsedQuery[@"index"] != nil)
+            return [self getField:parsedQuery[@"var"] atIndex:parsedQuery[@"index"]];
         return [self getField:parsedQuery[@"var"]];
+    }
     return self;        //we did not use any extraction command, but filtered by formType and type only
 }
 
@@ -219,25 +296,76 @@ static NSRegularExpression* dataFormQueryRegex;
     ];
 }
 
+//*** NSArray interface below (only indexed subscript parts)
+
+-(id) objectAtIndexedSubscript:(NSInteger) idx
+{
+    NSArray<MLXMLNode*>* items = [self find:@"item"];
+    if(items[idx] == nil)
+        return nil;
+    
+    NSMutableDictionary* retval = [NSMutableDictionary new];
+    for(MLXMLNode* fieldNode in [items[idx] find:@"field"])
+        retval[[NSString stringWithFormat:@"%@", [fieldNode findFirst:@"/@var"]]] = [NSString stringWithFormat:@"%@", [fieldNode findFirst:@"value#"]];
+    return [retval copy];       //immutable copy
+}
+
+-(void) setObject:(id _Nullable) obj atIndexedSubscript:(NSInteger) idx
+{
+    NSArray<MLXMLNode*>* items = [self find:@"item"];
+    
+    //remove whole item if nil was given
+    if(obj == nil)
+    {
+        [self removeChildNode:items[idx]];
+        [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
+        return;
+    }
+    
+    MLAssert([obj isKindOfClass:[NSDictionary class]], @"LHS number subscripts into a XMPPDataForm MUST have a NSDictionary on the RHS side!", (@{
+        @"index": @(idx),
+        @"obj": nilWrapper(obj),
+    }));
+        
+    //remove all present fields nodes first
+    for(MLXMLNode* fieldNode in [items[idx] find:@"field"])
+        [items[idx] removeChildNode:fieldNode];
+    
+    //then create new field nodes as specified
+    NSDictionary* fields = (NSDictionary*)obj;
+    for(NSString* name in fields)
+        [items[idx] addChildNode:[[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{@"var": name} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:fields[name]]
+        ] andData:nil]];
+    [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
+}
+
 //*** NSMutableDictionary interface below
 
 -(id _Nullable) objectForKeyedSubscript:(NSString* _Nonnull) key
 {
-    return [self findFirst:@"field<var=%@>/value#", key];
+    MLXMLNode* firstItem = [self findFirst:@"item"];
+    if(firstItem == nil)
+        firstItem = self;
+    return [firstItem findFirst:@"field<var=%@>/value#", key];
 }
 
 -(void) setObject:(id _Nullable) obj forKeyedSubscript:(NSString*) key
 {
+    MLXMLNode* firstItem = [self findFirst:@"item"];
+    if(firstItem == nil)
+        firstItem = self;
     if(!obj)
     {
-        [self removeChildNode:[self findFirst:@"field<var=%@>", key]];
+        [firstItem removeChildNode:[firstItem findFirst:@"field<var=%@>", key]];
         [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
         return;
     }
-    MLXMLNode* fieldNode = [self findFirst:@"field<var=%@>", key];
+    MLXMLNode* fieldNode;
+    fieldNode = [firstItem findFirst:@"field<var=%@>", key];
     if(!fieldNode)
     {
-        [self setField:key withValue:[NSString stringWithFormat:@"%@", obj]];
+        [self setField:key withValue:[NSString stringWithFormat:@"%@", obj] atIndex:(firstItem != nil ? 0 : nil)];
         return;
     }
     MLXMLNode* valueNode = [fieldNode findFirst:@"value"];
@@ -248,25 +376,38 @@ static NSRegularExpression* dataFormQueryRegex;
     [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 
+//for multi-item forms it will only return the list of var names of the first item
+//(as according to XEP-0004 all items should have the same set of field nodes --> this should contain all var names possible in any item)
 -(NSArray*) allKeys
 {
-    return [self find:@"field@var"];
+    MLXMLNode* firstItem = [self findFirst:@"item"];
+    if(firstItem == nil)
+        firstItem = self;
+    return [firstItem find:@"field@var"];
 }
 
 -(NSArray*) allValues
 {
-    return [self find:@"field/value#"];
+    MLXMLNode* firstItem = [self findFirst:@"item"];
+    if(firstItem == nil)
+        firstItem = self;
+    return [firstItem find:@"field/value#"];
 }
 
+//will return the count of items for a multi-item form and the count of vars otherwise
 -(NSUInteger) count
 {
+    if([self check:@"item"])
+        return [[self find:@"item"] count];
     return [[self allKeys] count];
 }
+
 
 -(NSArray*) allKeysForObject:(id) anObject
 {
     NSMutableArray* retval = [[NSMutableArray alloc] init];
-    for(MLXMLNode* field in [self find:@"field"])
+    MLXMLNode* firstItem = [self findFirst:@"item"];
+    for(MLXMLNode* field in (firstItem != nil ? [firstItem find:@"field"] : [self find:@"field"]))
         if([anObject isEqual:[field findFirst:@"value#"]])
             [retval addObject:[field findFirst:@"/@var"]];
     return retval;
@@ -274,7 +415,10 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(id) valueForKey:(NSString*) key
 {
-    return [self findFirst:@"field<var=%@>/value#", key];
+    MLXMLNode* firstItem = [self findFirst:@"item"];
+    if(firstItem == nil)
+        firstItem = self;
+    return [firstItem findFirst:@"field<var=%@>/value#", key];
 }
 
 -(id) objectForKey:(NSString*) key
@@ -284,13 +428,16 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(void) removeObjectForKey:(NSString*) key
 {
-    [self removeField:key];
+    [self removeField:key atIndex:([self check:@"item"] ? 0 : nil)];
 }
 
 -(void) removeAllObjects
 {
-    for(MLXMLNode* child in self.children)
-        [self removeChildNode:child];
+    MLXMLNode* firstItem = [self findFirst:@"item"];
+    if(firstItem == nil)
+        firstItem = self;
+    for(MLXMLNode* child in [firstItem find:@"field"])
+        [firstItem removeChildNode:child];
     [self invalidateUpstreamCache];     //make sure future queries accurately reflect this change
 }
 
@@ -302,7 +449,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(void) setObject:(NSString*) value forKey:(NSString*) key
 {
-    [self setField:key withValue:value];
+    [self setField:key withValue:value atIndex:([self check:@"item"] ? 0 : nil)];
 }
 
 -(void) setValue:(NSString* _Nullable) value forKey:(NSString*) key
@@ -318,7 +465,7 @@ static NSRegularExpression* dataFormQueryRegex;
     for(NSString* key in vars)
     {
         if([vars[key] isKindOfClass:[NSDictionary class]])
-            [self setFieldWithDictionary:vars[key]];
+            [self setFieldWithDictionary:vars[key] atIndex:([self check:@"item"] ? 0 : nil)];
         else
             self[key] = vars[key];
     }

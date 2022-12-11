@@ -22,6 +22,10 @@
     self = [super init];
     self.server = server;
     self.identity = identity;
+    self.serverFeatures = [NSSet new];
+    self.discoveredServices = [NSMutableArray new];
+    self.discoveredStunTurnServers = [NSMutableArray new];
+    self.discoveredAdhocCommands = [NSMutableDictionary new];
     return self;
 }
 

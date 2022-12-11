@@ -548,6 +548,23 @@ $$class_handler(handleServerDiscoItems, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
     }
 $$
 
+$$class_handler(handleAdhocDisco, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Adhoc command disco query to '%@' returned an error: %@", iqNode.from, [iqNode findFirst:@"error"]);
+        return;
+    }
+    
+    account.connectionProperties.discoveredAdhocCommands = [NSMutableDictionary new];
+    for(MLXMLNode* item in [iqNode find:@"{http://jabber.org/protocol/disco#items}query<node=http://jabber.org/protocol/commands>/item"])
+    {
+        if(![[item findFirst:@"/@jid"] isEqualToString:account.connectionProperties.identity.domain])
+            continue;
+        account.connectionProperties.discoveredAdhocCommands[[item findFirst:@"/@node"]] = nilWrapper([item findFirst:@"/@name"]);
+    }
+$$
+
+
 $$class_handler(handleExternalDisco, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {

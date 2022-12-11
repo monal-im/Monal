@@ -77,6 +77,7 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
  sets up a disco info query node
  */
 -(void) setDiscoItemNode;
+-(void) setAdhocDiscoNode;
 
 #pragma mark roster
 

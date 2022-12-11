@@ -246,6 +246,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) queryExternalServicesOn:(NSString*) jid;
 -(void) queryExternalServiceCredentialsFor:(NSDictionary*) service completion:(monal_id_block_t) completion;
 
+-(void) createInvitationWithCompletion:(monal_id_block_t) completion;
+
 @end
 
 NS_ASSUME_NONNULL_END

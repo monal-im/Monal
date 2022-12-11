@@ -3325,6 +3325,9 @@ NSString* const kStanza = @"stanza";
             
             if(self.connectionProperties.discoveredStunTurnServers)
                 [values setObject:[self.connectionProperties.discoveredStunTurnServers copy] forKey:@"discoveredStunTurnServers"];
+            
+            if(self.connectionProperties.discoveredAdhocCommands)
+                [values setObject:[self.connectionProperties.discoveredAdhocCommands copy] forKey:@"discoveredAdhocCommands"];
 
             [values setObject:self->_lastInteractionDate forKey:@"lastInteractionDate"];
             [values setValue:[NSDate date] forKey:@"stateSavedAt"];
@@ -3429,6 +3432,7 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
             self.connectionProperties.discoveredServices = [[dic objectForKey:@"discoveredServices"] mutableCopy];
             self.connectionProperties.discoveredStunTurnServers = [[dic objectForKey:@"discoveredStunTurnServers"] mutableCopy];
+            self.connectionProperties.discoveredAdhocCommands = [[dic objectForKey:@"discoveredAdhocCommands"] mutableCopy];
             
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
             self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
@@ -3659,20 +3663,21 @@ NSString* const kStanza = @"stanza";
 
 -(void) queryDisco
 {
-    XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoInfo setiqTo:self.connectionProperties.identity.domain];
+    XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:self.connectionProperties.identity.domain];
     [discoInfo setDiscoInfoNode];
     [self sendIq:discoInfo withHandler:$newHandler(MLIQProcessor, handleServerDiscoInfo)];
     
-    XMPPIQ* discoItems = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoItems setiqTo:self.connectionProperties.identity.domain];
+    XMPPIQ* discoItems = [[XMPPIQ alloc] initWithType:kiqGetType to:self.connectionProperties.identity.domain];
     [discoItems setDiscoItemNode];
     [self sendIq:discoItems withHandler:$newHandler(MLIQProcessor, handleServerDiscoItems)];
     
-    XMPPIQ* accountInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [accountInfo setiqTo:self.connectionProperties.identity.jid];
+    XMPPIQ* accountInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:self.connectionProperties.identity.jid];
     [accountInfo setDiscoInfoNode];
     [self sendIq:accountInfo withHandler:$newHandler(MLIQProcessor, handleAccountDiscoInfo)];
+    
+    XMPPIQ* adhocCommands = [[XMPPIQ alloc] initWithType:kiqGetType to:self.connectionProperties.identity.domain];
+    [adhocCommands setAdhocDiscoNode];
+    [self sendIq:adhocCommands withHandler:$newHandler(MLIQProcessor, handleAdhocDisco)];
 }
 
 -(void) queryExternalServicesOn:(NSString*) jid
@@ -3773,9 +3778,10 @@ NSString* const kStanza = @"stanza";
     //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
     //    and other state values are stale now
     //(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
-    self.connectionProperties.serverFeatures = nil;
-    self.connectionProperties.discoveredServices = nil;
-    self.connectionProperties.discoveredStunTurnServers = [[NSMutableArray alloc] init];
+    self.connectionProperties.serverFeatures = [NSSet new];
+    self.connectionProperties.discoveredServices = [NSMutableArray new];
+    self.connectionProperties.discoveredStunTurnServers = [NSMutableArray new];
+    self.connectionProperties.discoveredAdhocCommands = [NSMutableDictionary new];
     self.connectionProperties.uploadServer = nil;
     self.connectionProperties.conferenceServer = nil;
     self.connectionProperties.usingCarbons2 = NO;
@@ -3793,7 +3799,8 @@ NSString* const kStanza = @"stanza";
     //clear list of running mam queries
     _runningMamQueries = [[NSMutableDictionary alloc] init];
     
-    //clear old catchup state (technically all stanzas still in delayedMessageStanzas could have also been in the parseQueue in the last run and deleted there
+    //clear old catchup state (technically all stanzas still in delayedMessageStanzas could have also been
+    //in the parseQueue in the last run and deleted there)
     //--> no harm in deleting them when starting a new session (but DON'T DELETE them when resuming the old smacks session)
     _inCatchup = [[NSMutableDictionary alloc] init];
     [[DataLayer sharedInstance] deleteDelayedMessageStanzasForAccount:self.accountNo];
@@ -4268,6 +4275,49 @@ NSString* const kStanza = @"stanza";
 }
 
 #pragma mark - account management
+
+-(void) createInvitationWithCompletion:(monal_id_block_t) completion
+{
+    XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType to:self.connectionProperties.identity.domain];
+    [iq addChildNode:[[MLXMLNode alloc] initWithElement:@"command" andNamespace:@"http://jabber.org/protocol/commands" withAttributes:@{
+        @"node": @"urn:xmpp:invite#invite",
+        @"action": @"execute",
+    } andChildren:@[] andData:nil]];
+    [self sendIq:iq withResponseHandler:^(XMPPIQ* response) {
+        NSString* status = [response findFirst:@"{http://jabber.org/protocol/commands}command<node=urn:xmpp:invite#invite>@status"];
+        NSString* uri = [response findFirst:@"{http://jabber.org/protocol/commands}command<node=urn:xmpp:invite#invite>/\\[0]@uri\\"];
+        NSString* landing = [response findFirst:@"{http://jabber.org/protocol/commands}command<node=urn:xmpp:invite#invite>/\\[0]@landing-url\\"];
+        NSDate* expires = [response findFirst:@"{http://jabber.org/protocol/commands}command<node=urn:xmpp:invite#invite>/\\[0]@expire\\|datetime"];
+        //at least yax.im does not implement the dataform depicted in XEP-0401 example 4 (dataform with <item/> wrapper)
+        if(uri == nil)
+        {
+            uri = [response findFirst:@"{http://jabber.org/protocol/commands}command<node=urn:xmpp:invite#invite>/\\@uri\\"];
+            landing = [response findFirst:@"{http://jabber.org/protocol/commands}command<node=urn:xmpp:invite#invite>/\\@landing-url\\"];
+            expires = [response findFirst:@"{http://jabber.org/protocol/commands}command<node=urn:xmpp:invite#invite>/\\@expire\\|datetime"];
+        }
+        if([@"completed" isEqualToString:status] && uri != nil)
+        {
+            if(landing == nil)
+                landing = [NSString stringWithFormat:@"https://invite.monal-im.org/#%@", uri];
+            completion(@{
+                @"success": @YES,
+                @"uri": uri,
+                @"landing": landing,
+                @"expires": nilWrapper(expires),
+            });
+        }
+        else
+            completion(@{
+                @"success": @NO,
+                @"error": [NSString stringWithFormat:NSLocalizedString(@"Failed to create invitation, unknown error: %@", @""), status],
+            });
+    } andErrorHandler:^(XMPPIQ* error) {
+        completion(@{
+            @"success": @NO,
+            @"error": [HelperTools extractXMPPError:error withDescription:@"Failed to create invitation"],
+        });
+    }];
+}
 
 -(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion
 {

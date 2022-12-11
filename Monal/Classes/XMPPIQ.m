@@ -102,6 +102,14 @@ NSString* const kiqErrorType = @"error";
     ] andData:nil]];
 }
 
+-(void) setAdhocDiscoNode
+{
+    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items" withAttributes:@{
+        @"node": @"http://jabber.org/protocol/commands",
+    } andChildren:@[] andData:nil];
+    [self addChildNode:queryNode];
+}
+
 -(void) setDiscoInfoNode
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];

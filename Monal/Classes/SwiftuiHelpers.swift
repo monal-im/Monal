@@ -163,6 +163,43 @@ extension View {
     }
 }
 
+// //see https://stackoverflow.com/a/68291983
+// struct OverflowContentViewModifier: ViewModifier {
+//     @State private var contentOverflow: Bool = false
+//     func body(content: Content) -> some View {
+//         GeometryReader { geometry in
+//             content
+//             .background(
+//                 GeometryReader { contentGeometry in
+//                     Color.clear.onAppear {
+//                         contentOverflow = contentGeometry.size.height > geometry.size.height
+//                     }
+//                 }
+//             )
+//             .wrappedInScrollView(when: contentOverflow)
+//         }
+//     }
+// }
+// 
+// extension View {
+//     @ViewBuilder
+//     func wrappedInScrollView(when condition: Bool) -> some View {
+//         if condition {
+//             ScrollView {
+//                 self
+//             }
+//         } else {
+//             self
+//         }
+//     }
+// }
+// 
+// extension View {
+//     func scrollOnOverflow() -> some View {
+//         modifier(OverflowContentViewModifier())
+//     }
+// }
+
 // lazy loading of views (e.g. when used inside a NavigationLink) with the additional ability to use a closure to modify/wrap them
 // see https://stackoverflow.com/a/61234030/3528174
 struct LazyClosureView<Content: View>: View {
@@ -237,6 +274,60 @@ struct AlertPrompt {
     var title: Text = Text("")
     var message: Text = Text("")
     var dismissLabel: Text = Text("Close")
+}
+
+func nilWrapper(_ value: Any?) -> Any {
+    if let value = value {
+        return value
+    } else {
+        return NSNull()
+    }
+}
+
+func nilExtractor(_ value: Any?) -> Any? {
+    if value is NSNull {
+        return nil
+    } else {
+        return value
+    }
+}
+
+//see https://www.avanderlee.com/swiftui/conditional-view-modifier/
+extension View {
+    /// Applies the given transform if the given condition evaluates to `true`.
+    /// - Parameters:
+    ///   - condition: The condition to evaluate.
+    ///   - transform: The transform to apply to the source `View`.
+    /// - Returns: Either the original `View` or the modified `View` if the condition is `true`.
+    @ViewBuilder func `if`<Content: View>(_ condition: @autoclosure () -> Bool, transform: (Self) -> Content) -> some View {
+        if condition() {
+            transform(self)
+        } else {
+            self
+        }
+    }
+    
+    @ViewBuilder func `if`<Content: View>(closure condition: () -> Bool, transform: (Self) -> Content) -> some View {
+        if condition() {
+            transform(self)
+        } else {
+            self
+        }
+    }
+}
+
+func iOS15() -> Bool {
+    guard #available(iOS 15, *) else {
+        return true
+    }
+    return false
+}
+
+func iOS16() -> Bool {
+    guard #available(iOS 16, *) else {
+        return true
+    }
+    return false
 }
 
 // Interfaces between ObjectiveC/Storyboards and SwiftUI

@@ -6,8 +6,11 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
+import MobileCoreServices
+import UniformTypeIdentifiers
 import SwiftUI
 import monalxmpp
+
 
 struct AddContactMenu: View {
     var delegate: SheetDismisserProtocol
@@ -19,8 +22,11 @@ struct AddContactMenu: View {
     @State private var importScannedFingerprints: Bool = false
     @State private var toAdd: String = ""
 
+    @State private var showInvitationError = false
     @State private var showAlert = false
-    @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close")) // note: dismissLabel is not accessed but defined at the .alert() section
+    // note: dismissLabel is not accessed but defined at the .alert() section
+    @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
+    @State private var invitationResult: Dictionary<String, AnyObject>? = nil
 
     @ObservedObject private var overlay = LoadingOverlayState()
 
@@ -122,6 +128,8 @@ struct AddContactMenu: View {
     }
 
     var body: some View {
+        let account = self.connectedAccounts[selectedAccount]
+        let splitJid = HelperTools.splitJid(account.connectionProperties.identity.jid)
         Form {
             if(connectedAccounts.isEmpty) {
                 Text("Please make sure at least one account has connected before trying to add a contact or channel.")
@@ -195,11 +203,69 @@ struct AddContactMenu: View {
                 }
             }))
         }
+        .richAlert(isPresented: $invitationResult, title:Text("Invitation for \(splitJid["host"]!) created")) { data in
+            VStack {
+                Text("Direct your buddy to this webpage for instructions on how to setup an xmpp client. You will then automatically be added to their contact list.")
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Link(data["landing"] as! String, destination:URL(string:data["landing"] as! String)!)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 10)
+                    .padding(.bottom, 10)
+                if let expires = data["expires"] as? Date {
+                    HStack {
+                        if #available(iOS 15, *) {
+                            Text("This invitation will expire on \(expires.formatted(date:.numeric, time:.shortened))")
+                        } else {
+                            Text("This invitation will expire on \(expires)")
+                        }
+                    }
+                    .font(.footnote)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        } buttons: { data in 
+            Button(action: {
+                UIPasteboard.general.setValue(data["landing"] as! String, forPasteboardType:UTType.utf8PlainText.identifier as String)
+                invitationResult = nil
+            }) {
+                Text("Copy link to clipboard")
+                    .frame(maxWidth: .infinity)
+            }
+            Button(action: {
+                invitationResult = nil
+            }) {
+                Text("Close")
+                    .frame(maxWidth: .infinity)
+            }
+        }
         .addLoadingOverlay(overlay)
-        .navigationBarTitle("Add Contact or Group/Channel", displayMode: .inline)
+        .navigationBarTitle("Add Contact or Channel", displayMode: .inline)
         .navigationViewStyle(.stack)
         .toolbar(content: {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                if account.connectionProperties.discoveredAdhocCommands["urn:xmpp:invite#invite"] != nil {
+                    Button(action: {
+                        DDLogVerbose("Trying to create invitation for: \(String(describing:splitJid["host"]!))")
+                        showLoadingOverlay(overlay, headline: NSLocalizedString("Creating invitation...", comment: ""))
+                        account.createInvitation(completion: {
+                            let result = $0 as! Dictionary<String, AnyObject>
+                            DispatchQueue.main.async {
+                                hideLoadingOverlay(overlay)
+                                DDLogVerbose("Got invitation result: \(String(describing:result))")
+                                if result["success"] as! Bool == true {
+                                    invitationResult = result
+                                } else {
+                                    errorAlert(title:Text("Failed to create invitation for \(splitJid["host"]!)"), message:Text(result["error"] as! String))
+                                }
+                            }
+                        })
+                    }, label: {
+                        Image(systemName: "square.and.arrow.up").foregroundColor(monalGreen)
+                    })
+                }
                 Button(action: {
                     self.showQRCodeScanner = true
                 }, label: {
@@ -212,9 +278,9 @@ struct AddContactMenu: View {
                 MLQRCodeScanner(
                     handleContact: { jid, fingerprints in
                         self.toAdd = jid
-                        showQRCodeScanner = false
                         self.scannedFingerprints = fingerprints
                         self.importScannedFingerprints = true
+                        self.showQRCodeScanner = false
                     }, handleClose: {
                         self.showQRCodeScanner = false
                     }

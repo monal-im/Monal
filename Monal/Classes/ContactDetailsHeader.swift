@@ -7,6 +7,7 @@
 //
 
 import MobileCoreServices
+import UniformTypeIdentifiers
 import SwiftUI
 import monalxmpp
 
@@ -35,7 +36,7 @@ struct ContactDetailsHeader: View {
                 //.textSelection(.enabled)
                 Spacer().frame(width: 10)
                 Button(action: {
-                    UIPasteboard.general.setValue(contact.contactJid as String, forPasteboardType: kUTTypeUTF8PlainText as String)
+                    UIPasteboard.general.setValue(contact.contactJid as String, forPasteboardType:UTType.utf8PlainText.identifier as String)
                 }) {
                     Image(systemName: "doc.on.doc")
                         .foregroundColor(.primary)

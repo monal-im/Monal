@@ -17,6 +17,7 @@
 #import "MLNotificationQueue.h"
 
 @import MobileCoreServices;
+@import UniformTypeIdentifiers;
 
 static NSFileManager* _fileManager;
 static NSString* _documentCacheDir;
@@ -762,12 +763,10 @@ $$
 
 +(NSString*) getMimeTypeOfOriginalFile:(NSString*) file
 {
-    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)[file pathExtension], NULL);
-    NSString* mimeType = (__bridge_transfer NSString*)UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType);
-    CFRelease(UTI);
-    if(!mimeType)
-        mimeType = @"application/octet-stream";
-    return mimeType;
+    UTType* type = [UTType typeWithTag:[file pathExtension] tagClass:UTTagClassFilenameExtension conformingToType:UTTypeData];
+    if(type.preferredMIMEType == nil)
+        return @"application/octet-stream";
+    return type.preferredMIMEType;
 }
 
 +(NSString*) getMimeTypeOfCacheFile:(NSString*) file

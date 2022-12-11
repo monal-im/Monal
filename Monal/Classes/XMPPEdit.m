@@ -1046,7 +1046,7 @@ enum DummySettingsRows {
 -(void) imagePickerController:(UIImagePickerController*) picker didFinishPickingMediaWithInfo:(NSDictionary<NSString*, id>*) info
 {
     NSString* mediaType = info[UIImagePickerControllerMediaType];
-    if([mediaType isEqualToString:(NSString*) kUTTypeImage]) {
+    if([mediaType isEqualToString:UTTypeImage.identifier]) {
         UIImage* selectedImage = info[UIImagePickerControllerEditedImage];
         if(!selectedImage) selectedImage = info[UIImagePickerControllerOriginalImage];
         

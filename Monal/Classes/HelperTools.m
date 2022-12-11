@@ -44,6 +44,8 @@
 @import CoreImage.CIFilterBuiltins;
 @import UIKit;
 @import AVFoundation;
+@import UniformTypeIdentifiers;
+@import QuickLookThumbnailing;
 
 static DDFileLogger* _fileLogger = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
@@ -444,18 +446,23 @@ static id preprocess(id exception)
     void (^addPreview)(NSURL* _Nullable) = ^(NSURL* url) {
         if(url != nil)
         {
-            NSError* error;
-            NSDictionary* thumbnails = nil;
-            BOOL success = [url getResourceValue:&thumbnails forKey:NSThumbnail1024x1024SizeKey error:&error];
-            if(success == YES && thumbnails.count > 0)
-            {
-                NSArray<UIImage*>* values = [thumbnails allValues];
-                payload[@"preview"] = values.firstObject;
-                return completion(payload);
-            }
-            else
-            {
-                DDLogVerbose(@"Extracting thumbnail from document failed: %@", error);
+            QLThumbnailGenerationRequest* request = [[QLThumbnailGenerationRequest alloc] initWithFileAtURL:url size:CGSizeMake(64, 64) scale:1.0 representationTypes:QLThumbnailGenerationRequestRepresentationTypeThumbnail];
+            NSURL* tmpURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory: YES];
+            tmpURL = [tmpURL URLByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
+            [QLThumbnailGenerator.sharedGenerator saveBestRepresentationForRequest:request toFileAtURL:tmpURL withContentType:UTTypePNG.identifier completionHandler:^(NSError *error) {
+                if(error == nil)
+                {
+                    UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
+                    [[NSFileManager defaultManager] removeItemAtURL:tmpURL error:nil];      //remove temporary file, we don't need it anymore
+                    if(result != nil)
+                    {
+                        payload[@"preview"] = result;
+                        return completion(payload);     //don't fall through on success
+                    }
+                }
+                //if we fall through to this point, either the thumbnail generation or the imageWithContentsOfFile above failed
+                //--> try something else
+                DDLogVerbose(@"Extracting thumbnail using quick look framework failed, retrying with imageWithContentsOfFile: %@", error);
                 UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
                 if(result != nil)
                 {
@@ -472,14 +479,14 @@ static id preprocess(id exception)
                         return completion(payload);
                     }
                 }
-            }
+            }];
         }
         [provider loadPreviewImageWithOptions:nil completionHandler:^(UIImage*  _Nullable previewImage, NSError* _Null_unspecified error) {
             if(error != nil || previewImage == nil)
             {
                 if(url == nil)
                 {
-                    DDLogWarn(@"Error creating preview image via item provider, ignoring: %@", error);
+                    DDLogWarn(@"Error creating preview image via item provider, using generic doc image instead: %@", error);
                     payload[@"preview"] = [UIImage systemImageNamed:@"doc"];
                 }
             }
@@ -533,10 +540,10 @@ static id preprocess(id exception)
         }];
     }
     //the apple-private autoloop gif type has a bug that does not allow to load this as normal gif --> try audiovisual content below
-    else if([provider hasItemConformingToTypeIdentifier:@"com.compuserve.gif"] && ![provider hasItemConformingToTypeIdentifier:@"com.apple.private.auto-loop-gif"])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeGIF.identifier] && ![provider hasItemConformingToTypeIdentifier:@"com.apple.private.auto-loop-gif"])
     {
         /*
-        [provider loadDataRepresentationForTypeIdentifier:@"com.compuserve.gif" completionHandler:^(NSData* data, NSError* error) {
+        [provider loadDataRepresentationForTypeIdentifier:UTTypeGIF.identifier completionHandler:^(NSData* data, NSError* error) {
             if(error != nil || data == nil)
             {
                 DDLogError(@"Error extracting gif image from NSItemProvider: %@", error);
@@ -549,7 +556,7 @@ static id preprocess(id exception)
             return addPreview(nil);
         }];
         */
-        [provider loadInPlaceFileRepresentationForTypeIdentifier:@"com.compuserve.gif" completionHandler:^(NSURL*  _Nullable item, BOOL isInPlace, NSError* _Null_unspecified error) {
+        [provider loadInPlaceFileRepresentationForTypeIdentifier:UTTypeGIF.identifier completionHandler:^(NSURL*  _Nullable item, BOOL isInPlace, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting gif image from NSItemProvider: %@", error);
@@ -561,9 +568,9 @@ static id preprocess(id exception)
             return prepareFile(item);
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeAudiovisualContent])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeAudiovisualContent.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeAudiovisualContent options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeAudiovisualContent.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -575,14 +582,14 @@ static id preprocess(id exception)
             return prepareFile(item);
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeImage])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeImage.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeImage.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 //for example: image shared directly from screenshots
                 DDLogWarn(@"Got error, retrying with UIImage: %@", error);
-                [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(UIImage*  _Nullable item, NSError* _Null_unspecified error) {
+                [provider loadItemForTypeIdentifier:UTTypeImage.identifier options:nil completionHandler:^(UIImage*  _Nullable item, NSError* _Null_unspecified error) {
                     if(error != nil || item == nil)
                     {
                         DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -627,9 +634,9 @@ static id preprocess(id exception)
     else if([provider hasItemConformingToTypeIdentifier:(NSString*)])
     {
     }*/
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeContact])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeContact.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeContact options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeContact.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -641,9 +648,9 @@ static id preprocess(id exception)
             return prepareFile(item);
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeFileURL])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeFileURL.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeFileURL options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeFileURL.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -657,7 +664,7 @@ static id preprocess(id exception)
     }
     else if([provider hasItemConformingToTypeIdentifier:(NSString*)@"com.apple.finder.node"])
     {
-        [provider loadItemForTypeIdentifier:(NSString*) kUTTypeItem options:nil completionHandler:^(id <NSSecureCoding> item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeItem.identifier options:nil completionHandler:^(id <NSSecureCoding> item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -678,9 +685,9 @@ static id preprocess(id exception)
             }
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeURL])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeURL.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeURL options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeURL.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -693,9 +700,9 @@ static id preprocess(id exception)
             return addPreview(nil);
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypePlainText options:nil completionHandler:^(NSString*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypePlainText.identifier options:nil completionHandler:^(NSString*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);

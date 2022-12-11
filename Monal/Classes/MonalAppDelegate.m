@@ -274,7 +274,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             icon:[UNNotificationActionIcon iconWithSystemImageName:@"person.crop.circle.badge.xmark"]
         ];
     }
-    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionAnnouncement | UNAuthorizationOptionProvidesAppNotificationSettings;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionProvidesAppNotificationSettings;
 #if TARGET_OS_MACCATALYST
     authOptions |= UNAuthorizationOptionProvisional;
 #endif
@@ -282,13 +282,13 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         categoryWithIdentifier:@"message"
         actions:@[replyAction, markAsReadAction]
         intentIdentifiers:@[]
-        options:UNNotificationCategoryOptionAllowAnnouncement
+        options:UNNotificationCategoryOptionNone
     ];
     UNNotificationCategory* subscriptionCategory = [UNNotificationCategory
         categoryWithIdentifier:@"subscription"
         actions:@[approveSubscriptionAction, denySubscriptionAction]
         intentIdentifiers:@[]
-        options:UNNotificationCategoryOptionAllowAnnouncement
+        options:UNNotificationCategoryOptionCustomDismissAction
     ];
     
     [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
@@ -810,7 +810,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             [[MLXMPPManager sharedInstance] addContact:fromContact];
             [self openChatOfContact:fromContact];
         }
-        else if([response.actionIdentifier isEqualToString:@"DENY_SUBSCRIPTION_ACTION"])
+        else if([response.actionIdentifier isEqualToString:@"DENY_SUBSCRIPTION_ACTION"] || [response.actionIdentifier isEqualToString:UNNotificationDismissActionIdentifier])
         {
             DDLogInfo(@"DENY_SUBSCRIPTION_ACTION triggered...");
             [[MLXMPPManager sharedInstance] removeContact:fromContact];

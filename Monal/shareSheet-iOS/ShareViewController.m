@@ -21,6 +21,7 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 
 @import Intents;
+@import UniformTypeIdentifiers;
 
 @interface ShareViewController ()
 
@@ -168,7 +169,7 @@
     for(NSItemProvider* provider in item.attachments)
     {
         //text shares are also shared via comment field, so ignore them
-        if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
+        if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
             continue;
         DDLogVerbose(@"handling(%u) %@", loading, provider);
         loading++;

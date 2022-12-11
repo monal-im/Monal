@@ -21,6 +21,7 @@
 @import CoreServices;
 @import Intents;
 @import AVFoundation;
+@import UniformTypeIdentifiers;
 
 @interface MLNotificationManager ()
 @property (nonatomic, assign) NotificationPrivacySettingOption notificationPrivacySetting;
@@ -406,35 +407,12 @@
                 
                 if(![info[@"needsDownloading"] boolValue])
                 {
-                    /*
-                    if([mimeType hasPrefix:@"audio/"])
-                    {
-                        NSString* typeHint = (NSString*)kUTTypeMPEG4Audio;
-                        if([mimeType isEqualToString:@"audio/mpeg"])
-                            typeHint = (NSString*)kUTTypeMP3;
-                        if([mimeType isEqualToString:@"audio/mp4"])
-                            typeHint = (NSString*)kUTTypeMPEG4Audio;
-                        if([mimeType isEqualToString:@"audio/wav"])
-                            typeHint = (NSString*)kUTTypeWaveformAudio;
-                        if([mimeType isEqualToString:@"audio/x-aiff"])
-                            typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
-                        
-                        if(typeHint != nil)
-                            audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
-                        msgText = NSLocalizedString(@"🎵 A Audiomessage", @"");
-                    }
-                    */
-                    
                     if([mimeType hasPrefix:@"image/"])
                     {
                         UNNotificationAttachment* attachment;
-                        NSString* typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/jpeg"])
-                            typeHint = (NSString*)kUTTypeJPEG;
-                        if([mimeType isEqualToString:@"image/png"])
-                            typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/gif"])
-                            typeHint = (NSString*)kUTTypeGIF;
+                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
+                        if(typeHint == nil)
+                            typeHint = UTTypeImage;
                         attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
                         if(attachment)
                             content.attachments = @[attachment];
@@ -442,16 +420,10 @@
                     else if([mimeType hasPrefix:@"audio/"])
                     {
                         UNNotificationAttachment* attachment;
-                        NSString* typeHint = (NSString*)kUTTypeMPEG4Audio;
-                        if([mimeType isEqualToString:@"audio/mpeg"])
-                            typeHint = (NSString*)kUTTypeMP3;
-                        if([mimeType isEqualToString:@"audio/mp4"])
-                            typeHint = (NSString*)kUTTypeMPEG4Audio;
-                        if([mimeType isEqualToString:@"audio/wav"])
-                            typeHint = (NSString*)kUTTypeWaveformAudio;
-                        if([mimeType isEqualToString:@"audio/x-aiff"])
-                            typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
-                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
+                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
+                        if(typeHint == nil)
+                            typeHint = UTTypeAudio;
+                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint.identifier]];
                         DDLogVerbose(@"Added audio attachment(%@ = %@): %@", mimeType, typeHint, audioAttachment);
                         attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
                         if(attachment)
@@ -460,17 +432,9 @@
                     else if([mimeType hasPrefix:@"video/"])
                     {
                         UNNotificationAttachment* attachment;
-                        NSString* typeHint = @"public.mpeg-4";
-                        if([mimeType isEqualToString:@"video/mpeg"])
-                            typeHint = @"public.mpeg";
-                        if([mimeType isEqualToString:@"video/mp4"])
-                            typeHint = @"public.mpeg-4";
-                        if([mimeType isEqualToString:@"video/x-msvideo"])
-                            typeHint = @"public.avi";
-                        if([mimeType isEqualToString:@"video/quicktime"])
-                            typeHint = @"com.apple.quicktime-movie";
-                        if([mimeType isEqualToString:@"video/3gpp"])
-                            typeHint = (NSString*)AVFileType3GPP;
+                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
+                        if(typeHint == nil)
+                            typeHint = UTTypeMovie;
                         attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
                         if(attachment)
                             content.attachments = @[attachment];
@@ -783,13 +747,9 @@
                     UNNotificationAttachment* attachment;
                     if(![info[@"needsDownloading"] boolValue])
                     {
-                        NSString* typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/jpeg"])
-                            typeHint = (NSString*)kUTTypeJPEG;
-                        if([mimeType isEqualToString:@"image/png"])
-                            typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/gif"])
-                            typeHint = (NSString*)kUTTypeGIF;
+                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
+                        if(typeHint == nil)
+                            typeHint = UTTypeImage;
                         attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
                         if(attachment)
                         {
@@ -827,7 +787,7 @@
     [self publishNotificationContent:[self updateBadgeForContent:content] withID:idval];
 }
 
--(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(NSDictionary*) info havingTypeHint:(NSString*) typeHint
+-(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(NSDictionary*) info havingTypeHint:(UTType*) typeHint
 {
     NSError* error;
     //use ".tmp" extension to make sure this file will be garbage collected if the ios notification attachment should leave it behind

@@ -1400,7 +1400,7 @@ enum msgSentState {
         UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action __unused) {
             @try {
                 mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-                mediaPicker.mediaTypes = @[(NSString*)kUTTypeImage, (NSString*)kUTTypeMovie];
+                mediaPicker.mediaTypes = @[UTTypeImage.identifier, UTTypeMovie.identifier];
 
                 switch ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo])
                 {
@@ -1550,7 +1550,7 @@ enum msgSentState {
     if(info[UIImagePickerControllerMediaType] == nil)
         return;
     
-    if([info[UIImagePickerControllerMediaType] isEqualToString:(NSString*)kUTTypeImage])
+    if([info[UIImagePickerControllerMediaType] isEqualToString:UTTypeImage.identifier])
     {
         UIImage* selectedImage = info[UIImagePickerControllerEditedImage];
         if(!selectedImage)
@@ -1561,7 +1561,7 @@ enum msgSentState {
             @"data": [MLFiletransfer prepareUIImageUpload:selectedImage],
         }]];
     }
-    else if([info[UIImagePickerControllerMediaType] isEqualToString:(NSString*)kUTTypeMovie])
+    else if([info[UIImagePickerControllerMediaType] isEqualToString:UTTypeMovie.identifier])
     {
         NSURL* url = info[UIImagePickerControllerMediaURL];
         [self addToUIQueue:@[@{
@@ -3450,7 +3450,7 @@ enum msgSentState {
     {
         NSItemProvider* provider = item.itemProvider;
         MLAssert(provider != nil, @"provider must not be nil");
-        MLAssert([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeItem], @"provider must supply item conforming to kUTTypeItem");
+        MLAssert([provider hasItemConformingToTypeIdentifier:UTTypeItem.identifier], @"provider must supply item conforming to kUTTypeItem");
         [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* _Nullable payload) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if(payload == nil || payload[@"error"] != nil)

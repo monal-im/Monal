@@ -543,7 +543,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         @"host": host,
                     }));
                     
-                    if(account != nil)      //silence memory warning despite assertion above
+                    //add given jid to our roster if in roster mode (e.g. the jid is not the jid we just registered as like in register mode)
+                    if(account != nil && isRoster)      //silence memory warning despite assertion above
                     {
                         MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
                         DDLogInfo(@"Adding contact to roster: %@", contact);

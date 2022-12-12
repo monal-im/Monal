@@ -3308,6 +3308,7 @@ NSString* const kStanza = @"stanza";
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSubMax] forKey:@"supportsPubSubMax"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsModernPubSub] forKey:@"supportsModernPubSub"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
@@ -3336,7 +3337,7 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
                 self.accountNo,
                 values[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -3350,6 +3351,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
+                self.connectionProperties.supportsModernPubSub,
                 self.connectionProperties.supportsPubSubMax,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
@@ -3485,6 +3487,12 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsPubSubMax = supportsPubSubMax.boolValue;
             }
             
+            if([dic objectForKey:@"supportsModernPubSub"])
+            {
+                NSNumber* supportsModernPubSub = [dic objectForKey:@"supportsModernPubSub"];
+                self.connectionProperties.supportsModernPubSub = supportsModernPubSub.boolValue;
+            }
+            
             if([dic objectForKey:@"supportsHTTPUpload"])
             {
                 NSNumber* supportsHTTPUpload = [dic objectForKey:@"supportsHTTPUpload"];
@@ -3539,7 +3547,7 @@ NSString* const kStanza = @"stanza";
                 self.omemo.state = [dic objectForKey:@"omemoState"];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -3553,6 +3561,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
+                self.connectionProperties.supportsModernPubSub,
                 self.connectionProperties.supportsPubSubMax,
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
@@ -3776,6 +3785,7 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.supportsMam2 = NO;
     self.connectionProperties.supportsPubSub = NO;
     self.connectionProperties.supportsPubSubMax = NO;
+    self.connectionProperties.supportsModernPubSub = NO;
     self.connectionProperties.supportsHTTPUpload = NO;
     self.connectionProperties.supportsPing = NO;
     self.connectionProperties.supportsRosterPreApproval = NO;

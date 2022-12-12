@@ -135,7 +135,7 @@ enum MLServerDetailsSections {
         // see MLIQProcessor.m multiple xep required for pubsub
         @"Title":NSLocalizedString(@"XEP-0163 Personal Eventing Protocol", @""),
         @"Description":NSLocalizedString(@"This specification defines semantics for using the XMPP publish-subscribe protocol to broadcast state change events associated with an instant messaging and presence account.", @""),
-        @"Color": connection.supportsPubSub ? @"Green" : @"Red"
+        @"Color": connection.supportsPubSub ? (connection.supportsModernPubSub ? @"Green" : @"Yellow") : @"Red"
     }];
     
     // supportsSSDP

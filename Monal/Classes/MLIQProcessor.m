@@ -386,12 +386,8 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         [features containsObject:@"http://jabber.org/protocol/pubsub#filtered-notifications"] &&                    //needed for xep-0163 support
         [features containsObject:@"http://jabber.org/protocol/pubsub#publish-options"] &&                           //needed for xep-0223 support
         //important xep-0060 support (aka basic support)
-        // [features containsObject:@"http://jabber.org/protocol/pubsub#last-published"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#publish"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#subscribe"] &&
-        //item-ids SHOULD be supported but ejabberd has a regression in ejabberd >= 22.10
-        //[features containsObject:@"http://jabber.org/protocol/pubsub#item-ids"] &&
-        // [features containsObject:@"http://jabber.org/protocol/pubsub#create-and-configure"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#create-nodes"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#delete-items"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#delete-nodes"] &&
@@ -399,19 +395,35 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         [features containsObject:@"http://jabber.org/protocol/pubsub#retrieve-items"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#config-node"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#auto-create"] &&
-        //needed for xep-0402
-        [features containsObject:@"http://jabber.org/protocol/pubsub#multi-items"] &&
+        // [features containsObject:@"http://jabber.org/protocol/pubsub#last-published"] &&
+        // [features containsObject:@"http://jabber.org/protocol/pubsub#create-and-configure"] &&
         YES
     ) {
         DDLogInfo(@"Supports pubsub (pep)");
         account.connectionProperties.supportsPubSub = YES;
         
+        //modern pep support
+        account.connectionProperties.supportsModernPubSub = NO;
+        if(
+            //needed for xep-0402
+            [features containsObject:@"http://jabber.org/protocol/pubsub#item-ids"] &&
+            [features containsObject:@"http://jabber.org/protocol/pubsub#multi-items"] &&
+            YES
+        ) {
+            DDLogInfo(@"Supports modern pep multi-items");
+            account.connectionProperties.supportsModernPubSub = YES;
+        }
+        
         account.connectionProperties.supportsPubSubMax = NO;
         if([features containsObject:@"http://jabber.org/protocol/pubsub#config-node-max"])
+        {
+            DDLogInfo(@"Supports pep 'max' item count");
             account.connectionProperties.supportsPubSubMax = YES;
+        }
     }
     
-    if([features containsObject:@"urn:xmpp:bookmarks:1#compat-pep"])
+    //bookmarks2 needs modern pubsub features
+    if(account.connectionProperties.supportsModernPubSub && [features containsObject:@"urn:xmpp:bookmarks:1#compat-pep"])
     {
         DDLogInfo(@"supports XEP-0402 compat-pep");
         account.connectionProperties.supportsBookmarksCompat = YES;

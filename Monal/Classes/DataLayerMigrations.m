@@ -970,7 +970,7 @@
         }];
         
         //invalidate state to make sure the pushservers are switched
-        [self updateDB:db withDataLayer:dataLayer toVersion:5.306 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:5.307 withBlock:^{
         }];
 
 

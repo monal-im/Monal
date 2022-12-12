@@ -371,7 +371,9 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         //important xep-0060 support (aka basic support)
         // [features containsObject:@"http://jabber.org/protocol/pubsub#last-published"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#publish"] &&
-        [features containsObject:@"http://jabber.org/protocol/pubsub#item-ids"] &&
+        [features containsObject:@"http://jabber.org/protocol/pubsub#subscribe"] &&
+        //item-ids SHOULD be supported but ejabberd has a regression in ejabberd >= 22.10
+        //[features containsObject:@"http://jabber.org/protocol/pubsub#item-ids"] &&
         // [features containsObject:@"http://jabber.org/protocol/pubsub#create-and-configure"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#create-nodes"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#delete-items"] &&

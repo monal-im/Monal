@@ -141,7 +141,7 @@ enum MLServerDetailsSections {
     // supportsSSDP
     [self.serverCaps addObject:@{
         // see MLIQProcessor.m multiple xep required for pubsub
-        @"Title":NSLocalizedString(@"XEP-xxxx: SASL SCRAM Downgrade Protection", @""),
+        @"Title":NSLocalizedString(@"XEP-0474: SASL SCRAM Downgrade Protection", @""),
         @"Description":NSLocalizedString(@"This specification provides a way to secure the SASL and SASL2 handshakes against method and channel-binding downgrades.", @""),
         @"Color": connection.supportsSSDP ? @"Green" : @"Red"
     }];

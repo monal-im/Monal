@@ -379,7 +379,7 @@
  * from the identity store, but retain any metadata that may be kept
  * alongside it.
  */
-- (BOOL) saveIdentity:(SignalAddress*) address identityKey:(nullable NSData*) identityKey;
+-(BOOL) saveIdentity:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nullable) identityKey;
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
         NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];

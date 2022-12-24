@@ -1509,7 +1509,7 @@ void swizzle(Class c, SEL orig, SEL new)
 
 #pragma mark omemo stuff
 
-+(NSString *)signalHexKeyWithData:(NSData*) data
++(NSString*) signalHexKeyWithData:(NSData*) data
 {
     NSString* hex = [self hexadecimalString:data];
     
@@ -1519,7 +1519,16 @@ void swizzle(Class c, SEL orig, SEL new)
     return hex;
 }
 
-+(NSString *)signalHexKeyWithSpacesWithData:(NSData*) data
++(NSData*) signalIdentityWithHexKey:(NSString*) hexKey
+{
+    //add 05 cipher info
+    NSString* hexKeyWithCipherInfo = [NSString stringWithFormat:@"05%@", hexKey];
+    NSData* identity = [self dataWithHexString:hexKeyWithCipherInfo];
+
+    return identity;
+}
+
++(NSString*) signalHexKeyWithSpacesWithData:(NSData*) data
 {
     NSMutableString* hex = [[self signalHexKeyWithData:data] mutableCopy];
    

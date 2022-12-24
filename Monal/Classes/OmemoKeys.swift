@@ -283,13 +283,18 @@ struct OmemoKeys: View {
         // trust all devices that were part of the qr code
         let knownDevices = Array(self.account!.omemo.knownDevices(forAddressName: scannedJid))
         for (qrDeviceId, fingerprint) in scannedFingerprints {
-            if(knownDevices.contains(NSNumber(integerLiteral: qrDeviceId))) {
-                let address = SignalAddress(name: scannedJid, deviceId: Int32(qrDeviceId))
-                let identity = self.account!.omemo.getIdentityFor(address)
-                let knownIdentity = HelperTools.signalHexKey(with: identity)
-                if(knownIdentity.uppercased() == fingerprint.uppercased()) {
-                    self.account!.omemo.updateTrust(true, for: address)
-                }
+            let address = SignalAddress(name: scannedJid, deviceId: Int32(qrDeviceId))
+            let identityFromHex = HelperTools.signalIdentity(withHexKey: fingerprint)
+            // insert fingerprint of unkown devices to signalstore
+            if(!knownDevices.contains(NSNumber(integerLiteral: qrDeviceId))) {
+                self.account!.omemo.addIdentityManually(address, identityKey: identityFromHex)
+                assert(self.account!.omemo.getIdentityFor(address) == identityFromHex, "The stored and created fingerprint should match")
+            }
+            // trust device/fingerprint if fingerprints match
+            let identity = self.account!.omemo.getIdentityFor(address)
+            let knownIdentity = HelperTools.signalHexKey(with: identity)
+            if(knownIdentity.uppercased() == fingerprint.uppercased()) {
+                self.account!.omemo.updateTrust(true, for: address)
             }
         }
     }

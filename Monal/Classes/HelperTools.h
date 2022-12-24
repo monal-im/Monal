@@ -98,8 +98,9 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSData*) dataWithHexString:(NSString*) hex;
 +(NSData*) XORData:(NSData*) data1 withData:(NSData*) data2;
 
-+(NSString *)signalHexKeyWithData:(NSData*) data;
-+(NSString *)signalHexKeyWithSpacesWithData:(NSData*) data;
++(NSString*) signalHexKeyWithData:(NSData*) data;
++(NSData*) signalIdentityWithHexKey:(NSString*) hexKey;
++(NSString*) signalHexKeyWithSpacesWithData:(NSData*) data;
 
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title;
 +(CIImage*) createQRCodeFromString:(NSString*) input;

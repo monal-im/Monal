@@ -30,6 +30,7 @@
 -(void) saveValues;
 
 -(NSData* _Nullable) getIdentityForAddress:(SignalAddress* _Nonnull) address;
+-(BOOL) saveIdentity:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nullable) identityKey;
 /**
  all devices even those without sessions
  */

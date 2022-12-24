@@ -33,6 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(NSSet<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName;
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
+-(void) addIdentityManually:(SignalAddress*) address identityKey:(NSData* _Nonnull) identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(NSData*) getIdentityForAddress:(SignalAddress*) address;

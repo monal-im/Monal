@@ -567,7 +567,7 @@ $$
     //ignore bundles not conforming to the standard
     if(signedPreKeyPublic == nil || signedPreKeyPublicId == nil || signedPreKeySignature == nil || identityKey == nil)
     {
-        DDLogWarn(@"Bundle not onforming to omemo standard, ignoring: signedPreKeyPublic=%@, signedPreKeyPublicId=%@, signedPreKeySignature=%@, identityKey=%@", signedPreKeyPublic, signedPreKeyPublicId, signedPreKeySignature, identityKey);
+        DDLogWarn(@"Bundle not conforming to omemo standard, ignoring: signedPreKeyPublic=%@, signedPreKeyPublicId=%@, signedPreKeySignature=%@, identityKey=%@", signedPreKeyPublic, signedPreKeyPublicId, signedPreKeySignature, identityKey);
         return;
     }
 
@@ -1098,16 +1098,22 @@ $$
         [self.account.pubsub unsubscribeFromNode:@"eu.siacs.conversations.axolotl.devicelist" forJid:jid withHandler:$newHandler(self, handleDevicelistUnsubscribe)];
 }
 
-
 //interfaces for UI
--(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey
+-(BOOL) isTrustedIdentity:(SignalAddress*) address identityKey:(NSData*) identityKey
 {
     return [self.monalSignalStore isTrustedIdentity:address identityKey:identityKey];
 }
 
--(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey
+-(NSNumber*) getTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey
 {
     return [self.monalSignalStore getTrustLevel:address identityKey:identityKey];
+}
+
+// add OMEMO identity manually to our signalstore
+// only intended to be called from OMEMO QR scan UI
+-(void) addIdentityManually:(SignalAddress*) address identityKey:(NSData* _Nonnull) identityKey
+{
+    [self.monalSignalStore saveIdentity:address identityKey:identityKey];
 }
 
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address

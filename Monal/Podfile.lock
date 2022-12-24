@@ -28,7 +28,7 @@ PODS:
   - sqlite3/perf-threadsafe (3.40.0):
     - sqlite3/common
   - TOCropViewController (2.6.1)
-  - WebRTC-lib (107.0.0)
+  - WebRTC-lib (108.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -98,7 +98,7 @@ SPEC CHECKSUMS:
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   sqlite3: 88dd99ef4ac3945f5a15facdd752933c52fd93bf
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
-  WebRTC-lib: 56952c81f23b0e34ca86902938c0895d974279ff
+  WebRTC-lib: e3c964e4033218c36ace87b142691451680a4723
 
 PODFILE CHECKSUM: 7a09d276f6e87d71cc1ce2e4011b36b801f0282f
 

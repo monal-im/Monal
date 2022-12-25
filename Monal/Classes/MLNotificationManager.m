@@ -55,6 +55,14 @@
 
 -(void) handleContactRefresh:(NSNotification*) notification
 {
+    //these will not survive process switches, but that's enough for now
+    static NSMutableSet* displayed;
+    static NSMutableSet* removed;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        displayed = [[NSMutableSet alloc] init];
+        removed = [[NSMutableSet alloc] init];
+    });
     xmpp* xmppAccount = notification.object;
     MLContact* contact = notification.userInfo[@"contact"];
     NSString* idval = [NSString stringWithFormat:@"subscription(%@, %@)", contact.accountId, contact.contactJid];
@@ -79,16 +87,25 @@
                         [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[idval]];
                     }
             }];
+            [removed addObject:idval];
         };
         
-        //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
-        //but DON'T do this in the appex because this can try to mess with notifications after the parse queue was frozen (see appex code for explanation what this means)
-        if([HelperTools isAppExtension])
-            block();
-        else
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), block);
+        //only try to remove once
+        if(![removed containsObject:idval])
+        {
+            //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
+            //but DON'T do this in the appex because this can try to mess with notifications after the parse queue was frozen (see appex code for explanation what this means)
+            if([HelperTools isAppExtension])
+                block();
+            else
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), block);
+        }
         return;
     }
+    
+    //don't alert twice
+    if([displayed containsObject:idval])
+        return;
     
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title = xmppAccount.connectionProperties.identity.jid;
@@ -103,6 +120,7 @@
     
     DDLogDebug(@"Publishing notification with id %@", idval);
     [self publishNotificationContent:content withID:idval];
+    [displayed addObject:idval];
 }
 
 -(void) handleXMPPError:(NSNotification*) notification

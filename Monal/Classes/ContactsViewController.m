@@ -55,7 +55,7 @@
 
 -(void) configureContactRequestsImage
 {
-    UIImage* requestsImage = [[UIImage systemImageNamed:@"questionmark.bubble.fill"] imageWithTintColor:UIColor.monalGreen];
+    UIImage* requestsImage = [[UIImage systemImageNamed:@"person.crop.circle.fill.badge.questionmark"] imageWithTintColor:UIColor.monalGreen];
     UITapGestureRecognizer* requestsTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContactRequests:)];
     self.navigationItem.rightBarButtonItems[1].customView = [HelperTools
         buttonWithNotificationBadgeForImage:requestsImage

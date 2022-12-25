@@ -27,6 +27,16 @@ struct ContactRequestsMenuEntry: View {
             Spacer()
             Group {
                 Button {
+                    let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+                    appDelegate.openChat(of:contact)
+                } label: {
+                    Image(systemName: "text.bubble")
+                        .accentColor(.black)
+                }
+                //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952
+                .buttonStyle(BorderlessButtonStyle())
+                
+                Button {
                     // deny request
                     self.delete()       //update ui first because the array index can change afterwards
                     MLXMPPManager.sharedInstance().reject(contact)
@@ -60,9 +70,9 @@ struct ContactRequestsMenu: View {
     @State private var pendingRequests: [MLContact]
 
     var body: some View {
-        NavigationView {
+        Form {
             List {
-                Section(header: Text("Allowing someone to add you as a contact lets them see when you are online. It also allows you to send encrypted messages.")) {
+                Section(header: Text("Allowing someone to add you as a contact lets them see your profile picture and when you are online.")) {
                     if(pendingRequests.isEmpty) {
                         Text("No pending requests")
                             .foregroundColor(.secondary)

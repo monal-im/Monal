@@ -475,46 +475,42 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion
 {
-    DDLogVerbose(@"presenting chat with contact: %@", contact);
-    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
-        // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
-        if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
-        {
-            // make sure the already open chat is reloaded and return
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-            if(completion != nil)
-                completion(@YES);
-            return;
-        }
-        
-        // clear old chat before opening a new one (but not for splitView == YES)
-        if([HelperTools deviceUsesSplitView] == NO)
-            [self.navigationController popViewControllerAnimated:NO];
-        
-        // show placeholder if contact is nil, open chat otherwise
-        if(contact == nil)
-        {
-            [self openConversationPlaceholder:nil];
-            if(completion != nil)
-                completion(@NO);
-            return;
-        }
-        // check if the contact is a buddy
-        if([[DataLayer sharedInstance] isContactInList:contact.contactJid forAccount:contact.accountId] == NO)
-        {
-            DDLogError(@"Contact %@ unkown", contact.contactJid);
-            [self openConversationPlaceholder:nil];
-            if(completion != nil)
-                completion(@NO);
-            return;
-        }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogVerbose(@"presenting chat with contact: %@", contact);
+        MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+        [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
+            // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
+            if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
+            {
+                // make sure the already open chat is reloaded and return
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                if(completion != nil)
+                    completion(@YES);
+                return;
+            }
+            
+            // clear old chat before opening a new one (but not for splitView == YES)
+            if([HelperTools deviceUsesSplitView] == NO)
+                [self.navigationController popViewControllerAnimated:NO];
+            
+            // show placeholder if contact is nil, open chat otherwise
+            if(contact == nil)
+            {
+                [self openConversationPlaceholder:nil];
+                if(completion != nil)
+                    completion(@NO);
+                return;
+            }
 
-        // open chat
-        [self performSegueWithIdentifier:@"showConversation" sender:contact];
-        if(completion != nil)
-            completion(@YES);
-    }];
+            // open chat (make sure we have an active buddy for it and add it to our ui, if needed)
+            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+            [self insertOrMoveContact:contact completion:^(BOOL finished __unused) {
+                [self performSegueWithIdentifier:@"showConversation" sender:contact];
+                if(completion != nil)
+                    completion(@YES);
+            }];
+        }];
+    });
 }
 
 /*

@@ -137,7 +137,7 @@ struct AddContactMenu: View {
             }
             else
             {
-                Section(header: Text(verbatim: "Contact and Group/Channel Jids are usually in the format: name@domain.tld")) {
+                Section(header:Text("Contact and Group/Channel Jids are usually in the format: name@domain.tld")) {
                     if(connectedAccounts.count > 1) {
                         Picker("Use account", selection: $selectedAccount) {
                             ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in

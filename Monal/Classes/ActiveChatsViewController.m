@@ -170,6 +170,20 @@ static NSMutableSet* _smacksWarningDisplayed;
     };
 
     dispatch_async(dispatch_get_main_queue(), ^{
+        //make sure we don't display a chat view for a disabled account
+        if(self.currentChatViewController != nil && self.currentChatViewController.contact != nil)
+        {
+            BOOL found = NO;
+            for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
+            {
+                NSNumber* accountNo = accountDict[kAccountID];
+                if(self.currentChatViewController.contact.accountId.intValue == accountNo.intValue)
+                    found = YES;
+            }
+            if(!found)
+                [self presentChatWithContact:nil];
+        }
+        
         if(self.chatListTable.hasUncommittedUpdates)
             return;
         [CATransaction begin];
@@ -355,10 +369,11 @@ static NSMutableSet* _smacksWarningDisplayed;
     [super viewWillAppear:animated];
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
         [self refreshDisplay];      // load contacts
-    // only check if the login screens have been shown if there are no active chats
-    [self segueToIntroScreensIfNeeded];
     // open placeholder
-    [self presentChatWithContact:nil];
+    [self presentChatWithContact:nil andCompletion:^(id success __unused) {
+        // only check if the login screens have been shown if there are no active chats
+        [self segueToIntroScreensIfNeeded];
+    }];
 }
 
 -(void) viewWillDisappear:(BOOL) animated

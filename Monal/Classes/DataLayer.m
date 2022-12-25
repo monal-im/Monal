@@ -753,7 +753,7 @@ static NSDateFormatter* dbFormatter;
 -(NSMutableArray*) allContactRequests
 {
     return [self.db idReadTransaction:^{
-        NSString* query = @"SELECT account_id, buddy_name FROM subscriptionRequests;";
+        NSString* query = @"SELECT subscriptionRequests.account_id, subscriptionRequests.buddy_name FROM subscriptionRequests, account WHERE subscriptionRequests.account_id = account.account_id AND account.enabled;";
         NSMutableArray* toReturn = [[NSMutableArray alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query])
             [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];

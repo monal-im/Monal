@@ -55,8 +55,6 @@
     BOOL _isRecording;
 }
 
-@property (nonatomic, strong) MLContact* contact;
-
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSCalendar* gregorian;
 @property (nonatomic, assign)  NSInteger thisyear;

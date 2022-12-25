@@ -380,10 +380,9 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         [features containsObject:@"http://jabber.org/protocol/pubsub#delete-nodes"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#persistent-items"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#retrieve-items"] &&
-        [features containsObject:@"http://jabber.org/protocol/pubsub#config-node"] &&
+        //not sure if older ejabberd versions < 22.10 support this one, don't check it to be sure
+        //[features containsObject:@"http://jabber.org/protocol/pubsub#config-node"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#auto-create"] &&
-        //needed for xep-0402 later
-        [features containsObject:@"http://jabber.org/protocol/pubsub#multi-items"] &&
         YES
     ) {
         DDLogInfo(@"Supports pubsub (pep)");
@@ -394,7 +393,9 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
             account.connectionProperties.supportsPubSubMax = YES;
     }
     
-    if([features containsObject:@"urn:xmpp:bookmarks:1#compat-pep"])
+    if([features containsObject:@"urn:xmpp:bookmarks:1#compat-pep"] &&
+        [features containsObject:@"http://jabber.org/protocol/pubsub#multi-items"] &&
+        [features containsObject:@"http://jabber.org/protocol/pubsub#item-ids"])
     {
         DDLogInfo(@"supports XEP-0402 compat-pep");
         account.connectionProperties.supportsBookmarksCompat = YES;

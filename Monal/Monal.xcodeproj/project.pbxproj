@@ -134,6 +134,8 @@
 		54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81B282316F5003664BD /* RegisterAccount.swift */; };
 		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
 		840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */; };
+		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
+		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
 		8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */ = {isa = PBXBuildFile; fileRef = 8420EA9A2915E4FE0038FF40 /* OmemoState.h */; };
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
 		8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8441EFF82921B53500E851E9 /* BackgroundSettings.swift */; };
@@ -544,6 +546,7 @@
 		7FA9582E4CC566FE5466C557 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.debug.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
 		840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueCell.m; sourceTree = "<group>"; };
 		840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueCell.h; sourceTree = "<group>"; };
+		841898AB2957DBAC00FEC77D /* RichAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichAlert.swift; sourceTree = "<group>"; };
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
@@ -728,6 +731,7 @@
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
 				C1E1EC7B286A025F0097EC74 /* SwiftSoup in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
+				841898AA2957712000FEC77D /* ViewExtractor in Frameworks */,
 				7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1012,6 +1016,7 @@
 				3D27D955290B0BB60014748B /* AddContactMenu.swift */,
 				3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */,
 				846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */,
+				841898AB2957DBAC00FEC77D /* RichAlert.swift */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -1427,6 +1432,7 @@
 			packageProductDependencies = (
 				C1F5C7AE2777638B0001F295 /* OrderedCollections */,
 				C1E1EC7A286A025F0097EC74 /* SwiftSoup */,
+				841898A92957712000FEC77D /* ViewExtractor */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1632,6 +1638,7 @@
 			packageReferences = (
 				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */,
 				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -1973,6 +1980,7 @@
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */,
+				841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */,
 				840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */,
@@ -3770,6 +3778,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/GeorgeElsham/ViewExtractor";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
@@ -3789,6 +3805,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		841898A92957712000FEC77D /* ViewExtractor */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */;
+			productName = ViewExtractor;
+		};
 		C1E1EC7A286A025F0097EC74 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */;

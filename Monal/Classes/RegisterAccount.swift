@@ -317,11 +317,13 @@ struct RegisterAccount: View {
                         .background(Color(UIColor.tertiarySystemFill))
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     }
+                    .disabled(self.registerToken != nil)
 
                     if(selectedServerIndex == 0) {
                         TextField("Provide XMPP-Server", text: Binding(get: { self.providedServer }, set: { string in self.providedServer = string.lowercased() }))
                             //ios15: .textInputAutocapitalization(.never)
                             .disableAutocorrection(true)
+                            .disabled(self.registerToken != nil)
                     }
 
                     TextField("Username", text: Binding(get: { self.username }, set: { string in self.username = string.lowercased() }))

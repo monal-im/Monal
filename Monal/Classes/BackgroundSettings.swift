@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 import monalxmpp
 
 @ViewBuilder
@@ -41,7 +42,24 @@ struct BackgroundSettings: View {
                 Group {
                     Section(header:title(contact:contact)) {
                         Button(action: {
+#if targetEnvironment(macCatalyst)
+                            let picker = DocumentPickerViewController(
+                                supportedTypes: [UTType.image], 
+                                onPick: { url in
+                                    if let imageData = try? Data(contentsOf: url) {
+                                        if let loadedImage = UIImage(data: imageData) {
+                                                self.inputImage = loadedImage
+                                        }
+                                    }
+                                },
+                                onDismiss: {
+                                    //do nothing on dismiss
+                                }
+                            )
+                            UIApplication.shared.windows.first?.rootViewController?.present(picker, animated: true)
+#else
                             showingImagePicker = true
+#endif
                         }) {
                             if let inputImage = inputImage {
                                 ZStack(alignment: .topLeading) {
@@ -72,7 +90,27 @@ struct BackgroundSettings: View {
                         //>= ios16
                         /*
                         PhotosPicker(selection:$selectedItem, matching:.images, photoLibrary:.shared()) {
-                            Text("Select a photo")
+                            if let inputImage = inputImage {
+                                ZStack(alignment: .topLeading) {
+                                    HStack(alignment: .center) {
+                                        Image(uiImage:inputImage)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(maxWidth: .infinity, alignment: .center)
+                                    }
+                                    Button(action: {
+                                        self.inputImage = nil
+                                    }, label: {
+                                        Image(systemName: "xmark.circle.fill").foregroundColor(.red)
+                                    })
+                                    .buttonStyle(.borderless)
+                                    .offset(x: -7, y: -7)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            } else {
+                                Text("Select background image")
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            }
                         }
                         .onChange(of:selectedItem) { newItem in
                             Task {

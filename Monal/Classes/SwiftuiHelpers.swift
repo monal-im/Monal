@@ -334,6 +334,15 @@ func iOS16() -> Bool {
 @objc
 class SwiftuiInterface : NSObject {
     @objc
+    func makeCallScreen(_ contact: MLContact) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AVPrototype(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact))))
+        return host
+    }
+    
+    @objc
     func makeContactDetails(_ contact: MLContact) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))

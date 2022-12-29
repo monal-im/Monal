@@ -25,7 +25,7 @@ struct ContactDetails: View {
             Section {
                 VStack(alignment: .leading) {
                     //header
-                    ContactDetailsHeader(contact: contact)
+                    ContactDetailsHeader(delegate:delegate, contact:contact)
                     Spacer().frame(height: 20)
                 }
             }.padding()

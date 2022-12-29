@@ -11,9 +11,11 @@ import SwiftUI
 import monalxmpp
 
 struct ContactDetailsHeader: View {
+    var delegate: SheetDismisserProtocol
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     @State private var showingCannotEncryptAlert = false
     @State private var showingShouldDisableEncryptionAlert = false
+    @State private var navigationAction: String?
 
     var body: some View {
         VStack {
@@ -85,9 +87,12 @@ struct ContactDetailsHeader: View {
 
 #if IS_ALPHA                 
                 Spacer().frame(width: 20)
-                NavigationLink(destination: LazyClosureView(AVPrototype(contact: contact))) {
-                    Label("Call", systemImage:"phone")
+                Button(action: {
+                    navigationAction = "callScreen"
+                }) {
+                    Image(systemName: "phone")
                 }
+                .buttonStyle(BorderlessButtonStyle())
 #endif
 
                 /*
@@ -158,15 +163,21 @@ struct ContactDetailsHeader: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+        // all hidden navigation links collected in a hidden vstack
+        .background(VStack {
+            NavigationLink("", destination: LazyClosureView(AVPrototype(delegate: delegate, contact: contact)), tag: "callScreen", selection: $navigationAction)
+            //NavigationLink("", destination: LazyClosureView(AVPrototype(contact: contact)), tag: "someOtherScreen", selection: $navigationAction)
+        }.frame(width: 0, height: 0).opacity(0))
     }
 }
 
 struct ContactDetailsHeader_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        ContactDetailsHeader(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)))
-        ContactDetailsHeader(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(1)))
-        ContactDetailsHeader(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(2)))
-        ContactDetailsHeader(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(3)))
-        ContactDetailsHeader(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(4)))
+        ContactDetailsHeader(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)))
+        ContactDetailsHeader(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(1)))
+        ContactDetailsHeader(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(2)))
+        ContactDetailsHeader(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(3)))
+        ContactDetailsHeader(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(4)))
     }
 }

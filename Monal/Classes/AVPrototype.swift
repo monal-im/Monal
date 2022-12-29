@@ -14,10 +14,12 @@ import AVFoundation
 import CallKit
 
 struct AVPrototype: View {
+    var delegate: SheetDismisserProtocol
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     var callController: CXCallController
 
-    init(contact: ObservableKVOWrapper<MLContact>) {
+    init(delegate: SheetDismisserProtocol, contact: ObservableKVOWrapper<MLContact>) {
+        self.delegate = delegate
         _contact = StateObject(wrappedValue: contact)
         self.callController = CXCallController(queue: DispatchQueue.main)
     }
@@ -36,7 +38,8 @@ struct AVPrototype: View {
 }
 
 struct AVPrototype_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        AVPrototype(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)))
+        AVPrototype(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)))
     }
 }

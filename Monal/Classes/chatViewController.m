@@ -236,9 +236,15 @@ enum msgSentState {
             [rightBarButtons addObject:entry];
     self.navigationItem.rightBarButtonItems = rightBarButtons;
 #endif
-
-    // Init search button item.
-    [self initSearchButtonItem];
+    
+#ifdef IS_ALPHA
+    UIBarButtonItem* callButton = [UIBarButtonItem new];
+    callButton.image = [UIImage systemImageNamed:@"phone"];
+    [callButton setAction:@selector(openCallScreen:)];
+    NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
+    [rightBarButtons addObject:callButton];
+    self.navigationItem.rightBarButtonItems = rightBarButtons;
+#endif
 }
 
 -(void) initNavigationBarItems
@@ -444,6 +450,12 @@ enum msgSentState {
     }
     [self refreshData];
     [self reloadTable];
+}
+
+-(void) openCallScreen:(id) sender
+{
+    UIViewController* detailsViewController = [[SwiftuiInterface new] makeCallScreen:self.contact];
+    [self presentViewController:detailsViewController animated:YES completion:^{}];
 }
 
 -(IBAction) toggleEncryption:(id)sender

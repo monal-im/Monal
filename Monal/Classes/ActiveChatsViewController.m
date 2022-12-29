@@ -517,13 +517,21 @@ static NSMutableSet* _smacksWarningDisplayed;
                 return;
             }
 
-            // open chat (make sure we have an active buddy for it and add it to our ui, if needed)
+            //open chat (make sure we have an active buddy for it and add it to our ui, if needed)
+            //but don't animate this if the contact is already present in our list
             [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
-            [self insertOrMoveContact:contact completion:^(BOOL finished __unused) {
+            if([[self getChatArrayForSection:pinnedChats] containsObject:contact] || [[self getChatArrayForSection:unpinnedChats] containsObject:contact])
+            {
                 [self performSegueWithIdentifier:@"showConversation" sender:contact];
                 if(completion != nil)
                     completion(@YES);
-            }];
+            }
+            else
+                [self insertOrMoveContact:contact completion:^(BOOL finished __unused) {
+                    [self performSegueWithIdentifier:@"showConversation" sender:contact];
+                    if(completion != nil)
+                        completion(@YES);
+                }];
         }];
     });
 }

@@ -123,17 +123,13 @@ NSURL *audioFileURL = nil;
 -(NSString*) getAudioPath
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSString *documentsDirectory = [[fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path];
-
-    NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"AudioRecordCache"];
-    NSError *error = nil;
+    NSString* writablePath = [[HelperTools getContainerURLForPathComponents:@[@"AudioRecordCache"]] path];
+    NSError* error = nil;
     [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
-    [HelperTools configureFileProtectionFor:writablePath];
-    if (error) {
+    if(error)
         DDLogError(@"Audio Recoder create directory fail: %@", [error description]);
-    }
-
-    NSString *audioFilePath = [writablePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.aac",[[NSUUID UUID] UUIDString]]];
+    [HelperTools configureFileProtectionFor:writablePath];
+    NSString* audioFilePath = [writablePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.aac",[[NSUUID UUID] UUIDString]]];
     return  audioFilePath;
 }
 

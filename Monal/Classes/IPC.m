@@ -103,9 +103,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
 {
     self = [super init];
     
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
-    _dbFile = [[containerUrl path] stringByAppendingPathComponent:@"ipc.sqlite"];
+    _dbFile = [[HelperTools getContainerURLForPathComponents:@[@"ipc.sqlite"]] path];
     _processName = processName;
     _ipcQueues = [[NSMutableDictionary alloc] init];
     _serverThreadCondition = [[NSCondition alloc] init];
@@ -113,7 +111,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
     static dispatch_once_t once;
     static const int VERSION = 2;
     dispatch_once(&once, ^{
-        BOOL fileExists = [fileManager fileExistsAtPath:_dbFile];
+        BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:_dbFile];
         //first command creates initial database if file does not exist
         //this can not be used inside a transaction --> turn on WAL mode before executing any other db operations
         //this will create the database file and open the database because it is the first MLSQlite call done for this file

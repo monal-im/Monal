@@ -42,6 +42,7 @@ static NSMutableDictionary* currentTransactions;
 //this allows for concurrent reads/writes
 +(id) sharedInstanceForFile:(NSString*) dbFile
 {
+    MLAssert(dbFile != nil, @"MLSQLite sharedInstanceForFile:nil: file MUST NOT be nil!");
     @synchronized(self) {
         NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
         if(threadData[@"_sqliteInstancesForThread"] && threadData[@"_sqliteInstancesForThread"][dbFile])

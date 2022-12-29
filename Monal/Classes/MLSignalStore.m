@@ -11,6 +11,7 @@
 #import "SignalProtocolObjC.h"
 #import "DataLayer.h"
 #import "MLSQLite.h"
+#import "HelperTools.h"
 
 @interface MLSignalStore()
 {
@@ -40,9 +41,7 @@
 -(MLSignalStore*) initWithAccountId:(NSNumber*) accountId andAccountJid:(NSString* _Nonnull) accountJid
 {
     self = [super init];
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
-    _dbPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
+    _dbPath = [[HelperTools getContainerURLForPathComponents:@[@"sworim.sqlite"]] path];
     
     self.accountId = accountId;
     NSArray* data = [self.sqliteDatabase idReadTransaction:^{

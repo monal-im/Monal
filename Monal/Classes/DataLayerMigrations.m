@@ -57,8 +57,7 @@
         {
             DDLogError(@"Got *TOO OLD* db version %@", dbversion);
             NSFileManager* fileManager = [NSFileManager defaultManager];
-            NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
-            NSString* writableDBPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
+            NSString* writableDBPath = [[HelperTools getContainerURLForPathComponents:@[@"sworim.sqlite"]] path];
             for(NSString* suffix in @[@"", @"-wal", @"-shm"])
                 [fileManager removeItemAtPath:[NSString stringWithFormat:@"%@%@", writableDBPath, suffix] error:nil];
             @throw [NSException exceptionWithName:@"OLD_DB_DETECTED" reason:@"Detected too old DB version, deleted file and crashing now!" userInfo:nil];

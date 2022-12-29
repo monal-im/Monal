@@ -56,8 +56,7 @@ static NSDateFormatter* dbFormatter;
 +(void) initialize
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
-    NSString* writableDBPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
+    NSString* writableDBPath = [[HelperTools getContainerURLForPathComponents:@[@"sworim.sqlite"]] path];
     
     //the file does not exist (e.g. fresh install) --> copy default database to app group path
     if(![fileManager fileExistsAtPath:writableDBPath])

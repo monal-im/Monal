@@ -65,7 +65,7 @@ struct ContactDetails: View {
                     }
                 }
                 
-                let sharedUrl = HelperTools.getFilemanagerURL(forPathComponents:[MLXMPPManager.sharedInstance().getConnectedAccount(forID:contact.accountId)!.connectionProperties.identity.jid, contact.contactDisplayName as String])
+                let sharedUrl = HelperTools.getSharedDocumentsURL(forPathComponents:[MLXMPPManager.sharedInstance().getConnectedAccount(forID:contact.accountId)!.connectionProperties.identity.jid, contact.contactDisplayName as String])
                 if UIApplication.shared.canOpenURL(sharedUrl) {
                     Button(action: {
                             UIApplication.shared.open(sharedUrl, options:[:])

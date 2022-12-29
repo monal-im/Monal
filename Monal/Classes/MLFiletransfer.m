@@ -29,7 +29,7 @@ static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 {
     NSError* error;
     _fileManager = [NSFileManager defaultManager];
-    _documentCacheDir = [[[_fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path] stringByAppendingPathComponent:@"documentCache"];
+    _documentCacheDir = [[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path];
     
     [_fileManager createDirectoryAtURL:[NSURL fileURLWithPath:_documentCacheDir] withIntermediateDirectories:YES attributes:nil error:&error];
     if(error)

@@ -17,7 +17,6 @@ int main(int argc, char *argv[]) {
         NSSetUncaughtExceptionHandler(&logException);
 
         [HelperTools configureLogging];
-        
         [HelperTools activityLog];
 
         // check start arguments
@@ -26,7 +25,7 @@ int main(int argc, char *argv[]) {
         {
             // reset db
             NSFileManager* fileManager = [NSFileManager defaultManager];
-            NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
+            NSURL* containerUrl = [HelperTools getContainerURLForPathComponents:@[]];
             NSArray<NSString*>* dbPaths = @[
                 [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"],
                 [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite-shm"],
@@ -40,7 +39,7 @@ int main(int argc, char *argv[]) {
                 NSError* err;
                 if([fileManager fileExistsAtPath:path])
                     [fileManager removeItemAtPath:path error:&err];
-                assert(err == nil);
+                MLAssert(err == nil, @"Error cleaning up DB!");
             }
 
             // reset NSUserDefaults
@@ -48,14 +47,10 @@ int main(int argc, char *argv[]) {
         }
         // invalidate account states
         if([NSProcessInfo.processInfo.arguments containsObject:@"--disableAnimations"])
-        {
             [UIView setAnimationsEnabled:NO];
-        }
         // invalidate account states
         if([NSProcessInfo.processInfo.arguments containsObject:@"--invalidateAccountStates"])
-        {
             [[DataLayer sharedInstance] invalidateAllAccountStates];
-        }
         int retVal = UIApplicationMain(argc, argv, nil, NSStringFromClass([MonalAppDelegate class]));
         return retVal;
     }

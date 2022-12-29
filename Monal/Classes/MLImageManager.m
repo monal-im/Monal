@@ -80,7 +80,7 @@
     
     NSFileManager* fileManager = [NSFileManager defaultManager];
     
-    self.documentsDirectory = [[fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path];
+    self.documentsDirectory = [[HelperTools getContainerURLForPathComponents:@[]] path];
     
     NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"imagecache"];
     [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:nil];

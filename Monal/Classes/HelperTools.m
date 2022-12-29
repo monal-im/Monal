@@ -151,7 +151,8 @@ void swizzle(Class c, SEL orig, SEL new)
     else
     {
         return @"eu.prod.push.monal-im.org";
-    }*/
+    }
+    */
 #endif
 }
 
@@ -167,7 +168,21 @@ void swizzle(Class c, SEL orig, SEL new)
     };
 }
 
-+(NSURL*) getFilemanagerURLForPathComponents:(NSArray*) components
++(NSURL*) getContainerURLForPathComponents:(NSArray*) components
+{
+    static NSURL* containerUrl;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        containerUrl = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
+    });
+    MLAssert(containerUrl != nil, @"Container URL should never be nil!");
+    NSURL* retval = containerUrl;
+    for(NSString* component in components)
+        retval = [retval URLByAppendingPathComponent:component];
+    return retval;
+}
+
++(NSURL*) getSharedDocumentsURLForPathComponents:(NSArray*) components
 {
     NSURL* sharedUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
     for(NSString* component in components)
@@ -997,12 +1012,11 @@ void swizzle(Class c, SEL orig, SEL new)
     [DDLog addLogger:[DDOSLogger sharedInstance]];
 #endif
     
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
-    DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
+    NSString* containerUrl = [[HelperTools getContainerURLForPathComponents:@[]] path];
+    DDLogInfo(@"Logfile dir: %@", containerUrl);
     
     //file logger
-    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
+    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:containerUrl];
     self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
     [self.fileLogger setLogFormatter:formatter];
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
@@ -1024,9 +1038,9 @@ void swizzle(Class c, SEL orig, SEL new)
     [DDLog flushLog];
     
     //for debugging when upgrading the app
-    NSArray* directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
+    NSArray* directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:containerUrl error:nil];
     for(NSString* file in directoryContents)
-        DDLogVerbose(@"File %@/%@", [containerUrl path], file);
+        DDLogVerbose(@"File %@/%@", containerUrl, file);
 }
 
 +(BOOL) isAppExtension

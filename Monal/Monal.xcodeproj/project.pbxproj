@@ -143,6 +143,8 @@
 		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		846DF27C2937FAA600AAB9C0 /* ChatPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */; };
+		848717EE295E5FA200B8D288 /* MLCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 848717ED295E5FA200B8D288 /* MLCall.m */; };
+		848717F0295E5FBA00B8D288 /* MLCall.h in Headers */ = {isa = PBXBuildFile; fileRef = 848717EF295E5FBA00B8D288 /* MLCall.h */; };
 		848904A9289C82C30097E19C /* SCRAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 848904A8289C82C30097E19C /* SCRAM.m */; };
 		849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 849A53E3287135B2007E941A /* MLVoIPProcessor.m */; };
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
@@ -551,6 +553,8 @@
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
 		846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPlaceholder.swift; sourceTree = "<group>"; };
+		848717ED295E5FA200B8D288 /* MLCall.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLCall.m; path = Classes/MLCall.m; sourceTree = SOURCE_ROOT; };
+		848717EF295E5FBA00B8D288 /* MLCall.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLCall.h; path = Classes/MLCall.h; sourceTree = SOURCE_ROOT; };
 		848904A8289C82C30097E19C /* SCRAM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SCRAM.m; sourceTree = "<group>"; };
 		848904AA289C82DB0097E19C /* SCRAM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SCRAM.h; sourceTree = "<group>"; };
 		849A53E3287135B2007E941A /* MLVoIPProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLVoIPProcessor.m; path = Classes/MLVoIPProcessor.m; sourceTree = SOURCE_ROOT; };
@@ -1312,6 +1316,8 @@
 				84D31CE528653B83006D7926 /* WebRTCClient.swift */,
 				849A53E3287135B2007E941A /* MLVoIPProcessor.m */,
 				849A53E5287135D7007E941A /* MLVoIPProcessor.h */,
+				848717ED295E5FA200B8D288 /* MLCall.m */,
+				848717EF295E5FBA00B8D288 /* MLCall.h */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -1401,6 +1407,7 @@
 				541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */,
 				C1F5C7A92775DA000001F295 /* MLContactSoftwareVersionInfo.h in Headers */,
 				84FC37572897523500634E3E /* metamacros.h in Headers */,
+				848717F0295E5FBA00B8D288 /* MLCall.h in Headers */,
 				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2036,6 +2043,7 @@
 				C1F5C7AA2775DA000001F295 /* MLContactSoftwareVersionInfo.m in Sources */,
 				26CC57D423A08D7100ABB92A /* MLImageManager.m in Sources */,
 				540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */,
+				848717EE295E5FA200B8D288 /* MLCall.m in Sources */,
 				26CC57C823A0892100ABB92A /* MLMessage.m in Sources */,
 				848904A9289C82C30097E19C /* SCRAM.m in Sources */,
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,

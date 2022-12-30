@@ -2597,7 +2597,7 @@ NSString* const kStanza = @"stanza";
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}task-data/{urn:xmpp:scram-upgrade:0}salt"])
         {
             NSData* salt = [parsedStanza findFirst:@"{urn:xmpp:scram-upgrade:0}salt#|base64"];
-            uint32_t iterations = (uint32_t)[[parsedStanza findFirst:@"{urn:xmpp:scram-upgrade:0}salt@iterations"] integerValue];
+            uint32_t iterations = (uint32_t)[[parsedStanza findFirst:@"{urn:xmpp:scram-upgrade:0}salt@iterations|uint"] unsignedLongValue];
             
             NSString* scramMechanism = [_upgradeTask substringWithRange:NSMakeRange(5, _upgradeTask.length-5)];
             DDLogInfo(@"Upgrading password using SCRAM mechanism: %@", scramMechanism);
@@ -2605,7 +2605,7 @@ NSString* const kStanza = @"stanza";
             NSData* saltedPassword = [scramUpgradeHandler hashPasswordWithSalt:salt andIterationCount:iterations];
             
             [self send:[[MLXMLNode alloc] initWithElement:@"task-data" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"hash" andNamespace:@"urn:xmpp:sasl:2" andData:[HelperTools encodeBase64WithData:saltedPassword]]
+                [[MLXMLNode alloc] initWithElement:@"hash" andNamespace:@"urn:xmpp:scram-upgrade:0" andData:[HelperTools encodeBase64WithData:saltedPassword]]
             ] andData:nil]];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -2798,7 +2798,7 @@ NSString* const kStanza = @"stanza";
             self->_upgradeTask = nil;
             if([self channelBindingToUse] != nil)
             {
-                NSSet* upgradesOffered = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/upgrade#"]];
+                NSSet* upgradesOffered = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/{urn:xmpp:sasl:upgrade:0}upgrade#"]];
                 for(NSString* method in [SCRAM supportedMechanismsIncludingChannelBinding:NO])
                     if([upgradesOffered containsObject:[NSString stringWithFormat:@"UPGR-%@", method]])
                     {
@@ -2813,19 +2813,13 @@ NSString* const kStanza = @"stanza";
                 {
                     self->_scramHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:mechanism];
                     //set ssdp data for downgrade protection
-                    //_supportedChannelBindings will be nil, if XEP-0440 is not supported by our server
+                    //_supportedChannelBindings will be nil, if XEP-0440 is not supported by our server (which should never happen because XEP-0440 is mandatory for SASL2)
                     [self->_scramHandler setSSDPMechanisms:[self->_supportedSaslMechanisms allObjects] andChannelBindingTypes:[self->_supportedChannelBindings allObjects]];
-                    //NSString* deviceName = [NSString stringWithFormat:@"%@ (%@)", [[UIDevice currentDevice] name], [[UIDevice currentDevice] model]];
-                    [self send:[[MLXMLNode alloc]
+                    MLXMLNode* authenticate = [[MLXMLNode alloc]
                         initWithElement:@"authenticate"
                         andNamespace:@"urn:xmpp:sasl:2"
-                        //only allow SCRAM upgrades if we are using channel-binding to make sure the saltedPassword isn't intercepted
-                        withAttributes:(self->_upgradeTask != nil && [self channelBindingToUse] != nil ? @{
-                            @"mechanism": mechanism,
-                            @"upgrade": self->_upgradeTask, 
-                        } : @{
-                            @"mechanism": mechanism,
-                        }) andChildren:@[
+                        withAttributes:@{@"mechanism": mechanism}
+                        andChildren:@[
                             [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithChannelBinding:[self channelBindingToUse]]]],
                             [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
                                 @"id":[[[UIDevice currentDevice] identifierForVendor] UUIDString],
@@ -2833,9 +2827,13 @@ NSString* const kStanza = @"stanza";
                                 [[MLXMLNode alloc] initWithElement:@"software" andData:@"Monal IM"],
                                 [[MLXMLNode alloc] initWithElement:@"device" andData:[[UIDevice currentDevice] name]],
                             ] andData:nil],
-                            
-                        ] andData:nil
-                    ]];
+                        ]
+                        andData:nil
+                    ];
+                    //add upgrade element if we mutually support upgrades
+                    if(self->_upgradeTask != nil)
+                        [authenticate addChildNode:[[MLXMLNode alloc] initWithElement:@"upgrade" andNamespace:@"urn:xmpp:sasl:upgrade:0" andData:self->_upgradeTask]];
+                    [self send:authenticate];
                     return;
                 }
             

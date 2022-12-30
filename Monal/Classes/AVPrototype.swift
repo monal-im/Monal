@@ -16,6 +16,7 @@ import CallKit
 struct AVPrototype: View {
     var delegate: SheetDismisserProtocol
     @StateObject var contact: ObservableKVOWrapper<MLContact>
+    @State var isCalling = false
     var callController: CXCallController
 
     init(delegate: SheetDismisserProtocol, contact: ObservableKVOWrapper<MLContact>) {
@@ -25,15 +26,25 @@ struct AVPrototype: View {
     }
 
     var body: some View {
-        VStack {
-            Button("Start Call") {
-                let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-                if let voipProcessor = appDelegate.voipProcessor {
+        ZStack {
+            Color.white
+            
+            
+        }
+        .onAppear {
+            DDLogDebug("Call UI appeared")
+            let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+            if let voipProcessor = appDelegate.voipProcessor {
+                if isCalling == false {
                     voipProcessor.initiateAudioCall(to:self.contact.obj)
+                    isCalling = true
                 }
             }
         }
-        .navigationBarTitle("AV Prototype (Audio only)", displayMode: .inline)
+        .onDisappear {
+            DDLogDebug("Call UI disappeared")
+        }
+        .navigationBarTitle("Call with \(contact.contactDisplayName as String)", displayMode: .inline)
     }
 }
 

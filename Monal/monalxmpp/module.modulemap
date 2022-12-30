@@ -30,3 +30,7 @@ module MLMucProcessorPrivate {
     header "../Classes/MLMucProcessor.h"
     export *
 }
+module MLCall {
+    header "../Classes/MLCall.h"
+    export *
+}

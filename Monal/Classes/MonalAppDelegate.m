@@ -1282,7 +1282,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             DDLogVerbose(@"Now entered @synchronized(self) block...");
             //ui background tasks expire at the same time as background fetching tasks
             //--> we have to check if an ui bg task is running and don't disconnect, if so
-            if(background && self->_bgTask == UIBackgroundTaskInvalid)
+            if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid)
             {
                 DDLogVerbose(@"Setting _shutdownPending to YES...");
                 self->_shutdownPending = YES;
@@ -1378,7 +1378,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             DDLogVerbose(@"Now entered @synchronized(self) block...");
             //ui background tasks expire at the same time as background fetching tasks
             //--> we have to check if an ui bg task is running and don't disconnect, if so
-            if(background && self->_bgTask == UIBackgroundTaskInvalid)
+            if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid)
             {
                 DDLogVerbose(@"Setting _shutdownPending to YES...");
                 self->_shutdownPending = YES;
@@ -1599,7 +1599,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         BOOL background = [HelperTools isInBackground];
                         
                         //we have to check if an ui bg task or background processing/refreshing task is running and don't disconnect, if so
-                        if(background && self->_bgTask == UIBackgroundTaskInvalid && self->_bgProcessing == nil && self->_bgRefreshing == nil)
+                        if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid && self->_bgProcessing == nil && self->_bgRefreshing == nil)
                         {
                             DDLogVerbose(@"Setting _shutdownPending to YES...");
                             self->_shutdownPending = YES;

@@ -16,6 +16,7 @@ struct ContactDetailsHeader: View {
     @State private var showingCannotEncryptAlert = false
     @State private var showingShouldDisableEncryptionAlert = false
     @State private var navigationAction: String?
+    @State private var call: MLCall?
 
     var body: some View {
         VStack {
@@ -88,6 +89,8 @@ struct ContactDetailsHeader: View {
 #if IS_ALPHA                 
                 Spacer().frame(width: 20)
                 Button(action: {
+                    let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+                    call = appDelegate.voipProcessor!.initiateAudioCall(to:contact.obj)
                     navigationAction = "callScreen"
                 }) {
                     Image(systemName: "phone")
@@ -165,7 +168,7 @@ struct ContactDetailsHeader: View {
         }
         // all hidden navigation links collected in a hidden vstack
         .background(VStack {
-            NavigationLink("", destination: LazyClosureView(AVPrototype(delegate: delegate, contact: contact)), tag: "callScreen", selection: $navigationAction)
+            NavigationLink("", destination: LazyClosureView(AVPrototype(delegate: delegate, call: call!)), tag: "callScreen", selection: $navigationAction)
             //NavigationLink("", destination: LazyClosureView(AVPrototype(contact: contact)), tag: "someOtherScreen", selection: $navigationAction)
         }.frame(width: 0, height: 0).opacity(0))
     }

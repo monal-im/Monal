@@ -454,7 +454,7 @@ enum msgSentState {
 
 -(void) openCallScreen:(id) sender
 {
-    UIViewController* detailsViewController = [[SwiftuiInterface new] makeCallScreen:self.contact];
+    UIViewController* detailsViewController = [[SwiftuiInterface new] makeCallScreenToContact:self.contact];
     [self presentViewController:detailsViewController animated:YES completion:^{}];
 }
 

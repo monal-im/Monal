@@ -15,6 +15,10 @@
 #import "xmpp.h"
 #import "MLXMPPManager.h"
 #import "MLVoIPProcessor.h"
+#import "MLCall.h"
+#import "MonalAppDelegate.h"
+#import "ActiveChatsViewController.h"
+#import "MLNotificationQueue.h"
 
 @import PushKit;
 @import CallKit;
@@ -22,19 +26,33 @@
 
 static NSMutableDictionary* _pendingCalls;
 
-@interface WebRTCDelegate : NSObject <WebRTCClientDelegate>
-@property (atomic, strong) NSUUID* uuid;
-@property (atomic, weak) MLVoIPProcessor* voipProcessor;
+@interface MLVoIPProcessor() <PKPushRegistryDelegate, CXProviderDelegate>
+{
+}
+@property (nonatomic, strong) CXCallController* _Nullable callController;
+@property (nonatomic, strong) CXProvider* _Nullable cxProvider;
 @end
 
-@interface MLVoIPProcessor() <PKPushRegistryDelegate, CXProviderDelegate>
-@property (nonatomic, strong) CXProvider* _Nullable cxprovider;
-@property (nonatomic, strong) CXCallController* _Nullable callController;
+@interface MLCall() <WebRTCClientDelegate>
+@property (nonatomic, strong) NSUUID* uuid;
+@property (nonatomic, strong) MLContact* contact;
+@property (nonatomic) MLCallDirection direction;
 
--(void) acceptCall:(NSUUID*) uuid;
--(void) retractCall:(NSUUID*) uuid;
--(void) rejectCall:(NSUUID*) uuid;
--(void) finishCall:(NSUUID*) uuid withReason:(NSString*) reason;
+@property (nonatomic, strong) MLXMLNode* _Nullable jmiPropose;
+@property (nonatomic, strong) MLXMLNode* _Nullable jmiAccept;
+@property (nonatomic, strong) NSString* _Nullable fullRemoteJid;
+@property (nonatomic, strong) WebRTCClient* _Nullable webRTCClient;
+@property (nonatomic, strong) CXAnswerCallAction* _Nullable providerAnswerAction;
+@property (nonatomic, assign) BOOL isConnected;
+@property (nonatomic, strong) AVAudioSession* _Nullable audioSession;
+
+@property (nonatomic, readonly) xmpp* account;
+@property (nonatomic, readonly) MLVoIPProcessor* voipProcessor;
+
+-(instancetype) initWithUUID:(NSUUID*) uuid contact:(MLContact*) contact andDirection:(MLCallDirection) direction;
+-(void) handleEndCallAction;
+-(void) sendJmiReject;
+-(void) sendJmiPropose;
 @end
 
 
@@ -49,14 +67,18 @@ static NSMutableDictionary* _pendingCalls;
 {
     self = [super init];
     
-    _cxprovider = [[CXProvider alloc] initWithConfiguration:[[CXProviderConfiguration alloc] init]];
-    [self.cxprovider setDelegate:self queue:dispatch_get_main_queue()];
-    _callController = [[CXCallController alloc] initWithQueue:dispatch_get_main_queue()];
+    CXProviderConfiguration* config = [[CXProviderConfiguration alloc] init];
+    config.maximumCallGroups = 1;
+    config.maximumCallsPerCallGroup = 1;
+    config.supportedHandleTypes = [NSSet setWithObject:@(CXHandleTypeEmailAddress)];
+    config.supportsVideo = NO;
+    config.includesCallsInRecents = YES;
+    self.cxProvider = [[CXProvider alloc] initWithConfiguration:config];
+    [self.cxProvider setDelegate:self queue:dispatch_get_main_queue()];
+    self.callController = [[CXCallController alloc] initWithQueue:dispatch_get_main_queue()];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleIncomingVoipCall:) name:kMonalIncomingVoipCall object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleIncomingJMIStanza:) name:kMonalIncomingJMIStanza object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingSDP:) name:kMonalIncomingSDP object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingICECandidate:) name:kMonalIncomingICECandidate object:nil];
 
     return self;
 }
@@ -73,16 +95,58 @@ static NSMutableDictionary* _pendingCalls;
     }
 }
 
--(void) voipRegistration
+-(void) addCall:(MLCall*) call
 {
-    PKPushRegistry* voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
-    voipRegistry.delegate = self;
-    voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+    @synchronized(_pendingCalls) {
+        _pendingCalls[call.uuid] = call;
+    }
+
+}
+
+-(void) removeCall:(MLCall*) call
+{
+    @synchronized(_pendingCalls) {
+        [_pendingCalls removeObjectForKey:call.uuid];
+    }
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalCallRemoved object:call userInfo:@{@"uuid": call.uuid}];
 }
 
 -(NSUInteger) pendingCallsCount
 {
     return _pendingCalls.count;
+}
+
+-(MLCall*) initiateAudioCallToContact:(MLContact*) contact
+{
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
+    MLAssert(account != nil, @"account is nil in initiateAudioCallToContact!", (@{@"contact": contact}));
+    
+    MLCall* call = [[MLCall alloc] initWithUUID:[NSUUID UUID] contact:contact andDirection:MLCallDirectionOutgoing];
+    DDLogInfo(@"Initiating audio call to %@: %@", contact, call);
+    [self addCall:call];
+    
+    CXHandle* handle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:contact.contactJid];
+    CXStartCallAction* startCallAction = [[CXStartCallAction alloc] initWithCallUUID:call.uuid handle:handle];
+    startCallAction.contactIdentifier = call.contact.contactDisplayName;
+    startCallAction.video = NO;
+    CXTransaction* transaction = [[CXTransaction alloc] initWithAction:startCallAction];
+    [self.callController requestTransaction:transaction completion:^(NSError* error) {
+        if(error != nil)
+        {
+            DDLogError(@"Error requesting start call transaction: %@", error);
+            [self removeCall:call];
+        }
+        else
+            DDLogInfo(@"Successfully created outgoing call transaction for CallKit..");
+    }];
+    return call;
+}
+
+-(void) voipRegistration
+{
+    PKPushRegistry* voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
+    voipRegistry.delegate = self;
+    voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
 }
 
 // Handle updated APNS tokens
@@ -115,35 +179,57 @@ static NSMutableDictionary* _pendingCalls;
 -(void) processIncomingCall:(NSDictionary* _Nonnull) userInfo withCompletion:(void (^ _Nullable)(void)) completion
 {
     XMPPMessage* messageNode =  userInfo[@"messageNode"];
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:userInfo[@"accountNo"]];
-    MLAssert(account != nil, @"account is nil in processIncomingCall!", userInfo);
+    NSNumber* accountNo = userInfo[@"accountNo"];
+    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id|uuid"];
+    MLAssert(uuid != nil, @"call uuid invalid!", (@{@"propose@id": nilWrapper([messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"])}));
     
-    //save mapping from callkit uuid to our own call info
-    NSUUID* uuid = [NSUUID initWithUUIDString:[messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"]];
+    MLCall* call = [[MLCall alloc] initWithUUID:uuid contact:[MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo] andDirection:MLCallDirectionIncoming];
+    //order matters here!
+    call.fullRemoteJid = messageNode.from;
+    call.jmiPropose = messageNode;
+    DDLogInfo(@"Now processing new incoming call: %@", call);
     
-    @synchronized(_pendingCalls) {
-        _pendingCalls[uuid] = [NSMutableDictionary dictionaryWithDictionary:@{
-            @"messageNode": messageNode,
-            @"account": account,
-            @"contact": [MLContact createContactFromJid:messageNode.fromUser andAccountNo:account.accountNo],
-        }];
-        
-        DDLogInfo(@"Now processing new incoming call: %@", _pendingCalls[uuid]);
-    }
+    //add call to pending calls list
+    [self addCall:call];
     
     CXCallUpdate* update = [[CXCallUpdate alloc] init];
     update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:messageNode.fromUser];
-    [self.cxprovider reportNewIncomingCallWithUUID:uuid update:update completion:^(NSError *error) {
+    update.localizedCallerName = call.contact.contactDisplayName;
+    update.supportsDTMF = NO;
+    update.hasVideo = NO;
+    update.supportsHolding = NO;
+    update.supportsGrouping = NO;
+    update.supportsUngrouping = NO;
+    [self.cxProvider reportNewIncomingCallWithUUID:uuid update:update completion:^(NSError *error) {
         if(error != nil)
         {
             DDLogError(@"Call disallowed by system: %@", error);
-            [self rejectCall:uuid];
+            [call sendJmiReject];
+            //remove this call from pending calls
+            [self removeCall:call];
         }
         else
         {
-            DDLogDebug(@"Call reported successfully using PushKit, initializing WebRTC now...");
+            DDLogDebug(@"Call reported successfully using PushKit, initializing xmpp and WebRTC now...");
+            
             //initialize webrtc class (ask for external service credentials, gather ice servers etc.) for call as soon as the callkit ui is shown
-            [self initWebRTCForPendingCall:uuid];
+            //this will be done once the app delegate started to connect our xmpp accounts above
+            //do this in an extra thread to not block this callback thread (could be main thread or otherwise restricted by apple)
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                //add our completion handler to handler queue to initiate xmpp connections
+                MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+                [appDelegate incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
+                    DDLogWarn(@"VoIP push wakeup handler timed out");
+                }];
+                
+                //wait for our account to connect before initializing webrtc using XEP-0215 iq stanzas
+                //if the user accepts the call before we are bound, the outgoing accept message stanza will be queued and sent once we are bound
+                //outgoing iq messages are not queued in all cases (e.g. non-smacks reconnect), hence this waiting loop
+                while(call.account.accountState < kStateBound)
+                    [NSThread sleepForTimeInterval:0.250];
+                [self initWebRTCForPendingCall:call];
+            });
+            
         }
     }];
     
@@ -152,360 +238,14 @@ static NSMutableDictionary* _pendingCalls;
         completion();
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--(void) processIncomingICECandidate:(NSNotification*) notification
+-(void) initWebRTCForPendingCall:(MLCall*) call
 {
-    DDLogInfo(@"Got new incoming ICE candidate...");
-    
-    xmpp* account = notification.object;
-    NSDictionary* userInfo = notification.userInfo;
-    XMPPIQ* iqNode = userInfo[@"iqNode"];
-    
-    NSString* rawSDP = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate#|base64"] encoding:NSUTF8StringEncoding];
-    NSNumber* sdpMLineIndex = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@sdpMLineIndex|int"];
-    NSString* sdpMid = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@sdpMid|base64"] encoding:NSUTF8StringEncoding];
-    RTCIceCandidate* incomingCandidate = [[RTCIceCandidate alloc] initWithSdp:rawSDP sdpMLineIndex:[sdpMLineIndex intValue] sdpMid:sdpMid];
-    NSString* callID = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@id"];
-    
-    //search pending calls for callID
-    WebRTCClient* webRTCClient;
-    @synchronized(_pendingCalls) {
-        NSUUID* uuid = [self getUUIDForCallID:callID onAccount:account];
-        if(uuid == nil)
-        {
-            //not found --> ignore incoming sdp and respond with error
-            DDLogWarn(@"Could not find pending call for remote ICE candidate offer, responding with error...");
-            XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-            [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"unexpected-request" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-            ] andData:nil]];
-            [account send:errorIq];
-            return;
-        }
-        DDLogInfo(@"%@: Got remote ICE candidate for call %@: %@", account, callID, incomingCandidate);
-        webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
-    }
-    [webRTCClient setRemoteCandidate:incomingCandidate completion:^(id error) {
-        DDLogDebug(@"Got setRemoteCandidate: callback...");
-        if(error)
-        {
-            DDLogError(@"Got error while passing new remote ICE candidate to webRTCClient: %@", error);
-            XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-            [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"internal-server-error" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-            ] andData:nil]];
-            [account send:errorIq];
-        }
-        else
-        {
-            DDLogDebug(@"Successfully passed new remote ICE candidate to webRTCClient...");
-            [account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
-        }
-    }];
-    DDLogDebug(@"Leaving method...");
-}
-
--(void) processIncomingSDP:(NSNotification*) notification
-{
-    DDLogInfo(@"Got new incoming SDP...");
-    
-    xmpp* account = notification.object;
-    NSDictionary* userInfo = notification.userInfo;
-    XMPPIQ* iqNode = userInfo[@"iqNode"];
-    
-    NSString* rawSDP = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp#|base64"] encoding:NSUTF8StringEncoding];
-    NSString* type = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@type"];
-    RTCSessionDescription* resultSDP = [[RTCSessionDescription alloc] initWithType:[RTCSessionDescription typeForString:type] sdp:rawSDP];
-    NSString* callID = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@id"];
-    
-    //search pending calls for callID
-    @synchronized(_pendingCalls) {
-        NSUUID* uuid = [self getUUIDForCallID:callID onAccount:account];
-        if(uuid == nil)
-        {
-            //not found --> ignore incoming sdp and respond with error
-            DDLogWarn(@"Could not find pending call for remote sdp offer, responding with error...");
-            XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-            [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"unexpected-request" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-            ] andData:nil]];
-            [account send:errorIq];
-            return;
-        }
-        DDLogInfo(@"%@: Got remote SDP for call %@: %@", account, callID, resultSDP);
-        WebRTCClient* webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
-        //this is blocking (e.g. no need for an inner @synchronized)
-        [webRTCClient setRemoteSdp:resultSDP completion:^(id error) {
-            if(error)
-            {
-                DDLogError(@"Got error while passing remote SDP to webRTCClient: %@", error);
-                XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-                [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"internal-server-error" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-                ] andData:nil]];
-                [account send:errorIq];
-            }
-            else
-            {
-                DDLogDebug(@"Successfully passed SDP to webRTCClient...");
-                //it seems we have to create an offer and ignore it before we can create the desired answer
-                WebRTCClient* webRTCClient = _pendingCalls[uuid][@"webRTCClient"];
-                [webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
-                    [webRTCClient answerWithCompletion:^(RTCSessionDescription* localSdp) {
-                        XMPPIQ* responseIq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
-                        [responseIq addChildNode:[[MLXMLNode alloc] initWithElement:@"sdp" andNamespace:@"urn:tmp:monal:webrtc:sdp:1" withAttributes:@{
-                            @"id": callID,
-                            @"type": [RTCSessionDescription stringForType:localSdp.type]
-                        } andChildren:@[] andData:[HelperTools encodeBase64WithString:localSdp.sdp]]];
-                        [account send:responseIq];
-                    }];
-                }];
-            }
-        }];
-    }
-}
-
--(void) connectIncomingVoIPCall:(NSUUID*) uuid
-{
-    DDLogInfo(@"Now connecting incoming VoIP call %@...", uuid);
-    //TODO: in our non-jingle protocol we only have to accept the call via XEP-0353 and the initiator (e.g. remote) will then initialize the webrtc session via IQs
-    [self acceptCall:uuid];
-}
-
--(void) connectOutgoingVoIPCall:(NSUUID*) uuid
-{
-    DDLogInfo(@"Initializing CallKit for outgoing call...");
-    CXHandle* handle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:_pendingCalls[uuid][@"acceptedByRemote"]];
-    CXStartCallAction* startCallAction = [[CXStartCallAction alloc] initWithCallUUID:uuid handle:handle];
-    CXTransaction* transaction = [[CXTransaction alloc] initWithAction:startCallAction];
-    [self.callController requestTransaction:transaction completion:^(NSError* error) {
-        @synchronized(_pendingCalls) {
-            if(_pendingCalls[uuid] == nil)
-                return;
-            if(error != nil)
-            {
-                DDLogError(@"Error requesting call transaction, retracting call: %@", error);
-                [self retractCall:uuid];
-                return;
-            }
-            else
-                DDLogInfo(@"Successfully created outgoing call transaction for CallKit..");
-        }
-    }];
-}
-
--(void) providerDidReset:(CXProvider*) provider
-{
-    DDLogDebug(@"CXProvider: providerDidReset with provider=%@", provider);
-}
-
--(void) providerDidBegin:(CXProvider*) provider
-{
-    DDLogDebug(@"CXProvider: providerDidBegin with provider=%@", provider);
-}
-
--(void) provider:(CXProvider*) provider performStartCallAction:(CXStartCallAction*) action
-{
-    DDLogDebug(@"CXProvider: performStartCallAction with provider=%@, CXStartCallAction=%@", provider, action);
-    
-    DDLogInfo(@"Now connecting outgoing VoIP call %@...", action.callUUID);
-    //TODO: in our non-jingle protocol the initiator (e.g. we) has to initialize the webrtc session by sending the proper IQs
-    @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[action.callUUID] != nil, @"uuid not found in pending calls when trying to connect outgoing call!", (@{@"uuid": action.callUUID}));
-        XMPPMessage* messageNode = _pendingCalls[action.callUUID][@"messageNode"];
-        MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to connect outgoing call!", (@{@"uuid": action.callUUID}));
-        NSString* remoteJid = _pendingCalls[action.callUUID][@"acceptedByRemote"];
-        MLAssert(remoteJid != nil, @"remoteJid not found in pending calls when trying to connect outgoing call!", (@{@"uuid": action.callUUID}));
-        xmpp* account = _pendingCalls[action.callUUID][@"account"];
-        MLAssert(account != nil, @"account not found in pending calls when trying to connect outgoing call!", (@{@"uuid": action.callUUID}));
-        WebRTCClient* webRTCClient = _pendingCalls[action.callUUID][@"webRTCClient"];
-        MLAssert(webRTCClient != nil, @"webRTCClient not found in pending calls when trying to connect outgoing call!", (@{@"uuid": action.callUUID}));
-        
-        _pendingCalls[action.callUUID][@"startCallAction"] = action;
-        [webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
-            DDLogDebug(@"WebRTC reported local SDP offer, sending to '%@'...", remoteJid);
-            
-            //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCSessionDescription.h
-            XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:remoteJid];
-            [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"sdp" andNamespace:@"urn:tmp:monal:webrtc:sdp:1" withAttributes:@{
-                @"id": [messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"],
-                @"type": [RTCSessionDescription stringForType:sdp.type]
-            } andChildren:@[] andData:[HelperTools encodeBase64WithString:sdp.sdp]]];
-            [account sendIq:sdpIQ withResponseHandler:^(XMPPIQ* result) {
-                DDLogDebug(@"Received SDP response for offer: %@", result);
-                @synchronized(_pendingCalls) {
-                    if(_pendingCalls[action.callUUID] == nil)
-                    {
-                        DDLogWarn(@"Could not find pending call for remote sdp response, ignoring...");
-                        return;
-                    }
-                }
-                NSString* rawSDP = [[NSString alloc] initWithData:[result findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp#|base64"] encoding:NSUTF8StringEncoding];
-                NSString* type = [result findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@type"];
-                RTCSessionDescription* resultSDP = [[RTCSessionDescription alloc] initWithType:[RTCSessionDescription typeForString:type] sdp:rawSDP];
-                DDLogDebug(@"Setting resultSDP on webRTCClient(%@): %@", webRTCClient, resultSDP);
-                [webRTCClient setRemoteSdp:resultSDP completion:^(id error) {
-                    if(error)
-                        DDLogError(@"Got error while passing remote SDP to webRTCClient: %@", error);
-                    else
-                        DDLogDebug(@"Successfully passed SDP to webRTCClient...");
-                }];
-            } andErrorHandler:^(XMPPIQ* error) {
-                if(error != nil)
-                    DDLogError(@"Got error for SDP offer: %@", error);
-            }];
-        }];
-    }
-}
-
--(void) provider:(CXProvider*) provider performAnswerCallAction:(CXAnswerCallAction*) action
-{
-    @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[action.callUUID] != nil, @"Pending call not present anymore!", (@{
-            @"action": action,
-            @"uuid": action.callUUID
-        }));
-        
-        DDLogDebug(@"CXProvider: performAnswerCallAction with provider=%@, CXAnswerCallAction=%@, pendingCallsInfo: %@", provider, action, _pendingCalls[action.callUUID]);
-        _pendingCalls[action.callUUID][@"answerAction"] = action;
-        
-        //don't try to connect voip call if webrtc isn't initialized yet (will be done once initialized)
-        if(!_pendingCalls[action.callUUID][@"webRTCClient"])
-            return;
-    }
-    
-    //webrtc was already initialized --> connect voip call
-    DDLogDebug(@"webrtc was already initialized --> connect voip call");
-    [self connectIncomingVoIPCall:action.callUUID];
-}
-
--(void) provider:(CXProvider*) provider performEndCallAction:(CXEndCallAction*) action
-{
-    @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[action.callUUID] != nil, @"Pending call not present anymore!", (@{
-            @"action": action,
-            @"uuid": action.callUUID
-        }));
-        
-        DDLogDebug(@"CXProvider: performEndCallAction with provider=%@, CXEndCallAction=%@, pendingCallsInfo: %@", provider, action, _pendingCalls[action.callUUID]);
-        
-        //the CXEndCallAction means either the call was rejected (if not yet accepted) or it was terminated normally (if the call was accepted)
-        if(_pendingCalls[action.callUUID][@"answerAction"] == nil)
-            [self rejectCall:action.callUUID];
-        else
-            [self finishCall:action.callUUID withReason:@"success"];
-        
-        //end webrtc call if already established or in the process of establishing
-        if(_pendingCalls[action.callUUID][@"webRTCClient"])
-        {
-            WebRTCClient* webRTCClient = _pendingCalls[action.callUUID][@"webRTCClient"];
-            [webRTCClient.peerConnection close];
-        }
-        
-    }
-    [action fulfill];
-}
-
--(void) provider:(CXProvider*) provider didActivateAudioSession:(AVAudioSession*) audioSession
-{
-    DDLogDebug(@"CXProvider: didActivateAudioSession with provider=%@, audioSession=%@", provider, audioSession);
-    [[RTCAudioSession sharedInstance] lockForConfiguration];
-    [[RTCAudioSession sharedInstance] audioSessionDidActivate:audioSession];
-    [[RTCAudioSession sharedInstance] setIsAudioEnabled:YES];
-    [[RTCAudioSession sharedInstance] unlockForConfiguration];
-}
-
--(void) provider:(CXProvider*) provider didDeactivateAudioSession:(AVAudioSession*) audioSession
-{
-    DDLogDebug(@"CXProvider: didDeactivateAudioSession with provider=%@, audioSession=%@", provider, audioSession);
-    [[RTCAudioSession sharedInstance] lockForConfiguration];
-    [[RTCAudioSession sharedInstance] audioSessionDidDeactivate:audioSession];
-    [[RTCAudioSession sharedInstance] setIsAudioEnabled:NO];
-    [[RTCAudioSession sharedInstance] unlockForConfiguration];
-}
-
--(void) initWebRTCForPendingCall:(NSUUID*) uuid
-{
-    xmpp* account;
-    BOOL incoming;
-    @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[uuid] != nil, @"Pending call not present anymore!", (@{
-            @"uuid": uuid,
-        }));
-        
-        account = _pendingCalls[uuid][@"account"];
-        incoming = [account.connectionProperties.identity.jid isEqualToString:((XMPPMessage*)_pendingCalls[uuid][@"messageNode"]).toUser];
-    }
-    
-    DDLogInfo(@"Initializing WebRTC for pending %@ call %@...", incoming ? @"incoming" : @"outgoing", uuid);
-    
-    monal_id_block_t performCommonActions = ^(id client) {
-        WebRTCClient* webRTCClient = client;
-        if(incoming)
-        {
-            @synchronized(_pendingCalls) {
-                if(!_pendingCalls[uuid])
-                {
-                    DDLogWarn(@"Pending incoming call not present anymore, ignoring...");
-                    return;
-                }
-                _pendingCalls[uuid][@"webRTCClient"] = webRTCClient;
-                
-                //for incoming calls: don't try to connect voip call if call wasn't accepted by user yet (will be done once accepted)
-                if(!_pendingCalls[uuid][@"answerAction"])
-                {
-                    DDLogInfo(@"Not connecting incoming call, because not yet accepted by local user...");
-                    return;
-                }
-            }
-            //call was already accepted --> connect voip call
-            DDLogDebug(@"incoming: call was already accepted --> connect voip call");
-            [self connectIncomingVoIPCall:uuid];
-        }
-        else
-        {
-            @synchronized(_pendingCalls) {
-                if(!_pendingCalls[uuid])
-                {
-                    DDLogWarn(@"Pending outgoing call not present anymore, ignoring...");
-                    return;
-                }
-                _pendingCalls[uuid][@"webRTCClient"] = webRTCClient;
-                
-                //for outgoing calls: don't try to connect voip call if call wasn't accepted by remote yet (will be done once accepted)
-                if(_pendingCalls[uuid][@"acceptedByRemote"] == nil)
-                {
-                    DDLogInfo(@"Not connecting outgoing call, because not yet accepted by remote user...");
-                    return;
-                }
-            }
-            //call was already accepted --> connect voip call
-            DDLogDebug(@"outgoing: call was already accepted --> connect voip call");
-            [self connectOutgoingVoIPCall:uuid];
-        }
-    };
-    
+    DDLogInfo(@"Initializing WebRTC for: %@", call);
     NSMutableArray* iceServers = [[NSMutableArray alloc] init];
-    if([account.connectionProperties.discoveredStunTurnServers count] > 0)
+    if([call.account.connectionProperties.discoveredStunTurnServers count] > 0)
     {
-        for(NSDictionary* service in account.connectionProperties.discoveredStunTurnServers)
-        {
-            [account queryExternalServiceCredentialsFor:service completion:^(id data) {
+        for(NSDictionary* service in call.account.connectionProperties.discoveredStunTurnServers)
+            [call.account queryExternalServiceCredentialsFor:service completion:^(id data) {
                 //this will not include any credentials if we got an error answer for our credentials query (data will be an empty dict)
                 //--> just use the server without credentials then
                 NSMutableDictionary* serviceWithCredentials = [NSMutableDictionary dictionaryWithDictionary:service];
@@ -514,15 +254,14 @@ static NSMutableDictionary* _pendingCalls;
                 [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:@[[NSString stringWithFormat:@"%@:%@:%@", serviceWithCredentials[@"type"], serviceWithCredentials[@"host"], serviceWithCredentials[@"port"]]] username:serviceWithCredentials[@"username"] credential:serviceWithCredentials[@"password"]]];
                 
                 //proceed only if all ice servers have been processed
-                if([iceServers count] == [account.connectionProperties.discoveredStunTurnServers count])
+                if([iceServers count] == [call.account.connectionProperties.discoveredStunTurnServers count])
                 {
                     DDLogInfo(@"Done processing ICE servers, trying to connect WebRTC session...");
                     WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers];
-                    webRTCClient.delegate = [[WebRTCDelegate alloc] initWithUUID:uuid andVoIPProcessor:self];
-                    performCommonActions(webRTCClient);
+                    webRTCClient.delegate = call;
+                    call.webRTCClient = webRTCClient;
                 }
             }];
-        }
     }
     else
     {
@@ -537,40 +276,9 @@ static NSMutableDictionary* _pendingCalls;
         ]]];
         DDLogInfo(@"No ICE servers detected, trying to connect WebRTC session using googles STUN servers as fallback...");
         WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers];
-        webRTCClient.delegate = [[WebRTCDelegate alloc] initWithUUID:uuid andVoIPProcessor:self];
-        performCommonActions(webRTCClient);
+        webRTCClient.delegate = call;
+        call.webRTCClient = webRTCClient;
     }
-}
-
--(NSUUID*) initiateAudioCallToContact:(MLContact*) contact
-{
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
-    MLAssert(account != nil, @"account is nil in initiateAudioCallToContact!", (@{@"contact": contact}));
-    
-    NSUUID* uuid = [NSUUID UUID];
-    
-    DDLogInfo(@"Initiating audio call %@ to %@...", uuid, contact);
-    
-    XMPPMessage* messageNode = [[XMPPMessage alloc] init];
-    messageNode.to = contact.contactJid;
-    [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
-    [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"propose" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{@"id": [uuid UUIDString]} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"description" andNamespace:@"urn:xmpp:jingle:apps:rtp:1" withAttributes:@{@"media": @"audio"} andChildren:@[] andData:nil]
-    ] andData:nil]];
-    [messageNode setStoreHint];
-    [account send:messageNode];
-    
-    @synchronized(_pendingCalls) {
-        _pendingCalls[uuid] = [NSMutableDictionary dictionaryWithDictionary:@{
-            @"messageNode": messageNode,
-            @"account": account,
-            @"contact": contact,
-        }];
-    }
-    //initialize webrtc class (ask for external service credentials, gather ice servers etc.) for call as soon as the JMI propose was sent
-    [self initWebRTCForPendingCall:uuid];
-    
-    return uuid;
 }
 
 -(void) handleIncomingJMIStanza:(NSNotification*) notification
@@ -579,253 +287,198 @@ static NSMutableDictionary* _pendingCalls;
     MLAssert(messageNode != nil, @"messageNode is nil in handleIncomingJMIStanza!", notification.userInfo);
     xmpp* account = notification.object;
     MLAssert(account != nil, @"account is nil in handleIncomingJMIStanza!", notification.userInfo);
-    NSString* callID = [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id"];
-    @synchronized(_pendingCalls) {
-        NSUUID* uuid = [self getUUIDForCallID:callID onAccount:account];
-        if(uuid == nil)
+    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id|uuid"];
+    MLAssert(uuid != nil, @"call uuid invalid!", (@{@"*@id": nilWrapper([messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id"])}));
+    MLCall* call = [self getCallForUUID:uuid];
+    if(call == nil)
+    {
+        DDLogWarn(@"Ignoring unexpected JMI stanza: %@", messageNode);
+        return;
+    }
+        
+    DDLogInfo(@"Got new incoming JMI stanza for call: %@", call);
+    //TODO: handle tie breaking!
+    if([messageNode check:@"{urn:xmpp:jingle-message:1}accept"])
+    {
+        if(call.jmiAccept != nil)
         {
-            DDLogWarn(@"Ignoring incoming JMI stanza for unknown call: %@", callID);
+            //TODO: handle moving calls between own devices
+            DDLogWarn(@"Remote tried to accept an already accepted call, ignoring this accept jmi message!");
             return;
         }
         
-        DDLogInfo(@"Got new incoming JMI stanza for call %@ having call ID %@...", uuid, callID);
-        
-        if([messageNode check:@"{urn:xmpp:jingle-message:1}accept"])
+        //order matters here!
+        call.fullRemoteJid = messageNode.from;
+        call.jmiAccept = messageNode;
+    }
+    else if([messageNode check:@"{urn:xmpp:jingle-message:1}retract"])
+    {
+        if(call.jmiAccept != nil)
         {
-            //save state for initWebRTCForPendingCall
-            _pendingCalls[uuid][@"acceptedByRemote"] = messageNode.from;
-            
-            //connect call immediatley if we already managed to initialize our webrtc client while the remote device was ringing
-            if(_pendingCalls[uuid][@"webRTCClient"] != nil)
-                [self connectOutgoingVoIPCall:uuid];
-                    
+            DDLogWarn(@"Remote did try to retract already accepted call");
+            [call end];
         }
         else
         {
-            //TODO: handle incoming JMI messages other than propose and accept (e.g. retract, reject and finish)
-            DDLogWarn(@"NOT handling JMI stanza, not implemented yet: %@", messageNode);
+            //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
+            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
         }
+        [self removeCall:call];     //remove this call from pending calls
     }
-}
-
--(void) acceptCall:(NSUUID*) uuid
-{
-    DDLogDebug(@"Accepting call via JMI: %@", uuid);
-    @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
-        MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        xmpp* account = _pendingCalls[uuid][@"account"];
-        MLAssert(account != nil, @"account not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        
-        XMPPMessage* jmiNode = [[XMPPMessage alloc] init];
-        jmiNode.to = messageNode.fromUser;
-        [jmiNode.attributes setObject:kMessageChatType forKey:@"type"];
-        [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"accept" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
-            @"id": [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id"]
-        } andChildren:@[] andData:nil]];
-        [jmiNode setStoreHint];
-        [account send:jmiNode];
-    }
-}
-
--(void) retractCall:(NSUUID*) uuid
-{
-    DDLogDebug(@"Retracting call via JMI: %@", uuid);
-    @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
-        MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        xmpp* account = _pendingCalls[uuid][@"account"];
-        MLAssert(account != nil, @"account not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        
-        XMPPMessage* jmiNode = [[XMPPMessage alloc] init];
-        jmiNode.to = messageNode.toUser;
-        [jmiNode.attributes setObject:kMessageChatType forKey:@"type"];
-        [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
-            @"id": [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id"]
-        } andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"cancel"]
-            ] andData:nil]
-        ] andData:nil]];
-        [jmiNode setStoreHint];
-        [account send:jmiNode];
-        
-        //remove this call from pending calls
-        [_pendingCalls removeObjectForKey:uuid];
-    }
-}
-
--(void) rejectCall:(NSUUID*) uuid
-{
-    DDLogDebug(@"Rejecting call via JMI: %@", uuid);
-    @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
-        MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        xmpp* account = _pendingCalls[uuid][@"account"];
-        MLAssert(account != nil, @"account not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        
-        XMPPMessage* jmiNode = [[XMPPMessage alloc] init];
-        jmiNode.to = messageNode.fromUser;
-        [jmiNode.attributes setObject:kMessageChatType forKey:@"type"];
-        [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
-            @"id": [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id"]
-        } andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"busy"]
-            ] andData:nil]
-        ] andData:nil]];
-        [jmiNode setStoreHint];
-        [account send:jmiNode];
-        
-        //remove this call from pending calls
-        [_pendingCalls removeObjectForKey:uuid];
-    }
-}
-
--(void) finishCall:(NSUUID*) uuid withReason:(NSString*) reason
-{
-    DDLogDebug(@"Finishing call via JMI: %@", uuid);
-    @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[uuid] != nil, @"uuid not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        XMPPMessage* messageNode = _pendingCalls[uuid][@"messageNode"];
-        MLAssert(messageNode != nil, @"messageNode not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        xmpp* account = _pendingCalls[uuid][@"account"];
-        MLAssert(account != nil, @"account not found in pending calls when trying to send jmi stanza!", (@{@"uuid": uuid}));
-        
-        XMPPMessage* jmiNode = [[XMPPMessage alloc] init];
-        if(_pendingCalls[uuid][@"acceptedByRemote"] != nil)
-            jmiNode.to = _pendingCalls[uuid][@"acceptedByRemote"];
+    else if([messageNode check:@"{urn:xmpp:jingle-message:1}reject"])
+    {
+        if(call.jmiAccept != nil)
+        {
+            DDLogWarn(@"Remote did try to reject already accepted call");
+            [call end];
+        }
         else
-            jmiNode.to = messageNode.fromUser;
-        [jmiNode.attributes setObject:kMessageChatType forKey:@"type"];
-        [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
-            @"id": [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id"]
-        } andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
-                [[MLXMLNode alloc] initWithElement:reason]
-            ] andData:nil]
-        ] andData:nil]];
-        [jmiNode setStoreHint];
-        [account send:jmiNode];
-        
-        //remove this call from pending calls
-        [_pendingCalls removeObjectForKey:uuid];
+        {
+            //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
+            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+        }
+        [self removeCall:call];     //remove this call from pending calls
     }
+    else if([messageNode check:@"{urn:xmpp:jingle-message:1}finish"])
+    {
+        if(call.jmiAccept != nil)
+        {
+            DDLogInfo(@"Remote finished call with reason: %@", [messageNode findFirst:@"{urn:xmpp:jingle-message:1}finish/{urn:xmpp:jingle:1}reason/*$"]);
+            [call end];
+        }
+        else
+        {
+            DDLogWarn(@"Remote did try to finish an not yet established call");
+            //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
+            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+        }
+        [self removeCall:call];     //remove this call from pending calls
+    }
+    else
+        DDLogWarn(@"NOT handling JMI stanza, not implemented yet: %@", messageNode);
 }
 
-@end
+#pragma mark - CXProvider delegate
 
-@implementation WebRTCDelegate
-
--(instancetype) initWithUUID:(NSUUID*) uuid andVoIPProcessor:(MLVoIPProcessor*) voipProcessor
+-(void) providerDidReset:(CXProvider*) provider
 {
-    self = [super init];
-    self.uuid = uuid;
-    self.voipProcessor = voipProcessor;
-    return self;
+    DDLogDebug(@"CXProvider: providerDidReset with provider=%@", provider);
 }
 
--(void) webRTCClient:(WebRTCClient*) webRTCClient didDiscoverLocalCandidate:(RTCIceCandidate*) candidate
+-(void) providerDidBegin:(CXProvider*) provider
 {
-    DDLogDebug(@"Discovered local ICE candidate: %@", candidate);
-    @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[self.uuid] != nil, @"Pending call not present anymore!", (@{
-            @"uuid": self.uuid,
-            @"candidate": candidate,
+    DDLogDebug(@"CXProvider: providerDidBegin with provider=%@", provider);
+}
+
+-(void) provider:(CXProvider*) provider performStartCallAction:(CXStartCallAction*) action
+{
+    MLCall* call = [self getCallForUUID:action.callUUID];
+    DDLogDebug(@"CXProvider: performStartCallAction with provider=%@, CXStartCallAction=%@, pendingCallsInfo: %@", provider, action, call);
+    if(call == nil)
+    {
+        DDLogWarn(@"Pending call not present anymore: %@", (@{
+            @"provider": provider,
+            @"action": action,
+            @"uuid": action.callUUID,
         }));
-        
-        XMPPMessage* messageNode = _pendingCalls[self.uuid][@"messageNode"];
-        MLAssert(messageNode != nil, @"messageNode not found in pending calls when discovering local ice candidate!", (@{@"uuid": self.uuid}));
-        NSString* remoteJid;
-        xmpp* account = _pendingCalls[self.uuid][@"account"];
-        MLAssert(account != nil, @"account not found in pending calls when discovering local ice candidate!", (@{@"uuid": self.uuid}));
-        NSString* localCallID = [messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id"];
-        BOOL incoming = [account.connectionProperties.identity.jid isEqualToString:((XMPPMessage*)_pendingCalls[self.uuid][@"messageNode"]).toUser];
-        if(incoming)
-            remoteJid = ((XMPPMessage*)_pendingCalls[self.uuid][@"messageNode"]).from;
-        else
-            remoteJid = _pendingCalls[self.uuid][@"acceptedByRemote"];
-        MLAssert(remoteJid != nil, @"remoteJid not found in pending calls when discovering local ice candidate!", (@{@"uuid": self.uuid}));
-        
-        //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCIceCandidate.h
-        DDLogDebug(@"Sending new local ICE candidate to '%@'...", remoteJid);
-        XMPPIQ* candidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:remoteJid];
-        [candidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"candidate" andNamespace:@"urn:tmp:monal:webrtc:candidate:1" withAttributes:@{
-            @"id": localCallID,
-            @"sdpMLineIndex": [[NSNumber numberWithInt:candidate.sdpMLineIndex] stringValue],
-            @"sdpMid": [HelperTools encodeBase64WithString:candidate.sdpMid]
-        } andChildren:@[] andData:[HelperTools encodeBase64WithString:candidate.sdp]]];
-        [account sendIq:candidateIQ withResponseHandler:^(XMPPIQ* result) {
-            DDLogDebug(@"Received ICE candidate result: %@", result);
-        } andErrorHandler:^(XMPPIQ* error) {
-            if(error != nil)
-                DDLogError(@"Got error for ICE candidate: %@", error);
-        }];
+        [action fail];
+        return;
     }
-}
     
--(void) webRTCClient:(WebRTCClient*) client didChangeConnectionState:(RTCIceConnectionState) state
+    //propose call to contact (e.g. let it ring)
+    [call sendJmiPropose];
+    
+    //initialize webrtc class (ask for external service credentials, gather ice servers etc.) for call as soon as the JMI propose was sent
+    [self initWebRTCForPendingCall:call];
+    
+    [action fulfill];
+}
+
+-(void) provider:(CXProvider*) provider performAnswerCallAction:(CXAnswerCallAction*) action
 {
-    @synchronized(_pendingCalls) {
-        MLAssert(_pendingCalls[self.uuid] != nil, @"Pending call not present anymore!", (@{
-            @"uuid": self.uuid,
-            @"state": @(state),
+    MLCall* call = [self getCallForUUID:action.callUUID];
+    DDLogDebug(@"CXProvider: performAnswerCallAction with provider=%@, CXAnswerCallAction=%@, pendingCallsInfo: %@", provider, action, call);
+    if(call == nil)
+    {
+        DDLogWarn(@"Pending call not present anymore: %@", (@{
+            @"provider": provider,
+            @"action": action,
+            @"uuid": action.callUUID,
         }));
-        
-        switch(state)
+        [action fail];
+        return;
+    }
+    call.providerAnswerAction = action;
+    
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDelegate.activeChats presentCall:call];
+}
+
+-(void) provider:(CXProvider*) provider performEndCallAction:(CXEndCallAction*) action
+{
+    MLCall* call = [self getCallForUUID:action.callUUID];
+    DDLogDebug(@"CXProvider: performEndCallAction with provider=%@, CXEndCallAction=%@, pendingCallsInfo: %@", provider, action, call);
+    if(call == nil)
+    {
+        DDLogWarn(@"Pending call not present anymore: %@", (@{
+            @"provider": provider,
+            @"action": action,
+            @"uuid": action.callUUID,
+        }));
+        [action fail];
+        return;
+    }
+    
+    //handle call termination
+    [call handleEndCallAction];
+    
+    //remove this call from pending calls
+    [self removeCall:call];
+    
+    [action fulfill];
+}
+
+-(void) provider:(CXProvider*) provider performSetMutedCallAction:(CXSetMutedCallAction*) action
+{
+    MLCall* call = [self getCallForUUID:action.callUUID];
+    DDLogDebug(@"CXProvider: performEndCallAction with provider=%@, CXEndCallAction=%@, pendingCallsInfo: %@", provider, action, call);
+    if(call == nil)
+    {
+        DDLogWarn(@"Pending call not present anymore: %@", (@{
+            @"provider": provider,
+            @"action": action,
+            @"uuid": action.callUUID,
+        }));
+        [action fail];
+        return;
+    }
+    
+    call.muted = action.muted;
+    [action fulfill];
+}
+
+-(void) provider:(CXProvider*) provider didActivateAudioSession:(AVAudioSession*) audioSession
+{
+    DDLogDebug(@"CXProvider: didActivateAudioSession with provider=%@, audioSession=%@", provider, audioSession);
+    @synchronized(_pendingCalls) {
+        for(NSUUID* uuid in _pendingCalls)
         {
-            case RTCIceConnectionStateConnected:
-            case RTCIceConnectionStateCompleted:
-                DDLogInfo(@"New WebRTC ICE state: connected");
-                
-                @synchronized(_pendingCalls) {
-                    //at this stage this means the call is incoming (--> fulfill callkit answer action to update ui to reflect connected call)
-                    if(_pendingCalls[self.uuid][@"answerAction"] != nil)
-                    {
-                        DDLogInfo(@"Informing CallKit of successful connection of incoming call...");
-                        [_pendingCalls[self.uuid][@"answerAction"] fulfill];
-                    }
-                    //otherwise the call was outgoing (--> initialize callkit ui for outgoing call, we are connected now)
-                    else
-                    {
-                        DDLogInfo(@"Informing CallKit of successful connection of outgoing call...");
-                        [_pendingCalls[self.uuid][@"startCallAction"] fulfill];
-                    }
-                }
-                break;
-            case RTCIceConnectionStateDisconnected:
-                DDLogInfo(@"New WebRTC ICE state: disconnected");
-                [self.voipProcessor.cxprovider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
-                [self.voipProcessor finishCall:self.uuid withReason:@"success"];
-                break;
-            case RTCIceConnectionStateFailed:
-            case RTCIceConnectionStateClosed:
-                DDLogInfo(@"New WebRTC ICE state: closed");
-                [self.voipProcessor.cxprovider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
-                [self.voipProcessor finishCall:self.uuid withReason:@"success"];
-                break;
-            case RTCIceConnectionStateNew:
-                DDLogInfo(@"New WebRTC ICE state: new");
-                break;
-            case RTCIceConnectionStateChecking:
-                DDLogInfo(@"New WebRTC ICE state: checking");
-                break;
-            case RTCIceConnectionStateCount:
-                DDLogInfo(@"New WebRTC ICE state: count");
-                break;
-            default:
-                DDLogInfo(@"New WebRTC ICE state: UNKNOWN");
-                break;
+            MLCall* call = [self getCallForUUID:uuid];
+            call.audioSession = audioSession;
         }
     }
 }
-    
--(void) webRTCClient:(WebRTCClient*) client didReceiveData:(NSData*) data
+
+-(void) provider:(CXProvider*) provider didDeactivateAudioSession:(AVAudioSession*) audioSession
 {
-    DDLogDebug(@"Received WebRTC data: %@", data);
+    DDLogDebug(@"CXProvider: didDeactivateAudioSession with provider=%@, audioSession=%@", provider, audioSession);
+    @synchronized(_pendingCalls) {
+        for(NSUUID* uuid in _pendingCalls)
+        {
+            MLCall* call = [self getCallForUUID:uuid];
+            call.audioSession = nil;
+        }
+    }
 }
 
 @end

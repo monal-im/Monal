@@ -46,6 +46,7 @@ class KVOObserver: NSObject {
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
+        //DDLogVerbose("\(String(describing:object)): keyPath \(String(describing:keyPath)) changed: \(String(describing:change))")
         self.objectWillChange()
     }
 }
@@ -88,7 +89,7 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
     subscript<T>(dynamicMember member: String) -> T {
         get {
             addObserverForMember(member)
-            DDLogDebug("Returning value for member \(member): \(String(describing:self.obj.value(forKey:member)))")
+            DDLogDebug("Returning value for dynamicMember \(member): \(String(describing:self.obj.value(forKey:member)))")
             return self.obj.value(forKey:member) as! T
         }
         set {
@@ -363,12 +364,22 @@ func iOS16() -> Bool {
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {
-    @objc
-    func makeCallScreen(_ contact: MLContact) -> UIViewController {
+    @objc(makeCallScreenForCall:)
+    func makeCallScreen(for call: MLCall) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AVPrototype(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact))))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AVPrototype(delegate:delegate, call:call)))
+        return host
+    }
+    
+    @objc(makeCallScreenToContact:)
+    func makeCallScreen(to contact: MLContact) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AVPrototype(delegate:delegate, call:appDelegate.voipProcessor!.initiateAudioCall(to:contact))))
         return host
     }
     

@@ -163,11 +163,12 @@
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         DDLogInfo(@"Got incoming VOIP call");
-        [self disconnectAndFeedAllWaitingHandlers];
-    
-        DDLogInfo(@"Dispatching voip call to mainapp...");
         if(@available(iOS 14.5, macCatalyst 14.5, *))
         {
+            //directly disconnect without handling any possibly queued stanzas (they will be handled in mainapp once we wake it up)
+            [self disconnectAndFeedAllWaitingHandlers];
+        
+            DDLogInfo(@"Dispatching voip call to mainapp...");
             NSString* payload = [HelperTools encodeBase64WithData:[HelperTools serializeObject:notification.userInfo]];
             [CXProvider reportNewIncomingVoIPPushPayload:@{@"base64Payload": payload} completion:^(NSError* _Nullable error) {
                 if(error != nil)

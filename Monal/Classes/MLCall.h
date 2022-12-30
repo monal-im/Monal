@@ -10,13 +10,43 @@
 #define MLCall_h
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLCall : NSObject <NSSecureCoding>
+@class MLXMLNode;
+@class WebRTCClient;
+@class CXAnswerCallAction;
+@class CXEndCallAction;
+@class xmpp;
+@class MLVoIPProcessor;
 
-@property (nonatomic, strong) NSUUID* uuid;
-@property (nonatomic, strong) NSString* callID;
-@property (nonatomic, strong) WebRTCClient* webRTCClient;
+typedef NS_ENUM(NSUInteger, MLCallDirection) {
+    MLCallDirectionIncoming,
+    MLCallDirectionOutgoing
+};
 
-@property (nonatomic, strong) MLXMLNode* jmiPropose;
+typedef NS_ENUM(NSUInteger, MLCallState) {
+    MLCallStateRinging,
+    MLCallStateConnecting,
+    MLCallStateConnected,
+    MLCallStateFinished,
+    MLCallStateIdle,
+};
+
+@interface MLCall : NSObject
+@property (strong, readonly) NSString* description;
+
+@property (nonatomic, strong, readonly) NSUUID* uuid;
+@property (nonatomic, strong, readonly) MLContact* contact;
+@property (nonatomic, readonly) MLCallDirection direction;
+@property (nonatomic, readonly) MLCallState state;
+@property (nonatomic, assign) BOOL muted;
+@property (nonatomic, assign) BOOL speaker;
+
++(instancetype) makeDummyCall:(int) type;
+-(void) end;
+
+-(BOOL) isEqualToContact:(MLContact*) contact;
+-(BOOL) isEqualToCall:(MLCall*) call;
+-(BOOL) isEqual:(id _Nullable) object;
+-(NSUInteger) hash;
 @end
 
 NS_ASSUME_NONNULL_END

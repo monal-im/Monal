@@ -9,6 +9,7 @@
 
 import Foundation
 import WebRTC
+import CocoaLumberjack
 
 @objc
 protocol WebRTCClientDelegate: AnyObject {
@@ -73,8 +74,8 @@ final class WebRTCClient: NSObject {
         }
         
         self.peerConnection = peerConnection
-        
         super.init()
+        
         self.createMediaSenders()
         self.configureAudioSession()
         self.peerConnection.delegate = self
@@ -161,7 +162,7 @@ final class WebRTCClient: NSObject {
             try self.rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord.rawValue)
             try self.rtcAudioSession.setMode(AVAudioSession.Mode.voiceChat.rawValue)
         } catch let error {
-            debugPrint("Error changeing AVAudioSession category: \(error)")
+            DDLogDebug("Error changeing AVAudioSession category: \(error)")
         }
         self.rtcAudioSession.useManualAudio = true
         self.rtcAudioSession.isAudioEnabled = false
@@ -212,7 +213,7 @@ final class WebRTCClient: NSObject {
     private func createDataChannel() -> RTCDataChannel? {
         let config = RTCDataChannelConfiguration()
         guard let dataChannel = self.peerConnection.dataChannel(forLabel: "WebRTCData", configuration: config) else {
-            debugPrint("Warning: Couldn't create data channel.")
+            DDLogDebug("Warning: Couldn't create data channel.")
             return nil
         }
         return dataChannel
@@ -228,28 +229,28 @@ final class WebRTCClient: NSObject {
 extension WebRTCClient: RTCPeerConnectionDelegate {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {
-        debugPrint("peerConnection new signaling state: \(stateChanged)")
+        DDLogDebug("peerConnection new signaling state: \(stateChanged)")
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-        debugPrint("peerConnection did add stream")
+        DDLogDebug("peerConnection did add stream")
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {
-        debugPrint("peerConnection did remove stream")
+        DDLogDebug("peerConnection did remove stream")
     }
     
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {
-        debugPrint("peerConnection should negotiate")
+        DDLogDebug("peerConnection should negotiate")
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-        debugPrint("peerConnection new connection state: \(newState)")
+        DDLogDebug("peerConnection new connection state: \(newState)")
         self.delegate?.webRTCClient(self, didChangeConnectionState: newState)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
-        debugPrint("peerConnection new gathering state: \(newState)")
+        DDLogDebug("peerConnection new gathering state: \(newState)")
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
@@ -257,11 +258,11 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {
-        debugPrint("peerConnection did remove candidate(s)")
+        DDLogDebug("peerConnection did remove candidate(s)")
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
-        debugPrint("peerConnection did open data channel")
+        DDLogDebug("peerConnection did open data channel")
         self.remoteDataChannel = dataChannel
     }
 }
@@ -275,9 +276,11 @@ extension WebRTCClient {
 
 // MARK: - Video control
 extension WebRTCClient {
+    @objc
     func hideVideo() {
         self.setVideoEnabled(false)
     }
+    @objc
     func showVideo() {
         self.setVideoEnabled(true)
     }
@@ -287,15 +290,18 @@ extension WebRTCClient {
 }
 // MARK:- Audio control
 extension WebRTCClient {
+    @objc
     func muteAudio() {
         self.setAudioEnabled(false)
     }
     
+    @objc
     func unmuteAudio() {
         self.setAudioEnabled(true)
     }
     
     // Fallback to the default playing device: headphones/bluetooth/ear speaker
+    @objc
     func speakerOff() {
         self.audioQueue.async { [weak self] in
             guard let self = self else {
@@ -307,13 +313,14 @@ extension WebRTCClient {
                 try self.rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord.rawValue)
                 try self.rtcAudioSession.overrideOutputAudioPort(.none)
             } catch let error {
-                debugPrint("Error setting AVAudioSession category: \(error)")
+                DDLogDebug("Error setting AVAudioSession category: \(error)")
             }
             self.rtcAudioSession.unlockForConfiguration()
         }
     }
     
     // Force speaker
+    @objc
     func speakerOn() {
         self.audioQueue.async { [weak self] in
             guard let self = self else {
@@ -326,7 +333,7 @@ extension WebRTCClient {
                 try self.rtcAudioSession.overrideOutputAudioPort(.speaker)
                 try self.rtcAudioSession.setActive(true)
             } catch let error {
-                debugPrint("Couldn't force audio to speaker: \(error)")
+                DDLogDebug("Couldn't force audio to speaker: \(error)")
             }
             self.rtcAudioSession.unlockForConfiguration()
         }
@@ -339,7 +346,7 @@ extension WebRTCClient {
 
 extension WebRTCClient: RTCDataChannelDelegate {
     func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
-        debugPrint("dataChannel did change state: \(dataChannel.readyState)")
+        DDLogDebug("dataChannel did change state: \(dataChannel.readyState)")
     }
     
     func dataChannel(_ dataChannel: RTCDataChannel, didReceiveMessageWith buffer: RTCDataBuffer) {

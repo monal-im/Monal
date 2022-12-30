@@ -14,6 +14,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class chatViewController;
+@class MLCall;
 
 @interface ActiveChatsViewController : UITableViewController  <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 
@@ -34,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) showDetails;
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString* _Nullable) token usingCompletion:(monal_id_block_t _Nullable) callback;
 -(void) showAddContactWithJid:(NSString*) jid andPreauthToken:(NSString* _Nullable) preauthToken;
+-(void) presentCall:(MLCall*) call;
 
 @end
 

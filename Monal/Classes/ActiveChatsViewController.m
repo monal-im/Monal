@@ -483,6 +483,15 @@ static NSMutableSet* _smacksWarningDisplayed;
    [self performSegueWithIdentifier:@"showSettings" sender:self];
 }
 
+-(void) presentCall:(MLCall*) call
+{
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
+        UIViewController* callViewController = [[SwiftuiInterface new] makeCallScreenForCall:call];
+        [self presentViewController:callViewController animated:YES completion:^{}];
+    }];
+}
+
 -(void) presentChatWithContact:(MLContact*) contact
 {
     return [self presentChatWithContact:contact andCompletion:nil];

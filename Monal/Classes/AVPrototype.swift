@@ -15,42 +15,109 @@ import CallKit
 
 struct AVPrototype: View {
     var delegate: SheetDismisserProtocol
+    @StateObject var call: ObservableKVOWrapper<MLCall>
     @StateObject var contact: ObservableKVOWrapper<MLContact>
-    @State var isCalling = false
-    var callController: CXCallController
 
-    init(delegate: SheetDismisserProtocol, contact: ObservableKVOWrapper<MLContact>) {
+    init(delegate: SheetDismisserProtocol, call: MLCall) {
         self.delegate = delegate
-        _contact = StateObject(wrappedValue: contact)
-        self.callController = CXCallController(queue: DispatchQueue.main)
+        _call = StateObject(wrappedValue: ObservableKVOWrapper(call))
+        _contact = StateObject(wrappedValue: ObservableKVOWrapper(call.contact))
     }
 
     var body: some View {
         ZStack {
-            Color.white
+            monalGreen
             
+            VStack {
+                Spacer().frame(height: 32)
+                
+                Text(contact.contactDisplayName as String)
+                    .font(.largeTitle)
+                
+                Spacer().frame(height: 32)
+                
+                //this is needed because ObservableKVOWrapper somehow extracts an NSNumber from it's wrapped object
+                //which results in a runtime error when trying to cast NSNumber? to MLCallState
+                switch MLCallState(rawValue:(call.state as NSNumber).uintValue) {
+                    case .ringing:
+                        Text("Ringing...")
+                    case .connecting:
+                        Text("Connecting...")
+                    case .connected:
+                        Text("Connected")
+                    case .finished:
+                        Text("Call ended")
+                    case .idle:
+                        Text("Idle state")
+                    default:
+                        Text("Unknown state")
+                }
             
+                Spacer().frame(height: 32)
+                
+                Image(uiImage: contact.avatar)
+                    .resizable()
+                    .frame(minWidth: 100, idealWidth: 150, maxWidth: 200, minHeight: 100, idealHeight: 150, maxHeight: 200, alignment: .center)
+                    .scaledToFit()
+                    .shadow(radius: 7)
+                
+                Spacer()
+                
+                HStack() {
+                    Spacer()
+                    
+                    Button(action: {
+                        call.muted = !call.muted
+                    }) {
+                        Image(systemName: call.muted ? "mic.circle.fill" : "mic.slash.circle.fill")
+                            .resizable()
+                            .frame(width: 64.0, height: 64.0)
+                            .accentColor(call.muted ? .white : .black)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                    
+                    Spacer().frame(width: 32)
+                    Button(action: {
+                        call.obj.end()
+                    }) {
+                        Image(systemName: "phone.down.circle.fill")
+                            .resizable()
+                            .frame(width: 64.0, height: 64.0)
+                            .accentColor(.red)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                    
+                    Spacer().frame(width: 32)
+                    Button(action: {
+                        call.speaker = !call.speaker
+                    }) {
+                        Image(systemName: "speaker.wave.2.circle.fill")
+                            .resizable()
+                            .frame(width: 64.0, height: 64.0)
+                            .accentColor(call.speaker ? .white : .black)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                    
+                    Spacer()
+                }
+                
+                Spacer().frame(height: 32)
+            }
         }
-        .onAppear {
-            DDLogDebug("Call UI appeared")
-            let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-            if let voipProcessor = appDelegate.voipProcessor {
-                if isCalling == false {
-                    voipProcessor.initiateAudioCall(to:self.contact.obj)
-                    isCalling = true
+        .navigationBarTitle("Call with \(contact.contactDisplayName as String)", displayMode: .inline)
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalCallRemoved")).receive(on: RunLoop.main)) { notification in
+            if let notificationCall = notification.object as? MLCall {
+                if notificationCall == call.obj {
+                    self.delegate.dismiss()
                 }
             }
         }
-        .onDisappear {
-            DDLogDebug("Call UI disappeared")
-        }
-        .navigationBarTitle("Call with \(contact.contactDisplayName as String)", displayMode: .inline)
     }
 }
 
 struct AVPrototype_Previews: PreviewProvider {
     static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        AVPrototype(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)))
+        AVPrototype(delegate:delegate, call:MLCall.makeDummyCall(0))
     }
 }

@@ -2348,17 +2348,21 @@ enum msgSentState {
     LMCEditAction.image = [[[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     UIContextualAction* quoteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Quote", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+        //TODO: add datetime before quoting message if message is older than 5 minutes and/or 10 messages
         // Preserve user input
         NSMutableString* quoteString = [[NSMutableString alloc] init];
         if(self.chatInput.text.length > 0) {
             [quoteString appendFormat:@"%@\n", self.chatInput.text];
         }
         [message.messageText enumerateLinesUsingBlock:^(NSString* _Nonnull line, BOOL* _Nonnull stop) {
+            if(line.length > 0 && [[line substringToIndex:1] isEqualToString:@">"])
+                return;
             [quoteString appendFormat:@"> %@\n", line];
         }];
         // Append new empty line after quote
         [quoteString appendString:@"\n"];
-        self.chatInput.text = quoteString;
+        //remove newlines and spaces at the beginning and end of our message
+        self.chatInput.text = [quoteString stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
         self.placeHolderText.hidden = YES;
         return completionHandler(YES);
     }];

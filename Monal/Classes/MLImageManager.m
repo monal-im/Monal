@@ -329,8 +329,7 @@
         NSString* filename = [self fileNameforContact:contact];
         writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"backgrounds"];
         
-        NSError* error;
-        [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
+        [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:nil];
         [HelperTools configureFileProtectionFor:writablePath];
         
         writablePath = [writablePath stringByAppendingPathComponent:filename];

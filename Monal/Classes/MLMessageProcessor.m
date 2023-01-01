@@ -195,8 +195,13 @@ static NSMutableDictionary* _typingNotifications;
         // handle KeyTransportMessages directly without adding a 1:1 buddy
         if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] == YES && [messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload#"] == NO)
         {
-            DDLogInfo(@"Handling KeyTransportElement without trying to add a 1:1 buddy %@", possibleUnkownContact);
-            [account.omemo decryptMessage:messageNode withMucParticipantJid:nil];
+            if(!isMLhistory)
+            {
+                DDLogInfo(@"Handling KeyTransportElement without trying to add a 1:1 buddy %@", possibleUnkownContact);
+                [account.omemo decryptMessage:messageNode withMucParticipantJid:nil];
+            }
+            else
+                DDLogInfo(@"Ignoring MLhistory KeyTransportElement for buddy %@", possibleUnkownContact);
             return message;
         }
         

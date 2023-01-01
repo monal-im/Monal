@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSUInteger, MLCallDirection) {
     MLCallDirectionIncoming,
-    MLCallDirectionOutgoing
+    MLCallDirectionOutgoing,
 };
 
 typedef NS_ENUM(NSUInteger, MLCallState) {
@@ -30,6 +30,14 @@ typedef NS_ENUM(NSUInteger, MLCallState) {
     MLCallStateIdle,
 };
 
+typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
+    MLCallFinishReasonUnknown,
+    MLCallFinishReasonNormal,
+    MLCallFinishReasonError,
+    MLCallFinishReasonUnanswered,
+    MLCallFinishReasonRejected,
+};
+
 @interface MLCall : NSObject
 @property (strong, readonly) NSString* description;
 
@@ -37,6 +45,8 @@ typedef NS_ENUM(NSUInteger, MLCallState) {
 @property (nonatomic, strong, readonly) MLContact* contact;
 @property (nonatomic, readonly) MLCallDirection direction;
 @property (nonatomic, readonly) MLCallState state;
+@property (nonatomic, readonly) MLCallFinishReason finishReason;
+@property (nonatomic, readonly) uint32_t time;
 @property (nonatomic, assign) BOOL muted;
 @property (nonatomic, assign) BOOL speaker;
 

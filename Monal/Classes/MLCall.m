@@ -46,6 +46,8 @@
 @property (nonatomic, assign) BOOL isConnected;
 @property (nonatomic, assign) BOOL isFinished;
 @property (nonatomic, strong) AVAudioSession* _Nullable audioSession;
+@property (nonatomic, assign) uint32_t time;
+@property (nonatomic, assign) MLCallFinishReason finishReason;
 
 @property (nonatomic, readonly) xmpp* account;
 @property (nonatomic, readonly) MLVoIPProcessor* voipProcessor;
@@ -72,7 +74,9 @@
     self.contact = contact;
     self.direction = direction;
     self.isConnected = NO;
+    self.time = 0;
     self.isFinished = NO;
+    self.finishReason = MLCallFinishReasonUnknown;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingSDP:) name:kMonalIncomingSDP object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingICECandidate:) name:kMonalIncomingICECandidate object:nil];
@@ -200,6 +204,15 @@
     return appDelegate.voipProcessor;
 }
 
+-(void) startTimer
+{
+    [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
+        self.time++;
+        if(self.state != MLCallStateConnected)
+            [timer invalidate];
+    }];
+}
+
 -(void) setJmiAccept:(MLXMLNode*) jmiAccept
 {
     @synchronized(self) {
@@ -256,6 +269,10 @@
         //if switching to connected state: check if we need to activate the already reported audio session now
         if(oldValue == NO && self.isConnected == YES && self.audioSession != nil)
             [self didActivateAudioSession:self.audioSession];
+        
+        //start timer once we are fully connected
+        if(self.isConnected && self.audioSession != nil)
+            [self startTimer];
     }
 }
 -(BOOL) isConnected
@@ -284,8 +301,11 @@
         _audioSession = audioSession;
         
         //do nothing if not yet connected
-        if(self.isConnected == YES && self.audioSession != nil)
+        if(self.isConnected == YES && oldSession == nil && self.audioSession != nil)
+        {
             [self didActivateAudioSession:self.audioSession];
+            [self startTimer];
+        }
         
         if(self.audioSession == nil)
             [self didDeactivateAudioSession:oldSession];
@@ -341,11 +361,13 @@
             {
                 [self sendJmiFinishWithReason:@"success"];
                 [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
+                self.finishReason = MLCallFinishReasonNormal;
             }
             else
             {
                 [self sendJmiFinishWithReason:@"connectivity-error"];
                 [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                self.finishReason = MLCallFinishReasonError;
             }
         }
     }
@@ -359,17 +381,23 @@
                 {
                     [self sendJmiFinishWithReason:@"success"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
+                    if(self.finishReason == MLCallFinishReasonUnknown)
+                        self.finishReason = MLCallFinishReasonNormal;
                 }
                 else
                 {
                     [self sendJmiFinishWithReason:@"connectivity-error"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                    if(self.finishReason == MLCallFinishReasonUnknown)
+                        self.finishReason = MLCallFinishReasonError;
                 }
             }
             else
             {
                 [self sendJmiRetract];
                 [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+                if(self.finishReason == MLCallFinishReasonUnknown)
+                    self.finishReason = MLCallFinishReasonUnanswered;
             }
         }
         else
@@ -377,6 +405,8 @@
             //this case probably does never happen
             //(the outgoing call transaction was started, but start call action not yet executed, and then the end call action arrives)
             [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+            if(self.finishReason == MLCallFinishReasonUnknown)
+                self.finishReason = MLCallFinishReasonError;
         }
     }
 }

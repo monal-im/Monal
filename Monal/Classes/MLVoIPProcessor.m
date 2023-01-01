@@ -45,6 +45,7 @@ static NSMutableDictionary* _pendingCalls;
 @property (nonatomic, strong) CXAnswerCallAction* _Nullable providerAnswerAction;
 @property (nonatomic, assign) BOOL isConnected;
 @property (nonatomic, strong) AVAudioSession* _Nullable audioSession;
+@property (nonatomic, assign) MLCallFinishReason finishReason;
 
 @property (nonatomic, readonly) xmpp* account;
 @property (nonatomic, readonly) MLVoIPProcessor* voipProcessor;
@@ -178,6 +179,7 @@ static NSMutableDictionary* _pendingCalls;
 
 -(void) processIncomingCall:(NSDictionary* _Nonnull) userInfo withCompletion:(void (^ _Nullable)(void)) completion
 {
+    //TODO: handle jmi propose coming from other devices on our account
     XMPPMessage* messageNode =  userInfo[@"messageNode"];
     NSNumber* accountNo = userInfo[@"accountNo"];
     NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:1}propose@id|uuid"];
@@ -298,6 +300,7 @@ static NSMutableDictionary* _pendingCalls;
         
     DDLogInfo(@"Got new incoming JMI stanza for call: %@", call);
     //TODO: handle tie breaking!
+    //TODO: handle jmi stanzas coming from other devices on our account
     if([messageNode check:@"{urn:xmpp:jingle-message:1}accept"])
     {
         if(call.jmiAccept != nil)
@@ -322,6 +325,7 @@ static NSMutableDictionary* _pendingCalls;
         {
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+            call.finishReason = MLCallFinishReasonUnanswered;
         }
         [self removeCall:call];     //remove this call from pending calls
     }
@@ -336,6 +340,7 @@ static NSMutableDictionary* _pendingCalls;
         {
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+            call.finishReason = MLCallFinishReasonRejected;
         }
         [self removeCall:call];     //remove this call from pending calls
     }
@@ -351,6 +356,7 @@ static NSMutableDictionary* _pendingCalls;
             DDLogWarn(@"Remote did try to finish an not yet established call");
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+            call.finishReason = MLCallFinishReasonError;
         }
         [self removeCall:call];     //remove this call from pending calls
     }

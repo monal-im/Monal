@@ -1495,6 +1495,33 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID
+{
+    return [self.db idReadTransaction:^{
+        MLMessage* msg = [self messageForHistoryID:historyID];
+        
+        //timestamp not needed if we can't find the message we are quoting
+        if(msg == nil)
+            return (NSDate*)nil;
+
+        //check if message is among the newest 8 exchanged with this buddy
+        NSNumber*  isRecentEnough = (NSNumber*)[self.db executeScalar:@"\
+            SELECT COUNT(message_history_id) \
+            FROM \
+                (SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? ORDER BY message_history_id DESC LIMIT 8) \
+            WHERE \
+                message_history_id=?; \
+            " andArguments:@[msg.accountId, msg.buddyName, historyID]];
+        
+        if(isRecentEnough.intValue == 1)
+            return (NSDate*)nil;
+        //messages not among the newest 8, but received in the last 15 minutes don't need a timestamp either
+        if([[NSDate date] timeIntervalSinceDate:msg.timestamp] < 900)
+            return (NSDate*)nil;
+        return msg.timestamp;
+    }];
+}
+
 -(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted historyBaseID:(NSNumber* _Nullable) historyBaseID
 {
     return [self.db boolReadTransaction:^{

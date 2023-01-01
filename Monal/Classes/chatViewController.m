@@ -2348,21 +2348,33 @@ enum msgSentState {
     LMCEditAction.image = [[[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     UIContextualAction* quoteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Quote", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        //TODO: add datetime before quoting message if message is older than 5 minutes and/or 10 messages
-        // Preserve user input
-        NSMutableString* quoteString = [[NSMutableString alloc] init];
-        if(self.chatInput.text.length > 0) {
-            [quoteString appendFormat:@"%@\n", self.chatInput.text];
-        }
+        NSMutableString* filteredString = [[NSMutableString alloc] init];
+        //first of all: filter out already quoted text
         [message.messageText enumerateLinesUsingBlock:^(NSString* _Nonnull line, BOOL* _Nonnull stop) {
             if(line.length > 0 && [[line substringToIndex:1] isEqualToString:@">"])
                 return;
+            [filteredString appendFormat:@"%@\n", line];
+        }];
+        NSMutableString* quoteString = [[NSMutableString alloc] init];
+        //add datetime before quoting message if message is older than 15 minutes and 8 messages
+        NSDate* timestamp = [[DataLayer sharedInstance] returnTimestampForQuote:message.messageDBId];
+        if(timestamp != nil)
+        {
+            [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
+            [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
+            [quoteString appendFormat:@"%@:\n", [self.destinationDateFormat stringFromDate:timestamp]];
+        }
+        //then: make sure we quote only trimmed message contents
+        [[filteredString stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet] enumerateLinesUsingBlock:^(NSString* _Nonnull line, BOOL* _Nonnull stop) {
             [quoteString appendFormat:@"> %@\n", line];
         }];
-        // Append new empty line after quote
+        //Append new empty line after quote
         [quoteString appendString:@"\n"];
-        //remove newlines and spaces at the beginning and end of our message
-        self.chatInput.text = [quoteString stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+        //add already typed in text back in
+        if(self.chatInput.text.length > 0) {
+            [quoteString appendString:self.chatInput.text];
+        }
+        self.chatInput.text = quoteString;
         self.placeHolderText.hidden = YES;
         return completionHandler(YES);
     }];

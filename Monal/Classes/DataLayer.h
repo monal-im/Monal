@@ -208,6 +208,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
 -(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSNumber*) accountNo;
 
+-(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID;
 -(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted historyBaseID:(NSNumber* _Nullable) historyBaseID;
 
 #pragma mark - message history

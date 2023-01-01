@@ -4059,20 +4059,25 @@ NSString* const kStanza = @"stanza";
         NSMutableArray* __block historyIdList = [[NSMutableArray alloc] init];
         NSNumber* __block historyId = [NSNumber numberWithInt:[[[DataLayer sharedInstance] getSmallestHistoryId] intValue] - retrievedBodies];
         
-        //process all queued mam stanzas in a dedicated db write transaction
-        [[DataLayer sharedInstance] createTransaction:^{
-            //don't write data to our tcp stream while inside this db transaction (all effects to the outside world should be transactional, too)
-            [self freezeSendQueue];
-            //ignore all notifications generated while processing the queued stanzas
-            [MLNotificationQueue queueNotificationsInBlock:^{
-                //iterate through all pages and their messages forward in time (pages have already been sorted forward in time internally)
-                for(NSArray* page in [[pageList reverseObjectEnumerator] allObjects])
+        //ignore all notifications generated while processing the queued stanzas
+        [MLNotificationQueue queueNotificationsInBlock:^{
+            uint32_t pageNo = 0;
+            //iterate through all pages and their messages forward in time (pages have already been sorted forward in time internally)
+            DDLogDebug(@"Handling %@ mam pages...", @([pageList count]));
+            for(NSArray* page in [[pageList reverseObjectEnumerator] allObjects])
+            {
+                //process received message stanzas and manipulate the db accordingly
+                //if a new message got added to the history db, the message processor will return a MLMessage instance containing the history id of the newly created entry
+                DDLogDebug(@"Handling %@ entries in mam page...", @([page count]));
+                uint32_t entryNo = 0;
+                for(NSDictionary* data in page)
                 {
-                    //process received message stanzas and manipulate the db accordingly
-                    //if a new message got added to the history db, the message processor will return a MLMessage instance containing the history id of the newly created entry
-                    for(NSDictionary* data in page)
-                    {
-                        DDLogVerbose(@"Handling mam page entry: %@", data);
+                    //don't write data to our tcp stream while inside this db transaction
+                    //(all effects to the outside world should be transactional, too)
+                    [self freezeSendQueue];
+                    //process all queued mam stanzas in a dedicated db write transaction
+                    [[DataLayer sharedInstance] createTransaction:^{
+                        DDLogVerbose(@"Handling mam page entry[%u(%@).%u(%@)]): %@", pageNo, @([pageList count]), entryNo, @([page count]), data);
                         MLMessage* msg = [MLMessageProcessor processMessage:data[@"messageNode"] andOuterMessage:data[@"outerMessageNode"] forAccount:self withHistoryId:historyId];
                         //add successfully added messages to our display list
                         //stanzas not transporting a body will be processed, too, but the message processor will return nil for these
@@ -4081,14 +4086,16 @@ NSString* const kStanza = @"stanza";
                             [historyIdList addObject:msg.messageDBId];      //we only need the history id to fetch a fresh copy later
                             historyId = [NSNumber numberWithInt:[historyId intValue] + 1];      //calculate next history id
                         }
-                    }
+                    }];
+                    [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
+                    entryNo++;
                 }
-                
-                //throw away all queued notifications before leaving this context
-                [(MLNotificationQueue*)[MLNotificationQueue currentQueue] clear];
-            } onQueue:@"MLhistoryIgnoreQueue"];
-        }];
-        [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
+                pageNo++;
+            }
+            
+            //throw away all queued notifications before leaving this context
+            [(MLNotificationQueue*)[MLNotificationQueue currentQueue] clear];
+        } onQueue:@"MLhistoryIgnoreQueue"];
         
         DDLogDebug(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[historyIdList count]);
         MLAssert([historyIdList count] <= retrievedBodies, @"did add more messages to historydb table than bodies collected!", (@{

@@ -124,11 +124,11 @@ static NSMutableDictionary* _typingNotifications;
         if([messageNode check:@"{urn:xmpp:jingle-message:1}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=audio>"])
         {
             DDLogInfo(@"Got incoming JMI call");
+#ifdef IS_ALPHA
             NSDictionary* callData = @{
                 @"messageNode": messageNode,
                 @"accountNo": account.accountNo,
             };
-#ifdef IS_ALPHA
             if([HelperTools isAppExtension])
             {
                 DDLogInfo(@"Dispatching this stanza to mainapp...");

@@ -233,7 +233,7 @@ struct RegisterAccount: View {
         //dispatch after 50ms because otherwise we get an "Modifying state during view update, this will cause undefined behaviour" error 
         //undefined in our case seems to mean: we get only the blurring effect but the loading overlay will only be shown after an ui update
         //update: we still get this error even when using this timeout, but at least the ui is rendered properly
-        let newTimeout = DispatchTime.now() + 0.05;
+        let newTimeout = DispatchTime.now() + 0.05
         self.currentTimeout = newTimeout
         DispatchQueue.main.asyncAfter(deadline: newTimeout) {
             if(newTimeout == self.currentTimeout) {

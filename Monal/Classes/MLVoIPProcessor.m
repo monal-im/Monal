@@ -101,7 +101,7 @@ static NSMutableDictionary* _pendingCalls;
     @synchronized(_pendingCalls) {
         _pendingCalls[call.uuid] = call;
     }
-
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalCallAdded object:call userInfo:@{@"uuid": call.uuid}];
 }
 
 -(void) removeCall:(MLCall*) call

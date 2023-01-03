@@ -56,13 +56,14 @@
     BOOL _isRecording;
 }
 
-@property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
-@property (nonatomic, strong)  NSCalendar* gregorian;
-@property (nonatomic, assign)  NSInteger thisyear;
-@property (nonatomic, assign)  NSInteger thismonth;
-@property (nonatomic, assign)  NSInteger thisday;
-@property (nonatomic, strong)  MBProgressHUD* uploadHUD;
-@property (nonatomic, strong)  MBProgressHUD* gpsHUD;
+@property (nonatomic, strong) NSDateFormatter* destinationDateFormat;
+@property (nonatomic, strong) NSCalendar* gregorian;
+@property (nonatomic, assign) NSInteger thisyear;
+@property (nonatomic, assign) NSInteger thismonth;
+@property (nonatomic, assign) NSInteger thisday;
+@property (nonatomic, strong) MBProgressHUD* uploadHUD;
+@property (nonatomic, strong) MBProgressHUD* gpsHUD;
+@property (nonatomic, strong) UIBarButtonItem* callButton;
 
 @property (nonatomic, strong) NSMutableArray<MLMessage*>* messageList;
 @property (nonatomic, strong) NSMutableArray* photos;
@@ -241,14 +242,27 @@ enum msgSentState {
 #ifdef IS_ALPHA
     if(!self.contact.isGroup)
     {
-        UIBarButtonItem* callButton = [UIBarButtonItem new];
-        callButton.image = [UIImage systemImageNamed:@"phone"];
-        [callButton setAction:@selector(openCallScreen:)];
+        self.callButton = [UIBarButtonItem new];
+        [self.callButton setAction:@selector(openCallScreen:)];
         NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
-        [rightBarButtons addObject:callButton];
+        [rightBarButtons addObject:self.callButton];
         self.navigationItem.rightBarButtonItems = rightBarButtons;
+        [self updateCallButtonImage];
     }
 #endif
+}
+
+-(void) updateCallButtonImage
+{
+    if(self.callButton != nil)
+    {
+        MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+        MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
+        if(activeCall != nil)
+            self.callButton.image = [UIImage systemImageNamed:@"phone.connection"];
+        else
+            self.callButton.image = [UIImage systemImageNamed:@"phone"];
+    }
 }
 
 -(void) initNavigationBarItems
@@ -569,6 +583,8 @@ enum msgSentState {
         [[MLImageManager sharedInstance] getIconForContact:self.contact withCompletion:^(UIImage *image) {
             self.navBarIcon.image=image;
         }];
+        
+        [self updateCallButtonImage];
     });
 }
 
@@ -679,6 +695,9 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(updateNavBarLastInteractionLabel:) name:kMonalLastInteractionUpdatedNotice object:nil];
 
     [nc addObserver:self selector:@selector(handleBackgroundChanged) name:kMonalBackgroundChanged object:nil];
+    
+    [nc addObserver:self selector:@selector(updateCallButtonImage) name:kMonalCallAdded object:nil];
+    [nc addObserver:self selector:@selector(updateCallButtonImage) name:kMonalCallRemoved object:nil];
 
     self.viewDidAppear = NO;
     self.viewIsScrolling = YES;

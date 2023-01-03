@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSUInteger pendingCallsCount;
 -(void) voipRegistration;
 
+-(MLCall* _Nullable) getActiveCallWithContact:(MLContact*) contact;
 -(MLCall*) initiateAudioCallToContact:(MLContact*) contact;
 @end
 

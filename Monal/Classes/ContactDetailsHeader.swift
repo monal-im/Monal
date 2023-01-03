@@ -90,7 +90,11 @@ struct ContactDetailsHeader: View {
                 Spacer().frame(width: 20)
                 Button(action: {
                     let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-                    call = appDelegate.voipProcessor!.initiateAudioCall(to:contact.obj)
+                    if let activeCall = appDelegate.voipProcessor!.getActiveCall(with:self.contact.obj) {
+                        call = activeCall
+                    } else {
+                        call = appDelegate.voipProcessor!.initiateAudioCall(to:contact.obj)
+                    }
                     navigationAction = "callScreen"
                 }) {
                     Image(systemName: "phone")

@@ -24,6 +24,7 @@
 #import "MLFiletransfer.h"
 #import "MLImageManager.h"
 #import "MLMucProcessor.h"
+#import "MLVoIPProcessor.h"
 #import "MLNotificationQueue.h"
 #import "MLOMEMO.h"
 #import "MLSearchViewController.h"
@@ -454,7 +455,13 @@ enum msgSentState {
 
 -(void) openCallScreen:(id) sender
 {
-    UIViewController* detailsViewController = [[SwiftuiInterface new] makeCallScreenToContact:self.contact];
+    UIViewController* detailsViewController;
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
+    if(activeCall != nil)
+        detailsViewController = [[SwiftuiInterface new] makeCallScreenForCall:activeCall];
+    else
+        detailsViewController = [[SwiftuiInterface new] makeCallScreenToContact:self.contact];
     [self presentViewController:detailsViewController animated:YES completion:^{}];
 }
 

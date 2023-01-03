@@ -117,6 +117,19 @@ static NSMutableDictionary* _pendingCalls;
     return _pendingCalls.count;
 }
 
+-(MLCall* _Nullable) getActiveCallWithContact:(MLContact*) contact
+{
+    @synchronized(_pendingCalls) {
+        for(NSUUID* uuid in _pendingCalls)
+        {
+            MLCall* call = [self getCallForUUID:uuid];
+            if([call.contact isEqualToContact:contact])
+                return call;
+        }
+    }
+    return nil;
+}
+
 -(MLCall*) initiateAudioCallToContact:(MLContact*) contact
 {
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];

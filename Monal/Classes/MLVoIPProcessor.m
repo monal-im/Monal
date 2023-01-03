@@ -71,7 +71,7 @@ static NSMutableDictionary* _pendingCalls;
     CXProviderConfiguration* config = [[CXProviderConfiguration alloc] init];
     config.maximumCallGroups = 1;
     config.maximumCallsPerCallGroup = 1;
-    config.supportedHandleTypes = [NSSet setWithObject:@(CXHandleTypeEmailAddress)];
+    config.supportedHandleTypes = [NSSet setWithObject:@(CXHandleTypeGeneric)];
     config.supportsVideo = NO;
     config.includesCallsInRecents = YES;
     self.cxProvider = [[CXProvider alloc] initWithConfiguration:config];
@@ -139,7 +139,7 @@ static NSMutableDictionary* _pendingCalls;
     DDLogInfo(@"Initiating audio call to %@: %@", contact, call);
     [self addCall:call];
     
-    CXHandle* handle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:contact.contactJid];
+    CXHandle* handle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:contact.contactJid];
     CXStartCallAction* startCallAction = [[CXStartCallAction alloc] initWithCallUUID:call.uuid handle:handle];
     startCallAction.contactIdentifier = call.contact.contactDisplayName;
     startCallAction.video = NO;
@@ -208,7 +208,7 @@ static NSMutableDictionary* _pendingCalls;
     [self addCall:call];
     
     CXCallUpdate* update = [[CXCallUpdate alloc] init];
-    update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:messageNode.fromUser];
+    update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:messageNode.fromUser];
     update.localizedCallerName = call.contact.contactDisplayName;
     update.supportsDTMF = NO;
     update.hasVideo = NO;

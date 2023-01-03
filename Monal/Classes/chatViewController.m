@@ -462,6 +462,7 @@ enum msgSentState {
         detailsViewController = [[SwiftuiInterface new] makeCallScreenForCall:activeCall];
     else
         detailsViewController = [[SwiftuiInterface new] makeCallScreenToContact:self.contact];
+    detailsViewController.modalPresentationStyle = UIModalPresentationFullScreen;
     [self presentViewController:detailsViewController animated:YES completion:^{}];
 }
 

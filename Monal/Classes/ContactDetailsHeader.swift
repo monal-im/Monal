@@ -16,6 +16,7 @@ struct ContactDetailsHeader: View {
     @State private var showingCannotEncryptAlert = false
     @State private var showingShouldDisableEncryptionAlert = false
     @State private var navigationAction: String?
+    @State private var showCallScreen = false
     @State private var call: MLCall?
 
     var body: some View {
@@ -85,31 +86,7 @@ struct ContactDetailsHeader: View {
                     }
                 }
                 .buttonStyle(BorderlessButtonStyle())
-
-#if IS_ALPHA                 
-                Spacer().frame(width: 20)
-                Button(action: {
-                    let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-                    if let activeCall = appDelegate.voipProcessor!.getActiveCall(with:self.contact.obj) {
-                        call = activeCall
-                    } else {
-                        call = appDelegate.voipProcessor!.initiateAudioCall(to:contact.obj)
-                    }
-                    navigationAction = "callScreen"
-                }) {
-                    Image(systemName: "phone")
-                }
-                .buttonStyle(BorderlessButtonStyle())
-#endif
-
-                /*
-                Spacer().frame(width: 20)
-                Button(action: {
-                    print("button pressed")
-                }) {
-                    Image(systemName: "phone")
-                }
-                */
+                
 #if !DISABLE_OMEMO
                 if(!contact.isGroup || (contact.isGroup && contact.mucType == "group")) {
                     Spacer().frame(width: 20)
@@ -170,11 +147,6 @@ struct ContactDetailsHeader: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        // all hidden navigation links collected in a hidden vstack
-        .background(VStack {
-            NavigationLink("", destination: LazyClosureView(AVPrototype(delegate: delegate, call: call!)), tag: "callScreen", selection: $navigationAction)
-            //NavigationLink("", destination: LazyClosureView(AVPrototype(contact: contact)), tag: "someOtherScreen", selection: $navigationAction)
-        }.frame(width: 0, height: 0).opacity(0))
     }
 }
 

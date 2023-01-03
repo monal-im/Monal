@@ -372,7 +372,7 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AVPrototype(delegate:delegate, call:call)))
+        host.rootView = AnyView(AVPrototype(delegate:delegate, call:call))
         return host
     }
     
@@ -382,7 +382,7 @@ class SwiftuiInterface : NSObject {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
         let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AVPrototype(delegate:delegate, call:appDelegate.voipProcessor!.initiateAudioCall(to:contact))))
+        host.rootView = AnyView(AVPrototype(delegate:delegate, call:appDelegate.voipProcessor!.initiateAudioCall(to:contact)))
         return host
     }
     

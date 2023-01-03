@@ -17,7 +17,7 @@ struct AVPrototype: View {
     var delegate: SheetDismisserProtocol
     @StateObject var call: ObservableKVOWrapper<MLCall>
     @StateObject var contact: ObservableKVOWrapper<MLContact>
-    var formatter: DateComponentsFormatter;
+    var formatter: DateComponentsFormatter
 
     init(delegate: SheetDismisserProtocol, call: MLCall) {
         self.delegate = delegate
@@ -32,14 +32,49 @@ struct AVPrototype: View {
     var body: some View {
         ZStack {
             monalGreen
+                .edgesIgnoringSafeArea(.all)
             
             VStack {
-                Spacer().frame(height: 32)
-                
-                Text(contact.contactDisplayName as String)
-                    .font(.largeTitle)
-                
                 Spacer().frame(height: 12)
+                
+                HStack {
+                    Text(contact.contactDisplayName as String)
+                        .font(.largeTitle)
+                        .foregroundColor(.white)
+                    
+                    Spacer().frame(width: 20)
+                    
+                    Button(action: {
+                        self.delegate.dismiss()
+                    }, label: {
+                        ZStack(alignment: .center) {
+                                Image(systemName: "bubble.left.fill")
+                                    .resizable()
+                                    .frame(width: 28.0, height: 28.0)
+                                    .foregroundColor(.white)
+                                Image(systemName: "bubble.left")
+                                    .resizable()
+                                    .frame(width: 28.0, height: 28.0)
+                                    .foregroundColor(.black)
+                            if #available(iOS 16, *) {
+                                Image(systemName: "return.left")
+                                    .resizable()
+                                    .frame(width: 10.0, height: 10.0)
+                                    .foregroundColor(.black)
+                                    .bold()
+                                    .offset(y: -2)
+                            } else {
+                                Image(systemName: "return.left")
+                                    .resizable()
+                                    .frame(width: 10.0, height: 10.0)
+                                    .foregroundColor(.black)
+                                    .offset(y: -2)
+                            }
+                        }
+                    })
+                }
+                
+                Spacer().frame(height: 16)
                 
                 //this is needed because ObservableKVOWrapper somehow extracts an NSNumber from it's wrapped object
                 //which results in a runtime error when trying to cast NSNumber? to MLCallState
@@ -54,24 +89,26 @@ struct AVPrototype: View {
                         switch MLCallFinishReason(rawValue:(call.finishReason as NSNumber).uintValue) {
                             case .unknown:
                                 Text("Call ended for an unknown reason")
+                                .bold()
                             case .normal:
-                                Text("Call ended normally")
+                                Text("Call ended, duration: \(formatter.string(from: TimeInterval(call.time as UInt))!)")
                             case .error:
                                 Text("Call ended with error")
+                                .bold()
                             case .unanswered:
                                 Text("Call was not answered")
+                                .bold()
                             case .rejected:
                                 Text("Call ended: remote busy")
-                            default:
-                                Text("Call ended")      //should never be reached
+                                .bold()
+                            default:        //should never be reached
+                                Text("")
                         }
-                    case .idle:
-                        Text("Idle state")
-                    default:
-                        Text("Unknown state")           //should never be reached
+                    default:        //should never be reached
+                        Text("")
                 }
             
-                Spacer().frame(height: 32)
+                Spacer().frame(height: 48)
                 
                 Image(uiImage: contact.avatar)
                     .resizable()
@@ -88,12 +125,26 @@ struct AVPrototype: View {
                         Button(action: {
                             let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                             let newCall = appDelegate.voipProcessor!.initiateAudioCall(to:contact.obj)
-                            self.delegate.replace(with:AddTopLevelNavigation(withDelegate:delegate, to:AVPrototype(delegate: delegate, call: newCall)))
+                            self.delegate.replace(with:AVPrototype(delegate: delegate, call: newCall))
                         }) {
-                            Image(systemName: "arrow.clockwise.circle.fill")
-                                .resizable()
-                                .frame(width: 64.0, height: 64.0)
-                                .accentColor(.green)
+                            if #available(iOS 15, *) {
+                                Image(systemName: "arrow.clockwise.circle.fill")
+                                    .resizable()
+                                    .frame(width: 64.0, height: 64.0)
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .green)
+                            } else {
+                                ZStack {
+                                    Image(systemName: "circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .accentColor(.white)
+                                    Image(systemName: "arrow.clockwise.circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .accentColor(.green)
+                                }
+                            }
                         }
                         .buttonStyle(BorderlessButtonStyle())
                         
@@ -102,10 +153,24 @@ struct AVPrototype: View {
                         Button(action: {
                             delegate.dismiss()
                         }) {
-                            Image(systemName: "x.circle.fill")
-                                .resizable()
-                                .frame(width: 64.0, height: 64.0)
-                                .accentColor(.red)
+                            if #available(iOS 15, *) {
+                                Image(systemName: "x.circle.fill")
+                                    .resizable()
+                                    .frame(width: 64.0, height: 64.0)
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .red)
+                            } else {
+                                ZStack {
+                                    Image(systemName: "circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .accentColor(.white)
+                                    Image(systemName: "x.circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .accentColor(.red)
+                                }
+                            }
                         }
                         .buttonStyle(BorderlessButtonStyle())
                         
@@ -118,10 +183,24 @@ struct AVPrototype: View {
                         Button(action: {
                             call.muted = !call.muted
                         }) {
-                            Image(systemName: call.muted ? "mic.circle.fill" : "mic.slash.circle.fill")
-                                .resizable()
-                                .frame(width: 64.0, height: 64.0)
-                                .accentColor(call.muted ? .white : .black)
+                            if #available(iOS 15, *) {
+                                Image(systemName: call.muted ? "mic.circle.fill" : "mic.slash.circle.fill")
+                                    .resizable()
+                                    .frame(width: 64.0, height: 64.0)
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(call.muted ? .white : .black, call.muted ? .black : .white)
+                            } else {
+                                ZStack {
+                                    Image(systemName: "circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .accentColor(call.muted ? .black : .white)
+                                    Image(systemName: call.muted ? "mic.circle.fill" : "mic.slash.circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .accentColor(call.muted ? .white : .black)
+                                }
+                            }
                         }
                         .buttonStyle(BorderlessButtonStyle())
                         
@@ -130,10 +209,24 @@ struct AVPrototype: View {
                             call.obj.end()
                             self.delegate.dismiss()
                         }) {
-                            Image(systemName: "phone.down.circle.fill")
-                                .resizable()
-                                .frame(width: 64.0, height: 64.0)
-                                .accentColor(.red)
+                            if #available(iOS 15, *) {
+                                Image(systemName: "phone.down.circle.fill")
+                                    .resizable()
+                                    .frame(width: 64.0, height: 64.0)
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .red)
+                            } else {
+                                ZStack(alignment: .center) {
+                                    Image(systemName: "circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .accentColor(.white)
+                                    Image(systemName: "phone.down.circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .accentColor(.red)
+                                }
+                            }
                         }
                         .buttonStyle(BorderlessButtonStyle())
                         
@@ -141,10 +234,24 @@ struct AVPrototype: View {
                         Button(action: {
                             call.speaker = !call.speaker
                         }) {
-                            Image(systemName: "speaker.wave.2.circle.fill")
-                                .resizable()
-                                .frame(width: 64.0, height: 64.0)
-                                .accentColor(call.speaker ? .white : .black)
+                            if #available(iOS 15, *) {
+                                Image(systemName: "speaker.wave.2.circle.fill")
+                                    .resizable()
+                                    .frame(width: 64.0, height: 64.0)
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(call.speaker ? .white : .black, call.speaker ? .black : .white)
+                            } else {
+                                ZStack {
+                                    Image(systemName: "circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .accentColor(call.speaker ? .black : .white)
+                                    Image(systemName: "speaker.wave.2.circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .accentColor(call.speaker ? .white : .black)
+                                }
+                            }
                         }
                         .buttonStyle(BorderlessButtonStyle())
                         

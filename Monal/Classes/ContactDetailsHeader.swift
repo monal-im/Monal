@@ -13,19 +13,19 @@ import monalxmpp
 struct ContactDetailsHeader: View {
     var delegate: SheetDismisserProtocol
     @StateObject var contact: ObservableKVOWrapper<MLContact>
-    @State private var showingCannotEncryptAlert = false
-    @State private var showingShouldDisableEncryptionAlert = false
     @State private var navigationAction: String?
-    @State private var showCallScreen = false
-    @State private var call: MLCall?
 
     var body: some View {
-        VStack {
-            Image(uiImage: contact.avatar)
-                .resizable()
-                .frame(minWidth: 100, idealWidth: 150, maxWidth: 200, minHeight: 100, idealHeight: 150, maxHeight: 200, alignment: .center)
-                .scaledToFit()
-                .shadow(radius: 7)
+        VStack(alignment: .center) {
+            HStack {
+                Spacer()
+                Image(uiImage: contact.avatar)
+                    .resizable()
+                    .frame(minWidth: 100, idealWidth: 150, maxWidth: 200, minHeight: 100, idealHeight: 150, maxHeight: 200, alignment: .center)
+                    .scaledToFit()
+                    .shadow(radius: 7)
+                Spacer()
+            }
             
             Spacer()
                 .frame(height: 20)
@@ -58,75 +58,6 @@ struct ContactDetailsHeader: View {
                 }
             }
             
-            Spacer()
-                .frame(height: 20)
-            HStack {
-                Spacer()
-                Button(action: {
-                    if(contact.isGroup) {
-                        if(!contact.isMuted && !contact.isMentionOnly) {
-                            contact.obj.toggleMentionOnly(true)
-                        } else if(!contact.isMuted && contact.isMentionOnly) {
-                            contact.obj.toggleMentionOnly(false)
-                            contact.obj.toggleMute(true)
-                        } else {
-                            contact.obj.toggleMentionOnly(false)
-                            contact.obj.toggleMute(false)
-                        }
-                    } else {
-                        contact.obj.toggleMute(!contact.isMuted)
-                    }
-                }) {
-                    if(contact.isMuted) {
-                        Image(systemName: "bell.slash.fill")
-                    } else if(contact.isGroup && contact.isMentionOnly) {
-                        Image(systemName: "bell.badge")
-                    } else {
-                        Image(systemName: "bell.fill")
-                    }
-                }
-                .buttonStyle(BorderlessButtonStyle())
-                
-#if !DISABLE_OMEMO
-                if(!contact.isGroup || (contact.isGroup && contact.mucType == "group")) {
-                    Spacer().frame(width: 20)
-                    Button(action: {
-                        if(contact.isEncrypted) {
-                            showingShouldDisableEncryptionAlert = true
-                        } else {
-                            showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
-                        }
-                    }) {
-                        Image(systemName: contact.isEncrypted ? "lock.fill" : "lock.open.fill")
-                    }
-                    .alert(isPresented: $showingCannotEncryptAlert) {
-                        Alert(title: Text("No OMEMO keys found"), message: Text("This contact may not support OMEMO encrypted messages. Please try again in a few seconds."), dismissButton: .default(Text("Close")))
-                    }
-                    .actionSheet(isPresented: $showingShouldDisableEncryptionAlert) {
-                        ActionSheet(
-                            title: Text("Disable encryption?"),
-                            message: Text("Do you really want to disable encryption for this contact?"),
-                            buttons: [
-                                .cancel(
-                                    Text("No, keep encryption activated"),
-                                    action: { }
-                                ),
-                                .destructive(
-                                    Text("Yes, deactivate encryption"),
-                                    action: {
-                                        showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
-                                    }
-                                )
-                            ]
-                        )
-                    }
-                    .buttonStyle(BorderlessButtonStyle())
-                }
-#endif
-                Spacer()
-            }
-                .foregroundColor(.primary)
-            
             if(!contact.isGroup && (contact.statusMessage as String).count > 0) {
                 Spacer()
                     .frame(height: 20)
@@ -147,6 +78,8 @@ struct ContactDetailsHeader: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+        .foregroundColor(.primary)
+        .padding([.top, .bottom])
     }
 }
 

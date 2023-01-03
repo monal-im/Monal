@@ -227,15 +227,19 @@ static NSMutableDictionary* _pendingCalls;
         {
             DDLogDebug(@"Call reported successfully using PushKit, initializing xmpp and WebRTC now...");
             
-            //initialize webrtc class (ask for external service credentials, gather ice servers etc.) for call as soon as the callkit ui is shown
-            //this will be done once the app delegate started to connect our xmpp accounts above
-            //do this in an extra thread to not block this callback thread (could be main thread or otherwise restricted by apple)
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                //add our completion handler to handler queue to initiate xmpp connections
+            //add our completion handler to handler queue to initiate xmpp connections
+            //this must be done in main thread because the app delegate is only allowed in main thread
+            dispatch_async(dispatch_get_main_queue(), ^{
                 MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
                 [appDelegate incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
                     DDLogWarn(@"VoIP push wakeup handler timed out");
                 }];
+            });
+            
+            //initialize webrtc class (ask for external service credentials, gather ice servers etc.) for call as soon as the callkit ui is shown
+            //this will be done once the app delegate started to connect our xmpp accounts above
+            //do this in an extra thread to not block this callback thread (could be main thread or otherwise restricted by apple)
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 
                 //wait for our account to connect before initializing webrtc using XEP-0215 iq stanzas
                 //if the user accepts the call before we are bound, the outgoing accept message stanza will be queued and sent once we are bound

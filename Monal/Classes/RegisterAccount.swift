@@ -323,6 +323,7 @@ struct RegisterAccount: View {
                         TextField("Provide XMPP-Server", text: Binding(get: { self.providedServer }, set: { string in self.providedServer = string.lowercased() }))
                             //ios15: .textInputAutocapitalization(.never)
                             .disableAutocorrection(true)
+                            .foregroundColor(self.registerToken != nil ? .secondary : .primary)
                             .disabled(self.registerToken != nil)
                     }
 

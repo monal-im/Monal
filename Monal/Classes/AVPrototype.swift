@@ -35,7 +35,7 @@ struct AVPrototype: View {
                 .edgesIgnoringSafeArea(.all)
             
             VStack {
-                Spacer().frame(height: 12)
+                Spacer().frame(height: 24)
                 
                 HStack {
                     Text(contact.contactDisplayName as String)
@@ -188,7 +188,7 @@ struct AVPrototype: View {
                                     .resizable()
                                     .frame(width: 64.0, height: 64.0)
                                     .symbolRenderingMode(.palette)
-                                    .foregroundStyle(call.muted ? .white : .black, call.muted ? .black : .white)
+                                    .foregroundStyle(call.muted ? .black : .white, call.muted ? .white : .black)
                             } else {
                                 ZStack {
                                     Image(systemName: "circle.fill")
@@ -239,7 +239,7 @@ struct AVPrototype: View {
                                     .resizable()
                                     .frame(width: 64.0, height: 64.0)
                                     .symbolRenderingMode(.palette)
-                                    .foregroundStyle(call.speaker ? .white : .black, call.speaker ? .black : .white)
+                                    .foregroundStyle(call.speaker ? .black : .white, call.speaker ? .white : .black)
                             } else {
                                 ZStack {
                                     Image(systemName: "circle.fill")

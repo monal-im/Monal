@@ -239,12 +239,15 @@ enum msgSentState {
 #endif
     
 #ifdef IS_ALPHA
-    UIBarButtonItem* callButton = [UIBarButtonItem new];
-    callButton.image = [UIImage systemImageNamed:@"phone"];
-    [callButton setAction:@selector(openCallScreen:)];
-    NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
-    [rightBarButtons addObject:callButton];
-    self.navigationItem.rightBarButtonItems = rightBarButtons;
+    if(!self.contact.isGroup)
+    {
+        UIBarButtonItem* callButton = [UIBarButtonItem new];
+        callButton.image = [UIImage systemImageNamed:@"phone"];
+        [callButton setAction:@selector(openCallScreen:)];
+        NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
+        [rightBarButtons addObject:callButton];
+        self.navigationItem.rightBarButtonItems = rightBarButtons;
+    }
 #endif
 }
 

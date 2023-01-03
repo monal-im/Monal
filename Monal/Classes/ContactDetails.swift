@@ -19,19 +19,101 @@ struct ContactDetails: View {
     @State private var showingAddContactConfirmation = false
     @State private var showingClearHistoryConfirmation = false
     @State private var showingResetOmemoSessionConfirmation = false
+    @State private var showingCannotEncryptAlert = false
+    @State private var showingShouldDisableEncryptionAlert = false
 
     var body: some View {
         Form {
             Section {
-                VStack(alignment: .leading) {
-                    //header
-                    ContactDetailsHeader(delegate:delegate, contact:contact)
-                    Spacer().frame(height: 20)
-                }
-            }.padding()
+                ContactDetailsHeader(delegate:delegate, contact:contact)
+            }
                 
             // info/nondestructive buttons
             Section {
+                Button(action: {
+                    if(contact.isGroup) {
+                        if(!contact.isMuted && !contact.isMentionOnly) {
+                            contact.obj.toggleMentionOnly(true)
+                        } else if(!contact.isMuted && contact.isMentionOnly) {
+                            contact.obj.toggleMentionOnly(false)
+                            contact.obj.toggleMute(true)
+                        } else {
+                            contact.obj.toggleMentionOnly(false)
+                            contact.obj.toggleMute(false)
+                        }
+                    } else {
+                        contact.obj.toggleMute(!contact.isMuted)
+                    }
+                }) {
+                    HStack {
+                        if(contact.isMuted) {
+                            Image(systemName: "bell.slash.fill")
+                                .foregroundColor(.red)
+                            Text("Contact is muted")
+                                .foregroundColor(.accentColor)
+                        } else if(contact.isGroup && contact.isMentionOnly) {
+                            Image(systemName: "bell.badge")
+                                .foregroundColor(.accentColor)
+                            Text("Group/Channel is mention only")
+                                .foregroundColor(.accentColor)
+                        } else {
+                            Image(systemName: "bell.fill")
+                                .foregroundColor(.green)
+                            Text("Contact is not muted")
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                }
+                //.buttonStyle(BorderlessButtonStyle())
+                
+#if !DISABLE_OMEMO
+                if(!contact.isGroup || (contact.isGroup && contact.mucType == "group")) {
+                    Button(action: {
+                        if(contact.isEncrypted) {
+                            showingShouldDisableEncryptionAlert = true
+                        } else {
+                            showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
+                        }
+                    }) {
+                        HStack {
+                            if contact.isEncrypted {
+                                Image(systemName: "lock.fill")
+                                    .foregroundColor(.green)
+                                Text("Messages are encrypted")
+                                    .foregroundColor(.accentColor)
+                            } else {
+                                Image(systemName: "lock.open.fill")
+                                    .foregroundColor(.red)
+                                Text("Messages are NOT encrypted")
+                                    .foregroundColor(.accentColor)
+                            }
+                        }
+                    }
+                    .alert(isPresented: $showingCannotEncryptAlert) {
+                        Alert(title: Text("No OMEMO keys found"), message: Text("This contact may not support OMEMO encrypted messages. Please try again in a few seconds."), dismissButton: .default(Text("Close")))
+                    }
+                    .actionSheet(isPresented: $showingShouldDisableEncryptionAlert) {
+                        ActionSheet(
+                            title: Text("Disable encryption?"),
+                            message: Text("Do you really want to disable encryption for this contact?"),
+                            buttons: [
+                                .cancel(
+                                    Text("No, keep encryption activated"),
+                                    action: { }
+                                ),
+                                .destructive(
+                                    Text("Yes, deactivate encryption"),
+                                    action: {
+                                        showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
+                                    }
+                                )
+                            ]
+                        )
+                    }
+                    //.buttonStyle(BorderlessButtonStyle())
+                }
+#endif
+                
                 if(!contact.isGroup) {
                     TextField("Change Nickname", text: $contact.nickNameView)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -78,6 +160,7 @@ struct ContactDetails: View {
                     Text("Change Contact Background")
                 }
             }
+            .listStyle(.plain)
 
             Section { // the destructive section...
                 Button(action: {

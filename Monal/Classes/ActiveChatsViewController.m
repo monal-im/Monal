@@ -369,11 +369,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     [super viewWillAppear:animated];
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
         [self refreshDisplay];      // load contacts
-    // open placeholder
-    [self presentChatWithContact:nil andCompletion:^(id success __unused) {
-        // only check if the login screens have been shown if there are no active chats
-        [self segueToIntroScreensIfNeeded];
-    }];
+    [self segueToIntroScreensIfNeeded];
 }
 
 -(void) viewWillDisappear:(BOOL) animated

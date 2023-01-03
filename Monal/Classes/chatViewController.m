@@ -259,7 +259,7 @@ enum msgSentState {
         MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
         MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
         if(activeCall != nil)
-            self.callButton.image = [UIImage systemImageNamed:@"phone.connection"];
+            self.callButton.image = [UIImage systemImageNamed:@"phone.connection.fill"];
         else
             self.callButton.image = [UIImage systemImageNamed:@"phone"];
     }

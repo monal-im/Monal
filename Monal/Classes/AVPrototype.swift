@@ -14,15 +14,17 @@ import AVFoundation
 import CallKit
 
 struct AVPrototype: View {
-    var delegate: SheetDismisserProtocol
-    @StateObject var call: ObservableKVOWrapper<MLCall>
-    @StateObject var contact: ObservableKVOWrapper<MLContact>
-    var formatter: DateComponentsFormatter
+    @StateObject private var call: ObservableKVOWrapper<MLCall>
+    @StateObject private var contact: ObservableKVOWrapper<MLContact>
+    private var delegate: SheetDismisserProtocol
+    private var appDelegate: MonalAppDelegate
+    private var formatter: DateComponentsFormatter
 
     init(delegate: SheetDismisserProtocol, call: MLCall) {
-        self.delegate = delegate
         _call = StateObject(wrappedValue: ObservableKVOWrapper(call))
         _contact = StateObject(wrappedValue: ObservableKVOWrapper(call.contact))
+        self.delegate = delegate
+        self.appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
         self.formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.hour, .minute, .second]
         formatter.unitsStyle = .positional
@@ -31,101 +33,108 @@ struct AVPrototype: View {
 
     var body: some View {
         ZStack {
-            monalGreen
+            Color.background
                 .edgesIgnoringSafeArea(.all)
             
             VStack {
-                Spacer().frame(height: 24)
-                
-                HStack {
-                    Text(contact.contactDisplayName as String)
-                        .font(.largeTitle)
-                        .foregroundColor(.white)
+                Group {
+                    Spacer().frame(height: 24)
                     
-                    Spacer().frame(width: 20)
-                    
-                    Button(action: {
-                        self.delegate.dismiss()
-                    }, label: {
-                        ZStack(alignment: .center) {
-                                Image(systemName: "bubble.left.fill")
-                                    .resizable()
-                                    .frame(width: 28.0, height: 28.0)
-                                    .foregroundColor(.white)
-                                Image(systemName: "bubble.left")
-                                    .resizable()
-                                    .frame(width: 28.0, height: 28.0)
-                                    .foregroundColor(.black)
-                            if #available(iOS 16, *) {
-                                Image(systemName: "return.left")
-                                    .resizable()
-                                    .frame(width: 10.0, height: 10.0)
-                                    .foregroundColor(.black)
-                                    .bold()
-                                    .offset(y: -2)
-                            } else {
-                                Image(systemName: "return.left")
-                                    .resizable()
-                                    .frame(width: 10.0, height: 10.0)
-                                    .foregroundColor(.black)
-                                    .offset(y: -2)
-                            }
-                        }
-                    })
-                }
-                
-                Spacer().frame(height: 16)
-                
-                //this is needed because ObservableKVOWrapper somehow extracts an NSNumber from it's wrapped object
-                //which results in a runtime error when trying to cast NSNumber? to MLCallState
-                switch MLCallState(rawValue:(call.state as NSNumber).uintValue) {
-                    case .ringing:
-                        Text("Ringing...")
-                    case .connecting:
-                        Text("Connecting...")
-                    case .connected:
-                        Text("Connected: \(formatter.string(from: TimeInterval(call.time as UInt))!)")
-                    case .finished:
-                        switch MLCallFinishReason(rawValue:(call.finishReason as NSNumber).uintValue) {
-                            case .unknown:
-                                Text("Call ended for an unknown reason")
-                                .bold()
-                            case .normal:
-                                Text("Call ended, duration: \(formatter.string(from: TimeInterval(call.time as UInt))!)")
-                            case .error:
-                                Text("Call ended with error")
-                                .bold()
-                            case .unanswered:
-                                Text("Call was not answered")
-                                .bold()
-                            case .rejected:
-                                Text("Call ended: remote busy")
-                                .bold()
+                    HStack {
+                        switch MLCallDirection(rawValue:call.direction) {
+                            case .incoming:
+                                Image(systemName: "arrowshape.right")
+                            case .outgoing:
+                                Image(systemName: "arrowshape.left")
                             default:        //should never be reached
                                 Text("")
                         }
-                    default:        //should never be reached
-                        Text("")
+                        
+                        Text(contact.contactDisplayName as String)
+                            .font(.largeTitle)
+                            .foregroundColor(.primary)
+                        
+                        Spacer().frame(width: 20)
+                        
+                        Button(action: {
+                            self.delegate.dismissWithoutAnimation()
+                            if let activeChats = self.appDelegate.activeChats {
+                                activeChats.presentChat(with:self.contact.obj)
+                            }
+                        }, label: {
+                            Image(systemName: "text.bubble")
+                                .resizable()
+                                .frame(width: 28.0, height: 28.0)
+                                .foregroundColor(.primary)
+                        })
+                    }
+                    
+                    Spacer().frame(height: 16)
+                    
+                    //this is needed because ObservableKVOWrapper somehow extracts an NSNumber? from it's wrapped object
+                    //which results in a runtime error when trying to cast NSNumber? to MLCallState
+                    switch MLCallState(rawValue:call.state) {
+                        case .ringing:
+                            Text("Ringing...")
+                            .bold()
+                            .foregroundColor(.primary)
+                        case .connecting:
+                            Text("Connecting...")
+                            .bold()
+                            .foregroundColor(.primary)
+                        case .connected:
+                            Text("Connected: \(formatter.string(from: TimeInterval(call.time as UInt))!)")
+                            .bold()
+                            .foregroundColor(.primary)
+                        case .finished:
+                            switch MLCallFinishReason(rawValue:call.finishReason) {
+                                case .unknown:
+                                    Text("Call ended for an unknown reason")
+                                    .bold()
+                                    .foregroundColor(.primary)
+                                case .normal:
+                                    Text("Call ended, duration: \(formatter.string(from: TimeInterval(call.time as UInt))!)")
+                                    .bold()
+                                    .foregroundColor(.primary)
+                                case .error:
+                                    Text("Call ended with error")
+                                    .bold()
+                                    .foregroundColor(.primary)
+                                case .unanswered:
+                                    Text("Call was not answered")
+                                    .bold()
+                                    .foregroundColor(.primary)
+                                case .rejected:
+                                    Text("Call ended: remote busy")
+                                    .bold()
+                                    .foregroundColor(.primary)
+                                default:        //should never be reached
+                                    Text("")
+                            }
+                        default:        //should never be reached
+                            Text("")
+                    }
+                    
+                    Spacer().frame(height: 48)
+                    
+                    Image(uiImage: contact.avatar)
+                        .resizable()
+                        .frame(minWidth: 100, idealWidth: 150, maxWidth: 200, minHeight: 100, idealHeight: 150, maxHeight: 200, alignment: .center)
+                        .scaledToFit()
+                        .shadow(radius: 7)
+                    
+                    Spacer()
                 }
-            
-                Spacer().frame(height: 48)
                 
-                Image(uiImage: contact.avatar)
-                    .resizable()
-                    .frame(minWidth: 100, idealWidth: 150, maxWidth: 200, minHeight: 100, idealHeight: 150, maxHeight: 200, alignment: .center)
-                    .scaledToFit()
-                    .shadow(radius: 7)
-                
-                Spacer()
-                
-                if MLCallState(rawValue:(call.state as NSNumber).uintValue) == .finished {
+                if MLCallState(rawValue:call.state) == .finished {
                     HStack() {
                         Spacer()
                         
                         Button(action: {
-                            let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-                            let newCall = appDelegate.voipProcessor!.initiateAudioCall(to:contact.obj)
-                            self.delegate.replace(with:AVPrototype(delegate: delegate, call: newCall))
+                            self.delegate.dismissWithoutAnimation()
+                            if let activeChats = self.appDelegate.activeChats, let voipProcessor = self.appDelegate.voipProcessor {
+                                activeChats.present(voipProcessor.initiateAudioCall(to:contact.obj))
+                            }                            
                         }) {
                             if #available(iOS 15, *) {
                                 Image(systemName: "arrow.clockwise.circle.fill")
@@ -133,6 +142,7 @@ struct AVPrototype: View {
                                     .frame(width: 64.0, height: 64.0)
                                     .symbolRenderingMode(.palette)
                                     .foregroundStyle(.white, .green)
+                                    .shadow(radius: 7)
                             } else {
                                 ZStack {
                                     Image(systemName: "circle.fill")
@@ -143,6 +153,7 @@ struct AVPrototype: View {
                                         .resizable()
                                         .frame(width: 64.0, height: 64.0)
                                         .accentColor(.green)
+                                        .shadow(radius: 7)
                                 }
                             }
                         }
@@ -151,7 +162,7 @@ struct AVPrototype: View {
                         Spacer().frame(width: 64)
 
                         Button(action: {
-                            delegate.dismiss()
+                            delegate.dismissWithoutAnimation()
                         }) {
                             if #available(iOS 15, *) {
                                 Image(systemName: "x.circle.fill")
@@ -159,6 +170,7 @@ struct AVPrototype: View {
                                     .frame(width: 64.0, height: 64.0)
                                     .symbolRenderingMode(.palette)
                                     .foregroundStyle(.white, .red)
+                                    .shadow(radius: 7)
                             } else {
                                 ZStack {
                                     Image(systemName: "circle.fill")
@@ -169,6 +181,7 @@ struct AVPrototype: View {
                                         .resizable()
                                         .frame(width: 64.0, height: 64.0)
                                         .accentColor(.red)
+                                        .shadow(radius: 7)
                                 }
                             }
                         }
@@ -189,16 +202,18 @@ struct AVPrototype: View {
                                     .frame(width: 64.0, height: 64.0)
                                     .symbolRenderingMode(.palette)
                                     .foregroundStyle(call.muted ? .black : .white, call.muted ? .white : .black)
+                                    .shadow(radius: 7)
                             } else {
                                 ZStack {
                                     Image(systemName: "circle.fill")
                                         .resizable()
                                         .frame(width: 64.0, height: 64.0)
                                         .accentColor(call.muted ? .black : .white)
-                                    Image(systemName: call.muted ? "mic.circle.fill" : "mic.slash.circle.fill")
+                                    Image(systemName: call.muted ? "mic.circle.fill" : "mic.circle.fill")
                                         .resizable()
                                         .frame(width: 64.0, height: 64.0)
                                         .accentColor(call.muted ? .white : .black)
+                                        .shadow(radius: 7)
                                 }
                             }
                         }
@@ -207,7 +222,7 @@ struct AVPrototype: View {
                         Spacer().frame(width: 32)
                         Button(action: {
                             call.obj.end()
-                            self.delegate.dismiss()
+                            self.delegate.dismissWithoutAnimation()
                         }) {
                             if #available(iOS 15, *) {
                                 Image(systemName: "phone.down.circle.fill")
@@ -215,6 +230,7 @@ struct AVPrototype: View {
                                     .frame(width: 64.0, height: 64.0)
                                     .symbolRenderingMode(.palette)
                                     .foregroundStyle(.white, .red)
+                                    .shadow(radius: 7)
                             } else {
                                 ZStack(alignment: .center) {
                                     Image(systemName: "circle.fill")
@@ -225,6 +241,7 @@ struct AVPrototype: View {
                                         .resizable()
                                         .frame(width: 64.0, height: 64.0)
                                         .accentColor(.red)
+                                        .shadow(radius: 7)
                                 }
                             }
                         }
@@ -240,6 +257,7 @@ struct AVPrototype: View {
                                     .frame(width: 64.0, height: 64.0)
                                     .symbolRenderingMode(.palette)
                                     .foregroundStyle(call.speaker ? .black : .white, call.speaker ? .white : .black)
+                                    .shadow(radius: 7)
                             } else {
                                 ZStack {
                                     Image(systemName: "circle.fill")
@@ -250,6 +268,7 @@ struct AVPrototype: View {
                                         .resizable()
                                         .frame(width: 64.0, height: 64.0)
                                         .accentColor(call.speaker ? .white : .black)
+                                        .shadow(radius: 7)
                                 }
                             }
                         }
@@ -260,14 +279,6 @@ struct AVPrototype: View {
                 }
                 
                 Spacer().frame(height: 32)
-            }
-        }
-        .navigationBarTitle("Call with \(contact.contactDisplayName as String)", displayMode: .inline)
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalCallRemoved")).receive(on: RunLoop.main)) { notification in
-            if let notificationCall = notification.object as? MLCall {
-                if notificationCall == call.obj {
-                    //delegate.dismiss()
-                }
             }
         }
     }

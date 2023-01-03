@@ -225,7 +225,7 @@ static NSMutableDictionary* _pendingCalls;
         }
         else
         {
-            DDLogDebug(@"Call reported successfully using PushKit, initializing xmpp and WebRTC now...");
+            DDLogDebug(@"Call reported successfully using CallKit, initializing xmpp and WebRTC now...");
             
             //add our completion handler to handler queue to initiate xmpp connections
             //this must be done in main thread because the app delegate is only allowed in main thread

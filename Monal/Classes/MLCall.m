@@ -48,9 +48,10 @@
 @property (nonatomic, strong) AVAudioSession* _Nullable audioSession;
 @property (nonatomic, assign) uint32_t time;
 @property (nonatomic, assign) MLCallFinishReason finishReason;
+@property (nonatomic, strong) NSTimer* _Nullable timer;
 
 @property (nonatomic, readonly) xmpp* account;
-@property (nonatomic, readonly) MLVoIPProcessor* voipProcessor;
+@property (nonatomic, strong) MLVoIPProcessor* voipProcessor;
 @end
 
 //this is private and only shared to this class
@@ -78,6 +79,12 @@
     self.isFinished = NO;
     self.finishReason = MLCallFinishReasonUnknown;
     
+    [HelperTools dispatchSyncReentrant:^{
+        MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
+        MLAssert(appDelegate.voipProcessor != nil, @"appDelegate.voipProcessor should never be nil!");
+        self.voipProcessor = appDelegate.voipProcessor;
+    } onQueue:dispatch_get_main_queue()];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingSDP:) name:kMonalIncomingSDP object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingICECandidate:) name:kMonalIncomingICECandidate object:nil];
     
@@ -86,6 +93,7 @@
 
 -(void) deinit
 {
+    [self.timer invalidate];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -196,21 +204,25 @@
         return account;
     }
 }
-
--(MLVoIPProcessor*) voipProcessor
-{
-    MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
-    MLAssert(appDelegate.voipProcessor != nil, @"appDelegate.voipProcessor should never be nil!");
-    return appDelegate.voipProcessor;
-}
-
 -(void) startTimer
 {
-    [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
-        self.time++;
-        if(self.state != MLCallStateConnected)
-            [timer invalidate];
-    }];
+    //the timer needs a thread with runloop, see https://stackoverflow.com/a/18098396/3528174
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogInfo(@"%@: Starting call duration timer...", [self short]);
+        if(self.timer != nil)
+            [self.timer invalidate];
+        self.time = 0;
+        self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
+            DDLogVerbose(@"%@:Call duration timer triggered: %d", [self short], self.time);
+            self.time++;
+            if(self.state == MLCallStateFinished)
+            {
+                DDLogInfo(@"%@: Stopping call duration timer...", [self short]);
+                [timer invalidate];
+                self.timer = nil;
+            }
+        }];
+    });
 }
 
 -(void) setJmiAccept:(MLXMLNode*) jmiAccept

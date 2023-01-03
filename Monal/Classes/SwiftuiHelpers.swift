@@ -26,6 +26,9 @@ class SheetDismisserProtocol: ObservableObject {
     func dismiss() {
         host?.dismiss(animated: true)
     }
+    func dismissWithoutAnimation() {
+        host?.dismiss(animated: false)
+    }
     func replace<V>(with view: V) where V: View {
         host?.rootView = AnyView(view)
     }
@@ -99,6 +102,19 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
             self.obj.setValue(newValue, forKey:member)
         }
     }
+}
+
+//see https://stackoverflow.com/a/62207329/3528174
+public extension Color {
+#if os(macOS)
+    static let background = Color(NSColor.windowBackgroundColor)
+    static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
+    static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
+#else
+    static let background = Color(UIColor.systemBackground)
+    static let secondaryBackground = Color(UIColor.secondarySystemBackground)
+    static let tertiaryBackground = Color(UIColor.tertiarySystemBackground)
+#endif
 }
 
 //see https://www.hackingwithswift.com/books/ios-swiftui/importing-an-image-into-swiftui-using-phpickerviewcontroller

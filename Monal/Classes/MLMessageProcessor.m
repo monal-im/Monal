@@ -109,22 +109,28 @@ static NSMutableDictionary* _typingNotifications;
     
     //handle incoming jmi calls (TODO: add entry to local history, once the UI for this is implemented)
     //only handle incoming propose messages if not older than 60 seconds
-    NSDate* delayStamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
-    if(delayStamp == nil)
-        delayStamp = [NSDate date];
+#ifdef IS_ALPHA
     if([messageNode check:@"{urn:xmpp:jingle-message:1}propose"])
     {
+        if(![messageNode.toUser isEqualToString:account.connectionProperties.identity.jid])
+        {
+            //TODO: record this call in history db even if it was outgoing from another device on our account
+            DDLogWarn(@"Ignoring incoming JMI propose coming from another device on our account");
+            return message;
+        }
+        NSDate* delayStamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
+        if(delayStamp == nil)
+            delayStamp = [NSDate date];
         if([[NSDate date] timeIntervalSinceDate:delayStamp] > 60.0)
         {
-            DDLogWarn(@"Ignoring incoming JMI call: too old");
+            DDLogWarn(@"Ignoring incoming JMI propose: too old");
             return message;
         }
         
         //only allow audio calls for now
         if([messageNode check:@"{urn:xmpp:jingle-message:1}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=audio>"])
         {
-            DDLogInfo(@"Got incoming JMI call");
-#ifdef IS_ALPHA
+            DDLogInfo(@"Got incoming JMI propose");
             NSDictionary* callData = @{
                 @"messageNode": messageNode,
                 @"accountNo": account.accountNo,
@@ -136,9 +142,6 @@ static NSMutableDictionary* _typingNotifications;
             }
             else
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:account userInfo:callData];
-#else
-            DDLogWarn(@"Ignoring incoming call, not in alpha!");
-#endif
         }
         else
             DDLogWarn(@"Ignoring incoming non-audio JMI call, not implemented yet");
@@ -161,6 +164,11 @@ static NSMutableDictionary* _typingNotifications;
         }
         return message;
     }
+#else
+    DDLogWarn(@"Ignoring incoming JMI: not in alpha!");
+    return message;
+#endif
+    
     
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(

@@ -480,7 +480,7 @@ enum msgSentState {
     else
         detailsViewController = [[SwiftuiInterface new] makeCallScreenToContact:self.contact];
     detailsViewController.modalPresentationStyle = UIModalPresentationFullScreen;
-    [self presentViewController:detailsViewController animated:YES completion:^{}];
+    [self presentViewController:detailsViewController animated:NO completion:^{}];
 }
 
 -(IBAction) toggleEncryption:(id)sender

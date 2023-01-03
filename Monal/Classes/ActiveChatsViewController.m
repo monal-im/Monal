@@ -488,7 +488,8 @@ static NSMutableSet* _smacksWarningDisplayed;
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
         UIViewController* callViewController = [[SwiftuiInterface new] makeCallScreenForCall:call];
-        [self presentViewController:callViewController animated:YES completion:^{}];
+        callViewController.modalPresentationStyle = UIModalPresentationFullScreen;
+        [self presentViewController:callViewController animated:NO completion:^{}];
     }];
 }
 

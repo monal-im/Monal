@@ -302,13 +302,14 @@
         
         //do nothing if not yet connected
         if(self.isConnected == YES && oldSession == nil && self.audioSession != nil)
-        {
             [self didActivateAudioSession:self.audioSession];
-            [self startTimer];
-        }
         
         if(self.audioSession == nil)
             [self didDeactivateAudioSession:oldSession];
+        
+        //start timer once we are fully connected
+        if(self.isConnected && self.audioSession != nil)
+            [self startTimer];
     }
 }
 -(AVAudioSession*) audioSession

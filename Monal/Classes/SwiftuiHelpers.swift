@@ -26,6 +26,9 @@ class SheetDismisserProtocol: ObservableObject {
     func dismiss() {
         host?.dismiss(animated: true)
     }
+    func replace<V>(with view: V) where V: View {
+        host?.rootView = AnyView(view)
+    }
 }
 
 class KVOObserver: NSObject {

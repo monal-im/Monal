@@ -87,7 +87,8 @@ struct AVPrototype: View {
                         
                         Button(action: {
                             let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-                            appDelegate.voipProcessor!.initiateAudioCall(to:contact.obj)
+                            let newCall = appDelegate.voipProcessor!.initiateAudioCall(to:contact.obj)
+                            self.delegate.replace(with:AddTopLevelNavigation(withDelegate:delegate, to:AVPrototype(delegate: delegate, call: newCall)))
                         }) {
                             Image(systemName: "arrow.clockwise.circle.fill")
                                 .resizable()
@@ -99,7 +100,7 @@ struct AVPrototype: View {
                         Spacer().frame(width: 64)
 
                         Button(action: {
-                            self.delegate.dismiss()
+                            delegate.dismiss()
                         }) {
                             Image(systemName: "x.circle.fill")
                                 .resizable()
@@ -127,6 +128,7 @@ struct AVPrototype: View {
                         Spacer().frame(width: 32)
                         Button(action: {
                             call.obj.end()
+                            self.delegate.dismiss()
                         }) {
                             Image(systemName: "phone.down.circle.fill")
                                 .resizable()
@@ -157,7 +159,7 @@ struct AVPrototype: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalCallRemoved")).receive(on: RunLoop.main)) { notification in
             if let notificationCall = notification.object as? MLCall {
                 if notificationCall == call.obj {
-                    //self.delegate.dismiss()
+                    //delegate.dismiss()
                 }
             }
         }

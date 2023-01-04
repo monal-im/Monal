@@ -116,7 +116,8 @@ static NSString* _processID;
 -(void) disconnect
 {
     @synchronized(self) {
-        nw_connection_force_cancel(_connection);
+        if(_connection != NULL)
+            nw_connection_force_cancel(_connection);
         _connection = NULL;
     }
 }
@@ -140,9 +141,9 @@ static NSString* _processID;
                     [condition signal];
                     [condition unlock];
                 }
-                //retry in all error cases
-                else if(state == nw_connection_state_failed || state == nw_connection_state_cancelled || state == nw_connection_state_invalid)
-                    [self disconnect];
+//                 //retry in all error cases
+//                 else if(state == nw_connection_state_failed || state == nw_connection_state_cancelled || state == nw_connection_state_invalid)
+//                     [self disconnect];
             });
             [condition lock];
             nw_connection_start(_connection);

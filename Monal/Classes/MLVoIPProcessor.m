@@ -98,6 +98,7 @@ static NSMutableDictionary* _pendingCalls;
 
 -(void) addCall:(MLCall*) call
 {
+    DDLogInfo(@"Adding call to list: %@", call);
     @synchronized(_pendingCalls) {
         _pendingCalls[call.uuid] = call;
     }
@@ -106,6 +107,7 @@ static NSMutableDictionary* _pendingCalls;
 
 -(void) removeCall:(MLCall*) call
 {
+    DDLogInfo(@"Removing call from list: %@", call);
     @synchronized(_pendingCalls) {
         [_pendingCalls removeObjectForKey:call.uuid];
     }
@@ -311,7 +313,7 @@ static NSMutableDictionary* _pendingCalls;
     MLCall* call = [self getCallForUUID:uuid];
     if(call == nil)
     {
-        DDLogWarn(@"Ignoring unexpected JMI stanza: %@", messageNode);
+        DDLogWarn(@"Ignoring unexpected JMI stanza for unknown call: %@", messageNode);
         return;
     }
         
@@ -343,6 +345,7 @@ static NSMutableDictionary* _pendingCalls;
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
             call.finishReason = MLCallFinishReasonUnanswered;
+            [call end];
         }
         [self removeCall:call];     //remove this call from pending calls
     }
@@ -358,6 +361,7 @@ static NSMutableDictionary* _pendingCalls;
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
             call.finishReason = MLCallFinishReasonRejected;
+            [call end];
         }
         [self removeCall:call];     //remove this call from pending calls
     }
@@ -374,6 +378,7 @@ static NSMutableDictionary* _pendingCalls;
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
             call.finishReason = MLCallFinishReasonError;
+            [call end];
         }
         [self removeCall:call];     //remove this call from pending calls
     }
@@ -464,7 +469,7 @@ static NSMutableDictionary* _pendingCalls;
 -(void) provider:(CXProvider*) provider performSetMutedCallAction:(CXSetMutedCallAction*) action
 {
     MLCall* call = [self getCallForUUID:action.callUUID];
-    DDLogDebug(@"CXProvider: performEndCallAction with provider=%@, CXEndCallAction=%@, pendingCallsInfo: %@", provider, action, call);
+    DDLogDebug(@"CXProvider: performSetMutedCallAction with provider=%@, CXSetMutedCallAction=%@, pendingCallsInfo: %@", provider, action, call);
     if(call == nil)
     {
         DDLogWarn(@"Pending call not present anymore: %@", (@{

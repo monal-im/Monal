@@ -87,6 +87,7 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingSDP:) name:kMonalIncomingSDP object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingICECandidate:) name:kMonalIncomingICECandidate object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAudioRouteChangeNotification:) name:AVAudioSessionRouteChangeNotification object:nil];
     
     return self;
 }
@@ -140,6 +141,8 @@
 {
     @synchronized(self) {
         if(!self.isConnected)
+            return;
+        if(_speaker == speaker)
             return;
         _speaker = speaker;
         if(_speaker)
@@ -316,7 +319,7 @@
         if(self.isConnected == YES && oldSession == nil && self.audioSession != nil)
             [self didActivateAudioSession:self.audioSession];
         
-        if(self.audioSession == nil)
+        if(self.audioSession == nil && oldSession != nil)
             [self didDeactivateAudioSession:oldSession];
         
         //start timer once we are fully connected
@@ -766,6 +769,21 @@
     }];
     
     DDLogDebug(@"Leaving method...");
+}
+
+-(void) handleAudioRouteChangeNotification:(NSNotification*) notification
+{
+    DDLogVerbose(@"Audio route changed: %@", notification);
+    DDLogVerbose(@"Current audio route: %@", self.audioSession.currentRoute);
+    BOOL speaker = NO;
+    for(AVAudioSessionPortDescription* port in self.audioSession.currentRoute.outputs)
+        if(port.portType == AVAudioSessionPortBuiltInSpeaker)
+            speaker = YES;
+    
+    if(speaker)
+        self.speaker = YES;
+    else
+        self.speaker = NO;
 }
 
 @end

@@ -115,41 +115,51 @@ static NSString* _processID;
 
 -(void) disconnect
 {
-    @synchronized(self) {
-        if(_connection != NULL)
-            nw_connection_force_cancel(_connection);
-        _connection = NULL;
-    }
+    if(_connection != NULL)
+        nw_connection_force_cancel(_connection);
+    _connection = NULL;
 }
 
 -(void) createConnectionIfNeeded
 {
-    @synchronized(self) {
-        if(_connection == NULL)
-        {
-            __block NSCondition* condition = [[NSCondition alloc] init];
-            
-            nw_endpoint_t endpoint = nw_endpoint_create_host([[[HelperTools defaultsDB] stringForKey:@"udpLoggerHostname"] cStringUsingEncoding:NSUTF8StringEncoding], [[[HelperTools defaultsDB] stringForKey:@"udpLoggerPort"] cStringUsingEncoding:NSUTF8StringEncoding]);
-            nw_parameters_t parameters = nw_parameters_create_secure_udp(NW_PARAMETERS_DISABLE_PROTOCOL, NW_PARAMETERS_DEFAULT_CONFIGURATION);
-            
-            _connection = nw_connection_create(endpoint, parameters);
-            nw_connection_set_queue(_connection, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0));
-            nw_connection_set_state_changed_handler(_connection, ^(nw_connection_state_t state, nw_error_t error) {
-                if(state == nw_connection_state_ready)
-                {
-                    [condition lock];
-                    [condition signal];
-                    [condition unlock];
-                }
-//                 //retry in all error cases
-//                 else if(state == nw_connection_state_failed || state == nw_connection_state_cancelled || state == nw_connection_state_invalid)
-//                     [self disconnect];
-            });
-            [condition lock];
-            nw_connection_start(_connection);
-            [condition wait];
-            [condition unlock];
-        }
+    if(_connection == NULL)
+    {
+        __block NSCondition* condition = [[NSCondition alloc] init];
+        
+        nw_endpoint_t endpoint = nw_endpoint_create_host([[[HelperTools defaultsDB] stringForKey:@"udpLoggerHostname"] cStringUsingEncoding:NSUTF8StringEncoding], [[[HelperTools defaultsDB] stringForKey:@"udpLoggerPort"] cStringUsingEncoding:NSUTF8StringEncoding]);
+        nw_parameters_t parameters = nw_parameters_create_secure_udp(NW_PARAMETERS_DISABLE_PROTOCOL, NW_PARAMETERS_DEFAULT_CONFIGURATION);
+        
+        _connection = nw_connection_create(endpoint, parameters);
+        nw_connection_set_queue(_connection, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0));
+        nw_connection_set_state_changed_handler(_connection, ^(nw_connection_state_t state, nw_error_t error) {
+            if(state == nw_connection_state_ready)
+            {
+                [condition lock];
+                [condition signal];
+                [condition unlock];
+            }
+            //udp connections should be "established" in way less than 100ms, so unlock this (dispatch) queue after 100ms
+            //the connection blocking longer mostly happens if the device has no connectivity (state waiting)
+            else if(state == nw_connection_state_waiting || state == nw_connection_state_preparing)
+            {
+                usleep(100000);
+                [condition lock];
+                [condition signal];
+                [condition unlock];
+            }
+            //retry in all error cases
+            else if(state == nw_connection_state_failed || state == nw_connection_state_cancelled || state == nw_connection_state_invalid)
+            {
+                [self disconnect];
+                [condition lock];
+                [condition signal];
+                [condition unlock];
+            }
+        });
+        [condition lock];
+        nw_connection_start(_connection);
+        [condition wait];
+        [condition unlock];
     }
 }
 

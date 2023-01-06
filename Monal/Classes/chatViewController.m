@@ -2445,7 +2445,7 @@ enum msgSentState {
     else if([info[@"mimeType"] hasPrefix:@"audio/"])
     {
         //we may wan to make a new kind later but for now this is perfectly functional
-        MLFileTransferVideoCell* audioCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferAudio" andInbound:inDirection fromTable:tableView];
+        MLFileTransferVideoCell* audioCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
         NSString *audioStr = info[@"cacheFile"];
         NSString *audioFileName = info[@"filename"];
         [audioCell avplayerConfigWithUrlStr:audioStr andMimeType:info[@"mimeType"] fileName:audioFileName andVC:self];

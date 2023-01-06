@@ -102,6 +102,7 @@
 
 -(void) end
 {
+    DDLogVerbose(@"Requesting end call transaction for call: %@", [self short]);
     CXEndCallAction* endCallAction = [[CXEndCallAction alloc] initWithCallUUID:self.uuid];
     CXTransaction* transaction = [[CXTransaction alloc] initWithAction:endCallAction];
     [self.voipProcessor.callController requestTransaction:transaction completion:^(NSError* error) {
@@ -373,7 +374,7 @@
             [self sendJmiReject];
         else
         {
-            [self.providerAnswerAction fail];               //fill do nothing if already fulfilled
+            [self.providerAnswerAction fail];               //fail will do nothing if already fulfilled
             if(wasConnected)
             {
                 [self sendJmiFinishWithReason:@"success"];
@@ -411,7 +412,8 @@
             }
             else
             {
-                [self sendJmiRetract];
+                if(self.finishReason != MLCallFinishReasonRejected)
+                    [self sendJmiRetract];
                 [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
                 if(self.finishReason == MLCallFinishReasonUnknown)
                     self.finishReason = MLCallFinishReasonUnanswered;

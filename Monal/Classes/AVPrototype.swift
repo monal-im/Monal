@@ -108,6 +108,10 @@ struct AVPrototype: View {
                                     Text("Call ended: remote busy")
                                     .bold()
                                     .foregroundColor(.primary)
+                                case .answeredElsewhere:
+                                    Text("Call ended: answered with other device")
+                                    .bold()
+                                    .foregroundColor(.primary)
                                 default:        //should never be reached
                                     Text("")
                             }

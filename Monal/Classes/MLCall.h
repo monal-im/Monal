@@ -36,6 +36,7 @@ typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
     MLCallFinishReasonError,
     MLCallFinishReasonUnanswered,
     MLCallFinishReasonRejected,
+    MLCallFinishReasonAnsweredElsewhere,
 };
 
 @interface MLCall : NSObject

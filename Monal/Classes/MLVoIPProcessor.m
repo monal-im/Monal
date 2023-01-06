@@ -327,12 +327,22 @@ static NSMutableDictionary* _pendingCalls;
     DDLogInfo(@"Got new incoming JMI stanza for call: %@", call);
     //TODO: handle tie breaking!
     //TODO: handle jmi stanzas coming from other devices on our account
-    if([messageNode check:@"{urn:xmpp:jingle-message:1}accept"])
+    if(call.direction == MLCallDirectionOutgoing && [messageNode check:@"{urn:xmpp:jingle-message:1}accept"])
     {
         if(call.jmiAccept != nil)
         {
             //TODO: handle moving calls between own devices
-            DDLogWarn(@"Remote tried to accept an already accepted call, ignoring this accept jmi message!");
+            DDLogWarn(@"Someone tried to accept an already accepted call, ignoring this jmi accept!");
+            return;
+        }
+        
+        //handle accept on other device
+        if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+        {
+            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonAnsweredElsewhere];
+            call.finishReason = MLCallFinishReasonAnsweredElsewhere;
+            [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
+            [self removeCall:call];
             return;
         }
         
@@ -340,8 +350,35 @@ static NSMutableDictionary* _pendingCalls;
         call.fullRemoteJid = messageNode.from;
         call.jmiAccept = messageNode;
     }
-    else if([messageNode check:@"{urn:xmpp:jingle-message:1}retract"])
+    else if(call.direction == MLCallDirectionOutgoing && [messageNode check:@"{urn:xmpp:jingle-message:1}reject"])
     {
+        if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+        {
+            DDLogWarn(@"Ignoring bogus jmi reject coming from other device on our account...");
+            return;
+        }
+        if(call.jmiAccept != nil)
+        {
+            DDLogWarn(@"Remote did try to reject already accepted call");
+            [call end];
+        }
+        else
+        {
+            DDLogVerbose(@"Marking outgoing call as rejected...");
+            //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
+            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+            call.finishReason = MLCallFinishReasonRejected;
+            [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
+            [self removeCall:call];
+        }
+    }
+    else if(call.direction == MLCallDirectionIncoming && [messageNode check:@"{urn:xmpp:jingle-message:1}retract"])
+    {
+        if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+        {
+            DDLogWarn(@"Ignoring bogus jmi retract coming from other device on our account...");
+            return;
+        }
         if(call.jmiAccept != nil)
         {
             DDLogWarn(@"Remote did try to retract already accepted call");
@@ -352,25 +389,10 @@ static NSMutableDictionary* _pendingCalls;
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
             call.finishReason = MLCallFinishReasonUnanswered;
-            [call end];
+            [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
+            [self removeCall:call];
         }
-        [self removeCall:call];     //remove this call from pending calls
-    }
-    else if([messageNode check:@"{urn:xmpp:jingle-message:1}reject"])
-    {
-        if(call.jmiAccept != nil)
-        {
-            DDLogWarn(@"Remote did try to reject already accepted call");
-            [call end];
-        }
-        else
-        {
-            //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
-            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
-            call.finishReason = MLCallFinishReasonRejected;
-            [call end];
-        }
-        [self removeCall:call];     //remove this call from pending calls
+        
     }
     else if([messageNode check:@"{urn:xmpp:jingle-message:1}finish"])
     {
@@ -385,12 +407,12 @@ static NSMutableDictionary* _pendingCalls;
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
             call.finishReason = MLCallFinishReasonError;
-            [call end];
+            [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
+            [self removeCall:call];
         }
-        [self removeCall:call];     //remove this call from pending calls
     }
     else
-        DDLogWarn(@"NOT handling JMI stanza, not implemented yet: %@", messageNode);
+        DDLogWarn(@"NOT handling JMI stanza, wrong jmi-type/direction combination: %@", messageNode);
 }
 
 #pragma mark - CXProvider delegate

@@ -41,6 +41,8 @@
 #import "XMPPMessage.h"
 #import "chatViewController.h"
 
+@import Intents;
+
 #define GRACEFUL_TIMEOUT            20.0
 #define BGPROCESS_GRACEFUL_TIMEOUT  60.0
 
@@ -386,7 +388,38 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidBecomeKeyNotification" object:nil];
 #endif
 
+    NSDictionary* options = launchOptions[UIApplicationLaunchOptionsUserActivityDictionaryKey];
+    if(options != nil && [@"INSendMessageIntent" isEqualToString:options[UIApplicationLaunchOptionsUserActivityTypeKey]])
+    {
+        NSUserActivity* userActivity = options[@"UIApplicationLaunchOptionsUserActivityKey"];
+        DDLogError(@"intent: %@", userActivity.interaction);
+    }
     return YES;
+}
+
+-(BOOL) application:(UIApplication*) application continueUserActivity:(NSUserActivity*) userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>* restorableObjects)) restorationHandler
+{
+    DDLogError(@"got continueUserActivity call");
+    if([userActivity.interaction.intent isKindOfClass:[INStartCallIntent class]])
+    {
+        DDLogError(@"interaction: %@", userActivity.interaction);
+        INStartCallIntent* intent = (INStartCallIntent*)userActivity.interaction.intent;
+        if(intent.contacts.firstObject != nil)
+        {
+            DDLogError(@"intent: %@", intent);
+            DDLogError(@"contact: %@", intent.contacts.firstObject);
+            INPersonHandle* contactHandle = intent.contacts.firstObject.personHandle;
+            DDLogError(@"contactHandle: %@", contactHandle);
+            //MLContact* contact = [HelperTools unserializeData:[contactHandle.value dataUsingEncoding:NSISOLatin1StringEncoding]];
+            //DDLogError(@"user activity continuation for call to %@", contact);
+            return YES;
+        }
+    }
+    else if([userActivity.interaction.intent isKindOfClass:[INSendMessageIntent class]])
+    {
+        DDLogError(@"Got INSendMessageIntent: %@", (INSendMessageIntent*)userActivity.interaction.intent);
+    }
+    return NO;
 }
 
 #if TARGET_OS_MACCATALYST

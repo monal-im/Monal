@@ -217,7 +217,7 @@ static NSMutableDictionary* _pendingCalls;
     [self addCall:call];
     
     CXCallUpdate* update = [[CXCallUpdate alloc] init];
-    update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:messageNode.fromUser];
+    update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:call.contact.contactJid];
     update.localizedCallerName = call.contact.contactDisplayName;
     update.supportsDTMF = NO;
     update.hasVideo = NO;

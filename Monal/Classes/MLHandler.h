@@ -154,7 +154,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
 }
 +(BOOL) supportsSecureCoding;
-+(void) throwDynamicExceptionForType:(NSString*) type andVar:(NSString*) var andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func;
++(void) throwDynamicExceptionForType:(NSString*) type andVar:(NSString*) varName andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 
 //id of this handler (consisting of class name, method name and invalidation method name)
 @property (readonly, strong) NSString* id;

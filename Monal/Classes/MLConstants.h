@@ -69,7 +69,8 @@ typedef enum NotificationPrivacySettingOption {
 #define emptyDefault(var, eq, def)          (var == nil || (id)var == [NSNull null] || [var isEqual:eq] ? def : var)
 #define updateIfIdNotEqual(a, b)            if(a != b && ![a isEqual:b]) a = b
 #define updateIfPrimitiveNotEqual(a, b)     if(a != b) a = b
-
+#define var                                 __auto_type 
+#define let                                 const __auto_type
 
 //make sure we don't define this twice
 #ifndef STRIP_PARENTHESES

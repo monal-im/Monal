@@ -217,13 +217,14 @@
         self.time = 0;
         self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
             DDLogVerbose(@"%@:Call duration timer triggered: %d", [self short], self.time);
-            self.time++;
             if(self.state == MLCallStateFinished)
             {
                 DDLogInfo(@"%@: Stopping call duration timer...", [self short]);
                 [timer invalidate];
                 self.timer = nil;
             }
+            else
+                self.time++;
         }];
     });
 }

@@ -165,8 +165,11 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
 #else
-    DDLogWarn(@"Ignoring incoming JMI: not in alpha!");
-    return message;
+    if([messageNode check:@"{urn:xmpp:jingle-message:1}*"])
+    {
+        DDLogWarn(@"Ignoring incoming JMI message: not in alpha!");
+        return message;
+    }
 #endif
     
     

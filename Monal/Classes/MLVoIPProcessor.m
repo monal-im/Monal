@@ -139,6 +139,19 @@ static NSMutableDictionary* _pendingCalls;
     return nil;
 }
 
+-(CXCallUpdate*) constructUpdateForCall:(MLCall*) call
+{
+    CXCallUpdate* update = [[CXCallUpdate alloc] init];
+    update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:call.contact.contactJid];
+    update.localizedCallerName = call.contact.contactDisplayName;
+    update.supportsDTMF = NO;
+    update.hasVideo = NO;
+    update.supportsHolding = NO;
+    update.supportsGrouping = NO;
+    update.supportsUngrouping = NO;
+    return update;
+}
+
 -(MLCall*) initiateAudioCallToContact:(MLContact*) contact
 {
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
@@ -216,15 +229,7 @@ static NSMutableDictionary* _pendingCalls;
     //add call to pending calls list
     [self addCall:call];
     
-    CXCallUpdate* update = [[CXCallUpdate alloc] init];
-    update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:call.contact.contactJid];
-    update.localizedCallerName = call.contact.contactDisplayName;
-    update.supportsDTMF = NO;
-    update.hasVideo = NO;
-    update.supportsHolding = NO;
-    update.supportsGrouping = NO;
-    update.supportsUngrouping = NO;
-    [self.cxProvider reportNewIncomingCallWithUUID:uuid update:update completion:^(NSError *error) {
+    [self.cxProvider reportNewIncomingCallWithUUID:uuid update:[self constructUpdateForCall:call] completion:^(NSError *error) {
         if(error != nil)
         {
             DDLogError(@"Call disallowed by system: %@", error);
@@ -442,6 +447,9 @@ static NSMutableDictionary* _pendingCalls;
         return;
     }
     
+    //update call info to include the right info
+    [self.cxProvider reportCallWithUUID:call.uuid updated:[self constructUpdateForCall:call]];
+            
     //propose call to contact (e.g. let it ring)
     [call sendJmiPropose];
     

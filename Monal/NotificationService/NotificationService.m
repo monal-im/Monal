@@ -179,10 +179,7 @@
             }];
         }
         else
-        {
             DDLogError(@"iOS < 14.5 detected, ignoring incoming call!");
-            [self killAppex];
-        }
     });
 }
 

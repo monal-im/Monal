@@ -392,7 +392,7 @@
                 if([mimeType hasPrefix:@"image/"])
                     msgText = NSLocalizedString(@"📷 An Image", @"");
                 else if([mimeType hasPrefix:@"audio/"])
-                    msgText = NSLocalizedString(@"🎵 A Audiomessage", @"");
+                    msgText = NSLocalizedString(@"🎵 An Audiomessage", @"");
                 else if([mimeType hasPrefix:@"video/"])
                     msgText = NSLocalizedString(@"🎥 A Video", @"");
                 else if([mimeType isEqualToString:@"application/pdf"])
@@ -809,7 +809,7 @@
                 else if([mimeType hasPrefix:@"image/"])
                     content.body = NSLocalizedString(@"📷 An Image", @"");
                 else if([mimeType hasPrefix:@"audio/"])
-                    content.body = NSLocalizedString(@"🎵 A Audiomessage", @"");
+                    content.body = NSLocalizedString(@"🎵 An Audiomessage", @"");
                 else if([mimeType hasPrefix:@"video/"])
                     content.body = NSLocalizedString(@"🎥 A Video", @"");
                 else if([mimeType isEqualToString:@"application/pdf"])

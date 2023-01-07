@@ -72,7 +72,7 @@
             if([lastMessage.filetransferMimeType hasPrefix:@"image/"])
                 [self showStatusText:NSLocalizedString(@"📷 An Image", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             else if([lastMessage.filetransferMimeType hasPrefix:@"audio/"])
-                [self showStatusText:NSLocalizedString(@"🎵 A Audiomessage", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
+                [self showStatusText:NSLocalizedString(@"🎵 An Audiomessage", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             else if([lastMessage.filetransferMimeType hasPrefix:@"video/"])
                 [self showStatusText:NSLocalizedString(@"🎥 A Video", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             else if([lastMessage.filetransferMimeType isEqualToString:@"application/pdf"])

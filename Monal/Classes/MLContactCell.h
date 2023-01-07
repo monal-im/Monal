@@ -11,9 +11,6 @@
 
 @interface MLContactCell : UITableViewCell
 
-@property (nonatomic, assign) NSInteger accountNo;
-@property (nonatomic, strong) NSString* _Nullable username;
-
 @property (nonatomic, weak) IBOutlet UILabel* _Nullable displayName;
 @property (nonatomic, weak) IBOutlet UILabel* _Nullable centeredDisplayName;
 @property (nonatomic, weak) IBOutlet UILabel* _Nullable time;

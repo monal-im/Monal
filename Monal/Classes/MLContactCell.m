@@ -31,9 +31,6 @@
 
 -(void) initCell:(MLContact*) contact withLastMessage:(MLMessage* _Nullable) lastMessage
 {
-    self.accountNo = contact.accountId.integerValue;
-    self.username = contact.contactJid;
-    
     [self showDisplayName:contact.contactDisplayName];
     [self setPinned:contact.isPinned];
     [self setCount:(long)contact.unreadCount];
@@ -57,9 +54,9 @@
 
 -(void) displayLastMessage:(MLMessage* _Nullable) lastMessage forContact:(MLContact*) contact
 {
-    NSString* senderOfLastGroupMsg; // set to nick of sender in a group chat
-    if(contact.isGroup == YES)
-        senderOfLastGroupMsg = lastMessage.actualFrom;
+    NSString* senderOfLastGroupMsg;     // set to nick of sender in a group chat, if this is a group chat (1:1 MUST be nil)
+    if(lastMessage.isMuc)
+         senderOfLastGroupMsg = lastMessage.contactDisplayName;
 
     if(lastMessage)
     {

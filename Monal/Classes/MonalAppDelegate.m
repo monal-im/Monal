@@ -422,6 +422,12 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     return NO;
 }
 
+-(id) application:(UIApplication*) application handlerForIntent:(INIntent*) intent
+{
+    DDLogError(@"Got intent: %@", intent);
+    return nil;
+}
+
 #if TARGET_OS_MACCATALYST
 -(void) windowHandling:(NSNotification*) notification
 {

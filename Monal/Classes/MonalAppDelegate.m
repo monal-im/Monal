@@ -643,6 +643,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
 -(BOOL) application:(UIApplication*) app openURL:(NSURL*) url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*) options
 {
+    DDLogInfo(@"Got openURL for '%@' with options: %@", url, options);
     if([url.scheme isEqualToString:@"xmpp"])                //for xmpp uris
     {
         [self handleXMPPURL:url];

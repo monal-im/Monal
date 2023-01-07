@@ -667,7 +667,7 @@
 -(INPerson*) makeINPersonForOwnAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
     DDLogDebug(@"Building INPerson for self contact...");
-    INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:account.connectionProperties.identity.jid type:INPersonHandleTypeEmailAddress label:account.accountNo.stringValue];
+    INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:account.connectionProperties.identity.jid type:INPersonHandleTypeUnknown label:@"Monal IM"];
     NSPersonNameComponents* nameComponents = [[NSPersonNameComponents alloc] init];
     nameComponents.nickname = [MLContact ownDisplayNameForAccount:account];
     MLContact* ownContact = [MLContact createContactFromJid:account.connectionProperties.identity.jid andAccountNo:account.accountNo];
@@ -696,7 +696,7 @@
     DDLogDebug(@"Building INPerson for contact: %@ using display name: %@", contact, displayName);
     if(displayName == nil)
         displayName = contact.contactDisplayName;
-    INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeEmailAddress label:contact.accountId.stringValue];
+    INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeUnknown label:@"Monal IM"];
     NSPersonNameComponents* nameComponents = [[NSPersonNameComponents alloc] init];
     nameComponents.nickname = displayName;
     INImage* contactImage = nil;

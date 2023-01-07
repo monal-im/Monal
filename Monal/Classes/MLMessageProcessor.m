@@ -110,7 +110,9 @@ static NSMutableDictionary* _typingNotifications;
     //handle incoming jmi calls (TODO: add entry to local history, once the UI for this is implemented)
     //only handle incoming propose messages if not older than 60 seconds
 #ifdef IS_ALPHA
-    if([messageNode check:@"{urn:xmpp:jingle-message:1}propose"])
+    //only handle call proposals from users being in our roster
+    MLContact* contact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:account.accountNo];
+    if(contact.isInRoster && [messageNode check:@"{urn:xmpp:jingle-message:1}propose"])
     {
         if(![messageNode.toUser isEqualToString:account.connectionProperties.identity.jid])
         {
@@ -148,7 +150,8 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     //handle all other JMI events (TODO: add entry to local history, once the UI for this is implemented)
-    else if([messageNode check:@"{urn:xmpp:jingle-message:1}*"])
+    //only do so if the sender is in our roster
+    else if(contact.isInRoster && [messageNode check:@"{urn:xmpp:jingle-message:1}*"])
     {
         DDLogInfo(@"Got %@ for JMI call %@", [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*$"], [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id"]);
         if([HelperTools isAppExtension])

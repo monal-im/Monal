@@ -306,9 +306,11 @@
 
             //update jid to be a bare jid
             item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
-
+            
+#ifndef DISABLE_OMEMO
             BOOL isTypeGroup = [[[DataLayer sharedInstance] getMucTypeOfRoom:node.fromUser andAccount:_account.accountNo] isEqualToString:@"group"];
-
+#endif
+            
             if([@"none" isEqualToString:item[@"affiliation"]])
             {
                 [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:_account.accountNo];

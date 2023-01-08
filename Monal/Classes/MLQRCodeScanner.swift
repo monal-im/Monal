@@ -58,7 +58,9 @@ struct XMPPLoginQRCode : Codable
             case .notDetermined:
                 AVCaptureDevice.requestAccess(for: .video) { granted in
                     if granted {
-                        self.setupCaptureSession()
+                        DispatchQueue.main.async {
+                            self.setupCaptureSession()
+                        }
                     }
                 }
 

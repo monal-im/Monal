@@ -43,9 +43,9 @@ struct AVPrototype: View {
                     HStack {
                         switch MLCallDirection(rawValue:call.direction) {
                             case .incoming:
-                                Image(systemName: "arrowshape.right")
+                                Image(systemName: "phone.arrow.up.right")
                             case .outgoing:
-                                Image(systemName: "arrowshape.left")
+                                Image(systemName: "phone.arrow.up.left")
                             default:        //should never be reached
                                 Text("")
                         }

@@ -502,7 +502,7 @@
 		3D27D955290B0BB60014748B /* AddContactMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddContactMenu.swift; sourceTree = "<group>"; };
 		3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactRequestsMenu.swift; sourceTree = "<group>"; };
 		3D5A91412842B4AE008CE57E /* MemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberList.swift; sourceTree = "<group>"; };
-		3D631822294BAB1D00026BE7 /* ContactList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactList.swift; sourceTree = "<group>"; };
+		3D631822294BAB1D00026BE7 /* ContactPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactPicker.swift; sourceTree = "<group>"; };
 		3D65B78C27234B74005A30F4 /* ContactDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
 		3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftuiHelpers.swift; sourceTree = "<group>"; };
 		3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingOverlay.swift; sourceTree = "<group>"; };
@@ -1053,7 +1053,7 @@
 				26A78ED623C2B59400C7CF40 /* MLPlaceholderViewController.h */,
 				26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */,
 				84FC375828981A5600634E3E /* PasswordMigration.swift */,
-				3D631822294BAB1D00026BE7 /* ContactList.swift */,
+				3D631822294BAB1D00026BE7 /* ContactPicker.swift */,
 				3D27D955290B0BB60014748B /* AddContactMenu.swift */,
 				3D88BB76295BB6DC00FB30BA /* CreateGroupMenu.swift */,
 				3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */,

@@ -10,11 +10,29 @@ import SwiftUI
 import monalxmpp
 
 struct MemberList: View {
+    @Environment(\.editMode) private var editMode
+
     private let memberList: [ObservableKVOWrapper<MLContact>]
     private let groupName: String
     private let account: xmpp?
 
+    @State private var openAccountSelection : Bool = false
+    @State private var contactsToAdd : [MLContact] = []
+
+    @State private var showAlert = false
+    @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
+    func setAndShowAlert(title: String, description: String) {
+        self.alertPrompt.title = Text(title)
+        self.alertPrompt.message = Text(description)
+        self.showAlert = true
+    }
+
     var body: some View {
+        // This is the invisible NavigationLink hack again...
+        NavigationLink(destination:LazyClosureView(ContactPicker(excludedContacts: self.memberList, selectedContacts: [], selectedContactsCallback: { selectedContacts in
+            self.contactsToAdd = selectedContacts
+            setAndShowAlert(title: "Added contacts", description: "Selected " + String(selectedContacts.count) + " contact(s)")
+        })), isActive: $openAccountSelection){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
         List {
             Section(header: Text(self.groupName)) {
                 ForEach(self.memberList, id: \.self.obj) {
@@ -27,30 +45,39 @@ struct MemberList: View {
                                         .resizable()
                                         .frame(width: 40, height: 40, alignment: .center)
                                     Text(contact.contactDisplayName as String)
+                                    if(editMode?.wrappedValue.isEditing == true) {
+                                        Spacer()
+                                        Button(action: {}, label: {
+                                            Image(systemName: "slider.horizontal.3")
+                                        })
+                                    }
                                 }
-                                /*Button(action: {
-                                }, label: {
-                                    Image(systemName: "xmark.circle.fill").foregroundColor(.red)
-                                })
-                                .buttonStyle(.borderless)
-                                .offset(x: -7, y: -7)*/
                             }
                         })
                     }
                 }
+                .onDelete(perform: { memberIdx in
+                    // TODO maybe alert before deletion
+                    if(memberIdx.count == 1) {
+                        self.setAndShowAlert(title: "Member deleted", description: self.memberList[memberIdx.first!].contactJid)
+                    }
+                })
+            }.alert(isPresented: $showAlert, content: {
+                Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
+            })
+        }
+        .toolbar {
+            if(editMode?.wrappedValue.isEditing == true) {
+                Button(action: {
+                    openAccountSelection = true
+                }, label: {
+                    Image(systemName: "plus")
+                        .foregroundColor(.blue)
+                })
             }
+            EditButton()
         }
         .navigationBarTitle("Group Members", displayMode: .inline)
-        /*.toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                HStack{
-                    Button(action: {
-                    }, label: {
-                        Image(systemName: "person.fill.badge.plus")
-                    })
-                }
-            }
-        }*/
     }
 
     init(mucContact: ObservableKVOWrapper<MLContact>?) {

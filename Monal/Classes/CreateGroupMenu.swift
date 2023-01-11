@@ -21,6 +21,7 @@ struct CreateGroupMenu: View {
     @State private var showAlert = false
     // note: dismissLabel is not accessed but defined at the .alert() section
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
+    @State private var selectedContacts : [MLContact] = []
 
     @ObservedObject private var overlay = LoadingOverlayState()
 
@@ -82,14 +83,25 @@ struct CreateGroupMenu: View {
                         .autocapitalization(.none)
                         .addClearButton(text:$groupName)
 
-                    NavigationLink(destination: LazyClosureView(ContactList(contacts: DataLayer.sharedInstance().contactList() as! [MLContact])), label: {
+                    NavigationLink(destination: LazyClosureView(ContactPicker(excludedContacts: [], selectedContacts: self.selectedContacts, selectedContactsCallback: { selectedContacts in
+                        self.selectedContacts = selectedContacts
+                    })), label: {
                             Text("Group Members")
                         })
                 }
-                Section {
-                    Button(action: {}, label: {
-                        Text("Create new group")
-                    })
+                if(self.selectedContacts.count > 0) {
+                    Section(header: Text("Selected Group Members")) {
+                        ForEach(self.selectedContacts, id: \.self) { contact in
+                            ContactEntry(contact: contact)
+                        }
+                    }
+                    Section {
+                        Button(action: {
+                            
+                        }, label: {
+                            Text("Create new group")
+                        })
+                    }
                 }
             }
         }

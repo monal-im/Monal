@@ -53,6 +53,8 @@ jobs:
         run: ./scripts/uploadAlpha.sh
       - name: Notarize catalyst
         run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
+      - name: Update monal homebrew alpha repo
+        run: scripts/updateAlphaHomebrew.sh
       - uses: actions/upload-artifact@v2
         with:
           name: monal-catalyst

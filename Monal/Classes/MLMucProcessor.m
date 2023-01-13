@@ -1075,6 +1075,11 @@ $$
     return NO;
 }
 
+-(NSSet*) getRoomFeaturesForMuc:(NSString*) room
+{
+    return _roomFeatures[room];
+}
+
 -(void) deleteMuc:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry
 {
     DDLogInfo(@"Deleting muc %@ on account %@...", room, _account);

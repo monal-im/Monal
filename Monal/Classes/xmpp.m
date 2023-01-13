@@ -5062,7 +5062,7 @@ NSString* const kStanza = @"stanza";
     //the message type is needed so that the store hint is accepted by the server
     displayedNode.attributes[@"type"] = msg.isMuc ? @"groupchat" : @"chat";
     displayedNode.attributes[@"to"] = msg.inbound ? msg.buddyName : self.connectionProperties.identity.jid;
-    [displayedNode setDisplayed:msg.messageId];
+    [displayedNode setDisplayed:msg.isMuc && msg.stanzaId != nil ? msg.stanzaId : msg.messageId];
     [displayedNode setStoreHint];
     DDLogVerbose(@"Sending display marker: %@", displayedNode);
     [self send:displayedNode];

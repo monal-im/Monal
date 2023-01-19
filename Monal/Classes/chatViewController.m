@@ -2462,23 +2462,23 @@ enum msgSentState {
     //only allow editing for the 3 newest message && only on outgoing messages
     if(!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted || self.contact.isEncrypted) historyBaseID:nil])
         return [UISwipeActionsConfiguration configurationWithActions:@[
+            quoteAction,
+            copyAction,
             LMCEditAction,
             retractAction,
-            copyAction,
-            quoteAction
         ]];
     //only allow retraction for outgoing messages
     else if(!message.inbound)
         return [UISwipeActionsConfiguration configurationWithActions:@[
-            retractAction,
+            quoteAction,
             copyAction,
-            quoteAction
+            retractAction,
         ]];
     else
         return [UISwipeActionsConfiguration configurationWithActions:@[
-            localDeleteAction,
+            quoteAction,
             copyAction,
-            quoteAction
+            localDeleteAction,
         ]];
 }
 

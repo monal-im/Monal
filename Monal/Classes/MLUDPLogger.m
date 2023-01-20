@@ -21,13 +21,17 @@
 
 
 static NSString* _processID;
-
+static volatile MLUDPLogger* _self;
 
 @interface MLUDPLogger ()
 {
-    nw_connection_t _connection;
-    u_int64_t _counter;
+    volatile nw_connection_t _connection;
+    volatile dispatch_queue_t _send_queue;
+    volatile NSCondition* _send_condition;
+    volatile nw_error_t _last_error;
+    volatile u_int64_t _counter;
 }
++(void) logError:(NSString*) format, ... NS_FORMAT_FUNCTION(1, 2);
 @end
 
 
@@ -39,26 +43,59 @@ static NSString* _processID;
     _processID = [HelperTools hexadecimalString:[NSData dataWithBytes:&i length:sizeof(i)]];
 }
 
++(void) flushWithTimeout:(double) timeout
+{
+    if(_self != nil)
+    {
+        NSCondition* condition = [NSCondition new];
+        //this timeout will trigger if the flush could not be finished in time
+        monal_void_block_t cancel = createTimer(timeout, (^{
+            [[self class] logError:@"flush timer triggered!"];
+            [condition lock];
+            [condition signal];
+            [condition unlock];
+        }));
+        //this block will be executed if all prior blocks managed to send out their messages (e.g. queue is flushed)
+        dispatch_async(_self->_send_queue, ^{
+            [[self class] logError:@"flush succeeded in time"];
+            cancel();               //stop timer
+            [condition lock];
+            [condition signal];
+            [condition unlock];
+        });
+        //wait for either timeout or flush to trigger
+        [condition lock];
+        [condition wait];
+        [condition unlock];
+    }
+}
+
 -(void) dealloc
 {
+    _self = nil;
 }
 
 -(void) didAddLogger
 {
+    _self = self;
+    _send_condition = [NSCondition new];
+    _send_queue = dispatch_queue_create("MLUDPLoggerSendQueue", dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, 0));
 }
 
 -(void) willRemoveLogger
 {
+    _self = nil;
 }
 
--(void) logError:(NSString*) format, ... NS_FORMAT_FUNCTION(1, 2)
++(void) logError:(NSString*) format, ... NS_FORMAT_FUNCTION(1, 2)
 {
+#ifdef IS_ALPHA
     va_list args;
     va_start(args, format);
     NSString* message = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
     
-    NSLog(@"%@", message);
+    NSLog(@"MLUDPLogger: %@", message);
     
     /*
     //log error in 250ms
@@ -71,6 +108,7 @@ static NSString* _processID;
         DDLogError(@"%@", message);
     });
     */
+#endif
 }
 
 //code taken from here: https://stackoverflow.com/a/11389847/3528174
@@ -95,7 +133,7 @@ static NSString* _processID;
     //   Z_DEFAULT_COMPRESSION
     if(deflateInit2(&strm, Z_BEST_COMPRESSION, Z_DEFLATED, (15+16), 8, Z_DEFAULT_STRATEGY) != Z_OK)
     {
-        [self logError:@"MLUDPLogger gzipDeflate error"];
+        [[self class] logError:@"gzipDeflate error"];
         return nil;
     }
 
@@ -118,13 +156,16 @@ static NSString* _processID;
     if(_connection != NULL)
         nw_connection_force_cancel(_connection);
     _connection = NULL;
+    [_send_condition lock];
+    [_send_condition signal];
+    [_send_condition unlock];
 }
 
 -(void) createConnectionIfNeeded
 {
     if(_connection == NULL)
     {
-        __block NSCondition* condition = [[NSCondition alloc] init];
+        __block NSCondition* condition = [NSCondition new];
         
         nw_endpoint_t endpoint = nw_endpoint_create_host([[[HelperTools defaultsDB] stringForKey:@"udpLoggerHostname"] cStringUsingEncoding:NSUTF8StringEncoding], [[[HelperTools defaultsDB] stringForKey:@"udpLoggerPort"] cStringUsingEncoding:NSUTF8StringEncoding]);
         nw_parameters_t parameters = nw_parameters_create_secure_udp(NW_PARAMETERS_DISABLE_PROTOCOL, NW_PARAMETERS_DEFAULT_CONFIGURATION);
@@ -150,16 +191,28 @@ static NSString* _processID;
             //retry in all error cases
             else if(state == nw_connection_state_failed || state == nw_connection_state_cancelled || state == nw_connection_state_invalid)
             {
-                [self disconnect];
+                self->_last_error = error;
+                [[self class] logError:@"connect error: %@", error];
+                self->_connection = NULL;
                 [condition lock];
                 [condition signal];
                 [condition unlock];
+                [self->_send_condition lock];
+                [self->_send_condition signal];
+                [self->_send_condition unlock];
             }
         });
         [condition lock];
         nw_connection_start(_connection);
         [condition wait];
         [condition unlock];
+        
+        //try again if we did not succeed
+        if(_connection == NULL)
+        {
+            [[self class] logError:@"retrying connection start..."];
+            [self createConnectionIfNeeded];
+        }
     }
 }
 
@@ -187,7 +240,7 @@ static NSString* _processID;
         @"line": [NSNumber numberWithInteger:logMessage.line],
         @"tag": logMessage.representedObject ? logMessage.representedObject : [NSNull null],
         @"options": [NSNumber numberWithInteger:logMessage.options],
-        @"timestamp": [[[NSISO8601DateFormatter alloc] init] stringFromDate:logMessage.timestamp],
+        @"timestamp": [[NSISO8601DateFormatter new] stringFromDate:logMessage.timestamp],
         @"threadID": logMessage.threadID,
         @"threadName": logMessage.threadName,
         @"queueLabel": logMessage.queueLabel,
@@ -199,7 +252,7 @@ static NSString* _processID;
     NSData* rawData = [NSJSONSerialization dataWithJSONObject:msgDict options:NSJSONWritingPrettyPrinted error:&writeError];
     if(writeError)
     {
-        [self logError:@"MLUDPLogger json encode error: %@", writeError];
+        [[self class] logError:@"json encode error: %@", writeError];
         return;
     }
     
@@ -221,7 +274,9 @@ static NSString* _processID;
     [data appendData:payload.authTag];
     [data appendData:payload.body];
     
-    [self sendData:data withOriginalMessage:logMsg];
+    dispatch_async(_send_queue, ^{
+        [self sendData:data withOriginalMessage:logMsg];
+    });
 }
 
 -(void) sendData:(NSData*) data withOriginalMessage:(NSString*) msg
@@ -229,17 +284,30 @@ static NSString* _processID;
     [self createConnectionIfNeeded];
     
     //the call to dispatch_get_main_queue() is a dummy because we are using DISPATCH_DATA_DESTRUCTOR_DEFAULT which is performed inline
+    [_send_condition lock];
     nw_connection_send(_connection, dispatch_data_create(data.bytes, data.length, dispatch_get_main_queue(), DISPATCH_DATA_DESTRUCTOR_DEFAULT), NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, true, ^(nw_error_t  _Nullable error) {
+        self->_last_error = error;
         if(error != NULL)
         {
             //NSError* st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(error));
-            [self logError:@"MLUDPLogger error: %@\n%@", error, msg];
+            [[self class] logError:@"send error: %@\n%@", error, msg];
             
-            //retry
-            [self disconnect];
-            [self sendData:data withOriginalMessage:msg];
         }
+        [[self class] logError:@"unlocking send condition..."];
+        [self->_send_condition lock];
+        [self->_send_condition signal];
+        [self->_send_condition unlock];
     });
+    //block this queue until our udp message was sent or an error occured
+    [_send_condition wait];
+    [_send_condition unlock];
+    if(_last_error != NULL)
+    {
+        //retry
+        //[self disconnect];
+        [[self class] logError:@"retrying sendData with error: %@", _last_error];
+        [self sendData:data withOriginalMessage:msg];
+    }
 }
 
 @end

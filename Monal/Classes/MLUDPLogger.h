@@ -12,8 +12,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLUDPLogger : DDAbstractLogger <DDLogger>
-{
-}
+
++(void) flushWithTimeout:(double) timeout;
+
 @end
 
 NS_ASSUME_NONNULL_END

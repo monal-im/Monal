@@ -17,6 +17,7 @@
 #import "MLNotificationManager.h"
 #import "MLFiletransfer.h"
 #import "xmpp.h"
+#import "MLUDPLogger.h"
 
 @import CallKit;
 
@@ -136,6 +137,7 @@
     
     DDLogInfo(@"Now killing appex process, goodbye...");
     [DDLog flushLog];
+    [MLUDPLogger flushWithTimeout:0.100];
     exit(0);
 }
 

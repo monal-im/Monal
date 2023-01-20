@@ -24,6 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) chatViewController* currentChatViewController;
 @property (nonatomic, strong) UIActivityIndicatorView* spinner;
 
+-(void) callContact:(MLContact*) contact;
+-(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts;
+-(void) presentCall:(MLCall*) call;
 -(void) presentChatWithContact:(MLContact* _Nullable) contact;
 -(void) presentChatWithContact:(MLContact* _Nullable) contact andCompletion:(monal_id_block_t _Nullable) completion;
 -(void) refreshDisplay;
@@ -35,7 +38,6 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) showDetails;
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString* _Nullable) token usingCompletion:(monal_id_block_t _Nullable) callback;
 -(void) showAddContactWithJid:(NSString*) jid andPreauthToken:(NSString* _Nullable) preauthToken;
--(void) presentCall:(MLCall*) call;
 
 @end
 

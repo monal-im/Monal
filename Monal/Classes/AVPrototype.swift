@@ -136,8 +136,8 @@ struct AVPrototype: View {
                         
                         Button(action: {
                             self.delegate.dismissWithoutAnimation()
-                            if let activeChats = self.appDelegate.activeChats, let voipProcessor = self.appDelegate.voipProcessor {
-                                activeChats.present(voipProcessor.initiateAudioCall(to:contact.obj))
+                            if let activeChats = self.appDelegate.activeChats {
+                                activeChats.call(contact.obj)
                             }                            
                         }) {
                             if #available(iOS 15, *) {

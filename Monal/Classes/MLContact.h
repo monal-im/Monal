@@ -23,12 +23,13 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @class UIImage;
 
 @interface MLContact : NSObject <NSSecureCoding>
-
 +(MLContact*) makeDummyContact:(int) type;
 
 +(BOOL) supportsSecureCoding;
 
 +(NSString*) ownDisplayNameForAccount:(xmpp*) account;
+
+@property (readonly) NSString* id;     //for Identifiable protocol
 
 @property (nonatomic, assign) BOOL isInRoster;
 @property (nonatomic, assign) BOOL isSubscribedTo;

@@ -509,11 +509,16 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray<MLContact*>*) contactList
 {
+    return [self contactListWithJid:@""];
+}
+
+-(NSMutableArray<MLContact*>*) contactListWithJid:(NSString*) jid
+{
     return [self.db idReadTransaction:^{
         //list all contacts and group chats
-        NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) AS 'sortkey' FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 ORDER BY sortkey COLLATE NOCASE ASC;";
+        NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) AS 'sortkey' FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 AND (B.buddy_name=? OR ?='') ORDER BY sortkey COLLATE NOCASE ASC;";
         NSMutableArray* toReturn = [[NSMutableArray alloc] init];
-        for(NSDictionary* dic in [self.db executeReader:query])
+        for(NSDictionary* dic in [self.db executeReader:query andArguments:@[jid, jid]])
             [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
         return toReturn;
     }];

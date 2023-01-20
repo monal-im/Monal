@@ -388,30 +388,35 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidBecomeKeyNotification" object:nil];
 #endif
 
+    /*
     NSDictionary* options = launchOptions[UIApplicationLaunchOptionsUserActivityDictionaryKey];
     if(options != nil && [@"INSendMessageIntent" isEqualToString:options[UIApplicationLaunchOptionsUserActivityTypeKey]])
     {
         NSUserActivity* userActivity = options[@"UIApplicationLaunchOptionsUserActivityKey"];
         DDLogError(@"intent: %@", userActivity.interaction);
     }
+    */
     return YES;
 }
 
 -(BOOL) application:(UIApplication*) application continueUserActivity:(NSUserActivity*) userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>* restorableObjects)) restorationHandler
 {
-    DDLogError(@"got continueUserActivity call");
+    DDLogDebug(@"Got continueUserActivity call...");
     if([userActivity.interaction.intent isKindOfClass:[INStartCallIntent class]])
     {
-        DDLogError(@"interaction: %@", userActivity.interaction);
+        DDLogInfo(@"INStartCallIntent interaction: %@", userActivity.interaction);
         INStartCallIntent* intent = (INStartCallIntent*)userActivity.interaction.intent;
         if(intent.contacts.firstObject != nil)
         {
-            DDLogError(@"intent: %@", intent);
-            DDLogError(@"contact: %@", intent.contacts.firstObject);
             INPersonHandle* contactHandle = intent.contacts.firstObject.personHandle;
-            DDLogError(@"contactHandle: %@", contactHandle);
-            //MLContact* contact = [HelperTools unserializeData:[contactHandle.value dataUsingEncoding:NSISOLatin1StringEncoding]];
-            //DDLogError(@"user activity continuation for call to %@", contact);
+            DDLogInfo(@"INStartCallIntent with contact: %@", contactHandle.value);
+            NSArray<MLContact*>* contacts = [[DataLayer sharedInstance] contactListWithJid:contactHandle.value];
+            if([contacts count] == 0)
+                return NO;
+            if([contacts count] > 1)
+                [self.activeChats presentAccountPickerForContacts:contacts];
+            else
+                [self.activeChats callContact:contacts.firstObject];
             return YES;
         }
     }
@@ -669,9 +674,6 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     return NO;
 }
 
-
-
-
 #pragma mark  - user notifications
 
 -(void) application:(UIApplication*) application didReceiveRemoteNotification:(NSDictionary*) userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
@@ -680,7 +682,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     [self incomingWakeupWithCompletionHandler:completionHandler];
 }
 
-- (void)userNotificationCenter:(UNUserNotificationCenter*) center willPresentNotification:(UNNotification*) notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options)) completionHandler;
+-(void) userNotificationCenter:(UNUserNotificationCenter*) center willPresentNotification:(UNNotification*) notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options)) completionHandler
 {
     DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called");
     //show local notifications while the app is open and ignore remote pushes
@@ -981,13 +983,21 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             [self addBackgroundTask];
             [[MLXMPPManager sharedInstance] nowForegrounded];           //NOTE: this will unfreeze all queues in our accounts
             
-            if(loadingHUD != nil)
-                loadingHUD.hidden = YES;
+            //open call ui using first call if at least one call is present
+            NSDictionary* activeCalls = [self.voipProcessor getActiveCalls];
+            for(NSUUID* uuid in activeCalls)
+            {
+                [self.activeChats presentCall:activeCalls[uuid]];
+                break;
+            }
             
             //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
             //this must be done *after* [[MLXMPPManager sharedInstance] nowForegrounded] to make sure an already open chat view
             //knows it is now foregrounded (we obviously don't mark messages as read if a chat view is in background while still loaded/"visible")
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+            
+            if(loadingHUD != nil)
+                loadingHUD.hidden = YES;
         });
     });
 }

@@ -17,6 +17,7 @@
 #import "MLXEPSlashMeHandler.h"
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
+#import "MLVoIPProcessor.h"
 #import "UIColor+Theme.h"
 #import <Monal-Swift.h>
 
@@ -479,10 +480,29 @@ static NSMutableSet* _smacksWarningDisplayed;
    [self performSegueWithIdentifier:@"showSettings" sender:self];
 }
 
+-(void) callContact:(MLContact*) contact
+{
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:contact];
+    if(activeCall != nil)
+        [self presentCall:activeCall];
+    else
+        [self presentCall:[appDelegate.voipProcessor initiateAudioCallToContact:contact]];
+}
+
+-(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts
+{
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDelegate.window.rootViewController dismissViewControllerAnimated:NO completion:^{
+        UIViewController* accountPickerController = [[SwiftuiInterface new] makeAccountPickerForContacts:contacts];;
+        [self presentViewController:accountPickerController animated:YES completion:^{}];
+    }];
+}
+
 -(void) presentCall:(MLCall*) call
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
+    [appDelegate.window.rootViewController dismissViewControllerAnimated:NO completion:^{
         UIViewController* callViewController = [[SwiftuiInterface new] makeCallScreenForCall:call];
         callViewController.modalPresentationStyle = UIModalPresentationFullScreen;
         [self presentViewController:callViewController animated:NO completion:^{}];
@@ -664,29 +684,28 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 #pragma mark - tableview delegate
 
--(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat) tableView:(UITableView*) tableView heightForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     return 60.0f;
 }
 
-
--(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
+-(NSString*) tableView:(UITableView*) tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     return NSLocalizedString(@"Archive chat", @"");
 }
 
-
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+-(BOOL) tableView:(UITableView*) tableView canEditRowAtIndexPath:(NSIndexPath*) indexPath
 {
     return YES;
 }
 
-- (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath
+-(BOOL)tableView:(UITableView*) tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath*) indexPath
 {
     return YES;
 }
 
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+-(void)tableView:(UITableView*) tableView commitEditingStyle:(UITableViewCellEditingStyle) editingStyle forRowAtIndexPath:(NSIndexPath*) indexPath
+{
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         MLContact* contact = nil;
         // Delete contact from view

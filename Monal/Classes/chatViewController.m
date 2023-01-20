@@ -14,6 +14,7 @@
 #import "MLReloadCell.h"
 #import "MLUploadQueueCell.h"
 
+#import "ActiveChatsViewController.h"
 #import "AESGcm.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
@@ -472,15 +473,8 @@ enum msgSentState {
 
 -(void) openCallScreen:(id) sender
 {
-    UIViewController* detailsViewController;
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
-    if(activeCall != nil)
-        detailsViewController = [[SwiftuiInterface new] makeCallScreenForCall:activeCall];
-    else
-        detailsViewController = [[SwiftuiInterface new] makeCallScreenToContact:self.contact];
-    detailsViewController.modalPresentationStyle = UIModalPresentationFullScreen;
-    [self presentViewController:detailsViewController animated:NO completion:^{}];
+    [appDelegate.activeChats callContact:self.contact];
 }
 
 -(IBAction) toggleEncryption:(id)sender

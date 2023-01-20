@@ -610,6 +610,11 @@ NSString *const kAskSubscribe=@"subscribe";
     return [self.contactJid hash] ^ [self.accountId hash];
 }
 
+-(NSString*) id
+{
+    return [NSString stringWithFormat:@"%@|%@", self.accountId, self.contactJid];
+}
+
 -(NSString*) description
 {
     return [NSString stringWithFormat:@"%@: %@ (%@) %@%@", self.accountId, self.contactJid, self.isGroup ? self.mucType : @"1:1", self.isInRoster ? @"inRoster" : @"not(inRoster)", self.hasIncomingContactRequest ? @"[incomingContactRequest]" : @""];

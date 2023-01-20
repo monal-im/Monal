@@ -126,6 +126,13 @@ static NSMutableDictionary* _pendingCalls;
     return _pendingCalls.count;
 }
 
+-(NSDictionary<NSString*, MLCall*>*) getActiveCalls
+{
+    @synchronized(_pendingCalls) {
+        return [_pendingCalls copy];
+    }
+}
+
 -(MLCall* _Nullable) getActiveCallWithContact:(MLContact*) contact
 {
     @synchronized(_pendingCalls) {
@@ -254,7 +261,6 @@ static NSMutableDictionary* _pendingCalls;
             //this will be done once the app delegate started to connect our xmpp accounts above
             //do this in an extra thread to not block this callback thread (could be main thread or otherwise restricted by apple)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                
                 //wait for our account to connect before initializing webrtc using XEP-0215 iq stanzas
                 //if the user accepts the call before we are bound, the outgoing accept message stanza will be queued and sent once we are bound
                 //outgoing iq messages are not queued in all cases (e.g. non-smacks reconnect), hence this waiting loop
@@ -262,7 +268,6 @@ static NSMutableDictionary* _pendingCalls;
                     [NSThread sleepForTimeInterval:0.250];
                 [self initWebRTCForPendingCall:call];
             });
-            
         }
     }];
     

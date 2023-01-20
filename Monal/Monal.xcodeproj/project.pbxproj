@@ -135,6 +135,7 @@
 		840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */; };
 		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
 		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
+		841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F19297B18720074F9B7 /* AccountPicker.swift */; };
 		8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */ = {isa = PBXBuildFile; fileRef = 8420EA9A2915E4FE0038FF40 /* OmemoState.h */; };
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
 		8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8441EFF82921B53500E851E9 /* BackgroundSettings.swift */; };
@@ -548,6 +549,7 @@
 		840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueCell.m; sourceTree = "<group>"; };
 		840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueCell.h; sourceTree = "<group>"; };
 		841898AB2957DBAC00FEC77D /* RichAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichAlert.swift; sourceTree = "<group>"; };
+		841B6F19297B18720074F9B7 /* AccountPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountPicker.swift; sourceTree = "<group>"; };
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
@@ -1007,6 +1009,7 @@
 		26715E5E17650AF900684F3D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				841B6F16297AFB340074F9B7 /* Calls */,
 				3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */,
 				C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */,
 				3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */,
@@ -1309,12 +1312,20 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		841B6F16297AFB340074F9B7 /* Calls */ = {
+			isa = PBXGroup;
+			children = (
+				841B6F19297B18720074F9B7 /* AccountPicker.swift */,
+				84F520E0286548490068D1C1 /* AVPrototype.swift */,
+			);
+			name = Calls;
+			sourceTree = "<group>";
+		};
 		84D31CDA28653AA9006D7926 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
 				848717F2295ED64500B8D288 /* MLCall.h */,
 				848717F1295ED64500B8D288 /* MLCall.m */,
-				84F520E0286548490068D1C1 /* AVPrototype.swift */,
 				84D31CE528653B83006D7926 /* WebRTCClient.swift */,
 				849A53E3287135B2007E941A /* MLVoIPProcessor.m */,
 				849A53E5287135D7007E941A /* MLVoIPProcessor.h */,
@@ -1937,6 +1948,7 @@
 				848717F3295ED64600B8D288 /* MLCall.m in Sources */,
 				26D89F061A890672009B147C /* MLSwitchCell.m in Sources */,
 				C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */,
+				841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */,
 				3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */,
 				C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
@@ -3540,6 +3552,7 @@
 					"$(inherited)",
 					"$(SRCROOT)",
 				);
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = MonalSourceCodePrefix.pch;
 				GCC_THREADSAFE_STATICS = NO;

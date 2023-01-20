@@ -21,6 +21,8 @@ let monalDarkGreen = Color(UIColor(red:20.0/255, green:138.0/255, blue:103.0/255
 
 let swiftuiTranslationDummyString = Text("Dummy string to test SwiftUI translation support.")
 
+extension MLContact : Identifiable {}
+
 class SheetDismisserProtocol: ObservableObject {
     weak var host: UIHostingController<AnyView>? = nil
     func dismiss() {
@@ -383,22 +385,21 @@ func iOS16() -> Bool {
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {
+    @objc(makeAccountPickerForContacts:)
+    func makeAccountPicker(for contacts: [MLContact]) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(delegate:delegate, contacts:contacts)))
+        return host
+    }
+    
     @objc(makeCallScreenForCall:)
     func makeCallScreen(for call: MLCall) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
         host.rootView = AnyView(AVPrototype(delegate:delegate, call:call))
-        return host
-    }
-    
-    @objc(makeCallScreenToContact:)
-    func makeCallScreen(to contact: MLContact) -> UIViewController {
-        let delegate = SheetDismisserProtocol()
-        let host = UIHostingController(rootView:AnyView(EmptyView()))
-        delegate.host = host
-        let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-        host.rootView = AnyView(AVPrototype(delegate:delegate, call:appDelegate.voipProcessor!.initiateAudioCall(to:contact)))
         return host
     }
     

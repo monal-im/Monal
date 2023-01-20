@@ -222,13 +222,13 @@
     if([self checkAndUpdateFirstPush:NO])
     {
         DDLogInfo(@"First push, pinging main app");
-        if([MLProcessLock checkRemoteRunning:@"MainApp" withTimeout:2.0])
+        if([MLProcessLock checkRemoteRunning:@"MainApp"])
         {
             //this will make sure we still run if we get triggered immediately after the mainapp disconnected but before its process got freezed
             DDLogDebug(@"Main app already in foreground, sleeping for 5 seconds and trying again");
             usleep(5000000);
             DDLogDebug(@"Pinging main app again");
-            if([MLProcessLock checkRemoteRunning:@"MainApp" withTimeout:2.0])       //use a high timeout to make sure the mainapp isn't running, even if the mainthread is heavily busy
+            if([MLProcessLock checkRemoteRunning:@"MainApp"])
             {
                 DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
                 [DDLog flushLog];
@@ -453,6 +453,7 @@ static BOOL warnUnclean = NO;
     
     //init IPC
     [IPC initializeForProcess:@"NotificationServiceExtension"];
+    [MLProcessLock initializeForProcess:@"NotificationServiceExtension"];
     
     //log startup
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];

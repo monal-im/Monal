@@ -33,7 +33,7 @@ static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
     
     [_fileManager createDirectoryAtURL:[NSURL fileURLWithPath:_documentCacheDir] withIntermediateDirectories:YES attributes:nil error:&error];
     if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     [HelperTools configureFileProtectionFor:_documentCacheDir];
     
     _currentlyTransfering = [[NSMutableSet alloc] init];

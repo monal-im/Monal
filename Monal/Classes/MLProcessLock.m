@@ -9,92 +9,98 @@
 //
 
 #import <Foundation/Foundation.h>
+#include <sys/file.h>
+#include <errno.h>
+
 #import "MLProcessLock.h"
 #import "MLConstants.h"
-#import "IPC.h"
+#import "HelperTools.h"
 
 
 @interface MLProcessLock()
 
 @end
 
+static NSString* _locksDir;
+static char* _ownLockPath;
+static volatile int _ownLockFD;
+
 @implementation MLProcessLock
+
++(void) initializeForProcess:(NSString*) processName
+{
+    NSError*  error;
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSString* documentsDirectory = [[HelperTools getContainerURLForPathComponents:@[]] path];
+    _locksDir = [documentsDirectory stringByAppendingPathComponent:@"locks"];
+    [fileManager createDirectoryAtPath:_locksDir withIntermediateDirectories:YES attributes:nil error:&error];
+    if(error)
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    [HelperTools configureFileProtectionFor:_locksDir];
+    
+    const char* path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:[_locksDir stringByAppendingPathComponent:processName]];
+    _ownLockPath = calloc(strlen(path)+1, sizeof(*_ownLockPath));
+    strncpy(_ownLockPath, path, strlen(path));
+    DDLogInfo(@"Set _ownLockPath to '%s'...", _ownLockPath);
+}
+
++(void) lock
+{
+    int lock;
+    DDLogVerbose(@"Locking process (_ownLockPath=%s)...", _ownLockPath);
+    @synchronized(self) {
+        if(_ownLockFD != 0)
+        {
+            lock = flock(_ownLockFD, LOCK_EX | LOCK_NB);
+            if(lock == 0)
+            {
+                DDLogVerbose(@"Process still locked, doing nothing...");
+                return;
+            }
+            @throw [NSException exceptionWithName:@"LockingError" reason:[NSString stringWithFormat:@"flock returned: %d (%d) on file: %s", lock, errno, _ownLockPath] userInfo:nil];
+        }
+        _ownLockFD = open(_ownLockPath, O_CREAT, S_IRWXU | S_IRWXG);
+        if(_ownLockFD == 0)
+            @throw [NSException exceptionWithName:@"LockingError" reason:[NSString stringWithFormat:@"failed to fopen file (%d): %s", errno, _ownLockPath] userInfo:nil];
+        lock = flock(_ownLockFD, LOCK_EX | LOCK_NB);
+        if(lock != 0)
+            @throw [NSException exceptionWithName:@"LockingError" reason:[NSString stringWithFormat:@"flock returned: %d (%d) on file: %s", lock, errno, _ownLockPath] userInfo:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(unlock) name:kMonalIsFreezed object:nil];
+    }
+}
+
++(void) unlock
+{
+    DDLogVerbose(@"Unlocking process (_ownLockPath=%s)...", _ownLockPath);
+    @synchronized(self) {
+        if(_ownLockFD != 0)
+        {
+            close(_ownLockFD);
+            _ownLockFD = 0;
+        }
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+    }
+}
 
 +(BOOL) checkRemoteRunning:(NSString*) processName
 {
-    //default timeout used by mainapp (appex uses a higher timeout)
-    //EXPLANATION: the mainapp uses the main thread for UI stuff, which sometimes can block the main thread for more than 500ms
-    //             --> that would make the ping *NOT* succeed and in turn erroneously tell the appex that the mainapp was not running
-    //             the appex on the other side does not use its main thread --> a ping coming from the mainapp will almost always
-    //             be answered in only a few milliseconds
-    return [self checkRemoteRunning:processName withTimeout:0.500];
-}
-
-+(BOOL) checkRemoteRunning:(NSString*) processName withTimeout:(double) pingTimeout
-{
-    __block BOOL was_called_in_mainthread = [NSThread isMainThread];
-    __block NSCondition* condition = [[NSCondition alloc] init];
-    __block NSRunLoop* main_runloop = [NSRunLoop mainRunLoop];
-    __block BOOL response_received = NO;
-    
-    //lock condition object (needs to be locked for [condition signal] and [condition waitUntilDate:] to work correctly)
-    //the runloop-based waiting approach does use the lock embedded in this condition, too
-    [condition lock];
-    
-    //send out ping and handle response
-    DDLogDebug(@"Pinging %@", processName);
-    [[IPC sharedInstance] sendMessage:@"MLProcessLock.ping" withData:nil to:processName withResponseHandler:^(NSDictionary* response) {
-        //lock condition, change response_received to YES and wake up other thread
-        [condition lock];
-        DDLogDebug(@"Got ping response from %@: %@", processName, response);
-        response_received = YES;
-        //mainthreads need an extra wake up of their runloop while other threads can be woken up using our condition variable
-        if(was_called_in_mainthread)
-            //this will stop the innermost runloop invocation (done in the while loop below), not the entire runloop
-            CFRunLoopStop([main_runloop getCFRunLoop]);
-        else
-            [condition signal];
-        [condition unlock];
-    }];
-    
-    //wait for response blocking this thread for pingTimeout seconds
-    NSDate* timeout = [NSDate dateWithTimeIntervalSinceNow:pingTimeout];
-    DDLogVerbose(@"Waiting for %f seconds...", (double)[timeout timeIntervalSinceNow]);
-    //we have to repeate the condition wait/runloop polling until we time out if the wakeup was not due to a received ping response
-    while(!response_received && [timeout timeIntervalSinceNow] > 0)
+    char const* path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:[_locksDir stringByAppendingPathComponent:processName]];
+    DDLogVerbose(@"Checking if remote %@ is running (path=%s)...", processName, path);
+    int fd = open(path, O_CREAT, S_IRWXU | S_IRWXG);
+    if(fd == 0)
+        @throw [NSException exceptionWithName:@"LockingError" reason:[NSString stringWithFormat:@"failed to fopen file (%d): %s", errno, path] userInfo:@{@"processName": processName}];
+    int lock = flock(fd, LOCK_EX | LOCK_NB);
+    //try again if the file was not locked
+    //this makes sure we don't run into race conditions after app freezes/unfreezes
+    if(lock == 0)
     {
-        if(was_called_in_mainthread)
-        {
-            //poll runloop of main thread until the next event occurs or the polling call times out
-            //(that can be a received ping that force-stops this call or any other runloop timer/port/... event)
-            //the unlock-wait-lock triplet resembles exactly what the condition wait is doing internally
-            [condition unlock];
-            [main_runloop runMode:[main_runloop currentMode] beforeDate:timeout];
-            [condition lock];
-            DDLogVerbose(@"Runloop poll returned...");
-        }
-        else
-        {
-            [condition waitUntilDate:timeout];
-            DDLogVerbose(@"Condition wait returned...");
-        }
-        if(!response_received && [timeout timeIntervalSinceNow] > 0)
-            DDLogVerbose(@"Waiting again for the remaing %f seconds...", (double)[timeout timeIntervalSinceNow]);
+        flock(fd, LOCK_UN);
+        [self sleep:0.050];
+        lock = flock(fd, LOCK_EX | LOCK_NB);
     }
-    DDLogVerbose(@"waiting returned: response_received=%@, [timeout timeIntervalSinceNow]=%f", response_received ? @"YES" : @"NO", (double)[timeout timeIntervalSinceNow]);
-    
-    //get state and unlock condition object
-    BOOL remote_running = response_received;
-    [condition unlock];
-    
-    //we got frozen while waiting for the timeout if we waited more than 100ms longer than the timeout
-    if((double)[timeout timeIntervalSinceNow] < -0.1)
-    {
-        DDLogWarn(@"We got frozen while waiting, retrying ping!");
-        return [self checkRemoteRunning:processName withTimeout:pingTimeout];
-    }
-    DDLogDebug(@"checkRemoteRunning:%@ returning %@", processName, remote_running ? @"YES" : @"NO");
-    return remote_running;
+    close(fd);
+    DDLogVerbose(@"Remote %@ running: %@", processName, lock != 0 ? @"YES" : @"NO");
+    return lock != 0;
 }
 
 +(void) waitForRemoteStartup:(NSString*) processName
@@ -104,12 +110,11 @@
 
 +(void) waitForRemoteStartup:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler
 {
-    //we will wait almost 2 seconds (the IPC message timeout)
-    while(![[NSThread currentThread] isCancelled] && ![self checkRemoteRunning:processName withTimeout:1.5])
+    while(![[NSThread currentThread] isCancelled] && ![self checkRemoteRunning:processName])
     {
         if(handler)
             handler();
-        [self sleep:0.050];     //checkRemoteRunning did already wait for its timeout, because its ping was not answered --> don't wait too long here
+        [self sleep:1.0];
     }
 }
 
@@ -120,42 +125,15 @@
 
 +(void) waitForRemoteTermination:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler
 {
-    //wait 500ms (in case this method will be used by the appex to wait for the mainapp in the future)
+    //wait 250ms (in case this method will be used by the appex to wait for the mainapp in the future)
     //--> we want to make sure the mainapp *really* isn't running anymore while still not waiting too long
-    //(this 500ms is a tradeoff, a longer timeout would be safer but could result in long mainapp startup delays or startup kills by iOS)
+    //(this 250ms is a tradeoff, a longer timeout would be safer but could result in long mainapp startup delays or startup kills by iOS)
     //see the explanation of checkRemoteRunning: for further details
-    while(![[NSThread currentThread] isCancelled] && [self checkRemoteRunning:processName withTimeout:0.5])
+    while(![[NSThread currentThread] isCancelled] && [self checkRemoteRunning:processName])
     {
         if(handler)
             handler();
-        [self sleep:0.250];    //checkRemoteRunning did not wait for its timeout, because its ping got answered --> wait here
-    }
-}
-
-+(void) lock
-{
-    DDLogVerbose(@"Locking process...");
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ping:) name:kMonalIncomingIPC object:nil];
-}
-
-+(void) unlock
-{
-    DDLogVerbose(@"Unlocking process...");
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
--(void) dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-+(void) ping:(NSNotification*) notification
-{
-    NSDictionary* message = notification.userInfo;
-    if([message[@"name"] isEqualToString:@"MLProcessLock.ping"])
-    {
-        DDLogVerbose(@"MLProcessLock responding to ping %@", message[@"id"]);
-        [[IPC sharedInstance] respondToMessage:message withData:nil];
+        [self sleep:0.250];
     }
 }
 
@@ -164,8 +142,7 @@
     BOOL was_called_in_mainthread = [NSThread isMainThread];
     NSRunLoop* main_runloop = [NSRunLoop mainRunLoop];
     NSDate* timeout = [NSDate dateWithTimeIntervalSinceNow:time];
-    //we have to spin the runloop instead of simply sleeping to not miss incoming IPC messages
-    //(pings coming from the appex for example)
+    //we have to spin the runloop instead of simply sleeping to not get killed for unresponsiveness
     if(was_called_in_mainthread)
         while([timeout timeIntervalSinceNow] > 0)
             [main_runloop runMode:[main_runloop currentMode] beforeDate:timeout];

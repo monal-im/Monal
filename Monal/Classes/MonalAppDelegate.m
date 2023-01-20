@@ -166,6 +166,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     
     //init IPC and ProcessLock
     [IPC initializeForProcess:@"MainApp"];
+    [MLProcessLock initializeForProcess:@"MainApp"];
     
     //lock process and disconnect an already running NotificationServiceExtension
     [MLProcessLock lock];
@@ -947,6 +948,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 -(void) applicationWillEnterForeground:(UIApplication*) application
 {
     DDLogInfo(@"Entering FG");
+    [MLProcessLock lock];
+    
     @synchronized(self) {
         DDLogVerbose(@"Setting _shutdownPending to NO...");
         _shutdownPending = NO;
@@ -1252,6 +1255,12 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         DDLogDebug(@"no background tasks running, nothing to stop");
                         [DDLog flushLog];
                     }
+                    else
+                    {
+                        DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
+                        [DDLog flushLog];
+                    }
                 } onQueue:dispatch_get_main_queue()];
             }
         }
@@ -1280,6 +1289,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 @synchronized(self) {
                     //ui background tasks expire at the same time as background processing/refreshing tasks
                     //--> we have to check if a background processing/refreshing task is running and don't disconnect, if so
+                    BOOL stopped = NO;
                     if(self->_bgProcessing == nil && self->_bgRefreshing == nil)
                     {
                         DDLogVerbose(@"Setting _shutdownPending to YES...");
@@ -1299,6 +1309,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                         DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                        
+                        stopped = YES;
                     }
                     else
                         DDLogDebug(@"_bgProcessing != nil || _bgRefreshing != nil --> not disconnecting");
@@ -1308,6 +1320,13 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     UIBackgroundTaskIdentifier task = self->_bgTask;
                     self->_bgTask = UIBackgroundTaskInvalid;
                     [[UIApplication sharedApplication] endBackgroundTask:task];
+                    
+                    if(stopped)
+                    {
+                        DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
+                        [DDLog flushLog];
+                    }
                 }
             }];
         }
@@ -1332,6 +1351,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             DDLogVerbose(@"Now entered @synchronized(self) block...");
             //ui background tasks expire at the same time as background fetching tasks
             //--> we have to check if an ui bg task is running and don't disconnect, if so
+            BOOL stopped = NO;
             if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid)
             {
                 DDLogVerbose(@"Setting _shutdownPending to YES...");
@@ -1351,6 +1371,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                 DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                
+                stopped = YES;
             }
             else
                 DDLogDebug(@"!background || _bgTask != UIBackgroundTaskInvalid --> not disconnecting");
@@ -1360,10 +1382,18 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             self->_bgProcessing = nil;
             //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
             [task setTaskCompletedWithSuccess:!background];
+            
+            if(stopped)
+            {
+                DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
+                [DDLog flushLog];
+            }
         }
     };
     
     //only proceed with our BGTASK if the NotificationServiceExtension is not running
+    [MLProcessLock lock];
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
@@ -1428,6 +1458,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             DDLogVerbose(@"Now entered @synchronized(self) block...");
             //ui background tasks expire at the same time as background fetching tasks
             //--> we have to check if an ui bg task is running and don't disconnect, if so
+            BOOL stopped = NO;
             if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid)
             {
                 DDLogVerbose(@"Setting _shutdownPending to YES...");
@@ -1447,6 +1478,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                 DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                
+                stopped = YES;
             }
             else
                 DDLogDebug(@"!background || _bgTask != UIBackgroundTaskInvalid --> not disconnecting");
@@ -1456,10 +1489,18 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             self->_bgRefreshing = nil;
             //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
             [task setTaskCompletedWithSuccess:!background];
+            
+            if(stopped)
+            {
+                DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
+                [DDLog flushLog];
+            }
         }
     };
     
     //only proceed with our BGTASK if the NotificationServiceExtension is not running
+    [MLProcessLock lock];
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
@@ -1624,6 +1665,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     DDLogInfo(@"got incomingWakeupWithCompletionHandler with ID %@", completionId);
     
     //only proceed with handling wakeup if the NotificationServiceExtension is not running
+    [MLProcessLock lock];
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
@@ -1649,6 +1691,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         BOOL background = [HelperTools isInBackground];
                         
                         //we have to check if an ui bg task or background processing/refreshing task is running and don't disconnect, if so
+                        BOOL stopped = NO;
                         if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid && self->_bgProcessing == nil && self->_bgRefreshing == nil)
                         {
                             DDLogVerbose(@"Setting _shutdownPending to YES...");
@@ -1669,6 +1712,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                             //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                             DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                            
+                            stopped = YES;
                         }
                         else
                             DDLogDebug(@"NOT (background && _bgTask == UIBackgroundTaskInvalid && _bgProcessing == nil && _bgRefreshing == nil) --> not disconnecting");
@@ -1684,6 +1729,13 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                             dispatch_async(dispatch_get_main_queue(), ^{
                                 [self checkIfBackgroundTaskIsStillNeeded];
                             });
+                        
+                        if(stopped)
+                        {
+                            DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
+                            [DDLog flushLog];
+                        }
                     }
                 });
             }))

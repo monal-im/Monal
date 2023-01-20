@@ -136,6 +136,7 @@
 		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
 		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
 		841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F19297B18720074F9B7 /* AccountPicker.swift */; };
+		841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */; };
 		8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */ = {isa = PBXBuildFile; fileRef = 8420EA9A2915E4FE0038FF40 /* OmemoState.h */; };
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
 		8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8441EFF82921B53500E851E9 /* BackgroundSettings.swift */; };
@@ -149,7 +150,6 @@
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
 		84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		84E55E8029644279003E191A /* ActiveChatsViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E55E7F2964426D003E191A /* ActiveChatsViewController.h */; };
-		84F520E12865484A0068D1C1 /* AVPrototype.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F520E0286548490068D1C1 /* AVPrototype.swift */; };
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
@@ -550,6 +550,7 @@
 		840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueCell.h; sourceTree = "<group>"; };
 		841898AB2957DBAC00FEC77D /* RichAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichAlert.swift; sourceTree = "<group>"; };
 		841B6F19297B18720074F9B7 /* AccountPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountPicker.swift; sourceTree = "<group>"; };
+		841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVCallUI.swift; sourceTree = "<group>"; };
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
@@ -562,7 +563,6 @@
 		849A53E5287135D7007E941A /* MLVoIPProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLVoIPProcessor.h; path = Classes/MLVoIPProcessor.h; sourceTree = SOURCE_ROOT; };
 		84D31CE528653B83006D7926 /* WebRTCClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebRTCClient.swift; path = Classes/WebRTCClient.swift; sourceTree = SOURCE_ROOT; };
 		84E55E7F2964426D003E191A /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
-		84F520E0286548490068D1C1 /* AVPrototype.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVPrototype.swift; path = Classes/AVPrototype.swift; sourceTree = SOURCE_ROOT; };
 		84FC37542897521400634E3E /* snprintf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = snprintf.m; sourceTree = "<group>"; };
 		84FC37562897523500634E3E /* metamacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
 		84FC375828981A5600634E3E /* PasswordMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordMigration.swift; sourceTree = "<group>"; };
@@ -1315,8 +1315,8 @@
 		841B6F16297AFB340074F9B7 /* Calls */ = {
 			isa = PBXGroup;
 			children = (
+				841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */,
 				841B6F19297B18720074F9B7 /* AccountPicker.swift */,
-				84F520E0286548490068D1C1 /* AVPrototype.swift */,
 			);
 			name = Calls;
 			sourceTree = "<group>";
@@ -1968,6 +1968,7 @@
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
 				384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */,
+				841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */,
 				C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
 				3D27D956290B0BB60014748B /* AddContactMenu.swift in Sources */,
@@ -2008,7 +2009,6 @@
 				E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */,
 				C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */,
 				54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */,
-				84F520E12865484A0068D1C1 /* AVPrototype.swift in Sources */,
 				C1B1982625AB31B800D5028E /* MLBlockedUsersTableViewController.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,

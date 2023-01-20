@@ -1,8 +1,8 @@
 //
-//  ContactResources.swift
+//  AVCallUI.swift
 //  Monal
 //
-//  Created by Friedrich Altheide on 24.12.21.
+//  Created by Thilo Molitor on 20.12.22.
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 import monalxmpp
@@ -13,7 +13,7 @@ import WebRTC
 import AVFoundation
 import CallKit
 
-struct AVPrototype: View {
+struct AVCallUI: View {
     @StateObject private var call: ObservableKVOWrapper<MLCall>
     @StateObject private var contact: ObservableKVOWrapper<MLContact>
     private var delegate: SheetDismisserProtocol
@@ -43,9 +43,9 @@ struct AVPrototype: View {
                     HStack {
                         switch MLCallDirection(rawValue:call.direction) {
                             case .incoming:
-                                Image(systemName: "phone.arrow.up.right")
+                                Image(systemName: "phone.arrow.down.left")
                             case .outgoing:
-                                Image(systemName: "phone.arrow.up.left")
+                                Image(systemName: "phone.arrow.up.right")
                             default:        //should never be reached
                                 Text("")
                         }
@@ -288,9 +288,9 @@ struct AVPrototype: View {
     }
 }
 
-struct AVPrototype_Previews: PreviewProvider {
+struct AVCallUI_Previews: PreviewProvider {
     static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        AVPrototype(delegate:delegate, call:MLCall.makeDummyCall(0))
+        AVCallUI(delegate:delegate, call:MLCall.makeDummyCall(0))
     }
 }

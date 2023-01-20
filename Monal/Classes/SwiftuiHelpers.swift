@@ -399,7 +399,7 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AVPrototype(delegate:delegate, call:call))
+        host.rootView = AnyView(AVCallUI(delegate:delegate, call:call))
         return host
     }
     

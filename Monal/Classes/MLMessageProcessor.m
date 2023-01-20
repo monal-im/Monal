@@ -112,7 +112,7 @@ static NSMutableDictionary* _typingNotifications;
 #ifdef IS_ALPHA
     //only handle call proposals from users being in our roster
     MLContact* contact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:account.accountNo];
-    if(contact.isInRoster && [messageNode check:@"{urn:xmpp:jingle-message:1}propose"])
+    if(contact.isInRoster && [messageNode check:@"{urn:xmpp:jingle-message:0}propose"])
     {
         if(![messageNode.toUser isEqualToString:account.connectionProperties.identity.jid])
         {
@@ -130,7 +130,7 @@ static NSMutableDictionary* _typingNotifications;
         }
         
         //only allow audio calls for now
-        if([messageNode check:@"{urn:xmpp:jingle-message:1}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=audio>"])
+        if([messageNode check:@"{urn:xmpp:jingle-message:0}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=audio>"])
         {
             DDLogInfo(@"Got incoming JMI propose");
             NSDictionary* callData = @{
@@ -151,9 +151,9 @@ static NSMutableDictionary* _typingNotifications;
     }
     //handle all other JMI events (TODO: add entry to local history, once the UI for this is implemented)
     //only do so if the sender is in our roster
-    else if(contact.isInRoster && [messageNode check:@"{urn:xmpp:jingle-message:1}*"])
+    else if(contact.isInRoster && [messageNode check:@"{urn:xmpp:jingle-message:0}*"])
     {
-        DDLogInfo(@"Got %@ for JMI call %@", [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*$"], [messageNode findFirst:@"{urn:xmpp:jingle-message:1}*@id"]);
+        DDLogInfo(@"Got %@ for JMI call %@", [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*$"], [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id"]);
         if([HelperTools isAppExtension])
             DDLogWarn(@"Ignoring incoming JMI message: we are in the appex which means any outgoing or ongoing call was already terminated");
         else
@@ -168,7 +168,7 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
 #else
-    if([messageNode check:@"{urn:xmpp:jingle-message:1}*"])
+    if([messageNode check:@"{urn:xmpp:jingle-message:0}*"])
     {
         DDLogWarn(@"Ignoring incoming JMI message: not in alpha!");
         return message;

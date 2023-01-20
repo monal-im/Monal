@@ -476,7 +476,7 @@
 {
     DDLogDebug(@"Proposing new call via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
-    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"propose" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
+    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"propose" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.uuid.UUIDString,
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"description" andNamespace:@"urn:xmpp:jingle:apps:rtp:1" withAttributes:@{@"media": @"audio"} andChildren:@[] andData:nil]
@@ -490,7 +490,7 @@
 {
     DDLogDebug(@"Rejecting via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
-    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
+    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.uuid.UUIDString,
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
@@ -505,7 +505,7 @@
 {
     DDLogDebug(@"Accepting via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
-    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"accept" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
+    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"accept" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.uuid.UUIDString,
     } andChildren:@[] andData:nil]];
     [jmiNode setStoreHint];
@@ -517,7 +517,7 @@
 {
     DDLogDebug(@"Finishing via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
-    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
+    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.uuid.UUIDString,
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
@@ -532,7 +532,7 @@
 {
     DDLogDebug(@"Retracting via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
-    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:jingle-message:1" withAttributes:@{
+    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.uuid.UUIDString,
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[

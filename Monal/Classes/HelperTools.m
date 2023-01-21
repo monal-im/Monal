@@ -36,6 +36,7 @@
 #import "MLFiletransfer.h"
 #import "DataLayer.h"
 #import "OmemoState.h"
+#import "MLUDPLogger.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -56,6 +57,7 @@ void logException(NSException* exception)
     [DDLog flushLog];
     DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
+    [MLUDPLogger flushWithTimeout:0.100];
     usleep(1000000);
 }
 

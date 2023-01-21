@@ -48,17 +48,22 @@ static volatile MLUDPLogger* _self;
     if(_self != nil)
     {
         NSCondition* condition = [NSCondition new];
-        //this timeout will trigger if the flush could not be finished in time
-        monal_void_block_t cancel = createTimer(timeout, (^{
+        //this timeout will trigger if the flush could not be finished in time (leeway of 10ms)
+        //use dispatch_source_set_timer() directly instead of createTimer() because we don't want to log anything in here
+        dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+        dispatch_source_set_timer(timer, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout * NSEC_PER_SEC)), DISPATCH_TIME_FOREVER, (uint64_t)(0.010 * NSEC_PER_SEC));
+        dispatch_source_set_event_handler(timer, ^{
             [[self class] logError:@"flush timer triggered!"];
+            dispatch_source_cancel(timer);
             [condition lock];
             [condition signal];
             [condition unlock];
-        }));
+        });
+        dispatch_resume(timer);
         //this block will be executed if all prior blocks managed to send out their messages (e.g. queue is flushed)
         dispatch_async(_self->_send_queue, ^{
             [[self class] logError:@"flush succeeded in time"];
-            cancel();               //stop timer
+            dispatch_source_cancel(timer);      //stop timer
             [condition lock];
             [condition signal];
             [condition unlock];

@@ -19,6 +19,7 @@
 #import "MonalAppDelegate.h"
 #import "ActiveChatsViewController.h"
 #import "MLNotificationQueue.h"
+#import "secrets.h"
 
 @import PushKit;
 @import CallKit;

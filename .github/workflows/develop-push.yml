@@ -32,6 +32,11 @@ jobs:
         run: git fetch --tags
       - name: Checkout submodules
         run: git submodule update -f --init --remote
+      - name: Import TURN secrets
+        run: |
+          if [[ -e "/Users/ci/secrets.monal_alpha" ]]; then
+            echo "#import \"/Users/ci/secrets.monal_alpha\"" > Monal/Classes/secrets.h
+          fi
       - name: Make our build scripts executable
         run: chmod +x ./scripts/build.sh
       - name: Run build

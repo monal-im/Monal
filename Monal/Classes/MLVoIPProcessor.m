@@ -285,7 +285,7 @@ static NSMutableDictionary* _pendingCalls;
 {
     DDLogInfo(@"Initializing WebRTC for: %@", call);
     NSMutableArray* iceServers = [[NSMutableArray alloc] init];
-    if([call.account.connectionProperties.discoveredStunTurnServers count] > 0)
+    /*if([call.account.connectionProperties.discoveredStunTurnServers count] > 0)
     {
         for(NSDictionary* service in call.account.connectionProperties.discoveredStunTurnServers)
             [call.account queryExternalServiceCredentialsFor:service completion:^(id data) {
@@ -300,28 +300,101 @@ static NSMutableDictionary* _pendingCalls;
                 if([iceServers count] == [call.account.connectionProperties.discoveredStunTurnServers count])
                 {
                     DDLogInfo(@"Done processing ICE servers, trying to connect WebRTC session...");
-                    WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers];
-                    webRTCClient.delegate = call;
-                    call.webRTCClient = webRTCClient;
+                    [self loadIceCandidates:call andIceServers:iceServers];
                 }
             }];
     }
-    else
+    else */
+    if([[HelperTools defaultsDB] boolForKey: @"webrtcUseFallbackTurn"])
     {
-        //use google stun server as fallback
-        //TODO: use own stun/turn server instead
-        [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:@[
-            @"stun:stun.l.google.com:19302",
-            @"stun:stun1.l.google.com:19302",
-            @"stun:stun2.l.google.com:19302",
-            @"stun:stun3.l.google.com:19302",
-            @"stun:stun4.l.google.com:19302"
+        DDLogInfo(@"No ICE servers detected, trying to connect WebRTC session using our own STUN servers as fallback...");
+        //use own stun server as fallback
+         [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:@[
+#ifdef IS_ALPHA
+             @"stun:alpha.turn.monal-im.org:3478",
+#else
+             @"stun:eu.prod.turn.monal-im.org:3478",
+#endif
         ]]];
-        DDLogInfo(@"No ICE servers detected, trying to connect WebRTC session using googles STUN servers as fallback...");
-        WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers];
-        webRTCClient.delegate = call;
-        call.webRTCClient = webRTCClient;
+
+        // request turn credentials
+        NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://alpha.turn.monal-im.org/api/v1/challenge/new"]];
+        [urlRequest setTimeoutInterval:3.0];
+        NSURLSessionTask* channelSession = [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
+            if(error != nil || [(NSHTTPURLResponse*)response statusCode] != 200)
+            {
+                DDLogWarn(@"Could not retrieve turn challenge, only using stun: %@", error);
+                [self loadIceCandidates:call andIceServers:iceServers];
+                return;
+            }
+            // parse challenge
+            NSError* challengeJsonErr;
+            NSDictionary* challenge = [NSJSONSerialization JSONObjectWithData:data options:0 error:&challengeJsonErr];
+            if(challengeJsonErr != nil && [challenge objectForKey:@"challenge"] != nil)
+            {
+                DDLogWarn(@"Could not parse turn challenge: %@", challengeJsonErr);
+                [self loadIceCandidates:call andIceServers:iceServers];
+                return;
+            }
+            
+            unsigned long validUntil = [challenge[@"validUntil"] unsignedLongValue];
+            NSMutableData* challengeHmacInput = [NSMutableData dataWithBytes:&validUntil length:sizeof(validUntil)];
+            [challengeHmacInput appendData:[challenge[@"challenge"] dataUsingEncoding:NSUTF8StringEncoding]];
+            
+            // create challenge response
+            NSDictionary* challengeResponseDict = @{
+                @"challenge": challenge,
+                @"appId": TURN_API_SECRET_ID,
+                @"challengeResponse": [HelperTools encodeBase64WithData:[HelperTools sha512HmacForKey:[TURN_API_SECRET dataUsingEncoding:NSUTF8StringEncoding] andData:challengeHmacInput]],
+            };
+            NSError* challengeRespJsonErr;
+            NSData* challengeResp = [NSJSONSerialization dataWithJSONObject:challengeResponseDict options:kNilOptions error:&challengeRespJsonErr];
+            if(challengeRespJsonErr != nil)
+            {
+                DDLogWarn(@"Could not create json challenge reponse: %@", challengeRespJsonErr);
+                [self loadIceCandidates:call andIceServers:iceServers];
+                return;
+            }
+            
+            NSMutableURLRequest* responseRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://alpha.turn.monal-im.org/api/v1/challenge/validate"]];
+            [responseRequest setHTTPMethod:@"POST"];
+            [responseRequest setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+            [responseRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+            [responseRequest setValue:[NSString stringWithFormat:@"%lu", (unsigned long)[challengeResp length]] forHTTPHeaderField:@"Content-Length"];
+            [responseRequest setTimeoutInterval:3.0];
+            [responseRequest setHTTPBody:challengeResp];
+
+            NSURLSessionTask* responseSession = [[NSURLSession sharedSession] dataTaskWithRequest:responseRequest completionHandler:^(NSData* turnCredentialsData, NSURLResponse* response, NSError* error) {
+                if(error != nil || [(NSHTTPURLResponse*)response statusCode] != 200)
+                {
+                    DDLogWarn(@"Could not retrieve turn credentials, only using stun: %@", error);
+                    [self loadIceCandidates:call andIceServers:iceServers];
+                    return;
+                }
+                NSError* turnCredentialsErr;
+                NSDictionary* turnCredentials = [NSJSONSerialization JSONObjectWithData:turnCredentialsData options:0 error:&turnCredentialsErr];
+                if(turnCredentials == nil || turnCredentials[@"username"] == nil || turnCredentials[@"password"] == nil || turnCredentials[@"uris"] == nil)
+                {
+                    DDLogWarn(@"Could not parse turn credentials: %@", turnCredentialsErr);
+                    [self loadIceCandidates:call andIceServers:iceServers];
+                    return;
+                }
+                [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:[turnCredentials objectForKey:@"uris"] username:[turnCredentials objectForKey:@"username"] credential:[turnCredentials objectForKey:@"password"]]];
+                
+                [self loadIceCandidates:call 
+                          andIceServers:iceServers];
+            }];
+            [responseSession resume];
+        }];
+        [channelSession resume];
     }
+}
+
+-(void) loadIceCandidates:(MLCall*) call andIceServers:(NSArray<RTCIceServer*>*) iceServers
+{
+    WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers forceRelay:![[HelperTools defaultsDB] boolForKey:@"webrtcAllowP2P"]];
+    webRTCClient.delegate = call;
+    call.webRTCClient = webRTCClient;
 }
 
 -(void) handleIncomingJMIStanza:(NSNotification*) notification

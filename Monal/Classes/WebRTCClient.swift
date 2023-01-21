@@ -48,10 +48,13 @@ final class WebRTCClient: NSObject {
     }
     
     @objc
-    required init(iceServers: [RTCIceServer]) {
+    required init(iceServers: [RTCIceServer], forceRelay: Bool) {
         let config = RTCConfiguration()
-        config.iceTransportPolicy = .all
-        //config.iceTransportPolicy = .relay
+        if forceRelay {
+            config.iceTransportPolicy = .relay
+        } else {
+            config.iceTransportPolicy = .all
+        }
         config.iceServers = iceServers
         
         // Unified plan is more superior than planB

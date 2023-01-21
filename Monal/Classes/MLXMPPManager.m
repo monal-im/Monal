@@ -60,7 +60,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerHostname"];
         [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerPort"];
         [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerKey"];
-
+        
         [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
         [[HelperTools defaultsDB] synchronize];
     }
@@ -133,6 +133,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(bgImage != nil && [@"CUSTOM" isEqualToString:bgImage])
         [self removeObjectUserSettingsIfSet:@"BackgroundImage"];
     [self removeObjectUserSettingsIfSet:@"ChatBackgrounds"];
+
+    // add STUN / TURN settings
+    [self upgradeBoolUserSettingsIfUnset:@"webrtcAllowP2P" toDefault:YES];
+    [self upgradeBoolUserSettingsIfUnset:@"webrtcUseFallbackTurn" toDefault:YES];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

@@ -81,9 +81,9 @@ const long NotificationPrivacyOptionCnt = 3;
         case 0:
         {
 #ifdef DISABLE_OMEMO
-            return 10 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
+            return 12 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
 #else// DISABLE_OMEMO
-            return 11 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
+            return 13 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
 #endif// DISABLE_OMEMO
         }
         default:
@@ -187,6 +187,16 @@ const long NotificationPrivacyOptionCnt = 3;
                     break;
 #endif// DISABLE_OMEMO
                 }
+                case 14:
+                {
+                    [cell initCell:NSLocalizedString(@"WebRTC: Allow p2p sessions", @"") withToggleDefaultsKey:@"webrtcAllowP2P"];
+                    break;
+                }
+                case 15:
+                {
+                    [cell initCell:NSLocalizedString(@"WebRTC: Allow STUN/TURN fallback", @"") withToggleDefaultsKey:@"webrtcUseFallbackTurn"];
+                    break;
+                }
                 default:
                     unreachable();
                     break;
@@ -240,6 +250,8 @@ const long NotificationPrivacyOptionCnt = 3;
                 }
                 case 12:
                 case 13:
+                case 14:
+                case 15:
                     break;
             }
             break;

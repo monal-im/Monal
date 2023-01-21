@@ -41,20 +41,20 @@ struct AccountPicker: View {
                 let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                 List {
                     ForEach(contacts) { contact in
-                        if let account_entry = DataLayer.sharedInstance().details(forAccount:contact.accountId) {
-                            let account_jid = "\(account_entry["username"] ?? "<unknown>" as NSString)@\(account_entry["domain"] ?? "<unknown>" as NSString)"
-                            let account_contact = MLContact.createContact(fromJid:account_jid, andAccountNo:account_entry["id"] as! NSNumber)
-                            let account_avatar = MLImageManager.sharedInstance().getIconFor(account_contact)!
+                        if let accountEntry = DataLayer.sharedInstance().details(forAccount:contact.accountId) {
+                            let accountJid = "\(accountEntry["username"] ?? "<unknown>" as NSString)@\(accountEntry["domain"] ?? "<unknown>" as NSString)"
+                            let accountDisplayName = MLContact.ownDisplayName(forAccount:MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)!) as String
+                            let accountContact = MLContact.createContact(fromJid:accountJid, andAccountNo:accountEntry["account_id"] as! NSNumber)
                             Button {
                                 appDelegate.activeChats?.call(contact)
                             } label: {
                                 HStack(alignment: .center) {
-                                    Image(uiImage: account_avatar)
+                                    Image(uiImage: MLImageManager.sharedInstance().getIconFor(accountContact)!)
                                         .resizable()
                                         .frame(width: 40, height: 40, alignment: .center)
                                     VStack(alignment: .leading) {
-                                        Text(account_contact.contactDisplayName as String)
-                                        Text(account_contact.contactJid as String).font(.footnote).opacity(0.6)
+                                        Text(accountDisplayName)
+                                        Text(accountJid).font(.footnote).opacity(0.6)
                                     }
                                 }
                             }

@@ -861,6 +861,12 @@ $$
         if(device.unsignedIntValue == self.monalSignalStore.deviceid)
             continue;
         
+        if(self.state.openBundleFetches[encryptForJid] != nil && [self.state.openBundleFetches[encryptForJid] containsObject:device])
+        {
+            DDLogWarn(@"Ignoring deviceid %@ of %@ for KeyTransportElement: bundle fetch still pending...", device, encryptForJid);
+            continue;
+        }
+        
         SignalAddress* address = [[SignalAddress alloc] initWithName:encryptForJid deviceId:(uint32_t)device.unsignedIntValue];
 
         NSData* identity = [self.monalSignalStore getIdentityForAddress:address];

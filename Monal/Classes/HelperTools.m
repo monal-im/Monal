@@ -13,6 +13,7 @@
 #include <os/proc.h>
 #include <objc/runtime.h> 
 #include <objc/message.h>
+#include <objc/objc-exception.h>
 
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
@@ -44,7 +45,11 @@
 @import UIKit;
 @import AVFoundation;
 
-static DDFileLogger* _fileLogger;
+static DDFileLogger* _fileLogger = nil;
+static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
+#if TARGET_OS_MACCATALYST
+static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
+#endif
 
 @interface xmpp()
 -(void) dispatchOnReceiveQueue: (void (^)(void)) operation;
@@ -54,11 +59,16 @@ static DDFileLogger* _fileLogger;
 
 void logException(NSException* exception)
 {
+#if TARGET_OS_MACCATALYST
+    NSString* prefix = @"POSSIBLE_CRASH";
+#else
+    NSString* prefix = @"CRASH";
+#endif
+    //log error and flush all logs
     [DDLog flushLog];
-    DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
+    DDLogError(@"*****************\n%@(%@): %@\nUserInfo: %@\nStack Trace: %@", prefix, [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
     [MLUDPLogger flushWithTimeout:0.100];
-    usleep(1000000);
 }
 
 void swizzle(Class c, SEL orig, SEL new)
@@ -69,6 +79,45 @@ void swizzle(Class c, SEL orig, SEL new)
         class_replaceMethod(c, new, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
     else
     method_exchangeImplementations(origMethod, newMethod);
+}
+
+//this function will only be in use under macos alpha builds to log every exception (even when catched with @try-@catch constructs)
+#if TARGET_OS_MACCATALYST
+static id preprocess(id exception)
+{
+    id preprocessed = exception;
+    if(_oldExceptionPreprocessor != NULL)
+        preprocessed = _oldExceptionPreprocessor(exception);
+    logException(preprocessed);
+    return preprocessed;
+}
+#endif
+
++(void) installExceptionHandler
+{
+    //only install our exception handler if not yet installed
+    _oldExceptionHandler = (volatile void (*)(NSException*))NSGetUncaughtExceptionHandler();
+    if((void*)_oldExceptionHandler != (void*)logException)
+    {
+        DDLogVerbose(@"Replaced unhandled exception handler, old handler: %p, new handler: %p", NSGetUncaughtExceptionHandler(), &logException);
+        NSSetUncaughtExceptionHandler(logException);
+    }
+    
+#if TARGET_OS_MACCATALYST
+    //this is needed for catalyst because catalyst apps are based on NSApplication which will swallow exceptions on the main thread and just continue
+    //see: https://stackoverflow.com/questions/3336278/why-is-raising-an-nsexception-not-bringing-down-my-application
+    //obj exception handling explanation: https://stackoverflow.com/a/28391007/3528174
+    //objc exception implementation: https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-exception.mm.auto.html
+    //objc exception header: https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-exception.h.auto.html
+    //example C++ exception ABI: https://github.com/nicolasbrailo/cpp_exception_handling_abi/tree/master/abi_v12
+    
+    //this will log the exception
+    if(_oldExceptionPreprocessor == NULL)
+        _oldExceptionPreprocessor = objc_setExceptionPreprocessor(preprocess);
+    
+    //this will stop the swallowing
+    [[NSUserDefaults standardUserDefaults] registerDefaults:@{@"NSApplicationCrashOnExceptions": @YES}];
+#endif
 }
 
 +(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func

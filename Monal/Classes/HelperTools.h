@@ -32,6 +32,7 @@ void swizzle(Class c, SEL orig, SEL new);
 
 @interface HelperTools : NSObject
 
++(void) installExceptionHandler;
 +(void) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;

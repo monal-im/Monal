@@ -118,6 +118,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
 -(id) init
 {
+    //someone (suspect: AppKit) resets our exception handler between the call to [MonalAppDelegate initialize] and [MonalAppDelegate init]
+    [HelperTools installExceptionHandler];
+    
     self = [super init];
     _bgTask = UIBackgroundTaskInvalid;
     _wakeupCompletions = [[NSMutableDictionary alloc] init];

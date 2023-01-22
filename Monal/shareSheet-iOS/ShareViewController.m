@@ -38,12 +38,10 @@
 +(void) initialize
 {
     [HelperTools configureLogging];
-    [DDLog flushLog];
+    [HelperTools activityLog];
     
     //log unhandled exceptions
-    NSSetUncaughtExceptionHandler(&logException);
-    
-    [HelperTools activityLog];
+    [HelperTools installExceptionHandler];
     
     //init IPC
     [IPC initializeForProcess:@"ShareSheetExtension"];

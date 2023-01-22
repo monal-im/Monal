@@ -14,12 +14,12 @@
 
 int main(int argc, char *argv[]) {
     @autoreleasepool {
-        //log unhandled exceptions
-        NSSetUncaughtExceptionHandler(&logException);
-
         [HelperTools configureLogging];
         [HelperTools activityLog];
-
+        
+        //log unhandled exceptions
+        [HelperTools installExceptionHandler];
+        
         // check start arguments
         // reset sworim and ipc database for UI Tests
         if([NSProcessInfo.processInfo.arguments containsObject:@"--reset"])
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
         // invalidate account states
         if([NSProcessInfo.processInfo.arguments containsObject:@"--invalidateAccountStates"])
             [[DataLayer sharedInstance] invalidateAllAccountStates];
-        int retVal = UIApplicationMain(argc, argv, nil, NSStringFromClass([MonalAppDelegate class]));
-        return retVal;
+        
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([MonalAppDelegate class]));
     }
 }

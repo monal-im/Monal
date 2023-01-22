@@ -441,15 +441,13 @@ static BOOL warnUnclean = NO;
 
 +(void) initialize
 {
-    handlers = [[NSMutableArray alloc] init];
-    
     [HelperTools configureLogging];
-    [DDLog flushLog];
+    [HelperTools activityLog];
     
     //log unhandled exceptions
-    NSSetUncaughtExceptionHandler(&logException);
+    [HelperTools installExceptionHandler];
     
-    [HelperTools activityLog];
+    handlers = [[NSMutableArray alloc] init];
     
     //init IPC
     [IPC initializeForProcess:@"NotificationServiceExtension"];

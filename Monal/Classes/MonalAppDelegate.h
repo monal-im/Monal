@@ -23,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) ActiveChatsViewController* _Nullable activeChats;
 @property (nonatomic, strong) MLVoIPProcessor* _Nullable voipProcessor;
 
+-(UIViewController*) getTopViewController;
 -(void) updateUnread;
 -(void) handleXMPPURL:(NSURL* _Nonnull) url;
 -(void) openChatOfContact:(MLContact* _Nullable) contact;

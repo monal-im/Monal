@@ -493,7 +493,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate.window.rootViewController dismissViewControllerAnimated:NO completion:^{
+    [[appDelegate getTopViewController] dismissViewControllerAnimated:NO completion:^{
         UIViewController* accountPickerController = [[SwiftuiInterface new] makeAccountPickerForContacts:contacts];;
         [self presentViewController:accountPickerController animated:YES completion:^{}];
     }];
@@ -502,7 +502,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) presentCall:(MLCall*) call
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate.window.rootViewController dismissViewControllerAnimated:NO completion:^{
+    [[appDelegate getTopViewController] dismissViewControllerAnimated:NO completion:^{
         UIViewController* callViewController = [[SwiftuiInterface new] makeCallScreenForCall:call];
         callViewController.modalPresentationStyle = UIModalPresentationFullScreen;
         [self presentViewController:callViewController animated:NO completion:^{}];
@@ -519,7 +519,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     dispatch_async(dispatch_get_main_queue(), ^{
         DDLogVerbose(@"presenting chat with contact: %@", contact);
         MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-        [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
+        [[appDelegate getTopViewController] dismissViewControllerAnimated:YES completion:^{
             // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
             if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
             {
@@ -914,7 +914,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_id_block_t) callback
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate.window.rootViewController dismissViewControllerAnimated:YES completion:^{
+    [[appDelegate getTopViewController] dismissViewControllerAnimated:YES completion:^{
         UIViewController* registerViewController = [[SwiftuiInterface new] makeAccountRegistration:@{
             @"host": nilWrapper(host),
             @"username": nilWrapper(username),

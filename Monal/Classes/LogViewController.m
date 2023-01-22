@@ -12,6 +12,7 @@
 #import "DataLayer.h"
 #import "MBProgressHUD.h"
 #import "MLXMPPManager.h"
+#import "MLUDPLogger.h"
 
 
 @interface LogViewController ()
@@ -47,7 +48,7 @@ DDLogFileInfo* _logInfo;
     self.logUDPAESKey.delegate = self;
     
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
-    [self.view addGestureRecognizer:tapGestureRecognizer];    
+    [self.view addGestureRecognizer:tapGestureRecognizer];  
 }
 
 -(void) viewDidAppear:(BOOL)animated
@@ -109,15 +110,25 @@ DDLogFileInfo* _logInfo;
  */
 
 -(IBAction) rewindButton:(id)sender {
-    [self scrollToTop];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        [DDLog flushLog];
+        [MLUDPLogger flushWithTimeout:0.100];
+        $call($newHandler(self, IDontKwnowThis));
+    });
 }
 
 -(IBAction) fastForwardButton:(id)sender {
-    [self scrollToBottom];;
+    //[[NSArray arrayWithObject:@"object"] objectAtIndex:1];
+    id delegate = NSClassFromString(@"MonalAppDelegate");
+    SEL sel = NSSelectorFromString(@"UnknownSelectorExample");
+    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:sel]];
+    [inv setTarget:delegate];
+    [inv setSelector:sel];
+    [inv invoke];
 }
 
 -(IBAction) refreshButton:(id)sender {
-    [self reloadLog];
+    NSAssert(NO, @"assertion_example");
 }
 
 -(void) didReceiveMemoryWarning

@@ -257,12 +257,15 @@ enum msgSentState {
 {
     if(self.callButton != nil)
     {
-        MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-        MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
-        if(activeCall != nil)
-            self.callButton.image = [UIImage systemImageNamed:@"phone.connection.fill"];
-        else
-            self.callButton.image = [UIImage systemImageNamed:@"phone"];
+        //this has to be done in the main thread because it's ui related
+        [HelperTools dispatchSyncReentrant:^{
+            MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+            MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
+            if(activeCall != nil)
+                self.callButton.image = [UIImage systemImageNamed:@"phone.connection.fill"];
+            else
+                self.callButton.image = [UIImage systemImageNamed:@"phone"];
+        } onQueue:dispatch_get_main_queue()];
     }
 }
 

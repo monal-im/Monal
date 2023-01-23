@@ -66,8 +66,8 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
     
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
-    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
-    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
     attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~]+)([=~])([^>]+)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
 
 //     testcases for stanza
@@ -318,7 +318,8 @@ static NSRegularExpression* attributeFilterRegex;
 //"|double" --> convert xml string to NSNumber containing double
 //"|datetime" --> convert xml datetime string to NSDate
 //"|base64" --> convert base64 encoded xml string to NSData
-//"|uuid" --> convert xml string to NSUUID
+//"|uuid" --> interprete xml string as NSUUID
+//"|uuidcast" --> try to interprete xml string as UUID and convert xml string to NSUUID via sha256 transformation, if not
 -(NSArray*) find:(NSString* _Nonnull) queryString, ... NS_FORMAT_FUNCTION(1, 2)
 {
     va_list args;
@@ -634,6 +635,13 @@ static NSRegularExpression* attributeFilterRegex;
         return [HelperTools dataWithBase64EncodedString:string];
     else if([command isEqualToString:@"uuid"])
         return [[NSUUID alloc] initWithUUIDString:string];
+    else if([command isEqualToString:@"uuidcast"])
+    {
+        NSUUID* uuid = [[NSUUID alloc] initWithUUIDString:string];
+        if(uuid != nil)
+            return uuid;
+        return [HelperTools stringToUUID:string];
+    }
     else
         return string;
 }

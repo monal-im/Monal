@@ -92,6 +92,9 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSData* _Nullable) sha512HmacForKey:(NSData* _Nullable) key andData:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha512HmacForKey:(NSString* _Nullable) key andData:(NSString* _Nullable) data;
 
++(NSUUID*) dataToUUID:(NSData*) data;
++(NSUUID*) stringToUUID:(NSString*) data;
+
 +(NSString*) encodeBase64WithString:(NSString*) strData;
 +(NSString*) encodeBase64WithData:(NSData*) objData;
 +(NSData*) dataWithBase64EncodedString:(NSString*) string;

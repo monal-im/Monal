@@ -50,6 +50,8 @@ struct AVCallUI: View {
                                 Text("")
                         }
                         
+                        Spacer().frame(width: 20)
+                        
                         Text(contact.contactDisplayName as String)
                             .font(.largeTitle)
                             .foregroundColor(.primary)

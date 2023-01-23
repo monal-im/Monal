@@ -222,10 +222,10 @@ static NSMutableDictionary* _pendingCalls;
 
 -(void) processIncomingCall:(NSDictionary* _Nonnull) userInfo withCompletion:(void (^ _Nullable)(void)) completion
 {
-    //TODO: handle jmi propose coming from other devices on our account
+    //TODO: handle jmi propose coming from other devices on our account (see TODO in MLMessageProcessor.m)
     XMPPMessage* messageNode =  userInfo[@"messageNode"];
     NSNumber* accountNo = userInfo[@"accountNo"];
-    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id|uuid"];
+    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id|uuidcast"];
     MLAssert(uuid != nil, @"call uuid invalid!", (@{@"propose@id": nilWrapper([messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id"])}));
     
     MLCall* call = [[MLCall alloc] initWithUUID:uuid contact:[MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo] andDirection:MLCallDirectionIncoming];
@@ -326,34 +326,24 @@ static NSMutableDictionary* _pendingCalls;
     MLAssert(messageNode != nil, @"messageNode is nil in handleIncomingJMIStanza!", notification.userInfo);
     xmpp* account = notification.object;
     MLAssert(account != nil, @"account is nil in handleIncomingJMIStanza!", notification.userInfo);
-    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id|uuid"];
+    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id|uuidcast"];
     MLAssert(uuid != nil, @"call uuid invalid!", (@{@"*@id": nilWrapper([messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id"])}));
     MLCall* call = [self getCallForUUID:uuid];
     if(call == nil)
     {
         DDLogWarn(@"Ignoring unexpected JMI stanza for unknown call: %@", messageNode);
+        //TODO: log action in history db (see TODO in MLMessageProcessor.m)
         return;
     }
         
     DDLogInfo(@"Got new incoming JMI stanza for call: %@", call);
     //TODO: handle tie breaking!
-    //TODO: handle jmi stanzas coming from other devices on our account
     if(call.direction == MLCallDirectionOutgoing && [messageNode check:@"{urn:xmpp:jingle-message:0}accept"])
     {
         if(call.jmiAccept != nil)
         {
             //TODO: handle moving calls between own devices
-            DDLogWarn(@"Someone tried to accept an already accepted call, ignoring this jmi accept!");
-            return;
-        }
-        
-        //handle accept on other device
-        if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
-        {
-            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonAnsweredElsewhere];
-            call.finishReason = MLCallFinishReasonAnsweredElsewhere;
-            [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
-            [self removeCall:call];
+            DDLogWarn(@"Someone tried to accept an already accepted outgoing call, ignoring this jmi accept!");
             return;
         }
         
@@ -361,17 +351,59 @@ static NSMutableDictionary* _pendingCalls;
         call.fullRemoteJid = messageNode.from;
         call.jmiAccept = messageNode;
     }
-    else if(call.direction == MLCallDirectionOutgoing && [messageNode check:@"{urn:xmpp:jingle-message:0}reject"])
+    else if(call.direction == MLCallDirectionIncoming && [messageNode check:@"{urn:xmpp:jingle-message:0}accept"])
     {
-        if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+        if(![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
         {
-            DDLogWarn(@"Ignoring bogus jmi reject coming from other device on our account...");
+            DDLogWarn(@"Ignoring bogus jmi accept of incoming call NOT coming from other device on our account...");
             return;
         }
         if(call.jmiAccept != nil)
         {
-            DDLogWarn(@"Remote did try to reject already accepted call");
-            [call end];
+            //TODO: handle moving calls between own devices
+            DDLogWarn(@"Someone tried to accept an already accepted incoming call, ignoring this jmi accept!");
+            return;
+        }
+        
+        //handle accept on other device
+        [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonAnsweredElsewhere];
+        call.finishReason = MLCallFinishReasonAnsweredElsewhere;
+        [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
+        [self removeCall:call];
+    }
+    else if(call.direction == MLCallDirectionIncoming && [messageNode check:@"{urn:xmpp:jingle-message:0}reject"])
+    {
+        if(![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+        {
+            DDLogWarn(@"Ignoring bogus jmi reject of incoming call NOT coming from other device on our account...");
+            return;
+        }
+        if(call.jmiAccept != nil)
+        {
+            DDLogWarn(@"Other device did try to reject already accepted call, ignoring this jmi reject!");
+            return;
+        }
+        else
+        {
+            DDLogVerbose(@"Marking incoming call as rejected...");
+            //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
+            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonDeclinedElsewhere];
+            call.finishReason = MLCallFinishReasonRejected;
+            [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
+            [self removeCall:call];
+        }
+    }
+    else if(call.direction == MLCallDirectionOutgoing && [messageNode check:@"{urn:xmpp:jingle-message:0}reject"])
+    {
+        if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+        {
+            DDLogWarn(@"Ignoring bogus jmi reject of outgoing call coming from other device on our account...");
+            return;
+        }
+        if(call.jmiAccept != nil)
+        {
+            DDLogWarn(@"Remote did try to reject already accepted call, ignoring this jmi reject!");
+            return;
         }
         else
         {
@@ -387,23 +419,29 @@ static NSMutableDictionary* _pendingCalls;
     {
         if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
         {
-            DDLogWarn(@"Ignoring bogus jmi retract coming from other device on our account...");
+            DDLogWarn(@"Ignoring bogus jmi retract of incoming call coming from other device on our account...");
             return;
         }
         if(call.jmiAccept != nil)
         {
             DDLogWarn(@"Remote did try to retract already accepted call");
-            [call end];
+            return;
         }
         else
         {
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
-            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
             call.finishReason = MLCallFinishReasonUnanswered;
             [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
             [self removeCall:call];
         }
         
+    }
+    //this should never happen: one cannot retract a call initiated on one device using another device
+    else if(call.direction == MLCallDirectionOutgoing && [messageNode check:@"{urn:xmpp:jingle-message:0}retract"])
+    {
+        DDLogError(@"This jmi retract should never happen: one cannot retract a call initiated on one device using another device!");
+        return;
     }
     else if([messageNode check:@"{urn:xmpp:jingle-message:0}finish"])
     {

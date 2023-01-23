@@ -1482,6 +1482,20 @@ static id preprocess(id exception)
 	return [self hexadecimalString:[self sha512HmacForKey:[key dataUsingEncoding:NSUTF8StringEncoding] andData:[data dataUsingEncoding:NSUTF8StringEncoding]]];
 }
 
++(NSUUID*) dataToUUID:(NSData*) data
+{
+    NSData* hash = [self sha256:data];
+    uint8_t* bytes = (uint8_t*)hash.bytes;
+    uint16_t* version = (uint16_t*)(bytes + 6);
+    *version = (*version & 0x0fff) | 0x4000;
+    return [[NSUUID alloc] initWithUUIDBytes:bytes];
+}
+
++(NSUUID*) stringToUUID:(NSString*) data
+{
+    return [self dataToUUID:[data dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
 #pragma mark base64, hex and other data formats
 
 +(NSString*) encodeBase64WithString:(NSString*) strData

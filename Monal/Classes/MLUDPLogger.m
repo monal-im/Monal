@@ -279,9 +279,12 @@ static volatile MLUDPLogger* _self;
     [data appendData:payload.authTag];
     [data appendData:payload.body];
     
-    dispatch_async(_send_queue, ^{
-        [self sendData:data withOriginalMessage:logMsg];
-    });
+    if(data.length > 65000)
+        [[self class] logError:@"not sending message, too big: %lu", (unsigned long)data.length];
+    else
+        dispatch_async(_send_queue, ^{
+            [self sendData:data withOriginalMessage:logMsg];
+        });
 }
 
 -(void) sendData:(NSData*) data withOriginalMessage:(NSString*) msg

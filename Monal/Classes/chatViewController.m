@@ -2910,7 +2910,8 @@ enum msgSentState {
     [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error)
     {
         NSString* body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        MLOgHtmlParser* ogParser = [[MLOgHtmlParser alloc] initWithHtml:body];
+        NSURL* baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", row.url.scheme, row.url.host, row.url.path]];
+        MLOgHtmlParser* ogParser = [[MLOgHtmlParser alloc] initWithHtml:body andBaseUrl:baseURL];
         NSString* text = nil;
         NSURL* image = nil;
         if(ogParser != nil)
@@ -2922,17 +2923,17 @@ enum msgSentState {
         {
             row.previewText = text;
             row.previewImage = image;
-            [[DataLayer sharedInstance] setMessageId:row.messageId previewText:[row.previewText copy] andPreviewImage:[row.previewImage.absoluteString copy]];
-            //reload cells
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-            });
         }
         else
         {
             row.previewText = @"";
             row.previewImage = [NSURL URLWithString:@""];
         }
+        [[DataLayer sharedInstance] setMessageId:row.messageId previewText:[row.previewText copy] andPreviewImage:[row.previewImage.absoluteString copy]];
+        //reload cells
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+        });
     }] resume];
 }
 

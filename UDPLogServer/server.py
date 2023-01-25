@@ -6,6 +6,7 @@ import ipaddress
 import json
 import zlib
 import hashlib
+import struct
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -64,6 +65,7 @@ parser.add_argument("-k", "--key", type=str, required=True, metavar='KEY', help=
 parser.add_argument("-l", "--listen", type=str, metavar='HOSTNAME', help="Local hostname or IP to listen on (Default: :: e.g. any)", default="::")
 parser.add_argument("-p", "--port", type=int, metavar='PORT', help="Port to listen on (Default: 5555)", default=5555)
 parser.add_argument("-f", "--file", type=str, required=False, metavar='FILE', help="Filename to write the log to (in addition to stdout)")
+parser.add_argument("-r", "--rawfile", type=str, required=False, metavar='RAW', help="Filename to write the RAW log to")
 args = parser.parse_args()
 
 # "derive" 256 bit key
@@ -78,10 +80,13 @@ last_counter = None
 last_processID = None
 
 logfd = None
+rawfd = None
 if args.file:
     print(colorize("Opening logfile '%s' for writing..." % args.file, ansi=15, ansi_bg=0), flush=True)
     logfd = open(args.file, "w")
-
+if args.rawfile:
+    print(colorize("Opening RAW logfile '%s' for writing..." % args.rawfile, ansi=15, ansi_bg=0), flush=True)
+    rawfd = open(args.rawfile, "wb")
 while True:
     # receive raw udp packet
     payload, client_address = sock.recvfrom(65536)
@@ -95,6 +100,11 @@ while True:
     
     # decompress raw data
     payload = zlib.decompress(payload, zlib.MAX_WBITS | 16)
+    
+    # log to RAW file
+    if rawfd:
+        size = struct.pack("!Q", len(payload))
+        rawfd.write(size+payload)
     
     # decode raw json encoded data
     decoded = json.loads(str(payload, "UTF-8"))

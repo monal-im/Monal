@@ -2911,10 +2911,17 @@ enum msgSentState {
     {
         NSString* body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         MLOgHtmlParser* ogParser = [[MLOgHtmlParser alloc] initWithHtml:body];
+        NSString* text = nil;
+        NSURL* image = nil;
         if(ogParser != nil)
         {
-            row.previewText = [ogParser getOgTitle];
-            row.previewImage = [ogParser getOgImage];
+            text = [ogParser getOgTitle];
+            image = [ogParser getOgImage];
+        }
+        if((text != nil && text.length > 0) || (image != nil && image.absoluteString.length > 0))
+        {
+            row.previewText = text;
+            row.previewImage = image;
             [[DataLayer sharedInstance] setMessageId:row.messageId previewText:[row.previewText copy] andPreviewImage:[row.previewImage.absoluteString copy]];
             //reload cells
             dispatch_async(dispatch_get_main_queue(), ^{

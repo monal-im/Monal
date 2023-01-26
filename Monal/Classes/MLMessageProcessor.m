@@ -277,8 +277,11 @@ static NSMutableDictionary* _typingNotifications;
     {
         ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
         actualFrom = messageNode.fromResource;
+        //mam catchups will contain a muc#user item listing the jid of the participant
+        //this can't be reconstructed from *current* participant lists because someone new could have taken the same nick
+        //we don't accept this in non-mam context to make sure this can't be spoofed somehow
         participantJid = [messageNode findFirst:@"/<type=groupchat>/{http://jabber.org/protocol/muc#user}x/item@jid"];
-        if(participantJid == nil)
+        if(![outerMessageNode check:@"{urn:xmpp:mam:2}result"] || participantJid == nil)
         {
             NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo];
             participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;

@@ -842,9 +842,13 @@ $$
 
         //add encryption for all of our recipients' devices
         for(NSString* recipient in contactDeviceMap)
+        {
+            DDLogVerbose(@"Adding encryption for devices of %@: %@", recipient, contactDeviceMap[recipient]);
             [self addEncryptionKeyForAllDevices:contactDeviceMap[recipient] encryptForJid:recipient withEncryptedPayload:encryptedPayload withXMLHeader:header];
+        }
         
         //add encryption for all of our own devices
+        DDLogVerbose(@"Adding encryption for OWN (%@) devices: %@", self.account.connectionProperties.identity.jid, myDevices);
         [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self.account.connectionProperties.identity.jid withEncryptedPayload:encryptedPayload withXMLHeader:header];
 
         [encrypted addChildNode:header];

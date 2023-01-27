@@ -312,12 +312,6 @@
                 @"newAudioSession": nilWrapper(audioSession),
                 @"call": self,
             }));
-//         if(audioSession == nil)
-//             MLAssert(_audioSession != nil, @"Audio session should never be DEactivated without activating first!", (@{
-//                 @"oldAudioSession": nilWrapper(_audioSession),
-//                 @"newAudioSession": nilWrapper(audioSession),
-//                 @"call": self,
-//             }));
         AVAudioSession* oldSession = _audioSession;
         _audioSession = audioSession;
         
@@ -382,7 +376,8 @@
             if(wasConnected)
             {
                 [self sendJmiFinishWithReason:@"success"];
-                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
+                //this is not needed because this case is always looped through cxprovider endCallAction
+                //[self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
                 self.finishReason = MLCallFinishReasonNormal;
             }
             else
@@ -402,7 +397,8 @@
                 if(wasConnected)
                 {
                     [self sendJmiFinishWithReason:@"success"];
-                    [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
+                    //this is not needed because this case is always looped through cxprovider endCallAction
+                    //[self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
                     if(self.finishReason == MLCallFinishReasonUnknown)
                         self.finishReason = MLCallFinishReasonNormal;
                 }
@@ -501,6 +497,17 @@
             [[MLXMLNode alloc] initWithElement:@"busy"]
         ] andData:nil]
     ] andData:nil]];
+    [jmiNode setStoreHint];
+    [self.account send:jmiNode];
+}
+
+-(void) sendJmiRinging
+{
+    DDLogDebug(@"Ringing via JMI: %@", self);
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"ringing" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
+        @"id": self.uuid.UUIDString,
+    } andChildren:@[] andData:nil]];
     [jmiNode setStoreHint];
     [self.account send:jmiNode];
 }
@@ -633,7 +640,7 @@
         case RTCIceConnectionStateConnected:
             DDLogInfo(@"New WebRTC ICE state: connected, falling through to completed...");
         case RTCIceConnectionStateCompleted:
-            DDLogInfo(@"New WebRTC ICE state: connected: %@", self);
+            DDLogInfo(@"New WebRTC ICE state: completed: %@", self);
             self.isConnected = YES;
             //at this stage this means the call is incoming (--> fulfill callkit answer action to update ui to reflect connected call)
             if(self.direction == MLCallDirectionIncoming)
@@ -650,18 +657,16 @@
             break;
         case RTCIceConnectionStateDisconnected:
             DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
-            self.webRTCClient = nil;            //make sure we don't create a webrtc.close loop via handleEndCallAction
-            [self handleEndCallAction];
+            [self end];
             break;
         case RTCIceConnectionStateFailed:
             DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
             [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
-            self.webRTCClient = nil;            //make sure we don't create a webrtc.close loop via handleEndCallAction
             [self handleEndCallAction];
+            break;
+        //all following states can be ignored
         case RTCIceConnectionStateClosed:
             DDLogInfo(@"New WebRTC ICE state: closed: %@", self);
-            self.webRTCClient = nil;            //make sure we don't create a webrtc.close loop via handleEndCallAction
-            [self handleEndCallAction];
             break;
         case RTCIceConnectionStateNew:
             DDLogInfo(@"New WebRTC ICE state: new: %@", self);

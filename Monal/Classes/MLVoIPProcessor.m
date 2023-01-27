@@ -55,6 +55,7 @@ static NSMutableDictionary* _pendingCalls;
 -(void) handleEndCallAction;
 -(void) sendJmiReject;
 -(void) sendJmiPropose;
+-(void) sendJmiRinging;
 @end
 
 
@@ -238,6 +239,15 @@ static NSMutableDictionary* _pendingCalls;
     [self addCall:call];
     
     [self.cxProvider reportNewIncomingCallWithUUID:uuid update:[self constructUpdateForCall:call] completion:^(NSError *error) {
+        //add our completion handler to handler queue to initiate xmpp connections
+        //this must be done in main thread because the app delegate is only allowed in main thread
+        dispatch_async(dispatch_get_main_queue(), ^{
+            MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+            [appDelegate incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
+                DDLogWarn(@"VoIP push wakeup handler timed out");
+            }];
+        });
+        
         if(error != nil)
         {
             DDLogError(@"Call disallowed by system: %@", error);
@@ -249,15 +259,6 @@ static NSMutableDictionary* _pendingCalls;
         {
             DDLogDebug(@"Call reported successfully using CallKit, initializing xmpp and WebRTC now...");
             
-            //add our completion handler to handler queue to initiate xmpp connections
-            //this must be done in main thread because the app delegate is only allowed in main thread
-            dispatch_async(dispatch_get_main_queue(), ^{
-                MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-                [appDelegate incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
-                    DDLogWarn(@"VoIP push wakeup handler timed out");
-                }];
-            });
-            
             //initialize webrtc class (ask for external service credentials, gather ice servers etc.) for call as soon as the callkit ui is shown
             //this will be done once the app delegate started to connect our xmpp accounts above
             //do this in an extra thread to not block this callback thread (could be main thread or otherwise restricted by apple)
@@ -267,6 +268,9 @@ static NSMutableDictionary* _pendingCalls;
                 //outgoing iq messages are not queued in all cases (e.g. non-smacks reconnect), hence this waiting loop
                 while(call.account.accountState < kStateBound)
                     [NSThread sleepForTimeInterval:0.250];
+                
+                DDLogDebug(@"Account is connected, now send jmi ringing message and really initialize WebRTC...");
+                [call sendJmiRinging];
                 [self initWebRTCForPendingCall:call];
             });
         }
@@ -368,7 +372,7 @@ static NSMutableDictionary* _pendingCalls;
         //handle accept on other device
         [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonAnsweredElsewhere];
         call.finishReason = MLCallFinishReasonAnsweredElsewhere;
-        [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
+        [call handleEndCallAction];     //direct call, needed after reportCallWithUUID:endedAtDate:reason:
         [self removeCall:call];
     }
     else if(call.direction == MLCallDirectionIncoming && [messageNode check:@"{urn:xmpp:jingle-message:0}reject"])
@@ -389,7 +393,7 @@ static NSMutableDictionary* _pendingCalls;
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonDeclinedElsewhere];
             call.finishReason = MLCallFinishReasonRejected;
-            [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
+            [call handleEndCallAction];     //direct call, needed after reportCallWithUUID:endedAtDate:reason:
             [self removeCall:call];
         }
     }
@@ -409,9 +413,9 @@ static NSMutableDictionary* _pendingCalls;
         {
             DDLogVerbose(@"Marking outgoing call as rejected...");
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
-            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+            [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
             call.finishReason = MLCallFinishReasonRejected;
-            [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
+            [call handleEndCallAction];     //direct call, needed after reportCallWithUUID:endedAtDate:reason:
             [self removeCall:call];
         }
     }
@@ -432,7 +436,7 @@ static NSMutableDictionary* _pendingCalls;
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
             call.finishReason = MLCallFinishReasonUnanswered;
-            [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
+            [call handleEndCallAction];     //direct call, needed after reportCallWithUUID:endedAtDate:reason:
             [self removeCall:call];
         }
         

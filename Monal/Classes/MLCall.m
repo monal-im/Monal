@@ -58,6 +58,7 @@
 @interface MLVoIPProcessor()
 @property (nonatomic, strong) CXCallController* _Nullable callController;
 @property (nonatomic, strong) CXProvider* _Nullable cxProvider;
+-(void) removeCall:(MLCall*) call;
 @end
 
 @implementation MLCall
@@ -109,8 +110,11 @@
         if(error != nil)
         {
             DDLogError(@"Error requesting end call transaction: %@", error);
-            //TODO: is that needed here?
-            //[self.voipProcessor removeCall:self];
+            
+            //try to do this "manually" without looping through callkit
+            [self handleEndCallAction];
+            [self.voipProcessor removeCall:self];
+            
             return;
         }
         else

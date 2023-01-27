@@ -22,6 +22,7 @@ func resourceRowElement(_ k: String, _ v: String, space: CGFloat = 5) -> some Vi
 struct ContactResources: View {
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     @State var contactVersionInfos: [String:ObservableKVOWrapper<MLContactSoftwareVersionInfo>]
+    @State private var showCaps: String?
 
     init(contact: ObservableKVOWrapper<MLContact>, previewMock: [String:ObservableKVOWrapper<MLContactSoftwareVersionInfo>]? = nil) {
         _contact = StateObject(wrappedValue: contact)
@@ -49,6 +50,29 @@ struct ContactResources: View {
                         resourceRowElement("Client Name:", versionInfo.appName ?? "")
                         resourceRowElement("Client Version:", versionInfo.appVersion ?? "")
                         resourceRowElement("OS:", versionInfo.platformOs ?? "")
+                    }.onTapGesture(count: 2, perform: {
+                        showCaps = versionInfo.resource
+                    })
+                }
+            }
+        }
+        .richAlert(isPresented:$showCaps, title:Text("XMPP Capabilities")) { resource in
+            VStack(alignment: .leading) {
+                Text("The resource '\(resource)' has the following capabilities:")
+                    .font(Font.body.weight(.semibold))
+                Spacer()
+                    .frame(height: 20)
+                Section {
+                    let capsVer = DataLayer.sharedInstance().getVerForUser(self.contact.contactJid, andResource:resource, onAccountNo:self.contact.accountId)
+                    let caps = Array(DataLayer.sharedInstance().getCapsforVer(capsVer) as! Set<String>)
+                    VStack(alignment: .leading) {
+                        ForEach(caps, id: \.self) { cap in
+                            Text(cap)
+                                .font(.system(.footnote, design:.monospaced))
+                            if cap != caps.last {
+                                Divider()
+                            }
+                        }
                     }
                 }
             }

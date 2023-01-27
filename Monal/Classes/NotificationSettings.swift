@@ -51,7 +51,7 @@ struct NotificationSettings: View {
                         buildLabel(Text("Apple Push Service"), isWorking: self.applePushEnabled);
                         Divider()
                         Text("Apple push service should always be on. If it is off, your device can not talk to Apple's server.").font(.footnote)
-                    }.onTapGesture(count: 5, perform: {
+                    }.onTapGesture(count: 2, perform: {
                         showPushToken = true
                     }).alert(isPresented: $showPushToken) {
                         (self.applePushEnabled == true) ?

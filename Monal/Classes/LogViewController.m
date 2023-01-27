@@ -82,12 +82,14 @@ DDLogFileInfo* _logInfo;
     if(dbFile == nil)
         return;
     UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:@[[NSURL fileURLWithPath:dbFile]] applicationActivities:nil];
+    shareController.popoverPresentationController.sourceView = self.view;
     [self presentViewController:shareController animated:YES completion:^{}];
 }
 
 -(IBAction) shareAction:(id)sender
 {
     UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:@[[NSURL fileURLWithPath:_logInfo.filePath]] applicationActivities:nil];
+    shareController.popoverPresentationController.sourceView = self.view;
     [self presentViewController:shareController animated:YES completion:^{}];
 }
 

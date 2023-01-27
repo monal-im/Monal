@@ -43,18 +43,20 @@ struct ContactDetailsHeader: View {
                 .buttonStyle(BorderlessButtonStyle())
             }
             //only show account jid if more than one is configured
-            if MLXMPPManager.sharedInstance().connectedXMPP.count > 1 {
+            if MLXMPPManager.sharedInstance().connectedXMPP.count > 1 && !contact.isSelfChat {
                 Text("Account: \(MLXMPPManager.sharedInstance().getConnectedAccount(forID:contact.accountId)!.connectionProperties.identity.jid)")
             }
             
-            Spacer()
-                .frame(height: 20)
-            if(!contact.isGroup) {
-                if((contact.lastInteractionTime as Date).timeIntervalSince1970 > 0) {
-                    Text(String(format: NSLocalizedString("Last seen: %@", comment: ""),
-                        DateFormatter.localizedString(from: contact.lastInteractionTime, dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short)))
-                } else {
-                    Text(String(format: NSLocalizedString("Last seen: %@", comment: ""), NSLocalizedString("now", comment: "")))
+            if !contact.isSelfChat {
+                Spacer()
+                    .frame(height: 20)
+                if(!contact.isGroup) {
+                    if((contact.lastInteractionTime as Date).timeIntervalSince1970 > 0) {
+                        Text(String(format: NSLocalizedString("Last seen: %@", comment: ""),
+                            DateFormatter.localizedString(from: contact.lastInteractionTime, dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short)))
+                    } else {
+                        Text(String(format: NSLocalizedString("Last seen: %@", comment: ""), NSLocalizedString("now", comment: "")))
+                    }
                 }
             }
             

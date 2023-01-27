@@ -31,6 +31,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @property (readonly) NSString* id;     //for Identifiable protocol
 
+@property (nonatomic, assign) BOOL isSelfChat;
 @property (nonatomic, assign) BOOL isInRoster;
 @property (nonatomic, assign) BOOL isSubscribedTo;
 @property (nonatomic, assign) BOOL isSubscribedFrom;

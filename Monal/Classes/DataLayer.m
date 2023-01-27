@@ -233,24 +233,6 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSString*) jidOfAccount:(NSNumber*) accountNo
-{
-    return [self.db idReadTransaction:^{
-        NSString* query = @"SELECT username, domain FROM account WHERE account_id=?;";
-        NSMutableArray* accountDetails = [self.db executeReader:query andArguments:@[accountNo]];
-        
-        if(accountDetails == nil)
-            return (NSString*)nil;
-        
-        NSString* accountJid = nil;
-        if(accountDetails.count > 0) {
-            NSDictionary* firstRow = [accountDetails objectAtIndex:0];
-            accountJid = [NSString stringWithFormat:@"%@@%@", [firstRow objectForKey:kUsername], [firstRow objectForKey:kDomain]];
-        }
-        return accountJid;
-    }];
-}
-
 -(BOOL) updateAccounWithDictionary:(NSDictionary*) dictionary
 {
     return [self.db boolWriteTransaction:^{
@@ -272,7 +254,10 @@ static NSDateFormatter* dbFormatter;
             [dictionary objectForKey:kSupportsSasl2],
             [dictionary objectForKey:kAccountID],
         ];
-        return (BOOL)[self.db executeNonQuery:query andArguments:params];
+        BOOL retval = [self.db executeNonQuery:query andArguments:params];
+        //add self-chat
+        [self addContact:[NSString stringWithFormat:@"%@@%@", dictionary[kUsername], dictionary[kDomain]] forAccount:dictionary[kAccountID] nickname:nil];
+        return retval;
     }];
 }
 
@@ -298,6 +283,8 @@ static NSDateFormatter* dbFormatter;
         if(result == YES) {
             NSNumber* accountID = [self.db lastInsertId];
             DDLogInfo(@"Added account %@ to account table with accountNo %@", [dictionary objectForKey:kUsername], accountID);
+            //add self-chat
+            [self addContact:[NSString stringWithFormat:@"%@@%@", dictionary[kUsername], dictionary[kDomain]] forAccount:accountID nickname:nil];
             return accountID;
         } else {
             return (NSNumber*)nil;
@@ -1830,10 +1817,6 @@ static NSDateFormatter* dbFormatter;
         return;
     
     [self.db voidWriteTransaction:^{
-        NSString* accountJid = [self jidOfAccount:accountNo];
-        if(!accountJid)
-            return;
-
         //add contact if possible (ignore already existing contacts)
         [self addContact:buddyname forAccount:accountNo nickname:nil];
 

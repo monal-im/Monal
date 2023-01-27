@@ -983,6 +983,12 @@
                 FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE\
             );"];
         }];
+        
+        //create self-chats
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.003 withBlock:^{
+            for(NSDictionary* dictionary in [dataLayer accountList])
+                [dataLayer addContact:[NSString stringWithFormat:@"%@@%@", dictionary[kUsername], dictionary[kDomain]] forAccount:dictionary[kAccountID] nickname:nil];
+        }];
 
 
         //check if device id changed and invalidate state, if so

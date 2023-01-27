@@ -289,7 +289,7 @@ static NSMutableDictionary* _typingNotifications;
     }
     
     //inbound value for 1:1 chats
-    BOOL inbound = [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid];
+    BOOL inbound = ![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid];
     //inbound value for groupchat messages
     if(ownNick != nil)
     {

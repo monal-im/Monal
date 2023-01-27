@@ -114,7 +114,7 @@ struct ContactDetails: View {
                 }
 #endif
                 
-                if(!contact.isGroup) {
+                if(!contact.isGroup && !contact.isSelfChat) {
                     TextField("Change Nickname", text: $contact.nickNameView)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .addClearButton(text:$contact.nickNameView)
@@ -130,18 +130,18 @@ struct ContactDetails: View {
                     }
                 }
 #if !DISABLE_OMEMO
-                if(contact.isGroup == false) {
+                if(!contact.isGroup) {
                     NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
-                        Text("Encryption Keys")
+                        Text(contact.isSelfChat ? "Own Encryption Keys" : "Encryption Keys")
                     }
-                } else if(contact.isGroup && contact.mucType == "group") {
+                } else if(contact.mucType == "group") {
                     NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
                         Text("Encryption Keys")
                     }
                 }
 #endif
                 
-                if(!contact.isGroup) {
+                if(!contact.isGroup && !contact.isSelfChat) {
                     NavigationLink(destination: LazyClosureView(ContactResources(contact: contact))) {
                         Text("Resources")
                     }
@@ -163,101 +163,103 @@ struct ContactDetails: View {
             .listStyle(.plain)
 
             Section { // the destructive section...
-                Button(action: {
-                    if(!contact.isBlocked) {
-                        showingBlockContactConfirmation = true
-                    } else {
-                        showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
+                if !contact.isSelfChat {
+                    Button(action: {
+                        if(!contact.isBlocked) {
+                            showingBlockContactConfirmation = true
+                        } else {
+                            showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
+                        }
+                    }) {
+                        if(!contact.isBlocked) {
+                            Text("Block Contact")
+                                .foregroundColor(.red)
+                        } else {
+                            Text("Unblock Contact")
+                        }
                     }
-                }) {
-                    if(!contact.isBlocked) {
-                        Text("Block Contact")
-                            .foregroundColor(.red)
-                    } else {
-                        Text("Unblock Contact")
+                    .alert(isPresented: $showingCannotBlockAlert) {
+                        Alert(title: Text("Blocking/Unblocking Not Supported"), message: Text("The server does not support blocking (XEP-0191)."), dismissButton: .default(Text("Close")))
                     }
-                }
-                .alert(isPresented: $showingCannotBlockAlert) {
-                    Alert(title: Text("Blocking/Unblocking Not Supported"), message: Text("The server does not support blocking (XEP-0191)."), dismissButton: .default(Text("Close")))
-                }
-                .actionSheet(isPresented: $showingBlockContactConfirmation) {
-                    ActionSheet(
-                        title: Text("Block Contact"),
-                        message: Text("Do you really want to block this contact? You won't receive any messages from this contact."),
-                        buttons: [
-                            .cancel(),
-                            .destructive(
-                                Text("Yes"),
-                                action: {
-                                    showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
-                                }
-                            )
-                        ]
-                    )
-                }
+                    .actionSheet(isPresented: $showingBlockContactConfirmation) {
+                        ActionSheet(
+                            title: Text("Block Contact"),
+                            message: Text("Do you really want to block this contact? You won't receive any messages from this contact."),
+                            buttons: [
+                                .cancel(),
+                                .destructive(
+                                    Text("Yes"),
+                                    action: {
+                                        showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
+                                    }
+                                )
+                            ]
+                        )
+                    }
 
-                Group {
-                    if(contact.isInRoster) {
-                        Button(action: {
-                            showingRemoveContactConfirmation = true
-                        }) {
-                            if(contact.isGroup) {
-                                if(contact.mucType == "group") {
-                                    Text("Leave Group")
-                                        .foregroundColor(.red)
+                    Group {
+                        if(contact.isInRoster) {
+                            Button(action: {
+                                showingRemoveContactConfirmation = true
+                            }) {
+                                if(contact.isGroup) {
+                                    if(contact.mucType == "group") {
+                                        Text("Leave Group")
+                                            .foregroundColor(.red)
+                                    } else {
+                                        Text("Leave Channel")
+                                            .foregroundColor(.red)
+                                    }
                                 } else {
-                                    Text("Leave Channel")
+                                    Text("Remove from contacts")
                                         .foregroundColor(.red)
                                 }
-                            } else {
-                                Text("Remove from contacts")
-                                    .foregroundColor(.red)
                             }
-                        }
-                        .actionSheet(isPresented: $showingRemoveContactConfirmation) {
-                            ActionSheet(
-                                title: Text(contact.isGroup ? NSLocalizedString("Leave this conversation", comment: "") : String(format: NSLocalizedString("Remove %@ from contacts?", comment: ""), contact.contactJid)),
-                                    message: Text(contact.isGroup ? NSLocalizedString("You will no longer receive messages from this conversation", comment: "") : NSLocalizedString("They will no longer see when you are online. They may not be able to send you encrypted messages.", comment: "")),
-                                buttons: [
-                                    .cancel(),
-                                    .destructive(
-                                        Text("Yes"),
-                                        action: {
-                                            contact.obj.removeFromRoster()      //this will dismiss the chatview via kMonalContactRemoved notification
-                                            self.delegate.dismiss()
-                                        }
-                                    )
-                                ]
-                            )
-                        }
-                    } else {
-                        Button(action: {
-                            showingAddContactConfirmation = true
-                        }) {
-                            if(contact.isGroup) {
-                                if(contact.mucType == "group") {
-                                    Text("Join Group")
+                            .actionSheet(isPresented: $showingRemoveContactConfirmation) {
+                                ActionSheet(
+                                    title: Text(contact.isGroup ? NSLocalizedString("Leave this conversation", comment: "") : String(format: NSLocalizedString("Remove %@ from contacts?", comment: ""), contact.contactJid)),
+                                        message: Text(contact.isGroup ? NSLocalizedString("You will no longer receive messages from this conversation", comment: "") : NSLocalizedString("They will no longer see when you are online. They may not be able to send you encrypted messages.", comment: "")),
+                                    buttons: [
+                                        .cancel(),
+                                        .destructive(
+                                            Text("Yes"),
+                                            action: {
+                                                contact.obj.removeFromRoster()      //this will dismiss the chatview via kMonalContactRemoved notification
+                                                self.delegate.dismiss()
+                                            }
+                                        )
+                                    ]
+                                )
+                            }
+                        } else {
+                            Button(action: {
+                                showingAddContactConfirmation = true
+                            }) {
+                                if(contact.isGroup) {
+                                    if(contact.mucType == "group") {
+                                        Text("Join Group")
+                                    } else {
+                                        Text("Join Channel")
+                                    }
                                 } else {
-                                    Text("Join Channel")
+                                    Text("Add to contacts")
                                 }
-                            } else {
-                                Text("Add to contacts")
                             }
-                        }
-                        .actionSheet(isPresented: $showingAddContactConfirmation) {
-                            ActionSheet(
-                                title: Text(contact.isGroup ? (contact.mucType == "group" ? NSLocalizedString("Join Group", comment: "") : NSLocalizedString("Join Channel", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
-                                message: Text(contact.isGroup ? NSLocalizedString("You will receive subsequent messages from this conversation", comment: "") : NSLocalizedString("They will see when you are online. They will be able to send you encrypted messages.", comment: "")),
-                                buttons: [
-                                    .cancel(),
-                                    .default(
-                                        Text("Yes"),
-                                        action: {
-                                            contact.obj.addToRoster()
-                                        }
-                                    ),
-                                ]
-                            )
+                            .actionSheet(isPresented: $showingAddContactConfirmation) {
+                                ActionSheet(
+                                    title: Text(contact.isGroup ? (contact.mucType == "group" ? NSLocalizedString("Join Group", comment: "") : NSLocalizedString("Join Channel", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
+                                    message: Text(contact.isGroup ? NSLocalizedString("You will receive subsequent messages from this conversation", comment: "") : NSLocalizedString("They will see when you are online. They will be able to send you encrypted messages.", comment: "")),
+                                    buttons: [
+                                        .cancel(),
+                                        .default(
+                                            Text("Yes"),
+                                            action: {
+                                                contact.obj.addToRoster()
+                                            }
+                                        ),
+                                    ]
+                                )
+                            }
                         }
                     }
                 }

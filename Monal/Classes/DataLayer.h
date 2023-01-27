@@ -144,7 +144,6 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSNumber* _Nullable) accountIDForUser:(NSString*) user andDomain:(NSString *) domain;
 
 -(NSMutableDictionary* _Nullable) detailsForAccount:(NSNumber*) accountNo;
--(NSString* _Nullable) jidOfAccount:(NSNumber*) accountNo;
 
 -(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary;
 -(NSNumber* _Nullable) addAccountWithDictionary:(NSDictionary *) dictionary;

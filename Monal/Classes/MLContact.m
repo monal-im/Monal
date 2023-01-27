@@ -271,30 +271,43 @@ NSString *const kAskSubscribe=@"subscribe";
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName;
 {
     DDLogVerbose(@"Calculating contact display name...");
-    if(fallbackName == nil)
-    {
-        //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
-        NSDictionary* jidParts = [HelperTools splitJid:self.contactJid];
-        fallbackName = jidParts[@"host"];
-        if(jidParts[@"node"] != nil)
-            fallbackName = jidParts[@"node"];
-    }
     NSString* displayName;
-    if(self.nickName && self.nickName.length > 0)
+    if(!self.isSelfChat)
     {
-        DDLogVerbose(@"Using nickName: %@", self.nickName);
-        displayName = self.nickName;
-    }
-    else if(self.fullName && self.fullName.length > 0)
-    {
-        DDLogVerbose(@"Using fullName: %@", self.fullName);
-        displayName = self.fullName;
+        if(fallbackName == nil)
+        {
+            //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
+            NSDictionary* jidParts = [HelperTools splitJid:self.contactJid];
+            fallbackName = jidParts[@"host"];
+            if(jidParts[@"node"] != nil)
+                fallbackName = jidParts[@"node"];
+        }
+        if(self.nickName && self.nickName.length > 0)
+        {
+            DDLogVerbose(@"Using nickName: %@", self.nickName);
+            displayName = self.nickName;
+        }
+        else if(self.fullName && self.fullName.length > 0)
+        {
+            DDLogVerbose(@"Using fullName: %@", self.fullName);
+            displayName = self.fullName;
+        }
+        else
+        {
+            DDLogVerbose(@"Using fallback: %@", fallbackName);
+            displayName = fallbackName;
+        }
     }
     else
     {
-        DDLogVerbose(@"Using fallback: %@", fallbackName);
-        displayName = fallbackName;
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+        //add "Note to self: " prefix for selfchats
+        if([[DataLayer sharedInstance] enabledAccountCnts].intValue > 1)
+            displayName = [NSString stringWithFormat:NSLocalizedString(@"Notes to self: %@", @""), [[self class] ownDisplayNameForAccount:account]];
+        else
+            displayName = [NSString stringWithFormat:NSLocalizedString(@"Notes to self", @""), [[self class] ownDisplayNameForAccount:account]];
     }
+    
     DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, displayName);
     MLAssert(displayName != nil, @"Display name should never be nil!", (@{
         @"jid": nilWrapper(self.contactJid),
@@ -356,6 +369,12 @@ NSString *const kAskSubscribe=@"subscribe";
         _avatar = avatar;
     else
         _avatar = [[UIImage alloc] init];           //empty dummy image, to not save nil (should never happen, MLImageManager has default images)
+}
+
+-(BOOL) isSelfChat
+{
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    return [self.contactJid isEqualToString:account.connectionProperties.identity.jid];
 }
 
 -(BOOL) isInRoster

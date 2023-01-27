@@ -285,7 +285,11 @@
 -(BOOL) tableView:(UITableView*) tableView canEditRowAtIndexPath:(NSIndexPath*) indexPath
 {
     if(tableView == self.view)
-        return YES;
+    {
+        //don't allow deletion for self-chats
+        MLContact* contact = [self.contacts objectAtIndex:indexPath.row];
+        return !contact.isSelfChat;
+    }
     else
         return NO;
 }
@@ -420,7 +424,7 @@
         // A little trick for removing the cell separators
         self.tableView.tableFooterView = [UIView new];
     }
-    return self.contacts.count == 0;
+    return self.contacts.count <= 1;        //having only a self-chat should still show the placeholder image
 }
 
 -(IBAction) close:(id) sender

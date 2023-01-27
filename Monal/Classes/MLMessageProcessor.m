@@ -238,10 +238,6 @@ static NSMutableDictionary* _typingNotifications;
         [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil];
     }
 
-    //ignore self messages after this (only pubsub data and self-chats are from self)
-    if([messageNode.fromUser isEqualToString:messageNode.toUser])
-        return message;
-
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
     //check stanza-id @by according to the rules outlined in XEP-0359
     if(!stanzaid)

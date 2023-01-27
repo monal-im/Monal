@@ -311,6 +311,9 @@ static volatile MLUDPLogger* _self;
     [_send_condition unlock];
     if(_last_error != NULL)
     {
+        //don't retry if message was too long
+        if([@"Message too long" isEqualToString:[NSString stringWithFormat:@"%@", _last_error]])
+            return;
         //retry
         //[self disconnect];
         [[self class] logError:@"retrying sendData with error: %@", _last_error];

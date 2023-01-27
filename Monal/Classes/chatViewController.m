@@ -240,33 +240,55 @@ enum msgSentState {
     self.navigationItem.rightBarButtonItems = rightBarButtons;
 #endif
     
-#ifdef IS_ALPHA
-    if(!self.contact.isGroup)
-    {
-        self.callButton = [UIBarButtonItem new];
-        [self.callButton setAction:@selector(openCallScreen:)];
-        NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
-        [rightBarButtons addObject:self.callButton];
-        self.navigationItem.rightBarButtonItems = rightBarButtons;
-        [self updateCallButtonImage];
-    }
-#endif
+    [self updateCallButtonImage];
 }
 
 -(void) updateCallButtonImage
 {
-    if(self.callButton != nil)
-    {
-        //this has to be done in the main thread because it's ui related
-        [HelperTools dispatchSyncReentrant:^{
-            MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-            MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
-            if(activeCall != nil)
-                self.callButton.image = [UIImage systemImageNamed:@"phone.connection.fill"];
-            else
-                self.callButton.image = [UIImage systemImageNamed:@"phone"];
-        } onQueue:dispatch_get_main_queue()];
-    }
+#ifdef IS_ALPHA
+    //this has to be done in the main thread because it's ui related
+    [HelperTools dispatchSyncReentrant:^{
+        //these contact types can not be called
+        if(self.contact.isGroup || self.contact.isSelfChat)
+        {
+            self.callButton = nil;
+            
+            //remove call button, if present
+            NSMutableArray* rightBarButtons = [[NSMutableArray alloc] init];
+            for(UIBarButtonItem* entry in self.navigationItem.rightBarButtonItems)
+                if(entry.action != @selector(openCallScreen:))
+                    [rightBarButtons addObject:entry];
+            self.navigationItem.rightBarButtonItems = rightBarButtons;
+            
+            return;
+        }
+        
+        if(self.callButton == nil)
+        {
+            self.callButton = [UIBarButtonItem new];
+            [self.callButton setAction:@selector(openCallScreen:)];
+        }
+        
+        MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+        MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
+        if(activeCall != nil)
+            self.callButton.image = [UIImage systemImageNamed:@"phone.connection.fill"];
+        else
+            self.callButton.image = [UIImage systemImageNamed:@"phone.fill"];
+        
+        //add the button to the bar button items if not already present
+        BOOL present = NO;
+        for(UIBarButtonItem* entry in self.navigationItem.rightBarButtonItems)
+            if(entry.action == @selector(openCallScreen:))
+                present = YES;
+        if(!present)
+        {
+            NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
+            [rightBarButtons addObject:self.callButton];
+            self.navigationItem.rightBarButtonItems = rightBarButtons;
+        }
+    } onQueue:dispatch_get_main_queue()];
+#endif
 }
 
 -(void) initNavigationBarItems
@@ -443,7 +465,8 @@ enum msgSentState {
 
 -(void) resetHistoryAttributeForCell:(MLBaseCell*) cell
 {
-    if (!cell.messageBody.text) return;
+    if(!cell.messageBody.text)
+        return;
 
     NSMutableAttributedString *defaultAttrString = [[NSMutableAttributedString alloc] initWithString:cell.messageBody.text];
     NSInteger textLength = (cell.messageBody.text == nil) ? 0: cell.messageBody.text.length;
@@ -456,17 +479,18 @@ enum msgSentState {
 
 -(void) setChatInputHeightConstraints:(BOOL) hwKeyboardPresent
 {
-    if((!self.chatInputConstraintHWKeyboard) || (!self.chatInputConstraintSWKeyboard)) {
+    if(!self.chatInputConstraintHWKeyboard || !self.chatInputConstraintSWKeyboard)
         return;
-    }
+    
     // activate / disable constraints depending on keyboard type
     self.chatInputConstraintHWKeyboard.active = hwKeyboardPresent;
     self.chatInputConstraintSWKeyboard.active = !hwKeyboardPresent;
-
+    
     [self.inputContainerView layoutIfNeeded];
 }
 
--(void) handleForeGround {
+-(void) handleForeGround
+{
     @synchronized(_localMLContactCache) {
         [_localMLContactCache removeAllObjects];
     }
@@ -476,8 +500,31 @@ enum msgSentState {
 
 -(void) openCallScreen:(id) sender
 {
-    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate.activeChats callContact:self.contact];
+    if(![[DataLayer sharedInstance] checkCap:@"urn:tmp:monal:webrtc" forUser:self.contact.contactJid onAccountNo:self.contact.accountId])
+    {
+        NSInteger style = UIAlertControllerStyleActionSheet;
+#if TARGET_OS_MACCATALYST
+        style = UIAlertControllerStyleAlert;
+#endif
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact seems to not support Monal-Style calls. Your call might never reach its destination.", @"") preferredStyle:style];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Try nevertheless", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+            
+            //now initiate call
+            MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+            [appDelegate.activeChats callContact:self.contact];
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        alert.popoverPresentationController.sourceView = sender;
+        [self presentViewController:alert animated:YES completion:nil];
+    }
+    else
+    {
+        MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+        [appDelegate.activeChats callContact:self.contact];
+    }
 }
 
 -(IBAction) toggleEncryption:(id)sender

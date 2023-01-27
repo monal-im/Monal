@@ -1146,7 +1146,8 @@ static id preprocess(id exception)
             @"jabber:iq:version",
             @"urn:xmpp:chat-markers:0",
             @"urn:xmpp:eme:0",
-            @"urn:xmpp:message-retract:0"
+            @"urn:xmpp:message-retract:0",
+            @"urn:tmp:monal:webrtc",            //TODO: tmp implementation, to be removed later on
         ];
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });

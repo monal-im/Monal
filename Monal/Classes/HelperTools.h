@@ -42,6 +42,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSDictionary<NSString*, NSString*>*) getInvalidPushServers;
 +(NSString*) getSelectedPushServerBasedOnLocale;
 +(NSDictionary<NSString*, NSString*>*) getAvailablePushServers;
++(BOOL) isSandboxAPNS;
 
 +(NSURL*) getContainerURLForPathComponents:(NSArray*) components;
 +(NSURL*) getSharedDocumentsURLForPathComponents:(NSArray*) components;

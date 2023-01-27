@@ -219,6 +219,48 @@ static id preprocess(id exception)
     };
 }
 
++(BOOL) isSandboxAPNS
+{
+    // check if were are sandbox or production
+    NSString* embeddedProvUrl;
+#if TARGET_OS_MACCATALYST
+    embeddedProvUrl = [[NSBundle mainBundle] pathForResource:@"embedded" ofType:@"provisionprofile"];
+#else
+    embeddedProvUrl = [[NSBundle mainBundle] pathForResource:@"embedded" ofType:@"mobileprovision"];
+#endif
+    NSError* loadingError;
+    NSString* embeddedProvStr = [NSString stringWithContentsOfFile:embeddedProvUrl encoding:NSISOLatin1StringEncoding error:&loadingError];
+    if(loadingError != nil)
+    {
+        // file does not exist --> simulator
+        // use sandbox
+        DDLogWarn(@"Could not read embedded provision: %@", loadingError);
+        return YES;
+    }
+    NSScanner* plistScanner = [NSScanner scannerWithString:embeddedProvStr];
+    [plistScanner scanUpToString:@"<plist" intoString:nil];
+    NSString* plistStr;
+    [plistScanner scanUpToString:@"</plist>" intoString:&plistStr];
+    plistStr = [NSString stringWithFormat:@"%@</plist>", plistStr];
+
+    NSError* plistError;
+    NSPropertyListFormat format;
+    NSDictionary* plist = [NSPropertyListSerialization propertyListWithData:[plistStr dataUsingEncoding:NSISOLatin1StringEncoding] options:NSPropertyListImmutable format:&format error:&plistError];
+    if(plistError != nil)
+    {
+        // fallback to production
+        DDLogWarn(@"Could not parse embedded provision as plist: %@", plistError);
+        return NO;
+    }
+    if(plist[@"com.apple.developer.aps-environment"] && [plist[@"com.apple.developer.aps-environment"] isEqualToString:@"production"] == NO)
+    {
+        // sandbox
+        return YES;
+    }
+    // productions
+    return NO;
+}
+
 +(NSURL*) getContainerURLForPathComponents:(NSArray*) components
 {
     static NSURL* containerUrl;

@@ -4747,6 +4747,10 @@ NSString* const kStanza = @"stanza";
 
 -(void) enablePush
 {
+#if TARGET_OS_SIMULATOR
+    DDLogError(@"Not registering push on the simulator!");
+    [self disablePush];
+#else
     NSString* pushToken = [MLXMPPManager sharedInstance].pushToken;
     NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
     if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateBound)
@@ -4787,6 +4791,7 @@ NSString* const kStanza = @"stanza";
             [self disablePush];
         }
     }
+#endif
 }
 
 -(void) disablePush

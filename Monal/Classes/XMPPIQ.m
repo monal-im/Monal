@@ -62,20 +62,28 @@ NSString* const kiqErrorType = @"error";
 // direct push registration at xmpp server without registration at appserver
 -(void) setPushEnableWithNode:(NSString*) node onAppserver:(NSString*) jid
 {
+    NSMutableString* pushModule = [[NSMutableString alloc] init];
+#ifdef IS_ALPHA
+    [pushModule appendString:@"monalAlpha"];
+#else //IS_ALPHA
+#if TARGET_OS_MACCATALYST
+    [pushModule appendString:@"monalProdCatalyst"];
+#else //TARGET_OS_MACCATALYST
+    [pushModule appendString:@"monalProdiOS"];
+#endif //NOT TARGET_OS_MACCATALYST
+#endif //NOT IS_ALPHA
+
+    if([HelperTools isSandboxAPNS])
+    {
+        [pushModule appendString:@"-sandbox"];
+        DDLogInfo(@"Detected APNS sandbox, using sandbox push module: %@", pushModule);
+    }
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
         @"jid": jid,
         @"node": node
     } andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:@{
-#ifdef IS_ALPHA
-            @"pushModule": @"monalAlpha"
-#else //IS_ALPHA
-#if TARGET_OS_MACCATALYST
-            @"pushModule": @"monalProdCatalyst"
-#else //TARGET_OS_MACCATALYST
-            @"pushModule": @"monalProdiOS"
-#endif //NOT TARGET_OS_MACCATALYST
-#endif //NOT IS_ALPHA
+            @"pushModule": pushModule
         }]
     ] andData:nil]];
 }

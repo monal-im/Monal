@@ -1883,9 +1883,9 @@ NSString* const kStanza = @"stanza";
                     else
                     {
                         NSString* newVer = [presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@ver"];
-                        NSString* ver = [[DataLayer sharedInstance] getVerForUser:presenceNode.fromUser andResource:presenceNode.fromResource];
+                        NSString* ver = [[DataLayer sharedInstance] getVerForUser:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo];
                         if(!ver || ![ver isEqualToString:newVer])     //caps hash of resource changed
-                            [[DataLayer sharedInstance] setVer:newVer forUser:presenceNode.fromUser andResource:presenceNode.fromResource];
+                            [[DataLayer sharedInstance] setVer:newVer forUser:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo];
 
                         if(![[DataLayer sharedInstance] getCapsforVer:newVer])
                         {
@@ -1924,9 +1924,7 @@ NSString* const kStanza = @"stanza";
                     }
                     else if(presenceNode.fromResource)
                     {
-                        NSString* capsVer = [[DataLayer sharedInstance] getVerForUser:presenceNode.fromUser andResource:presenceNode.fromResource];
-                        NSSet* caps = [[DataLayer sharedInstance] getCapsforVer:capsVer];
-                        if([caps containsObject:@"urn:xmpp:idle:1"])
+                        if([[DataLayer sharedInstance] checkCap:@"urn:xmpp:idle:1" forUser:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo])
                         {
                             [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
                                 @"jid": presenceNode.fromUser,
@@ -3882,10 +3880,9 @@ NSString* const kStanza = @"stanza";
 
 -(void) getEntitySoftWareVersion:(NSString*) user
 {
-    NSArray* userDataArr = [user componentsSeparatedByString:@"/"];
-    NSString* userWithoutResources = userDataArr[0];
-    
-    if([[DataLayer sharedInstance] checkCap:@"jabber:iq:version" forUser:userWithoutResources andAccountNo:self.accountNo])
+    NSDictionary* jid = [HelperTools splitJid:user];
+    MLAssert(jid[@"resource"] != nil, @"getEntitySoftWareVersion needs a full jid!");
+    if([[DataLayer sharedInstance] checkCap:@"jabber:iq:version" forUser:jid[@"user"] andResource:jid[@"resource"] onAccountNo:self.accountNo])
     {
         XMPPIQ* iqEntitySoftWareVersion = [[XMPPIQ alloc] initWithType:kiqGetType];
         [iqEntitySoftWareVersion getEntitySoftWareVersionTo:user];

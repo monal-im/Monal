@@ -71,9 +71,10 @@ extern NSString* const kMessageTypeFiletransfer;
 
 #pragma mark Ver string and Capabilities
 
--(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andAccountNo:(NSNumber*) acctNo;
--(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource;
--(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource;
+-(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user onAccountNo:(NSNumber*) accountNo;
+-(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo;
+-(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo;
+-(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo;
 -(NSSet* _Nullable) getCapsforVer:(NSString*) ver;
 -(void) setCaps:(NSSet*) caps forVer:(NSString*) ver;
 

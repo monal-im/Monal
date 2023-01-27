@@ -513,7 +513,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark entity capabilities
 
--(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andAccountNo:(NSNumber*) accountNo
+-(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user onAccountNo:(NSNumber*) accountNo
 {
     return [self.db boolReadTransaction:^{
         NSString* query = @"SELECT COUNT(*) FROM buddylist AS a INNER JOIN buddy_resources AS b ON a.buddy_id=b.buddy_id INNER JOIN ver_info AS c ON b.ver=c.ver WHERE buddy_name=? AND account_id=? AND cap=?;";
@@ -523,23 +523,32 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource
+-(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo
+{
+    return [self.db boolReadTransaction:^{
+        NSString* query = @"SELECT COUNT(*) FROM buddylist AS a INNER JOIN buddy_resources AS b ON a.buddy_id=b.buddy_id INNER JOIN ver_info AS c ON b.ver=c.ver WHERE buddy_name=? AND resource=? AND account_id=? AND cap=?;";
+        NSNumber* count = (NSNumber*) [self.db executeScalar:query andArguments:@[user, resource, accountNo, cap]];
+        return (BOOL)([count integerValue]>0);
+    }];
+}
+
+-(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
-        NSString* query = @"SELECT ver FROM buddy_resources AS A INNER JOIN buddylist AS B ON a.buddy_id=b.buddy_id WHERE resource=? AND buddy_name=?;";
-        NSArray * params = @[resource, user];
+        NSString* query = @"SELECT ver FROM buddy_resources AS A INNER JOIN buddylist AS B ON a.buddy_id=b.buddy_id WHERE resource=? AND buddy_name=? AND account_id=? LIMIT 1;";
+        NSArray * params = @[resource, user, accountNo];
         NSString* ver = (NSString*) [self.db executeScalar:query andArguments:params];
         return ver;
     }];
 }
 
--(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource
+-(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo
 {
     NSNumber* timestamp = [HelperTools currentTimestampInSeconds];
     [self.db voidWriteTransaction:^{
         //set ver for user and resource
-        NSString* query = @"UPDATE buddy_resources SET ver=? WHERE EXISTS(SELECT * FROM buddylist WHERE buddy_resources.buddy_id=buddylist.buddy_id AND resource=? AND buddy_name=?)";
-        NSArray * params = @[ver, resource, user];
+        NSString* query = @"UPDATE buddy_resources SET ver=? WHERE EXISTS(SELECT * FROM buddylist WHERE buddy_resources.buddy_id=buddylist.buddy_id AND resource=? AND buddy_name=? AND account_id=?)";
+        NSArray * params = @[ver, resource, user, accountNo];
         [self.db executeNonQuery:query andArguments:params];
         
         //update timestamp for this ver string to make it not timeout (old ver strings and features are removed from feature cache after 28 days)

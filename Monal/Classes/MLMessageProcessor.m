@@ -690,7 +690,7 @@ static NSMutableDictionary* _typingNotifications;
         //only use "is typing" messages when not older than 2 minutes (always allow "not typing" messages)
         if(
             [messageNode check:@"{http://jabber.org/protocol/chatstates}*"] &&
-            [[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.fromUser andAccountNo:account.accountNo]
+            [[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.fromUser onAccountNo:account.accountNo]
         )
         {
             //deduce state

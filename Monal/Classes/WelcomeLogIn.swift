@@ -113,6 +113,7 @@ struct WelcomeLogIn: View {
                     Image(decorative: appLogoId)
                         .resizable()
                         .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         .padding()
                     
                     Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")

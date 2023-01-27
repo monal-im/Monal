@@ -490,10 +490,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 -(void) applicationDidBecomeActive:(UIApplication*) application
 {
     if([[MLXMPPManager sharedInstance] connectedXMPP].count > 0)
-    {
-        //show spinner
-        [self.activeChats.spinner startAnimating];
-    }
+        [self handleSpinner];
     else
     {
         //hide spinner
@@ -1152,10 +1149,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
 #pragma mark - background tasks
 
--(void) nowNotIdle:(NSNotification*) notification
+-(void) handleSpinner
 {
-    DDLogInfo(@"### SOME ACCOUNT CHANGED TO NON-IDLE STATE ###");
-    //show spinner (dispatch *async* to main queue to allow for ui changes)
+    //show/hide spinner (dispatch *async* to main queue to allow for ui changes)
     dispatch_async(dispatch_get_main_queue(), ^{
         if(([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle]))
             [self.activeChats.spinner stopAnimating];
@@ -1164,9 +1160,17 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     });
 }
 
+-(void) nowNotIdle:(NSNotification*) notification
+{
+    DDLogInfo(@"### SOME ACCOUNT CHANGED TO NON-IDLE STATE ###");
+    [self handleSpinner];
+}
+
 -(void) nowIdle:(NSNotification*) notification
 {
     DDLogInfo(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
+    [self handleSpinner];
+    
     //dispatch *async* to main queue to avoid deadlock between receiveQueue ---sync--> im.monal.disconnect ---sync--> receiveQueue
     dispatch_async(dispatch_get_main_queue(), ^{
         [self checkIfBackgroundTaskIsStillNeeded];
@@ -1192,9 +1196,6 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         //if we used a bg fetch/processing task, that means we did not get a push informing us about a waiting message
         //nor did the user interact with our app --> don't show possible sync warnings in this case (but delete old warnings if we are synced now)
         [HelperTools updateSyncErrorsWithDeleteOnly:(self->_bgProcessing != nil || self->_bgRefreshing != nil) andWaitForCompletion:YES];
-        
-        //hide spinner
-        [self.activeChats.spinner stopAnimating];
         
         //use a synchronized block to disconnect only once
         @synchronized(self) {

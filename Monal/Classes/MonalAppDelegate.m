@@ -456,6 +456,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     else if([notification.name isEqualToString:@"NSWindowDidBecomeKeyNotification"])
     {
         DDLogInfo(@"Window got focus (key window)...");
+        [MLProcessLock lock];
         @synchronized(self) {
             DDLogVerbose(@"Setting _shutdownPending to NO...");
             _shutdownPending = NO;

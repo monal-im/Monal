@@ -1136,8 +1136,7 @@ static id preprocess(id exception)
         NSArray* featuresArray = @[
             @"http://jabber.org/protocol/caps",
             @"http://jabber.org/protocol/disco#info",
-            @"http://jabber.org/protocol/disco#items",
-            @"http://jabber.org/protocol/muc",
+            @"jabber:x:conference",
             @"jabber:x:oob",
             @"urn:xmpp:ping",
             @"urn:xmpp:receipts",
@@ -1147,6 +1146,7 @@ static id preprocess(id exception)
             @"urn:xmpp:chat-markers:0",
             @"urn:xmpp:eme:0",
             @"urn:xmpp:message-retract:0",
+            @"urn:xmpp:message-correct:0",
             @"urn:tmp:monal:webrtc",            //TODO: tmp implementation, to be removed later on
         ];
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];

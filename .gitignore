@@ -43,3 +43,4 @@ Monal/shareSheet-iOS/localization/external/*
 *.mobileprovision
 *.provisionprofile
 *.p12
+Monal/Classes/secrets.h

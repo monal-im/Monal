@@ -461,7 +461,7 @@
 
 -(void) createRingingTimeoutTimer
 {
-    self.cancelRingingTimeout = createTimer(60.0, (^{
+    self.cancelRingingTimeout = createTimer(45.0, (^{
         DDLogError(@"Call not answered in time, aborting!");
         [self handleEndCallAction];
     }));
@@ -737,7 +737,7 @@
     NSUUID* uuid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@id|uuid"];
     if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.uuid isEqual:uuid])
     {
-        DDLogInfo(@"Incoming ICE candidate not matching this call object, ignoring...");
+        DDLogInfo(@"Incoming ICE candidate not matching %@, ignoring...", [self short]);
         return;
     }
     
@@ -779,7 +779,7 @@
     NSUUID* uuid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@id|uuid"];
     if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.uuid isEqual:uuid])
     {
-        DDLogInfo(@"Incoming SDP not matching this call object, ignoring...");
+        DDLogInfo(@"Incoming SDP not matching %@, ignoring...", [self short]);
         return;
     }
     

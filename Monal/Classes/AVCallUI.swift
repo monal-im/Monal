@@ -45,12 +45,12 @@ struct AVCallUI: View {
                             case .incoming:
                                 Image(systemName: "phone.arrow.down.left")
                                     .resizable()
-                                    .frame(width: 28.0, height: 28.0)
+                                    .frame(width: 20.0, height: 20.0)
                                     .foregroundColor(.primary)
                             case .outgoing:
                                 Image(systemName: "phone.arrow.up.right")
                                     .resizable()
-                                    .frame(width: 28.0, height: 28.0)
+                                    .frame(width: 20.0, height: 20.0)
                                     .foregroundColor(.primary)
                             default:        //should never be reached
                                 Text("")

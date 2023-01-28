@@ -1055,7 +1055,7 @@ static id preprocess(id exception)
     MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
     
     //console logger (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
     [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
 #else

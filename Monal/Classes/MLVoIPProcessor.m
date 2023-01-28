@@ -286,7 +286,7 @@ static NSMutableDictionary* _pendingCalls;
 {
     DDLogInfo(@"Initializing WebRTC for: %@", call);
     NSMutableArray* iceServers = [[NSMutableArray alloc] init];
-    /*if([call.account.connectionProperties.discoveredStunTurnServers count] > 0)
+    if([call.account.connectionProperties.discoveredStunTurnServers count] > 0)
     {
         for(NSDictionary* service in call.account.connectionProperties.discoveredStunTurnServers)
             [call.account queryExternalServiceCredentialsFor:service completion:^(id data) {
@@ -305,20 +305,20 @@ static NSMutableDictionary* _pendingCalls;
                 }
             }];
     }
-    else */
-    if([[HelperTools defaultsDB] boolForKey: @"webrtcUseFallbackTurn"])
+    else if([[HelperTools defaultsDB] boolForKey: @"webrtcUseFallbackTurn"])
     {
         DDLogInfo(@"No ICE servers detected, trying to connect WebRTC session using our own STUN servers as fallback...");
         //use own stun server as fallback
-         [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:@[
+        [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:@[
 #ifdef IS_ALPHA
-             @"stun:alpha.turn.monal-im.org:3478",
+            @"stun:alpha.turn.monal-im.org:3478",
 #else
-             @"stun:eu.prod.turn.monal-im.org:3478",
+            @"stun:eu.prod.turn.monal-im.org:3478",
 #endif
         ]]];
-
+        
         // request turn credentials
+        //TODO: use alpha and prod servers and don't hardcode url
         NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://alpha.turn.monal-im.org/api/v1/challenge/new"]];
         [urlRequest setTimeoutInterval:3.0];
         NSURLSessionTask* challengeSession = [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
@@ -391,7 +391,7 @@ static NSMutableDictionary* _pendingCalls;
     //continue without any stun/turn servers if only p2p but no stun/turn servers could be found on local xmpp server
     //AND no fallback to monal servers was configured
     else
-        [self loadIceCandidates:call andIceServers:iceServers];
+        [self loadIceCandidates:call andIceServers:@[]];
 }
 
 -(void) loadIceCandidates:(MLCall*) call andIceServers:(NSArray<RTCIceServer*>*) iceServers

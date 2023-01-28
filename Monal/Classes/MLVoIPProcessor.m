@@ -203,7 +203,7 @@ static NSMutableDictionary* _pendingCalls;
 
 -(void) pushRegistry:(PKPushRegistry*) registry didInvalidatePushTokenForType:(NSString*) type
 {
-    DDLogInfo(@"APNS voip didInvalidatePushTokenForType:%@ called and ignored...", type);
+    DDLogDebug(@"APNS voip didInvalidatePushTokenForType:%@ called and ignored...", type);
 }
 
 //called if jmi propose was received by appex
@@ -320,7 +320,7 @@ static NSMutableDictionary* _pendingCalls;
         // request turn credentials
         NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://alpha.turn.monal-im.org/api/v1/challenge/new"]];
         [urlRequest setTimeoutInterval:3.0];
-        NSURLSessionTask* channelSession = [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
+        NSURLSessionTask* challengeSession = [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
             if(error != nil || [(NSHTTPURLResponse*)response statusCode] != 200)
             {
                 DDLogWarn(@"Could not retrieve turn challenge, only using stun: %@", error);
@@ -332,7 +332,7 @@ static NSMutableDictionary* _pendingCalls;
             NSDictionary* challenge = [NSJSONSerialization JSONObjectWithData:data options:0 error:&challengeJsonErr];
             if(challengeJsonErr != nil && [challenge objectForKey:@"challenge"] != nil)
             {
-                DDLogWarn(@"Could not parse turn challenge: %@", challengeJsonErr);
+                DDLogWarn(@"Could not parse turn challenge, only using stun: %@", challengeJsonErr);
                 [self loadIceCandidates:call andIceServers:iceServers];
                 return;
             }
@@ -351,7 +351,7 @@ static NSMutableDictionary* _pendingCalls;
             NSData* challengeResp = [NSJSONSerialization dataWithJSONObject:challengeResponseDict options:kNilOptions error:&challengeRespJsonErr];
             if(challengeRespJsonErr != nil)
             {
-                DDLogWarn(@"Could not create json challenge reponse: %@", challengeRespJsonErr);
+                DDLogWarn(@"Could not create json challenge reponse, only using stun: %@", challengeRespJsonErr);
                 [self loadIceCandidates:call andIceServers:iceServers];
                 return;
             }
@@ -375,24 +375,29 @@ static NSMutableDictionary* _pendingCalls;
                 NSDictionary* turnCredentials = [NSJSONSerialization JSONObjectWithData:turnCredentialsData options:0 error:&turnCredentialsErr];
                 if(turnCredentials == nil || turnCredentials[@"username"] == nil || turnCredentials[@"password"] == nil || turnCredentials[@"uris"] == nil)
                 {
-                    DDLogWarn(@"Could not parse turn credentials: %@", turnCredentialsErr);
+                    DDLogWarn(@"Could not parse turn credentials, only using stun: %@", turnCredentialsErr);
                     [self loadIceCandidates:call andIceServers:iceServers];
                     return;
                 }
                 [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:[turnCredentials objectForKey:@"uris"] username:[turnCredentials objectForKey:@"username"] credential:[turnCredentials objectForKey:@"password"]]];
                 
-                [self loadIceCandidates:call 
-                          andIceServers:iceServers];
+                [self loadIceCandidates:call andIceServers:iceServers];
             }];
             [responseSession resume];
         }];
-        [channelSession resume];
+        [challengeSession resume];
     }
+    //continue without any stun/turn servers if only p2p but no stun/turn servers could be found on local xmpp server
+    //AND no fallback to monal servers was configured
+    else
+        [self loadIceCandidates:call andIceServers:iceServers];
 }
 
 -(void) loadIceCandidates:(MLCall*) call andIceServers:(NSArray<RTCIceServer*>*) iceServers
 {
-    WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers forceRelay:![[HelperTools defaultsDB] boolForKey:@"webrtcAllowP2P"]];
+    BOOL forceRelay = ![[HelperTools defaultsDB] boolForKey:@"webrtcAllowP2P"];
+    DDLogInfo(@"Initializing webrtc with forceRelay=%@ using ice servers: %@", forceRelay ? @"YES" : @"NO", iceServers);
+    WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers forceRelay:forceRelay];
     webRTCClient.delegate = call;
     call.webRTCClient = webRTCClient;
 }

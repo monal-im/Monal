@@ -817,6 +817,9 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
             if(updateBookmarks == NO)
                 [_noUpdateBookmarks addObject:iqNode.fromUser];
         }
+        //make public channels "mention only" on first join
+        if([@"channel" isEqualToString:mucType])
+            [[DataLayer sharedInstance] setMucAlertOnMentionOnly:iqNode.fromUser onAccount:_account.accountNo];
     }
     
     if(![mucType isEqualToString:[[DataLayer sharedInstance] getMucTypeOfRoom:iqNode.fromUser andAccount:_account.accountNo]])

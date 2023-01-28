@@ -183,18 +183,18 @@ const long NotificationPrivacyOptionCnt = 3;
                 {
 //flow into default case for non-omemo builds
 #ifndef DISABLE_OMEMO
-                    [cell initCell:NSLocalizedString(@"Enable OMEMO per default", @"") withToggleDefaultsKey:@"OMEMODefaultOn"];
+                    [cell initCell:NSLocalizedString(@"Enable encryption by default for new chats", @"") withToggleDefaultsKey:@"OMEMODefaultOn"];
                     break;
 #endif// DISABLE_OMEMO
                 }
                 case 14:
                 {
-                    [cell initCell:NSLocalizedString(@"WebRTC: Allow p2p sessions", @"") withToggleDefaultsKey:@"webrtcAllowP2P"];
+                    [cell initCell:NSLocalizedString(@"Calls: Allow P2P sessions", @"") withToggleDefaultsKey:@"webrtcAllowP2P"];
                     break;
                 }
                 case 15:
                 {
-                    [cell initCell:NSLocalizedString(@"WebRTC: Allow STUN/TURN fallback", @"") withToggleDefaultsKey:@"webrtcUseFallbackTurn"];
+                    [cell initCell:NSLocalizedString(@"Calls: Allow TURN fallback to Monal-Servers", @"") withToggleDefaultsKey:@"webrtcUseFallbackTurn"];
                     break;
                 }
                 default:

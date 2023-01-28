@@ -2020,13 +2020,14 @@ enum msgSentState {
 
     if([row.messageType isEqualToString:kMessageTypeStatus])
     {
+        DDLogVerbose(@"got status cell cell: %@", messageText);
         cell = [tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
         cell.messageBody.text = messageText;
         cell.link = nil;
         cell.parent = self;
         return cell;
     }
-    else if([row.messageType isEqualToString:kMessageTypeFiletransfer])
+    if(cell == nil && [row.messageType isEqualToString:kMessageTypeFiletransfer])
     {
         DDLogVerbose(@"got filetransfer chat cell: %@ (%@)", row.filetransferMimeType, row.filetransferSize);
         NSDictionary* info = [MLFiletransfer getFileInfoForMessage:row];
@@ -2037,40 +2038,58 @@ enum msgSentState {
         }
         else if (info && [info[@"needsDownloading"] boolValue])
         {
-            MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inboundDir fromTable:tableView];
+            MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell*)[self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inboundDir fromTable:tableView];
             NSString* fileSize = info[@"size"] ? info[@"size"] : @"0";
             [fileTransferCell initCellForMessageId:row.messageDBId andFilename:info[@"filename"] andMimeType:info[@"mimeType"] andFileSize:fileSize.longLongValue];
 
             cell = fileTransferCell;
         }
     }
-    else if([row.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
+    if(cell == nil && [row.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
     {
-        MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inboundDir fromTable: tableView];
+        DDLogVerbose(@"got link preview cell: %@", messageText);
+        MLLinkCell* toreturn = (MLLinkCell*)[self messageTableCellWithIdentifier:@"link" andInbound:inboundDir fromTable: tableView];
 
         NSString* cleanLink = [messageText stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSArray* parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         toreturn.link = parts[0];
-        row.url= [NSURL URLWithString:toreturn.link];
+        row.url = [NSURL URLWithString:toreturn.link];
         toreturn.messageBody.text = toreturn.link;
         toreturn.messageHistoryId = row.messageDBId;
 
-        if(row.previewText || row.previewImage)
+        if(row.previewText != nil || row.previewImage != nil)
         {
-            toreturn.imageUrl = row.previewImage;
-            toreturn.messageTitle.text = row.previewText;
-            [toreturn loadImageWithCompletion:^{}];
+            if((row.previewText == nil || row.previewText.length == 0) && (row.previewImage == nil || row.previewImage.absoluteString.length == 0))
+            {
+                DDLogWarn(@"Not showing preview for %@, preview unavailable: row.previewText=%@, row.previewImage=%@", messageText, row.previewText, row.previewImage);
+                toreturn = nil;     //no preview available: use default MLChatCell for this
+            }
+            else
+            {
+                DDLogVerbose(@"Using db cached preview for %@", toreturn.link);
+                toreturn.imageUrl = row.previewImage;
+                toreturn.messageTitle.text = row.previewText;
+                [toreturn loadImageWithCompletion:^{}];
+            }
         }
         else
         {
-            [self loadPreviewWithUrlForRow:indexPath withCompletion:^{
-
+            DDLogVerbose(@"Loading link preview for %@", toreturn.link);
+            [self loadPreviewWithUrlForRow:indexPath withResultHandler:^{
+                DDLogVerbose(@"Reloading row for preview: %@", messageText);
+                [[DataLayer sharedInstance] setMessageId:row.messageId previewText:[row.previewText copy] andPreviewImage:[row.previewImage.absoluteString copy]];
+                //reload cells
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                });
             }];
         }
         cell = toreturn;
-    } else if ([row.messageType isEqualToString:kMessageTypeGeo]) {
+    }
+    if(cell == nil && [row.messageType isEqualToString:kMessageTypeGeo])
+    {
+        DDLogVerbose(@"got geo cell: %@", messageText);
         // Parse latitude and longitude
-
         NSError* error = NULL;
         NSRegularExpression* geoRegex = [NSRegularExpression regularExpressionWithPattern:geoPattern
         options:NSRegularExpressionCaseInsensitive
@@ -2090,7 +2109,7 @@ enum msgSentState {
 
             // Display inline map
             if(self.showGeoLocationsInline) {
-                MLChatMapsCell* mapsCell = (MLChatMapsCell *)[self messageTableCellWithIdentifier:@"maps" andInbound:inboundDir fromTable: tableView];
+                MLChatMapsCell* mapsCell = (MLChatMapsCell*)[self messageTableCellWithIdentifier:@"maps" andInbound:inboundDir fromTable: tableView];
 
                 // Set lat / long used for map view and pin
                 mapsCell.latitude = [latitude doubleValue];
@@ -2111,7 +2130,10 @@ enum msgSentState {
         } else {
             DDLogWarn(@"msgs of type kMessageTypeGeo should contain a geo location");
         }
-    } else {
+    }
+    if(cell == nil)
+    {
+        DDLogVerbose(@"got normal text cell: %@", messageText);
         // Use default text cell
         cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"text" andInbound:inboundDir fromTable: tableView];
 
@@ -2192,8 +2214,9 @@ enum msgSentState {
 
     if(cell == nil)
     {
+        DDLogError(@"Using fallback cell for message text: '%@'", messageText);
         //this is just a dummy to display something usable (the filetransfer url as link cell)
-        MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inboundDir fromTable: tableView];;
+        MLLinkCell* toreturn = (MLLinkCell*)[self messageTableCellWithIdentifier:@"link" andInbound:inboundDir fromTable: tableView];;
         toreturn.link = row.messageText;
         toreturn.messageBody.text = toreturn.link;
 
@@ -2201,9 +2224,7 @@ enum msgSentState {
     }
     MLMessage* priorRow = nil;
     if(indexPath.row > 0)
-    {
         priorRow = [self.messageList objectAtIndex:indexPath.row-1];
-    }
     // Only display names for groups
     BOOL hideName = YES;
     if(self.contact.isGroup)
@@ -2266,7 +2287,8 @@ enum msgSentState {
 
     [cell updateCellWithNewSender:newSender];
 
-    if(!cell.link) [self resetHistoryAttributeForCell:cell];
+    if(!cell.link)
+        [self resetHistoryAttributeForCell:cell];
     if(self.searchController.isActive && row.messageDBId)
     {
         if([self.searchController isDBIdExistent:row.messageDBId])
@@ -2881,117 +2903,151 @@ enum msgSentState {
 
 #pragma mark - link preview
 
--(void) loadPreviewWithUrlForRow:(NSIndexPath *) indexPath withCompletion:(void (^)(void))completion
+-(void) loadPreviewWithUrlForRow:(NSIndexPath *) indexPath withResultHandler:(monal_void_block_t) resultHandler
 {
     MLMessage* row;
     if((NSUInteger)indexPath.row < self.messageList.count)
-    {
         row = [self.messageList objectAtIndex:indexPath.row];
-    }
     else
     {
         DDLogError(@"Attempt to access beyond bounds");
-    }
-
-    //prevent duplicated calls from cell animations
-    if([self.previewedIds containsObject:row.messageDBId])
-    {
-        completion();
         return;
     }
 
+    //prevent duplicated calls from cell animations (don't call resultHandler in this case because the resultHandler would reload the row)
+    if([self.previewedIds containsObject:row.messageDBId])
+    {
+        DDLogDebug(@"Not loading preview for already pending row: %@ in %@", row.messageDBId, self.previewedIds);
+        return;
+    }
+    [self.previewedIds addObject:row.messageDBId];
+
+    row.previewText = @"";
+    row.previewImage = [NSURL URLWithString:@""];
     if(row.url)
     {
-        NSMutableURLRequest* headRequest = [[NSMutableURLRequest alloc] initWithURL: row.url];
+        DDLogVerbose(@"Fetching HTTP HEAD for %@...", row.url);
+        NSMutableURLRequest* headRequest = [[NSMutableURLRequest alloc] initWithURL:row.url];
         headRequest.HTTPMethod = @"HEAD";
         headRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
-
         NSURLSession* session = [NSURLSession sharedSession];
         [[session dataTaskWithRequest:headRequest completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+            if(error != nil)
+            {
+                DDLogWarn(@"Loding preview HEAD for %@ failed: %@", row.url, error);
+                resultHandler();
+                return;
+            }
+            
             NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
             NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);
-
-            if(mimeType.length==0) {
-                completion();
+            
+            if(mimeType.length==0)
+            {
+                DDLogWarn(@"Loding preview HEAD for %@ failed: mimeType unkown", row.url);
+                resultHandler();
                 return;
             }
-            if(![mimeType hasPrefix:@"text"]) {
-                completion();
+            //preview images, too
+            if([mimeType hasPrefix:@"image/"])
+            {
+                DDLogVerbose(@"Now loading image preview data for: %@", row.url);
+                row.previewText = [row.url lastPathComponent];
+                row.previewImage = row.url;
+                resultHandler();
                 return;
             }
-            if(contentLength.intValue > 500 * 1024) {
-                completion();
+            if(![mimeType hasPrefix:@"text/"])
+            {
+                DDLogWarn(@"Loding HEAD preview for %@ failed: mimeType not supported: %@", row.url, mimeType);
+                resultHandler();
                 return;
-            } //limit to half a meg of HTML
-
-            [self downloadPreviewWithRow:indexPath];
-            completion();
-
+            }
+            //limit to 512KB of html
+            if(contentLength.intValue > 524288)
+            {
+                DDLogWarn(@"Now loading preview HTML for %@ with byte range 0-512k...", row.url);
+                [self downloadPreviewWithRow:indexPath usingByterange:YES andResultHandler:resultHandler];
+                return;
+            }
+            
+            DDLogVerbose(@"Now loading preview for: %@", row.url);
+            [self downloadPreviewWithRow:indexPath usingByterange:NO andResultHandler:resultHandler];
         }] resume];
-
     }
-    else if(completion)
-        completion();
+    else if(resultHandler)
+    {
+        DDLogWarn(@"Not loading HEAD preview for '%@': no url given!", row.url);
+        resultHandler();
+    }
 }
 
--(void) downloadPreviewWithRow:(NSIndexPath*) indexPath
+-(void) downloadPreviewWithRow:(NSIndexPath*) indexPath usingByterange:(BOOL) useByterange andResultHandler:(monal_void_block_t) resultHandler
 {
     MLMessage* row;
-    if((NSUInteger)indexPath.row < self.messageList.count) {
+    if((NSUInteger)indexPath.row < self.messageList.count)
         row = [self.messageList objectAtIndex:indexPath.row];
-    } else {
+    else
+    {
         DDLogError(@"Attempt to access beyond bounds");
         return;
     }
 
-    [self.previewedIds addObject:row.messageDBId];
     /**
      <meta property="og:title" content="Nintendo recommits to “keep the business going” for 3DS">
      <meta property="og:image" content="https://cdn.arstechnica.net/wp-content/uploads/2016/09/3DS_SuperMarioMakerforNintendo3DS_char_01-760x380.jpg">
      facebookexternalhit/1.1
      */
+    DDLogVerbose(@"Fetching HTTP GET for %@...", row.url);
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:row.url];
     [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on some sites for og tags e.g. youtube
+    if(useByterange)
+        [request setValue:@"bytes=0-524288" forHTTPHeaderField:@"Range"];
     request.timeoutInterval = 10;
-    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error)
-    {
-        NSString* body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        NSURL* baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", row.url.scheme, row.url.host, row.url.path]];
-        MLOgHtmlParser* ogParser = [[MLOgHtmlParser alloc] initWithHtml:body andBaseUrl:baseURL];
-        NSString* text = nil;
-        NSURL* image = nil;
-        if(ogParser != nil)
-        {
-            text = [ogParser getOgTitle];
-            image = [ogParser getOgImage];
-        }
-        if((text != nil && text.length > 0) || (image != nil && image.absoluteString.length > 0))
-        {
-            row.previewText = text;
-            row.previewImage = image;
-        }
+    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+        if(error != nil)
+            DDLogVerbose(@"preview fetching error: %@", error);
         else
         {
-            row.previewText = @"";
-            row.previewImage = [NSURL URLWithString:@""];
+            NSString* body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            NSURL* baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", row.url.scheme, row.url.host, row.url.path]];
+            MLOgHtmlParser* ogParser = [[MLOgHtmlParser alloc] initWithHtml:body andBaseUrl:baseURL];
+            NSString* text = nil;
+            NSURL* image = nil;
+            if(ogParser != nil)
+            {
+                text = [ogParser getOgTitle];
+                image = [ogParser getOgImage];
+            }
+            else
+                DDLogError(@"Could not create OG parser!");
+            if((text != nil && text.length > 0) || (image != nil && image.absoluteString.length > 0))
+            {
+                DDLogVerbose(@"Preview of %@: title=%@, image=%@", row.url, text, image);
+                row.previewText = text;
+                row.previewImage = image;
+            }
+            else
+            {
+                DDLogWarn(@"Preview of %@ is empty!", row.url);
+                row.previewText = @"";
+                row.previewImage = [NSURL URLWithString:@""];
+            }
         }
-        [[DataLayer sharedInstance] setMessageId:row.messageId previewText:[row.previewText copy] andPreviewImage:[row.previewImage.absoluteString copy]];
-        //reload cells
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-        });
+        [self.previewedIds removeObject:row.messageDBId];
+        resultHandler();
     }] resume];
 }
 
 #pragma mark - photo browser delegate
 
-- (NSUInteger)numberOfPhotosInPhotoBrowser:(IDMPhotoBrowser*) photoBrowser
+-(NSUInteger)numberOfPhotosInPhotoBrowser:(IDMPhotoBrowser*) photoBrowser
 {
     return self.photos.count;
 }
 
-- (id <IDMPhoto>)photoBrowser:(IDMPhotoBrowser*) photoBrowser photoAtIndex:(NSUInteger)index
+-(id<IDMPhoto>) photoBrowser:(IDMPhotoBrowser*) photoBrowser photoAtIndex:(NSUInteger) index
 {
     if (index < self.photos.count)
     {

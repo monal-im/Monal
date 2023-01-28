@@ -283,6 +283,8 @@ struct RegisterAccount: View {
                 .background(Color(UIColor.systemBackground))
 
                 Form {
+                    Text("I need an account:")
+                    
                     Menu {
                         Picker("", selection: $selectedServerIndex) {
                             ForEach (RegisterAccount.XMPPServer.indices, id: \.self) {

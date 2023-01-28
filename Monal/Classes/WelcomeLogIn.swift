@@ -125,6 +125,10 @@ struct WelcomeLogIn: View {
                 .background(Color(UIColor.systemBackground))
 
                 Form {
+                    Text("I already have an account:")
+                    //for ios >= 15.0
+                    //.listRowSeparator(.hidden)
+                    
                     TextField("user@domain.tld", text: Binding(
                         get: { self.jid },
                         set: { string in self.jid = string.lowercased() })
@@ -196,7 +200,7 @@ struct WelcomeLogIn: View {
                     }
                     
                     NavigationLink(destination: LazyClosureView(RegisterAccount(delegate: self.delegate))) {
-                        Text("Register")
+                        Text("Register a new account")
                         .foregroundColor(monalDarkGreen)
                     }
                     

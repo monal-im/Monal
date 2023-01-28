@@ -23,17 +23,18 @@ typedef NS_ENUM(NSUInteger, MLCallDirection) {
 };
 
 typedef NS_ENUM(NSUInteger, MLCallState) {
+    MLCallStateDiscovering,
     MLCallStateRinging,
     MLCallStateConnecting,
     MLCallStateConnected,
     MLCallStateFinished,
-    MLCallStateIdle,
+    MLCallStateUnknown,
 };
 
 typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
     MLCallFinishReasonUnknown,
     MLCallFinishReasonNormal,
-    MLCallFinishReasonError,
+    MLCallFinishReasonConnectivityError,
     MLCallFinishReasonUnanswered,
     MLCallFinishReasonRejected,
     MLCallFinishReasonAnsweredElsewhere,
@@ -47,7 +48,7 @@ typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
 @property (nonatomic, readonly) MLCallDirection direction;
 @property (nonatomic, readonly) MLCallState state;
 @property (nonatomic, readonly) MLCallFinishReason finishReason;
-@property (nonatomic, readonly) uint32_t time;
+@property (nonatomic, readonly) uint32_t durationTime;
 @property (nonatomic, assign) BOOL muted;
 @property (nonatomic, assign) BOOL speaker;
 

@@ -82,6 +82,10 @@ struct AVCallUI: View {
                     //this is needed because ObservableKVOWrapper somehow extracts an NSNumber? from it's wrapped object
                     //which results in a runtime error when trying to cast NSNumber? to MLCallState
                     switch MLCallState(rawValue:call.state) {
+                        case .discovering:
+                            Text("Discovering devices...")
+                            .bold()
+                            .foregroundColor(.primary)
                         case .ringing:
                             Text("Ringing...")
                             .bold()
@@ -91,7 +95,7 @@ struct AVCallUI: View {
                             .bold()
                             .foregroundColor(.primary)
                         case .connected:
-                            Text("Connected: \(formatter.string(from: TimeInterval(call.time as UInt))!)")
+                            Text("Connected: \(formatter.string(from: TimeInterval(call.durationTime as UInt))!)")
                             .bold()
                             .foregroundColor(.primary)
                         case .finished:
@@ -101,11 +105,11 @@ struct AVCallUI: View {
                                     .bold()
                                     .foregroundColor(.primary)
                                 case .normal:
-                                    Text("Call ended, duration: \(formatter.string(from: TimeInterval(call.time as UInt))!)")
+                                    Text("Call ended, duration: \(formatter.string(from: TimeInterval(call.durationTime as UInt))!)")
                                     .bold()
                                     .foregroundColor(.primary)
-                                case .error:
-                                    Text("Call ended with error")
+                                case .connectivityError:
+                                    Text("Call ended: connection failed")
                                     .bold()
                                     .foregroundColor(.primary)
                                 case .unanswered:

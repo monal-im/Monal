@@ -46,9 +46,11 @@
 @property (nonatomic, assign) BOOL isConnected;
 @property (nonatomic, assign) BOOL isFinished;
 @property (nonatomic, strong) AVAudioSession* _Nullable audioSession;
-@property (nonatomic, assign) uint32_t time;
 @property (nonatomic, assign) MLCallFinishReason finishReason;
-@property (nonatomic, strong) NSTimer* _Nullable timer;
+@property (nonatomic, assign) uint32_t durationTime;
+@property (nonatomic, strong) NSTimer* _Nullable callDurationTimer;
+@property (nonatomic, strong) monal_void_block_t _Nullable cancelRingingTimeout;
+@property (nonatomic, strong) monal_void_block_t _Nullable cancelConnectingTimeout;
 
 @property (nonatomic, readonly) xmpp* account;
 @property (nonatomic, strong) MLVoIPProcessor* voipProcessor;
@@ -76,9 +78,11 @@
     self.contact = contact;
     self.direction = direction;
     self.isConnected = NO;
-    self.time = 0;
+    self.durationTime = 0;
     self.isFinished = NO;
     self.finishReason = MLCallFinishReasonUnknown;
+    self.cancelRingingTimeout = nil;
+    self.cancelConnectingTimeout = nil;
     
     [HelperTools dispatchSyncReentrant:^{
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
@@ -95,15 +99,21 @@
 
 -(void) deinit
 {
-    [self.timer invalidate];
+    [self.callDurationTimer invalidate];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - public interface
 
+-(void) reportRinging
+{
+    DDLogDebug(@"%@ was reported as ringing...", [self short]);
+    [self createRingingTimeoutTimer];
+}
+
 -(void) end
 {
-    DDLogVerbose(@"Requesting end call transaction for call: %@", [self short]);
+    DDLogVerbose(@"Requesting end call transaction for %@", [self short]);
     CXEndCallAction* endCallAction = [[CXEndCallAction alloc] initWithCallUUID:self.uuid];
     CXTransaction* transaction = [[CXTransaction alloc] initWithAction:endCallAction];
     [self.voipProcessor.callController requestTransaction:transaction completion:^(NSError* error) {
@@ -175,9 +185,11 @@
                 return MLCallStateConnected;
             if(self.jmiAccept != nil)
                 return MLCallStateConnecting;
-            if(self.jmiAccept == nil)
+            if(self.jmiAccept == nil && self.cancelRingingTimeout != nil)
                 return MLCallStateRinging;
-            return MLCallStateIdle;
+            if(self.jmiAccept == nil && self.cancelRingingTimeout == nil)
+                return MLCallStateDiscovering;
+            return MLCallStateUnknown;
         }
         else
         {
@@ -189,14 +201,14 @@
                 return MLCallStateConnecting;
             if(self.providerAnswerAction == nil)
                 return MLCallStateRinging;
-            return MLCallStateIdle;
+            return MLCallStateUnknown;
         }
     }
 }
 
 +(NSSet*) keyPathsForValuesAffectingState
 {
-    return [NSSet setWithObjects:@"direction", @"isConnected", @"jmiAccept", @"webRTCClient", @"providerAnswerAction", @"audioSession", @"isFinished", nil];
+    return [NSSet setWithObjects:@"direction", @"isConnected", @"jmiAccept", @"webRTCClient", @"providerAnswerAction", @"audioSession", @"isFinished", @"cancelRingingTimeout", @"cancelConnectingTimeout", nil];
 }
 
 #pragma mark - internals
@@ -212,24 +224,26 @@
         return account;
     }
 }
--(void) startTimer
+-(void) startCallDuartionTimer
 {
     //the timer needs a thread with runloop, see https://stackoverflow.com/a/18098396/3528174
     dispatch_async(dispatch_get_main_queue(), ^{
         DDLogInfo(@"%@: Starting call duration timer...", [self short]);
-        if(self.timer != nil)
-            [self.timer invalidate];
-        self.time = 0;
-        self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
-            DDLogVerbose(@"%@:Call duration timer triggered: %d", [self short], self.time);
+        if(self.cancelConnectingTimeout != nil)
+            self.cancelConnectingTimeout();
+        if(self.callDurationTimer != nil)
+            [self.callDurationTimer invalidate];
+        self.durationTime = 0;
+        self.callDurationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
+            DDLogVerbose(@"%@:Call duration timer triggered: %d", [self short], self.durationTime);
             if(self.state == MLCallStateFinished)
             {
                 DDLogInfo(@"%@: Stopping call duration timer...", [self short]);
                 [timer invalidate];
-                self.timer = nil;
+                self.callDurationTimer = nil;
             }
             else
-                self.time++;
+                self.durationTime++;
         }];
     });
 }
@@ -293,7 +307,7 @@
         
         //start timer once we are fully connected
         if(self.isConnected && self.audioSession != nil)
-            [self startTimer];
+            [self startCallDuartionTimer];
     }
 }
 -(BOOL) isConnected
@@ -324,7 +338,7 @@
         
         //start timer once we are fully connected
         if(self.isConnected && self.audioSession != nil)
-            [self startTimer];
+            [self startCallDuartionTimer];
     }
 }
 -(AVAudioSession*) audioSession
@@ -356,6 +370,11 @@
 {
     BOOL wasConnected = self.isConnected;
     
+    if(self.cancelRingingTimeout != nil)
+        self.cancelRingingTimeout();
+    if(self.cancelConnectingTimeout != nil)
+        self.cancelConnectingTimeout();
+    
     //end webrtc call if already established or in the process of establishing
     if(self.webRTCClient != nil)
     {
@@ -384,7 +403,7 @@
             {
                 [self sendJmiFinishWithReason:@"connectivity-error"];
                 [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
-                self.finishReason = MLCallFinishReasonError;
+                self.finishReason = MLCallFinishReasonConnectivityError;
             }
         }
     }
@@ -407,7 +426,7 @@
                     [self sendJmiFinishWithReason:@"connectivity-error"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                     if(self.finishReason == MLCallFinishReasonUnknown)
-                        self.finishReason = MLCallFinishReasonError;
+                        self.finishReason = MLCallFinishReasonConnectivityError;
                 }
             }
             else
@@ -425,14 +444,33 @@
             //(the outgoing call transaction was started, but start call action not yet executed, and then the end call action arrives)
             [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
             if(self.finishReason == MLCallFinishReasonUnknown)
-                self.finishReason = MLCallFinishReasonError;
+                self.finishReason = MLCallFinishReasonConnectivityError;
         }
     }
+}
+
+-(void) createConnectingTimeoutTimer
+{
+    if(self.cancelRingingTimeout != nil)
+        self.cancelRingingTimeout();
+    self.cancelConnectingTimeout = createTimer(15.0, (^{
+        DDLogError(@"Failed to connect call, aborting!");
+        [self handleEndCallAction];
+    }));
+}
+
+-(void) createRingingTimeoutTimer
+{
+    self.cancelRingingTimeout = createTimer(60.0, (^{
+        DDLogError(@"Call not answered in time, aborting!");
+        [self handleEndCallAction];
+    }));
 }
 
 -(void) establishIncomingConnection
 {
     DDLogInfo(@"Now connecting incoming VoIP call: %@", self);
+    [self createConnectingTimeoutTimer];
     
     //TODO: in our non-jingle protocol we only have to accept the call via XEP-0353 and the initiator (e.g. remote) will then initialize the webrtc session via IQs
     [self sendJmiAccept];
@@ -442,6 +480,7 @@
 {
     DDLogInfo(@"Now connecting outgoing VoIP call: %@", self);
     [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid startedConnectingAtDate:nil];
+    [self createConnectingTimeoutTimer];
     
     //TODO: in our non-jingle protocol the initiator (e.g. we) has to initialize the webrtc session by sending the proper IQs
     [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
@@ -563,8 +602,8 @@
         case MLCallStateConnecting: state = @"connecting"; break;
         case MLCallStateConnected: state = @"connected"; break;
         case MLCallStateFinished: state = @"finished"; break;
-        case MLCallStateIdle: state = @"idle"; break;
-        default: state = @"unknown"; break;
+        case MLCallStateUnknown: state = @"unknown"; break;
+        default: state = @"undefined"; break;
     }
     return [NSString stringWithFormat:@"%@Call:%@", self.direction == MLCallDirectionIncoming ? @"Incoming" : @"Outgoing", @{
         @"uuid": self.uuid,
@@ -657,11 +696,10 @@
             break;
         case RTCIceConnectionStateDisconnected:
             DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
-            [self end];
+            [self end];     //use "end" because this was a successful call
             break;
         case RTCIceConnectionStateFailed:
             DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
-            [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
             [self handleEndCallAction];
             break;
         //all following states can be ignored

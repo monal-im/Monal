@@ -52,6 +52,7 @@ static NSMutableDictionary* _pendingCalls;
 @property (nonatomic, readonly) MLVoIPProcessor* voipProcessor;
 
 -(instancetype) initWithUUID:(NSUUID*) uuid contact:(MLContact*) contact andDirection:(MLCallDirection) direction;
+-(void) reportRinging;
 -(void) handleEndCallAction;
 -(void) sendJmiReject;
 -(void) sendJmiPropose;
@@ -420,20 +421,7 @@ static NSMutableDictionary* _pendingCalls;
         
     DDLogInfo(@"Got new incoming JMI stanza for call: %@", call);
     //TODO: handle tie breaking!
-    if(call.direction == MLCallDirectionOutgoing && [messageNode check:@"{urn:xmpp:jingle-message:0}accept"])
-    {
-        if(call.jmiAccept != nil)
-        {
-            //TODO: handle moving calls between own devices
-            DDLogWarn(@"Someone tried to accept an already accepted outgoing call, ignoring this jmi accept!");
-            return;
-        }
-        
-        //order matters here!
-        call.fullRemoteJid = messageNode.from;
-        call.jmiAccept = messageNode;
-    }
-    else if(call.direction == MLCallDirectionIncoming && [messageNode check:@"{urn:xmpp:jingle-message:0}accept"])
+    if(call.direction == MLCallDirectionIncoming && [messageNode check:@"{urn:xmpp:jingle-message:0}accept"])
     {
         if(![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
         {
@@ -452,6 +440,44 @@ static NSMutableDictionary* _pendingCalls;
         call.finishReason = MLCallFinishReasonAnsweredElsewhere;
         [call handleEndCallAction];     //direct call, needed after reportCallWithUUID:endedAtDate:reason:
         [self removeCall:call];
+    }
+    else if(call.direction == MLCallDirectionOutgoing && [messageNode check:@"{urn:xmpp:jingle-message:0}accept"])
+    {
+        if(call.jmiAccept != nil)
+        {
+            //TODO: handle moving calls between own devices
+            DDLogWarn(@"Someone tried to accept an already accepted outgoing call, ignoring this jmi accept!");
+            return;
+        }
+        
+        //order matters here!
+        call.fullRemoteJid = messageNode.from;
+        call.jmiAccept = messageNode;
+    }
+    else if(call.direction == MLCallDirectionIncoming && [messageNode check:@"{urn:xmpp:jingle-message:0}ringing"])
+    {
+        if(![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+        {
+            DDLogWarn(@"Ignoring bogus jmi ringing of incoming call NOT coming from other device on our account...");
+            return;
+        }
+        DDLogWarn(@"Ignoring jmi ringing of incoming call coming from other device on our account...");
+    }
+    else if(call.direction == MLCallDirectionOutgoing && [messageNode check:@"{urn:xmpp:jingle-message:0}ringing"])
+    {
+        if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+        {
+            DDLogWarn(@"Ignoring bogus jmi ringing of outgoing call coming from other device on our account...");
+            return;
+        }
+        
+        if(call.jmiPropose == nil)
+        {
+            DDLogWarn(@"Other device did try to report state ringing for a not yet proposed call, ignoring this jmi ringing!");
+            return;
+        }
+        
+        [call reportRinging];
     }
     else if(call.direction == MLCallDirectionIncoming && [messageNode check:@"{urn:xmpp:jingle-message:0}reject"])
     {
@@ -530,14 +556,14 @@ static NSMutableDictionary* _pendingCalls;
         if(call.jmiAccept != nil)
         {
             DDLogInfo(@"Remote finished call with reason: %@", [messageNode findFirst:@"{urn:xmpp:jingle-message:0}finish/{urn:xmpp:jingle:1}reason/*$"]);
-            [call end];
+            [call end];     //use "end" because this was a successful call
         }
         else
         {
             DDLogWarn(@"Remote did try to finish an not yet established call");
             //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc
             [self.cxProvider reportCallWithUUID:call.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
-            call.finishReason = MLCallFinishReasonError;
+            call.finishReason = MLCallFinishReasonUnknown;
             [call handleEndCallAction];     //direct call needed after reportCallWithUUID:endedAtDate:reason:
             [self removeCall:call];
         }

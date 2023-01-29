@@ -585,7 +585,7 @@ $$class_handler(handleExternalDisco, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode)
 $$
 
 //entity caps of some contact
-$$class_handler(handleEntityCapsDisco, $$ID(XMPPIQ*, iqNode))
+$$class_handler(handleEntityCapsDisco, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     NSMutableArray* identities = [[NSMutableArray alloc] init];
     for(MLXMLNode* identity in [iqNode find:@"{http://jabber.org/protocol/disco#info}query/identity"])
         [identities addObject:[NSString stringWithFormat:@"%@/%@/%@/%@", [identity findFirst:@"/@category"], [identity findFirst:@"/@type"], ([identity check:@"/@xml:lang"] ? [identity findFirst:@"/@xml:lang"] : @""), [identity findFirst:@"/@name"]]];
@@ -593,6 +593,11 @@ $$class_handler(handleEntityCapsDisco, $$ID(XMPPIQ*, iqNode))
     NSArray* forms = [iqNode find:@"{http://jabber.org/protocol/disco#info}query/{jabber:x:data}x"];
     NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features andForms:forms];
     [[DataLayer sharedInstance] setCaps:features forVer:ver];
+    
+    //send out kMonalContactRefresh notification
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+        @"contact": [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo]
+    }];
 $$
 
 $$class_handler(handleMamPrefs, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))

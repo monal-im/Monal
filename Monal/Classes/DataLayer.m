@@ -682,32 +682,11 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) setOfflineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
+-(void) setOfflineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
 {
-    return [self.db boolWriteTransaction:^{
-        NSString* query1 = @"SELECT buddy_id FROM buddylist WHERE account_id=? AND buddy_name=?;";
-        NSArray* params=@[accountNo, presenceObj.fromUser];
-        NSObject* buddyid = [self.db executeScalar:query1 andArguments:params];
-        if(buddyid == nil)
-            return NO;
-
-        NSString* query2 = @"DELETE FROM buddy_resources WHERE buddy_id=? AND resource=?;";
-        NSArray* params2 = @[buddyid, presenceObj.fromResource ? presenceObj.fromResource : @""];
-        if([self.db executeNonQuery:query2 andArguments:params2] == NO)
-            return NO;
-
-        //see how many left
-        NSString* resourceCount = [self.db executeScalar:@"SELECT COUNT(buddy_id) FROM buddy_resources WHERE buddy_id=?;" andArguments:@[buddyid]];
-
-        if([resourceCount integerValue] < 1)
-        {
-            NSString* query = @"UPDATE buddylist SET state='offline' WHERE account_id=? AND buddy_name=?;";
-            NSArray* params4 = @[accountNo, presenceObj.fromUser];
-            BOOL retval = [self.db executeNonQuery:query andArguments:params4];
-            return retval;
-        }
-        else
-            return NO;
+    return [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"DELETE FROM buddy_resources AS R WHERE resource=? AND EXISTS(SELECT * FROM buddylist AS B WHERE B.buddy_id=R.buddy_id AND B.account_id=? AND B.buddy_name=?);" andArguments:@[presenceObj.fromResource ? presenceObj.fromResource : @"", accountNo, presenceObj.fromUser]];
+        [self.db executeNonQuery:@"UPDATE buddylist AS B SET state='offline' WHERE account_id=? AND buddy_name=? AND NOT EXISTS(SELECT * FROM buddy_resources AS R WHERE B.buddy_id=R.buddy_id);" andArguments:@[accountNo, presenceObj.fromUser]];
     }];
 }
 

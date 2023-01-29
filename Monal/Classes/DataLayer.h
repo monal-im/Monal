@@ -81,7 +81,7 @@ extern NSString* const kMessageTypeFiletransfer;
 #pragma mark  presence functions
 -(void) setResourceOnline:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
 -(void) setOnlineBuddy:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
--(BOOL) setOfflineBuddy:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
+-(void) setOfflineBuddy:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
 
 -(void) setBuddyStatus:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
 -(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSNumber*) accountNo;

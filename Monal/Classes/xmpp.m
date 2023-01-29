@@ -1863,6 +1863,7 @@ NSString* const kStanza = @"stanza";
                 }
                 else if([presenceNode check:@"/<type=unavailable>"])
                 {
+                    DDLogVerbose(@"Updating lastInteraction from unavailable presence...");
                     [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:self.accountNo];
                     
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewPresenceNotice object:self userInfo:@{
@@ -1924,6 +1925,7 @@ NSString* const kStanza = @"stanza";
                 //but only do so if the urn:xmpp:idle:1 was supported by that resource (e.g. don't send out unneeded updates)
                 if(![presenceNode check:@"/@type"] && presenceNode.fromResource && [[DataLayer sharedInstance] checkCap:@"urn:xmpp:idle:1" forUser:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo])
                 {
+                    DDLogVerbose(@"Updating lastInteraction from normal presence...");
                     //findFirst: will return nil for lastInteraction = "online" --> DataLayer will handle that correctly
                     [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo];
                     

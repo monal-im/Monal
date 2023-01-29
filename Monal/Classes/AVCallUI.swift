@@ -26,9 +26,9 @@ struct AVCallUI: View {
         self.delegate = delegate
         self.appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
         self.formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute, .second]
-        formatter.unitsStyle = .positional
-        formatter.zeroFormattingBehavior = .pad
+        self.formatter.allowedUnits = [.hour, .minute, .second]
+        self.formatter.unitsStyle = .positional
+        self.formatter.zeroFormattingBehavior = .pad
     }
 
     var body: some View {

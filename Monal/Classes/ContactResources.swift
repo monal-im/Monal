@@ -52,10 +52,15 @@ struct ContactResources: View {
                             resourceRowElement("Client Version:", Text(versionInfo.appVersion as String? ?? ""))
                             resourceRowElement("OS:", Text(versionInfo.platformOs as String? ?? ""))
                             if let lastInteraction = versionInfo.lastInteraction as Date? {
-                                resourceRowElement("Last Interaction:", HStack {
-                                    Text(lastInteraction, style:.date)
-                                    Text(lastInteraction, style:.time)
-                                })
+                                if lastInteraction.timeIntervalSince1970 == 0 {
+                                    resourceRowElement("Last Interaction:", Text("Currently Online"))
+                                } else {
+                                    if #available(iOS 15, *) {
+                                        resourceRowElement("Last Interaction:", Text(lastInteraction.formatted(date:.numeric, time:.standard)))
+                                    } else {
+                                        resourceRowElement("Last Interaction:", Text("\(String(describing:lastInteraction))"))
+                                    }
+                                }
                             } else {
                                 resourceRowElement("Last Interaction:", Text("unsupported"))
                             }

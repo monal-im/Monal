@@ -33,7 +33,7 @@ struct ContactResources: View {
             var tmpInfos:[String:ObservableKVOWrapper<MLContactSoftwareVersionInfo>] = [:]
             for ressourceName in DataLayer.sharedInstance().resources(for: contact.obj) {
                 // load already known software version info from database
-                if let softwareInfo = DataLayer.sharedInstance().getSoftwareVersionInfo(forContact: contact.obj.contactJid, resource: ressourceName, andAccount: contact.obj.accountId) {
+                if let softwareInfo = DataLayer.sharedInstance().getSoftwareVersionInfo(forContact:contact.obj.contactJid, resource:ressourceName, andAccount:contact.obj.accountId) {
                     tmpInfos[ressourceName] = ObservableKVOWrapper<MLContactSoftwareVersionInfo>(softwareInfo)
                 }
             }
@@ -67,7 +67,7 @@ struct ContactResources: View {
                 }
             }
         }
-        .richAlert(isPresented:$showCaps, title:Text("XMPP Capabilities")) { resource in
+        .richAlert(isPresented:$showCaps, title:Text("XMPP Capabilities").foregroundColor(.black)) { resource in
             VStack(alignment: .leading) {
                 Text("The resource '\(resource)' has the following capabilities:")
                     .font(Font.body.weight(.semibold))
@@ -99,23 +99,35 @@ struct ContactResources: View {
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalNewPresenceNotice")).receive(on: RunLoop.main)) { notification in
+            if let xmppAccount = notification.object as? xmpp, let jid = notification.userInfo?["jid"] as? String, let resource = notification.userInfo?["resource"] as? String, let available = notification.userInfo?["available"] as? NSNumber {
+                DDLogVerbose("Got presence update from account \(xmppAccount)...")
+                if jid == contact.obj.contactJid && xmppAccount.accountNo == contact.obj.accountId {
+                    DispatchQueue.main.async {
+                        DDLogVerbose("Successfully matched presence update to current contact: \(contact.obj)")
+                        if available.boolValue {
+                            if let softwareInfo = DataLayer.sharedInstance().getSoftwareVersionInfo(forContact:contact.obj.contactJid, resource:resource, andAccount:contact.obj.accountId) {
+                                self.contactVersionInfos[resource] = ObservableKVOWrapper<MLContactSoftwareVersionInfo>(softwareInfo)
+                            }
+                            // query software version from contact
+                            MLXMPPManager.sharedInstance().getEntitySoftWareVersion(for:contact.obj, andResource:resource)
+                        } else {
+                            self.contactVersionInfos[resource] = nil
+                        }
+                    }
+                }
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalLastInteractionUpdatedNotice")).receive(on: RunLoop.main)) { notification in
-            DDLogVerbose("Checking lastInteraction update...")
-            if let xmppAccount = notification.object as? xmpp {
-                DDLogVerbose("Checking lastInteraction update: step 1")
-                if let jid = notification.userInfo?["jid"] as? String {
-                    DDLogVerbose("Checking lastInteraction update: step 2")
-                    if let resource = notification.userInfo?["resource"] as? String {
-                        DDLogVerbose("Checking lastInteraction update: step 3")
-                        if let lastInteraction = notification.userInfo?["lastInteraction"] as? NSDate {
+            if let xmppAccount = notification.object as? xmpp, let jid = notification.userInfo?["jid"] as? String, let resource = notification.userInfo?["resource"] as? String, notification.userInfo?["lastInteraction"] as? NSDate != nil {
                 DDLogVerbose("Got lastInteraction update from account \(xmppAccount)...")
                 if jid == contact.obj.contactJid && xmppAccount.accountNo == contact.obj.accountId {
                     DispatchQueue.main.async {
                         DDLogVerbose("Successfully matched lastInteraction update to current contact: \(contact.obj)")
-                        self.contactVersionInfos[resource]?.obj.lastInteraction = lastInteraction as Date
+                        self.contactVersionInfos[resource]?.obj.lastInteraction = DataLayer.sharedInstance().lastInteraction(ofJid:self.contact.obj.contactJid, andResource:resource, forAccountNo:contact.obj.accountId)
                     }
                 }
-            } } } }
+            }
         }
         .onAppear {
             DDLogVerbose("View will appear...")
@@ -124,8 +136,7 @@ struct ContactResources: View {
                 DDLogVerbose("Refreshing software version info...")
                 for ressourceName in DataLayer.sharedInstance().resources(for: contact.obj) {
                     // query software version from contact
-                    MLXMPPManager.sharedInstance()
-                        .getEntitySoftWareVersion(for: contact.obj, andResource: ressourceName)
+                    MLXMPPManager.sharedInstance().getEntitySoftWareVersion(for:contact.obj, andResource:ressourceName)
                 }
             }
         }

@@ -1852,11 +1852,25 @@ NSString* const kStanza = @"stanza";
                         //update buddy state
                         [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self.accountNo];
                         [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self.accountNo];
+                        
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewPresenceNotice object:self userInfo:@{
+                            @"jid": presenceNode.fromUser,
+                            @"accountNo": self.accountNo,
+                            @"resource": nilWrapper(presenceNode.fromResource),
+                            @"available": @YES,
+                        }];
                     }
                 }
                 else if([presenceNode check:@"/<type=unavailable>"])
                 {
                     [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:self.accountNo];
+                    
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewPresenceNotice object:self userInfo:@{
+                        @"jid": presenceNode.fromUser,
+                        @"accountNo": self.accountNo,
+                        @"resource": nilWrapper(presenceNode.fromResource),
+                        @"available": @NO,
+                    }];
                     
                     //inform other parts of our system that the lastInteraction timestamp has potentially changed
                     //(e.g. no supporting resource online anymore)

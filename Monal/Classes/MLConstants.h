@@ -120,6 +120,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
 #define kMonalMessageFiletransferUpdateNotice @"kMonalMessageFiletransferUpdateNotice"
 
+#define kMonalNewPresenceNotice @"kMonalNewPresenceNotice"
 #define kMonalLastInteractionUpdatedNotice @"kMonalLastInteractionUpdatedNotice"
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"
 #define kMonalMessageDisplayedNotice @"kMonalMessageDisplayedNotice"

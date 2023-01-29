@@ -82,26 +82,32 @@ class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
             self.observedMembers.add(member)
         }
     }
+    
+    private func getWrapper(for member:String) -> AnyObject? {
+        addObserverForMember(member)
+        DDLogDebug("Returning value for dynamicMember \(member): \(String(describing:self.obj.value(forKey:member)))")
+        return self.obj.value(forKey:member) as AnyObject?
+    }
+    
+    private func setWrapper(for member:String, value:AnyObject?) {
+        self.obj.setValue(value, forKey:member)
+    }
 
     subscript<T>(member: String) -> T {
         get {
-            addObserverForMember(member)
-            DDLogDebug("Returning value for member \(member): \(String(describing:self.obj.value(forKeyPath:member)))")
-            return self.obj.value(forKeyPath:member) as! T
+            return self.getWrapper(for:member) as! T
         }
         set {
-            self.obj.setValue(newValue, forKey:member)
+            self.setWrapper(for:member, value:newValue as AnyObject?)
         }
     }
     
     subscript<T>(dynamicMember member: String) -> T {
         get {
-            addObserverForMember(member)
-            DDLogDebug("Returning value for dynamicMember \(member): \(String(describing:self.obj.value(forKey:member)))")
-            return self.obj.value(forKey:member) as! T
+            return self.getWrapper(for:member) as! T
         }
         set {
-            self.obj.setValue(newValue, forKey:member)
+            self.setWrapper(for:member, value:newValue as AnyObject?)
         }
     }
 }

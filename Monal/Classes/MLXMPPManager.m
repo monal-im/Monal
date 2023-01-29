@@ -285,12 +285,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             //we want do do "polling" reconnects in NSE instead to make sure we try as long as possible until the NSE times out
             if(![HelperTools isAppExtension])
             {
-                BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
+                //BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
                 [self disconnectAll];
                 DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
-                //this will automatically start the app if connectivity gets restored (force as soon as possible if !wasIdle)
+                //this will automatically start the app if connectivity gets restored
+                //always force as soon as possible to make sure any missed pushes get compensated for
                 //don't queue this notification because it should be handled immediately
-                [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @(!wasIdle)}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @YES}];
             }
         }
         else

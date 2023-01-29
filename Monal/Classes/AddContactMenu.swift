@@ -152,6 +152,9 @@ struct AddContactMenu: View {
                         .disabled(scannedFingerprints != nil)
                         .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
                         .addClearButton(text:$toAdd)
+                        //ios15: .textInputAutocapitalization(.never)
+                        .disableAutocorrection(true)
+                        .keyboardType(.emailAddress)
                 }
                 if(scannedFingerprints != nil && scannedFingerprints!.count > 0) {
                     Section(header: Text("A contact was scanned through the QR code scanner")) {

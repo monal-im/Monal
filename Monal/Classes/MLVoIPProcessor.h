@@ -16,12 +16,13 @@ NS_ASSUME_NONNULL_BEGIN
 @class CXProvider;
 
 @interface MLVoIPProcessor : NSObject
-@property (nonatomic, readonly) NSUInteger pendingCallsCount;
--(void) voipRegistration;
+-(MLCall*) initiateAudioCallToContact:(MLContact*) contact;
 
+@property (nonatomic, readonly) NSUInteger pendingCallsCount;
 -(NSDictionary<NSString*, MLCall*>*) getActiveCalls;
 -(MLCall* _Nullable) getActiveCallWithContact:(MLContact*) contact;
--(MLCall*) initiateAudioCallToContact:(MLContact*) contact;
+
+-(void) voipRegistration;
 @end
 
 NS_ASSUME_NONNULL_END

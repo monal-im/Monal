@@ -391,7 +391,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0353.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>6.0</xmpp:since>
-        <xmpp:version>0.4.0</xmpp:version>
+        <xmpp:version>0.6.0</xmpp:version>
         <xmpp:note>XEP-0353: Jingle Message Initiation</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>

@@ -1835,35 +1835,38 @@ NSString* const kStanza = @"stanza";
                 if(![presenceNode check:@"/@type"])
                 {
                     DDLogVerbose(@"presence notice from %@", presenceNode.fromUser);
-                    if(presenceNode.from)
-                    {
-                        MLContact* contact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo];
-                        if(contact.isGroup)
-                            [self.mucProcessor processPresence:presenceNode];
-                        else
-                        {
-                            contact.state = [presenceNode findFirst:@"show#"];
-                            contact.statusMessage = [presenceNode findFirst:@"status#"];
-
-                            //add contact if possible (ignore already existing contacts)
-                            [[DataLayer sharedInstance] addContact:presenceNode.fromUser forAccount:self.accountNo nickname:nil];
-
-                            //clear the state field in db and reset the ver hash for this resource
-                            [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self.accountNo];
-                            
-                            //update buddy state
-                            [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self.accountNo];
-                            [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self.accountNo];
-                        }
-                    }
+                    MLContact* contact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo];
+                    if(contact.isGroup)
+                        [self.mucProcessor processPresence:presenceNode];
                     else
                     {
-                        DDLogError(@"ERROR: presence notice but no user name.");
+                        contact.state = [presenceNode findFirst:@"show#"];
+                        contact.statusMessage = [presenceNode findFirst:@"status#"];
+
+                        //add contact if possible (ignore already existing contacts)
+                        [[DataLayer sharedInstance] addContact:presenceNode.fromUser forAccount:self.accountNo nickname:nil];
+
+                        //clear the state field in db and reset the ver hash for this resource
+                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self.accountNo];
+                        
+                        //update buddy state
+                        [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self.accountNo];
+                        [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self.accountNo];
                     }
                 }
                 else if([presenceNode check:@"/<type=unavailable>"])
                 {
                     [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:self.accountNo];
+                    
+                    //inform other parts of our system that the lastInteraction timestamp has potentially changed
+                    //(e.g. no supporting resource online anymore)
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                        @"jid": presenceNode.fromUser,
+                        @"accountNo": self.accountNo,
+                        @"lastInteraction": nilWrapper([[DataLayer sharedInstance] lastInteractionOfJid:presenceNode.fromUser forAccountNo:self.accountNo]),
+                        @"isTyping": @NO,
+                        @"resource": nilWrapper(presenceNode.fromResource),
+                    }];
                 }
 
                 //handle entity capabilities (this has to be done *after* setOnlineBuddy which sets the ver hash for the resource to "")
@@ -1903,37 +1906,21 @@ NSString* const kStanza = @"stanza";
                     }
                 }
                 
-                //handle last interaction time (only update db if the last interaction time is NEWER than the one already in our db, needed for multiclient setups)
-                //this must be done *after* parsing the ver attribute to get the cached capabilities
-                if(![presenceNode check:@"/@type"] && presenceNode.from)
+                //handle last interaction time (this must be done *after* parsing the ver attribute to get the cached capabilities)
+                //but only do so if the urn:xmpp:idle:1 was supported by that resource (e.g. don't send out unneeded updates)
+                if(![presenceNode check:@"/@type"] && presenceNode.fromResource && [[DataLayer sharedInstance] checkCap:@"urn:xmpp:idle:1" forUser:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo])
                 {
-                    if(presenceNode.fromResource && [presenceNode check:@"{urn:xmpp:idle:1}idle@since"])
-                    {
-                        NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:presenceNode.fromUser forAccountNo:self.accountNo];
-                        if([[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] compare:lastInteraction] == NSOrderedDescending)
-                        {
-                            [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andAccountNo:self.accountNo];
-
-                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-                                @"jid": presenceNode.fromUser,
-                                @"accountNo": self.accountNo,
-                                @"lastInteraction": [presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"],
-                                @"isTyping": @NO
-                            }];
-                        }
-                    }
-                    else if(presenceNode.fromResource)
-                    {
-                        if([[DataLayer sharedInstance] checkCap:@"urn:xmpp:idle:1" forUser:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo])
-                        {
-                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-                                @"jid": presenceNode.fromUser,
-                                @"accountNo": self.accountNo,
-                                @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
-                                @"isTyping": @NO
-                            }];
-                        }
-                    }
+                    //findFirst: will return nil for lastInteraction = "online" --> DataLayer will handle that correctly
+                    [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo];
+                    
+                    //inform other parts of our system that the lastInteraction timestamp has changed
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                        @"jid": presenceNode.fromUser,
+                        @"accountNo": self.accountNo,
+                        @"lastInteraction": nilWrapper([[DataLayer sharedInstance] lastInteractionOfJid:presenceNode.fromUser forAccountNo:self.accountNo]),
+                        @"isTyping": @NO,
+                        @"resource": nilWrapper(presenceNode.fromResource),
+                    }];
                 }
             }
             

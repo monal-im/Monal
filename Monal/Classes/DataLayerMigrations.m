@@ -989,6 +989,11 @@
             for(NSDictionary* dictionary in [dataLayer accountList])
                 [dataLayer addContact:[NSString stringWithFormat:@"%@@%@", dictionary[kUsername], dictionary[kDomain]] forAccount:dictionary[kAccountID] nickname:nil];
         }];
+        
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.004 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE buddy_resources ADD COLUMN lastInteraction INTEGER NOT NULL DEFAULT 0;"];
+            [db executeNonQuery:@"ALTER TABLE buddylist DROP COLUMN lastInteraction;"];
+        }];
 
 
         //check if device id changed and invalidate state, if so

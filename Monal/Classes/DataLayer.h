@@ -264,8 +264,10 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) disableEncryptForJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo;
 
 -(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSNumber*) accountNo;
--(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSNumber* _Nonnull) accountNo;
--(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSNumber* _Nonnull) accountNo;
+
+-(NSDate* _Nullable) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSNumber* _Nonnull) accountNo;
+-(NSDate* _Nullable) lastInteractionOfJid:(NSString* _Nonnull) jid andResource:(NSString* _Nonnull) resource forAccountNo:(NSNumber* _Nonnull) accountNo;
+-(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andResource:(NSString*) resource onAccountNo:(NSNumber* _Nonnull) accountNo;
 
 -(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSNumber*) accountNo;
 -(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSNumber*) accountNo;

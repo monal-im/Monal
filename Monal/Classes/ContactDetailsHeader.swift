@@ -47,16 +47,18 @@ struct ContactDetailsHeader: View {
                 Text("Account: \(MLXMPPManager.sharedInstance().getConnectedAccount(forID:contact.accountId)!.connectionProperties.identity.jid)")
             }
             
-            if !contact.isSelfChat {
+            if !contact.isSelfChat && !contact.isGroup {
                 Spacer()
                     .frame(height: 20)
-                if(!contact.isGroup) {
-                    if((contact.lastInteractionTime as Date).timeIntervalSince1970 > 0) {
+                if let lastInteractionTime = contact.lastInteractionTime as Date? {
+                    if lastInteractionTime.timeIntervalSince1970 > 0 {
                         Text(String(format: NSLocalizedString("Last seen: %@", comment: ""),
-                            DateFormatter.localizedString(from: contact.lastInteractionTime, dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short)))
+                            DateFormatter.localizedString(from: lastInteractionTime, dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short)))
                     } else {
                         Text(String(format: NSLocalizedString("Last seen: %@", comment: ""), NSLocalizedString("now", comment: "")))
                     }
+                } else {
+                    Text(String(format: NSLocalizedString("Last seen: %@", comment: ""), NSLocalizedString("unknown", comment: "")))
                 }
             }
             

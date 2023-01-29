@@ -689,7 +689,8 @@ $$
         [versionDBInfo.platformOs isEqualToString:iqPlatformOS]
     )) {
         DDLogVerbose(@"Updating software version info for %@", iqNode.from);
-        MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS];
+        NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:iqNode.fromUser andResource:iqNode.fromResource forAccountNo:account.accountNo];
+        MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS andLastInteraction:lastInteraction];
 
         [[DataLayer sharedInstance] setSoftwareVersionInfoForContact:iqNode.fromUser
                                                             resource:iqNode.fromResource

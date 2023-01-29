@@ -656,25 +656,31 @@ enum msgSentState {
 
 -(void) stopLastInteractionTimer
 {
-    if(_cancelLastInteractionTimer)
-        _cancelLastInteractionTimer();
-    _cancelLastInteractionTimer = nil;
+    @synchronized(self) {
+        if(_cancelLastInteractionTimer)
+            _cancelLastInteractionTimer();
+        _cancelLastInteractionTimer = nil;
+    }
 }
 
--(void) updateTypingTime:(NSDate*) lastInteractionDate
+-(void) updateTypingTime:(NSDate* _Nullable) lastInteractionDate
 {
     DDLogVerbose(@"LastInteraction updateTime() called");
-    NSString* lastInteractionString = [HelperTools formatLastInteraction:lastInteractionDate];
+    NSString* lastInteractionString = @"";      //unknown last interaction because not supported by any remote resource
+    if(lastInteractionDate != nil)
+        lastInteractionString = [HelperTools formatLastInteraction:lastInteractionDate];
     dispatch_async(dispatch_get_main_queue(), ^{
         self.navBarLastInteraction.text = lastInteractionString;
     });
 
-    [self stopLastInteractionTimer];
-    // this timer will be called only if needed
-    if(lastInteractionDate && lastInteractionDate.timeIntervalSince1970 > 0)
-        _cancelLastInteractionTimer = createTimer(60, ^{
-            [self updateTypingTime:lastInteractionDate];
-        });
+    @synchronized(self) {
+        [self stopLastInteractionTimer];
+        // this timer will be called only if needed and makes sure the "last active: xx minutes ago" text gets updated every minute
+        if(lastInteractionDate != nil && lastInteractionDate.timeIntervalSince1970 > 0)
+            _cancelLastInteractionTimer = createTimer(60.0, ^{
+                [self updateTypingTime:lastInteractionDate];
+            });
+    }
 }
 
 -(void) updateNavBarLastInteractionLabel:(NSNotification*) notification
@@ -696,10 +702,12 @@ enum msgSentState {
             });
             return;
         }
-        lastInteractionDate = data[@"lastInteraction"];     // this is nil for a "not typing" (aka typing ended) notification --> "online"
+        // this is nil for a "not typing" (aka typing ended) notification or if no "urn:xmpp:idle:1" is supported by any devices of this contact
+        lastInteractionDate = nilExtractor(data[@"lastInteraction"]);
     }
     // ...or load the latest interaction timestamp from db
     else
+        // this is nil if no "urn:xmpp:idle:1" is supported by any devices of this contact
         lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:jid forAccountNo:self.contact.accountId];
 
     // make timestamp human readable (lastInteractionDate will be captured by this block and automatically used by our timer)

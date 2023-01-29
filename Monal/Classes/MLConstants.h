@@ -71,6 +71,7 @@ typedef enum NotificationPrivacySettingOption {
 #define updateIfPrimitiveNotEqual(a, b)     if(a != b) a = b
 #define var                                 __auto_type 
 #define let                                 const __auto_type
+#define bool2str(b)                         (b ? @"YES" : @"NO")
 
 //make sure we don't define this twice
 #ifndef STRIP_PARENTHESES

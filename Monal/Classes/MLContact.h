@@ -31,11 +31,11 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @property (readonly) NSString* id;     //for Identifiable protocol
 
-@property (nonatomic, assign) BOOL isSelfChat;
-@property (nonatomic, assign) BOOL isInRoster;
-@property (nonatomic, assign) BOOL isSubscribedTo;
-@property (nonatomic, assign) BOOL isSubscribedFrom;
-@property (nonatomic, assign) BOOL hasIncomingContactRequest;
+@property (nonatomic, readonly) BOOL isSelfChat;
+@property (nonatomic, readonly) BOOL isInRoster;
+@property (nonatomic, readonly) BOOL isSubscribedTo;
+@property (nonatomic, readonly) BOOL isSubscribedFrom;
+@property (nonatomic, readonly) BOOL hasIncomingContactRequest;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
 -(BOOL) isEqualToMessage:(MLMessage*) message;
@@ -46,14 +46,14 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 /**
  account number in the database should be an integer
  */
-@property (nonatomic, copy) NSNumber* accountId;
-@property (nonatomic, copy) NSString* contactJid;
+@property (nonatomic, readonly) NSNumber* accountId;
+@property (nonatomic, readonly) NSString* contactJid;
 @property (nonatomic, copy) UIImage* avatar;
-@property (nonatomic, copy) NSString* fullName;
+@property (nonatomic, readonly) NSString* fullName;
 /**
  usually user assigned nick name
  */
-@property (nonatomic, copy) NSString* nickName;
+@property (nonatomic, readonly) NSString* nickName;
 @property (nonatomic, strong) NSString* nickNameView;
 
 /**
@@ -65,27 +65,27 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  xmpp status message
  */
 @property (nonatomic, copy) NSString* statusMessage;
-@property (nonatomic, copy) NSDate* lastInteractionTime;
+@property (nonatomic, readonly) NSDate* _Nullable lastInteractionTime;
 
 /**
  used to display the badge on a row
  */
 @property (nonatomic, readonly) NSInteger unreadCount;
 
-@property (nonatomic, assign) BOOL isPinned;
-@property (nonatomic, assign) BOOL isBlocked;
-@property (nonatomic, assign) BOOL isMuted;
-@property (nonatomic, assign) BOOL isActiveChat;
+@property (nonatomic, readonly) BOOL isPinned;
+@property (nonatomic, readonly) BOOL isBlocked;
+@property (nonatomic, readonly) BOOL isMuted;
+@property (nonatomic, readonly) BOOL isActiveChat;
 @property (nonatomic, assign) BOOL isEncrypted;
 
-@property (nonatomic, assign) BOOL isGroup;
-@property (nonatomic, copy) NSString* groupSubject;
-@property (nonatomic, copy) NSString* mucType;
-@property (nonatomic, copy) NSString* accountNickInGroup;
-@property (nonatomic, assign) BOOL isMentionOnly;
+@property (nonatomic, readonly) BOOL isGroup;
+@property (nonatomic, readonly) NSString* groupSubject;
+@property (nonatomic, readonly) NSString* mucType;
+@property (nonatomic, readonly) NSString* accountNickInGroup;
+@property (nonatomic, readonly) BOOL isMentionOnly;
 
-@property (nonatomic, copy) NSString* subscription; //roster subbscription state
-@property (nonatomic, copy) NSString* ask; //whether we have tried to subscribe
+@property (nonatomic, readonly) NSString* subscription; //roster subbscription state
+@property (nonatomic, readonly) NSString* ask; //whether we have tried to subscribe
 
 @property (nonatomic, readonly) NSString* contactDisplayName;
 

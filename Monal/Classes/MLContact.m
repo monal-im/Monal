@@ -33,6 +33,36 @@ NSString *const kAskSubscribe=@"subscribe";
     monal_void_block_t _cancelNickChange;
     UIImage* _avatar;
 }
+@property (nonatomic, assign) BOOL isSelfChat;
+@property (nonatomic, assign) BOOL isInRoster;
+@property (nonatomic, assign) BOOL isSubscribedTo;
+@property (nonatomic, assign) BOOL isSubscribedFrom;
+@property (nonatomic, assign) BOOL hasIncomingContactRequest;
+
+@property (nonatomic, strong) NSNumber* accountId;
+@property (nonatomic, strong) NSString* contactJid;
+@property (nonatomic, strong) NSString* fullName;
+@property (nonatomic, strong) NSString* nickName;
+
+@property (nonatomic, strong) NSDate* _Nullable lastInteractionTime;
+
+@property (nonatomic, assign) NSInteger unreadCount;
+
+@property (nonatomic, assign) BOOL isPinned;
+@property (nonatomic, assign) BOOL isBlocked;
+@property (nonatomic, assign) BOOL isMuted;
+@property (nonatomic, assign) BOOL isActiveChat;
+
+@property (nonatomic, assign) BOOL isGroup;
+@property (nonatomic, strong) NSString* groupSubject;
+@property (nonatomic, strong) NSString* mucType;
+@property (nonatomic, strong) NSString* accountNickInGroup;
+@property (nonatomic, assign) BOOL isMentionOnly;
+
+@property (nonatomic, strong) NSString* subscription;
+@property (nonatomic, strong) NSString* ask;
+
+@property (nonatomic, strong) NSString* contactDisplayName;
 @end
 
 @implementation MLContact
@@ -216,8 +246,10 @@ NSString *const kAskSubscribe=@"subscribe";
         return;     // ignore other accounts or contacts
     if(data[@"lastInteraction"] == nil)
         return;     // ignore typing notifications
-    self.lastInteractionTime = data[@"lastInteraction"];
-    //self.lastInteractionTime = [[DataLayer sharedInstance] lastInteractionOfJid:self.contactJid forAccountNo:self.accountId];
+    
+    //this will be nil if "urn:xmpp:idle:1" is not supported by any of the contact's devices
+    DDLogVerbose(@"Updating lastInteractionTime=%@ of %@", data[@"lastInteraction"], self);
+    self.lastInteractionTime = nilExtractor(data[@"lastInteraction"]);
 }
 
 -(void) handleBlockListRefresh:(NSNotification*) notification
@@ -594,8 +626,8 @@ NSString *const kAskSubscribe=@"subscribe";
     updateIfPrimitiveNotEqual(self.isActiveChat, contact.isActiveChat);
     updateIfPrimitiveNotEqual(self.isEncrypted, contact.isEncrypted);
     updateIfPrimitiveNotEqual(self.isMuted, contact.isMuted);
-    // don't update lastInteractionTime from contact, we dynamically update ourselves by handling kMonalLastInteractionUpdatedNotice
-    // updateIfIdNotEqual(self.lastInteractionTime, contact.lastInteractionTime);
+    //don't update lastInteractionTime from contact, we dynamically update ourselves by handling kMonalLastInteractionUpdatedNotice
+    //updateIfIdNotEqual(self.lastInteractionTime, contact.lastInteractionTime);
 }
 
 -(BOOL) isEqualToMessage:(MLMessage*) message

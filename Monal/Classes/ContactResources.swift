@@ -11,11 +11,11 @@ import SwiftUI
 import OrderedCollections
 
 @ViewBuilder
-func resourceRowElement(_ k: String, _ v: String, space: CGFloat = 5) -> some View {
+func resourceRowElement(_ k: String, _ v: some View, space: CGFloat = 5) -> some View {
     HStack {
         Text(k).font(.headline)
         Spacer()
-        Text(v).foregroundColor(.secondary)
+        v.foregroundColor(.secondary)
     }
 }
 
@@ -46,13 +46,24 @@ struct ContactResources: View {
             ForEach(self.contactVersionInfos.sorted(by:{ $0.0 < $1.0 }), id: \.key) { key, value in
                 if let versionInfo = value {
                     Section {
-                        resourceRowElement("Resource:", versionInfo.resource ?? "")
-                        resourceRowElement("Client Name:", versionInfo.appName ?? "")
-                        resourceRowElement("Client Version:", versionInfo.appVersion ?? "")
-                        resourceRowElement("OS:", versionInfo.platformOs ?? "")
-                    }.onTapGesture(count: 2, perform: {
-                        showCaps = versionInfo.resource
-                    })
+                        VStack {
+                            resourceRowElement("Resource:", Text(versionInfo.resource as String))
+                            resourceRowElement("Client Name:", Text(versionInfo.appName as String? ?? ""))
+                            resourceRowElement("Client Version:", Text(versionInfo.appVersion as String? ?? ""))
+                            resourceRowElement("OS:", Text(versionInfo.platformOs as String? ?? ""))
+                            if let lastInteraction = versionInfo.lastInteraction as Date? {
+                                resourceRowElement("Last Interaction:", HStack {
+                                    Text(lastInteraction, style:.date)
+                                    Text(lastInteraction, style:.time)
+                                })
+                            } else {
+                                resourceRowElement("Last Interaction:", Text("unsupported"))
+                            }
+                        }
+                        .onTapGesture(count: 2, perform: {
+                            showCaps = versionInfo.resource
+                        })
+                    }
                 }
             }
         }
@@ -75,7 +86,7 @@ struct ContactResources: View {
                         }
                     }
                 }
-            }
+            }.foregroundColor(.black)
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalXmppUserSoftWareVersionRefresh")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let softwareInfo = notification.userInfo?["versionInfo"] as? MLContactSoftwareVersionInfo {
@@ -87,6 +98,24 @@ struct ContactResources: View {
                     }
                 }
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalLastInteractionUpdatedNotice")).receive(on: RunLoop.main)) { notification in
+            DDLogVerbose("Checking lastInteraction update...")
+            if let xmppAccount = notification.object as? xmpp {
+                DDLogVerbose("Checking lastInteraction update: step 1")
+                if let jid = notification.userInfo?["jid"] as? String {
+                    DDLogVerbose("Checking lastInteraction update: step 2")
+                    if let resource = notification.userInfo?["resource"] as? String {
+                        DDLogVerbose("Checking lastInteraction update: step 3")
+                        if let lastInteraction = notification.userInfo?["lastInteraction"] as? NSDate {
+                DDLogVerbose("Got lastInteraction update from account \(xmppAccount)...")
+                if jid == contact.obj.contactJid && xmppAccount.accountNo == contact.obj.accountId {
+                    DispatchQueue.main.async {
+                        DDLogVerbose("Successfully matched lastInteraction update to current contact: \(contact.obj)")
+                        self.contactVersionInfos[resource]?.obj.lastInteraction = lastInteraction as Date
+                    }
+                }
+            } } } }
         }
         .onAppear {
             DDLogVerbose("View will appear...")
@@ -100,15 +129,15 @@ struct ContactResources: View {
                 }
             }
         }
-        .navigationBarTitle("Devices", displayMode: .inline)
+        .navigationBarTitle("Devices of \(contact.contactDisplayName as String)", displayMode: .inline)
     }
 }
 
 func previewMock() -> [String:ObservableKVOWrapper<MLContactSoftwareVersionInfo>] {
     var previewMock:[String:ObservableKVOWrapper<MLContactSoftwareVersionInfo>] = [:]
-    previewMock["m1"] = ObservableKVOWrapper<MLContactSoftwareVersionInfo>(MLContactSoftwareVersionInfo.init(jid: "test1@monal.im", andRessource: "m1", andAppName: "Monal", andAppVersion: "1.1.1", andPlatformOS: "ios"))
-    previewMock["m2"] = ObservableKVOWrapper<MLContactSoftwareVersionInfo>(MLContactSoftwareVersionInfo.init(jid: "test1@monal.im", andRessource: "m2", andAppName: "Monal", andAppVersion: "1.1.2", andPlatformOS: "macOS"))
-    previewMock["m3"] = ObservableKVOWrapper<MLContactSoftwareVersionInfo>(MLContactSoftwareVersionInfo.init(jid: "test1@monal.im", andRessource: "m3", andAppName: "Monal", andAppVersion: "1.1.2", andPlatformOS: "macOS"))
+    previewMock["m1"] = ObservableKVOWrapper<MLContactSoftwareVersionInfo>(MLContactSoftwareVersionInfo.init(jid: "test1@monal.im", andRessource: "m1", andAppName: "Monal", andAppVersion: "1.1.1", andPlatformOS: "ios", andLastInteraction: Date()))
+    previewMock["m2"] = ObservableKVOWrapper<MLContactSoftwareVersionInfo>(MLContactSoftwareVersionInfo.init(jid: "test1@monal.im", andRessource: "m2", andAppName: "Monal", andAppVersion: "1.1.2", andPlatformOS: "macOS", andLastInteraction: Date()))
+    previewMock["m3"] = ObservableKVOWrapper<MLContactSoftwareVersionInfo>(MLContactSoftwareVersionInfo.init(jid: "test1@monal.im", andRessource: "m3", andAppName: "Monal", andAppVersion: "1.1.2", andPlatformOS: "macOS", andLastInteraction: Date()))
     return previewMock
 }
 

@@ -14,7 +14,7 @@
 
 @implementation MLContactSoftwareVersionInfo
 
--(instancetype) initWithJid:(NSString*) jid andRessource:(NSString*) resource andAppName:(NSString*) appName andAppVersion:(NSString*) appVersion andPlatformOS:(NSString*) platformOs
+-(instancetype) initWithJid:(NSString*) jid andRessource:(NSString*) resource andAppName:(NSString* _Nullable) appName andAppVersion:(NSString* _Nullable) appVersion andPlatformOS:(NSString* _Nullable) platformOs andLastInteraction:(NSDate* _Nullable) lastInteraction
 {
     self = [super init];
     self.fromJid = jid;
@@ -22,6 +22,7 @@
     self.appName = appName;
     self.appVersion = appVersion;
     self.platformOs = platformOs;
+    self.lastInteraction = lastInteraction;
     return self;
 }
 
@@ -37,7 +38,7 @@
 
 -(NSUInteger) hash
 {
-    return [self.fromJid hash] ^ [self.resource hash] ^ [self.appName hash] ^ [self.appVersion hash] ^ [self.platformOs hash];
+    return [self.fromJid hash] ^ [self.resource hash] ^ [self.appName hash] ^ [self.appVersion hash] ^ [self.platformOs hash] ^ [self.lastInteraction hash];
 }
 
 -(NSString*) id

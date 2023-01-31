@@ -196,7 +196,7 @@ static NSMutableDictionary* _typingNotifications;
         [errorReply.attributes setObject:[messageNode findFirst:@"/@id"] forKey:@"id"];        //don't set origin id here
         [errorReply addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"feature-not-implemented" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-            [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" withAttributes:@{} andChildren:@[] andData:@"MUC-PMs are not supported here!"]
+            [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" withAttributes:@{} andChildren:@[] andData:@"The receiver does not seem to support MUC-PMs"]
         ] andData:nil]];
         [errorReply setStoreHint];
         [account send:errorReply];

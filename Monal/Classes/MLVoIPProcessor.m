@@ -301,7 +301,7 @@ static NSMutableDictionary* _pendingCalls;
                 if([iceServers count] == [call.account.connectionProperties.discoveredStunTurnServers count])
                 {
                     DDLogInfo(@"Done processing ICE servers, trying to connect WebRTC session...");
-                    [self loadIceCandidates:call andIceServers:iceServers];
+                    [self createWebRTCClientForCall:call usingICEServers:iceServers];
                 }
             }];
     }
@@ -325,7 +325,7 @@ static NSMutableDictionary* _pendingCalls;
             if(error != nil || [(NSHTTPURLResponse*)response statusCode] != 200)
             {
                 DDLogWarn(@"Could not retrieve turn challenge, only using stun: %@", error);
-                [self loadIceCandidates:call andIceServers:iceServers];
+                [self createWebRTCClientForCall:call usingICEServers:iceServers];
                 return;
             }
             // parse challenge
@@ -334,7 +334,7 @@ static NSMutableDictionary* _pendingCalls;
             if(challengeJsonErr != nil && [challenge objectForKey:@"challenge"] != nil)
             {
                 DDLogWarn(@"Could not parse turn challenge, only using stun: %@", challengeJsonErr);
-                [self loadIceCandidates:call andIceServers:iceServers];
+                [self createWebRTCClientForCall:call usingICEServers:iceServers];
                 return;
             }
             
@@ -353,7 +353,7 @@ static NSMutableDictionary* _pendingCalls;
             if(challengeRespJsonErr != nil)
             {
                 DDLogWarn(@"Could not create json challenge reponse, only using stun: %@", challengeRespJsonErr);
-                [self loadIceCandidates:call andIceServers:iceServers];
+                [self createWebRTCClientForCall:call usingICEServers:iceServers];
                 return;
             }
             
@@ -369,7 +369,7 @@ static NSMutableDictionary* _pendingCalls;
                 if(error != nil || [(NSHTTPURLResponse*)response statusCode] != 200)
                 {
                     DDLogWarn(@"Could not retrieve turn credentials, only using stun: %@", error);
-                    [self loadIceCandidates:call andIceServers:iceServers];
+                    [self createWebRTCClientForCall:call usingICEServers:iceServers];
                     return;
                 }
                 NSError* turnCredentialsErr;
@@ -377,12 +377,12 @@ static NSMutableDictionary* _pendingCalls;
                 if(turnCredentials == nil || turnCredentials[@"username"] == nil || turnCredentials[@"password"] == nil || turnCredentials[@"uris"] == nil)
                 {
                     DDLogWarn(@"Could not parse turn credentials, only using stun: %@", turnCredentialsErr);
-                    [self loadIceCandidates:call andIceServers:iceServers];
+                    [self createWebRTCClientForCall:call usingICEServers:iceServers];
                     return;
                 }
                 [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:[turnCredentials objectForKey:@"uris"] username:[turnCredentials objectForKey:@"username"] credential:[turnCredentials objectForKey:@"password"]]];
                 
-                [self loadIceCandidates:call andIceServers:iceServers];
+                [self createWebRTCClientForCall:call usingICEServers:iceServers];
             }];
             [responseSession resume];
         }];
@@ -391,10 +391,10 @@ static NSMutableDictionary* _pendingCalls;
     //continue without any stun/turn servers if only p2p but no stun/turn servers could be found on local xmpp server
     //AND no fallback to monal servers was configured
     else
-        [self loadIceCandidates:call andIceServers:@[]];
+        [self createWebRTCClientForCall:call usingICEServers:@[]];
 }
 
--(void) loadIceCandidates:(MLCall*) call andIceServers:(NSArray<RTCIceServer*>*) iceServers
+-(void) createWebRTCClientForCall:(MLCall*) call usingICEServers:(NSArray<RTCIceServer*>*) iceServers
 {
     BOOL forceRelay = ![[HelperTools defaultsDB] boolForKey:@"webrtcAllowP2P"];
     DDLogInfo(@"Initializing webrtc with forceRelay=%@ using ice servers: %@", forceRelay ? @"YES" : @"NO", iceServers);

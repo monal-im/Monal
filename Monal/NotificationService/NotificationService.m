@@ -163,10 +163,17 @@
 
 -(void) handleIncomingVoipCall:(NSNotification*) notification
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        DDLogInfo(@"Got incoming VOIP call");
-        if(@available(iOS 14.5, macCatalyst 14.5, *))
-        {
+    DDLogInfo(@"Got incoming VOIP call");
+    if(@available(iOS 14.5, macCatalyst 14.5, *))
+    {
+        //disconnect while still being in the receive queue to make sure we don't process any other stanza after this jmi one
+        //(we don't want to handle a second jmi stanza for example: that could confuse tie-breaking and other parts of our call handling)
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:notification.userInfo[@"accountNo"]];
+        [account disconnect];
+        
+        //now disconnect all other accounts, post the voip push and kill the appex
+        //do this in an extra thread to avoid deadlocks via: receive_queue -> disconnect_thread -> receive_queue
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             //directly disconnect without handling any possibly queued stanzas (they will be handled in mainapp once we wake it up)
             [self disconnectAndFeedAllWaitingHandlers];
         
@@ -179,10 +186,10 @@
                     DDLogInfo(@"Successfully called reportNewIncomingVoIPPushPayload");
                 [self killAppex];
             }];
-        }
-        else
-            DDLogError(@"iOS < 14.5 detected, ignoring incoming call!");
-    });
+        });
+    }
+    else
+        DDLogError(@"iOS < 14.5 detected, ignoring incoming call!");
 }
 
 -(void) disconnectAndFeedAllWaitingHandlers

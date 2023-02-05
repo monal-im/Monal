@@ -35,6 +35,7 @@
     AVAudioSession* _audioSession;
 }
 @property (nonatomic, strong) NSUUID* uuid;
+@property (nonatomic, strong) NSString* jmiid;
 @property (nonatomic, strong) MLContact* contact;
 @property (nonatomic) MLCallDirection direction;
 
@@ -44,7 +45,9 @@
 @property (nonatomic, strong) WebRTCClient* _Nullable webRTCClient;
 @property (nonatomic, strong) CXAnswerCallAction* _Nullable providerAnswerAction;
 @property (nonatomic, assign) BOOL isConnected;
+@property (nonatomic, assign) BOOL isReconnecting;
 @property (nonatomic, assign) BOOL isFinished;
+@property (nonatomic, assign) BOOL tieBreak;
 @property (nonatomic, strong) AVAudioSession* _Nullable audioSession;
 @property (nonatomic, assign) MLCallFinishReason finishReason;
 @property (nonatomic, assign) uint32_t durationTime;
@@ -67,17 +70,21 @@
 
 +(instancetype) makeDummyCall:(int) type
 {
-    return [[self alloc] initWithUUID:[NSUUID UUID] contact:[MLContact makeDummyContact:type] andDirection:MLCallDirectionOutgoing];
+    NSUUID* uuid = [NSUUID UUID];
+    return [[self alloc] initWithUUID:uuid jmiid:uuid.UUIDString contact:[MLContact makeDummyContact:type] andDirection:MLCallDirectionOutgoing];
 }
 
--(instancetype) initWithUUID:(NSUUID*) uuid contact:(MLContact*) contact andDirection:(MLCallDirection) direction;
+-(instancetype) initWithUUID:(NSUUID*) uuid jmiid:(NSString*) jmiid contact:(MLContact*) contact andDirection:(MLCallDirection) direction
 {
     self = [super init];
     MLAssert(uuid != nil, @"Call UUIDs must not be nil!");
+    MLAssert(jmiid != nil, @"Call jmiids must not be nil!");
     self.uuid = uuid;
+    self.jmiid = jmiid;
     self.contact = contact;
     self.direction = direction;
     self.isConnected = NO;
+    self.isReconnecting = NO;
     self.durationTime = 0;
     self.isFinished = NO;
     self.finishReason = MLCallFinishReasonUnknown;
@@ -104,12 +111,6 @@
 }
 
 #pragma mark - public interface
-
--(void) reportRinging
-{
-    DDLogDebug(@"%@ was reported as ringing...", [self short]);
-    [self createRingingTimeoutTimer];
-}
 
 -(void) end
 {
@@ -183,6 +184,8 @@
                 return MLCallStateFinished;
             if(self.isConnected && self.webRTCClient != nil && self.audioSession != nil)
                 return MLCallStateConnected;
+            if(self.jmiProceed != nil && self.isReconnecting)
+                return MLCallStateReconnecting;
             if(self.jmiProceed != nil)
                 return MLCallStateConnecting;
             if(self.jmiProceed == nil && self.cancelRingingTimeout != nil)
@@ -197,6 +200,8 @@
                 return MLCallStateFinished;
             if(self.isConnected && self.webRTCClient != nil && self.audioSession != nil)
                 return MLCallStateConnected;
+            if(self.providerAnswerAction != nil && self.isReconnecting)
+                return MLCallStateReconnecting;
             if(self.providerAnswerAction != nil)
                 return MLCallStateConnecting;
             if(self.providerAnswerAction == nil)
@@ -233,7 +238,6 @@
             self.cancelConnectingTimeout();
         if(self.callDurationTimer != nil)
             [self.callDurationTimer invalidate];
-        self.durationTime = 0;
         self.callDurationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
             DDLogVerbose(@"%@:Call duration timer triggered: %d", [self short], self.durationTime);
             if(self.state == MLCallStateFinished)
@@ -366,6 +370,57 @@
     [[RTCAudioSession sharedInstance] unlockForConfiguration];
 }
 
+-(void) reportRinging
+{
+    DDLogDebug(@"%@ was reported as ringing...", [self short]);
+    [self createRingingTimeoutTimer];
+}
+
+-(void) migrateTo:(MLCall*) otherCall
+{
+    //send jmi finish with migration before chaning all ids etc.
+    DDLogDebug(@"Migrating call using JMI finish: %@", self);
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
+        @"id": self.jmiid,
+    } andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"expired"]
+        ] andData:nil],
+        [[MLXMLNode alloc] initWithElement:@"migrated" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+            @"to": otherCall.jmiid,
+        }  andChildren:@[] andData:nil]
+    ] andData:nil]];
+    [jmiNode setStoreHint];
+    [self.account send:jmiNode];
+    
+    @synchronized(self) {
+        //prepare this call for new webrtc connection
+        self.jmiid = otherCall.jmiid;
+        self.direction = otherCall.direction;
+        self.isConnected = NO;
+        self.isReconnecting = YES;
+        self.finishReason = MLCallFinishReasonUnknown;
+        if(self.webRTCClient != nil)
+        {
+            [self.webRTCClient.peerConnection close];
+            self.webRTCClient = nil;
+        }
+        if(self.cancelRingingTimeout != nil)
+            self.cancelRingingTimeout();
+        if(self.cancelConnectingTimeout != nil)
+            self.cancelConnectingTimeout();
+        self.cancelRingingTimeout = nil;
+        self.cancelConnectingTimeout = nil;
+        
+        //report this migrated call as ringing
+        [self sendJmiRinging];
+        
+        //now fake a cxprovider answer action (we do auto-answer this call, but ios does not even know we switched the underlying webrtc connection)
+        self.providerAnswerAction = [[CXAnswerCallAction alloc] initWithCallUUID:self.uuid];
+    }
+}
+
 -(void) handleEndCallAction
 {
     BOOL wasConnected = self.isConnected;
@@ -388,7 +443,15 @@
     if(self.direction == MLCallDirectionIncoming)
     {
         if(self.providerAnswerAction == nil)
-            [self sendJmiReject];
+        {
+            if(self.finishReason != MLCallFinishReasonUnanswered)
+            {
+                if(self.tieBreak)
+                    [self sendJmiRejectWithTieBreak];
+                else
+                    [self sendJmiReject];
+            }
+        }
         else
         {
             [self.providerAnswerAction fail];               //fail will do nothing if already fulfilled
@@ -432,7 +495,12 @@
             else
             {
                 if(self.finishReason != MLCallFinishReasonRejected)
-                    [self sendJmiRetract];
+                {
+                    if(self.tieBreak)
+                        [self sendJmiRetractWithTieBreak];
+                    else
+                        [self sendJmiRetract];
+                }
                 [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
                 if(self.finishReason == MLCallFinishReasonUnknown)
                     self.finishReason = MLCallFinishReasonUnanswered;
@@ -489,7 +557,7 @@
         //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCSessionDescription.h
         XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
         [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"sdp" andNamespace:@"urn:tmp:monal:webrtc:sdp:1" withAttributes:@{
-            @"id": self.uuid.UUIDString,
+            @"id": self.jmiid,
             @"type": [RTCSessionDescription stringForType:sdp.type]
         } andChildren:@[] andData:[HelperTools encodeBase64WithString:sdp.sdp]]];
         [self.account sendIq:sdpIQ withResponseHandler:^(XMPPIQ* result) {
@@ -516,7 +584,7 @@
     DDLogDebug(@"Proposing new call via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"propose" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
-        @"id": self.uuid.UUIDString,
+        @"id": self.jmiid,
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"description" andNamespace:@"urn:xmpp:jingle:apps:rtp:1" withAttributes:@{@"media": @"audio"} andChildren:@[] andData:nil]
     ] andData:nil]];
@@ -530,11 +598,27 @@
     DDLogDebug(@"Rejecting via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
-        @"id": self.uuid.UUIDString,
+        @"id": self.jmiid,
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"busy"]
         ] andData:nil]
+    ] andData:nil]];
+    [jmiNode setStoreHint];
+    [self.account send:jmiNode];
+}
+
+-(void) sendJmiRejectWithTieBreak
+{
+    DDLogDebug(@"Rejecting with tie-break via JMI: %@", self);
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
+        @"id": self.jmiid,
+    } andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"expired"]
+        ] andData:nil],
+        [[MLXMLNode alloc] initWithElement:@"tie-break"]
     ] andData:nil]];
     [jmiNode setStoreHint];
     [self.account send:jmiNode];
@@ -545,7 +629,7 @@
     DDLogDebug(@"Ringing via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"ringing" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
-        @"id": self.uuid.UUIDString,
+        @"id": self.jmiid,
     } andChildren:@[] andData:nil]];
     [jmiNode setStoreHint];
     [self.account send:jmiNode];
@@ -556,7 +640,7 @@
     DDLogDebug(@"Accepting via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"proceed" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
-        @"id": self.uuid.UUIDString,
+        @"id": self.jmiid,
     } andChildren:@[] andData:nil]];
     [jmiNode setStoreHint];
     self.jmiProceed = jmiNode;
@@ -568,7 +652,7 @@
     DDLogDebug(@"Finishing via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
-        @"id": self.uuid.UUIDString,
+        @"id": self.jmiid,
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
             [[MLXMLNode alloc] initWithElement:reason]
@@ -583,7 +667,22 @@
     DDLogDebug(@"Retracting via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
-        @"id": self.uuid.UUIDString,
+        @"id": self.jmiid,
+    } andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"cancel"]
+        ] andData:nil]
+    ] andData:nil]];
+    [jmiNode setStoreHint];
+    [self.account send:jmiNode];
+}
+
+-(void) sendJmiRetractWithTieBreak
+{
+    DDLogDebug(@"Retracting via JMI: %@", self);
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
+        @"id": self.jmiid,
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"cancel"]
@@ -654,12 +753,14 @@
 
 -(void) webRTCClient:(WebRTCClient*) webRTCClient didDiscoverLocalCandidate:(RTCIceCandidate*) candidate
 {
+    if(webRTCClient != self.webRTCClient)
+        return;
     DDLogDebug(@"%@: Discovered local ICE candidate: %@", [self short], candidate);
     //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCIceCandidate.h
     DDLogDebug(@"%@: sending new local ICE candidate to '%@'...", [self short], self.fullRemoteJid);
     XMPPIQ* candidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
     [candidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"candidate" andNamespace:@"urn:tmp:monal:webrtc:candidate:1" withAttributes:@{
-        @"id": self.uuid.UUIDString,
+        @"id": self.jmiid,
         @"sdpMLineIndex": [[NSNumber numberWithInt:candidate.sdpMLineIndex] stringValue],
         @"sdpMid": [HelperTools encodeBase64WithString:candidate.sdpMid]
     } andChildren:@[] andData:[HelperTools encodeBase64WithString:candidate.sdp]]];
@@ -671,8 +772,10 @@
     }];
 }
     
--(void) webRTCClient:(WebRTCClient*) client didChangeConnectionState:(RTCIceConnectionState) state
+-(void) webRTCClient:(WebRTCClient*) webRTCClient didChangeConnectionState:(RTCIceConnectionState) state
 {
+    if(webRTCClient != self.webRTCClient)
+        return;
     DDLogDebug(@"New RTCIceConnectionState %ld for peer connection: %@", (long)state, self.webRTCClient.peerConnection);
     switch(state)
     {
@@ -721,8 +824,11 @@
     }
 }
     
--(void) webRTCClient:(WebRTCClient*) client didReceiveData:(NSData*) data
+-(void) webRTCClient:(WebRTCClient*) webRTCClient didReceiveData:(NSData*) data
 {
+    if(webRTCClient != self.webRTCClient)
+        return;
+    
     DDLogDebug(@"Received WebRTC data: %@", data);
 }
 
@@ -809,7 +915,7 @@
                 [self.webRTCClient answerWithCompletion:^(RTCSessionDescription* localSdp) {
                     XMPPIQ* responseIq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
                     [responseIq addChildNode:[[MLXMLNode alloc] initWithElement:@"sdp" andNamespace:@"urn:tmp:monal:webrtc:sdp:1" withAttributes:@{
-                        @"id": self.uuid.UUIDString,
+                        @"id": self.jmiid,
                         @"type": [RTCSessionDescription stringForType:localSdp.type]
                     } andChildren:@[] andData:[HelperTools encodeBase64WithString:localSdp.sdp]]];
                     [self.account send:responseIq];

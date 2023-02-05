@@ -35,8 +35,7 @@ static NSMutableDictionary* _pendingCalls;
 @end
 
 @interface MLCall() <WebRTCClientDelegate>
-@property (nonatomic, strong) NSUUID* uuid;
-@property (nonatomic, strong) MLContact* contact;
+@property (nonatomic, strong) NSString* jmiid;
 @property (nonatomic) MLCallDirection direction;
 
 @property (nonatomic, strong) MLXMLNode* _Nullable jmiPropose;
@@ -45,13 +44,15 @@ static NSMutableDictionary* _pendingCalls;
 @property (nonatomic, strong) WebRTCClient* _Nullable webRTCClient;
 @property (nonatomic, strong) CXAnswerCallAction* _Nullable providerAnswerAction;
 @property (nonatomic, assign) BOOL isConnected;
+@property (nonatomic, assign) BOOL tieBreak;
 @property (nonatomic, strong) AVAudioSession* _Nullable audioSession;
 @property (nonatomic, assign) MLCallFinishReason finishReason;
 
 @property (nonatomic, readonly) xmpp* account;
 @property (nonatomic, readonly) MLVoIPProcessor* voipProcessor;
 
--(instancetype) initWithUUID:(NSUUID*) uuid contact:(MLContact*) contact andDirection:(MLCallDirection) direction;
+-(instancetype) initWithUUID:(NSUUID*) uuid jmiid:(NSString*) jmiid contact:(MLContact*) contact andDirection:(MLCallDirection) direction;
+-(void) migrateTo:(MLCall*) otherCall;
 -(void) reportRinging;
 -(void) handleEndCallAction;
 -(void) sendJmiReject;
@@ -149,6 +150,19 @@ static NSMutableDictionary* _pendingCalls;
     return nil;
 }
 
+-(MLCall* _Nullable) getCallForJmiid:(NSString*) jmiid
+{
+    @synchronized(_pendingCalls) {
+        for(NSUUID* uuid in _pendingCalls)
+        {
+            MLCall* call = [self getCallForUUID:uuid];
+            if([call.jmiid isEqualToString:jmiid])
+                return call;
+        }
+    }
+    return nil;
+}
+
 -(CXCallUpdate*) constructUpdateForCall:(MLCall*) call
 {
     CXCallUpdate* update = [[CXCallUpdate alloc] init];
@@ -162,12 +176,27 @@ static NSMutableDictionary* _pendingCalls;
     return update;
 }
 
+-(MLCall*) createCallWithJmiPropose:(XMPPMessage*) messageNode onAccountNo:(NSNumber*) accountNo
+{
+    //if the jmi id is a uuid, just use it, otherwise infer a uuid from the given jmi id
+    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id|uuidcast"];
+    NSString* jmiid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id"];
+    MLAssert(uuid != nil, @"call uuid invalid!", (@{@"propose@id": nilWrapper(jmiid)}));
+    
+    MLCall* call = [[MLCall alloc] initWithUUID:uuid jmiid:jmiid contact:[MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo] andDirection:MLCallDirectionIncoming];
+    //order matters here!
+    call.fullRemoteJid = messageNode.from;
+    call.jmiPropose = messageNode;
+    return call;
+}
+
 -(MLCall*) initiateAudioCallToContact:(MLContact*) contact
 {
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
     MLAssert(account != nil, @"account is nil in initiateAudioCallToContact!", (@{@"contact": contact}));
     
-    MLCall* call = [[MLCall alloc] initWithUUID:[NSUUID UUID] contact:contact andDirection:MLCallDirectionOutgoing];
+    NSUUID* uuid = [NSUUID UUID];
+    MLCall* call = [[MLCall alloc] initWithUUID:uuid jmiid:uuid.UUIDString contact:contact andDirection:MLCallDirectionOutgoing];
     DDLogInfo(@"Initiating audio call to %@: %@", contact, call);
     [self addCall:call];
     
@@ -219,7 +248,56 @@ static NSMutableDictionary* _pendingCalls;
 -(void) handleIncomingVoipCall:(NSNotification*) notification
 {
     DDLogInfo(@"Received JMI propose directly in mainapp...");
-    [self processIncomingCall:notification.userInfo withCompletion:nil];
+    //handle tie breaking: check for already running call
+    //(this is only needed if we are in the mainapp because of an already "running" call we now have to tie break)
+    XMPPMessage* messageNode =  notification.userInfo[@"messageNode"];
+    NSNumber* accountNo = notification.userInfo[@"accountNo"];
+    MLContact* contact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo];
+    MLCall* existingCall = [self getActiveCallWithContact:contact];
+    if(existingCall == nil || existingCall.state == MLCallStateFinished)
+        return [self processIncomingCall:notification.userInfo withCompletion:nil];
+    
+    //handle tie breaking: both parties call each other "simultaneously"
+    MLCall* newCall = [self createCallWithJmiPropose:messageNode onAccountNo:accountNo];
+    if(existingCall.state < MLCallStateConnecting)          //e.g. MLCallStateDiscovering or MLCallStateRinging
+    {
+        //determine call sort order
+        NSData* existingID = [[existingCall.jmiPropose findFirst:@"{urn:xmpp:jingle-message:0}propose@id"] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData* newID = [[newCall.jmiPropose findFirst:@"{urn:xmpp:jingle-message:0}propose@id"] dataUsingEncoding:NSUTF8StringEncoding];
+        int result = [HelperTools compareIOcted:existingID with:newID];
+        if(result == 0)
+            result = [HelperTools compareIOcted:[existingCall.contact.contactJid dataUsingEncoding:NSUTF8StringEncoding] with:[newCall.contact.contactJid dataUsingEncoding:NSUTF8StringEncoding]];
+        
+        DDLogDebug(@"Tie-breaking new incoming call: existingID=%@, newID=%@, result=%d, existingCall=%@, newCall=%@", existingID, newID, result, existingCall, newCall);
+        if(result <= 0)         //keep existingID, reject new call having a higher ID
+        {
+            //reject new call and do nothing with the existingCall
+            newCall.tieBreak = YES;
+            [newCall handleEndCallAction];
+        }
+        else                    //use newID, hang up existing call having a higher ID
+        {
+            //hang up existing call (retract it) and process new incoming call
+            existingCall.tieBreak = YES;
+            [existingCall end];
+            [self processIncomingCall:notification.userInfo withCompletion:nil];
+        }
+        return;
+    }
+    else if(existingCall.state < MLCallStateFinished)       //call already running
+    {
+        //migrate from new call to existing call
+        [existingCall migrateTo:newCall];
+        
+        //drop new call after migration to make sure it does not interfere with our existing call
+        newCall = nil;
+        
+        //now init webrtc for our migrated call
+        [self initWebRTCForPendingCall:existingCall];
+        
+        return;
+    }
+    unreachable();
 }
 
 -(void) processIncomingCall:(NSDictionary* _Nonnull) userInfo withCompletion:(void (^ _Nullable)(void)) completion
@@ -227,19 +305,14 @@ static NSMutableDictionary* _pendingCalls;
     //TODO: handle jmi propose coming from other devices on our account (see TODO in MLMessageProcessor.m)
     XMPPMessage* messageNode =  userInfo[@"messageNode"];
     NSNumber* accountNo = userInfo[@"accountNo"];
-    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id|uuidcast"];
-    MLAssert(uuid != nil, @"call uuid invalid!", (@{@"propose@id": nilWrapper([messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id"])}));
+    MLCall* call = [self createCallWithJmiPropose:messageNode onAccountNo:accountNo];
     
-    MLCall* call = [[MLCall alloc] initWithUUID:uuid contact:[MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo] andDirection:MLCallDirectionIncoming];
-    //order matters here!
-    call.fullRemoteJid = messageNode.from;
-    call.jmiPropose = messageNode;
     DDLogInfo(@"Now processing new incoming call: %@", call);
     
     //add call to pending calls list
     [self addCall:call];
     
-    [self.cxProvider reportNewIncomingCallWithUUID:uuid update:[self constructUpdateForCall:call] completion:^(NSError *error) {
+    [self.cxProvider reportNewIncomingCallWithUUID:call.uuid update:[self constructUpdateForCall:call] completion:^(NSError *error) {
         //add our completion handler to handler queue to initiate xmpp connections
         //this must be done in main thread because the app delegate is only allowed in main thread
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -409,9 +482,9 @@ static NSMutableDictionary* _pendingCalls;
     MLAssert(messageNode != nil, @"messageNode is nil in handleIncomingJMIStanza!", notification.userInfo);
     xmpp* account = notification.object;
     MLAssert(account != nil, @"account is nil in handleIncomingJMIStanza!", notification.userInfo);
-    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id|uuidcast"];
-    MLAssert(uuid != nil, @"call uuid invalid!", (@{@"*@id": nilWrapper([messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id"])}));
-    MLCall* call = [self getCallForUUID:uuid];
+    NSString* jmiid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id"];
+    MLAssert(jmiid != nil, @"call jmiid invalid!", (@{@"*@id": nilWrapper([messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id"])}));
+    MLCall* call = [self getCallForJmiid:jmiid];
     if(call == nil)
     {
         DDLogWarn(@"Ignoring unexpected JMI stanza for unknown call: %@", messageNode);
@@ -420,7 +493,6 @@ static NSMutableDictionary* _pendingCalls;
     }
         
     DDLogInfo(@"Got new incoming JMI stanza for call: %@", call);
-    //TODO: handle tie breaking!
     if(call.direction == MLCallDirectionIncoming && [messageNode check:@"{urn:xmpp:jingle-message:0}proceed"])
     {
         if(![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
@@ -430,7 +502,6 @@ static NSMutableDictionary* _pendingCalls;
         }
         if(call.jmiProceed != nil)
         {
-            //TODO: handle moving calls between own devices
             DDLogWarn(@"Someone tried to proceed an already proceeded incoming call, ignoring this jmi proceed!");
             return;
         }
@@ -445,7 +516,6 @@ static NSMutableDictionary* _pendingCalls;
     {
         if(call.jmiProceed != nil)
         {
-            //TODO: handle moving calls between own devices
             DDLogWarn(@"Someone tried to proceed an already proceeded outgoing call, ignoring this jmi proceed!");
             return;
         }

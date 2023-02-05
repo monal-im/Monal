@@ -73,6 +73,15 @@ typedef enum NotificationPrivacySettingOption {
 #define let                                 const __auto_type
 #define bool2str(b)                         (b ? @"YES" : @"NO")
 
+#define min(a, b) \
+    ({ __typeof__ (a) _a = (a); \
+    __typeof__ (b) _b = (b); \
+    _a < _b ? _a : _b; })
+#define max(a, b) \
+    ({ __typeof__ (a) _a = (a); \
+    __typeof__ (b) _b = (b); \
+    _a > _b ? _a : _b; })
+
 //make sure we don't define this twice
 #ifndef STRIP_PARENTHESES
     //see https://stackoverflow.com/a/62984543/3528174

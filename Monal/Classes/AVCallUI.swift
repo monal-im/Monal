@@ -90,6 +90,10 @@ struct AVCallUI: View {
                             Text("Ringing...")
                             .bold()
                             .foregroundColor(.primary)
+                        case .reconnecting:
+                            Text("Reconnecting...")
+                            .bold()
+                            .foregroundColor(.primary)
                         case .connecting:
                             Text("Connecting...")
                             .bold()

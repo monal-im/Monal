@@ -261,6 +261,16 @@ static id preprocess(id exception)
     return NO;
 }
 
++(int) compareIOcted:(NSData*) data1 with:(NSData*) data2
+{
+    int result = memcmp(data1.bytes, data2.bytes, min(data1.length, data2.length));
+    if(result == 0 && data1.length < data2.length)
+        return -1;
+    else if(result == 0 && data1.length > data2.length)
+        return 1;
+    return result;
+}
+
 +(NSURL*) getContainerURLForPathComponents:(NSArray*) components
 {
     static NSURL* containerUrl;

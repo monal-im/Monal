@@ -44,6 +44,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSDictionary<NSString*, NSString*>*) getAvailablePushServers;
 +(BOOL) isSandboxAPNS;
 
++(int) compareIOcted:(NSData*) data1 with:(NSData*) data2;
 +(NSURL*) getContainerURLForPathComponents:(NSArray*) components;
 +(NSURL*) getSharedDocumentsURLForPathComponents:(NSArray*) components;
 +(NSData*) serializeObject:(id) obj;

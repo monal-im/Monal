@@ -171,6 +171,8 @@ static NSMutableDictionary* _typingNotifications;
                 return message;
             }
         }
+        else
+            return message;
     }
 #else
     if([messageNode check:@"{urn:xmpp:jingle-message:0}*"])

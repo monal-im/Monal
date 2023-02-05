@@ -23,12 +23,13 @@ typedef NS_ENUM(NSUInteger, MLCallDirection) {
 };
 
 typedef NS_ENUM(NSUInteger, MLCallState) {
+    MLCallStateUnknown,
     MLCallStateDiscovering,
     MLCallStateRinging,
     MLCallStateConnecting,
+    MLCallStateReconnecting,
     MLCallStateConnected,
     MLCallStateFinished,
-    MLCallStateUnknown,
 };
 
 typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
@@ -44,6 +45,7 @@ typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
 @property (strong, readonly) NSString* description;
 
 @property (nonatomic, strong, readonly) NSUUID* uuid;
+@property (nonatomic, strong, readonly) NSString* jmiid;
 @property (nonatomic, strong, readonly) MLContact* contact;
 @property (nonatomic, readonly) MLCallDirection direction;
 @property (nonatomic, readonly) MLCallState state;

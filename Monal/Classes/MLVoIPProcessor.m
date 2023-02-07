@@ -53,6 +53,7 @@ static NSMutableDictionary* _pendingCalls;
 
 -(instancetype) initWithUUID:(NSUUID*) uuid jmiid:(NSString*) jmiid contact:(MLContact*) contact andDirection:(MLCallDirection) direction;
 -(void) migrateTo:(MLCall*) otherCall;
+-(NSString*) short;
 -(void) reportRinging;
 -(void) handleEndCallAction;
 -(void) sendJmiReject;
@@ -286,10 +287,11 @@ static NSMutableDictionary* _pendingCalls;
     }
     else if(existingCall.state < MLCallStateFinished)       //call already running
     {
-        //migrate from new call to existing call
+        DDLogVerbose(@"Migrating from new call to existing call...");
         [existingCall migrateTo:newCall];
         
         //drop new call after migration to make sure it does not interfere with our existing call
+        DDLogVerbose(@"Dropping newCall '%@' in favor of existingCall '%@' ...", [newCall short], [existingCall short]);
         newCall = nil;
         
         //now init webrtc for our migrated call

@@ -395,7 +395,7 @@
     [self.account send:jmiNode];
     
     @synchronized(self) {
-        //prepare this call for new webrtc connection
+        DDLogDebug(@"Preparing this call for new webrtc connection...");
         self.jmiid = otherCall.jmiid;
         self.direction = otherCall.direction;
         self.isConnected = NO;
@@ -403,9 +403,12 @@
         self.finishReason = MLCallFinishReasonUnknown;
         if(self.webRTCClient != nil)
         {
-            [self.webRTCClient.peerConnection close];
+            DDLogDebug(@"Closing old webrtc connection...");
+            WebRTCClient* client = self.webRTCClient;
             self.webRTCClient = nil;
+            [client.peerConnection close];
         }
+        DDLogDebug(@"Stopping all running timers...");
         if(self.cancelRingingTimeout != nil)
             self.cancelRingingTimeout();
         if(self.cancelConnectingTimeout != nil)
@@ -417,8 +420,10 @@
         [self sendJmiRinging];
         
         //now fake a cxprovider answer action (we do auto-answer this call, but ios does not even know we switched the underlying webrtc connection)
+        DDLogVerbose(@"Faking CXAnswerCallAction...");
         self.providerAnswerAction = [[CXAnswerCallAction alloc] initWithCallUUID:self.uuid];
     }
+    DDLogDebug(@"Migration done, waiting for new webrtc connection...");
 }
 
 -(void) handleEndCallAction
@@ -754,7 +759,10 @@
 -(void) webRTCClient:(WebRTCClient*) webRTCClient didDiscoverLocalCandidate:(RTCIceCandidate*) candidate
 {
     if(webRTCClient != self.webRTCClient)
+    {
+        DDLogDebug(@"%@: Ignoring discovered local ICE candidate: %@ (call migrated)", [self short], candidate);
         return;
+    }
     DDLogDebug(@"%@: Discovered local ICE candidate: %@", [self short], candidate);
     //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCIceCandidate.h
     DDLogDebug(@"%@: sending new local ICE candidate to '%@'...", [self short], self.fullRemoteJid);
@@ -774,61 +782,68 @@
     
 -(void) webRTCClient:(WebRTCClient*) webRTCClient didChangeConnectionState:(RTCIceConnectionState) state
 {
-    if(webRTCClient != self.webRTCClient)
-        return;
-    DDLogDebug(@"New RTCIceConnectionState %ld for peer connection: %@", (long)state, self.webRTCClient.peerConnection);
-    switch(state)
-    {
-        case RTCIceConnectionStateConnected:
-            DDLogInfo(@"New WebRTC ICE state: connected, falling through to completed...");
-        case RTCIceConnectionStateCompleted:
-            DDLogInfo(@"New WebRTC ICE state: completed: %@", self);
-            self.isConnected = YES;
-            //at this stage this means the call is incoming (--> fulfill callkit answer action to update ui to reflect connected call)
-            if(self.direction == MLCallDirectionIncoming)
-            {
-                DDLogInfo(@"Informing CallKit of successful connection of incoming call...");
-                [self.providerAnswerAction fulfill];
-            }
-            //otherwise the call was outgoing (--> initialize callkit ui for outgoing call, we are connected now)
-            else
-            {
-                DDLogInfo(@"Informing CallKit of successful connection of outgoing call...");
-                [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid connectedAtDate:nil];
-            }
-            break;
-        case RTCIceConnectionStateDisconnected:
-            DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
-            [self end];     //use "end" because this was a successful call
-            break;
-        case RTCIceConnectionStateFailed:
-            DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
-            [self handleEndCallAction];
-            break;
-        //all following states can be ignored
-        case RTCIceConnectionStateClosed:
-            DDLogInfo(@"New WebRTC ICE state: closed: %@", self);
-            break;
-        case RTCIceConnectionStateNew:
-            DDLogInfo(@"New WebRTC ICE state: new: %@", self);
-            break;
-        case RTCIceConnectionStateChecking:
-            DDLogInfo(@"New WebRTC ICE state: checking: %@", self);
-            break;
-        case RTCIceConnectionStateCount:
-            DDLogInfo(@"New WebRTC ICE state: count: %@", self);
-            break;
-        default:
-            DDLogInfo(@"New WebRTC ICE state: UNKNOWN: %@", self);
-            break;
+    @synchronized(self) {
+        if(webRTCClient != self.webRTCClient)
+        {
+            DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for peer connection: %@ (call migrated)", (long)state, self.webRTCClient.peerConnection);
+            return;
+        }
+        DDLogDebug(@"New RTCIceConnectionState %ld for peer connection: %@", (long)state, self.webRTCClient.peerConnection);
+        switch(state)
+        {
+            case RTCIceConnectionStateConnected:
+                DDLogInfo(@"New WebRTC ICE state: connected, falling through to completed...");
+            case RTCIceConnectionStateCompleted:
+                DDLogInfo(@"New WebRTC ICE state: completed: %@", self);
+                self.isConnected = YES;
+                //at this stage this means the call is incoming (--> fulfill callkit answer action to update ui to reflect connected call)
+                if(self.direction == MLCallDirectionIncoming)
+                {
+                    DDLogInfo(@"Informing CallKit of successful connection of incoming call...");
+                    [self.providerAnswerAction fulfill];
+                }
+                //otherwise the call was outgoing (--> initialize callkit ui for outgoing call, we are connected now)
+                else
+                {
+                    DDLogInfo(@"Informing CallKit of successful connection of outgoing call...");
+                    [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid connectedAtDate:nil];
+                }
+                break;
+            case RTCIceConnectionStateDisconnected:
+                DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
+                [self end];     //use "end" because this was a successful call
+                break;
+            case RTCIceConnectionStateFailed:
+                DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
+                [self handleEndCallAction];
+                break;
+            //all following states can be ignored
+            case RTCIceConnectionStateClosed:
+                DDLogInfo(@"New WebRTC ICE state: closed: %@", self);
+                break;
+            case RTCIceConnectionStateNew:
+                DDLogInfo(@"New WebRTC ICE state: new: %@", self);
+                break;
+            case RTCIceConnectionStateChecking:
+                DDLogInfo(@"New WebRTC ICE state: checking: %@", self);
+                break;
+            case RTCIceConnectionStateCount:
+                DDLogInfo(@"New WebRTC ICE state: count: %@", self);
+                break;
+            default:
+                DDLogInfo(@"New WebRTC ICE state: UNKNOWN: %@", self);
+                break;
+        }
     }
 }
     
 -(void) webRTCClient:(WebRTCClient*) webRTCClient didReceiveData:(NSData*) data
 {
     if(webRTCClient != self.webRTCClient)
+    {
+        DDLogDebug(@"Ignoring received WebRTC data: %@ (call migrated)", data);
         return;
-    
+    }
     DDLogDebug(@"Received WebRTC data: %@", data);
 }
 

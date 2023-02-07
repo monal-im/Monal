@@ -314,6 +314,7 @@ NSString *const kAskSubscribe=@"subscribe";
             if(jidParts[@"node"] != nil)
                 fallbackName = jidParts[@"node"];
         }
+        
         if(self.nickName && self.nickName.length > 0)
         {
             DDLogVerbose(@"Using nickName: %@", self.nickName);
@@ -337,7 +338,7 @@ NSString *const kAskSubscribe=@"subscribe";
         if([[DataLayer sharedInstance] enabledAccountCnts].intValue > 1)
             displayName = [NSString stringWithFormat:NSLocalizedString(@"Notes to self: %@", @""), [[self class] ownDisplayNameForAccount:account]];
         else
-            displayName = [NSString stringWithFormat:NSLocalizedString(@"Notes to self", @""), [[self class] ownDisplayNameForAccount:account]];
+            displayName = NSLocalizedString(@"Notes to self", @"");
     }
     
     DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, displayName);

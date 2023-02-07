@@ -2238,23 +2238,16 @@ enum msgSentState {
     if(self.contact.isGroup)
     {
         if([@"group" isEqualToString:self.contact.mucType] && row.participantJid)
-        {
-            hideName = (priorRow != nil
-                         && [priorRow.participantJid isEqualToString:row.participantJid]);
-            //row.contactDisplayName will automatically use row.actualFrom as fallback if no roster name or XEP-0172 nickname could be found
-            cell.name.text = hideName == YES ? nil : row.contactDisplayName;
-        }
-        else {
-            hideName = (priorRow != nil
-                             && [priorRow.actualFrom isEqualToString:row.actualFrom]);
-            cell.name.text = hideName == YES ? nil : row.actualFrom;
-        }
+            hideName = (priorRow != nil && [priorRow.participantJid isEqualToString:row.participantJid]);
+        else
+            hideName = (priorRow != nil && [priorRow.actualFrom isEqualToString:row.actualFrom]);
+        //((MLMessage*)row).contactDisplayName will automatically use row.actualFrom as fallback for group-type mucs
+        //if no roster name or XEP-0172 nickname could be found and always use row.actualFrom for channel-type mucs
+        cell.name.text = hideName == YES ? nil : row.contactDisplayName;
     }
+    // remove hidden text for better constraints
     if(hideName == YES)
-    {
-        // remove hidden text for better constraints
         cell.name.text = nil;
-    }
     cell.name.hidden = hideName;
 
     if(row.hasBeenDisplayed)

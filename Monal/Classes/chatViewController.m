@@ -2040,16 +2040,17 @@ enum msgSentState {
         DDLogVerbose(@"got filetransfer chat cell: %@ (%@)", row.filetransferMimeType, row.filetransferSize);
         NSDictionary* info = [MLFiletransfer getFileInfoForMessage:row];
 
-        if(info && ![info[@"needsDownloading"] boolValue])
+        if(![info[@"needsDownloading"] boolValue])
         {
+            DDLogVerbose(@"Filetransfer already downloaded: %@", info);
             cell = [self fileTransferCellCheckerWithInfo:info direction:inboundDir tableView:tableView andMsg:row];
         }
-        else if (info && [info[@"needsDownloading"] boolValue])
+        else if([info[@"needsDownloading"] boolValue])
         {
+            DDLogVerbose(@"Filetransfer needs downloading: %@", info);
             MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell*)[self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inboundDir fromTable:tableView];
             NSString* fileSize = info[@"size"] ? info[@"size"] : @"0";
             [fileTransferCell initCellForMessageId:row.messageDBId andFilename:info[@"filename"] andMimeType:info[@"mimeType"] andFileSize:fileSize.longLongValue];
-
             cell = fileTransferCell;
         }
     }

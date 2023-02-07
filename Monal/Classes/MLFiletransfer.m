@@ -199,7 +199,7 @@ static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
             //encrypted filetransfer
             if([[urlComponents.scheme lowercaseString] isEqualToString:@"aesgcm"])
             {
-                DDLogInfo(@"Decrypting encrypted filetransfer");
+                DDLogInfo(@"Decrypting encrypted filetransfer stored at '%@'...", location);
                 if(urlComponents.fragment.length < 88)
                 {
                     DDLogError(@"File download failed: %@", error);
@@ -225,6 +225,7 @@ static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
                         [self markAsComplete:historyId];
                         return;
                     }
+                    MLAssert([_fileManager fileExistsAtPath:cacheFile], @"cache file should be there!", (@{@"cacheFile": cacheFile}));
                     [HelperTools configureFileProtectionFor:cacheFile];
                 }
                 else
@@ -237,9 +238,10 @@ static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
             }
             else        //cleartext filetransfer
             {
-                //copy file to our document cache
-                DDLogInfo(@"Copying downloaded file to document cache at %@", cacheFile);
-                [_fileManager moveItemAtPath:[location path] toPath:cacheFile error:&error];
+                //hardlink file to our cache directory
+                //it will be removed once this completion returnes, even if moved to a new location (this seems to be a ios16 bug)
+                DDLogInfo(@"Hardlinking downloaded file from '%@' to document cache at '%@'...", [location path], cacheFile);
+                [_fileManager linkItemAtPath:[location path] toPath:cacheFile error:&error];
                 if(error)
                 {
                     DDLogError(@"File download failed: %@", error);
@@ -247,6 +249,7 @@ static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
                     [self markAsComplete:historyId];
                     return;
                 }
+                MLAssert([_fileManager fileExistsAtPath:cacheFile], @"cache file should be there!", (@{@"cacheFile": cacheFile}));
                 [HelperTools configureFileProtectionFor:cacheFile];
             }
             
@@ -468,8 +471,8 @@ $$
 
 +(NSDictionary*) getFileInfoForMessage:(MLMessage*) msg
 {
-    if(![msg.messageType isEqualToString:kMessageTypeFiletransfer])
-        return nil;
+    MLAssert([msg.messageType isEqualToString:kMessageTypeFiletransfer], @"message not of type filetransfer!", (@{@"msg": msg}));
+    
     NSURLComponents* urlComponents = [NSURLComponents componentsWithString:msg.messageText];
     NSString* filename = [[NSUUID UUID] UUIDString];       //default is a dummy filename (used when the filename can not be extracted from url)
     if(urlComponents != nil && urlComponents.path)
@@ -719,12 +722,14 @@ $$
     }
     
     //check for files having a different mime type but the same base url
+    NSString* predicateString = [NSString stringWithFormat:@"self BEGINSWITH '%@.'", urlPart];
     NSArray* directoryContents = [_fileManager contentsOfDirectoryAtPath:_documentCacheDir error:nil];
-    NSPredicate* filter = [NSPredicate predicateWithFormat:[NSString stringWithFormat:@"self BEGINSWITH '%@.'", urlPart]];
+    NSPredicate* filter = [NSPredicate predicateWithFormat:predicateString];
     for(NSString* file in [directoryContents filteredArrayUsingPredicate:filter])
         return [_documentCacheDir stringByAppendingPathComponent:file];
     
     //nothing found
+    DDLogVerbose(@"Could not find cache file for url '%@' having mime type '%@'...", url, mimeType);
     return nil;
 }
 

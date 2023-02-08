@@ -384,17 +384,11 @@ static NSMutableDictionary* _pendingCalls;
     {
         DDLogInfo(@"No ICE servers detected, trying to connect WebRTC session using our own STUN servers as fallback...");
         //use own stun server as fallback
-        [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:@[
-#ifdef IS_ALPHA
-            @"stun:alpha.turn.monal-im.org:3478",
-#else
-            @"stun:eu.prod.turn.monal-im.org:3478",
-#endif
-        ]]];
+        [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:[HelperTools getFailoverStunServers]]];
         
         // request turn credentials
         //TODO: use alpha and prod servers and don't hardcode url
-        NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://alpha.turn.monal-im.org/api/v1/challenge/new"]];
+        NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"/api/v1/challenge/new" relativeToURL:[HelperTools getFailoverTurnApiServer]]];
         [urlRequest setTimeoutInterval:3.0];
         NSURLSessionTask* challengeSession = [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
             if(error != nil || [(NSHTTPURLResponse*)response statusCode] != 200)
@@ -431,8 +425,8 @@ static NSMutableDictionary* _pendingCalls;
                 [self createWebRTCClientForCall:call usingICEServers:iceServers];
                 return;
             }
-            
-            NSMutableURLRequest* responseRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://alpha.turn.monal-im.org/api/v1/challenge/validate"]];
+            NSMutableURLRequest* responseRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"/api/v1/challenge/validate" relativeToURL:[HelperTools getFailoverTurnApiServer]]];
+
             [responseRequest setHTTPMethod:@"POST"];
             [responseRequest setValue:@"application/json" forHTTPHeaderField:@"Accept"];
             [responseRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
@@ -466,7 +460,9 @@ static NSMutableDictionary* _pendingCalls;
     //continue without any stun/turn servers if only p2p but no stun/turn servers could be found on local xmpp server
     //AND no fallback to monal servers was configured
     else
+    {
         [self createWebRTCClientForCall:call usingICEServers:@[]];
+    }
 }
 
 -(void) createWebRTCClientForCall:(MLCall*) call usingICEServers:(NSArray<RTCIceServer*>*) iceServers

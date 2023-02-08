@@ -42,6 +42,10 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSDictionary<NSString*, NSString*>*) getInvalidPushServers;
 +(NSString*) getSelectedPushServerBasedOnLocale;
 +(NSDictionary<NSString*, NSString*>*) getAvailablePushServers;
+
++(NSArray<NSString*>*) getFailoverStunServers;
++(NSURL*) getFailoverTurnApiServer;
+
 +(BOOL) isSandboxAPNS;
 
 +(int) compareIOcted:(NSData*) data1 with:(NSData*) data2;

@@ -219,6 +219,30 @@ static id preprocess(id exception)
     };
 }
 
++(NSArray<NSString*>*) getFailoverStunServers
+{
+    return @[
+#ifdef IS_ALPHA
+        @"stun:alpha.turn.monal-im.org:443",
+        @"stun:alpha.turn.monal-im.org:3478",
+#else
+        @"stun:eu.prod.turn.monal-im.org:443",
+        @"stun:eu.prod.turn.monal-im.org:3478",
+#endif
+    ];
+}
+
++(NSURL*) getFailoverTurnApiServer
+{
+    NSString* turnApiServer;
+#ifdef IS_ALPHA
+    turnApiServer = @"https://alpha.turn.monal-im.org";
+#else
+    turnApiServer = @"https://eu.prod.turn.monal-im.org";
+#endif
+    return [NSURL URLWithString:turnApiServer];
+}
+
 +(BOOL) isSandboxAPNS
 {
     // check if were are sandbox or production

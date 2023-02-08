@@ -222,12 +222,13 @@ static id preprocess(id exception)
 +(BOOL) isSandboxAPNS
 {
     // check if were are sandbox or production
-    NSString* embeddedProvUrl;
 #if TARGET_OS_MACCATALYST
-    embeddedProvUrl = [[NSBundle mainBundle] pathForResource:@"embedded" ofType:@"provisionprofile"];
+    // We currently can not access the embedded.provisionprofile
+    // Instead we always use the production APNS
+    return YES;
 #else
-    embeddedProvUrl = [[NSBundle mainBundle] pathForResource:@"embedded" ofType:@"mobileprovision"];
-#endif
+    NSString* embeddedProvUrl = [[NSBundle mainBundle] pathForResource:@"embedded" ofType:@"mobileprovision"];
+
     NSError* loadingError;
     NSString* embeddedProvStr = [NSString stringWithContentsOfFile:embeddedProvUrl encoding:NSISOLatin1StringEncoding error:&loadingError];
     if(loadingError != nil)
@@ -259,6 +260,7 @@ static id preprocess(id exception)
     }
     // productions
     return NO;
+#endif
 }
 
 +(int) compareIOcted:(NSData*) data1 with:(NSData*) data2

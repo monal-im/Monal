@@ -618,10 +618,13 @@ $$
             DDLogWarn(@"Error adding preKeyBundle: %@", error);
             continue;
         }
-        
+        // mark session as functional
+        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)rid.unsignedIntValue];
+        [self.monalSignalStore markSessionAsFunctional:address];
+
         //found and imported a working key --> try to (re)build a new session proactively (or repair a broken one)
         [self sendKeyTransportElement:jid forRids:[NSSet setWithArray:@[rid]]];      //this will remove the queuedSessionRepairs entry, if any
-        
+
         return;
     } while(++processedKeys < preKeyIds.count);
     DDLogError(@"Could not import a single prekey from bundle for rid %@ (tried %lu keys)", rid, processedKeys);

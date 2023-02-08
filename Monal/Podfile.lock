@@ -10,11 +10,11 @@ PODS:
     - DACircularProgress
     - pop
     - SDWebImage (= 4.0.0)
-  - MarqueeLabel (4.0.5)
+  - MarqueeLabel (4.3.0)
   - MBProgressHUD (1.2.0)
-  - NotificationBannerSwift (3.1.0):
-    - MarqueeLabel (~> 4.0.5)
-    - SnapKit (~> 5.0.1)
+  - NotificationBannerSwift (3.2.0):
+    - MarqueeLabel (~> 4.3.0)
+    - SnapKit (~> 5.6.0)
   - pop (1.0.12)
   - SAMKeychain (1.5.3)
   - SDWebImage (4.0.0):
@@ -23,12 +23,12 @@ PODS:
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
-  - SnapKit (5.0.1)
+  - SnapKit (5.6.0)
   - sqlite3/common (3.40.0)
   - sqlite3/perf-threadsafe (3.40.0):
     - sqlite3/common
   - TOCropViewController (2.6.1)
-  - WebRTC-lib (108.0.0)
+  - WebRTC-lib (109.0.1)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -37,7 +37,7 @@ DEPENDENCIES:
   - FLAnimatedImage (~> 1.0)
   - IDMPhotoBrowser
   - MBProgressHUD (~> 1.2.0)
-  - NotificationBannerSwift (~> 3.1.0)
+  - NotificationBannerSwift (~> 3.2.0)
   - SAMKeychain
   - SignalProtocolC (from `https://github.com/monal-im/libsignal-protocol-c`, branch `master`)
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
@@ -87,19 +87,19 @@ SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
   IDMPhotoBrowser: b96159fe4adb991a844068eb17dab9c0b7d7e51a
-  MarqueeLabel: 00cc0bcd087111dca575878b3531af980559707d
+  MarqueeLabel: 02f5ac8fd6877c94564556cb93fa86c70c08baeb
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  NotificationBannerSwift: 49912a48b37e2f55d1cef4e8a38f15394f66a70a
+  NotificationBannerSwift: 437e135298d297fcb03f3eec4466f45cdb128d3d
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: 76a6348bdc74eb5a55dd08a091ef298e56b55e41
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
-  SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
+  SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   sqlite3: 88dd99ef4ac3945f5a15facdd752933c52fd93bf
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
-  WebRTC-lib: e3c964e4033218c36ace87b142691451680a4723
+  WebRTC-lib: 1113ea2d07d8bba7250b456758618990db8c585d
 
-PODFILE CHECKSUM: 7a09d276f6e87d71cc1ce2e4011b36b801f0282f
+PODFILE CHECKSUM: 724c45c4ab700d4fcb4895b70836aa32e4a0a8ba
 
 COCOAPODS: 1.11.3

@@ -19,7 +19,7 @@ def monal
   pod 'IDMPhotoBrowser'
   pod 'DZNEmptyDataSet'
   pod 'TOCropViewController'
-  pod 'NotificationBannerSwift', '~> 3.1.0'
+  pod 'NotificationBannerSwift', '~> 3.2.0'
   pod 'FLAnimatedImage', '~> 1.0'
 end
 

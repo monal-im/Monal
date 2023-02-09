@@ -512,7 +512,19 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
         if(receivedKeys)
             [self processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
         else
+        {
             DDLogWarn(@"Could not find any bundle in pubsub data from %@ rid: %@, data=%@", jid, rid, data);
+            if([jid isEqualToString:self.account.connectionProperties.identity.jid] && rid.unsignedIntValue != self.monalSignalStore.deviceid)
+            {
+                DDLogInfo(@"Removing device %@ from own device list, due to a invalid bundle", rid);
+                // removing this device from own bundle
+                [self.ownDeviceList removeObject:rid];
+                SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.unsignedIntValue];
+                [self.monalSignalStore markDeviceAsDeleted:address];
+                // publish updated device list
+                [self publishOwnDeviceList];
+            }
+        }
     }
     
     //update bundle fetch status (this has to be done even in error cases!)

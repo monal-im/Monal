@@ -15,6 +15,8 @@
 
 #define MLOmemoNotTrusted 0
 #define MLOmemoToFU 100
+#define MLOmemoToFUButRemoved 101
+#define MLOmemoToFUButNoMsgSeenInTime 102
 #define MLOmemoTrusted 200
 #define MLOmemoTrustedButRemoved 201
 #define MLOmemoTrustedButNoMsgSeenInTime 202
@@ -35,7 +37,6 @@
  all devices even those without sessions
  */
 -(NSArray<NSNumber*>* _Nullable) knownDevicesForAddressName:(NSString* _Nullable) addressName;
--(NSArray<NSNumber*>* _Nullable) knownDevicesWithValidSessionEntryForName:(NSString* _Nullable) addrName;
 -(NSMutableArray<SignalPreKey*>* _Nonnull) readPreKeys;
 
 -(void) deleteDeviceforAddress:(SignalAddress* _Nonnull) address;

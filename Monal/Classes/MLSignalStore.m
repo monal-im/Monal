@@ -212,16 +212,6 @@
     }];
 }
 
--(NSArray<NSNumber*>*) knownDevicesWithValidSessionEntryForName:(NSString*) addrName
-{
-    if(!addrName)
-        return nil;
-
-    return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT sci.contactDeviceId FROM signalContactIdentity as sci INNER JOIN signalContactSession as scs ON sci.account_id=scs.account_id AND sci.contactName=scs.contactName AND sci.contactDeviceId=scs.contactDeviceId WHERE sci.account_id=? AND sci.contactName=? AND sci.removedFromDeviceList IS NULL AND sci.brokenSession=false;" andArguments:@[self.accountId, addrName]];
-    }];
-}
-
 /**
  * Remove the session records corresponding to all devices of a recipient ID.
  *
@@ -405,7 +395,8 @@
 -(BOOL) isTrustedIdentity:(SignalAddress*) address identityKey:(NSData*) identityKey;
 {
     int trustLevel = [self getTrustLevel:address identityKey:identityKey].intValue;
-    return (trustLevel == MLOmemoTrusted || trustLevel == MLOmemoToFU);
+    // For better UX trust ToFU devices even if we did not receive msg in a long time
+    return (trustLevel == MLOmemoTrusted || trustLevel == MLOmemoToFU || trustLevel == MLOmemoToFUButNoMsgSeenInTime);
 }
 
 -(NSData*) getIdentityForAddress:(SignalAddress*) address
@@ -505,7 +496,9 @@
         return [self.sqliteDatabase executeScalar:(@"SELECT \
                 CASE \
                     WHEN (trustLevel=0) THEN 0 \
-                    WHEN (trustLevel=1) THEN 100 \
+                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= date('now', '-90 day'))) THEN 100 \
+                    WHEN (trustLevel=1 AND removedFromDeviceList IS NOT NULL) THEN 101 \
+                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < date('now', '-90 day'))) THEN 102 \
                     WHEN (COUNT(*)=0) THEN 100 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= date('now', '-90 day'))) THEN 200 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NOT NULL) THEN 201 \

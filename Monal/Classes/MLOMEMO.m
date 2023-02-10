@@ -341,7 +341,7 @@ $$
 {
     DDLogVerbose(@"Processing omemo devices from %@: %@", source, receivedDevices);
     
-    NSSet<NSNumber*>* existingDevices = [NSSet setWithArray:[self.monalSignalStore knownDevicesWithValidSessionEntryForName:source]];
+    NSSet<NSNumber*>* existingDevices = [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:source]];
     NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
     [newDevices minusSet:existingDevices];
     DDLogVerbose(@"New devices detected: %@", newDevices);
@@ -488,8 +488,7 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
             //delete this device for all non-wait errors
             if(![errorIq check:@"error<type=wait>"])
             {
-                SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.unsignedIntValue];
-                [self.monalSignalStore markDeviceAsDeleted:address];
+                [self handleBundleWithInvalidEntryForJid:jid andRid:rid];
             }
         }
         //don't delete this device for errorReasons (normally server bugs or transient problems inside monal)
@@ -514,22 +513,27 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
         else
         {
             DDLogWarn(@"Could not find any bundle in pubsub data from %@ rid: %@, data=%@", jid, rid, data);
-            if([jid isEqualToString:self.account.connectionProperties.identity.jid] && rid.unsignedIntValue != self.monalSignalStore.deviceid)
-            {
-                DDLogInfo(@"Removing device %@ from own device list, due to a invalid bundle", rid);
-                // removing this device from own bundle
-                [self.ownDeviceList removeObject:rid];
-                SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.unsignedIntValue];
-                [self.monalSignalStore markDeviceAsDeleted:address];
-                // publish updated device list
-                [self publishOwnDeviceList];
-            }
+            [self handleBundleWithInvalidEntryForJid:jid andRid:rid];
         }
     }
     
     //update bundle fetch status (this has to be done even in error cases!)
     [self decrementBundleFetchCount];
 $$
+
+-(void) handleBundleWithInvalidEntryForJid:(NSString*) jid andRid:(NSNumber*) rid
+{
+    SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.unsignedIntValue];
+    [self.monalSignalStore markDeviceAsDeleted:address];
+    if([jid isEqualToString:self.account.connectionProperties.identity.jid] && rid.unsignedIntValue != self.monalSignalStore.deviceid)
+    {
+        DDLogInfo(@"Removing device %@ from own device list, due to a invalid bundle", rid);
+        // removing this device from own bundle
+        [self.ownDeviceList removeObject:rid];
+        // publish updated device list
+        [self publishOwnDeviceList];
+    }
+}
 
 -(void) decrementBundleFetchCount
 {

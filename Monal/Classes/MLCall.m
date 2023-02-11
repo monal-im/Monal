@@ -538,7 +538,7 @@
         self.cancelRingingTimeout();
     self.cancelConnectingTimeout = createTimer(15.0, (^{
         DDLogError(@"Failed to connect call, aborting!");
-        [self handleEndCallAction];
+        [self end];
     }));
 }
 
@@ -548,7 +548,7 @@
         self.cancelDiscoveringTimeout();
     self.cancelRingingTimeout = createTimer(45.0, (^{
         DDLogError(@"Call not answered in time, aborting!");
-        [self handleEndCallAction];
+        [self end];
     }));
 }
 
@@ -556,7 +556,7 @@
 {
     self.cancelDiscoveringTimeout = createTimer(30.0, (^{
         DDLogError(@"Discovery not answered in time, aborting!");
-        [self handleEndCallAction];
+        [self end];
     }));
 }
 
@@ -838,7 +838,7 @@
                 break;
             case RTCIceConnectionStateFailed:
                 DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
-                [self handleEndCallAction];
+                [self end];
                 break;
             //all following states can be ignored
             case RTCIceConnectionStateClosed:

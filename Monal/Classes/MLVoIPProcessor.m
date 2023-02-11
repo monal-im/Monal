@@ -387,7 +387,6 @@ static NSMutableDictionary* _pendingCalls;
         [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:[HelperTools getFailoverStunServers]]];
         
         // request turn credentials
-        //TODO: use alpha and prod servers and don't hardcode url
         NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"/api/v1/challenge/new" relativeToURL:[HelperTools getFailoverTurnApiServer]]];
         [urlRequest setTimeoutInterval:3.0];
         NSURLSessionTask* challengeSession = [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {

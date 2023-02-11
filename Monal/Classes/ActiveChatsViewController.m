@@ -480,6 +480,13 @@ static NSMutableSet* _smacksWarningDisplayed;
    [self performSegueWithIdentifier:@"showSettings" sender:self];
 }
 
+-(void) showCallContactNotFoundAlert:(NSString*) jid
+{
+    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Contact not found", @"") message:[NSString stringWithFormat:NSLocalizedString(@"You tried to call contact '%@' but this contact could not be found in your contact list.", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
+    [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {}]];
+    [self presentViewController:messageAlert animated:YES completion:nil];
+}
+
 -(void) callContact:(MLContact*) contact
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];

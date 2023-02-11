@@ -777,6 +777,7 @@ enum msgSentState {
         });
     }
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
+    [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
 
     // Set correct chatInput height constraints
     [self setChatInputHeightConstraints:self.hardwareKeyboardPresent];

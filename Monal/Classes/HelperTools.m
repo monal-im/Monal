@@ -245,15 +245,11 @@ static id preprocess(id exception)
 
 +(BOOL) shouldProvideVoip
 {
-    __block BOOL shouldProvideVoip = NO;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        NSLocale* userLocale = [NSLocale currentLocale];
-        shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
+    NSLocale* userLocale = [NSLocale currentLocale];
+    BOOL shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
 #if TARGET_OS_MACCATALYST
-        shouldProvideVoip = NO;
+    shouldProvideVoip = NO;
 #endif
-    });
     return shouldProvideVoip;
 }
     

@@ -52,6 +52,7 @@
 @property (nonatomic, assign) MLCallFinishReason finishReason;
 @property (nonatomic, assign) uint32_t durationTime;
 @property (nonatomic, strong) NSTimer* _Nullable callDurationTimer;
+@property (nonatomic, strong) monal_void_block_t _Nullable cancelDiscoveringTimeout;
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelRingingTimeout;
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelConnectingTimeout;
 
@@ -88,6 +89,7 @@
     self.durationTime = 0;
     self.isFinished = NO;
     self.finishReason = MLCallFinishReasonUnknown;
+    self.cancelDiscoveringTimeout = nil;
     self.cancelRingingTimeout = nil;
     self.cancelConnectingTimeout = nil;
     
@@ -190,7 +192,7 @@
                 return MLCallStateConnecting;
             if(self.jmiProceed == nil && self.cancelRingingTimeout != nil)
                 return MLCallStateRinging;
-            if(self.jmiProceed == nil && self.cancelRingingTimeout == nil)
+            if(self.jmiProceed == nil && self.cancelDiscoveringTimeout != nil)
                 return MLCallStateDiscovering;
             return MLCallStateUnknown;
         }
@@ -213,7 +215,7 @@
 
 +(NSSet*) keyPathsForValuesAffectingState
 {
-    return [NSSet setWithObjects:@"direction", @"isConnected", @"jmiProceed", @"webRTCClient", @"providerAnswerAction", @"audioSession", @"isFinished", @"cancelRingingTimeout", @"cancelConnectingTimeout", nil];
+    return [NSSet setWithObjects:@"direction", @"isConnected", @"jmiProceed", @"webRTCClient", @"providerAnswerAction", @"audioSession", @"isFinished", @"cancelDiscoveringTimeout", @"cancelRingingTimeout", @"cancelConnectingTimeout", nil];
 }
 
 #pragma mark - internals
@@ -409,11 +411,14 @@
             [client.peerConnection close];
         }
         DDLogDebug(@"Stopping all running timers...");
+        if(self.cancelDiscoveringTimeout != nil)
+            self.cancelDiscoveringTimeout();
+        self.cancelDiscoveringTimeout = nil;
         if(self.cancelRingingTimeout != nil)
             self.cancelRingingTimeout();
+        self.cancelRingingTimeout = nil;
         if(self.cancelConnectingTimeout != nil)
             self.cancelConnectingTimeout();
-        self.cancelRingingTimeout = nil;
         self.cancelConnectingTimeout = nil;
         
         //report this migrated call as ringing
@@ -430,10 +435,15 @@
 {
     BOOL wasConnected = self.isConnected;
     
+    if(self.cancelDiscoveringTimeout != nil)
+        self.cancelDiscoveringTimeout();
+    self.cancelDiscoveringTimeout = nil;
     if(self.cancelRingingTimeout != nil)
         self.cancelRingingTimeout();
+    self.cancelRingingTimeout = nil;
     if(self.cancelConnectingTimeout != nil)
         self.cancelConnectingTimeout();
+    self.cancelConnectingTimeout = nil;
     
     //end webrtc call if already established or in the process of establishing
     if(self.webRTCClient != nil)
@@ -534,8 +544,18 @@
 
 -(void) createRingingTimeoutTimer
 {
+    if(self.cancelDiscoveringTimeout != nil)
+        self.cancelDiscoveringTimeout();
     self.cancelRingingTimeout = createTimer(45.0, (^{
         DDLogError(@"Call not answered in time, aborting!");
+        [self handleEndCallAction];
+    }));
+}
+
+-(void) createDiscoveringTimeoutTimer
+{
+    self.cancelDiscoveringTimeout = createTimer(30.0, (^{
+        DDLogError(@"Discovery not answered in time, aborting!");
         [self handleEndCallAction];
     }));
 }
@@ -596,6 +616,9 @@
     [jmiNode setStoreHint];
     self.jmiPropose = jmiNode;
     [self.account send:jmiNode];
+    
+    //abort if no device responds with "ringing" in time
+    [self createDiscoveringTimeoutTimer];
 }
 
 -(void) sendJmiReject

@@ -159,33 +159,6 @@ static NSMutableDictionary* _pendingCalls;
     return nil;
 }
 
--(CXCallUpdate*) constructUpdateForCall:(MLCall*) call
-{
-    CXCallUpdate* update = [[CXCallUpdate alloc] init];
-    update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:call.contact.contactJid];
-    update.localizedCallerName = call.contact.contactDisplayName;
-    update.supportsDTMF = NO;
-    update.hasVideo = NO;
-    update.supportsHolding = NO;
-    update.supportsGrouping = NO;
-    update.supportsUngrouping = NO;
-    return update;
-}
-
--(MLCall*) createCallWithJmiPropose:(XMPPMessage*) messageNode onAccountNo:(NSNumber*) accountNo
-{
-    //if the jmi id is a uuid, just use it, otherwise infer a uuid from the given jmi id
-    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id|uuidcast"];
-    NSString* jmiid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id"];
-    MLAssert(uuid != nil, @"call uuid invalid!", (@{@"propose@id": nilWrapper(jmiid)}));
-    
-    MLCall* call = [[MLCall alloc] initWithUUID:uuid jmiid:jmiid contact:[MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo] andDirection:MLCallDirectionIncoming];
-    //order matters here!
-    call.fullRemoteJid = messageNode.from;
-    call.jmiPropose = messageNode;
-    return call;
-}
-
 -(MLCall*) initiateAudioCallToContact:(MLContact*) contact
 {
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
@@ -758,6 +731,33 @@ static NSMutableDictionary* _pendingCalls;
             call.audioSession = nil;
         }
     }
+}
+
+-(CXCallUpdate*) constructUpdateForCall:(MLCall*) call
+{
+    CXCallUpdate* update = [[CXCallUpdate alloc] init];
+    update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:call.contact.contactJid];
+    update.localizedCallerName = call.contact.contactDisplayName;
+    update.supportsDTMF = NO;
+    update.hasVideo = NO;
+    update.supportsHolding = NO;
+    update.supportsGrouping = NO;
+    update.supportsUngrouping = NO;
+    return update;
+}
+
+-(MLCall*) createCallWithJmiPropose:(XMPPMessage*) messageNode onAccountNo:(NSNumber*) accountNo
+{
+    //if the jmi id is a uuid, just use it, otherwise infer a uuid from the given jmi id
+    NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id|uuidcast"];
+    NSString* jmiid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id"];
+    MLAssert(uuid != nil, @"call uuid invalid!", (@{@"propose@id": nilWrapper(jmiid)}));
+    
+    MLCall* call = [[MLCall alloc] initWithUUID:uuid jmiid:jmiid contact:[MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo] andDirection:MLCallDirectionIncoming];
+    //order matters here!
+    call.fullRemoteJid = messageNode.from;
+    call.jmiPropose = messageNode;
+    return call;
 }
 
 @end

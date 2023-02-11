@@ -134,7 +134,7 @@
     self.lastSelectedContact = nil;
     [self refreshDisplay];
 
-    if(self.contacts.count == 0)
+    if(self.contacts.count <= 1)
     {
         self.navigationItem.searchController = nil;
         [self reloadTable];
@@ -249,7 +249,7 @@
 
 - (NSInteger)tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
 {
-    return [self.contacts count];
+    return [self.contacts count] > 1 ? [self.contacts count] : 0;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -419,7 +419,7 @@
 
 -(BOOL) emptyDataSetShouldDisplay:(UIScrollView*) scrollView
 {
-    if(self.contacts.count == 0)
+    if(self.contacts.count <= 1)
     {
         // A little trick for removing the cell separators
         self.tableView.tableFooterView = [UIView new];

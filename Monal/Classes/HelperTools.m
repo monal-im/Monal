@@ -243,6 +243,20 @@ static id preprocess(id exception)
     return [NSURL URLWithString:turnApiServer];
 }
 
++(BOOL) shouldProvideVoip
+{
+    __block BOOL shouldProvideVoip = NO;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSLocale* userLocale = [NSLocale currentLocale];
+        shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
+#if TARGET_OS_MACCATALYST
+        shouldProvideVoip = NO;
+#endif
+    });
+    return shouldProvideVoip;
+}
+    
 +(BOOL) isSandboxAPNS
 {
     // check if were are sandbox or production
@@ -1211,7 +1225,7 @@ static id preprocess(id exception)
     static NSSet* featuresSet;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        NSArray* featuresArray = @[
+        NSMutableArray* featuresArray = [@[
             @"http://jabber.org/protocol/caps",
             @"http://jabber.org/protocol/disco#info",
             @"jabber:x:conference",
@@ -1225,8 +1239,9 @@ static id preprocess(id exception)
             @"urn:xmpp:eme:0",
             @"urn:xmpp:message-retract:0",
             @"urn:xmpp:message-correct:0",
-            @"urn:tmp:monal:webrtc",            //TODO: tmp implementation, to be removed later on
-        ];
+        ] mutableCopy];
+        if([HelperTools shouldProvideVoip])
+            [featuresArray addObject:@"urn:tmp:monal:webrtc"];  //TODO: tmp implementation, to be replaced by urn:xmpp:jingle-message:0 later on
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });
     return featuresSet;

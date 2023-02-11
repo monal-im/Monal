@@ -245,50 +245,51 @@ enum msgSentState {
 
 -(void) updateCallButtonImage
 {
-#ifdef IS_ALPHA
-    //this has to be done in the main thread because it's ui related
-    [HelperTools dispatchSyncReentrant:^{
-        //these contact types can not be called
-        if(self.contact.isGroup || self.contact.isSelfChat)
-        {
-            self.callButton = nil;
+    if([HelperTools shouldProvideVoip])
+    {
+        //this has to be done in the main thread because it's ui related
+        [HelperTools dispatchSyncReentrant:^{
+            //these contact types can not be called
+            if(self.contact.isGroup || self.contact.isSelfChat)
+            {
+                self.callButton = nil;
+                
+                //remove call button, if present
+                NSMutableArray* rightBarButtons = [[NSMutableArray alloc] init];
+                for(UIBarButtonItem* entry in self.navigationItem.rightBarButtonItems)
+                    if(entry.action != @selector(openCallScreen:))
+                        [rightBarButtons addObject:entry];
+                self.navigationItem.rightBarButtonItems = rightBarButtons;
+                
+                return;
+            }
             
-            //remove call button, if present
-            NSMutableArray* rightBarButtons = [[NSMutableArray alloc] init];
+            if(self.callButton == nil)
+            {
+                self.callButton = [UIBarButtonItem new];
+                [self.callButton setAction:@selector(openCallScreen:)];
+            }
+            
+            MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+            MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
+            if(activeCall != nil)
+                self.callButton.image = [UIImage systemImageNamed:@"phone.connection.fill"];
+            else
+                self.callButton.image = [UIImage systemImageNamed:@"phone.fill"];
+            
+            //add the button to the bar button items if not already present
+            BOOL present = NO;
             for(UIBarButtonItem* entry in self.navigationItem.rightBarButtonItems)
-                if(entry.action != @selector(openCallScreen:))
-                    [rightBarButtons addObject:entry];
-            self.navigationItem.rightBarButtonItems = rightBarButtons;
-            
-            return;
-        }
-        
-        if(self.callButton == nil)
-        {
-            self.callButton = [UIBarButtonItem new];
-            [self.callButton setAction:@selector(openCallScreen:)];
-        }
-        
-        MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-        MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
-        if(activeCall != nil)
-            self.callButton.image = [UIImage systemImageNamed:@"phone.connection.fill"];
-        else
-            self.callButton.image = [UIImage systemImageNamed:@"phone.fill"];
-        
-        //add the button to the bar button items if not already present
-        BOOL present = NO;
-        for(UIBarButtonItem* entry in self.navigationItem.rightBarButtonItems)
-            if(entry.action == @selector(openCallScreen:))
-                present = YES;
-        if(!present)
-        {
-            NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
-            [rightBarButtons addObject:self.callButton];
-            self.navigationItem.rightBarButtonItems = rightBarButtons;
-        }
-    } onQueue:dispatch_get_main_queue()];
-#endif
+                if(entry.action == @selector(openCallScreen:))
+                    present = YES;
+            if(!present)
+            {
+                NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
+                [rightBarButtons addObject:self.callButton];
+                self.navigationItem.rightBarButtonItems = rightBarButtons;
+            }
+        } onQueue:dispatch_get_main_queue()];
+    }
 }
 
 -(void) initNavigationBarItems
@@ -506,7 +507,7 @@ enum msgSentState {
 #if TARGET_OS_MACCATALYST
         style = UIAlertControllerStyleAlert;
 #endif
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact seems to not support Monal-Style calls. Your call might never reach its destination.", @"") preferredStyle:style];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact may to not support Monal-Style calls. Your call might never reach its destination.", @"") preferredStyle:style];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Try nevertheless", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
             

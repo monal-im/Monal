@@ -46,8 +46,8 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSArray<NSString*>*) getFailoverStunServers;
 +(NSURL*) getFailoverTurnApiServer;
 
++(BOOL) shouldProvideVoip;
 +(BOOL) isSandboxAPNS;
-
 +(int) compareIOcted:(NSData*) data1 with:(NSData*) data2;
 +(NSURL*) getContainerURLForPathComponents:(NSArray*) components;
 +(NSURL*) getSharedDocumentsURLForPathComponents:(NSArray*) components;

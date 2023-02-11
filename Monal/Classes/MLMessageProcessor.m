@@ -109,8 +109,13 @@ static NSMutableDictionary* _typingNotifications;
     
     //handle incoming jmi calls (TODO: add entry to local history, once the UI for this is implemented)
     //only handle incoming propose messages if not older than 60 seconds
-#ifdef IS_ALPHA
-    if([messageNode check:@"{urn:xmpp:jingle-message:0}*"])
+    
+    if([messageNode check:@"{urn:xmpp:jingle-message:0}*"] && ![HelperTools shouldProvideVoip])
+    {
+        DDLogWarn(@"China locale detected, ignoring incoming JMI message!");
+        return message;
+    }
+    else if([messageNode check:@"{urn:xmpp:jingle-message:0}*"])
     {
         MLContact* jmiContact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:account.accountNo];
         if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
@@ -174,14 +179,6 @@ static NSMutableDictionary* _typingNotifications;
         else
             return message;
     }
-#else
-    if([messageNode check:@"{urn:xmpp:jingle-message:0}*"])
-    {
-        DDLogWarn(@"Ignoring incoming JMI message: not in alpha!");
-        return message;
-    }
-#endif
-    
     
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(

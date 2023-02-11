@@ -79,13 +79,8 @@ static NSMutableDictionary* _pendingCalls;
     config.supportedHandleTypes = [NSSet setWithObject:@(CXHandleTypeGeneric)];
     config.supportsVideo = NO;
     config.includesCallsInRecents = YES;
-    //TODO: we need a new app icon having a transparent background
     //see https://stackoverflow.com/a/45823730/3528174
-#ifdef IS_ALPHA
-    config.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:@"AlphaAppIcon"]);
-#else
-    config.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:@"AppIcon"]);
-#endif
+    config.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:@"CallKitLogo"]);
     self.cxProvider = [[CXProvider alloc] initWithConfiguration:config];
     [self.cxProvider setDelegate:self queue:dispatch_get_main_queue()];
     self.callController = [[CXCallController alloc] initWithQueue:dispatch_get_main_queue()];

@@ -23,11 +23,16 @@ let swiftuiTranslationDummyString = Text("Dummy string to test SwiftUI translati
 
 extension MLContact : Identifiable {}
 
-func MLAssert(_ predicate: @autoclosure() -> Bool, _ text: String = "",	_ auxData: [String:AnyObject] = [String:AnyObject](), file: String = #file, line: Int = #line, function: String = #function) {
+
+func unreachable(_ text: String = "unreachable", _ auxData: [String:AnyObject] = [String:AnyObject](), file: String = #file, line: Int = #line, function: String = #function) -> Never {
+    HelperTools.mlAssert(withText:text, andUserData:auxData, andFile:(file as NSString).utf8String!, andLine:Int32(line), andFunc:(function as NSString).utf8String!)
+    while true {}       //should never be reached
+}
+
+func MLAssert(_ predicate: @autoclosure() -> Bool, _ text: String = "", _ auxData: [String:AnyObject] = [String:AnyObject](), file: String = #file, line: Int = #line, function: String = #function) {
     if !predicate() {
         HelperTools.mlAssert(withText:text, andUserData:auxData, andFile:(file as NSString).utf8String!, andLine:Int32(line), andFunc:(function as NSString).utf8String!)
-        while true {}
-        fatalError("swift assertion")
+        while true {}       //should never be reached
     }
 }
 
@@ -190,8 +195,7 @@ class DocumentPickerViewController: UIDocumentPickerViewController {
     }
 
     required init?(coder: NSCoder) {
-        MLAssert(false, "init(coder:) has not been implemented")
-        fatalError("unreachable")
+        unreachable("init(coder:) has not been implemented")
     }
 }
 

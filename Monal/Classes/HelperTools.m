@@ -223,11 +223,11 @@ static id preprocess(id exception)
 {
     return @[
 #ifdef IS_ALPHA
-        @"stun:alpha.turn.monal-im.org:443",
-        @"stun:alpha.turn.monal-im.org:3478",
+        @"stuns:alpha.turn.monal-im.org:443",
+        @"stuns:alpha.turn.monal-im.org:3478",
 #else
-        @"stun:eu.prod.turn.monal-im.org:443",
-        @"stun:eu.prod.turn.monal-im.org:3478",
+        @"stuns:eu.prod.turn.monal-im.org:443",
+        @"stuns:eu.prod.turn.monal-im.org:3478",
 #endif
     ];
 }

@@ -301,7 +301,7 @@ static volatile MLUDPLogger* _self;
             [[self class] logError:@"send error: %@\n%@", error, msg];
             
         }
-        [[self class] logError:@"unlocking send condition..."];
+        [[self class] logError:@"unlocking send condition (%@: %@)...", _processID, [NSNumber numberWithUnsignedLongLong:self->_counter]];
         [self->_send_condition lock];
         [self->_send_condition signal];
         [self->_send_condition unlock];

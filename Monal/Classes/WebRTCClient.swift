@@ -48,7 +48,7 @@ final class WebRTCClient: NSObject {
     }
     
     @objc
-    required init(iceServers: [RTCIceServer], forceRelay: Bool) {
+    static func createPeerConnection(iceServers: [RTCIceServer], forceRelay: Bool) -> RTCPeerConnection? {
         let config = RTCConfiguration()
         if forceRelay {
             config.iceTransportPolicy = .relay
@@ -72,11 +72,23 @@ final class WebRTCClient: NSObject {
             "VoiceActivityDetection": kRTCMediaConstraintsValueTrue
         ])
         
-        guard let peerConnection = WebRTCClient.factory.peerConnection(with: config, constraints: constraints, delegate: nil) else {
-            unreachable("Could not create new RTCPeerConnection")
+        return WebRTCClient.factory.peerConnection(with: config, constraints: constraints, delegate: nil)
+    }
+    
+    @objc
+    required init(iceServers: [RTCIceServer], forceRelay: Bool) {
+        var peerConnection = WebRTCClient.createPeerConnection(iceServers: iceServers, forceRelay: forceRelay)
+        if peerConnection == nil {
+            // try again with empty ice server list
+            DDLogError("Broken ice server list, retrying without any ice servers: \(String(describing:iceServers))")
+            peerConnection = WebRTCClient.createPeerConnection(iceServers: [], forceRelay: forceRelay)
+            guard peerConnection != nil else {
+                //this should never happen --> crash
+                unreachable("Could not create new RTCPeerConnection")
+            }
         }
         
-        self.peerConnection = peerConnection
+        self.peerConnection = peerConnection!
         super.init()
         
         self.createMediaSenders()

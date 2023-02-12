@@ -919,6 +919,8 @@ NSString* const kStanza = @"stanza";
 
 -(void) disconnectWithStreamError:(MLXMLNode* _Nullable) streamError andExplicitLogout:(BOOL) explicitLogout 
 {
+    DDLogInfo(@"disconnect called...");
+    
     //short-circuit common case without dispatching to receive queue
     //this allows calling a noop disconnect while the receive queue is frozen
     if(self->_accountState<kStateReconnecting && !explicitLogout)
@@ -1187,6 +1189,8 @@ NSString* const kStanza = @"stanza";
 
 -(void) reconnectWithStreamError:(MLXMLNode* _Nullable) streamError andWaitingTime:(double) wait
 {
+    DDLogInfo(@"reconnect called...");
+    
     if(_reconnectInProgress)
     {
         DDLogInfo(@"Ignoring reconnect while one already in progress");
@@ -1194,6 +1198,7 @@ NSString* const kStanza = @"stanza";
     }
     
     [self dispatchAsyncOnReceiveQueue: ^{
+        DDLogInfo(@"reconnect starts");
         if(self->_reconnectInProgress)
         {
             DDLogInfo(@"Ignoring reconnect while one already in progress");
@@ -2336,7 +2341,10 @@ NSString* const kStanza = @"stanza";
             
             //don't report error but reconnect if we pipelined stuff that is not correct anymore...
             if(oldPipeliningState != kPipelinedNothing)
+            {
+                DDLogInfo(@"Reconnecting to flush pipeline...");
                 [self reconnect];
+            }
             //...but don't try again if it's really the password, that's wrong
             //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
             else
@@ -2474,7 +2482,10 @@ NSString* const kStanza = @"stanza";
             
             //don't report error but reconnect if we pipelined stuff that is not correct anymore and no downgrade was detected...
             if(oldPipeliningState != kPipelinedNothing && ![parsedStanza check:@"{urn:xmpp:ssdp:0}downgrade-detected"])
+            {
+                DDLogInfo(@"Reconnecting to flush pipeline...");
                 [self reconnect];
+            }
             //...but don't try again if it's really the password, that's wrong
             else
             {

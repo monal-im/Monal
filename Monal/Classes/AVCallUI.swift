@@ -125,7 +125,10 @@ struct AVCallUI: View {
                                     .bold()
                                     .foregroundColor(.primary)
                                 case .retracted:
-                                    Text("Call ended: hung up")
+                                    //this will only be displayed for timer-induced retractions,
+                                    //reflect that in our text instead of using some generic "hung up"
+                                    //Text("Call ended: hung up")
+                                    Text("Call ended: remote busy")
                                     .bold()
                                     .foregroundColor(.primary)
                                 case .rejected:

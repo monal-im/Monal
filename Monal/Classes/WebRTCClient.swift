@@ -44,7 +44,8 @@ final class WebRTCClient: NSObject {
 
     @available(*, unavailable)
     override init() {
-        fatalError("WebRTCClient:init is unavailable")
+        MLAssert(false, "WebRTCClient:init is unavailable")
+        fatalError("unreachable")
     }
     
     @objc
@@ -73,7 +74,8 @@ final class WebRTCClient: NSObject {
         ])
         
         guard let peerConnection = WebRTCClient.factory.peerConnection(with: config, constraints: constraints, delegate: nil) else {
-            fatalError("Could not create new RTCPeerConnection")
+            MLAssert(false, "Could not create new RTCPeerConnection")
+            fatalError("unreachable")
         }
         
         self.peerConnection = peerConnection

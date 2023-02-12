@@ -23,6 +23,14 @@ let swiftuiTranslationDummyString = Text("Dummy string to test SwiftUI translati
 
 extension MLContact : Identifiable {}
 
+func MLAssert(_ predicate: @autoclosure() -> Bool, _ text: String = "",	_ auxData: [String:AnyObject] = [String:AnyObject](), file: String = #file, line: Int = #line, function: String = #function) {
+    if !predicate() {
+        HelperTools.mlAssert(withText:text, andUserData:auxData, andFile:(file as NSString).utf8String!, andLine:Int32(line), andFunc:(function as NSString).utf8String!)
+        while true {}
+        fatalError("swift assertion")
+    }
+}
+
 class SheetDismisserProtocol: ObservableObject {
     weak var host: UIHostingController<AnyView>? = nil
     func dismiss() {
@@ -182,7 +190,8 @@ class DocumentPickerViewController: UIDocumentPickerViewController {
     }
 
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        MLAssert(false, "init(coder:) has not been implemented")
+        fatalError("unreachable")
     }
 }
 

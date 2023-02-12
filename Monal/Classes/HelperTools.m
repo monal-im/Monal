@@ -120,7 +120,7 @@ static id preprocess(id exception)
 #endif
 }
 
-+(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
++(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func
 {
     NSString* fileStr = [NSString stringWithFormat:@"%s", file];
     NSArray* filePathComponents = [fileStr pathComponents];

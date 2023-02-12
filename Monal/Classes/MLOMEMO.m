@@ -57,6 +57,7 @@ static const int KEY_SIZE = 16;
     //read own devicelist from database
     self.ownDeviceList = [[self knownDevicesForAddressName:self.account.connectionProperties.identity.jid] mutableCopy];
     DDLogVerbose(@"Own devicelist for account %@ is now: %@", self.account, self.ownDeviceList);
+    DDLogVerbose(@"Deviceid of this device: %@", @(self.monalSignalStore.deviceid));
     
     [self createLocalIdentiyKeyPairIfNeeded];
     
@@ -117,6 +118,7 @@ static const int KEY_SIZE = 16;
         [self.monalSignalStore cleanupKeys];
         [self.monalSignalStore reloadCachedPrekeys];
         // we generated a new identity
+        DDLogWarn(@"Created new omemo identity with deviceid: %@", @(self.monalSignalStore.deviceid));
         return YES;
     }
     // we did not generate a new identity

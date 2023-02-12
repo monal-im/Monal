@@ -438,8 +438,8 @@ static NSMutableDictionary* _pendingCalls;
     BOOL forceRelay = ![[HelperTools defaultsDB] boolForKey:@"webrtcAllowP2P"];
     DDLogInfo(@"Initializing webrtc with forceRelay=%@ using ice servers: %@", forceRelay ? @"YES" : @"NO", iceServers);
     WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers forceRelay:forceRelay];
-    webRTCClient.delegate = call;
     call.webRTCClient = webRTCClient;
+    webRTCClient.delegate = call;
 }
 
 -(void) handleIncomingJMIStanza:(NSNotification*) notification

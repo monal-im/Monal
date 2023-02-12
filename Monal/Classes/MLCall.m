@@ -746,6 +746,8 @@
     return [NSString stringWithFormat:@"%@Call:%@", self.direction == MLCallDirectionIncoming ? @"Incoming" : @"Outgoing", @{
         @"uuid": self.uuid,
         @"state": state,
+        @"finishReason": @(self.finishReason),
+        @"durationTime": @(self.durationTime),
         @"contact": nilWrapper(self.contact),
         @"fullRemoteJid": nilWrapper(self.fullRemoteJid),
         @"jmiPropose": nilWrapper(self.jmiPropose),

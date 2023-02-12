@@ -1001,6 +1001,7 @@
         NSString* current_id = UIDevice.currentDevice.identifierForVendor.UUIDString;
         if(![current_id isEqualToString:stored_id])
         {
+            DDLogWarn(@"Device id has changed (%@ --> %@), invalidating state AND omemo identity keys!", stored_id, current_id);
             //invalidate account state because the app was migrated to a new device
             [dataLayer invalidateAllAccountStates];
             //change resource because of app migration

@@ -120,12 +120,20 @@ struct AVCallUI: View {
                                     Text("Call was not answered")
                                     .bold()
                                     .foregroundColor(.primary)
+                                case .answeredElsewhere:
+                                    Text("Call ended: answered with other device")
+                                    .bold()
+                                    .foregroundColor(.primary)
+                                case .retracted:
+                                    Text("Call ended: hung up")
+                                    .bold()
+                                    .foregroundColor(.primary)
                                 case .rejected:
                                     Text("Call ended: remote busy")
                                     .bold()
                                     .foregroundColor(.primary)
-                                case .answeredElsewhere:
-                                    Text("Call ended: answered with other device")
+                                case .declined:
+                                    Text("Call ended: declined")
                                     .bold()
                                     .foregroundColor(.primary)
                                 default:        //should never be reached

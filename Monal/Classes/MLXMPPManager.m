@@ -294,18 +294,24 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @YES}];
             }
         }
-        else
+        else if(nw_path_get_status(path) == nw_path_status_satisfied)
         {
+            DDLogVerbose(@"still reachable");
             //when switching from wifi to mobile (or back) we sometimes don't have any unreachable state in between
             //--> reconnect directly because switching from wifi to mobile will cut the connection a few seconds after the switch anyways
             //NOTE: wait for 1 sec before reconnecting to compensate for multiple nw_path updates in a row
             for(xmpp* xmppAccount in [self connectedXMPP])
                 //don't reconnect if appex has frozen our queues!
                 if(!xmppAccount.parseQueueFrozen)
-                    [xmppAccount reconnect:1];
+                {
+                    [NSThread sleepForTimeInterval:1];
+                    [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+                }
                 else
-                    DDLogDebug(@"Not trying to reconnect in 1s, parse queue frozen!");
+                    DDLogDebug(@"Not pinging after 1s, parse queue frozen!");
         }
+        else
+            DDLogVerbose(@"nothing changed, still NOT reachable");
     });
     nw_path_monitor_start(_path_monitor);
     

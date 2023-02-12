@@ -124,7 +124,7 @@
         {
             //try to do this "manually" without looping through callkit
             DDLogError(@"Error requesting end call transaction: %@", error);
-            [self handleEndCallActionWithReason:MLCallFinishReasonUnknown];
+            [self internalHandleEndCallActionWithReason:MLCallFinishReasonUnknown];
             return;
         }
         else
@@ -430,91 +430,68 @@
 
 -(void) handleEndCallActionWithReason:(MLCallFinishReason) reason
 {
-    //stop all running timers
-    if(self.cancelDiscoveringTimeout != nil)
-        self.cancelDiscoveringTimeout();
-    self.cancelDiscoveringTimeout = nil;
-    if(self.cancelRingingTimeout != nil)
-        self.cancelRingingTimeout();
-    self.cancelRingingTimeout = nil;
-    if(self.cancelConnectingTimeout != nil)
-        self.cancelConnectingTimeout();
-    self.cancelConnectingTimeout = nil;
-    
-    //end webrtc call if already established or in the process of establishing
-    if(self.webRTCClient != nil)
-    {
-        [self.webRTCClient.peerConnection close];
-        self.webRTCClient = nil;
+    @synchronized(self) {
+        [self internalHandleEndCallActionWithReason:reason];
+        [self internalUpdateCallKitState];
     }
-    
-    //update state (this will automatically stop the call duration timer)
-    self.finishReason = reason;
-    self.isConnected = NO;
-    self.isFinished = YES;
-    
-    //remove this call from pending calls
-    [self.voipProcessor removeCall:self];
-    
-    //the CXEndCallAction means either the call was rejected (if not yet answered) or it was terminated normally (if the call was accepted)
-    //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc for end reasons
-    if(self.direction == MLCallDirectionIncoming)
-    {
-        [self.providerAnswerAction fail];               //fail will do nothing if already fulfilled or nil
-        if(self.jmiProceed == nil)
+}
+
+-(void) internalHandleEndCallActionWithReason:(MLCallFinishReason) reason
+{
+    @synchronized(self) {
+        //stop all running timers
+        if(self.cancelDiscoveringTimeout != nil)
+            self.cancelDiscoveringTimeout();
+        self.cancelDiscoveringTimeout = nil;
+        if(self.cancelRingingTimeout != nil)
+            self.cancelRingingTimeout();
+        self.cancelRingingTimeout = nil;
+        if(self.cancelConnectingTimeout != nil)
+            self.cancelConnectingTimeout();
+        self.cancelConnectingTimeout = nil;
+        
+        //end webrtc call if already established or in the process of establishing
+        if(self.webRTCClient != nil)
         {
-            if(self.finishReason == MLCallFinishReasonAnsweredElsewhere)
-                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonAnsweredElsewhere];
-            else if(self.finishReason == MLCallFinishReasonUnanswered)
-                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
-            else if(self.finishReason == MLCallFinishReasonRejected)
-                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonDeclinedElsewhere];
-            else if(self.finishReason == MLCallFinishReasonDeclined)
-            {
-                if(self.tieBreak)
-                    [self sendJmiRejectWithTieBreak];
-                else
-                    [self sendJmiReject];
-            }
-            else
-                MLAssert(NO, @"Unexpected finish reason!", (@{@"reason": @(self.finishReason), @"call": self}));
+            [self.webRTCClient.peerConnection close];
+            self.webRTCClient = nil;
         }
-        else
-        {
-            if(self.finishReason == MLCallFinishReasonNormal)
-            {
-                [self sendJmiFinishWithReason:@"success"];
-                //this is not needed because this case is always looped through cxprovider endCallAction
-                //[self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
-            }
-            else if(self.finishReason == MLCallFinishReasonConnectivityError)
-            {
-                [self sendJmiFinishWithReason:@"connectivity-error"];
-                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
-            }
-            else
-                MLAssert(NO, @"Unexpected finish reason!", (@{@"reason": @(self.finishReason), @"call": self}));
-        }
+        
+        //update state (this will automatically stop the call duration timer)
+        self.finishReason = reason;
+        self.isConnected = NO;
+        self.isFinished = YES;
+        
+        //remove this call from pending calls
+        [self.voipProcessor removeCall:self];
     }
-    else
-    {
-        if(self.jmiPropose != nil)
+}
+
+-(void) internalUpdateCallKitState
+{
+    @synchronized(self) {
+        //the CXEndCallAction means either the call was rejected (if not yet answered) or it was terminated normally (if the call was accepted)
+        //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc for end reasons
+        if(self.direction == MLCallDirectionIncoming)
         {
+            [self.providerAnswerAction fail];               //fail will do nothing if already fulfilled or nil
             if(self.jmiProceed == nil)
             {
-                if(self.finishReason == MLCallFinishReasonRejected)
-                    [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
-                else if(self.finishReason == MLCallFinishReasonAnsweredElsewhere)
+                if(self.finishReason == MLCallFinishReasonAnsweredElsewhere)
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonAnsweredElsewhere];
-                else if(self.finishReason == MLCallFinishReasonRetracted)
+                else if(self.finishReason == MLCallFinishReasonUnanswered)
+                    [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
+                else if(self.finishReason == MLCallFinishReasonRejected)
+                    [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonDeclinedElsewhere];
+                else if(self.finishReason == MLCallFinishReasonDeclined)
                 {
                     if(self.tieBreak)
-                        [self sendJmiRetractWithTieBreak];
+                        [self sendJmiRejectWithTieBreak];
                     else
-                        [self sendJmiRetract];
+                        [self sendJmiReject];
                 }
                 else
-                    MLAssert(NO, @"Unexpected finish reason!", (@{@"reason": @(self.finishReason), @"call": self}));
+                    MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
             }
             else
             {
@@ -530,15 +507,53 @@
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                 }
                 else
-                    MLAssert(NO, @"Unexpected finish reason!", (@{@"reason": @(self.finishReason), @"call": self}));
+                    MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
             }
         }
         else
         {
-            //this case probably does never happen
-            //(the outgoing call transaction was started, but start call action not yet executed, and then the end call action arrives)
-            [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
-            self.finishReason = MLCallFinishReasonConnectivityError;
+            if(self.jmiPropose != nil)
+            {
+                if(self.jmiProceed == nil)
+                {
+                    if(self.finishReason == MLCallFinishReasonRejected)
+                        [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
+                    else if(self.finishReason == MLCallFinishReasonAnsweredElsewhere)
+                        [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonAnsweredElsewhere];
+                    else if(self.finishReason == MLCallFinishReasonRetracted)
+                    {
+                        if(self.tieBreak)
+                            [self sendJmiRetractWithTieBreak];
+                        else
+                            [self sendJmiRetract];
+                    }
+                    else
+                        MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
+                }
+                else
+                {
+                    if(self.finishReason == MLCallFinishReasonNormal)
+                    {
+                        [self sendJmiFinishWithReason:@"success"];
+                        //this is not needed because this case is always looped through cxprovider endCallAction
+                        //[self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
+                    }
+                    else if(self.finishReason == MLCallFinishReasonConnectivityError)
+                    {
+                        [self sendJmiFinishWithReason:@"connectivity-error"];
+                        [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                    }
+                    else
+                        MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
+                }
+            }
+            else
+            {
+                //this case probably does never happen
+                //(the outgoing call transaction was started, but start call action not yet executed, and then the end call action arrives)
+                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
+                self.finishReason = MLCallFinishReasonConnectivityError;
+            }
         }
     }
 }

@@ -567,14 +567,20 @@ static NSMutableDictionary* _pendingCalls;
     }
     else if([messageNode check:@"{urn:xmpp:jingle-message:0}finish"])
     {
+        NSString* reason = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}finish/{urn:xmpp:jingle:1}reason/*$"];
         if(call.jmiProceed != nil)
         {
-            DDLogInfo(@"Remote finished call with reason: %@", [messageNode findFirst:@"{urn:xmpp:jingle-message:0}finish/{urn:xmpp:jingle:1}reason/*$"]);
+            DDLogInfo(@"Remote finished call with reason: %@", reason);
             [call end];     //use "end" because this was a successful call
         }
-        
-        DDLogWarn(@"Remote did try to finish an not yet established call");
-        [call handleEndCallActionWithReason:MLCallFinishReasonAnsweredElsewhere];
+        else
+        {
+            DDLogWarn(@"Remote did try to finish an not yet established call");
+            if([@"connectivity-error" isEqualToString:reason])
+                [call handleEndCallActionWithReason:MLCallFinishReasonConnectivityError];
+            else
+                [call handleEndCallActionWithReason:MLCallFinishReasonAnsweredElsewhere];
+        }
     }
     else
         DDLogWarn(@"NOT handling JMI stanza, wrong jmi-type/direction combination: %@", messageNode);

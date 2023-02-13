@@ -393,7 +393,8 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         [features containsObject:@"http://jabber.org/protocol/pubsub#delete-nodes"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#persistent-items"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#retrieve-items"] &&
-        [features containsObject:@"http://jabber.org/protocol/pubsub#config-node"] &&
+        //not advertised in ejabberd 22.05 but supported
+        //[features containsObject:@"http://jabber.org/protocol/pubsub#config-node"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#auto-create"] &&
         // [features containsObject:@"http://jabber.org/protocol/pubsub#last-published"] &&
         // [features containsObject:@"http://jabber.org/protocol/pubsub#create-and-configure"] &&

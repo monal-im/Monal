@@ -49,13 +49,14 @@ Take a look at this list to get information on [supported XEPs by Monal](https:/
 
 ### iOS Screenshots
 <p float="left">
-<img src ="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.58.26-1.png" width=250 >
-<img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.56.17-4.png" width="250">  <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.51-1.png" width="250">
+<img src ="https://github.com/monal-im/Monal/raw/develop/Art/screenshots/02_chats.png" width=250 >
+<img src="https://github.com/monal-im/Monal/raw/develop/Art/screenshots/01_groupchats.png" width="250">
+<img src="https://github.com/monal-im/Monal/raw/develop/Art/screenshots/04_contacts.png" width="250">
 </p>
 
-### macOS Screenshot
+### iPad (and macOS) Screenshot
 
-<img src="https://monal.im/wp-content/uploads/2020/02/Screen-Shot-2020-02-15-at-10.28.38-PM-1.png" width="500">
+<img src="https://github.com/monal-im/Monal/raw/develop/Art/screenshots/ipad_01_groupchats.png" width="500">
 
 ### License
 Monal is licensed under the BSD license. Any code contributions should be compatible with that license.  ** NO GPL ** .  By contributing to this project, you agree that your code is not GPL or any similarly restrictive license. You agree that your code can be used to publish in App stores such as Apple's that use DRM.

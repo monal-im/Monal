@@ -109,10 +109,7 @@
             self.time.hidden = YES;
     }
     else
-    {
         [self showStatusText:nil inboundDir:NO fromUser:nil];
-        DDLogWarn(@"Active chat but no messages found in history for %@.", contact.contactJid);
-    }
 }
 
 -(void) showStatusText:(NSString *) text inboundDir:(BOOL) inboundDir fromUser:(NSString* _Nullable) fromUser

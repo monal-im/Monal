@@ -52,6 +52,7 @@
 @property (nonatomic, assign) MLCallFinishReason finishReason;
 @property (nonatomic, assign) uint32_t durationTime;
 @property (nonatomic, strong) NSTimer* _Nullable callDurationTimer;
+@property (nonatomic, strong) monal_void_block_t _Nullable cancelDiscoveringTimeout;
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelRingingTimeout;
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelConnectingTimeout;
 
@@ -88,6 +89,7 @@
     self.durationTime = 0;
     self.isFinished = NO;
     self.finishReason = MLCallFinishReasonUnknown;
+    self.cancelDiscoveringTimeout = nil;
     self.cancelRingingTimeout = nil;
     self.cancelConnectingTimeout = nil;
     
@@ -120,12 +122,9 @@
     [self.voipProcessor.callController requestTransaction:transaction completion:^(NSError* error) {
         if(error != nil)
         {
-            DDLogError(@"Error requesting end call transaction: %@", error);
-            
             //try to do this "manually" without looping through callkit
-            [self handleEndCallAction];
-            [self.voipProcessor removeCall:self];
-            
+            DDLogError(@"Error requesting end call transaction: %@", error);
+            [self internalHandleEndCallActionWithReason:MLCallFinishReasonUnknown];
             return;
         }
         else
@@ -190,7 +189,7 @@
                 return MLCallStateConnecting;
             if(self.jmiProceed == nil && self.cancelRingingTimeout != nil)
                 return MLCallStateRinging;
-            if(self.jmiProceed == nil && self.cancelRingingTimeout == nil)
+            if(self.jmiProceed == nil && self.cancelDiscoveringTimeout != nil)
                 return MLCallStateDiscovering;
             return MLCallStateUnknown;
         }
@@ -213,7 +212,7 @@
 
 +(NSSet*) keyPathsForValuesAffectingState
 {
-    return [NSSet setWithObjects:@"direction", @"isConnected", @"jmiProceed", @"webRTCClient", @"providerAnswerAction", @"audioSession", @"isFinished", @"cancelRingingTimeout", @"cancelConnectingTimeout", nil];
+    return [NSSet setWithObjects:@"direction", @"isConnected", @"jmiProceed", @"webRTCClient", @"providerAnswerAction", @"audioSession", @"isFinished", @"cancelDiscoveringTimeout", @"cancelRingingTimeout", @"cancelConnectingTimeout", nil];
 }
 
 #pragma mark - internals
@@ -406,14 +405,20 @@
             DDLogDebug(@"Closing old webrtc connection...");
             WebRTCClient* client = self.webRTCClient;
             self.webRTCClient = nil;
-            [client.peerConnection close];
+            //do this async to not run into a deadlock with the signalling thread
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [client.peerConnection close];
+            });
         }
         DDLogDebug(@"Stopping all running timers...");
+        if(self.cancelDiscoveringTimeout != nil)
+            self.cancelDiscoveringTimeout();
+        self.cancelDiscoveringTimeout = nil;
         if(self.cancelRingingTimeout != nil)
             self.cancelRingingTimeout();
+        self.cancelRingingTimeout = nil;
         if(self.cancelConnectingTimeout != nil)
             self.cancelConnectingTimeout();
-        self.cancelRingingTimeout = nil;
         self.cancelConnectingTimeout = nil;
         
         //report this migrated call as ringing
@@ -426,98 +431,136 @@
     DDLogDebug(@"Migration done, waiting for new webrtc connection...");
 }
 
--(void) handleEndCallAction
+-(void) handleEndCallActionWithReason:(MLCallFinishReason) reason
 {
-    BOOL wasConnected = self.isConnected;
-    
-    if(self.cancelRingingTimeout != nil)
-        self.cancelRingingTimeout();
-    if(self.cancelConnectingTimeout != nil)
-        self.cancelConnectingTimeout();
-    
-    //end webrtc call if already established or in the process of establishing
-    if(self.webRTCClient != nil)
-    {
-        [self.webRTCClient.peerConnection close];
-        self.webRTCClient = nil;
+    @synchronized(self) {
+        [self internalHandleEndCallActionWithReason:reason];
+        [self internalUpdateCallKitState];
     }
-    self.isConnected = NO;
-    self.isFinished = YES;
-    
-    //the CXEndCallAction means either the call was rejected (if not yet answered) or it was terminated normally (if the call was accepted)
-    if(self.direction == MLCallDirectionIncoming)
-    {
-        if(self.providerAnswerAction == nil)
+}
+
+-(void) internalHandleEndCallActionWithReason:(MLCallFinishReason) reason
+{
+    @synchronized(self) {
+        //stop all running timers
+        if(self.cancelDiscoveringTimeout != nil)
+            self.cancelDiscoveringTimeout();
+        self.cancelDiscoveringTimeout = nil;
+        if(self.cancelRingingTimeout != nil)
+            self.cancelRingingTimeout();
+        self.cancelRingingTimeout = nil;
+        if(self.cancelConnectingTimeout != nil)
+            self.cancelConnectingTimeout();
+        self.cancelConnectingTimeout = nil;
+        
+        //end webrtc call if already established or in the process of establishing
+        if(self.webRTCClient != nil)
         {
-            if(self.finishReason != MLCallFinishReasonUnanswered)
-            {
-                if(self.tieBreak)
-                    [self sendJmiRejectWithTieBreak];
-                else
-                    [self sendJmiReject];
-            }
+            WebRTCClient* client = self.webRTCClient;
+            self.webRTCClient = nil;
+            //do this async to not run into a deadlock with the signalling thread
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [client.peerConnection close];
+            });
         }
-        else
+        
+        //update state (this will automatically stop the call duration timer)
+        self.finishReason = reason;
+        self.isConnected = NO;
+        self.isFinished = YES;
+        
+        //remove this call from pending calls
+        [self.voipProcessor removeCall:self];
+    }
+}
+
+-(void) internalUpdateCallKitState
+{
+    @synchronized(self) {
+        //the CXEndCallAction means either the call was rejected (if not yet answered) or it was terminated normally (if the call was accepted)
+        //see https://developer.apple.com/documentation/callkit/cxcallendedreason?language=objc for end reasons
+        if(self.direction == MLCallDirectionIncoming)
         {
-            [self.providerAnswerAction fail];               //fail will do nothing if already fulfilled
-            if(wasConnected)
+            [self.providerAnswerAction fail];               //fail will do nothing if already fulfilled or nil
+            if(self.jmiProceed == nil)
             {
-                [self sendJmiFinishWithReason:@"success"];
-                //this is not needed because this case is always looped through cxprovider endCallAction
-                //[self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
-                self.finishReason = MLCallFinishReasonNormal;
+                if(self.finishReason == MLCallFinishReasonAnsweredElsewhere)
+                    [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonAnsweredElsewhere];
+                else if(self.finishReason == MLCallFinishReasonUnanswered)
+                    [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
+                else if(self.finishReason == MLCallFinishReasonRejected)
+                    [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonDeclinedElsewhere];
+                else if(self.finishReason == MLCallFinishReasonDeclined)
+                {
+                    if(self.tieBreak)
+                        [self sendJmiRejectWithTieBreak];
+                    else
+                        [self sendJmiReject];
+                }
+                else
+                    MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
             }
             else
             {
-                [self sendJmiFinishWithReason:@"connectivity-error"];
-                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
-                self.finishReason = MLCallFinishReasonConnectivityError;
-            }
-        }
-    }
-    else
-    {
-        if(self.jmiPropose != nil)
-        {
-            if(self.jmiProceed != nil)
-            {
-                if(wasConnected)
+                if(self.finishReason == MLCallFinishReasonNormal)
                 {
                     [self sendJmiFinishWithReason:@"success"];
                     //this is not needed because this case is always looped through cxprovider endCallAction
                     //[self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
-                    if(self.finishReason == MLCallFinishReasonUnknown)
-                        self.finishReason = MLCallFinishReasonNormal;
                 }
-                else
+                else if(self.finishReason == MLCallFinishReasonConnectivityError)
                 {
                     [self sendJmiFinishWithReason:@"connectivity-error"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
-                    if(self.finishReason == MLCallFinishReasonUnknown)
-                        self.finishReason = MLCallFinishReasonConnectivityError;
                 }
-            }
-            else
-            {
-                if(self.finishReason != MLCallFinishReasonRejected)
-                {
-                    if(self.tieBreak)
-                        [self sendJmiRetractWithTieBreak];
-                    else
-                        [self sendJmiRetract];
-                }
-                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
-                if(self.finishReason == MLCallFinishReasonUnknown)
-                    self.finishReason = MLCallFinishReasonUnanswered;
+                else
+                    MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
             }
         }
         else
         {
-            //this case probably does never happen
-            //(the outgoing call transaction was started, but start call action not yet executed, and then the end call action arrives)
-            [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
-            if(self.finishReason == MLCallFinishReasonUnknown)
+            if(self.jmiPropose != nil)
+            {
+                if(self.jmiProceed == nil)
+                {
+                    if(self.finishReason == MLCallFinishReasonRejected)
+                        [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
+                    else if(self.finishReason == MLCallFinishReasonAnsweredElsewhere)
+                        [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonAnsweredElsewhere];
+                    else if(self.finishReason == MLCallFinishReasonRetracted)
+                    {
+                        if(self.tieBreak)
+                            [self sendJmiRetractWithTieBreak];
+                        else
+                            [self sendJmiRetract];
+                    }
+                    else
+                        MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
+                }
+                else
+                {
+                    if(self.finishReason == MLCallFinishReasonNormal)
+                    {
+                        [self sendJmiFinishWithReason:@"success"];
+                        //this is not needed because this case is always looped through cxprovider endCallAction
+                        //[self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonRemoteEnded];
+                    }
+                    else if(self.finishReason == MLCallFinishReasonConnectivityError)
+                    {
+                        [self sendJmiFinishWithReason:@"connectivity-error"];
+                        [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                    }
+                    else
+                        MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
+                }
+            }
+            else
+            {
+                //this case probably does never happen
+                //(the outgoing call transaction was started, but start call action not yet executed, and then the end call action arrives)
+                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
                 self.finishReason = MLCallFinishReasonConnectivityError;
+            }
         }
     }
 }
@@ -528,15 +571,25 @@
         self.cancelRingingTimeout();
     self.cancelConnectingTimeout = createTimer(15.0, (^{
         DDLogError(@"Failed to connect call, aborting!");
-        [self handleEndCallAction];
+        [self end];
     }));
 }
 
 -(void) createRingingTimeoutTimer
 {
+    if(self.cancelDiscoveringTimeout != nil)
+        self.cancelDiscoveringTimeout();
     self.cancelRingingTimeout = createTimer(45.0, (^{
         DDLogError(@"Call not answered in time, aborting!");
-        [self handleEndCallAction];
+        [self end];
+    }));
+}
+
+-(void) createDiscoveringTimeoutTimer
+{
+    self.cancelDiscoveringTimeout = createTimer(30.0, (^{
+        DDLogError(@"Discovery not answered in time, aborting!");
+        [self end];
     }));
 }
 
@@ -596,6 +649,9 @@
     [jmiNode setStoreHint];
     self.jmiPropose = jmiNode;
     [self.account send:jmiNode];
+    
+    //abort if no device responds with "ringing" in time
+    [self createDiscoveringTimeoutTimer];
 }
 
 -(void) sendJmiReject
@@ -712,6 +768,8 @@
     return [NSString stringWithFormat:@"%@Call:%@", self.direction == MLCallDirectionIncoming ? @"Incoming" : @"Outgoing", @{
         @"uuid": self.uuid,
         @"state": state,
+        @"finishReason": @(self.finishReason),
+        @"durationTime": @(self.durationTime),
         @"contact": nilWrapper(self.contact),
         @"fullRemoteJid": nilWrapper(self.fullRemoteJid),
         @"jmiPropose": nilWrapper(self.jmiPropose),
@@ -782,58 +840,56 @@
     
 -(void) webRTCClient:(WebRTCClient*) webRTCClient didChangeConnectionState:(RTCIceConnectionState) state
 {
-    @synchronized(self) {
-        if(webRTCClient != self.webRTCClient)
-        {
-            DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for peer connection: %@ (call migrated)", (long)state, self.webRTCClient.peerConnection);
-            return;
-        }
-        DDLogDebug(@"New RTCIceConnectionState %ld for peer connection: %@", (long)state, self.webRTCClient.peerConnection);
-        switch(state)
-        {
-            case RTCIceConnectionStateConnected:
-                DDLogInfo(@"New WebRTC ICE state: connected, falling through to completed...");
-            case RTCIceConnectionStateCompleted:
-                DDLogInfo(@"New WebRTC ICE state: completed: %@", self);
-                self.isConnected = YES;
-                //at this stage this means the call is incoming (--> fulfill callkit answer action to update ui to reflect connected call)
-                if(self.direction == MLCallDirectionIncoming)
-                {
-                    DDLogInfo(@"Informing CallKit of successful connection of incoming call...");
-                    [self.providerAnswerAction fulfill];
-                }
-                //otherwise the call was outgoing (--> initialize callkit ui for outgoing call, we are connected now)
-                else
-                {
-                    DDLogInfo(@"Informing CallKit of successful connection of outgoing call...");
-                    [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid connectedAtDate:nil];
-                }
-                break;
-            case RTCIceConnectionStateDisconnected:
-                DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
-                [self end];     //use "end" because this was a successful call
-                break;
-            case RTCIceConnectionStateFailed:
-                DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
-                [self handleEndCallAction];
-                break;
-            //all following states can be ignored
-            case RTCIceConnectionStateClosed:
-                DDLogInfo(@"New WebRTC ICE state: closed: %@", self);
-                break;
-            case RTCIceConnectionStateNew:
-                DDLogInfo(@"New WebRTC ICE state: new: %@", self);
-                break;
-            case RTCIceConnectionStateChecking:
-                DDLogInfo(@"New WebRTC ICE state: checking: %@", self);
-                break;
-            case RTCIceConnectionStateCount:
-                DDLogInfo(@"New WebRTC ICE state: count: %@", self);
-                break;
-            default:
-                DDLogInfo(@"New WebRTC ICE state: UNKNOWN: %@", self);
-                break;
-        }
+    if(webRTCClient != self.webRTCClient)
+    {
+        DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for peer connection: %@ (call migrated)", (long)state, self.webRTCClient.peerConnection);
+        return;
+    }
+    DDLogDebug(@"New RTCIceConnectionState %ld for peer connection: %@", (long)state, self.webRTCClient.peerConnection);
+    switch(state)
+    {
+        case RTCIceConnectionStateConnected:
+            DDLogInfo(@"New WebRTC ICE state: connected, falling through to completed...");
+        case RTCIceConnectionStateCompleted:
+            DDLogInfo(@"New WebRTC ICE state: completed: %@", self);
+            self.isConnected = YES;
+            //at this stage this means the call is incoming (--> fulfill callkit answer action to update ui to reflect connected call)
+            if(self.direction == MLCallDirectionIncoming)
+            {
+                DDLogInfo(@"Informing CallKit of successful connection of incoming call...");
+                [self.providerAnswerAction fulfill];
+            }
+            //otherwise the call was outgoing (--> initialize callkit ui for outgoing call, we are connected now)
+            else
+            {
+                DDLogInfo(@"Informing CallKit of successful connection of outgoing call...");
+                [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid connectedAtDate:nil];
+            }
+            break;
+        case RTCIceConnectionStateDisconnected:
+            DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
+            [self end];     //use "end" because this was a successful call
+            break;
+        case RTCIceConnectionStateFailed:
+            DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
+            [self end];
+            break;
+        //all following states can be ignored
+        case RTCIceConnectionStateClosed:
+            DDLogInfo(@"New WebRTC ICE state: closed: %@", self);
+            break;
+        case RTCIceConnectionStateNew:
+            DDLogInfo(@"New WebRTC ICE state: new: %@", self);
+            break;
+        case RTCIceConnectionStateChecking:
+            DDLogInfo(@"New WebRTC ICE state: checking: %@", self);
+            break;
+        case RTCIceConnectionStateCount:
+            DDLogInfo(@"New WebRTC ICE state: count: %@", self);
+            break;
+        default:
+            DDLogInfo(@"New WebRTC ICE state: UNKNOWN: %@", self);
+            break;
     }
 }
     

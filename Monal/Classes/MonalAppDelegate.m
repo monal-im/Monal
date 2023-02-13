@@ -417,7 +417,10 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             DDLogInfo(@"INStartCallIntent with contact: %@", contactHandle.value);
             NSArray<MLContact*>* contacts = [[DataLayer sharedInstance] contactListWithJid:contactHandle.value];
             if([contacts count] == 0)
+            {
+                [self.activeChats showCallContactNotFoundAlert:contactHandle.value];
                 return NO;
+            }
             if([contacts count] > 1)
                 [self.activeChats presentAccountPickerForContacts:contacts];
             else

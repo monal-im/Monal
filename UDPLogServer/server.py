@@ -126,7 +126,7 @@ while True:
     kwargs = flag_to_kwargs(decoded["flag"] if "flag" in decoded else None)
     
     # print original formatted log message
-    logline = ("%s" % str(decoded["formattedMessage"])).rstrip()
+    logline = ("%d: %s" % (decoded["_counter"], str(decoded["formattedMessage"]).rstrip()))
     if logfd:
         print(logline, file=logfd)
     print(colorize(logline, **kwargs), flush=True)

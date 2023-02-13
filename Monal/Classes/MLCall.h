@@ -33,12 +33,14 @@ typedef NS_ENUM(NSUInteger, MLCallState) {
 };
 
 typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
-    MLCallFinishReasonUnknown,
-    MLCallFinishReasonNormal,
-    MLCallFinishReasonConnectivityError,
-    MLCallFinishReasonUnanswered,
-    MLCallFinishReasonRejected,
-    MLCallFinishReasonAnsweredElsewhere,
+    MLCallFinishReasonUnknown,              //dummy default value
+    MLCallFinishReasonNormal,               //used for a call answered and finished locally (call direction etc. don't matter here)
+    MLCallFinishReasonConnectivityError,    //used for a call accepted but not connected (call direction etc. don't matter here)
+    MLCallFinishReasonUnanswered,           //used for a call retracted remotely (always remote party)
+    MLCallFinishReasonAnsweredElsewhere,    //used for a call answered and finished remotely (own account OR remote party)
+    MLCallFinishReasonRetracted,            //used for a call retracted locally (always own acount)
+    MLCallFinishReasonRejected,             //used for a call rejected remotely (own account OR remote party)
+    MLCallFinishReasonDeclined,             //used for a call rejected locally (always own account)
 };
 
 @interface MLCall : NSObject

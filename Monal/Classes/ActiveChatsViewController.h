@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) chatViewController* currentChatViewController;
 @property (nonatomic, strong) UIActivityIndicatorView* spinner;
 
+-(void) showCallContactNotFoundAlert:(NSString*) jid;
 -(void) callContact:(MLContact*) contact;
 -(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts;
 -(void) presentCall:(MLCall*) call;

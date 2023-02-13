@@ -56,6 +56,7 @@ NSURL *audioFileURL = nil;
     
     if(recoderError)
     {
+        DDLogError(@"recoderError: %@", recoderError);
         [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder init fail.", @"")];
         return;
     }
@@ -129,7 +130,7 @@ NSURL *audioFileURL = nil;
     if(error)
         DDLogError(@"Audio Recoder create directory fail: %@", [error description]);
     [HelperTools configureFileProtectionFor:writablePath];
-    NSString* audioFilePath = [writablePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.aac",[[NSUUID UUID] UUIDString]]];
+    NSString* audioFilePath = [writablePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.m4a",[[NSUUID UUID] UUIDString]]];
     return  audioFilePath;
 }
 

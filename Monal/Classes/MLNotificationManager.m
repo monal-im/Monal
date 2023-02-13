@@ -435,11 +435,8 @@
                             typeHint = (NSString*)kUTTypePNG;
                         if([mimeType isEqualToString:@"image/gif"])
                             typeHint = (NSString*)kUTTypeGIF;
-                        NSError* error;
-                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
-                        if(error)
-                            DDLogError(@"Error %@", error);
-                        else if(attachment)
+                        attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
+                        if(attachment)
                             content.attachments = @[attachment];
                     }
                     else if([mimeType hasPrefix:@"audio/"])
@@ -456,11 +453,8 @@
                             typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
                         audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
                         DDLogVerbose(@"Added audio attachment(%@ = %@): %@", mimeType, typeHint, audioAttachment);
-                        NSError* error;
-                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
-                        if(error)
-                            DDLogError(@"Error %@", error);
-                        else if(attachment)
+                        attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
+                        if(attachment)
                             content.attachments = @[attachment];
                     }
                     else if([mimeType hasPrefix:@"video/"])
@@ -477,11 +471,8 @@
                             typeHint = @"com.apple.quicktime-movie";
                         if([mimeType isEqualToString:@"video/3gpp"])
                             typeHint = (NSString*)AVFileType3GPP;
-                        NSError* error;
-                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
-                        if(error)
-                            DDLogError(@"Error %@", error);
-                        else if(attachment)
+                        attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
+                        if(attachment)
                             content.attachments = @[attachment];
                     }
                 }
@@ -799,10 +790,7 @@
                             typeHint = (NSString*)kUTTypePNG;
                         if([mimeType isEqualToString:@"image/gif"])
                             typeHint = (NSString*)kUTTypeGIF;
-                        NSError *error;
-                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
-                        if(error)
-                            DDLogError(@"Error %@", error);
+                        attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
                         if(attachment)
                         {
                             content.attachments = @[attachment];
@@ -837,6 +825,22 @@
 
     DDLogDebug(@"Publishing notification with id %@", idval);
     [self publishNotificationContent:[self updateBadgeForContent:content] withID:idval];
+}
+
+-(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(NSDictionary*) info havingTypeHint:(NSString*) typeHint
+{
+    NSError* error;
+    //use ".tmp" extension to make sure this file will be garbage collected if the ios notification attachment should leave it behind
+    NSString* notificationImage = [[[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.tmp", info[@"cacheId"]]];
+    DDLogVerbose(@"Preparing for notification attachment: hardlinking downloaded file from '%@' to '%@'..", info[@"cacheFile"], notificationImage);
+    [[NSFileManager defaultManager] linkItemAtPath:info[@"cacheFile"] toPath:notificationImage error:&error];
+    [HelperTools configureFileProtectionFor:notificationImage];
+    if(error)
+    {
+        DDLogError(@"Could not hardlink cache file to notification image temp file!");
+        return nil;
+    }
+    return [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:notificationImage] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
 }
 
 -(void) dealloc

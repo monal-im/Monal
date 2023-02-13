@@ -120,7 +120,7 @@ static id preprocess(id exception)
 #endif
 }
 
-+(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
++(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func
 {
     NSString* fileStr = [NSString stringWithFormat:@"%s", file];
     NSArray* filePathComponents = [fileStr pathComponents];
@@ -223,11 +223,11 @@ static id preprocess(id exception)
 {
     return @[
 #ifdef IS_ALPHA
-        @"stun:alpha.turn.monal-im.org:443",
-        @"stun:alpha.turn.monal-im.org:3478",
+        @"stuns:alpha.turn.monal-im.org:443",
+        @"stuns:alpha.turn.monal-im.org:3478",
 #else
-        @"stun:eu.prod.turn.monal-im.org:443",
-        @"stun:eu.prod.turn.monal-im.org:3478",
+        @"stuns:eu.prod.turn.monal-im.org:443",
+        @"stuns:eu.prod.turn.monal-im.org:3478",
 #endif
     ];
 }
@@ -245,15 +245,11 @@ static id preprocess(id exception)
 
 +(BOOL) shouldProvideVoip
 {
-    __block BOOL shouldProvideVoip = NO;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        NSLocale* userLocale = [NSLocale currentLocale];
-        shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
+    NSLocale* userLocale = [NSLocale currentLocale];
+    BOOL shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
 #if TARGET_OS_MACCATALYST
-        shouldProvideVoip = NO;
+    shouldProvideVoip = NO;
 #endif
-    });
     return shouldProvideVoip;
 }
     

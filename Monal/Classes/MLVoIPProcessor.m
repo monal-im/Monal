@@ -263,9 +263,6 @@ static NSMutableDictionary* _pendingCalls;
         DDLogInfo(@"Dropping newCall '%@' in favor of migrated existingCall '%@' ...", [newCall short], [existingCall short]);
         newCall = nil;
         
-        //now init webrtc for our migrated call
-        [self initWebRTCForPendingCall:existingCall];
-        
         return;
     }
     unreachable();

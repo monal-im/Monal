@@ -396,10 +396,13 @@
     @synchronized(self) {
         DDLogDebug(@"Preparing this call for new webrtc connection...");
         self.jmiid = otherCall.jmiid;
-        self.direction = otherCall.direction;
         self.isConnected = NO;
         self.isReconnecting = YES;
         self.finishReason = MLCallFinishReasonUnknown;
+        self.direction = otherCall.direction;
+        self.jmiPropose = otherCall.jmiPropose;
+        self.jmiProceed = nil;
+        self.audioSession = nil;
         if(self.webRTCClient != nil)
         {
             DDLogDebug(@"Closing old webrtc connection...");
@@ -610,7 +613,7 @@
     
     //TODO: in our non-jingle protocol the initiator (e.g. we) has to initialize the webrtc session by sending the proper IQs
     [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
-        DDLogDebug(@"WebRTC reported local SDP offer, sending to '%@'...", self.fullRemoteJid);
+        DDLogDebug(@"WebRTC reported local SDP '%@' offer, sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
         //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCSessionDescription.h
         XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
@@ -622,6 +625,7 @@
             DDLogDebug(@"Received SDP response for offer: %@", result);
             NSString* rawSDP = [[NSString alloc] initWithData:[result findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp#|base64"] encoding:NSUTF8StringEncoding];
             NSString* type = [result findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@type"];
+            DDLogDebug(@"Got SDP '%@': %@", type, rawSDP);
             RTCSessionDescription* resultSDP = [[RTCSessionDescription alloc] initWithType:[RTCSessionDescription typeForString:type] sdp:rawSDP];
             DDLogDebug(@"Setting resultSDP on webRTCClient(%@): %@", self.webRTCClient, resultSDP);
             [self.webRTCClient setRemoteSdp:resultSDP completion:^(id error) {
@@ -767,6 +771,7 @@
     }
     return [NSString stringWithFormat:@"%@Call:%@", self.direction == MLCallDirectionIncoming ? @"Incoming" : @"Outgoing", @{
         @"uuid": self.uuid,
+        @"jmiid": self.jmiid,
         @"state": state,
         @"finishReason": @(self.finishReason),
         @"durationTime": @(self.durationTime),
@@ -911,8 +916,8 @@
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
     XMPPIQ* iqNode = userInfo[@"iqNode"];
-    NSUUID* uuid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@id|uuid"];
-    if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.uuid isEqual:uuid])
+    NSString* jmiid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@id"];
+    if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
     {
         DDLogInfo(@"Incoming ICE candidate not matching %@, ignoring...", [self short]);
         return;
@@ -953,8 +958,8 @@
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
     XMPPIQ* iqNode = userInfo[@"iqNode"];
-    NSUUID* uuid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@id|uuid"];
-    if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.uuid isEqual:uuid])
+    NSString* jmiid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@id"];
+    if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
     {
         DDLogInfo(@"Incoming SDP not matching %@, ignoring...", [self short]);
         return;

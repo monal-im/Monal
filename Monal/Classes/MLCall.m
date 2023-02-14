@@ -847,10 +847,10 @@
 {
     if(webRTCClient != self.webRTCClient)
     {
-        DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for peer connection: %@ (call migrated)", (long)state, self.webRTCClient.peerConnection);
+        DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for webRTCClient: %@ (call migrated)", (long)state, self.webRTCClient);
         return;
     }
-    DDLogDebug(@"New RTCIceConnectionState %ld for peer connection: %@", (long)state, self.webRTCClient.peerConnection);
+    DDLogDebug(@"New RTCIceConnectionState %ld for webRTCClient: %@", (long)state, self.webRTCClient);
     switch(state)
     {
         case RTCIceConnectionStateConnected:

@@ -65,6 +65,7 @@
 @property (nonatomic, strong) CXCallController* _Nullable callController;
 @property (nonatomic, strong) CXProvider* _Nullable cxProvider;
 -(void) removeCall:(MLCall*) call;
+-(void) initWebRTCForPendingCall:(MLCall*) call;
 @end
 
 @implementation MLCall
@@ -403,16 +404,7 @@
         self.jmiPropose = otherCall.jmiPropose;
         self.jmiProceed = nil;
         self.audioSession = nil;
-        if(self.webRTCClient != nil)
-        {
-            DDLogDebug(@"Closing old webrtc connection...");
-            WebRTCClient* client = self.webRTCClient;
-            self.webRTCClient = nil;
-            //do this async to not run into a deadlock with the signalling thread
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [client.peerConnection close];
-            });
-        }
+        
         DDLogDebug(@"Stopping all running timers...");
         if(self.cancelDiscoveringTimeout != nil)
             self.cancelDiscoveringTimeout();
@@ -424,14 +416,31 @@
             self.cancelConnectingTimeout();
         self.cancelConnectingTimeout = nil;
         
-        //report this migrated call as ringing
-        [self sendJmiRinging];
-        
-        //now fake a cxprovider answer action (we do auto-answer this call, but ios does not even know we switched the underlying webrtc connection)
-        DDLogVerbose(@"Faking CXAnswerCallAction...");
-        self.providerAnswerAction = [[CXAnswerCallAction alloc] initWithCallUUID:self.uuid];
+        if(self.webRTCClient != nil)
+        {
+            DDLogDebug(@"Closing old webrtc connection...");
+            WebRTCClient* client = self.webRTCClient;
+            self.webRTCClient = nil;
+            //do this async to not run into a deadlock with the signalling thread
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [client.peerConnection close];
+                
+                //report this migrated call as ringing
+                [self sendJmiRinging];
+                
+                //now fake a cxprovider answer action (we do auto-answer this call, but ios does not even know we switched the underlying webrtc connection)
+                DDLogVerbose(@"Faking CXAnswerCallAction...");
+                self.providerAnswerAction = [[CXAnswerCallAction alloc] initWithCallUUID:self.uuid];
+    
+                DDLogVerbose(@"Initializing webrtc for our migrated call...");
+                [self.voipProcessor initWebRTCForPendingCall:self];
+                
+                DDLogDebug(@"Migration done, waiting for new webrtc connection...");
+            });
+        }
+        else
+            DDLogDebug(@"No old webrtc connection to close...");
     }
-    DDLogDebug(@"Migration done, waiting for new webrtc connection...");
 }
 
 -(void) handleEndCallActionWithReason:(MLCallFinishReason) reason
@@ -847,10 +856,10 @@
 {
     if(webRTCClient != self.webRTCClient)
     {
-        DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for webRTCClient: %@ (call migrated)", (long)state, self.webRTCClient);
+        DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for webRTCClient: %@ (call migrated)", (long)state, webRTCClient);
         return;
     }
-    DDLogDebug(@"New RTCIceConnectionState %ld for webRTCClient: %@", (long)state, self.webRTCClient);
+    DDLogDebug(@"New RTCIceConnectionState %ld for webRTCClient: %@", (long)state, webRTCClient);
     switch(state)
     {
         case RTCIceConnectionStateConnected:

@@ -45,28 +45,38 @@
 
 +(void) processGetIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    if([iqNode check:@"{urn:xmpp:ping}ping"])
+    //only handle these iqs if the remote user is on our roster
+    MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
+    if([account.connectionProperties.identity.jid isEqualToString:iqNode.fromUser] || contact.isSubscribedFrom)
     {
-        XMPPIQ* pong = [[XMPPIQ alloc] initAsResponseTo:iqNode];
-        [pong setiqTo:iqNode.from];
-        [account send:pong];
-        return;
+        if([iqNode check:@"{urn:xmpp:ping}ping"])
+        {
+            XMPPIQ* pong = [[XMPPIQ alloc] initAsResponseTo:iqNode];
+            [pong setiqTo:iqNode.from];
+            [account send:pong];
+            return;
+        }
+        
+        if([iqNode check:@"{jabber:iq:version}query"])
+        {
+            XMPPIQ* versioniq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
+            [versioniq setiqTo:iqNode.from];
+            [versioniq setVersion];
+            [account send:versioniq];
+            return;
+        }
+        
+        if([iqNode check:@"{http://jabber.org/protocol/disco#info}query"])
+        {
+            XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initAsResponseTo:iqNode];
+            [discoInfoResponse setDiscoInfoWithFeatures:account.capsFeatures identity:account.capsIdentity andNode:[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query@node"]];
+            [account send:discoInfoResponse];
+            return;
+        }
     }
-    
-    if([iqNode check:@"{jabber:iq:version}query"])
+    else
     {
-        XMPPIQ* versioniq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
-        [versioniq setiqTo:iqNode.from];
-        [versioniq setVersion];
-        [account send:versioniq];
-        return;
-    }
-    
-    if([iqNode check:@"{http://jabber.org/protocol/disco#info}query"])
-    {
-        XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initAsResponseTo:iqNode];
-        [discoInfoResponse setDiscoInfoWithFeatures:account.capsFeatures identity:account.capsIdentity andNode:[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query@node"]];
-        [account send:discoInfoResponse];
+        DDLogWarn(@"Invalid sender for get iq (not subscribedFrom), ignoring iq: %@", iqNode);
         return;
     }
     
@@ -93,16 +103,19 @@
     //its a roster push (sanity check will be done in processRosterWithAccount:andIqNode:)
     if([iqNode check:@"{jabber:iq:roster}query"])
     {
-        [self processRosterWithAccount:account andIqNode:iqNode];
-        
-        //send empty result iq as per RFC 6121 requirements
-        XMPPIQ* reply = [[XMPPIQ alloc] initAsResponseTo:iqNode];
-        [reply setiqTo:iqNode.from];
-        [account send:reply];
+        //this will only return YES, if the roster push was allowed and processed successfully
+        if([self processRosterWithAccount:account andIqNode:iqNode])
+        {
+            //send empty result iq as per RFC 6121 requirements
+            XMPPIQ* reply = [[XMPPIQ alloc] initAsResponseTo:iqNode];
+            [reply setiqTo:iqNode.from];
+            [account send:reply];
+        }
         return;
     }
 
-    if(account.connectionProperties.supportsBlocking)
+    //make sure we don't process blocking updates not coming from our own account
+    if(account.connectionProperties.supportsBlocking && (iqNode.from == nil || [iqNode.fromUser isEqualToString:account.connectionProperties.identity.jid]))
     {
         BOOL blockingUpdated = NO;
         // mark jid as unblocked
@@ -137,6 +150,11 @@
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
             return;
         }
+    }
+    else
+    {
+        DDLogWarn(@"Invalid sender for blocklist, ignoring iq: %@", iqNode);
+        return;
     }
     
     DDLogWarn(@"Got unhandled set IQ: %@", iqNode);
@@ -275,7 +293,7 @@ $$class_handler(handleRoster, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     [self processRosterWithAccount:account andIqNode:iqNode];
 $$
 
-+(void) processRosterWithAccount:(xmpp*) account andIqNode:(XMPPIQ*) iqNode
++(BOOL) processRosterWithAccount:(xmpp*) account andIqNode:(XMPPIQ*) iqNode
 {
     //check sanity of from according to RFC 6121:
     //  https://tools.ietf.org/html/rfc6121#section-2.1.3 (roster get)
@@ -287,14 +305,14 @@ $$
     )
     {
         DDLogWarn(@"Invalid sender for roster, ignoring iq: %@", iqNode);
-        return;
+        return NO;
     }
     
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Roster query returned an error: %@", [iqNode findFirst:@"error"]);
         [HelperTools postError:NSLocalizedString(@"XMPP Roster Error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
-        return;
+        return NO;
     }
     
     for(NSMutableDictionary* contact in [iqNode find:@"{jabber:iq:roster}query/item@@"])
@@ -368,6 +386,8 @@ $$
     
     if([iqNode check:@"{jabber:iq:roster}query@ver"])
         [[DataLayer sharedInstance] setRosterVersion:[iqNode findFirst:@"{jabber:iq:roster}query@ver"] forAccount:account.accountNo];
+    
+    return YES;
 }
 
 //features advertised on our own jid/account

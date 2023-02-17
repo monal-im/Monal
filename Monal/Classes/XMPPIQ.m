@@ -283,9 +283,9 @@ NSString* const kiqErrorType = @"error";
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"name" andData:@"Monal"],
 #if TARGET_OS_MACCATALYST
-        [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"macOS %lu.%lu.%lu", osVersion.majorVersion, osVersion.minorVersion, osVersion.patchVersion]],
+        [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"macOS %lu", osVersion.majorVersion]],
 #else
-        [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"iOS %lu.%lu.%lu", osVersion.majorVersion, osVersion.minorVersion, osVersion.patchVersion]],
+        [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"iOS %lu", osVersion.majorVersion]],
 #endif
         [[MLXMLNode alloc] initWithElement:@"version" andData:[HelperTools appBuildVersionInfo]]
     ] andData:nil]];

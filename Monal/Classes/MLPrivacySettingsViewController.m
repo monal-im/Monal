@@ -181,21 +181,26 @@ const long NotificationPrivacyOptionCnt = 3;
                 }
                 case 13:
                 {
+                    [cell initCell:NSLocalizedString(@"Calls: Allow P2P sessions", @"") withToggleDefaultsKey:@"webrtcAllowP2P"];
+                    break;
+                }
+                case 14:
+                {
+                    [cell initCell:NSLocalizedString(@"Calls: Allow TURN fallback to Monal-Servers", @"") withToggleDefaultsKey:@"webrtcUseFallbackTurn"];
+                    break;
+                }
+                case 15:
+                {
+                    [cell initCell:NSLocalizedString(@"Allow approved contacts to query my Monal and iOS version", @"") withToggleDefaultsKey:@"allowVersionIQ"];
+                    break;
+                }
+                case 16:
+                {
 //flow into default case for non-omemo builds
 #ifndef DISABLE_OMEMO
                     [cell initCell:NSLocalizedString(@"Enable encryption by default for new chats", @"") withToggleDefaultsKey:@"OMEMODefaultOn"];
                     break;
 #endif// DISABLE_OMEMO
-                }
-                case 14:
-                {
-                    [cell initCell:NSLocalizedString(@"Calls: Allow P2P sessions", @"") withToggleDefaultsKey:@"webrtcAllowP2P"];
-                    break;
-                }
-                case 15:
-                {
-                    [cell initCell:NSLocalizedString(@"Calls: Allow TURN fallback to Monal-Servers", @"") withToggleDefaultsKey:@"webrtcUseFallbackTurn"];
-                    break;
                 }
                 default:
                     unreachable();
@@ -252,6 +257,7 @@ const long NotificationPrivacyOptionCnt = 3;
                 case 13:
                 case 14:
                 case 15:
+                case 16:
                     break;
             }
             break;

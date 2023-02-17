@@ -57,7 +57,7 @@
             return;
         }
         
-        if([iqNode check:@"{jabber:iq:version}query"])
+        if([iqNode check:@"{jabber:iq:version}query"] && [[HelperTools defaultsDB] boolForKey: @"allowVersionIQ"])
         {
             XMPPIQ* versioniq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
             [versioniq setiqTo:iqNode.from];

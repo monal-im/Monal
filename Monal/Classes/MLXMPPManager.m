@@ -137,6 +137,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     // add STUN / TURN settings
     [self upgradeBoolUserSettingsIfUnset:@"webrtcAllowP2P" toDefault:YES];
     [self upgradeBoolUserSettingsIfUnset:@"webrtcUseFallbackTurn" toDefault:YES];
+    
+    //jabber:iq:version
+    [self upgradeBoolUserSettingsIfUnset:@"allowVersionIQ" toDefault:YES];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

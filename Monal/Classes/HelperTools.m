@@ -1230,14 +1230,16 @@ static id preprocess(id exception)
             @"urn:xmpp:receipts",
             @"urn:xmpp:idle:1",
             @"http://jabber.org/protocol/chatstates",
-            @"jabber:iq:version",
             @"urn:xmpp:chat-markers:0",
             @"urn:xmpp:eme:0",
             @"urn:xmpp:message-retract:0",
             @"urn:xmpp:message-correct:0",
         ] mutableCopy];
+        if([[HelperTools defaultsDB] boolForKey: @"allowVersionIQ"])
+            [featuresArray addObject:@"jabber:iq:version"];
         if([HelperTools shouldProvideVoip])
             [featuresArray addObject:@"urn:tmp:monal:webrtc"];  //TODO: tmp implementation, to be replaced by urn:xmpp:jingle-message:0 later on
+        
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });
     return featuresSet;

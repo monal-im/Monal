@@ -1355,53 +1355,55 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         DDLogWarn(@"*** BGPROCESSING EXPIRED ***");
         [DDLog flushLog];
         
-        BOOL background = [HelperTools isInBackground];
-        
-        DDLogVerbose(@"Waiting for @synchronized(self)...");
-        @synchronized(self) {
-            DDLogVerbose(@"Now entered @synchronized(self) block...");
-            //ui background tasks expire at the same time as background fetching tasks
-            //--> we have to check if an ui bg task is running and don't disconnect, if so
-            BOOL stopped = NO;
-            if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid)
-            {
-                DDLogVerbose(@"Setting _shutdownPending to YES...");
-                self->_shutdownPending = YES;
-                DDLogDebug(@"_bgTask == UIBackgroundTaskInvalid --> disconnecting and ending background task");
+        DDLogVerbose(@"Dispatching to main queue...");
+        [HelperTools dispatchSyncReentrant:^{
+            BOOL background = [HelperTools isInBackground];
+            DDLogVerbose(@"Waiting for @synchronized(self)...");
+            @synchronized(self) {
+                DDLogVerbose(@"Now entered @synchronized(self) block...");
+                //ui background tasks expire at the same time as background fetching tasks
+                //--> we have to check if an ui bg task is running and don't disconnect, if so
+                BOOL stopped = NO;
+                if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid)
+                {
+                    DDLogVerbose(@"Setting _shutdownPending to YES...");
+                    self->_shutdownPending = YES;
+                    DDLogDebug(@"_bgTask == UIBackgroundTaskInvalid --> disconnecting and ending background task");
+                    
+                    //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
+                    [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+                    
+                    //disconnect all accounts to prevent TCP buffer leaking
+                    [[MLXMPPManager sharedInstance] disconnectAll];
+                    
+                    //schedule a new BGProcessingTaskRequest to process this further as soon as possible
+                    //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
+                    [self scheduleBackgroundTask:YES];      //force as soon as possible
+                    
+                    //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                    DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                    
+                    stopped = YES;
+                }
+                else
+                    DDLogDebug(@"!background || _bgTask != UIBackgroundTaskInvalid --> not disconnecting");
                 
-                //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-                [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
-                
-                //disconnect all accounts to prevent TCP buffer leaking
-                [[MLXMPPManager sharedInstance] disconnectAll];
-                
-                //schedule a new BGProcessingTaskRequest to process this further as soon as possible
-                //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                [self scheduleBackgroundTask:YES];      //force as soon as possible
-                
-                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-                DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-                
-                stopped = YES;
-            }
-            else
-                DDLogDebug(@"!background || _bgTask != UIBackgroundTaskInvalid --> not disconnecting");
-            
-            DDLogDebug(@"stopping backgroundProcessingTask: %@", task);
-            [DDLog flushLog];
-            self->_bgProcessing = nil;
-            //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
-            [task setTaskCompletedWithSuccess:!background];
-            
-            if(stopped)
-            {
-                DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
+                DDLogDebug(@"stopping backgroundProcessingTask: %@", task);
                 [DDLog flushLog];
-                [MLUDPLogger flushWithTimeout:0.100];
+                self->_bgProcessing = nil;
+                //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
+                [task setTaskCompletedWithSuccess:!background];
+                
+                if(stopped)
+                {
+                    DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
+                    [DDLog flushLog];
+                    [MLUDPLogger flushWithTimeout:0.100];
+                }
             }
-        }
+        } onQueue:dispatch_get_main_queue()];
     };
     
     //only proceed with our BGTASK if the NotificationServiceExtension is not running
@@ -1463,53 +1465,55 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         DDLogWarn(@"*** BGREFRESHING EXPIRED ***");
         [DDLog flushLog];
         
-        BOOL background = [HelperTools isInBackground];
-        
-        DDLogVerbose(@"Waiting for @synchronized(self)...");
-        @synchronized(self) {
-            DDLogVerbose(@"Now entered @synchronized(self) block...");
-            //ui background tasks expire at the same time as background fetching tasks
-            //--> we have to check if an ui bg task is running and don't disconnect, if so
-            BOOL stopped = NO;
-            if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid)
-            {
-                DDLogVerbose(@"Setting _shutdownPending to YES...");
-                self->_shutdownPending = YES;
-                DDLogDebug(@"_bgTask == UIBackgroundTaskInvalid --> disconnecting and ending background task");
+        DDLogVerbose(@"Dispatching to main queue...");
+        [HelperTools dispatchSyncReentrant:^{
+            BOOL background = [HelperTools isInBackground];
+            DDLogVerbose(@"Waiting for @synchronized(self)...");
+            @synchronized(self) {
+                DDLogVerbose(@"Now entered @synchronized(self) block...");
+                //ui background tasks expire at the same time as background fetching tasks
+                //--> we have to check if an ui bg task is running and don't disconnect, if so
+                BOOL stopped = NO;
+                if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid)
+                {
+                    DDLogVerbose(@"Setting _shutdownPending to YES...");
+                    self->_shutdownPending = YES;
+                    DDLogDebug(@"_bgTask == UIBackgroundTaskInvalid --> disconnecting and ending background task");
+                    
+                    //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
+                    [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+                    
+                    //disconnect all accounts to prevent TCP buffer leaking
+                    [[MLXMPPManager sharedInstance] disconnectAll];
+                    
+                    //schedule a new BGProcessingTaskRequest to process this further as soon as possible
+                    //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
+                    [self scheduleBackgroundTask:YES];      //force as soon as possible
+                    
+                    //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+                    DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
+                    
+                    stopped = YES;
+                }
+                else
+                    DDLogDebug(@"!background || _bgTask != UIBackgroundTaskInvalid --> not disconnecting");
                 
-                //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-                [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
-                
-                //disconnect all accounts to prevent TCP buffer leaking
-                [[MLXMPPManager sharedInstance] disconnectAll];
-                
-                //schedule a new BGProcessingTaskRequest to process this further as soon as possible
-                //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                [self scheduleBackgroundTask:YES];      //force as soon as possible
-                
-                //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
-                DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalWillBeFreezed object:nil];
-                
-                stopped = YES;
-            }
-            else
-                DDLogDebug(@"!background || _bgTask != UIBackgroundTaskInvalid --> not disconnecting");
-            
-            DDLogDebug(@"stopping backgroundProcessingTask: %@", task);
-            [DDLog flushLog];
-            self->_bgRefreshing = nil;
-            //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
-            [task setTaskCompletedWithSuccess:!background];
-            
-            if(stopped)
-            {
-                DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
+                DDLogDebug(@"stopping backgroundProcessingTask: %@", task);
                 [DDLog flushLog];
-                [MLUDPLogger flushWithTimeout:0.100];
+                self->_bgRefreshing = nil;
+                //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
+                [task setTaskCompletedWithSuccess:!background];
+                
+                if(stopped)
+                {
+                    DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
+                    [DDLog flushLog];
+                    [MLUDPLogger flushWithTimeout:0.100];
+                }
             }
-        }
+        } onQueue:dispatch_get_main_queue()];
     };
     
     //only proceed with our BGTASK if the NotificationServiceExtension is not running
@@ -1553,7 +1557,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
 -(void) configureBackgroundTasks
 {
-    [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundProcessingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0) launchHandler:^(BGTask *task) {
+    [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundProcessingTask usingQueue:dispatch_get_main_queue() launchHandler:^(BGTask *task) {
         DDLogDebug(@"RUNNING BGPROCESSING LAUNCH HANDLER");
         DDLogInfo(@"BG time available: %f", [UIApplication sharedApplication].backgroundTimeRemaining);
         if(![HelperTools isInBackground])
@@ -1573,7 +1577,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         [self handleBackgroundProcessingTask:task];
     }];
     
-    [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundRefreshingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0) launchHandler:^(BGTask *task) {
+    [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundRefreshingTask usingQueue:dispatch_get_main_queue() launchHandler:^(BGTask *task) {
         DDLogDebug(@"RUNNING BGREFRESHING LAUNCH HANDLER");
         DDLogInfo(@"BG time available: %f", [UIApplication sharedApplication].backgroundTimeRemaining);
         if(![HelperTools isInBackground])

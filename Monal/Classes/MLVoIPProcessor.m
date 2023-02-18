@@ -237,7 +237,7 @@ static NSMutableDictionary* _pendingCalls;
         if(result == 0)
             result = [HelperTools compareIOcted:[existingCall.contact.contactJid dataUsingEncoding:NSUTF8StringEncoding] with:[newCall.contact.contactJid dataUsingEncoding:NSUTF8StringEncoding]];
         
-        DDLogDebug(@"Tie-breaking new incoming call: existingID=%@, newID=%@, result=%d, existingCall=%@, newCall=%@", existingID, newID, result, existingCall, newCall);
+        DDLogInfo(@"Tie-breaking new incoming call: existingID=%@, newID=%@, result=%d, existingCall=%@, newCall=%@", existingID, newID, result, existingCall, newCall);
         if(result <= 0)         //keep existingID, reject new call having a higher ID
         {
             //reject new call and do nothing with the existingCall
@@ -256,15 +256,12 @@ static NSMutableDictionary* _pendingCalls;
     //handle tie breaking: one party migrates the call to other device
     else if(existingCall.state < MLCallStateFinished)       //call already running
     {
-        DDLogVerbose(@"Migrating from new call to existing call...");
+        DDLogInfo(@"Migrating from new call to existing call...");
         [existingCall migrateTo:newCall];
         
         //drop new call after migration to make sure it does not interfere with our existing call
-        DDLogVerbose(@"Dropping newCall '%@' in favor of existingCall '%@' ...", [newCall short], [existingCall short]);
+        DDLogInfo(@"Dropping newCall '%@' in favor of migrated existingCall '%@' ...", [newCall short], [existingCall short]);
         newCall = nil;
-        
-        //now init webrtc for our migrated call
-        [self initWebRTCForPendingCall:existingCall];
         
         return;
     }

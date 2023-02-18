@@ -65,6 +65,7 @@
 @property (nonatomic, strong) CXCallController* _Nullable callController;
 @property (nonatomic, strong) CXProvider* _Nullable cxProvider;
 -(void) removeCall:(MLCall*) call;
+-(void) initWebRTCForPendingCall:(MLCall*) call;
 @end
 
 @implementation MLCall
@@ -396,20 +397,14 @@
     @synchronized(self) {
         DDLogDebug(@"Preparing this call for new webrtc connection...");
         self.jmiid = otherCall.jmiid;
-        self.direction = otherCall.direction;
         self.isConnected = NO;
         self.isReconnecting = YES;
         self.finishReason = MLCallFinishReasonUnknown;
-        if(self.webRTCClient != nil)
-        {
-            DDLogDebug(@"Closing old webrtc connection...");
-            WebRTCClient* client = self.webRTCClient;
-            self.webRTCClient = nil;
-            //do this async to not run into a deadlock with the signalling thread
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [client.peerConnection close];
-            });
-        }
+        self.direction = otherCall.direction;
+        self.jmiPropose = otherCall.jmiPropose;
+        self.jmiProceed = nil;
+        self.audioSession = nil;
+        
         DDLogDebug(@"Stopping all running timers...");
         if(self.cancelDiscoveringTimeout != nil)
             self.cancelDiscoveringTimeout();
@@ -421,14 +416,31 @@
             self.cancelConnectingTimeout();
         self.cancelConnectingTimeout = nil;
         
-        //report this migrated call as ringing
-        [self sendJmiRinging];
-        
-        //now fake a cxprovider answer action (we do auto-answer this call, but ios does not even know we switched the underlying webrtc connection)
-        DDLogVerbose(@"Faking CXAnswerCallAction...");
-        self.providerAnswerAction = [[CXAnswerCallAction alloc] initWithCallUUID:self.uuid];
+        if(self.webRTCClient != nil)
+        {
+            DDLogDebug(@"Closing old webrtc connection...");
+            WebRTCClient* client = self.webRTCClient;
+            self.webRTCClient = nil;
+            //do this async to not run into a deadlock with the signalling thread
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [client.peerConnection close];
+                
+                //report this migrated call as ringing
+                [self sendJmiRinging];
+                
+                //now fake a cxprovider answer action (we do auto-answer this call, but ios does not even know we switched the underlying webrtc connection)
+                DDLogVerbose(@"Faking CXAnswerCallAction...");
+                self.providerAnswerAction = [[CXAnswerCallAction alloc] initWithCallUUID:self.uuid];
+    
+                DDLogVerbose(@"Initializing webrtc for our migrated call...");
+                [self.voipProcessor initWebRTCForPendingCall:self];
+                
+                DDLogDebug(@"Migration done, waiting for new webrtc connection...");
+            });
+        }
+        else
+            DDLogDebug(@"No old webrtc connection to close...");
     }
-    DDLogDebug(@"Migration done, waiting for new webrtc connection...");
 }
 
 -(void) handleEndCallActionWithReason:(MLCallFinishReason) reason
@@ -610,7 +622,7 @@
     
     //TODO: in our non-jingle protocol the initiator (e.g. we) has to initialize the webrtc session by sending the proper IQs
     [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
-        DDLogDebug(@"WebRTC reported local SDP offer, sending to '%@'...", self.fullRemoteJid);
+        DDLogDebug(@"WebRTC reported local SDP '%@' offer, sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
         //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCSessionDescription.h
         XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
@@ -622,6 +634,7 @@
             DDLogDebug(@"Received SDP response for offer: %@", result);
             NSString* rawSDP = [[NSString alloc] initWithData:[result findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp#|base64"] encoding:NSUTF8StringEncoding];
             NSString* type = [result findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@type"];
+            DDLogDebug(@"Got SDP '%@': %@", type, rawSDP);
             RTCSessionDescription* resultSDP = [[RTCSessionDescription alloc] initWithType:[RTCSessionDescription typeForString:type] sdp:rawSDP];
             DDLogDebug(@"Setting resultSDP on webRTCClient(%@): %@", self.webRTCClient, resultSDP);
             [self.webRTCClient setRemoteSdp:resultSDP completion:^(id error) {
@@ -767,6 +780,7 @@
     }
     return [NSString stringWithFormat:@"%@Call:%@", self.direction == MLCallDirectionIncoming ? @"Incoming" : @"Outgoing", @{
         @"uuid": self.uuid,
+        @"jmiid": self.jmiid,
         @"state": state,
         @"finishReason": @(self.finishReason),
         @"durationTime": @(self.durationTime),
@@ -842,10 +856,10 @@
 {
     if(webRTCClient != self.webRTCClient)
     {
-        DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for peer connection: %@ (call migrated)", (long)state, self.webRTCClient.peerConnection);
+        DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for webRTCClient: %@ (call migrated)", (long)state, webRTCClient);
         return;
     }
-    DDLogDebug(@"New RTCIceConnectionState %ld for peer connection: %@", (long)state, self.webRTCClient.peerConnection);
+    DDLogDebug(@"New RTCIceConnectionState %ld for webRTCClient: %@", (long)state, webRTCClient);
     switch(state)
     {
         case RTCIceConnectionStateConnected:
@@ -911,8 +925,8 @@
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
     XMPPIQ* iqNode = userInfo[@"iqNode"];
-    NSUUID* uuid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@id|uuid"];
-    if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.uuid isEqual:uuid])
+    NSString* jmiid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@id"];
+    if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
     {
         DDLogInfo(@"Incoming ICE candidate not matching %@, ignoring...", [self short]);
         return;
@@ -953,8 +967,8 @@
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
     XMPPIQ* iqNode = userInfo[@"iqNode"];
-    NSUUID* uuid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@id|uuid"];
-    if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.uuid isEqual:uuid])
+    NSString* jmiid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@id"];
+    if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
     {
         DDLogInfo(@"Incoming SDP not matching %@, ignoring...", [self short]);
         return;

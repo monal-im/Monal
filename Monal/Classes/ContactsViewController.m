@@ -134,7 +134,7 @@
     self.lastSelectedContact = nil;
     [self refreshDisplay];
 
-    if(self.contacts.count <= 1)
+    if(self.contacts.count < 1)
     {
         self.navigationItem.searchController = nil;
         [self reloadTable];
@@ -214,10 +214,24 @@
 
 -(void) loadContactsWithFilter:(NSString*) filter
 {
+    NSMutableArray* contacts;
     if(filter && [filter length] > 0)
         self.contacts = [[DataLayer sharedInstance] searchContactsWithString:filter];
     else
-        self.contacts = [[DataLayer sharedInstance] contactList];
+    {
+        contacts = [[DataLayer sharedInstance] contactList];
+        BOOL onlySelfChats = YES;
+        for(MLContact* contact in contacts)
+            if(!contact.isSelfChat)
+            {
+                onlySelfChats = NO;
+                break;
+            }
+        if(!onlySelfChats)
+            self.contacts = contacts;
+        else
+            self.contacts = [NSMutableArray new];
+    }
 }
 
 #pragma mark - Search Controller
@@ -249,7 +263,7 @@
 
 - (NSInteger)tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
 {
-    return [self.contacts count] > 1 ? [self.contacts count] : 0;
+    return [self.contacts count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -419,12 +433,12 @@
 
 -(BOOL) emptyDataSetShouldDisplay:(UIScrollView*) scrollView
 {
-    if(self.contacts.count <= 1)
+    if(self.contacts.count < 1)
     {
         // A little trick for removing the cell separators
         self.tableView.tableFooterView = [UIView new];
     }
-    return self.contacts.count <= 1;        //having only a self-chat should still show the placeholder image
+    return self.contacts.count < 1;
 }
 
 -(IBAction) close:(id) sender

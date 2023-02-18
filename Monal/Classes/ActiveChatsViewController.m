@@ -353,7 +353,8 @@ static NSMutableSet* _smacksWarningDisplayed;
                 [insertContactToArray insertObject:contact atIndex:0];
                 [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationNone];
             }
-            else {
+            else
+            {
                 // Chats does not exists in active Chats yet
                 [insertContactToArray insertObject:contact atIndex:0];
                 [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationRight];
@@ -499,8 +500,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts
 {
-    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [[appDelegate getTopViewController] dismissViewControllerAnimated:NO completion:^{
+    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
         UIViewController* accountPickerController = [[SwiftuiInterface new] makeAccountPickerForContacts:contacts];;
         [self presentViewController:accountPickerController animated:YES completion:^{}];
     }];
@@ -508,8 +508,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentCall:(MLCall*) call
 {
-    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [[appDelegate getTopViewController] dismissViewControllerAnimated:NO completion:^{
+    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
         UIViewController* callViewController = [[SwiftuiInterface new] makeCallScreenForCall:call];
         callViewController.modalPresentationStyle = UIModalPresentationFullScreen;
         [self presentViewController:callViewController animated:NO completion:^{}];
@@ -525,8 +524,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         DDLogVerbose(@"presenting chat with contact: %@", contact);
-        MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-        [[appDelegate getTopViewController] dismissViewControllerAnimated:YES completion:^{
+        [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
             // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
             if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
             {
@@ -555,16 +553,20 @@ static NSMutableSet* _smacksWarningDisplayed;
             [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
             if([[self getChatArrayForSection:pinnedChats] containsObject:contact] || [[self getChatArrayForSection:unpinnedChats] containsObject:contact])
             {
+                [self scrollToContact:contact];
                 [self performSegueWithIdentifier:@"showConversation" sender:contact];
                 if(completion != nil)
                     completion(@YES);
             }
             else
+            {
                 [self insertOrMoveContact:contact completion:^(BOOL finished __unused) {
+                    [self scrollToContact:contact];
                     [self performSegueWithIdentifier:@"showConversation" sender:contact];
                     if(completion != nil)
                         completion(@YES);
                 }];
+            }
         }];
     });
 }
@@ -626,17 +628,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         ContactsViewController* contacts = (ContactsViewController*)nav.topViewController;
         contacts.selectContact = ^(MLContact* selectedContact) {
             DDLogVerbose(@"Got selected contact from contactlist ui: %@", selectedContact);
-            [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId];
-            //no success may mean its already there
-            [self insertOrMoveContact:selectedContact completion:^(BOOL finished __unused) {
-                size_t sectionToUse = unpinnedChats; // Default is not pinned
-                if(selectedContact.isPinned) {
-                    sectionToUse = pinnedChats; // Insert in pinned section
-                }
-                NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:sectionToUse];
-                [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
-                [self presentChatWithContact:selectedContact];
-            }];
+            [self presentChatWithContact:selectedContact];
         };
     }
 }
@@ -920,8 +912,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 //so this makes it compile again
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_id_block_t) callback
 {
-    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [[appDelegate getTopViewController] dismissViewControllerAnimated:YES completion:^{
+    [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
         UIViewController* registerViewController = [[SwiftuiInterface new] makeAccountRegistration:@{
             @"host": nilWrapper(host),
             @"username": nilWrapper(username),
@@ -962,6 +953,59 @@ static NSMutableSet* _smacksWarningDisplayed;
             }
         }];
     }
+}
+
+-(void) dismissCompleteViewChainWithAnimation:(BOOL) animation andCompletion:(monal_void_block_t _Nullable) completion
+{
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    UIViewController* rootViewController = appDelegate.window.rootViewController;
+    NSMutableArray* viewControllers = [NSMutableArray new];
+    while(rootViewController.presentedViewController)
+    {
+        [viewControllers addObject:rootViewController.presentedViewController];
+        rootViewController = rootViewController.presentedViewController;
+    }
+    viewControllers = [[[viewControllers reverseObjectEnumerator] allObjects] mutableCopy];
+    
+    DDLogVerbose(@"Dismissing view controller hierarchy: %@", viewControllers);
+    [self dismissRecursorWithViewControllers:viewControllers animation:animation andCompletion:completion];
+}
+
+-(void) dismissRecursorWithViewControllers:(NSMutableArray*) viewControllers animation:(BOOL) animation andCompletion:(monal_void_block_t _Nullable) completion
+{
+    if([viewControllers count] > 0)
+    {
+        UIViewController* viewController = viewControllers[0];
+        [viewControllers removeObjectAtIndex:0];
+        DDLogVerbose(@"Dismissing: %@", viewController);
+        [viewController dismissViewControllerAnimated:animation completion:^{
+            [self dismissRecursorWithViewControllers:viewControllers animation:animation andCompletion:completion];
+        }];
+    }
+    else
+    {
+        DDLogVerbose(@"View chain completely dismissed...");
+        completion();
+    }
+}
+
+-(void) scrollToContact:(MLContact*) contact
+{
+    __block NSIndexPath* indexPath = nil;
+    for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++) {
+        NSMutableArray* curContactArray = [self getChatArrayForSection:section];
+
+        // get indexPath
+        [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            MLContact* rowContact = (MLContact*)obj;
+            if([rowContact isEqualToContact:contact])
+            {
+                indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
+                *stop = YES;
+            }
+        }];
+    }
+    [self.chatListTable selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
 }
 
 @end

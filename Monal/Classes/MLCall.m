@@ -581,6 +581,8 @@
 {
     if(self.cancelRingingTimeout != nil)
         self.cancelRingingTimeout();
+    if(self.cancelConnectingTimeout != nil)
+        self.cancelConnectingTimeout();
     self.cancelConnectingTimeout = createTimer(15.0, (^{
         DDLogError(@"Failed to connect call, aborting!");
         [self end];
@@ -591,6 +593,8 @@
 {
     if(self.cancelDiscoveringTimeout != nil)
         self.cancelDiscoveringTimeout();
+    if(self.cancelRingingTimeout != nil)
+        self.cancelRingingTimeout();
     self.cancelRingingTimeout = createTimer(45.0, (^{
         DDLogError(@"Call not answered in time, aborting!");
         [self end];
@@ -599,6 +603,8 @@
 
 -(void) createDiscoveringTimeoutTimer
 {
+    if(self.cancelDiscoveringTimeout != nil)
+        self.cancelDiscoveringTimeout();
     self.cancelDiscoveringTimeout = createTimer(30.0, (^{
         DDLogError(@"Discovery not answered in time, aborting!");
         [self end];
@@ -970,7 +976,7 @@
     NSString* jmiid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@id"];
     if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
     {
-        DDLogInfo(@"Incoming SDP not matching %@, ignoring...", [self short]);
+        DDLogInfo(@"Ignoring incoming SDP not matching: %@", self);
         return;
     }
     
@@ -998,6 +1004,7 @@
             //it seems we have to create an offer and ignore it before we can create the desired answer
             [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
                 [self.webRTCClient answerWithCompletion:^(RTCSessionDescription* localSdp) {
+                    DDLogDebug(@"Sending SDP answer back...");
                     XMPPIQ* responseIq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
                     [responseIq addChildNode:[[MLXMLNode alloc] initWithElement:@"sdp" andNamespace:@"urn:tmp:monal:webrtc:sdp:1" withAttributes:@{
                         @"id": self.jmiid,

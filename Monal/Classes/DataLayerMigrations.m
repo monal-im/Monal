@@ -997,26 +997,30 @@
 
 
         //check if device id changed and invalidate state, if so
-        NSString* stored_id = (NSString*)[db executeScalar:@"SELECT value FROM flags WHERE name='device_id';"];
-        NSString* current_id = UIDevice.currentDevice.identifierForVendor.UUIDString;
-        if(![current_id isEqualToString:stored_id])
+        //but do so only for non-sandbox (e.g. non-development) installs
+        if(![HelperTools isSandboxAPNS])
         {
-            DDLogWarn(@"Device id has changed (%@ --> %@), invalidating state AND omemo identity keys!", stored_id, current_id);
-            //invalidate account state because the app was migrated to a new device
-            [dataLayer invalidateAllAccountStates];
-            //change resource because of app migration
-            for(NSMutableDictionary* accountDict in [[dataLayer accountList] mutableCopy])
+            NSString* stored_id = (NSString*)[db executeScalar:@"SELECT value FROM flags WHERE name='device_id';"];
+            NSString* current_id = UIDevice.currentDevice.identifierForVendor.UUIDString;
+            if(![current_id isEqualToString:stored_id])
             {
-                accountDict[kResource] = [HelperTools encodeRandomResource];
-                [dataLayer updateAccounWithDictionary:accountDict];
+                DDLogWarn(@"Device id has changed (%@ --> %@), invalidating state AND omemo identity keys!", stored_id, current_id);
+                //invalidate account state because the app was migrated to a new device
+                [dataLayer invalidateAllAccountStates];
+                //change resource because of app migration
+                for(NSMutableDictionary* accountDict in [[dataLayer accountList] mutableCopy])
+                {
+                    accountDict[kResource] = [HelperTools encodeRandomResource];
+                    [dataLayer updateAccounWithDictionary:accountDict];
+                }
+                //clean up signal store and generate new omemo keys (but don't change trust settings!)
+                [db executeNonQuery:@"DELETE FROM signalContactSession;"];
+                [db executeNonQuery:@"DELETE FROM signalIdentity;"];
+                [db executeNonQuery:@"DELETE FROM signalPreKey;"];
+                [db executeNonQuery:@"DELETE FROM signalSignedPreKey;"];
+                //update device id in db
+                [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='device_id';" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
             }
-            //clean up signal store and generate new omemo keys (but don't change trust settings!)
-            [db executeNonQuery:@"DELETE FROM signalContactSession;"];
-            [db executeNonQuery:@"DELETE FROM signalIdentity;"];
-            [db executeNonQuery:@"DELETE FROM signalPreKey;"];
-            [db executeNonQuery:@"DELETE FROM signalSignedPreKey;"];
-            //update device id in db
-            [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='device_id';" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
         }
         
         //check if db version changed and invalidate state, if so

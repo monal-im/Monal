@@ -1115,7 +1115,7 @@ $$instance_handler(handleDevicelistUnsubscribe, account.omemo, $$ID(xmpp*, accou
     // TODO: improve error handling
 $$
 
-//called after a new MUC member was added by MLMucProcessor
+//called after new contact was added via roster or a new MUC member was added by MLMucProcessor
 -(void) subscribeAndFetchDevicelistIfNoSessionExistsForJid:(NSString*) buddyJid
 {
     if([self.monalSignalStore sessionsExistForBuddy:buddyJid] == NO)

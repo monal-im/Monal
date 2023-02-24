@@ -60,6 +60,7 @@ NSString* const kStanza = @"stanza";
 -(id) initWithAccount:(xmpp*) account;
 -(NSDictionary*) getInternalData;
 -(void) setInternalData:(NSDictionary*) data;
+-(void) invalidateQueue;
 -(void) handleHeadlineMessage:(XMPPMessage*) messageNode;
 @end
 
@@ -980,6 +981,9 @@ NSString* const kStanza = @"stanza";
                         self->_iqHandlers = [[NSMutableDictionary alloc] init];
                     }
                     
+                    //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
+                    [self.pubsub invalidateQueue];
+                    
                     //clear pipeline cache
                     self->_pipeliningState = kPipelinedNothing;
                     self->_cachedStreamFeaturesBeforeAuth = nil;
@@ -1063,6 +1067,9 @@ NSString* const kStanza = @"stanza";
                     }
                     self->_iqHandlers = [[NSMutableDictionary alloc] init];
                 }
+                
+                //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
+                [self.pubsub invalidateQueue];
                 
                 //clear pipeline cache
                 self->_pipeliningState = kPipelinedNothing;
@@ -3776,6 +3783,9 @@ NSString* const kStanza = @"stanza";
             else if(handlersCopy[iqid][@"errorHandler"])
                 ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
         }
+        
+        //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
+        [self.pubsub invalidateQueue];
     }
     
     //force new disco queries because we landed here because of a failed smacks resume
@@ -3826,7 +3836,8 @@ NSString* const kStanza = @"stanza";
     [self queryDisco];
     [self purgeOfflineStorage];
     [self sendPresence];            //this will trigger a replay of offline stanzas on prosody (no XEP-0013 support anymore 😡)
-    //the offline messages will come in *after* we started to query mam, because the disco result comes in first (and this is what triggers mam catchup)
+    //the offline messages will come in *after* we initialized the mam query, because the disco result comes in first
+    //(and this is what triggers mam catchup)
     //--> no holes in our history can be caused by these offline messages in conjunction with mam catchup,
     //    however all offline messages will be received twice (as offline message AND via mam catchup)
     

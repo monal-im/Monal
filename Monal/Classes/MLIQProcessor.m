@@ -491,6 +491,7 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
     }
     
     account.connectionProperties.accountDiscoDone = YES;
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalAccountDiscoDone object:account];
 $$
 
 //features advertised on our server

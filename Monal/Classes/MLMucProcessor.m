@@ -611,12 +611,17 @@
         DDLogInfo(@"Not pinging all mucs, last ping was less than %d seconds ago: %@", MUC_PING, _lastPing);
         return;
     }
-    _lastPing = [NSDate date];
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
-        [self ping:entry[@"room"]];
+        [self ping:entry[@"room"] withLastPing:_lastPing];
+    _lastPing = [NSDate date];
 }
 
 -(void) ping:(NSString*) roomJid
+{
+    [self ping:roomJid withLastPing:nil];
+}
+
+-(void) ping:(NSString*) roomJid withLastPing:(NSDate* _Nullable) lastPing
 {
     if(![[DataLayer sharedInstance] isBuddyMuc:roomJid forAccount:_account.accountNo])
     {
@@ -638,6 +643,9 @@
         if(error == nil)
         {
             DDLogWarn(@"Ping handler for %@ got invalidated, aborting ping...", roomJid);
+            //make sure we try again without waiting another MUC_PING seconds, if possible (i.e. this ping was not triggered by ui)
+            if(lastPing != nil)
+                self->_lastPing = lastPing;
             return;
         }
         DDLogWarn([HelperTools extractXMPPError:error withDescription:@"Muc ping returned error"]);

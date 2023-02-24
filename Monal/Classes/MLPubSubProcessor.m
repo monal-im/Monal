@@ -323,7 +323,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     for(NSString* itemId in _data)
     {
         if([data[itemId] check:@"{urn:xmpp:bookmarks:1}conference/password"])
-            [data removeObjectWithKey:itemId];
+            [data removeObjectForKey:itemId];
     }
     
     for(NSString* itemId in data)

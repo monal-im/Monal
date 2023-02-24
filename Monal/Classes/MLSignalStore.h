@@ -34,9 +34,18 @@
 -(NSData* _Nullable) getIdentityForAddress:(SignalAddress* _Nonnull) address;
 -(BOOL) saveIdentity:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nullable) identityKey;
 /**
- all devices even those without sessions
+ all non deleted devices (even those without sessions or a broken session)
  */
 -(NSArray<NSNumber*>* _Nullable) knownDevicesForAddressName:(NSString* _Nullable) addressName;
+/**
+ all non deleted devices with a valid (non broken) session
+ */
+-(NSArray<NSNumber*>* _Nonnull) knownDevicesWithValidSession:(NSString* _Nonnull) jid;
+/**
+ * all non deleted devices with a broken sessions where a bundle fetch is advised
+ */
+-(NSArray<NSNumber*>* _Nonnull) knownDevicesWithPendingBrokenSessionHandling:(NSString* _Nonnull) jid;
+
 -(NSMutableArray<SignalPreKey*>* _Nonnull) readPreKeys;
 
 -(void) deleteDeviceforAddress:(SignalAddress* _Nonnull) address;
@@ -45,8 +54,9 @@
 -(void) removeDeviceDeletedMark:(SignalAddress* _Nonnull) address;
 -(void) updateLastSuccessfulDecryptTime:(SignalAddress* _Nonnull) address;
 -(void) markSessionAsBroken:(SignalAddress* _Nonnull) address;
--(void) markSessionAsFunctional:(SignalAddress* _Nonnull) address;
+-(void) markBundleAsFixed:(SignalAddress* _Nonnull) address;
 -(BOOL) isSessionBrokenForJid:(NSString* _Nonnull) jid andDeviceId:(NSNumber* _Nonnull) deviceId;
+-(void) markBundleAsBroken:(SignalAddress* _Nonnull) address;
 
 // MUC session management
 -(BOOL) sessionsExistForBuddy:(NSString* _Nonnull) buddyJid;

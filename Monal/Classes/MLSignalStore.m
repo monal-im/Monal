@@ -206,9 +206,42 @@
 {
     if(!jid)
         return nil;
-    
+
     return [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=? AND removedFromDeviceList IS NULL;" andArguments:@[self.accountId, jid]];
+    }];
+}
+
+-(NSArray<NSNumber*>*) knownDevicesWithValidSession:(NSString*) jid
+{
+    return [self.sqliteDatabase idReadTransaction:^{
+        return [self.sqliteDatabase executeScalarReader:@"\
+                SELECT DISTINCT \
+                    contactDeviceId \
+                FROM signalContactIdentity \
+                WHERE \
+                    account_id=? \
+                    AND contactName=? \
+                    AND removedFromDeviceList IS NULL \
+                    AND brokenSession=false \
+            ;" andArguments:@[self.accountId, jid]];
+    }];
+}
+
+-(NSArray<NSNumber*>*) knownDevicesWithPendingBrokenSessionHandling:(NSString*) jid
+{
+    return [self.sqliteDatabase idReadTransaction:^{
+        return [self.sqliteDatabase executeScalarReader:@"\
+                SELECT DISTINCT \
+                    contactDeviceId \
+                FROM signalContactIdentity \
+                WHERE \
+                    account_id=? \
+                    AND contactName=? \
+                    AND removedFromDeviceList IS NULL \
+                    AND brokenSession=true \
+                    AND (lastFailedBundleFetch IS NULL OR lastFailedBundleFetch <= date('now', '-5 day'))\
+            ;" andArguments:@[self.accountId, jid]];
     }];
 }
 
@@ -435,7 +468,7 @@
 
 /*
  * update lastReceivedMsg to CURRENT_TIMESTAMP
- * reset brokenSession to faöse
+ * reset brokenSession to false
  */
 -(void) updateLastSuccessfulDecryptTime:(SignalAddress*) address
 {
@@ -451,10 +484,17 @@
     }];
 }
 
--(void) markSessionAsFunctional:(SignalAddress*) address
+-(void) markBundleAsFixed:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=false WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=false, lastFailedBundleFetch=NULL WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    }];
+}
+
+-(void) markBundleAsBroken:(SignalAddress*) address
+{
+    [self.sqliteDatabase voidWriteTransaction:^{
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET lastFailedBundleFetch=date('now') WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 

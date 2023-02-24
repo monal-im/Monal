@@ -995,6 +995,10 @@
             [db executeNonQuery:@"ALTER TABLE buddylist DROP COLUMN lastInteraction;"];
         }];
 
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.005 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE signalContactIdentity ADD COLUMN lastFailedBundleFetch INTEGER DEFAULT NULL;"];
+        }];
+
 
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

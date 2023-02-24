@@ -517,9 +517,9 @@ NSString* const kStanza = @"stanza";
             "\t[[_inCatchup count] = %lu\n\t--> %@"
         ),
         self.accountNo,
-        _accountState < kStateReconnecting ? @"YES" : @"NO",
-        _reconnectInProgress ? @"YES" : @"NO",
-        _catchupDone ? @"YES" : @"NO",
+        bool2str(_accountState < kStateReconnecting),
+        bool2str(_reconnectInProgress),
+        bool2str(_catchupDone),
         _cancelPingTimer == nil ? @"none" : @"running timer",
         unackedCount,
         (unsigned long)[_parseQueue operationCount],
@@ -552,7 +552,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) createStreams
 {
-    DDLogInfo(@"stream creating to server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, self.connectionProperties.server.isDirectTLS ? @"YES" : @"NO");
+    DDLogInfo(@"stream creating to server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, bool2str(self.connectionProperties.server.isDirectTLS));
     
     NSInputStream* localIStream;
     NSOutputStream* localOStream;
@@ -2083,7 +2083,7 @@ NSString* const kStanza = @"stanza";
             //we don't want to process messages going backwards in time, too (e.g. MLhistory:* mam queries)
             else if(![outerMessageNode check:@"{urn:xmpp:mam:2}result"] || [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"])
             {
-                DDLogInfo(@"Processing message stanza (delayedReplay=%@)...", delayedReplay ? @"YES" : @"NO");
+                DDLogInfo(@"Processing message stanza (delayedReplay=%@)...", bool2str(delayedReplay));
                 
                 //process message
                 [MLMessageProcessor processMessage:messageNode andOuterMessage:outerMessageNode forAccount:self];
@@ -4776,7 +4776,7 @@ NSString* const kStanza = @"stanza";
     NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
     if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateBound)
     {
-        DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, bool2str(self.connectionProperties.supportsPush));
         return;
     }
     if([MLXMPPManager sharedInstance].hasAPNSToken)
@@ -4824,7 +4824,7 @@ NSString* const kStanza = @"stanza";
     {
         return;
     }
-    DDLogInfo(@"DISABLING push token %@ on server %@ (accountState: %ld, supportsPush: %@)", pushToken, pushServer, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+    DDLogInfo(@"DISABLING push token %@ on server %@ (accountState: %ld, supportsPush: %@)", pushToken, pushServer, (long)self.accountState, bool2str(self.connectionProperties.supportsPush));
     XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
     [disable setPushDisable:pushToken onPushServer:pushServer];
     [self send:disable];

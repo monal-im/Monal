@@ -971,7 +971,7 @@ $$
     NSData* messageKey = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
     BOOL devicePreKey = [[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid] boolValue];
     
-    DDLogVerbose(@"Decrypting using:\nrid=%u --> messageKey=%@\nrid=%u --> isPreKey=%@", self.monalSignalStore.deviceid, messageKey, self.monalSignalStore.deviceid, devicePreKey ? @"YES" : @"NO");
+    DDLogVerbose(@"Decrypting using:\nrid=%u --> messageKey=%@\nrid=%u --> isPreKey=%@", self.monalSignalStore.deviceid, messageKey, self.monalSignalStore.deviceid, bool2str(devicePreKey));
 
     if(!messageKey && isKeyTransportElement)
     {

@@ -298,7 +298,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     //request auth to show notifications and register our notification categories created above
     [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError* error) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", granted ? @"YES" : @"NO", error);
+            DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", bool2str(granted), error);
             BOOL oldGranted = [[HelperTools defaultsDB] boolForKey:@"notificationsGranted"];
             [[HelperTools defaultsDB] setBool:granted forKey:@"notificationsGranted"];
             if(granted == YES)
@@ -753,7 +753,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             
             BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:fromContact.contactJid andAccountNo:fromContact.accountId];
             [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText havingType:kMessageTypeText toContact:fromContact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                DDLogInfo(@"REPLY_ACTION success=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", messageIdSentObject);
+                DDLogInfo(@"REPLY_ACTION success=%@, messageIdSentObject=%@", bool2str(successSendObject), messageIdSentObject);
             }];
         }
         else if([response.actionIdentifier isEqualToString:@"MARK_AS_READ_ACTION"])
@@ -1616,7 +1616,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
 -(void) scheduleBackgroundTask:(BOOL) force
 {
-    DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");
+    DDLogInfo(@"Scheduling new BackgroundTask with force=%@...", bool2str(force));
     [HelperTools dispatchSyncReentrant:^{
         NSError* error;
         if(force)
@@ -1818,21 +1818,21 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         if([payload[@"type"] isEqualToString:@"text"])
         {
             [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeText toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
                 cleanup(payload);
             }];
         }
         else if([payload[@"type"] isEqualToString:@"url"])
         {
             [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeUrl toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
                 cleanup(payload);
             }];
         }
         else if([payload[@"type"] isEqualToString:@"geo"])
         {
             [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeGeo toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
                 cleanup(payload);
             }];
         }
@@ -1856,7 +1856,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         }
                         else
                             [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url havingType:kMessageTypeFiletransfer toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", account.accountNo, messageIdSentObject);
+                                DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
                                 cleanup(payload);
                             }];
                     });

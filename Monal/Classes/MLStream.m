@@ -126,7 +126,7 @@
     _reading = YES;
     DDLogVerbose(@"calling nw_connection_receive");
     nw_connection_receive(self.shared_state.connection, 1, BUFFER_SIZE, ^(dispatch_data_t content, nw_content_context_t context __unused, bool is_complete, nw_error_t receive_error) {
-        DDLogVerbose(@"nw_connection_receive got callback with is_complete:%@, receive_error=%@", is_complete ? @"YES" : @"NO", receive_error);
+        DDLogVerbose(@"nw_connection_receive got callback with is_complete:%@, receive_error=%@", bool2str(is_complete), receive_error);
         self->_reading = NO;
         
         //handle content received

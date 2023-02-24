@@ -796,7 +796,7 @@
         @"jmiProceed": nilWrapper(self.jmiProceed),
         @"webRTCClient": nilWrapper(self.webRTCClient),
         @"providerAnswerAction": nilWrapper(self.providerAnswerAction),
-        @"isConnected": self.isConnected ? @"YES" : @"NO",
+        @"isConnected": bool2str(self.isConnected),
     }];
 }
 

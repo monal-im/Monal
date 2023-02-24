@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MLConstants.h"
 #import "OmemoState.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -68,7 +69,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"OmemoState(\n\topenBundleFetches=%@\n\topenDevicelistFetches=%@\n\topenDevicelistSubscriptions=%@\n\tqueuedKeyTransportElements=%@\n\tqueuedSessionRepairs=%@\n\thasSeenDeviceList=%@\n\tcatchupDone=%@\n)", self.openBundleFetches, self.openDevicelistFetches, self.openDevicelistSubscriptions, self.queuedKeyTransportElements, self.queuedSessionRepairs, self.hasSeenDeviceList ? @"YES" : @"NO", self.catchupDone ? @"YES" : @"NO"];
+    return [NSString stringWithFormat:@"OmemoState(\n\topenBundleFetches=%@\n\topenDevicelistFetches=%@\n\topenDevicelistSubscriptions=%@\n\tqueuedKeyTransportElements=%@\n\tqueuedSessionRepairs=%@\n\thasSeenDeviceList=%@\n\tcatchupDone=%@\n)", self.openBundleFetches, self.openDevicelistFetches, self.openDevicelistSubscriptions, self.queuedKeyTransportElements, self.queuedSessionRepairs, bool2str(self.hasSeenDeviceList), bool2str(self.catchupDone)];
 }
 
 @end

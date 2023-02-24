@@ -811,11 +811,11 @@ $$
     //remove own jid from recipients (our own devices get special treatment via myDevices NSSet below)
     [recipients removeObject:self.account.connectionProperties.identity.jid];
     
-    NSMutableDictionary<NSString*, NSArray<NSNumber*>*>* contactDeviceMap = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary<NSString*, NSSet<NSNumber*>*>* contactDeviceMap = [[NSMutableDictionary alloc] init];
     for(NSString* recipient in recipients)
     {
         //contactDeviceMap
-        NSMutableArray<NSNumber*>* recipientDevices = [[NSMutableArray alloc] init];
+        NSMutableSet<NSNumber*>* recipientDevices = [[NSMutableSet alloc] init];
         [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithValidSession:recipient]];
         // add devices with known but old broken session to trigger a bundle refetch
         [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:recipient]];
@@ -823,7 +823,7 @@ $$
          if(recipientDevices && recipientDevices.count > 0)
             contactDeviceMap[recipient] = recipientDevices;
     }
-    NSArray<NSNumber*>* myDevices = [self.monalSignalStore knownDevicesForAddressName:self.account.connectionProperties.identity.jid];
+    NSSet<NSNumber*>* myDevices = [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:self.account.connectionProperties.identity.jid]];
 
     //check if we found omemo keys of at least one of the recipients or more than 1 own device, otherwise don't encrypt anything
     if(contactDeviceMap.count > 0 || myDevices.count > 1)
@@ -883,7 +883,7 @@ $$
     }
 }
 
--(void) addEncryptionKeyForAllDevices:(NSArray*) devices encryptForJid:(NSString*) encryptForJid withEncryptedPayload:(MLEncryptedPayload*) encryptedPayload withXMLHeader:(MLXMLNode*) xmlHeader
+-(void) addEncryptionKeyForAllDevices:(NSSet<NSNumber*>*) devices encryptForJid:(NSString*) encryptForJid withEncryptedPayload:(MLEncryptedPayload*) encryptedPayload withXMLHeader:(MLXMLNode*) xmlHeader
 {
     //encrypt message for all given deviceids
     for(NSNumber* device in devices)

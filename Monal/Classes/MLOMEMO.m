@@ -342,16 +342,16 @@ $$
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString*) source
 {
     DDLogVerbose(@"Processing omemo devices from %@: %@", source, receivedDevices);
-    
-    NSSet<NSNumber*>* existingDevices = [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:source]];
-    NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
-    [newDevices minusSet:existingDevices];
-    DDLogVerbose(@"New devices detected: %@", newDevices);
-    
+
+    NSMutableSet<NSNumber*>* existingDevices = [NSMutableSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:source]];
+    // ensure that we refetch bundles of devices with broken bundles again after some time
+    NSSet<NSNumber*>* existingDevicesReqPendingFetch = [NSSet setWithArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:source]];
+    [existingDevices minusSet:existingDevicesReqPendingFetch];
+
     NSMutableSet<NSNumber*>* removedDevices = [existingDevices mutableCopy];
     [removedDevices minusSet:receivedDevices];
     DDLogVerbose(@"Removed devices detected: %@", removedDevices);
-    
+
     //iterate through all received deviceids and query the corresponding bundle, if we don't know that deviceid yet
     for(NSNumber* deviceId in receivedDevices)
     {
@@ -526,10 +526,12 @@ $$
 -(void) handleBundleWithInvalidEntryForJid:(NSString*) jid andRid:(NSNumber*) rid
 {
     SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.unsignedIntValue];
-    [self.monalSignalStore markDeviceAsDeleted:address];
+    DDLogInfo(@"Marking device %@ bundle as broken, due to a invalid bundle", rid);
+    [self.monalSignalStore markBundleAsBroken:address];
     if([jid isEqualToString:self.account.connectionProperties.identity.jid] && rid.unsignedIntValue != self.monalSignalStore.deviceid)
     {
         DDLogInfo(@"Removing device %@ from own device list, due to a invalid bundle", rid);
+        [self.monalSignalStore markDeviceAsDeleted:address];
         // removing this device from own bundle
         [self.ownDeviceList removeObject:rid];
         // publish updated device list
@@ -638,7 +640,7 @@ $$
         }
         // mark session as functional
         SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)rid.unsignedIntValue];
-        [self.monalSignalStore markSessionAsFunctional:address];
+        [self.monalSignalStore markBundleAsFixed:address];
 
         //found and imported a working key --> try to (re)build a new session proactively (or repair a broken one)
         [self sendKeyTransportElement:jid forRids:[NSSet setWithArray:@[rid]]];      //this will remove the queuedSessionRepairs entry, if any
@@ -813,8 +815,12 @@ $$
     for(NSString* recipient in recipients)
     {
         //contactDeviceMap
-        NSArray<NSNumber*>* recipientDevices = [self.monalSignalStore knownDevicesForAddressName:recipient];
-        if(recipientDevices && recipientDevices.count > 0)
+        NSMutableArray<NSNumber*>* recipientDevices = [[NSMutableArray alloc] init];
+        [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithValidSession:recipient]];
+        // add devices with known but old broken session to trigger a bundle refetch
+        [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:recipient]];
+
+         if(recipientDevices && recipientDevices.count > 0)
             contactDeviceMap[recipient] = recipientDevices;
     }
     NSArray<NSNumber*>* myDevices = [self.monalSignalStore knownDevicesForAddressName:self.account.connectionProperties.identity.jid];
@@ -1194,7 +1200,9 @@ $$
 {
     NSSet<NSNumber*>* devices = [self knownDevicesForAddressName:jid];
     for(NSNumber* device in devices)
+    {
         [self deleteDeviceForSource:jid andRid:device];
+    }
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation)];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation)];

@@ -218,6 +218,9 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
             //NSString* name = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference@name"];
             NSString* room = [itemId lowercaseString];
             NSString* nick = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference/nick#"];
+            //ignore password protected mucs
+            if([data[itemId] check:@"{urn:xmpp:bookmarks:1}conference/password"])
+                continue;
             NSNumber* autojoin = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference@autojoin|bool"];
             if(autojoin == nil)
                 autojoin = @NO;     //default value specified in xep
@@ -287,7 +290,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
     }
 $$
 
-$$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), _data))
     if(!account.connectionProperties.supportsBookmarksCompat)
     {
         DDLogWarn(@"Ignoring new XEP-0402 bookmarks, server does not support syncing between XEP-0048 and XEP-0402!");
@@ -298,7 +301,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     {
         //item-not-found means: no bookmarks in storage --> use an empty data dict
         if([errorIq check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
-            data = @{};
+            _data = @{};
         else
         {
             DDLogWarn(@"Could not fetch bookmarks from pep prior to publishing!");
@@ -314,6 +317,14 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     NSMutableDictionary* ownFavorites = [[NSMutableDictionary alloc] init];
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
         ownFavorites[entry[@"room"]] = entry;
+    
+    //filter passwort protected mucs
+    NSMutableDictionary* data = [_data mutableCopy];
+    for(NSString* itemId in _data)
+    {
+        if([data[itemId] check:@"{urn:xmpp:bookmarks:1}conference/password"])
+            [data removeObjectWithKey:itemId];
+    }
     
     for(NSString* itemId in data)
     {
@@ -454,6 +465,11 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
                     DDLogError(@"Received non-xep-compliant bookmarks entry, ignoring: %@", conference);
                     continue;
                 }
+                
+                //ignore password protected mucs
+                if([conference check:@"password"])
+                    continue;
+                
                 [bookmarkedMucs addObject:room];
                 NSString* nick = [conference findFirst:@"nick#"];
                 NSNumber* autojoin = [conference findFirst:@"/@autojoin|bool"];

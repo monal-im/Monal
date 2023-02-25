@@ -2175,9 +2175,7 @@ NSString* const kStanza = @"stanza";
                 }
             }
             else            //only process iqs that have not already been handled by a registered iq handler
-            {
-                [MLIQProcessor processIq:iqNode forAccount:self];
-            }
+                [MLIQProcessor processUnboundIq:iqNode forAccount:self];
             
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];

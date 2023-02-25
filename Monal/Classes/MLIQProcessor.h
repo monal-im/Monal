@@ -25,7 +25,7 @@ typedef void (^processAction)(void);
 /**
  Process a iq, persist any changes and post notifications
  */
-+(void) processIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account;
++(void) processUnboundIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account;
 
 @end
 

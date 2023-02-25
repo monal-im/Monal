@@ -255,6 +255,9 @@ static id preprocess(id exception)
     
 +(BOOL) isSandboxAPNS
 {
+#if TARGET_OS_SIMULATOR
+    return YES;
+#else
     // check if were are sandbox or production
     NSString* embeddedProvPath;
 #if TARGET_OS_MACCATALYST
@@ -263,24 +266,26 @@ static id preprocess(id exception)
 #else
     embeddedProvPath = [[NSBundle mainBundle] pathForResource:@"embedded" ofType:@"mobileprovision"];
 #endif
+    DDLogVerbose(@"Loading embedded provision plist at: %@", embeddedProvPath);
     NSError* loadingError;
     NSString* embeddedProvStr = [NSString stringWithContentsOfFile:embeddedProvPath encoding:NSISOLatin1StringEncoding error:&loadingError];
     if(embeddedProvStr == nil)
     {
-        // file does not exist --> simulator
-        // use sandbox
-        DDLogWarn(@"Could not read embedded provision: %@", loadingError);
-        return YES;
+        // fallback to production
+        DDLogWarn(@"Could not read embedded provision (should be production install): %@", loadingError);
+        return NO;
     }
     NSScanner* plistScanner = [NSScanner scannerWithString:embeddedProvStr];
     [plistScanner scanUpToString:@"<plist" intoString:nil];
     NSString* plistStr;
     [plistScanner scanUpToString:@"</plist>" intoString:&plistStr];
     plistStr = [NSString stringWithFormat:@"%@</plist>", plistStr];
+    DDLogVerbose(@"Extracted bundle plist string: %@", plistStr);
 
     NSError* plistError;
     NSPropertyListFormat format;
     NSDictionary* plist = [NSPropertyListSerialization propertyListWithData:[plistStr dataUsingEncoding:NSISOLatin1StringEncoding] options:NSPropertyListImmutable format:&format error:&plistError];
+    DDLogVerbose(@"Parsed plist: %@", plist);
     if(plistError != nil)
     {
         // fallback to production
@@ -290,11 +295,12 @@ static id preprocess(id exception)
     if(plist[@"com.apple.developer.aps-environment"] && [plist[@"com.apple.developer.aps-environment"] isEqualToString:@"production"] == NO)
     {
         // sandbox
-	DDLogWarn(@"aps-environmnet is set to: %@", plist[@"com.apple.developer.aps-environment"]);
+        DDLogWarn(@"aps-environmnet is set to: %@", plist[@"com.apple.developer.aps-environment"]);
         return YES;
     }
     // productions
     return NO;
+#endif
 }
 
 +(int) compareIOcted:(NSData*) data1 with:(NSData*) data2

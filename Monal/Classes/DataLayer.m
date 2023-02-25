@@ -2390,6 +2390,7 @@ static NSDateFormatter* dbFormatter;
     return [self.db voidWriteTransaction:^{
         for(NSDictionary* timer in [self.db executeReader:@"SELECT * FROM idle_timers WHERE account_id=?;" andArguments:@[account.accountNo]])
         {
+            DDLogVerbose(@"Decrementing idle timer %@(%@): %@", timer[@"id"], timer[@"timeout"], [HelperTools unserializeData:timer[@"handler"]]);
             if([timer[@"timeout"] unsignedIntegerValue] == 0)
             {
                 //this timer expired --> call it's handler and delete the timer afterwards

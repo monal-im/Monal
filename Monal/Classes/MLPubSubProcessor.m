@@ -373,7 +373,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
                 } andChildren:@[
                     [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:[[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo]],
                     [[MLXMLNode alloc] initWithElement:@"extensions" withAttributes:@{} andChildren:@[
-                        [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:xmpp:monal.im" withAttributes:@{
+                        [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:xmpp:monal.im:bookmarks:info" withAttributes:@{
                             @"name": @"Monal",
                             @"version": infoDict[@"CFBundleShortVersionString"],
                             @"build": infoDict[@"CFBundleVersion"],

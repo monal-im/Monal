@@ -192,6 +192,7 @@ static NSMutableDictionary* _typingNotifications;
         ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] && [messageNode check:@"body#"]
     )
     {
+        DDLogWarn(@"Ignoring muc pm marked as such...");
         //ignore muc pms without id attribute (we can't send out errors pointing to this message without an id)
         if([messageNode findFirst:@"/@id"] == nil)
             return message;
@@ -205,6 +206,12 @@ static NSMutableDictionary* _typingNotifications;
         ] andData:nil]];
         [errorReply setStoreHint];
         [account send:errorReply];
+        return message;
+    }
+    //ignore carbon copied muc pms not marked as such
+    if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"] && [MLContact createContactFromJid:messageNode.fromUser andAccountNo:account.accountNo].isGroup)
+    {
+        DDLogWarn(@"Ignoring carbon copied muc pm...");
         return message;
     }
 

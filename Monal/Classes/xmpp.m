@@ -2009,8 +2009,16 @@ NSString* const kStanza = @"stanza";
                 
                 DDLogDebug(@"mam extracted, messageNode is now: %@", messageNode);
             }
-            else if(self.connectionProperties.usingCarbons2 && [outerMessageNode check:@"{urn:xmpp:carbons:2}*"])     //carbon copy
+            else if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"])     //carbon copy
             {
+                if(!self.connectionProperties.usingCarbons2)
+                {
+                    DDLogError(@"carbon copies not enabled, ignoring this spoofed carbon copy!");
+                    //even these stanzas have to be counted by smacks
+                    [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
+                    return;
+                }
+                
                 if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
                 {
                     DDLogError(@"carbon copies must be from our bare jid, ignoring this spoofed carbon copy!");

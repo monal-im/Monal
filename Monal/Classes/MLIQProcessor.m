@@ -321,6 +321,7 @@ $$
             continue;
         contact[@"jid"] = [[NSString stringWithFormat:@"%@", contact[@"jid"]] lowercaseString];
         MLContact* contactObj = [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo];
+        BOOL isKnownUser = [[DataLayer sharedInstance] contactDictionaryForUsername:contact[@"jid"] forAccount:account.accountNo] != nil;
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
             if(contactObj.isGroup)
@@ -360,8 +361,10 @@ $$
 #ifndef DISABLE_OMEMO
             if(contactObj.isGroup == NO)
             {
-                // Request omemo devicelist
-                [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:contactObj.contactJid];
+                //request omemo devicelist, but only if this is a new user
+                //(we could get already known users if roster version is not supported by the server)
+                if(!isKnownUser)
+                    [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:contact[@"jid"]];
             }
 #endif// DISABLE_OMEMO
             

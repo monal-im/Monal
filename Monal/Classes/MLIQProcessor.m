@@ -312,7 +312,8 @@ $$
         return NO;
     }
     
-    for(NSMutableDictionary* contact in [iqNode find:@"{jabber:iq:roster}query/item@@"])
+    NSArray* rosterList = [iqNode find:@"{jabber:iq:roster}query/item@@"];
+    for(NSMutableDictionary* contact in rosterList)
     {
         if(!contact[@"jid"])
             continue;
@@ -355,21 +356,22 @@ $$
             [[DataLayer sharedInstance] addContact:contact[@"jid"]
                                         forAccount:account.accountNo
                                           nickname:[contact objectForKey:@"name"] ? [contact objectForKey:@"name"] : @""];
-#ifndef DISABLE_OMEMO
-            if(contactObj.isGroup == NO)
-            {
-                //request omemo devicelist, but only if this is a new user
-                //(we could get already known users if roster version is not supported by the server)
-                if(!isKnownUser)
-                    [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:contact[@"jid"]];
-            }
-#endif// DISABLE_OMEMO
             
             DDLogVerbose(@"Setting subscription status '%@' (ask=%@) for contact %@", contact[@"subscription"], contact[@"ask"], contact[@"jid"]);
             [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
                                                  andAsk:[contact objectForKey:@"ask"]
                                              forContact:contact[@"jid"]
                                              andAccount:account.accountNo];
+            
+#ifndef DISABLE_OMEMO
+            if(contactObj.isGroup == NO)
+            {
+                //request omemo devicelist, but only if this is a new user
+                //(we could get a roster with already known users if roster version is not supported by the server)
+                if(!isKnownUser && !([contact[@"subscription"] isEqualToString:kSubBoth] || [contact[@"subscription"] isEqualToString:kSubTo]))
+                    [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:contact[@"jid"]];
+            }
+#endif// DISABLE_OMEMO
             
             //regenerate avatar if the nickame has changed
             if(![contactObj.nickName isEqualToString:[contact objectForKey:@"name"]])

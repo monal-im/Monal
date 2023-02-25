@@ -999,6 +999,12 @@
             [db executeNonQuery:@"ALTER TABLE signalContactIdentity ADD COLUMN lastFailedBundleFetch INTEGER DEFAULT NULL;"];
         }];
 
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.006 withBlock:^{
+            // remove session records without a corresponding trust info
+            [db executeNonQuery:@"DELETE FROM signalContactSession WHERE (account_id, contactName, contactDeviceId) NOT IN (SELECT account_id, contactName, contactDeviceId FROM signalContactIdentity);"];
+            // mark identities as broken if no session exists
+            [db executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=true WHERE (account_id, contactName, contactDeviceId) NOT IN (SELECT account_id, contactName, contactDeviceId FROM signalContactSession);"];
+        }];
 
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

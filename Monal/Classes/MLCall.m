@@ -109,6 +109,7 @@
 
 -(void) deinit
 {
+    DDLogInfo(@"Call deinit: %@", self);
     [self.callDurationTimer invalidate];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -236,6 +237,7 @@
         DDLogInfo(@"%@: Starting call duration timer...", [self short]);
         if(self.cancelConnectingTimeout != nil)
             self.cancelConnectingTimeout();
+        self.cancelConnectingTimeout = nil;
         if(self.callDurationTimer != nil)
             [self.callDurationTimer invalidate];
         self.callDurationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
@@ -397,13 +399,15 @@
     @synchronized(self) {
         DDLogDebug(@"%@: Preparing this call for new webrtc connection...", [self short]);
         self.jmiid = otherCall.jmiid;
+        self.fullRemoteJid = otherCall.fullRemoteJid;
         self.isConnected = NO;
         self.isReconnecting = YES;
         self.finishReason = MLCallFinishReasonUnknown;
         self.direction = otherCall.direction;
         self.jmiPropose = otherCall.jmiPropose;
         self.jmiProceed = nil;
-        self.audioSession = nil;
+        [self.callDurationTimer invalidate];
+        self.callDurationTimer = nil;
         otherCall = nil;
         
         DDLogDebug(@"%@: Stopping all running timers...", [self short]);
@@ -779,8 +783,10 @@
     NSString* state;
     switch(self.state)
     {
+        case MLCallStateDiscovering: state = @"discovering"; break;
         case MLCallStateRinging: state = @"ringing"; break;
         case MLCallStateConnecting: state = @"connecting"; break;
+        case MLCallStateReconnecting: state = @"reconnecting"; break;
         case MLCallStateConnected: state = @"connected"; break;
         case MLCallStateFinished: state = @"finished"; break;
         case MLCallStateUnknown: state = @"unknown"; break;

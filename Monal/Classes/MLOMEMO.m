@@ -342,16 +342,16 @@ $$
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString*) source
 {
     DDLogVerbose(@"Processing omemo devices from %@: %@", source, receivedDevices);
-    
-    NSSet<NSNumber*>* existingDevices = [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:source]];
-    NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
-    [newDevices minusSet:existingDevices];
-    DDLogVerbose(@"New devices detected: %@", newDevices);
-    
+
+    NSMutableSet<NSNumber*>* existingDevices = [NSMutableSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:source]];
+    // ensure that we refetch bundles of devices with broken bundles again after some time
+    NSSet<NSNumber*>* existingDevicesReqPendingFetch = [NSSet setWithArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:source]];
+    [existingDevices minusSet:existingDevicesReqPendingFetch];
+
     NSMutableSet<NSNumber*>* removedDevices = [existingDevices mutableCopy];
     [removedDevices minusSet:receivedDevices];
     DDLogVerbose(@"Removed devices detected: %@", removedDevices);
-    
+
     //iterate through all received deviceids and query the corresponding bundle, if we don't know that deviceid yet
     for(NSNumber* deviceId in receivedDevices)
     {
@@ -526,10 +526,12 @@ $$
 -(void) handleBundleWithInvalidEntryForJid:(NSString*) jid andRid:(NSNumber*) rid
 {
     SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.unsignedIntValue];
-    [self.monalSignalStore markDeviceAsDeleted:address];
+    DDLogInfo(@"Marking device %@ bundle as broken, due to a invalid bundle", rid);
+    [self.monalSignalStore markBundleAsBroken:address];
     if([jid isEqualToString:self.account.connectionProperties.identity.jid] && rid.unsignedIntValue != self.monalSignalStore.deviceid)
     {
         DDLogInfo(@"Removing device %@ from own device list, due to a invalid bundle", rid);
+        [self.monalSignalStore markDeviceAsDeleted:address];
         // removing this device from own bundle
         [self.ownDeviceList removeObject:rid];
         // publish updated device list
@@ -638,7 +640,7 @@ $$
         }
         // mark session as functional
         SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)rid.unsignedIntValue];
-        [self.monalSignalStore markSessionAsFunctional:address];
+        [self.monalSignalStore markBundleAsFixed:address];
 
         //found and imported a working key --> try to (re)build a new session proactively (or repair a broken one)
         [self sendKeyTransportElement:jid forRids:[NSSet setWithArray:@[rid]]];      //this will remove the queuedSessionRepairs entry, if any
@@ -809,15 +811,19 @@ $$
     //remove own jid from recipients (our own devices get special treatment via myDevices NSSet below)
     [recipients removeObject:self.account.connectionProperties.identity.jid];
     
-    NSMutableDictionary<NSString*, NSArray<NSNumber*>*>* contactDeviceMap = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary<NSString*, NSSet<NSNumber*>*>* contactDeviceMap = [[NSMutableDictionary alloc] init];
     for(NSString* recipient in recipients)
     {
         //contactDeviceMap
-        NSArray<NSNumber*>* recipientDevices = [self.monalSignalStore knownDevicesForAddressName:recipient];
-        if(recipientDevices && recipientDevices.count > 0)
+        NSMutableSet<NSNumber*>* recipientDevices = [[NSMutableSet alloc] init];
+        [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithValidSession:recipient]];
+        // add devices with known but old broken session to trigger a bundle refetch
+        [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:recipient]];
+
+         if(recipientDevices && recipientDevices.count > 0)
             contactDeviceMap[recipient] = recipientDevices;
     }
-    NSArray<NSNumber*>* myDevices = [self.monalSignalStore knownDevicesForAddressName:self.account.connectionProperties.identity.jid];
+    NSSet<NSNumber*>* myDevices = [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:self.account.connectionProperties.identity.jid]];
 
     //check if we found omemo keys of at least one of the recipients or more than 1 own device, otherwise don't encrypt anything
     if(contactDeviceMap.count > 0 || myDevices.count > 1)
@@ -877,7 +883,7 @@ $$
     }
 }
 
--(void) addEncryptionKeyForAllDevices:(NSArray*) devices encryptForJid:(NSString*) encryptForJid withEncryptedPayload:(MLEncryptedPayload*) encryptedPayload withXMLHeader:(MLXMLNode*) xmlHeader
+-(void) addEncryptionKeyForAllDevices:(NSSet<NSNumber*>*) devices encryptForJid:(NSString*) encryptForJid withEncryptedPayload:(MLEncryptedPayload*) encryptedPayload withXMLHeader:(MLXMLNode*) xmlHeader
 {
     //encrypt message for all given deviceids
     for(NSNumber* device in devices)
@@ -965,7 +971,7 @@ $$
     NSData* messageKey = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
     BOOL devicePreKey = [[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid] boolValue];
     
-    DDLogVerbose(@"Decrypting using:\nrid=%u --> messageKey=%@\nrid=%u --> isPreKey=%@", self.monalSignalStore.deviceid, messageKey, self.monalSignalStore.deviceid, devicePreKey ? @"YES" : @"NO");
+    DDLogVerbose(@"Decrypting using:\nrid=%u --> messageKey=%@\nrid=%u --> isPreKey=%@", self.monalSignalStore.deviceid, messageKey, self.monalSignalStore.deviceid, bool2str(devicePreKey));
 
     if(!messageKey && isKeyTransportElement)
     {
@@ -1109,7 +1115,7 @@ $$instance_handler(handleDevicelistUnsubscribe, account.omemo, $$ID(xmpp*, accou
     // TODO: improve error handling
 $$
 
-//called after a new MUC member was added by MLMucProcessor
+//called after new contact was added via roster or a new MUC member was added by MLMucProcessor
 -(void) subscribeAndFetchDevicelistIfNoSessionExistsForJid:(NSString*) buddyJid
 {
     if([self.monalSignalStore sessionsExistForBuddy:buddyJid] == NO)
@@ -1194,7 +1200,9 @@ $$
 {
     NSSet<NSNumber*>* devices = [self knownDevicesForAddressName:jid];
     for(NSNumber* device in devices)
+    {
         [self deleteDeviceForSource:jid andRid:device];
+    }
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation)];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation)];

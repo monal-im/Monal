@@ -526,7 +526,7 @@ static BOOL warnUnclean = NO;
         for(NSNumber* allowed in request.content.userInfo[@"knownGoodBuildNumber"])
             if(buildNumber == allowed.integerValue)
                 isKnownGoodBuild = YES;
-        DDLogDebug(@"current build number: %ld, firstGoodBuildNumber: %ld, isKnownGoodBuild: %@", buildNumber, firstGoodBuildNumber, isKnownGoodBuild ? @"YES" : @"NO");
+        DDLogDebug(@"current build number: %ld, firstGoodBuildNumber: %ld, isKnownGoodBuild: %@", buildNumber, firstGoodBuildNumber, bool2str(isKnownGoodBuild));
         if(buildNumber < firstGoodBuildNumber && !isKnownGoodBuild)
         {
             UNMutableNotificationContent* tooOldContent = [[UNMutableNotificationContent alloc] init];

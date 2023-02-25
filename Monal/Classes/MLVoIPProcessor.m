@@ -226,8 +226,10 @@ static NSMutableDictionary* _pendingCalls;
     if(existingCall == nil || existingCall.state == MLCallStateFinished)
         return [self processIncomingCall:notification.userInfo withCompletion:nil];
     
-    //handle tie breaking: both parties call each other "simultaneously"
+    DDLogDebug(@"Found existing call, trying to break the tie: %@", existingCall);
     MLCall* newCall = [self createCallWithJmiPropose:messageNode onAccountNo:accountNo];
+    
+    //handle tie breaking: both parties call each other "simultaneously"
     if(existingCall.state < MLCallStateConnecting)          //e.g. MLCallStateDiscovering or MLCallStateRinging
     {
         //determine call sort order
@@ -256,7 +258,7 @@ static NSMutableDictionary* _pendingCalls;
     //handle tie breaking: one party migrates the call to other device
     else if(existingCall.state < MLCallStateFinished)       //call already running
     {
-        DDLogInfo(@"Migrating from new call to existing call...");
+        DDLogInfo(@"Migrating from new call to existing call: %@", existingCall);
         [existingCall migrateTo:newCall];
         
         //drop new call after migration to make sure it does not interfere with our existing call
@@ -433,7 +435,8 @@ static NSMutableDictionary* _pendingCalls;
 -(void) createWebRTCClientForCall:(MLCall*) call usingICEServers:(NSArray<RTCIceServer*>*) iceServers
 {
     BOOL forceRelay = ![[HelperTools defaultsDB] boolForKey:@"webrtcAllowP2P"];
-    DDLogInfo(@"Initializing webrtc with forceRelay=%@ using ice servers: %@", forceRelay ? @"YES" : @"NO", iceServers);
+    DDLogInfo(@"Initializing webrtc with forceRelay=%@ using ice servers: %@", bool2str(forceRelay), iceServers);
+    MLAssert(call.webRTCClient == nil, @"Call does already have a webrtc client object!", (@{@"old_client": call.webRTCClient}));
     WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers forceRelay:forceRelay];
     call.webRTCClient = webRTCClient;
     webRTCClient.delegate = call;

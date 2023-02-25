@@ -99,7 +99,7 @@ static volatile int _ownLockFD;
         lock = flock(fd, LOCK_EX | LOCK_NB);
     }
     close(fd);
-    DDLogVerbose(@"Remote %@ running: %@", processName, lock != 0 ? @"YES" : @"NO");
+    DDLogVerbose(@"Remote %@ running: %@", processName, bool2str(lock != 0));
     return lock != 0;
 }
 

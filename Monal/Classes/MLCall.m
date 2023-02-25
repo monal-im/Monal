@@ -109,6 +109,7 @@
 
 -(void) deinit
 {
+    DDLogInfo(@"Call deinit: %@", self);
     [self.callDurationTimer invalidate];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -236,6 +237,7 @@
         DDLogInfo(@"%@: Starting call duration timer...", [self short]);
         if(self.cancelConnectingTimeout != nil)
             self.cancelConnectingTimeout();
+        self.cancelConnectingTimeout = nil;
         if(self.callDurationTimer != nil)
             [self.callDurationTimer invalidate];
         self.callDurationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
@@ -395,17 +397,20 @@
     [self.account send:jmiNode];
     
     @synchronized(self) {
-        DDLogDebug(@"Preparing this call for new webrtc connection...");
+        DDLogDebug(@"%@: Preparing this call for new webrtc connection...", [self short]);
         self.jmiid = otherCall.jmiid;
+        self.fullRemoteJid = otherCall.fullRemoteJid;
         self.isConnected = NO;
         self.isReconnecting = YES;
         self.finishReason = MLCallFinishReasonUnknown;
         self.direction = otherCall.direction;
         self.jmiPropose = otherCall.jmiPropose;
         self.jmiProceed = nil;
-        self.audioSession = nil;
+        [self.callDurationTimer invalidate];
+        self.callDurationTimer = nil;
+        otherCall = nil;
         
-        DDLogDebug(@"Stopping all running timers...");
+        DDLogDebug(@"%@: Stopping all running timers...", [self short]);
         if(self.cancelDiscoveringTimeout != nil)
             self.cancelDiscoveringTimeout();
         self.cancelDiscoveringTimeout = nil;
@@ -418,28 +423,29 @@
         
         if(self.webRTCClient != nil)
         {
-            DDLogDebug(@"Closing old webrtc connection...");
-            WebRTCClient* client = self.webRTCClient;
+            DDLogDebug(@"%@: Closing old webrtc connection...", [self short]);
+            __block WebRTCClient* client = self.webRTCClient;
             self.webRTCClient = nil;
             //do this async to not run into a deadlock with the signalling thread
             dispatch_async(dispatch_get_main_queue(), ^{
                 [client.peerConnection close];
+                client = nil;
                 
                 //report this migrated call as ringing
                 [self sendJmiRinging];
                 
                 //now fake a cxprovider answer action (we do auto-answer this call, but ios does not even know we switched the underlying webrtc connection)
-                DDLogVerbose(@"Faking CXAnswerCallAction...");
+                DDLogVerbose(@"%@: Faking CXAnswerCallAction...", [self short]);
                 self.providerAnswerAction = [[CXAnswerCallAction alloc] initWithCallUUID:self.uuid];
     
-                DDLogVerbose(@"Initializing webrtc for our migrated call...");
+                DDLogVerbose(@"%@: Initializing webrtc for our migrated call...", [self short]);
                 [self.voipProcessor initWebRTCForPendingCall:self];
                 
-                DDLogDebug(@"Migration done, waiting for new webrtc connection...");
+                DDLogDebug(@"%@: Migration done, waiting for new webrtc connection...", [self short]);
             });
         }
         else
-            DDLogDebug(@"No old webrtc connection to close...");
+            DDLogDebug(@"%@: No old webrtc connection to close...", [self short]);
     }
 }
 
@@ -581,6 +587,8 @@
 {
     if(self.cancelRingingTimeout != nil)
         self.cancelRingingTimeout();
+    if(self.cancelConnectingTimeout != nil)
+        self.cancelConnectingTimeout();
     self.cancelConnectingTimeout = createTimer(15.0, (^{
         DDLogError(@"Failed to connect call, aborting!");
         [self end];
@@ -591,6 +599,8 @@
 {
     if(self.cancelDiscoveringTimeout != nil)
         self.cancelDiscoveringTimeout();
+    if(self.cancelRingingTimeout != nil)
+        self.cancelRingingTimeout();
     self.cancelRingingTimeout = createTimer(45.0, (^{
         DDLogError(@"Call not answered in time, aborting!");
         [self end];
@@ -599,6 +609,8 @@
 
 -(void) createDiscoveringTimeoutTimer
 {
+    if(self.cancelDiscoveringTimeout != nil)
+        self.cancelDiscoveringTimeout();
     self.cancelDiscoveringTimeout = createTimer(30.0, (^{
         DDLogError(@"Discovery not answered in time, aborting!");
         [self end];
@@ -771,8 +783,10 @@
     NSString* state;
     switch(self.state)
     {
+        case MLCallStateDiscovering: state = @"discovering"; break;
         case MLCallStateRinging: state = @"ringing"; break;
         case MLCallStateConnecting: state = @"connecting"; break;
+        case MLCallStateReconnecting: state = @"reconnecting"; break;
         case MLCallStateConnected: state = @"connected"; break;
         case MLCallStateFinished: state = @"finished"; break;
         case MLCallStateUnknown: state = @"unknown"; break;
@@ -790,13 +804,13 @@
         @"jmiProceed": nilWrapper(self.jmiProceed),
         @"webRTCClient": nilWrapper(self.webRTCClient),
         @"providerAnswerAction": nilWrapper(self.providerAnswerAction),
-        @"isConnected": self.isConnected ? @"YES" : @"NO",
+        @"isConnected": bool2str(self.isConnected),
     }];
 }
 
 -(NSString*) short
 {
-    return [NSString stringWithFormat:@"%@Call:%@", self.direction == MLCallDirectionIncoming ? @"Incoming" : @"Outgoing", self.uuid];
+    return [NSString stringWithFormat:@"%@Call:%@{%@}", self.direction == MLCallDirectionIncoming ? @"Incoming" : @"Outgoing", self.uuid, self.jmiid];
 }
 
 -(BOOL) isEqualToContact:(MLContact*) contact
@@ -970,7 +984,7 @@
     NSString* jmiid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@id"];
     if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
     {
-        DDLogInfo(@"Incoming SDP not matching %@, ignoring...", [self short]);
+        DDLogInfo(@"Ignoring incoming SDP not matching: %@", self);
         return;
     }
     
@@ -998,6 +1012,7 @@
             //it seems we have to create an offer and ignore it before we can create the desired answer
             [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
                 [self.webRTCClient answerWithCompletion:^(RTCSessionDescription* localSdp) {
+                    DDLogDebug(@"Sending SDP answer back...");
                     XMPPIQ* responseIq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
                     [responseIq addChildNode:[[MLXMLNode alloc] initWithElement:@"sdp" andNamespace:@"urn:tmp:monal:webrtc:sdp:1" withAttributes:@{
                         @"id": self.jmiid,

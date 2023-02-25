@@ -964,7 +964,7 @@ enum msgSentState {
 
         }
         else
-            DDLogDebug(@"Not marking messages as read because we are still in background: %@ notInFokus: %@", [HelperTools isInBackground] ? @"YES" : @"NO", [HelperTools isNotInFocus] ? @"YES" : @"NO");
+            DDLogDebug(@"Not marking messages as read because we are still in background: %@ notInFokus: %@", bool2str([HelperTools isInBackground]), bool2str([HelperTools isNotInFocus]));
     }
 }
 
@@ -1085,7 +1085,7 @@ enum msgSentState {
 
     if(isTyping != _isTyping)       //changed state? --> send typing notification
     {
-        DDLogVerbose(@"Sending chatstate isTyping=%@", isTyping ? @"YES" : @"NO");
+        DDLogVerbose(@"Sending chatstate isTyping=%@", bool2str(isTyping));
         [[MLXMPPManager sharedInstance] sendChatState:isTyping fromAccount:self.contact.accountId toJid:self.contact.contactJid];
     }
 

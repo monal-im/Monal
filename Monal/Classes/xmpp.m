@@ -60,6 +60,7 @@ NSString* const kStanza = @"stanza";
 -(id) initWithAccount:(xmpp*) account;
 -(NSDictionary*) getInternalData;
 -(void) setInternalData:(NSDictionary*) data;
+-(void) invalidateQueue;
 -(void) handleHeadlineMessage:(XMPPMessage*) messageNode;
 @end
 
@@ -516,9 +517,9 @@ NSString* const kStanza = @"stanza";
             "\t[[_inCatchup count] = %lu\n\t--> %@"
         ),
         self.accountNo,
-        _accountState < kStateReconnecting ? @"YES" : @"NO",
-        _reconnectInProgress ? @"YES" : @"NO",
-        _catchupDone ? @"YES" : @"NO",
+        bool2str(_accountState < kStateReconnecting),
+        bool2str(_reconnectInProgress),
+        bool2str(_catchupDone),
         _cancelPingTimer == nil ? @"none" : @"running timer",
         unackedCount,
         (unsigned long)[_parseQueue operationCount],
@@ -551,7 +552,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) createStreams
 {
-    DDLogInfo(@"stream creating to server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, self.connectionProperties.server.isDirectTLS ? @"YES" : @"NO");
+    DDLogInfo(@"stream creating to server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, bool2str(self.connectionProperties.server.isDirectTLS));
     
     NSInputStream* localIStream;
     NSOutputStream* localOStream;
@@ -980,6 +981,9 @@ NSString* const kStanza = @"stanza";
                         self->_iqHandlers = [[NSMutableDictionary alloc] init];
                     }
                     
+                    //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
+                    [self.pubsub invalidateQueue];
+                    
                     //clear pipeline cache
                     self->_pipeliningState = kPipelinedNothing;
                     self->_cachedStreamFeaturesBeforeAuth = nil;
@@ -1063,6 +1067,9 @@ NSString* const kStanza = @"stanza";
                     }
                     self->_iqHandlers = [[NSMutableDictionary alloc] init];
                 }
+                
+                //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
+                [self.pubsub invalidateQueue];
                 
                 //clear pipeline cache
                 self->_pipeliningState = kPipelinedNothing;
@@ -1773,6 +1780,7 @@ NSString* const kStanza = @"stanza";
                 return;
             }
             
+            MLContact* contact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo];
             if([presenceNode.fromUser isEqualToString:self.connectionProperties.identity.jid])
             {
                 DDLogInfo(@"got self presence");
@@ -1789,8 +1797,6 @@ NSString* const kStanza = @"stanza";
             {
                 if([presenceNode check:@"/<type=subscribe>"])
                 {
-                    MLContact* contact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo];
-
                     // check if we need a contact request
                     NSDictionary* contactSub = [[DataLayer sharedInstance] getSubscriptionForContact:contact.contactJid andAccount:contact.accountId];
                     DDLogVerbose(@"Got subscription request for contact %@ having subscription status: %@", presenceNode.fromUser, contactSub);
@@ -1809,8 +1815,6 @@ NSString* const kStanza = @"stanza";
                 
                 if([presenceNode check:@"/<type=unsubscribe>"])
                 {
-                    MLContact* contact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo];
-
                     // check if we need a contact request
                     NSDictionary* contactSub = [[DataLayer sharedInstance] getSubscriptionForContact:contact.contactJid andAccount:contact.accountId];
                     DDLogVerbose(@"Got unsubscribe request of contact %@ having subscription status: %@", presenceNode.fromUser, contactSub);
@@ -1824,7 +1828,7 @@ NSString* const kStanza = @"stanza";
                     }));
                 }
 
-                if([presenceNode check:@"{http://jabber.org/protocol/muc#user}x"] || [presenceNode check:@"{http://jabber.org/protocol/muc}x"])
+                if(contact.isGroup || [presenceNode check:@"{http://jabber.org/protocol/muc#user}x"] || [presenceNode check:@"{http://jabber.org/protocol/muc}x"])
                 {
                     //only handle presences for mucs we know
                     if([[DataLayer sharedInstance] isBuddyMuc:presenceNode.fromUser forAccount:self.accountNo])
@@ -1840,7 +1844,6 @@ NSString* const kStanza = @"stanza";
                 if(![presenceNode check:@"/@type"])
                 {
                     DDLogVerbose(@"presence notice from %@", presenceNode.fromUser);
-                    MLContact* contact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo];
                     if(contact.isGroup)
                         [self.mucProcessor processPresence:presenceNode];
                     else
@@ -2080,7 +2083,7 @@ NSString* const kStanza = @"stanza";
             //we don't want to process messages going backwards in time, too (e.g. MLhistory:* mam queries)
             else if(![outerMessageNode check:@"{urn:xmpp:mam:2}result"] || [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"])
             {
-                DDLogInfo(@"Processing message stanza (delayedReplay=%@)...", delayedReplay ? @"YES" : @"NO");
+                DDLogInfo(@"Processing message stanza (delayedReplay=%@)...", bool2str(delayedReplay));
                 
                 //process message
                 [MLMessageProcessor processMessage:messageNode andOuterMessage:outerMessageNode forAccount:self];
@@ -3780,6 +3783,9 @@ NSString* const kStanza = @"stanza";
             else if(handlersCopy[iqid][@"errorHandler"])
                 ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
         }
+        
+        //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
+        [self.pubsub invalidateQueue];
     }
     
     //force new disco queries because we landed here because of a failed smacks resume
@@ -3830,7 +3836,8 @@ NSString* const kStanza = @"stanza";
     [self queryDisco];
     [self purgeOfflineStorage];
     [self sendPresence];            //this will trigger a replay of offline stanzas on prosody (no XEP-0013 support anymore 😡)
-    //the offline messages will come in *after* we started to query mam, because the disco result comes in first (and this is what triggers mam catchup)
+    //the offline messages will come in *after* we initialized the mam query, because the disco result comes in first
+    //(and this is what triggers mam catchup)
     //--> no holes in our history can be caused by these offline messages in conjunction with mam catchup,
     //    however all offline messages will be received twice (as offline message AND via mam catchup)
     
@@ -4769,7 +4776,7 @@ NSString* const kStanza = @"stanza";
     NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
     if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateBound)
     {
-        DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, bool2str(self.connectionProperties.supportsPush));
         return;
     }
     if([MLXMPPManager sharedInstance].hasAPNSToken)
@@ -4817,7 +4824,7 @@ NSString* const kStanza = @"stanza";
     {
         return;
     }
-    DDLogInfo(@"DISABLING push token %@ on server %@ (accountState: %ld, supportsPush: %@)", pushToken, pushServer, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+    DDLogInfo(@"DISABLING push token %@ on server %@ (accountState: %ld, supportsPush: %@)", pushToken, pushServer, (long)self.accountState, bool2str(self.connectionProperties.supportsPush));
     XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
     [disable setPushDisable:pushToken onPushServer:pushServer];
     [self send:disable];

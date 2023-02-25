@@ -254,10 +254,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     nw_path_monitor_set_queue(_path_monitor, q_background);
     nw_path_monitor_set_update_handler(_path_monitor, ^(nw_path_t path) {
         DDLogVerbose(@"*** nw_path_monitor: update_handler called");
-        DDLogDebug(@"*** nw_path_monitor: nw_path_is_constrained=%@", nw_path_is_constrained(path) ? @"YES" : @"NO");
-        DDLogDebug(@"*** nw_path_monitor: nw_path_is_expensive=%@", nw_path_is_expensive(path) ? @"YES" : @"NO");
+        DDLogDebug(@"*** nw_path_monitor: nw_path_is_constrained=%@", bool2str(nw_path_is_constrained(path)));
+        DDLogDebug(@"*** nw_path_monitor: nw_path_is_expensive=%@", bool2str(nw_path_is_expensive(path)));
         self->_onMobile = nw_path_is_constrained(path) || nw_path_is_expensive(path);
-        DDLogDebug(@"*** nw_path_monitor: on 'mobile' --> %@", self->_onMobile ? @"YES" : @"NO");
+        DDLogDebug(@"*** nw_path_monitor: on 'mobile' --> %@", bool2str(self->_onMobile));
         if(nw_path_get_status(path) == nw_path_status_satisfied && !self->_hasConnectivity)
         {
             DDLogVerbose(@"reachable again");

@@ -98,8 +98,14 @@ static NSMutableDictionary* _typingNotifications;
     }
     
     //ignore prosody mod_muc_notifications muc push stanzas (they are only needed to trigger an apns push)
+    //but trigger a muc ping for these mucs nonetheless (if this muc is known, we don't want to arbitrarily join mucs just because of this stanza)
     if([messageNode check:@"{http://quobis.com/xmpp/muc#push}notification"])
+    {
+        NSString* roomJid = [messageNode findFirst:@"{http://quobis.com/xmpp/muc#push}notification@jid"];
+        if([[[DataLayer sharedInstance] listMucsForAccount:account.accountNo] containsObject:roomJid])
+            [account.mucProcessor ping:roomJid];
         return message;
+    }
     
     if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"])
     {

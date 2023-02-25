@@ -16,12 +16,13 @@
 #import "XMPPMessage.h"
 #import "HelperTools.h"
 
-#define CURRENT_PUBSUB_DATA_VERSION @5
+#define CURRENT_PUBSUB_DATA_VERSION @6
 
 @interface MLPubSub ()
 {
     __weak xmpp* _account;
     NSMutableDictionary* _registeredHandlers;
+    NSMutableArray* _queue;
 }
 @end
 
@@ -41,7 +42,10 @@ static NSDictionary* _defaultOptions;
 {
     self = [super init];
     _account = account;
-    _registeredHandlers = [[NSMutableDictionary alloc] init];
+    _registeredHandlers = [NSMutableDictionary new];
+    _queue = [NSMutableArray new];
+    //retry our pubsub operation as soon as possible
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAccountDiscoReady:) name:kMonalAccountDiscoDone object:nil];
     return self;
 }
 
@@ -67,10 +71,34 @@ static NSDictionary* _defaultOptions;
     }
 }
 
--(void) fetchNode:(NSString*) node from:(NSString*) jid withItemsList:(NSArray*) itemsList andHandler:(MLHandler*) handler
+-(void) handleAccountDiscoReady:(NSNotification*) notification
+{
+    if(_account.accountNo.intValue != ((xmpp*)notification.object).accountNo.intValue)
+        return;
+    NSArray* queue;
+    @synchronized(_queue) {
+        queue = [_queue copy];
+        _queue = [NSMutableArray new];
+    }
+    for(MLHandler* handler in queue)
+        $call(handler, $ID(account, _account));
+}
+
+$$instance_handler(queuedFetchNodeHandler, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $_ID(NSArray*, itemsList), $$HANDLER(handler))
+    [self fetchNode:node from:jid withItemsList:itemsList andHandler:handler];
+$$
+-(void) fetchNode:(NSString*) node from:(NSString*) jid withItemsList:(NSArray* _Nullable) itemsList andHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Fetching node '%@' at jid '%@' using callback %@...", node, jid, handler);
     xmpp* account = _account;
+    
+    if(!account.connectionProperties.accountDiscoDone)
+    {
+        DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedFetchNodeHandler, handleFetchInvalidation, $ID(node), $ID(jid), $ID(itemsList), $ID(handler))];
+        return;
+    }
+
     if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
@@ -104,10 +132,21 @@ static NSDictionary* _defaultOptions;
     )];
 }
 
+$$instance_handler(queuedSubscribeToNodeHandler, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$HANDLER(handler))
+    [self subscribeToNode:node onJid:jid withHandler:handler];
+$$
 -(void) subscribeToNode:(NSString*) node onJid:(NSString*) jid withHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Subscribing to node '%@' at jid '%@' using callback %@...", node, jid, handler);
     xmpp* account = _account;
+    
+    if(!account.connectionProperties.accountDiscoDone)
+    {
+        DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedSubscribeToNodeHandler, handleSubscribeInvalidation, $ID(node), $ID(jid), $ID(handler))];
+        return;
+    }
+    
     if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
@@ -135,14 +174,26 @@ static NSDictionary* _defaultOptions;
     )];
 }
 
+$$instance_handler(queuedUnsubscribeFromNodeHandler, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $_HANDLER(handler))
+    [self unsubscribeFromNode:node forJid:jid withHandler:handler];
+$$
 -(void) unsubscribeFromNode:(NSString*) node forJid:(NSString*) jid withHandler:(MLHandler* _Nullable) handler
 {
     DDLogInfo(@"Unsubscribing from node '%@' at jid '%@' using callback %@...", node, jid, handler);
+    
+    if(!_account.connectionProperties.accountDiscoDone)
+    {
+        DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedUnsubscribeFromNodeHandler, handleUnsubscribeInvalidation, $ID(node), $ID(jid), $ID(handler))];
+        return;
+    }
+    
     if(!_account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@' and jid '%@'!", node, jid);
         return;
     }
+    
     if(jid != nil)
     {
         NSDictionary* splitJid = [HelperTools splitJid:jid];
@@ -165,9 +216,20 @@ static NSDictionary* _defaultOptions;
     )];
 }
 
+$$instance_handler(queuedConfigureNodeHandler, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $_HANDLER(handler))
+    [self configureNode:node withConfigOptions:configOptions andHandler:handler];
+$$
 -(void) configureNode:(NSString*) node withConfigOptions:(NSDictionary*) configOptions andHandler:(MLHandler* _Nullable) handler
 {
     xmpp* account = _account;
+    
+    if(!account.connectionProperties.accountDiscoDone)
+    {
+        DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedConfigureNodeHandler, handleConfigFormResultInvalidation, $ID(node), $ID(configOptions), $ID(handler))];
+        return;
+    }
+    
     if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@'!", node);
@@ -200,8 +262,18 @@ static NSDictionary* _defaultOptions;
     [self publishItem:item onNode:node withConfigOptions:configOptions andHandler:nil];
 }
 
+$$instance_handler(queuedPublishItemHandler, account.pubsub, $$ID(xmpp*, account), $$ID(MLXMLNode*, item), $$ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
+    [self publishItem:item onNode:node withConfigOptions:configOptions andHandler:handler];
+$$
 -(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node withConfigOptions:(NSDictionary* _Nullable) configOptions andHandler:(MLHandler* _Nullable) handler
 {
+    if(!_account.connectionProperties.accountDiscoDone)
+    {
+        DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedPublishItemHandler, handlePublishResultInvalidation, $ID(item), $ID(node), $ID(configOptions), $ID(handler))];
+        return;
+    }
+    
     if(!_account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@'!", node);
@@ -221,9 +293,20 @@ static NSDictionary* _defaultOptions;
     [self retractItemWithId:itemId onNode:node andHandler:nil];
 }
 
+$$instance_handler(queuedRetractItemWithIdHandler, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, itemId), $$ID(NSString*, node), $_HANDLER(handler))
+    [self retractItemWithId:itemId onNode:node andHandler:handler];
+$$
 -(void) retractItemWithId:(NSString*) itemId onNode:(NSString*) node andHandler:(MLHandler* _Nullable) handler
 {
     xmpp* account = _account;
+    
+    if(!account.connectionProperties.accountDiscoDone)
+    {
+        DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedRetractItemWithIdHandler, handleRetractResultInvalidation, $ID(itemId), $ID(node), $ID(handler))];
+        return;
+    }
+    
     if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@'!", node);
@@ -247,9 +330,20 @@ static NSDictionary* _defaultOptions;
     [self purgeNode:node andHandler:nil];
 }
 
+$$instance_handler(queuedPurgeNodeNodeHandler, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $_HANDLER(handler))
+    [self purgeNode:node andHandler:handler];
+$$
 -(void) purgeNode:(NSString*) node andHandler:(MLHandler* _Nullable) handler
 {
     xmpp* account = _account;
+    
+    if(!account.connectionProperties.accountDiscoDone)
+    {
+        DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedPurgeNodeNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $ID(handler))];
+        return;
+    }
+    
     if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@'!", node);
@@ -270,9 +364,20 @@ static NSDictionary* _defaultOptions;
     [self deleteNode:node andHandler:nil];
 }
 
+$$instance_handler(queuedDeleteNodeHandler, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $_HANDLER(handler))
+    [self deleteNode:node andHandler:handler];
+$$
 -(void) deleteNode:(NSString*) node andHandler:(MLHandler* _Nullable) handler
 {
     xmpp* account = _account;
+    
+    if(!account.connectionProperties.accountDiscoDone)
+    {
+        DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedDeleteNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $ID(handler))];
+        return;
+    }
+    
     if(!account.connectionProperties.supportsPubSub)
     {
         DDLogWarn(@"Pubsub not supported, ignoring this call for node '%@'!", node);
@@ -292,10 +397,10 @@ static NSDictionary* _defaultOptions;
 
 -(NSDictionary*) getInternalData
 {
-    @synchronized(_registeredHandlers) {
+    @synchronized(_queue) {
         return @{
             @"version": CURRENT_PUBSUB_DATA_VERSION,
-            //@"handlers": _registeredHandlers
+            @"queue": [_queue copy],
         };
     }
 }
@@ -303,27 +408,36 @@ static NSDictionary* _defaultOptions;
 -(void) setInternalData:(NSDictionary*) data
 {
     DDLogDebug(@"Loading internal pubsub data");
-    @synchronized(_registeredHandlers) {
+    @synchronized(_queue) {
         if(!data[@"version"] || ![data[@"version"] isEqualToNumber:CURRENT_PUBSUB_DATA_VERSION])
             return;     //ignore old data
-        //_registeredHandlers = data[@"handlers"];
-        //update caps hash according to our new _registeredHandlers dictionary
-        //but don't persist state again (it was just read from persistent storage)
-        //[_account setPubSubNotificationsForNodes:[_registeredHandlers allKeys] persistState:NO];
+        _queue = [data[@"queue"] mutableCopy];
     }
+}
+
+-(void) invalidateQueue
+{
+    NSArray* queue;
+    @synchronized(_queue) {
+        queue = [_queue copy];
+        _queue = [NSMutableArray new];
+    }
+    for(MLHandler* handler in queue)
+        $invalidate(handler, $ID(account, _account));
 }
 
 -(void) handleHeadlineMessage:(XMPPMessage*) messageNode
 {
-    if(!_account.connectionProperties.supportsPubSub)
-    {
-        DDLogWarn(@"Pubsub not supported, ignoring this call for headline message: %@", messageNode);
-        return;
-    }
     NSString* node = [messageNode findFirst:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/{*}*@node"];
     if(!node)
     {
         DDLogWarn(@"Got pubsub data without node attribute!");
+        return;
+    }
+    
+    if(!_account.connectionProperties.supportsPubSub)
+    {
+        DDLogError(@"Pubsub not supported, ignoring this call for headline message (THIS SHOULD NEVER HAPPEN): %@", messageNode);
         return;
     }
     

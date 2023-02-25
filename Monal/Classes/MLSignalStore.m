@@ -90,9 +90,9 @@
 {
     [self.sqliteDatabase voidWriteTransaction:^{
         // remove old keys that have been remove a long time ago from pubsub
-        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NOT NULL AND pubSubRemovalTimestamp <= date('now', '-14 day');" andArguments:@[self.accountId]];
+        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NOT NULL AND pubSubRemovalTimestamp <= unixepoch('now', '-14 day');" andArguments:@[self.accountId]];
         // mark old unused keys to be removed from pubsub
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=0 AND pubSubRemovalTimestamp IS  NULL AND creationTimestamp<= date('now','-14 day');" andArguments:@[self.accountId]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=0 AND pubSubRemovalTimestamp IS  NULL AND creationTimestamp<= unixepoch('now','-14 day');" andArguments:@[self.accountId]];
     }];
 }
 
@@ -206,9 +206,42 @@
 {
     if(!jid)
         return nil;
-    
+
     return [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=? AND removedFromDeviceList IS NULL;" andArguments:@[self.accountId, jid]];
+    }];
+}
+
+-(NSArray<NSNumber*>*) knownDevicesWithValidSession:(NSString*) jid
+{
+    return [self.sqliteDatabase idReadTransaction:^{
+        return [self.sqliteDatabase executeScalarReader:@"\
+                SELECT DISTINCT \
+                    contactDeviceId \
+                FROM signalContactIdentity \
+                WHERE \
+                    account_id=? \
+                    AND contactName=? \
+                    AND removedFromDeviceList IS NULL \
+                    AND brokenSession=false \
+            ;" andArguments:@[self.accountId, jid]];
+    }];
+}
+
+-(NSArray<NSNumber*>*) knownDevicesWithPendingBrokenSessionHandling:(NSString*) jid
+{
+    return [self.sqliteDatabase idReadTransaction:^{
+        return [self.sqliteDatabase executeScalarReader:@"\
+                SELECT DISTINCT \
+                    contactDeviceId \
+                FROM signalContactIdentity \
+                WHERE \
+                    account_id=? \
+                    AND contactName=? \
+                    AND removedFromDeviceList IS NULL \
+                    AND brokenSession=true \
+                    AND (lastFailedBundleFetch IS NULL OR lastFailedBundleFetch <= unixepoch('now', '-5 day'))\
+            ;" andArguments:@[self.accountId, jid]];
     }];
 }
 
@@ -435,7 +468,7 @@
 
 /*
  * update lastReceivedMsg to CURRENT_TIMESTAMP
- * reset brokenSession to faöse
+ * reset brokenSession to false
  */
 -(void) updateLastSuccessfulDecryptTime:(SignalAddress*) address
 {
@@ -451,10 +484,17 @@
     }];
 }
 
--(void) markSessionAsFunctional:(SignalAddress*) address
+-(void) markBundleAsFixed:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=false WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=false, lastFailedBundleFetch=NULL WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    }];
+}
+
+-(void) markBundleAsBroken:(SignalAddress*) address
+{
+    [self.sqliteDatabase voidWriteTransaction:^{
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET lastFailedBundleFetch=unixepoch('now') WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
@@ -496,13 +536,13 @@
         return [self.sqliteDatabase executeScalar:(@"SELECT \
                 CASE \
                     WHEN (trustLevel=0) THEN 0 \
-                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= date('now', '-90 day'))) THEN 100 \
+                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= unixepoch('now', '-90 day'))) THEN 100 \
                     WHEN (trustLevel=1 AND removedFromDeviceList IS NOT NULL) THEN 101 \
-                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < date('now', '-90 day'))) THEN 102 \
+                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < unixepoch('now', '-90 day'))) THEN 102 \
                     WHEN (COUNT(*)=0) THEN 100 \
-                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= date('now', '-90 day'))) THEN 200 \
+                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= unixepoch('now', '-90 day'))) THEN 200 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NOT NULL) THEN 201 \
-                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < date('now', '-90 day'))) THEN 202 \
+                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < unixepoch('now', '-90 day'))) THEN 202 \
                     ELSE 0 \
                 END \
                 FROM signalContactIdentity \

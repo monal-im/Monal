@@ -256,16 +256,16 @@ static id preprocess(id exception)
 +(BOOL) isSandboxAPNS
 {
     // check if were are sandbox or production
+    NSString* embeddedProvPath;
 #if TARGET_OS_MACCATALYST
-    // We currently can not access the embedded.provisionprofile
-    // Instead we always use the production APNS
-    return YES;
+    NSString* bundleURL = [[NSBundle mainBundle] bundleURL].absoluteString;
+    embeddedProvPath = [[[bundleURL componentsSeparatedByString:@"file://"] objectAtIndex:1] stringByAppendingString:@"Contents/embedded.provisionprofile"];
 #else
-    NSString* embeddedProvUrl = [[NSBundle mainBundle] pathForResource:@"embedded" ofType:@"mobileprovision"];
-
+    embeddedProvPath = [[NSBundle mainBundle] pathForResource:@"embedded" ofType:@"mobileprovision"];
+#endif
     NSError* loadingError;
-    NSString* embeddedProvStr = [NSString stringWithContentsOfFile:embeddedProvUrl encoding:NSISOLatin1StringEncoding error:&loadingError];
-    if(loadingError != nil)
+    NSString* embeddedProvStr = [NSString stringWithContentsOfFile:embeddedProvPath encoding:NSISOLatin1StringEncoding error:&loadingError];
+    if(embeddedProvStr == nil)
     {
         // file does not exist --> simulator
         // use sandbox
@@ -290,11 +290,11 @@ static id preprocess(id exception)
     if(plist[@"com.apple.developer.aps-environment"] && [plist[@"com.apple.developer.aps-environment"] isEqualToString:@"production"] == NO)
     {
         // sandbox
+	DDLogWarn(@"aps-environmnet is set to: %@", plist[@"com.apple.developer.aps-environment"]);
         return YES;
     }
     // productions
     return NO;
-#endif
 }
 
 +(int) compareIOcted:(NSData*) data1 with:(NSData*) data2

@@ -252,10 +252,10 @@ static NSMutableDictionary* _typingNotifications;
     //check stanza-id @by according to the rules outlined in XEP-0359
     if(!stanzaid)
     {
-        if(![messageNode check:@"/<type=groupchat>"] && [account.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
-            stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
-        else if([messageNode check:@"/<type=groupchat>"] && [messageNode.fromUser isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]] && [[account.mucProcessor getRoomFeaturesForMuc:messageNode.fromUser] containsObject:@"urn:xmpp:sid:0"])
-            stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
+        if(![messageNode check:@"/<type=groupchat>"] && [messageNode check:@"{urn:xmpp:sid:0}stanza-id<by=%@>", account.connectionProperties.identity.jid])
+            stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id<by=%@>@id", account.connectionProperties.identity.jid];
+        else if([messageNode check:@"/<type=groupchat>"] && [messageNode check:@"{urn:xmpp:sid:0}stanza-id<by=%@>", messageNode.fromUser] && [[account.mucProcessor getRoomFeaturesForMuc:messageNode.fromUser] containsObject:@"urn:xmpp:sid:0"])
+            stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id<by=%@>@id", messageNode.fromUser];
     }
     
     //all modern clients using origin-id should use the same id for origin-id AND message id 

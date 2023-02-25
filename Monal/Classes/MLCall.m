@@ -395,7 +395,7 @@
     [self.account send:jmiNode];
     
     @synchronized(self) {
-        DDLogDebug(@"Preparing this call for new webrtc connection...");
+        DDLogDebug(@"%@: Preparing this call for new webrtc connection...", [self short]);
         self.jmiid = otherCall.jmiid;
         self.isConnected = NO;
         self.isReconnecting = YES;
@@ -404,8 +404,9 @@
         self.jmiPropose = otherCall.jmiPropose;
         self.jmiProceed = nil;
         self.audioSession = nil;
+        otherCall = nil;
         
-        DDLogDebug(@"Stopping all running timers...");
+        DDLogDebug(@"%@: Stopping all running timers...", [self short]);
         if(self.cancelDiscoveringTimeout != nil)
             self.cancelDiscoveringTimeout();
         self.cancelDiscoveringTimeout = nil;
@@ -418,28 +419,29 @@
         
         if(self.webRTCClient != nil)
         {
-            DDLogDebug(@"Closing old webrtc connection...");
-            WebRTCClient* client = self.webRTCClient;
+            DDLogDebug(@"%@: Closing old webrtc connection...", [self short]);
+            __block WebRTCClient* client = self.webRTCClient;
             self.webRTCClient = nil;
             //do this async to not run into a deadlock with the signalling thread
             dispatch_async(dispatch_get_main_queue(), ^{
                 [client.peerConnection close];
+                client = nil;
                 
                 //report this migrated call as ringing
                 [self sendJmiRinging];
                 
                 //now fake a cxprovider answer action (we do auto-answer this call, but ios does not even know we switched the underlying webrtc connection)
-                DDLogVerbose(@"Faking CXAnswerCallAction...");
+                DDLogVerbose(@"%@: Faking CXAnswerCallAction...", [self short]);
                 self.providerAnswerAction = [[CXAnswerCallAction alloc] initWithCallUUID:self.uuid];
     
-                DDLogVerbose(@"Initializing webrtc for our migrated call...");
+                DDLogVerbose(@"%@: Initializing webrtc for our migrated call...", [self short]);
                 [self.voipProcessor initWebRTCForPendingCall:self];
                 
-                DDLogDebug(@"Migration done, waiting for new webrtc connection...");
+                DDLogDebug(@"%@: Migration done, waiting for new webrtc connection...", [self short]);
             });
         }
         else
-            DDLogDebug(@"No old webrtc connection to close...");
+            DDLogDebug(@"%@: No old webrtc connection to close...", [self short]);
     }
 }
 
@@ -802,7 +804,7 @@
 
 -(NSString*) short
 {
-    return [NSString stringWithFormat:@"%@Call:%@", self.direction == MLCallDirectionIncoming ? @"Incoming" : @"Outgoing", self.uuid];
+    return [NSString stringWithFormat:@"%@Call:%@{%@}", self.direction == MLCallDirectionIncoming ? @"Incoming" : @"Outgoing", self.uuid, self.jmiid];
 }
 
 -(BOOL) isEqualToContact:(MLContact*) contact

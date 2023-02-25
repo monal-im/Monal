@@ -209,10 +209,16 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     //ignore carbon copied muc pms not marked as such
-    if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"] && [MLContact createContactFromJid:messageNode.fromUser andAccountNo:account.accountNo].isGroup)
+    if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"])
     {
-        DDLogWarn(@"Ignoring carbon copied muc pm...");
-        return message;
+        MLContact* carbonTestContact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:account.accountNo];
+        if(carbonTestContact.isGroup)
+        {
+            DDLogWarn(@"Ignoring carbon copied muc pm...");
+            return message;
+        }
+        else
+            DDLogVerbose(@"Not a carbon copy of a muc pm for contact: %@", carbonTestContact);
     }
 
     if(([messageNode check:@"/<type=groupchat>"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])

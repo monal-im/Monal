@@ -209,9 +209,11 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     //ignore carbon copied muc pms not marked as such
-    if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"])
+    NSString* carbonType = [outerMessageNode findFirst:@"{urn:xmpp:carbons:2}*$"];
+    if(carbonType != nil)
     {
-        MLContact* carbonTestContact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:account.accountNo];
+        NSString* maybeMucJid = [carbonType isEqualToString:@"sent"] ? messageNode.toUser : messageNode.fromUser;
+        MLContact* carbonTestContact = [MLContact createContactFromJid:maybeMucJid andAccountNo:account.accountNo];
         if(carbonTestContact.isGroup)
         {
             DDLogWarn(@"Ignoring carbon copied muc pm...");

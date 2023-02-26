@@ -163,16 +163,6 @@ NSString* const kStanza = @"stanza";
  */
 @property (nonatomic, strong) NSMutableArray* unAckedStanzas;
 
-/**
- ID of the signal device query
- */
-
-/**
-    Privacy Settings: Only send idle notifications out when the user allows it
- */
-@property (nonatomic, assign) BOOL sendIdleNotifications;
-
-
 @end
 
 
@@ -309,7 +299,6 @@ NSString* const kStanza = @"stanza";
         _isCSIActive = NO;
     }
     _lastInteractionDate = [NSDate date];     //better default than 1970
-    self.sendIdleNotifications = [[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"];
     
     self.statusMessage = @"";
 }
@@ -3763,7 +3752,7 @@ NSString* const kStanza = @"stanza";
     
     //send last interaction date if not currently active
     //and the user prefers to send out lastInteraction date
-    if(!_isCSIActive && self.sendIdleNotifications)
+    if(!_isCSIActive && [[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"])
         [presence setLastInteraction:_lastInteractionDate];
     
     [self send:presence];
@@ -4004,7 +3993,7 @@ NSString* const kStanza = @"stanza";
         
         //this will broadcast our presence without idle element, because of _isCSIActive=YES
         //(presence without idle indicates the client is now active, see XEP-0319)
-        if(self.sendIdleNotifications)
+        if([[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"])
             [self sendPresence];
     }];
 }
@@ -4027,7 +4016,7 @@ NSString* const kStanza = @"stanza";
         self->_isCSIActive = NO;
         
         //this will broadcast our presence with idle element set, because of _isCSIActive=NO (see XEP-0319)
-        if(self.sendIdleNotifications)
+        if([[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"])
             [self sendPresence];
         
         //send csi inactive nonza *after* broadcasting our presence

@@ -208,20 +208,16 @@ static const int KEY_SIZE = 16;
             [self generateNewKeysIfNeeded];
         }
         
-        //send all needed key transport elements now (added by incoming catchup messages)
+        //send all needed key transport elements now (added by incoming catchup messages or bundle fetches)
         //the queue is needed to make sure we won't send multiple key transport messages to a single contact/device
-        //only because we received multiple messages from this user in the catchup
+        //only because we received multiple messages from this user in the catchup or fetched multiple bundles
         //queuedKeyTransportElements will survive any smacks or non-smacks resumptions and eventually trigger key transport elements
         //once the catchup could be finished (could take several smacks resumptions to finish the whole (mam) catchup)
         //has to be synchronized because [xmpp sendMessage:] could be called from main thread
         @synchronized(self.state.queuedKeyTransportElements) {
-            DDLogDebug(@"Replaying queuedKeyTransportElements: %@", self.state.queuedKeyTransportElements);
-            for(NSString* jid in self.state.queuedKeyTransportElements)
-            {
-                [self sendKeyTransportElement:jid forRids:self.state.queuedKeyTransportElements[jid]];
-                [self.state.queuedKeyTransportElements[jid] removeAllObjects];       //this gets us better logging while doing replay
-            }
-            self.state.queuedKeyTransportElements = [NSMutableDictionary new];
+            DDLogDebug(@"Replaying queuedKeyTransportElements for all jids: %@", self.state.queuedKeyTransportElements);
+            for(NSString* jid in [self.state.queuedKeyTransportElements allKeys])
+                [self retriggerKeyTransportElementsForJid:jid];
         }
         
         //handle all broken sessions now (e.g. reestablish them by fetching their bundles and sending key transport elements afterwards)
@@ -240,6 +236,28 @@ static const int KEY_SIZE = 16;
         DDLogVerbose(@"New state: %@", self.state);
     }
 #endif
+}
+
+-(void) retriggerKeyTransportElementsForJid:(NSString*) jid
+{
+    //send all needed key transport elements now (added by incoming catchup messages or bundle fetches)
+    //the queue is needed to make sure we won't send multiple key transport messages to a single contact/device
+    //only because we received multiple messages from this user in the catchup or fetched multiple bundles
+    //queuedKeyTransportElements will survive any smacks or non-smacks resumptions and eventually trigger key transport elements
+    //once the catchup could be finished (could take several smacks resumptions to finish the whole (mam) catchup)
+    //has to be synchronized because [xmpp sendMessage:] could be called from main thread
+    @synchronized(self.state.queuedKeyTransportElements) {
+        NSMutableSet* rids = self.state.queuedKeyTransportElements[jid];
+        if(rids == nil)
+        {
+            DDLogVerbose(@"No key transport elements queued for %@", jid);
+            return;
+        }
+        DDLogDebug(@"Replaying queuedKeyTransportElements for %@: %@", jid, rids);
+        //rids can be added back by sendKeyTransportElement: if the sending is still blocked by open bundle fetches etc.
+        [self.state.queuedKeyTransportElements removeObjectForKey:jid];
+        [self sendKeyTransportElement:jid forRids:rids];
+    }
 }
 
 $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
@@ -304,6 +322,9 @@ $$
 $$instance_handler(handleDevicelistFetchInvalidation, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid))
     //mark devicelist fetch as done
     [self.state.openDevicelistFetches removeObject:jid];
+    
+    //retrigger queued key transport elements for this jid (if any)
+    [self retriggerKeyTransportElementsForJid:jid];
 $$
 
 $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
@@ -337,6 +358,9 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
             [self processOMEMODevices:deviceSet from:jid];
         }
     }
+    
+    //retrigger queued key transport elements for this jid (if any)
+    [self retriggerKeyTransportElementsForJid:jid];
 $$
 
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString*) source
@@ -473,6 +497,9 @@ $$instance_handler(handleBundleFetchInvalidation, account.omemo, $$ID(xmpp*, acc
     
     //update bundle fetch status (this has to be done even in error cases!)
     [self decrementBundleFetchCount];
+    
+    //retrigger queued key transport elements for this jid (if any)
+    [self retriggerKeyTransportElementsForJid:jid];
 $$
 
 $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data), $$ID(NSNumber*, rid))
@@ -521,6 +548,9 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
     
     //update bundle fetch status (this has to be done even in error cases!)
     [self decrementBundleFetchCount];
+    
+    //retrigger queued key transport elements for this jid (if any)
+    [self retriggerKeyTransportElementsForJid:jid];
 $$
 
 -(void) handleBundleWithInvalidEntryForJid:(NSString*) jid andRid:(NSNumber*) rid
@@ -689,7 +719,9 @@ $$
 -(void) sendKeyTransportElement:(NSString*) jid forRids:(NSSet<NSNumber*>*) rids
 {
     //queue all actions until the catchup was done
-    if(!self.state.catchupDone)
+    //OR
+    //queue all actions until all devicelists and bundles of this jid are fetched
+    if(!self.state.catchupDone || ([self.state.openDevicelistFetches containsObject:jid] || (self.state.openBundleFetches[jid] != nil && self.state.openBundleFetches[jid].count > 0)))
     {
         @synchronized(self.state.queuedKeyTransportElements) {
             if(self.state.queuedKeyTransportElements[jid] == nil)
@@ -704,6 +736,7 @@ $$
     [self generateNewKeysIfNeeded];
     
     //send key-transport element for all known rids (e.g. devices) to recover broken sessions
+    //this will remove any queued key transport elements for rids used to encrypt so that we only send one key transport element
     DDLogDebug(@"Sending KeyTransportElement to jid: %@", jid);
     XMPPMessage* messageNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:jid];
     [self encryptMessage:messageNode withMessage:nil toContact:jid];
@@ -717,6 +750,18 @@ $$
                 DDLogDebug(@"Removing deviceid %@ on jid %@ from queuedSessionRepairs...", rid, jid);
                 [self.state.queuedSessionRepairs[jid] removeObject:rid];
             }
+    }
+}
+
+-(void) removeQueuedKeyTransportElementsFor:(NSString*) jid andDevices:(NSSet*) devices
+{
+    @synchronized(self.state.queuedKeyTransportElements) {
+        if(self.state.queuedKeyTransportElements[jid] != nil)
+        {
+            [self.state.queuedKeyTransportElements[jid] minusSet:devices];
+            if(self.state.queuedKeyTransportElements[jid].count == 0)
+                [self.state.queuedKeyTransportElements removeObjectForKey:jid];
+        }
     }
 }
 
@@ -885,6 +930,7 @@ $$
 
 -(void) addEncryptionKeyForAllDevices:(NSSet<NSNumber*>*) devices encryptForJid:(NSString*) encryptForJid withEncryptedPayload:(MLEncryptedPayload*) encryptedPayload withXMLHeader:(MLXMLNode*) xmlHeader
 {
+    NSMutableSet* usedRids = [NSMutableSet new];
     //encrypt message for all given deviceids
     for(NSNumber* device in devices)
     {
@@ -924,8 +970,14 @@ $$
                 @"rid": [NSString stringWithFormat:@"%@", device],
                 @"prekey": (deviceEncryptedKey.type == SignalCiphertextTypePreKeyMessage ? @"1" : @"0"),
             } andChildren:@[] andData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]]];
+            
+            //record this deviceid as used for encryption (it doesn't need any further key transport element potentially already queued)
+            [usedRids addObject:device];
         }
     }
+    
+    //remove queued key transport element entry
+    [self removeQueuedKeyTransportElementsFor:encryptForJid andDevices:usedRids];
 }
 
 -(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid

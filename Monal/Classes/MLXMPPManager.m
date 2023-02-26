@@ -833,8 +833,6 @@ $$
             [account joinMuc:contact.contactJid];
         else
         {
-            [account addToRoster:contact.contactJid withPreauthToken:preauthToken];
-            
             BOOL approve = NO;
             // approve contact ahead of time if possible
             if(account.connectionProperties.supportsRosterPreApproval)
@@ -852,6 +850,9 @@ $$
                 // and approve the new contact
                 [self approveContact:contact];
             }
+            
+            [account addToRoster:contact.contactJid withPreauthToken:preauthToken];
+            
 #ifndef DISABLE_OMEMO
             // Request omemo devicelist
             [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:contact.contactJid];

@@ -232,6 +232,24 @@ static id preprocess(id exception)
     ];
 }
 
++(NSString*) getQueueThreadLabelFor:(DDLogMessage*) logMessage
+{
+    NSString* queueThreadLabel = logMessage.threadName;
+    if(![queueThreadLabel length])
+        queueThreadLabel = logMessage.queueLabel;
+    if([@"com.apple.main-thread" isEqualToString:queueThreadLabel])
+        queueThreadLabel = @"main";
+    if(![queueThreadLabel length])
+        queueThreadLabel = logMessage.threadID;
+
+    //remove already appended " (QOS: XXX)" because we want to append the QOS part ourselves
+    NSRange range = [queueThreadLabel rangeOfString:@" (QOS: "];
+    if(range.length > 0)
+        queueThreadLabel = [queueThreadLabel substringWithRange:NSMakeRange(0, range.location)];
+    
+    return queueThreadLabel;
+}
+
 +(NSURL*) getFailoverTurnApiServer
 {
     NSString* turnApiServer;

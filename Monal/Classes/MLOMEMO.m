@@ -571,7 +571,8 @@ $$
 
 -(void) decrementBundleFetchCount
 {
-    if(self.openBundleFetchCnt > 1)
+    //use catchupDone for better UX on first login
+    if(self.openBundleFetchCnt > 1 || !self.state.catchupDone)
     {
         //update bundle fetch status (e.g. pending)
         self.openBundleFetchCnt--;

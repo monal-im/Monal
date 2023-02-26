@@ -41,10 +41,6 @@ static inline NSString* _loglevel_name(NSUInteger flag) {
     return @" UNKN";
 }
 
-@interface MLLogFormatter ()
-@end
-
-
 @implementation MLLogFormatter
 
 -(NSString*) formatLogMessage:(DDLogMessage*) logMessage
@@ -53,18 +49,13 @@ static inline NSString* _loglevel_name(NSUInteger flag) {
     NSString* file = logMessage.file;
     if([filePathComponents count]>1)
         file = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
-    NSString* timestamp = [self stringFromDate:(logMessage.timestamp)];
-    NSString* queueThreadLabel = [self queueThreadLabelForLogMessage:logMessage];
+    NSString* timestamp = [self stringFromDate:logMessage.timestamp];
+    NSString* queueThreadLabel = [HelperTools getQueueThreadLabelFor:logMessage];
 
-    //remove already appended " (QOS: XXX)" because we want to append the QOS part ourselves
-    NSRange range = [queueThreadLabel rangeOfString:@" (QOS: "];
-    if(range.length > 0)
-        queueThreadLabel = [queueThreadLabel substringWithRange:NSMakeRange(0, range.location)];
-    
     //append the mach thread id if not already present
     if(![queueThreadLabel isEqualToString:logMessage.threadID])
         queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage.threadID, queueThreadLabel];
-
+    
     return [NSString stringWithFormat:@"%@ [%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", timestamp, _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
 }
 

@@ -46,6 +46,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSArray<NSString*>*) getFailoverStunServers;
 +(NSURL*) getFailoverTurnApiServer;
 
++(NSString*) getQueueThreadLabelFor:(DDLogMessage*) logMessage;
 +(BOOL) shouldProvideVoip;
 +(BOOL) isSandboxAPNS;
 +(int) compareIOcted:(NSData*) data1 with:(NSData*) data2;

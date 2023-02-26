@@ -232,6 +232,24 @@ static id preprocess(id exception)
     ];
 }
 
++(NSString*) getQueueThreadLabelFor:(DDLogMessage*) logMessage
+{
+    NSString* queueThreadLabel = logMessage.threadName;
+    if(![queueThreadLabel length])
+        queueThreadLabel = logMessage.queueLabel;
+    if([@"com.apple.main-thread" isEqualToString:queueThreadLabel])
+        queueThreadLabel = @"main";
+    if(![queueThreadLabel length])
+        queueThreadLabel = logMessage.threadID;
+
+    //remove already appended " (QOS: XXX)" because we want to append the QOS part ourselves
+    NSRange range = [queueThreadLabel rangeOfString:@" (QOS: "];
+    if(range.length > 0)
+        queueThreadLabel = [queueThreadLabel substringWithRange:NSMakeRange(0, range.location)];
+    
+    return queueThreadLabel;
+}
+
 +(NSURL*) getFailoverTurnApiServer
 {
     NSString* turnApiServer;
@@ -256,6 +274,7 @@ static id preprocess(id exception)
 +(BOOL) isSandboxAPNS
 {
 #if TARGET_OS_SIMULATOR
+    DDLogVerbose(@"APNS environment is: sandbox");
     return YES;
 #else
     // check if were are sandbox or production
@@ -273,6 +292,7 @@ static id preprocess(id exception)
     {
         // fallback to production
         DDLogWarn(@"Could not read embedded provision (should be production install): %@", loadingError);
+        DDLogVerbose(@"APNS environment is: production");
         return NO;
     }
     NSScanner* plistScanner = [NSScanner scannerWithString:embeddedProvStr];
@@ -290,15 +310,18 @@ static id preprocess(id exception)
     {
         // fallback to production
         DDLogWarn(@"Could not parse embedded provision as plist: %@", plistError);
+        DDLogVerbose(@"APNS environment is: production");
         return NO;
     }
     if(plist[@"com.apple.developer.aps-environment"] && [plist[@"com.apple.developer.aps-environment"] isEqualToString:@"production"] == NO)
     {
         // sandbox
         DDLogWarn(@"aps-environmnet is set to: %@", plist[@"com.apple.developer.aps-environment"]);
+        DDLogVerbose(@"APNS environment is: sandbox");
         return YES;
     }
-    // productions
+    // production
+    DDLogVerbose(@"APNS environment is: production");
     return NO;
 #endif
 }

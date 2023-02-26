@@ -232,6 +232,12 @@ static volatile MLUDPLogger* _self;
     if(self->_logFormatter)
         logMsg = [NSString stringWithFormat:@"%@\n", [self->_logFormatter formatLogMessage:logMessage]];
     
+    NSDictionary* representedObject = @{
+        @"queueThreadLabel": [HelperTools getQueueThreadLabelFor:logMessage],
+        @"processType": [HelperTools isAppExtension] ? @"appex" : @"mainapp",
+        @"representedObject": logMessage.representedObject ? logMessage.representedObject : [NSNull null]
+    };
+    
     _counter++;
     NSDictionary* msgDict = @{
         @"formattedMessage": logMsg,
@@ -243,7 +249,7 @@ static volatile MLUDPLogger* _self;
         @"fileName": logMessage.fileName,
         @"function": logMessage.function,
         @"line": [NSNumber numberWithInteger:logMessage.line],
-        @"tag": logMessage.representedObject ? logMessage.representedObject : [NSNull null],
+        @"tag": representedObject,
         @"options": [NSNumber numberWithInteger:logMessage.options],
         @"timestamp": [[NSISO8601DateFormatter new] stringFromDate:logMessage.timestamp],
         @"threadID": logMessage.threadID,

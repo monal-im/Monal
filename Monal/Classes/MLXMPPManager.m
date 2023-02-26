@@ -789,12 +789,13 @@ $$
         }
         
         if(contact.isGroup)
-        {
-            //if MUC
             [account leaveMuc:contact.contactJid];
-        } else  {
+        else
+        {
             [account removeFromRoster:contact.contactJid];
+            [[DataLayer sharedInstance] deleteContactRequest:contact];
         }
+        
         //remove from DB
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
         [contact removeShareInteractions];

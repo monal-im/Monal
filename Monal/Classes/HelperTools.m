@@ -313,10 +313,17 @@ static id preprocess(id exception)
         DDLogVerbose(@"APNS environment is: production");
         return NO;
     }
-    if(plist[@"com.apple.developer.aps-environment"] && [plist[@"com.apple.developer.aps-environment"] isEqualToString:@"production"] == NO)
+    if(plist[@"com.apple.developer.aps-environment"] && [@"production" isEqualToString:plist[@"com.apple.developer.aps-environment"]] == NO)
     {
         // sandbox
         DDLogWarn(@"aps-environmnet is set to: %@", plist[@"com.apple.developer.aps-environment"]);
+        DDLogVerbose(@"APNS environment is: sandbox");
+        return YES;
+    }
+    if(plist[@"Entitlements"] && [@"production" isEqualToString:plist[@"Entitlements"][@"aps-environment"]] == NO)
+    {
+        // sandbox
+        DDLogWarn(@"aps-environmnet is set to: %@", plist[@"Entitlements"][@"aps-environment"]);
         DDLogVerbose(@"APNS environment is: sandbox");
         return YES;
     }

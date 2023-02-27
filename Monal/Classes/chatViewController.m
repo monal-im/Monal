@@ -250,7 +250,7 @@ enum msgSentState {
         //this has to be done in the main thread because it's ui related
         [HelperTools dispatchSyncReentrant:^{
             //these contact types can not be called
-            if(self.contact.isGroup || self.contact.isSelfChat)
+            if(self.contact.isGroup || self.contact.isSelfChat || !self.contact.isSubscribedBoth)
             {
                 self.callButton = nil;
                 

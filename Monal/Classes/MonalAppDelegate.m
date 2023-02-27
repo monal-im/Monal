@@ -808,16 +808,12 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         {
             DDLogInfo(@"APPROVE_SUBSCRIPTION_ACTION triggered...");
             [[MLXMPPManager sharedInstance] addContact:fromContact];
-            
-            //make sure we have an active buddy for this chat and open it
-            [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountId];
             [self openChatOfContact:fromContact];
-            
         }
         else if([response.actionIdentifier isEqualToString:@"DENY_SUBSCRIPTION_ACTION"])
         {
             DDLogInfo(@"DENY_SUBSCRIPTION_ACTION triggered...");
-            [[MLXMPPManager sharedInstance] rejectContact:fromContact];
+            [[MLXMPPManager sharedInstance] removeContact:fromContact];
         }
         else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
             [self openChatOfContact:fromContact];

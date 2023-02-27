@@ -163,16 +163,6 @@ NSString* const kStanza = @"stanza";
  */
 @property (nonatomic, strong) NSMutableArray* unAckedStanzas;
 
-/**
- ID of the signal device query
- */
-
-/**
-    Privacy Settings: Only send idle notifications out when the user allows it
- */
-@property (nonatomic, assign) BOOL sendIdleNotifications;
-
-
 @end
 
 
@@ -309,7 +299,6 @@ NSString* const kStanza = @"stanza";
         _isCSIActive = NO;
     }
     _lastInteractionDate = [NSDate date];     //better default than 1970
-    self.sendIdleNotifications = [[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"];
     
     self.statusMessage = @"";
 }
@@ -1805,12 +1794,12 @@ NSString* const kStanza = @"stanza";
                     if(!contactSub || !([[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo] || [[contactSub objectForKey:@"subscription"] isEqualToString:kSubBoth]))
                         [[DataLayer sharedInstance] addContactRequest:contact];
                     else if(contactSub && [[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo])
-                        [self approveToRoster:presenceNode.fromUser];
+                        [self addToRoster:contact withPreauthToken:nil];
                     
                     //wait 1 sec for nickname and profile image to be processed, then send out kMonalContactRefresh notification
                     createTimer(1.0, (^{
                         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
-                            @"contact": contact
+                            @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo]
                         }];
                     }));
                 }
@@ -1825,7 +1814,7 @@ NSString* const kStanza = @"stanza";
                     //wait 1 sec for nickname and profile image to be processed, then send out kMonalContactRefresh notification
                     createTimer(1.0, (^{
                         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
-                            @"contact": contact
+                            @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo]
                         }];
                     }));
                 }
@@ -3763,7 +3752,7 @@ NSString* const kStanza = @"stanza";
     
     //send last interaction date if not currently active
     //and the user prefers to send out lastInteraction date
-    if(!_isCSIActive && self.sendIdleNotifications)
+    if(!_isCSIActive && [[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"])
         [presence setLastInteraction:_lastInteractionDate];
     
     [self send:presence];
@@ -4004,7 +3993,7 @@ NSString* const kStanza = @"stanza";
         
         //this will broadcast our presence without idle element, because of _isCSIActive=YES
         //(presence without idle indicates the client is now active, see XEP-0319)
-        if(self.sendIdleNotifications)
+        if([[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"])
             [self sendPresence];
     }];
 }
@@ -4027,7 +4016,7 @@ NSString* const kStanza = @"stanza";
         self->_isCSIActive = NO;
         
         //this will broadcast our presence with idle element set, because of _isCSIActive=NO (see XEP-0319)
-        if(self.sendIdleNotifications)
+        if([[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"])
             [self sendPresence];
         
         //send csi inactive nonza *after* broadcasting our presence
@@ -4272,42 +4261,39 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark- XMPP add and remove contact
 
--(void) removeFromRoster:(NSString*) contact
+-(void) removeFromRoster:(MLContact*) contact
 {
     DDLogVerbose(@"Removing jid from roster: %@", contact);
-    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [iq setRemoveFromRoster:contact];
-    [self send:iq];
-
+    
+    //delete contact request if it exists
+    [[DataLayer sharedInstance] deleteContactRequest:contact];
+    
     XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence unsubscribeContact:contact];
+    [presence unsubscribeContact:contact.contactJid];
     [self send:presence];
     
-    [self rejectFromRoster:contact];
-}
-
--(void) rejectFromRoster:(NSString*) contact
-{
-    DDLogVerbose(@"Rejecting jid from roster: %@", contact);
     XMPPPresence* presence2 =[[XMPPPresence alloc] init];
-    [presence2 unsubscribedContact:contact];
+    [presence2 unsubscribedContact:contact.contactJid];
     [self send:presence2];
+    
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [iq setRemoveFromRoster:contact.contactJid];
+    [self send:iq];
 }
 
-
--(void) addToRoster:(NSString*) contact withPreauthToken:(NSString* _Nullable) preauthToken
+-(void) addToRoster:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken
 {
-    DDLogVerbose(@"Adding jid to roster: %@", contact);
+    DDLogVerbose(@"(re)adding jid to roster: %@", contact);
+    
+    //delete contact request if it exists
+    [[DataLayer sharedInstance] deleteContactRequest:contact];
+    
     XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence subscribeContact:contact withPreauthToken:preauthToken];
-    [self send:presence];   //add them
-}
-
--(void) approveToRoster:(NSString*) contact
-{
-    DDLogVerbose(@"Approving jid to roster: %@", contact);
+    [presence subscribeContact:contact.contactJid withPreauthToken:preauthToken];
+    [self send:presence];
+    
     XMPPPresence* presence2 =[[XMPPPresence alloc] init];
-    [presence2 subscribedContact:contact];
+    [presence2 subscribedContact:contact.contactJid];
     [self send:presence2];
 }
 

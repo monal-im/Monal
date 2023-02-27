@@ -430,6 +430,11 @@ NSString *const kAskSubscribe=@"subscribe";
         || [self.subscription isEqualToString:kSubFrom];
 }
 
+-(BOOL) isSubscribedBoth
+{
+    return [self.subscription isEqualToString:kSubBoth];
+}
+
 -(BOOL) hasIncomingContactRequest
 {
     return self.isGroup == NO && [[DataLayer sharedInstance] hasContactRequestForAccount:self.accountId andBuddyName:self.contactJid];

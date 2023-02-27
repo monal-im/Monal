@@ -402,41 +402,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - Connection related
 
-//this handler will simply retry the rejectContact: call
-$$class_handler(handleRejectContact, $$ID(MLContact*, contact))
-    [[MLXMPPManager sharedInstance] rejectContact:contact];
-$$
-
--(void) rejectContact:(MLContact*) contact
-{
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
-    if(account)
-    {
-        //queue reject contact for execution once bound (e.g. on catchup done)
-        if(account.accountState < kStateBound)
-        {
-            [account addReconnectionHandler:$newHandler(self, handleRejectContact, $ID(contact))];
-            return;
-        }
-        
-        //delete existing contact request if exists
-        [[DataLayer sharedInstance] deleteContactRequest:contact];
-        //and reject contact
-        [account rejectFromRoster:contact.contactJid];
-        
-        //notify the UI
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
-            @"contact": [MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]
-        }];
-    }
-}
-
--(void) approveContact:(MLContact*) contact
-{
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
-    [account approveToRoster:contact.contactJid];
-}
-
 -(BOOL) isAccountForIdConnected:(NSNumber*) accountNo
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
@@ -775,7 +740,6 @@ $$
 $$class_handler(handleRemoveContact, $$ID(MLContact*, contact))
     [[MLXMPPManager sharedInstance] removeContact:contact];
 $$
-
 -(void) removeContact:(MLContact*) contact
 {
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
@@ -789,12 +753,10 @@ $$
         }
         
         if(contact.isGroup)
-        {
-            //if MUC
             [account leaveMuc:contact.contactJid];
-        } else  {
-            [account removeFromRoster:contact.contactJid];
-        }
+        else
+            [account removeFromRoster:contact];
+        
         //remove from DB
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
         [contact removeShareInteractions];
@@ -815,7 +777,6 @@ $$
 $$class_handler(handleAddContact, $$ID(MLContact*, contact), $_ID(NSString*, preauthToken))
     [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
 $$
-
 -(void) addContact:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken
 {
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
@@ -832,35 +793,18 @@ $$
             [account joinMuc:contact.contactJid];
         else
         {
-            [account addToRoster:contact.contactJid withPreauthToken:preauthToken];
+            [account addToRoster:contact withPreauthToken:preauthToken];
             
-            BOOL approve = NO;
-            // approve contact ahead of time if possible
-            if(account.connectionProperties.supportsRosterPreApproval)
-                approve = YES;
-            // just in case there was a pending request
-            else if([contact.state isEqualToString:kSubTo] || [contact.state isEqualToString:kSubNone])
-                approve = YES;
-            // approve contact requests not catched by the above checks (can that even happen?)
-            else if([[DataLayer sharedInstance] hasContactRequestForAccount:account.accountNo andBuddyName:contact.contactJid])
-                approve = YES;
-            if(approve)
-            {
-                // delete existing contact request if exists
-                [[DataLayer sharedInstance] deleteContactRequest:contact];
-                // and approve the new contact
-                [self approveContact:contact];
-            }
 #ifndef DISABLE_OMEMO
             // Request omemo devicelist
             [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:contact.contactJid];
 #endif// DISABLE_OMEMO
-            
-            //notify the UI
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
-                @"contact": [MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]
-            }];
         }
+        
+        //notify the UI
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+            @"contact": [MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]
+        }];
     }
 }
 

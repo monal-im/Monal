@@ -96,9 +96,6 @@ NS_ASSUME_NONNULL_BEGIN
 -(BOOL) isValidPassword:(NSString*) password forAccount:(NSNumber*) accountNo;
 -(void) updatePassword:(NSString*) password forAccount:(NSNumber*) accountNo;
 
--(void) approveContact:(MLContact*) contact;
--(void) rejectContact:(MLContact*) contact;
-
 /**
 Sends a message to a specified contact in account. Calls completion handler on success or failure.
  */

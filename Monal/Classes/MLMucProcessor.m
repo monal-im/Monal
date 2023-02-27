@@ -814,7 +814,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     {
         //remove old non-muc contact from contactlist (we don't want mucs as normal contacts on our (server) roster and shadowed in monal by the real muc contact)
         if([[DataLayer sharedInstance] contactDictionaryForUsername:iqNode.fromUser forAccount:_account.accountNo] != nil)
-            [_account removeFromRoster:iqNode.fromUser];
+            [_account removeFromRoster:[MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo]];
         //add new muc buddy (potentially deleting a non-muc buddy having the same jid)
         NSString* nick = [self calculateNickForMuc:iqNode.fromUser];
         DDLogInfo(@"Adding new muc %@ using nick '%@' to buddylist...", iqNode.fromUser, nick);

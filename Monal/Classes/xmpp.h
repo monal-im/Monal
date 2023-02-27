@@ -146,19 +146,12 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 /**
  removes a contact from the roster
  */
--(void) removeFromRoster:(NSString*) contact;
+-(void) removeFromRoster:(MLContact*) contact;
 
 /**
  adds a new contact to the roster
  */
--(void) addToRoster:(NSString*) contact withPreauthToken:(NSString* _Nullable) preauthToken;
-
-/**
- adds a new contact to the roster
- */
--(void) approveToRoster:(NSString*) contact;
-
--(void) rejectFromRoster:(NSString*) contact;
+-(void) addToRoster:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken;
 
 -(void) updateRosterItem:(NSString*) jid withName:(NSString*) name;
 

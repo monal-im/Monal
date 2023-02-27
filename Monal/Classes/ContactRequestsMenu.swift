@@ -39,7 +39,7 @@ struct ContactRequestsMenuEntry: View {
                 Button {
                     // deny request
                     self.delete()       //update ui first because the array index can change afterwards
-                    MLXMPPManager.sharedInstance().reject(contact)
+                    MLXMPPManager.sharedInstance().remove(contact)
                 } label: {
                     Image(systemName: "trash.circle")
                         .accentColor(.red)

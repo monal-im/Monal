@@ -1794,12 +1794,12 @@ NSString* const kStanza = @"stanza";
                     if(!contactSub || !([[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo] || [[contactSub objectForKey:@"subscription"] isEqualToString:kSubBoth]))
                         [[DataLayer sharedInstance] addContactRequest:contact];
                     else if(contactSub && [[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo])
-                        [self approveToRoster:presenceNode.fromUser];
+                        [self addToRoster:contact withPreauthToken:nil];
                     
                     //wait 1 sec for nickname and profile image to be processed, then send out kMonalContactRefresh notification
                     createTimer(1.0, (^{
                         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
-                            @"contact": contact
+                            @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo]
                         }];
                     }));
                 }
@@ -1814,7 +1814,7 @@ NSString* const kStanza = @"stanza";
                     //wait 1 sec for nickname and profile image to be processed, then send out kMonalContactRefresh notification
                     createTimer(1.0, (^{
                         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
-                            @"contact": contact
+                            @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo]
                         }];
                     }));
                 }
@@ -4261,42 +4261,39 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark- XMPP add and remove contact
 
--(void) removeFromRoster:(NSString*) contact
+-(void) removeFromRoster:(MLContact*) contact
 {
     DDLogVerbose(@"Removing jid from roster: %@", contact);
-    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [iq setRemoveFromRoster:contact];
-    [self send:iq];
-
+    
+    //delete contact request if it exists
+    [[DataLayer sharedInstance] deleteContactRequest:contact];
+    
     XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence unsubscribeContact:contact];
+    [presence unsubscribeContact:contact.contactJid];
     [self send:presence];
     
-    [self rejectFromRoster:contact];
-}
-
--(void) rejectFromRoster:(NSString*) contact
-{
-    DDLogVerbose(@"Rejecting jid from roster: %@", contact);
     XMPPPresence* presence2 =[[XMPPPresence alloc] init];
-    [presence2 unsubscribedContact:contact];
+    [presence2 unsubscribedContact:contact.contactJid];
     [self send:presence2];
+    
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [iq setRemoveFromRoster:contact.contactJid];
+    [self send:iq];
 }
 
-
--(void) addToRoster:(NSString*) contact withPreauthToken:(NSString* _Nullable) preauthToken
+-(void) addToRoster:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken
 {
-    DDLogVerbose(@"Adding jid to roster: %@", contact);
+    DDLogVerbose(@"(re)adding jid to roster: %@", contact);
+    
+    //delete contact request if it exists
+    [[DataLayer sharedInstance] deleteContactRequest:contact];
+    
     XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence subscribeContact:contact withPreauthToken:preauthToken];
-    [self send:presence];   //add them
-}
-
--(void) approveToRoster:(NSString*) contact
-{
-    DDLogVerbose(@"Approving jid to roster: %@", contact);
+    [presence subscribeContact:contact.contactJid withPreauthToken:preauthToken];
+    [self send:presence];
+    
     XMPPPresence* presence2 =[[XMPPPresence alloc] init];
-    [presence2 subscribedContact:contact];
+    [presence2 subscribedContact:contact.contactJid];
     [self send:presence2];
 }
 

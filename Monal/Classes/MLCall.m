@@ -18,7 +18,6 @@
 #import "MLCall.h"
 #import "MonalAppDelegate.h"
 
-@import PushKit;
 @import CallKit;
 @import WebRTC;
 

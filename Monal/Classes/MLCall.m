@@ -938,6 +938,9 @@
     DDLogInfo(@"Got new incoming ICE candidate...");
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
+    //ignore sdp for disabled accounts
+    if(account != [[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo])
+        return;
     XMPPIQ* iqNode = userInfo[@"iqNode"];
     NSString* jmiid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@id"];
     if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
@@ -980,6 +983,9 @@
     DDLogInfo(@"Got new incoming SDP...");
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
+    //ignore sdp for disabled accounts
+    if(account != [[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo])
+        return;
     XMPPIQ* iqNode = userInfo[@"iqNode"];
     NSString* jmiid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@id"];
     if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])

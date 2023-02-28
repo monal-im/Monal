@@ -3040,7 +3040,7 @@ NSString* const kStanza = @"stanza";
             return type;
     
     DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory!");
-    return @"_no_supported_binding_mitm_possible_";     //this will make sure the authentication fails
+    return kServerDoesNotFollowXep0440Error;     //this will make sure the authentication fails
 }
 
 //proxy this to ostream if directTLS is used

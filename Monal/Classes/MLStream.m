@@ -503,6 +503,8 @@
         return [self channelBindingData_TLSExporter];
     else if([@"tls-server-end-point" isEqualToString:type])
         return [self channelBindingData_TLSServerEndPoint];
+    else if([kServerDoesNotFollowXep0440Error isEqualToString:type])
+        return [kServerDoesNotFollowXep0440Error dataUsingEncoding:NSUTF8StringEncoding];
     
     MLAssert(NO, @"Trying to use unknown channel-binding type!", (@{@"type":type}));
 }

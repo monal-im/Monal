@@ -105,6 +105,8 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
   return s;
 }
 
+#define kServerDoesNotFollowXep0440Error @"__incomplete XEP-0388 support, XEP-0440 MUST be implemented and this mandates that servers MUST at least implement tls-server-end-point__"
+
 //some xmpp related constants
 #define kId @"id"
 #define kMessageId @"kMessageId"

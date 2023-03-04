@@ -56,7 +56,7 @@
 {
     DDLogDebug(@"Queueing notification: %@, object = %@, userInfo = %@", notificationName, notificationObject, notificationUserInfo);
     //create queue entry (handle nil arguments)
-    NSMutableDictionary* entry = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* entry = [NSMutableDictionary new];
     entry[@"name"] = notificationName;
     if(notificationObject != nil)
         entry[@"obj"] = notificationObject;
@@ -87,7 +87,7 @@
     NSArray* toFlush;
     @synchronized(_entries) {
         toFlush = _entries;
-        _entries = [[NSMutableArray alloc] init];
+        _entries = [NSMutableArray new];
     }
     DDLogVerbose(@"Notifications in queue '%@': %@", [self name], toFlush);
     for(NSDictionary* entry in toFlush)
@@ -106,7 +106,7 @@
     NSUInteger retval;
     @synchronized(_entries) {
         retval = [_entries count];
-        _entries = [[NSMutableArray alloc] init];
+        _entries = [NSMutableArray new];
     }
     return retval;
 }
@@ -118,7 +118,7 @@
 
 -(NSString*) description
 {
-    NSMutableArray* queuedNotificationNames = [[NSMutableArray alloc] init];
+    NSMutableArray* queuedNotificationNames = [NSMutableArray new];
     @synchronized(_entries) {
         for(NSDictionary* entry in _entries)
             [queuedNotificationNames addObject:entry[@"name"]];
@@ -131,7 +131,7 @@
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     //init dictionaries if neccessary
     if(!threadData[@"_notificationQueueStack"])
-        threadData[@"_notificationQueueStack"] = [[NSMutableArray alloc] init];
+        threadData[@"_notificationQueueStack"] = [NSMutableArray new];
     return threadData[@"_notificationQueueStack"];
 }
 
@@ -139,7 +139,7 @@
 {
     self = [super init];
     _queueName = queueName;
-    _entries = [[NSMutableArray alloc] init];
+    _entries = [NSMutableArray new];
     _lowerQueue = [MLNotificationQueue currentQueue];
     return self;
 }

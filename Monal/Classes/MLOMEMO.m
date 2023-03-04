@@ -842,7 +842,7 @@ $$
         [messageNode setStoreHint];
     }
     
-    NSMutableSet<NSString*>* recipients = [[NSMutableSet alloc] init];
+    NSMutableSet<NSString*>* recipients = [NSMutableSet new];
     if([[DataLayer sharedInstance] isBuddyMuc:toContact forAccount:self.account.accountNo])
         for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:toContact forAccountId:self.account.accountNo])
         {
@@ -857,11 +857,11 @@ $$
     //remove own jid from recipients (our own devices get special treatment via myDevices NSSet below)
     [recipients removeObject:self.account.connectionProperties.identity.jid];
     
-    NSMutableDictionary<NSString*, NSSet<NSNumber*>*>* contactDeviceMap = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary<NSString*, NSSet<NSNumber*>*>* contactDeviceMap = [NSMutableDictionary new];
     for(NSString* recipient in recipients)
     {
         //contactDeviceMap
-        NSMutableSet<NSNumber*>* recipientDevices = [[NSMutableSet alloc] init];
+        NSMutableSet<NSNumber*>* recipientDevices = [NSMutableSet new];
         [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithValidSession:recipient]];
         // add devices with known but old broken session to trigger a bundle refetch
         [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:recipient]];
@@ -1178,7 +1178,7 @@ $$
 //called after a buddy was deleted from roster OR by MLMucProcessor after a MUC member was removed
 -(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid isMuc:(BOOL) isMuc
 {
-    NSMutableSet<NSString*>* danglingJids = [[NSMutableSet alloc] init];
+    NSMutableSet<NSString*>* danglingJids = [NSMutableSet new];
     if(isMuc == YES)
         danglingJids = [[NSMutableSet alloc] initWithSet:[self.monalSignalStore removeDanglingMucSessions]];
     else if([self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid] == NO)

@@ -67,7 +67,7 @@
             FLAnimatedImage* image = [FLAnimatedImage animatedImageWithGIFData:[NSData dataWithContentsOfFile:info[@"cacheFile"]]];
             if(!image)
                 return;
-            _animatedImageView = [[FLAnimatedImageView alloc] init];
+            _animatedImageView = [FLAnimatedImageView new];
             DDLogVerbose(@"image: %fx%f", image.size.height, image.size.width);
             CGFloat wi = image.size.width;
             CGFloat hi = image.size.height;

@@ -47,13 +47,13 @@
 {
     self = [super init];
     _account = account;
-    _stateLockObject = [[NSObject alloc] init];
-    _roomFeatures = [[NSMutableDictionary alloc] init];
-    _joining = [[NSMutableDictionary alloc] init];
-    _firstJoin = [[NSMutableSet alloc] init];
-    _uiHandler = [[NSMutableDictionary alloc] init];
+    _stateLockObject = [NSObject new];
+    _roomFeatures = [NSMutableDictionary new];
+    _joining = [NSMutableDictionary new];
+    _firstJoin = [NSMutableSet new];
+    _uiHandler = [NSMutableDictionary new];
     _lastPing = [NSDate date];
-    _noUpdateBookmarks = [[NSMutableSet alloc] init];
+    _noUpdateBookmarks = [NSMutableSet new];
     _hasFetchedBookmarks = NO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleResourceBound:) name:kMLResourceBoundNotice object:nil];
@@ -112,8 +112,8 @@
     if(_account == ((xmpp*)notification.object))
     {
         @synchronized(_stateLockObject) {
-            _roomFeatures = [[NSMutableDictionary alloc] init];
-            _joining = [[NSMutableDictionary alloc] init];
+            _roomFeatures = [NSMutableDictionary new];
+            _joining = [NSMutableDictionary new];
             //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
             
             //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
@@ -237,7 +237,7 @@
         //extract info if present (use an empty dict if no info is present)
         NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
         if(!item)
-            item = [[NSMutableDictionary alloc] init];
+            item = [NSMutableDictionary new];
         
         //update jid to be a bare jid and add muc nick to our dict
         if(item[@"jid"])
@@ -569,7 +569,7 @@
     }
     DDLogInfo(@"Leaving room '%@' on account %@ using nick '%@'...", room, _account, nick);
     //send unsubscribe even if we are not fully joined (join aborted), just to make sure we *really* leave ths muc
-    XMPPPresence* presence = [[XMPPPresence alloc] init];
+    XMPPPresence* presence = [XMPPPresence new];
     [presence leaveRoom:room withNick:nick];
     [_account send:presence];
     
@@ -889,7 +889,7 @@ $$
         //we don't need to force saving of our new state because once this outgoing join presence gets handled by smacks the whole state will be saved
     }
     
-    XMPPPresence* presence = [[XMPPPresence alloc] init];
+    XMPPPresence* presence = [XMPPPresence new];
     [presence joinRoom:room withNick:nick];
     [_account send:presence];
 }

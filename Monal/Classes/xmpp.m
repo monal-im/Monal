@@ -236,7 +236,7 @@ NSString* const kStanza = @"stanza";
     //init muc processor
     self.mucProcessor = [[MLMucProcessor alloc] initWithAccount:self];
     
-    _stateLockObject = [[NSObject alloc] init];
+    _stateLockObject = [NSObject new];
     [self initSM3];
     
     _accountState = kStateLoggedOut;
@@ -247,37 +247,37 @@ NSString* const kStanza = @"stanza";
     _reconnectInProgress = NO;
     _disconnectInProgres = NO;
     _lastIdleState = NO;
-    _outputQueue = [[NSMutableArray alloc] init];
-    _iqHandlers = [[NSMutableDictionary alloc] init];
-    _reconnectionHandlers = [[NSMutableArray alloc] init];
-    _mamPageArrays = [[NSMutableDictionary alloc] init];
+    _outputQueue = [NSMutableArray new];
+    _iqHandlers = [NSMutableDictionary new];
+    _reconnectionHandlers = [NSMutableArray new];
+    _mamPageArrays = [NSMutableDictionary new];
     _runningCapsQueries = [NSMutableSet new];
-    _runningMamQueries = [[NSMutableDictionary alloc] init];
-    _inCatchup = [[NSMutableDictionary alloc] init];
+    _runningMamQueries = [NSMutableDictionary new];
+    _inCatchup = [NSMutableDictionary new];
     _pipeliningState = kPipelinedNothing;
     _cachedStreamFeaturesBeforeAuth = nil;
     _cachedStreamFeaturesAfterAuth = nil;
-    _timersToCancelOnDisconnect = [[NSMutableArray alloc] init];
+    _timersToCancelOnDisconnect = [NSMutableArray new];
 
     _SRVDiscoveryDone = NO;
-    _discoveredServersList = [[NSMutableArray alloc] init];
+    _discoveredServersList = [NSMutableArray new];
     if(!_usableServersList)
-        _usableServersList = [[NSMutableArray alloc] init];
+        _usableServersList = [NSMutableArray new];
     _reconnectBackoffTime = 0;
     
-    _parseQueue = [[NSOperationQueue alloc] init];
+    _parseQueue = [NSOperationQueue new];
     _parseQueue.name = [NSString stringWithFormat:@"parseQueue[%@:%@]", self.accountNo, _internalID];
     _parseQueue.qualityOfService = NSQualityOfServiceUtility;
     _parseQueue.maxConcurrentOperationCount = 1;
     [_parseQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
     
-    _receiveQueue = [[NSOperationQueue alloc] init];
+    _receiveQueue = [NSOperationQueue new];
     _receiveQueue.name = [NSString stringWithFormat:@"receiveQueue[%@:%@]", self.accountNo, _internalID];
     _receiveQueue.qualityOfService = NSQualityOfServiceUserInitiated;
     _receiveQueue.maxConcurrentOperationCount = 1;
     [_receiveQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
 
-    _sendQueue = [[NSOperationQueue alloc] init];
+    _sendQueue = [NSOperationQueue new];
     _sendQueue.name = [NSString stringWithFormat:@"sendQueue[%@:%@]", self.accountNo, _internalID];
     _sendQueue.qualityOfService = NSQualityOfServiceUserInitiated;
     _sendQueue.maxConcurrentOperationCount = 1;
@@ -530,7 +530,7 @@ NSString* const kStanza = @"stanza";
     [_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
         DDLogVerbose(@"Cleaning up sendQueue [internal]");
         [self->_sendQueue cancelAllOperations];
-        self->_outputQueue = [[NSMutableArray alloc] init];
+        self->_outputQueue = [NSMutableArray new];
         if(self->_outputBuffer)
             free(self->_outputBuffer);
         self->_outputBuffer = nil;
@@ -637,7 +637,7 @@ NSString* const kStanza = @"stanza";
     if(!_SRVDiscoveryDone)
     {
         DDLogInfo(@"Querying for SRV records");
-        _discoveredServersList = [[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
+        _discoveredServersList = [[MLDNSLookup new] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
         _SRVDiscoveryDone = YES;
         // no SRV records found, update server to directly connect to specified domain
         if([_discoveredServersList count] == 0)
@@ -969,7 +969,7 @@ NSString* const kStanza = @"stanza";
                             else if(self->_iqHandlers[iqid][@"errorHandler"])
                                 ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                         }
-                        self->_iqHandlers = [[NSMutableDictionary alloc] init];
+                        self->_iqHandlers = [NSMutableDictionary new];
                     }
                     
                     //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
@@ -1056,7 +1056,7 @@ NSString* const kStanza = @"stanza";
                         else if(self->_iqHandlers[iqid][@"errorHandler"])
                             ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                     }
-                    self->_iqHandlers = [[NSMutableDictionary alloc] init];
+                    self->_iqHandlers = [NSMutableDictionary new];
                 }
                 
                 //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
@@ -2381,7 +2381,7 @@ NSString* const kStanza = @"stanza";
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
             
-            _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
+            _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_cancelLoginTimer)
             {
                 _cancelLoginTimer();        //we are now logged in --> cancel running login timer
@@ -2501,14 +2501,14 @@ NSString* const kStanza = @"stanza";
                 //display sasl mechanism list and list of channel-binding types even if SASL2 failed
                 
                 //build mechanism list displayed in ui (mark _scramHandler.method as used)
-                NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary* mechanismList = [NSMutableDictionary new];
                 for(NSString* mechanism in _supportedSaslMechanisms)
                     mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
                 DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
                 self.connectionProperties.saslMethods = mechanismList;
                 
                 //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
-                NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary* channelBindings = [NSMutableDictionary new];
                 if(_supportedChannelBindings != nil)
                     for(NSString* cbType in _supportedChannelBindings)
                         channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
@@ -2538,14 +2538,14 @@ NSString* const kStanza = @"stanza";
                 [self handleScramInSuccessOrContinue:parsedStanza];
             
             //build mechanism list displayed in ui (mark _scramHandler.method as used)
-            NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* mechanismList = [NSMutableDictionary new];
             for(NSString* mechanism in _supportedSaslMechanisms)
                 mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
             DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
             self.connectionProperties.saslMethods = mechanismList;
             
             //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
-            NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* channelBindings = [NSMutableDictionary new];
             if(_supportedChannelBindings != nil)
                 for(NSString* cbType in _supportedChannelBindings)
                     channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
@@ -2571,7 +2571,7 @@ NSString* const kStanza = @"stanza";
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
             self->_accountState = kStateLoggedIn;
-            _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
+            _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_cancelLoginTimer)
             {
                 _cancelLoginTimer();        //we are now logged in --> cancel running login timer
@@ -2721,7 +2721,7 @@ NSString* const kStanza = @"stanza";
             //this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
             DDLogInfo(@"configuring/starting tls handshake");
             self->_streamHasSpace = NO;         //make sure we do not try to send any data while the tls handshake is still performed
-            NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* settings = [NSMutableDictionary new];
             [settings setObject:(NSNumber*)kCFBooleanTrue forKey:(NSString*)kCFStreamSSLValidatesCertificateChain];
             [settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
             [settings setObject:@"kCFStreamSocketSecurityLevelTLSv1_2" forKey:(NSString*)kCFStreamSSLLevel];
@@ -3255,7 +3255,7 @@ NSString* const kStanza = @"stanza";
     if(self.accountState < kStateBound)
         return;
 
-    XMPPMessage* messageNode = [[XMPPMessage alloc] init];
+    XMPPMessage* messageNode = [XMPPMessage new];
     messageNode.attributes[@"to"] = jid;
     [messageNode setNoStoreHint];
     if(isTyping)
@@ -3283,7 +3283,7 @@ NSString* const kStanza = @"stanza";
         @synchronized(self->_stateLockObject) {
             DDLogVerbose(@"%@ --> realPersistState before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
             //state dictionary
-            NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* values = [NSMutableDictionary new];
 
             //collect smacks state
             [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
@@ -3292,8 +3292,8 @@ NSString* const kStanza = @"stanza";
             [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
             [values setValue:self.streamID forKey:@"streamID"];
 
-            NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
-            NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* persistentIqHandlers = [NSMutableDictionary new];
+            NSMutableDictionary* persistentIqHandlerDescriptions = [NSMutableDictionary new];
             @synchronized(self->_iqHandlers) {
                 for(NSString* iqid in self->_iqHandlers)
                     if(self->_iqHandlers[iqid][@"handler"] != nil)
@@ -3428,7 +3428,7 @@ NSString* const kStanza = @"stanza";
             }
             
             NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
-            NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* persistentIqHandlerDescriptions = [NSMutableDictionary new];
             @synchronized(_iqHandlers) {
                 //remove all current persistent handlers...
                 NSMutableDictionary* handlersCopy = [_iqHandlers copy];
@@ -3601,7 +3601,7 @@ NSString* const kStanza = @"stanza";
         }
         
         //always reset handler and smacksRequestInFlight when loading smacks state
-        _smacksAckHandler = [[NSMutableArray alloc] init];
+        _smacksAckHandler = [NSMutableArray new];
         self.smacksRequestInFlight = NO;
         
         DDLogVerbose(@"%@ --> realReadState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
@@ -3612,7 +3612,7 @@ NSString* const kStanza = @"stanza";
 {
     NSArray* toKeep = @[@"lastHandledInboundStanza", @"lastHandledOutboundStanza", @"lastOutboundStanza", @"unAckedStanzas", @"loggedInOnce", @"lastInteractionDate", @"inCatchup"];
     
-    NSMutableDictionary* newState = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* newState = [NSMutableDictionary new];
     if(dic)
     {
         for(NSString* entry in toKeep)
@@ -3628,7 +3628,7 @@ NSString* const kStanza = @"stanza";
     if(newState[@"lastOutboundStanza"] == nil)
         newState[@"lastOutboundStanza"] = [NSNumber numberWithInteger:0];
     if(newState[@"unAckedStanzas"] == nil)
-        newState[@"unAckedStanzas"] = [[NSMutableArray alloc] init];
+        newState[@"unAckedStanzas"] = [NSMutableArray new];
     
     newState[@"stateSavedAt"] = [NSDate date];
     newState[@"VERSION"] = @(STATE_VERSION);
@@ -3660,9 +3660,9 @@ NSString* const kStanza = @"stanza";
         self.lastHandledInboundStanza = [NSNumber numberWithInteger:0];
         self.lastHandledOutboundStanza = [NSNumber numberWithInteger:0];
         self.lastOutboundStanza = [NSNumber numberWithInteger:0];
-        self.unAckedStanzas = [[NSMutableArray alloc] init];
+        self.unAckedStanzas = [NSMutableArray new];
         self.streamID = nil;
-        _smacksAckHandler = [[NSMutableArray alloc] init];
+        _smacksAckHandler = [NSMutableArray new];
         DDLogDebug(@"initSM3 done");
     }
 }
@@ -3822,7 +3822,7 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.supportsRosterPreApproval = NO;
     
     //clear list of running mam queries
-    _runningMamQueries = [[NSMutableDictionary alloc] init];
+    _runningMamQueries = [NSMutableDictionary new];
     
     //clear list of running caps queries
     _runningCapsQueries = [NSMutableSet new];
@@ -3830,7 +3830,7 @@ NSString* const kStanza = @"stanza";
     //clear old catchup state (technically all stanzas still in delayedMessageStanzas could have also been
     //in the parseQueue in the last run and deleted there)
     //--> no harm in deleting them when starting a new session (but DON'T DELETE them when resuming the old smacks session)
-    _inCatchup = [[NSMutableDictionary alloc] init];
+    _inCatchup = [NSMutableDictionary new];
     [[DataLayer sharedInstance] deleteDelayedMessageStanzasForAccount:self.accountNo];
     
     //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
@@ -3938,7 +3938,7 @@ NSString* const kStanza = @"stanza";
     [self sendIq:httpSlotRequest withResponseHandler:^(XMPPIQ* response) {
         DDLogInfo(@"Got slot for upload: %@", [response findFirst:@"{urn:xmpp:http:upload:0}slot/put@url"]);
         //upload to server using HTTP PUT
-        NSMutableDictionary* headers = [[NSMutableDictionary alloc] init];
+        NSMutableDictionary* headers = [NSMutableDictionary new];
         headers[@"Content-Type"] = params[@"contentType"];
         for(MLXMLNode* header in [response find:@"{urn:xmpp:http:upload:0}slot/put/header"])
             headers[[header findFirst:@"/@name"]] = [header findFirst:@"/#"];
@@ -4073,7 +4073,7 @@ NSString* const kStanza = @"stanza";
     //the completion handler will get nil, if an error prevented us toget any messaes, an empty array, if the upper end of our archive was reached or an array
     //of newly loaded mlmessages in all other cases
     unsigned int __block retrievedBodies = 0;
-    NSMutableArray* __block pageList = [[NSMutableArray alloc] init];
+    NSMutableArray* __block pageList = [NSMutableArray new];
     void __block (^query)(NSString* before);
     monal_iq_handler_t __block responseHandler;
     monal_void_block_t callUI = ^{
@@ -4086,7 +4086,7 @@ NSString* const kStanza = @"stanza";
             return;
         }
         
-        NSMutableArray* __block historyIdList = [[NSMutableArray alloc] init];
+        NSMutableArray* __block historyIdList = [NSMutableArray new];
         NSNumber* __block historyId = [NSNumber numberWithInt:[[[DataLayer sharedInstance] getSmallestHistoryId] intValue] - retrievedBodies];
         
         //ignore all notifications generated while processing the queued stanzas
@@ -4268,11 +4268,11 @@ NSString* const kStanza = @"stanza";
     //delete contact request if it exists
     [[DataLayer sharedInstance] deleteContactRequest:contact];
     
-    XMPPPresence* presence =[[XMPPPresence alloc] init];
+    XMPPPresence* presence =[XMPPPresence new];
     [presence unsubscribeContact:contact.contactJid];
     [self send:presence];
     
-    XMPPPresence* presence2 =[[XMPPPresence alloc] init];
+    XMPPPresence* presence2 =[XMPPPresence new];
     [presence2 unsubscribedContact:contact.contactJid];
     [self send:presence2];
     
@@ -4288,11 +4288,11 @@ NSString* const kStanza = @"stanza";
     //delete contact request if it exists
     [[DataLayer sharedInstance] deleteContactRequest:contact];
     
-    XMPPPresence* presence =[[XMPPPresence alloc] init];
+    XMPPPresence* presence =[XMPPPresence new];
     [presence subscribeContact:contact.contactJid withPreauthToken:preauthToken];
     [self send:presence];
     
-    XMPPPresence* presence2 =[[XMPPPresence alloc] init];
+    XMPPPresence* presence2 =[XMPPPresence new];
     [presence2 subscribedContact:contact.contactJid];
     [self send:presence2];
 }
@@ -4445,7 +4445,7 @@ NSString* const kStanza = @"stanza";
         //dispatch completion handler outside of the receiveQueue
         if(self->_regFormCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSMutableDictionary* hiddenFormFields = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary* hiddenFormFields = [NSMutableDictionary new];
                 for(MLXMLNode* field in [result find:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/field<type=hidden>"])
                     hiddenFormFields[[field findFirst:@"/@var"]] = [field findFirst:@"value#"];
                 self->_regFormCompletion([result findFirst:@"{jabber:iq:register}query/{urn:xmpp:bob}data#|base64"], hiddenFormFields);
@@ -5051,7 +5051,7 @@ NSString* const kStanza = @"stanza";
 {
     @synchronized(_mamPageArrays) {
         if(!_mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]])
-            _mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]] = [[NSMutableArray alloc] init];
+            _mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]] = [NSMutableArray new];
         [_mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]] addObject:messageDictionary];
     }
 }
@@ -5061,7 +5061,7 @@ NSString* const kStanza = @"stanza";
     NSMutableArray* array;
     @synchronized(_mamPageArrays) {
         if(_mamPageArrays[mamQueryId] == nil)
-            return [[NSMutableArray alloc] init];       //return empty array if nothing can be found (after app crash etc.)
+            return [NSMutableArray new];       //return empty array if nothing can be found (after app crash etc.)
         array = _mamPageArrays[mamQueryId];
         [_mamPageArrays removeObjectForKey:mamQueryId];
     }
@@ -5091,7 +5091,7 @@ NSString* const kStanza = @"stanza";
         return;
     }
     
-    XMPPMessage* displayedNode = [[XMPPMessage alloc] init];
+    XMPPMessage* displayedNode = [XMPPMessage new];
     //the message type is needed so that the store hint is accepted by the server
     displayedNode.attributes[@"type"] = msg.isMuc ? @"groupchat" : @"chat";
     displayedNode.attributes[@"to"] = msg.inbound ? msg.buddyName : self.connectionProperties.identity.jid;

@@ -401,7 +401,7 @@ NSString *const kAskSubscribe=@"subscribe";
     if(avatar != nil)
         _avatar = avatar;
     else
-        _avatar = [[UIImage alloc] init];           //empty dummy image, to not save nil (should never happen, MLImageManager has default images)
+        _avatar = [UIImage new];           //empty dummy image, to not save nil (should never happen, MLImageManager has default images)
 }
 
 -(BOOL) isSelfChat
@@ -437,7 +437,7 @@ NSString *const kAskSubscribe=@"subscribe";
 
 -(BOOL) hasIncomingContactRequest
 {
-    return self.isGroup == NO && [[DataLayer sharedInstance] hasContactRequestForAccount:self.accountId andBuddyName:self.contactJid];
+    return self.isGroup == NO && [[DataLayer sharedInstance] hasContactRequestForContact:self];
 }
 
 // this will cache the unread count on first access
@@ -679,7 +679,7 @@ NSString *const kAskSubscribe=@"subscribe";
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic
 {
-    MLContact* contact = [[MLContact alloc] init];
+    MLContact* contact = [MLContact new];
     contact.contactJid = [dic objectForKey:@"buddy_name"];
     contact.nickName = nilDefault([dic objectForKey:@"nick_name"], @"");
     contact.fullName = nilDefault([dic objectForKey:@"full_name"], @"");

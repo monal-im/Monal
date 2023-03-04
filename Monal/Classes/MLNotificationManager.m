@@ -33,7 +33,7 @@
     static dispatch_once_t once;
     static MLNotificationManager* sharedInstance;
     dispatch_once(&once, ^{
-        sharedInstance = [[MLNotificationManager alloc] init] ;
+        sharedInstance = [MLNotificationManager new] ;
     });
     return sharedInstance;
 }
@@ -60,8 +60,8 @@
     static NSMutableSet* removed;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        displayed = [[NSMutableSet alloc] init];
-        removed = [[NSMutableSet alloc] init];
+        displayed = [NSMutableSet new];
+        removed = [NSMutableSet new];
     });
     xmpp* xmppAccount = notification.object;
     MLContact* contact = notification.userInfo[@"contact"];
@@ -107,7 +107,7 @@
     if([displayed containsObject:idval])
         return;
     
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     content.title = xmppAccount.connectionProperties.identity.jid;
     content.body = [NSString stringWithFormat:NSLocalizedString(@"The user %@ (%@) wants to add you to their contact list", @""), contact.contactDisplayName, contact.contactJid];
     content.threadIdentifier = [self threadIdentifierWithContact:contact];
@@ -135,7 +135,7 @@
 #else
         NSString* idval = xmppAccount.connectionProperties.identity.jid;        //use this to only show the newest error notification per account
 #endif
-        UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+        UNMutableNotificationContent* content = [UNMutableNotificationContent new];
         content.title = xmppAccount.connectionProperties.identity.jid;
         content.body = notification.userInfo[@"message"];
         content.sound = [UNNotificationSound defaultSound];
@@ -318,7 +318,7 @@
 
 -(void) playNotificationSoundForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
 {
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     NSString* idval = [self identifierWithMessage:message];
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
@@ -359,7 +359,7 @@
 
 -(void) showModernNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     NSString* idval = [self identifierWithMessage:message];
     
     INSendMessageAttachment* audioAttachment = nil;
@@ -556,7 +556,7 @@
     MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     INPerson* sender = nil;
     NSString* groupDisplayName = nil;
-    NSMutableArray* recipients = [[NSMutableArray alloc] init];
+    NSMutableArray* recipients = [NSMutableArray new];
     if(message.isMuc)
     {
         groupDisplayName = contact.contactDisplayName;
@@ -663,7 +663,7 @@
 {
     DDLogDebug(@"Building INPerson for self contact...");
     INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:account.connectionProperties.identity.jid type:INPersonHandleTypeUnknown label:@"Monal IM"];
-    NSPersonNameComponents* nameComponents = [[NSPersonNameComponents alloc] init];
+    NSPersonNameComponents* nameComponents = [NSPersonNameComponents new];
     nameComponents.nickname = [MLContact ownDisplayNameForAccount:account];
     MLContact* ownContact = [MLContact createContactFromJid:account.connectionProperties.identity.jid andAccountNo:account.accountNo];
     INImage* contactImage = nil;
@@ -692,7 +692,7 @@
     if(displayName == nil)
         displayName = contact.contactDisplayName;
     INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeUnknown label:@"Monal IM"];
-    NSPersonNameComponents* nameComponents = [[NSPersonNameComponents alloc] init];
+    NSPersonNameComponents* nameComponents = [NSPersonNameComponents new];
     nameComponents.nickname = displayName;
     INImage* contactImage = nil;
     if(contact.avatar != nil)
@@ -720,7 +720,7 @@
 
 -(void) showLegacyNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound
 {
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     NSString* idval = [self identifierWithMessage:message];
     

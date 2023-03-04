@@ -62,7 +62,7 @@ NSString* const kiqErrorType = @"error";
 // direct push registration at xmpp server without registration at appserver
 -(void) setPushEnableWithNode:(NSString*) node onAppserver:(NSString*) jid
 {
-    NSMutableString* pushModule = [[NSMutableString alloc] init];
+    NSMutableString* pushModule = [NSMutableString new];
 #ifdef IS_ALPHA
     [pushModule appendString:@"monalAlpha"];
 #else //IS_ALPHA

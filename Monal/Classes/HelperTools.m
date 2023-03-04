@@ -410,7 +410,7 @@ static id preprocess(id exception)
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request
 {
     __block NSError* retval = nil;
-    NSCondition* condition = [[NSCondition alloc] init];
+    NSCondition* condition = [NSCondition new];
     [condition lock];
     monal_void_block_t cancelTimeout = createTimer(1.0, (^{
         DDLogError(@"Waiting for notification center took more than 1.0 second, continuing anyways");
@@ -436,7 +436,7 @@ static id preprocess(id exception)
 #pragma clang diagnostic ignored "-Wcompletion-handler"
 +(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion
 {
-    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* payload = [NSMutableDictionary new];
     //for a list of types, see UTCoreTypes.h in MobileCoreServices framework
     DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
     if(provider.suggestedName != nil)
@@ -491,7 +491,7 @@ static id preprocess(id exception)
     void (^prepareFile)(NSURL*) = ^(NSURL* item) {
         NSError* error;
         [item startAccessingSecurityScopedResource];
-        [[[NSFileCoordinator alloc] init] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
+        [[NSFileCoordinator new] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
             DDLogDebug(@"NSFileCoordinator called accessor: %@", newURL);
             payload[@"data"] = [MLFiletransfer prepareFileUpload:newURL];
             [item stopAccessingSecurityScopedResource];
@@ -602,7 +602,7 @@ static id preprocess(id exception)
                 DDLogInfo(@"Got image item: %@", item);
                 payload[@"type"] = @"image";
                 [item startAccessingSecurityScopedResource];
-                [[[NSFileCoordinator alloc] init] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
+                [[NSFileCoordinator new] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
                     DDLogDebug(@"NSFileCoordinator called accessor for image: %@", newURL);
                     UIImage* image = [UIImage imageWithContentsOfFile:[newURL path]];
                     DDLogDebug(@"Created UIImage: %@", image);
@@ -744,12 +744,12 @@ static id preprocess(id exception)
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length
 {
     if(!image)
-        return [[NSData alloc] init];
+        return [NSData new];
     
     int destinationSize = 480;
     int epsilon = 8;
     UIImage* clippedImage = image;
-    UIGraphicsImageRendererFormat* format = [[UIGraphicsImageRendererFormat alloc] init];
+    UIGraphicsImageRendererFormat* format = [UIGraphicsImageRendererFormat new];
     format.opaque = NO;
     format.preferredRange = UIGraphicsImageRendererFormatRangeStandard;
     format.scale = 1.0;
@@ -865,7 +865,7 @@ static id preprocess(id exception)
     static NSMutableDictionary* cache;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        cache = [[NSMutableDictionary alloc] init];
+        cache = [NSMutableDictionary new];
     });
     if(cache[jid] != nil)
         return cache[jid];
@@ -903,7 +903,7 @@ static id preprocess(id exception)
 +(NSString*) stringFromToken:(NSData*) tokenIn
 {
     unsigned char* tokenBytes = (unsigned char*)[tokenIn bytes];
-    NSMutableString* token = [[NSMutableString alloc] init];
+    NSMutableString* token = [NSMutableString new];
     NSUInteger counter = 0;
     while(counter < tokenIn.length)
     {
@@ -953,7 +953,7 @@ static id preprocess(id exception)
             return [cache objectForKey:jid];
     }
     
-    NSMutableDictionary<NSString*, NSString*>* retval = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary<NSString*, NSString*>* retval = [NSMutableDictionary new];
     NSArray* parts = [jid componentsSeparatedByString:@"/"];
     
     retval[@"user"] = [[parts objectAtIndex:0] lowercaseString];        //intended to not break code that expects lowercase
@@ -1057,7 +1057,7 @@ static id preprocess(id exception)
                         continue;
                     }
                     DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);
-                    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+                    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
                     content.title = NSLocalizedString(@"Could not synchronize", @"");
                     content.subtitle = account.connectionProperties.identity.jid;
                     content.body = NSLocalizedString(@"Please open the app to retry", @"");
@@ -1176,7 +1176,7 @@ static id preprocess(id exception)
 +(void) configureLogging
 {
     //create log formatter
-    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
+    MLLogFormatter* formatter = [MLLogFormatter new];
     
     //console logger (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
 #if TARGET_OS_SIMULATOR
@@ -1200,7 +1200,7 @@ static id preprocess(id exception)
     [DDLog addLogger:self.fileLogger];
     
     //network logger
-    MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
+    MLUDPLogger* udpLogger = [MLUDPLogger new];
     [udpLogger setLogFormatter:formatter];
     [DDLog addLogger:udpLogger];
     
@@ -1227,7 +1227,7 @@ static id preprocess(id exception)
 +(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features andForms:(NSArray*) forms
 {
     // see https://xmpp.org/extensions/xep-0115.html#ver
-    NSMutableString* unhashed = [[NSMutableString alloc] init];
+    NSMutableString* unhashed = [NSMutableString new];
     
     //generate identities string (must be sorted according to XEP-0115)
     identities = [identities sortedArrayUsingSelector:@selector(compare:)];
@@ -1285,7 +1285,7 @@ static id preprocess(id exception)
 {
     // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
     NSArray* featuresArray = [[features allObjects] sortedArrayUsingSelector:@selector(compare:)];
-    NSMutableString* toreturn = [[NSMutableString alloc] init];
+    NSMutableString* toreturn = [NSMutableString new];
     for(NSString* feature in featuresArray)
     {
         [toreturn appendString:[self _replaceLowerThanInString:feature]];
@@ -1297,7 +1297,7 @@ static id preprocess(id exception)
 +(NSString*) generateStringOfCapsForms:(NSArray*) forms
 {
     // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
-    NSMutableString* toreturn = [[NSMutableString alloc] init];
+    NSMutableString* toreturn = [NSMutableString new];
     for(XMPPDataForm* form in [forms sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"formType" ascending:YES selector:@selector(compare:)]]])
     {
         [toreturn appendString:[self _replaceLowerThanInString:form.formType]];
@@ -1391,8 +1391,8 @@ static id preprocess(id exception)
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-        rfc3339DateFormatter = [[NSDateFormatter alloc] init];
-        rfc3339DateFormatter2 = [[NSDateFormatter alloc] init];
+        rfc3339DateFormatter = [NSDateFormatter new];
+        rfc3339DateFormatter2 = [NSDateFormatter new];
         
         [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
         [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSSSSSXXXXX"];
@@ -1415,7 +1415,7 @@ static id preprocess(id exception)
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-        rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+        rfc3339DateFormatter = [NSDateFormatter new];
         
         [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
         [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z"];
@@ -1667,7 +1667,7 @@ static id preprocess(id exception)
     
     if([hex length] % 2 != 00) {
         DDLogError(@"Hex strings should have an even number of digits");
-        return [[NSData alloc] init];
+        return [NSData new];
     }
     unsigned char* bytes = malloc([hex length] / 2);
     unsigned char* bp = bytes;
@@ -1679,7 +1679,7 @@ static id preprocess(id exception)
         if(b2 != buf + 2) {
             DDLogError(@"String should be all hex digits");
             free(bytes);
-            return [[NSData alloc] init];
+            return [NSData new];
         }
     }
     return [NSData dataWithBytesNoCopy:bytes length:[hex length]/2 freeWhenDone:YES];
@@ -1691,7 +1691,7 @@ static id preprocess(id exception)
     const char* data1Bytes = [data1 bytes];
     const char* data2Bytes = [data2 bytes];
     // Mutable data that individual xor'd bytes will be added to
-    NSMutableData* xorData = [[NSMutableData alloc] init];
+    NSMutableData* xorData = [NSMutableData new];
     for(NSUInteger i = 0; i < data1.length; i++)
     {
         const char xorByte = data1Bytes[i] ^ data2Bytes[i];

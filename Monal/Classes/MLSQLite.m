@@ -24,7 +24,7 @@ static NSMutableDictionary* currentTransactions;
 
 +(void) initialize
 {
-    currentTransactions = [[NSMutableDictionary alloc] init];
+    currentTransactions = [NSMutableDictionary new];
     
     if(sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK)
         DDLogInfo(@"sqlite initialize: sqlite3 configured ok");
@@ -50,11 +50,11 @@ static NSMutableDictionary* currentTransactions;
         MLSQLite* newInstance = [[self alloc] initWithFile:dbFile];
         //init dictionaries if neccessary
         if(!threadData[@"_sqliteInstancesForThread"])
-            threadData[@"_sqliteInstancesForThread"] = [[NSMutableDictionary alloc] init];
+            threadData[@"_sqliteInstancesForThread"] = [NSMutableDictionary new];
         if(!threadData[@"_sqliteTransactionsRunning"])
-            threadData[@"_sqliteTransactionsRunning"] = [[NSMutableDictionary alloc] init];
+            threadData[@"_sqliteTransactionsRunning"] = [NSMutableDictionary new];
         if(!threadData[@"_sqliteStartedReadTransaction"])
-            threadData[@"_sqliteStartedReadTransaction"] = [[NSMutableDictionary alloc] init];
+            threadData[@"_sqliteStartedReadTransaction"] = [NSMutableDictionary new];
         //save thread-local instance
         threadData[@"_sqliteInstancesForThread"][dbFile] = newInstance;
         //init data for nested transactions
@@ -509,7 +509,7 @@ static NSMutableDictionary* currentTransactions;
     [self testThreadInstanceForQuery:query andArguments:args];
     [self testTransactionsForQuery:query andArguments:args];
     
-    NSMutableArray* __block toReturn = [[NSMutableArray alloc] init];
+    NSMutableArray* __block toReturn = [NSMutableArray new];
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
     if(statement != NULL)
     {
@@ -544,14 +544,14 @@ static NSMutableDictionary* currentTransactions;
     [self testThreadInstanceForQuery:query andArguments:args];
     [self testTransactionsForQuery:query andArguments:args];
 
-    NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+    NSMutableArray* toReturn = [NSMutableArray new];
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
     if(statement != NULL)
     {
         int step;
         while((step=sqlite3_step(statement)) == SQLITE_ROW)
         {
-            NSMutableDictionary* row = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* row = [NSMutableDictionary new];
             int counter = 0;
             while(counter < sqlite3_column_count(statement))
             {

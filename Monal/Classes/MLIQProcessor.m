@@ -556,7 +556,7 @@ $$class_handler(handleServiceDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
 $$
 
 $$class_handler(handleServerDiscoItems, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
-    account.connectionProperties.discoveredServices = [[NSMutableArray alloc] init];
+    account.connectionProperties.discoveredServices = [NSMutableArray new];
     for(NSDictionary* item in [iqNode find:@"{http://jabber.org/protocol/disco#items}query/item@@"])
     {
         [account.connectionProperties.discoveredServices addObject:item];
@@ -610,7 +610,7 @@ $$
 
 //entity caps of some contact
 $$class_handler(handleEntityCapsDisco, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
-    NSMutableArray* identities = [[NSMutableArray alloc] init];
+    NSMutableArray* identities = [NSMutableArray new];
     for(MLXMLNode* identity in [iqNode find:@"{http://jabber.org/protocol/disco#info}query/identity"])
         [identities addObject:[NSString stringWithFormat:@"%@/%@/%@/%@", [identity findFirst:@"/@category"], [identity findFirst:@"/@type"], ([identity check:@"/@xml:lang"] ? [identity findFirst:@"/@xml:lang"] : @""), [identity findFirst:@"/@name"]]];
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];

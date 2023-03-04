@@ -75,7 +75,7 @@
     self.contactsTable.delegate = self;
     self.contactsTable.dataSource = self;
 
-    self.contacts = [[NSMutableArray alloc] init];
+    self.contacts = [NSMutableArray new];
     
     [self.contactsTable reloadData];
     
@@ -95,11 +95,11 @@
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
 
-    UIBarButtonItem* addContact = [[UIBarButtonItem alloc] init];
+    UIBarButtonItem* addContact = [UIBarButtonItem new];
     addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
     [addContact setAction:@selector(openAddContacts:)];
 
-    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], nil];
+    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [UIBarButtonItem new], nil];
     [self configureContactRequestsImage];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactUpdate) name:kMonalContactRemoved object:nil];

@@ -54,7 +54,7 @@ static NSDictionary* _defaultOptions;
     DDLogInfo(@"Adding PEP handler %@ for node %@", handler, node);
     @synchronized(_registeredHandlers) {
         if(!_registeredHandlers[node])
-            _registeredHandlers[node] = [[NSMutableDictionary alloc] init];
+            _registeredHandlers[node] = [NSMutableDictionary new];
         _registeredHandlers[node][handler.id] = handler;
         [_account setPubSubNotificationsForNodes:[_registeredHandlers allKeys] persistState:NO];
     }
@@ -113,7 +113,7 @@ $$
     //build list of items to query (empty list means all items)
     if(!itemsList)
         itemsList = @[];
-    NSMutableArray* queryItems = [[NSMutableArray alloc] init];
+    NSMutableArray* queryItems = [NSMutableArray new];
     for(NSString* itemId in itemsList)
         [queryItems addObject:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": itemId} andChildren:@[] andData:nil]];
     
@@ -127,7 +127,7 @@ $$
         $ID(node),
         $ID(jid),
         $ID(queryItems),
-        $ID(data, [[NSMutableDictionary alloc] init]),
+        $ID(data, [NSMutableDictionary new]),
         $HANDLER(handler),
     )];
 }
@@ -471,7 +471,7 @@ $$
     if([items check:@"retract"])
     {
         DDLogDebug(@"Handling retract");
-        NSMutableDictionary* data = [self handleRetraction:items fromJid:messageNode.fromUser withData:[[NSMutableDictionary alloc] init]];
+        NSMutableDictionary* data = [self handleRetraction:items fromJid:messageNode.fromUser withData:[NSMutableDictionary new]];
         if(data)        //ignore unexpected/wrong data
             [self callHandlersForNode:node andJid:messageNode.fromUser withType:@"retract" andData:data];
     }
@@ -480,7 +480,7 @@ $$
     if([items check:@"item/{*}*"])
     {
         DDLogDebug(@"Handling publish");
-        NSMutableDictionary* data = [self handleItems:items fromJid:messageNode.fromUser withData:[[NSMutableDictionary alloc] init]];
+        NSMutableDictionary* data = [self handleItems:items fromJid:messageNode.fromUser withData:[NSMutableDictionary new]];
         if(data)        //ignore unexpected/wrong data
             [self callHandlersForNode:node andJid:messageNode.fromUser withType:@"publish" andData:data];
     }
@@ -907,7 +907,7 @@ $$instance_handler(handlePublishResult, account.pubsub, $$ID(xmpp*, account), $$
             DDLogWarn(@"ejabberd (~21.07) workaround for old preconditions handling active for node: %@", node);
             
             //make sure we don't try all preconditions from configOptions again: only these two listed preconditions are safe to use with ejabberd
-            NSMutableDictionary* publishPreconditions = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* publishPreconditions = [NSMutableDictionary new];
             if(configOptions[@"pubsub#persist_items"])
                 publishPreconditions[@"pubsub#persist_items"] = configOptions[@"pubsub#persist_items"];
             if(configOptions[@"pubsub#persist_items"])

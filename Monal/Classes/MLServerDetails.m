@@ -38,11 +38,11 @@ enum MLServerDetailsSections {
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.serverCaps = [[NSMutableArray alloc] init];
-    self.srvRecords = [[NSMutableArray alloc] init];
-    self.tlsVersions = [[NSMutableArray alloc] init];
-    self.saslMethods = [[NSMutableArray alloc] init];
-    self.channelBindingTypes = [[NSMutableArray alloc] init];
+    self.serverCaps = [NSMutableArray new];
+    self.srvRecords = [NSMutableArray new];
+    self.tlsVersions = [NSMutableArray new];
+    self.saslMethods = [NSMutableArray new];
+    self.channelBindingTypes = [NSMutableArray new];
 
     self.navigationItem.title = self.xmppAccount.connectionProperties.identity.domain;
     self.tableView.allowsSelection = NO;

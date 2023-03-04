@@ -198,7 +198,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     static dispatch_once_t once;
     static MLXMPPManager* sharedInstance;
     dispatch_once(&once, ^{
-        sharedInstance = [[MLXMPPManager alloc] init] ;
+        sharedInstance = [MLXMPPManager new] ;
     });
     return sharedInstance;
 }
@@ -207,7 +207,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 {
     self = [super init];
 
-    _connectedXMPP = [[NSMutableArray alloc] init];
+    _connectedXMPP = [NSMutableArray new];
     _hasConnectivity = NO;
     _isBackgrounded = NO;
     _isNotInFocus = NO;
@@ -470,7 +470,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         //show notifications for disabled accounts to warn user if in appex
         if([HelperTools isAppExtension])
         {
-            UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+            UNMutableNotificationContent* content = [UNMutableNotificationContent new];
             content.title = NSLocalizedString(@"Account disabled", @"");;
             content.subtitle = jid;
             content.body = NSLocalizedString(@"You restored an iCloud backup of Monal, please open the app to reenable this account.", @"");
@@ -683,7 +683,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         return nil;
     }
 
-    NSMutableDictionary* dic  = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* dic  = [NSMutableDictionary new];
     [dic setObject:domain.lowercaseString forKey:kDomain];
     [dic setObject:user.lowercaseString forKey:kUsername];
     [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];

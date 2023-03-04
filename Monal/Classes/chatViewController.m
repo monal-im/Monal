@@ -146,7 +146,7 @@ enum msgSentState {
     // init privacy Settings
     self.showGeoLocationsInline = [[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"];
     self.sendLastChatState = [[HelperTools defaultsDB] boolForKey: @"SendLastChatState"];
-    self.previewedIds = [[NSMutableSet alloc] init];
+    self.previewedIds = [NSMutableSet new];
 
     _localMLContactCache = [[NSMutableDictionary<NSString*, MLContact*> alloc] init];
 }
@@ -221,7 +221,7 @@ enum msgSentState {
 #endif
 
     // setup refreshControl for infinite scrolling
-    UIRefreshControl* refreshControl = [[UIRefreshControl alloc] init];
+    UIRefreshControl* refreshControl = [UIRefreshControl new];
     [refreshControl addTarget:self action:@selector(loadOldMsgHistory:) forControlEvents:UIControlEventValueChanged];
     refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"Loading more Messages from Server", @"")];
     [self.messageTable setRefreshControl:refreshControl];
@@ -233,7 +233,7 @@ enum msgSentState {
     [self.inputContainerView addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
 
 #ifdef DISABLE_OMEMO
-    NSMutableArray* rightBarButtons = [[NSMutableArray alloc] init];
+    NSMutableArray* rightBarButtons = [NSMutableArray new];
     for(UIBarButtonItem* entry in self.navigationItem.rightBarButtonItems)
         if(entry.action != @selector(toggleEncryption:))
             [rightBarButtons addObject:entry];
@@ -255,7 +255,7 @@ enum msgSentState {
                 self.callButton = nil;
                 
                 //remove call button, if present
-                NSMutableArray* rightBarButtons = [[NSMutableArray alloc] init];
+                NSMutableArray* rightBarButtons = [NSMutableArray new];
                 for(UIBarButtonItem* entry in self.navigationItem.rightBarButtonItems)
                     if(entry.action != @selector(openCallScreen:))
                         [rightBarButtons addObject:entry];
@@ -316,7 +316,7 @@ enum msgSentState {
 {
     unichar arrowSymbol = 0x2193;
 
-    self.lastMsgButton = [[UIButton alloc] init];
+    self.lastMsgButton = [UIButton new];
     [self lastMsgButtonPositionConfigWithSize:self.inputContainerView.bounds.size];
     self.lastMsgButton.layer.cornerRadius = lastMsgButtonSize/2;
     self.lastMsgButton.layer.backgroundColor = [UIColor whiteColor].CGColor;
@@ -360,7 +360,7 @@ enum msgSentState {
     [self.searchController setObscuresBackgroundDuringPresentation:NO];
     self.searchController.searchResultDelegate = self;
     self.searchController.jid = self.jid;
-    self.searchResultMessageList = [[NSMutableArray alloc] init];
+    self.searchResultMessageList = [NSMutableArray new];
 }
 
 -(void) initSearchButtonItem
@@ -983,7 +983,7 @@ enum msgSentState {
         return;
 
     //TODO: use a factory method for this!!
-    MLMessage* unreadStatus = [[MLMessage alloc] init];
+    MLMessage* unreadStatus = [MLMessage new];
     unreadStatus.messageType = kMessageTypeStatus;
     unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @"");
     unreadStatus.actualFrom = self.jid;
@@ -1303,7 +1303,7 @@ enum msgSentState {
 {
     if(self.locationManager == nil)
     {
-        self.locationManager = [[CLLocationManager alloc] init];
+        self.locationManager = [CLLocationManager new];
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
         self.locationManager.delegate = self;
     }
@@ -1341,7 +1341,7 @@ enum msgSentState {
 
 -(PHPickerViewController*) generatePHPickerViewController
 {
-    PHPickerConfiguration* phConf = [[PHPickerConfiguration alloc] init];
+    PHPickerConfiguration* phConf = [PHPickerConfiguration new];
     phConf.selectionLimit = 0;
     phConf.filter = [PHPickerFilter anyFilterMatchingSubfilters:@[PHPickerFilter.imagesFilter, PHPickerFilter.videosFilter]];
     PHPickerViewController* picker = [[PHPickerViewController alloc] initWithConfiguration:phConf];
@@ -1394,7 +1394,7 @@ enum msgSentState {
         [fileAction setValue:[[UIImage systemImageNamed:@"doc"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         [actionControll addAction:fileAction];
 #else
-        UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
+        UIImagePickerController* mediaPicker = [UIImagePickerController new];
         mediaPicker.delegate = self;
 
         UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action __unused) {
@@ -1461,7 +1461,7 @@ enum msgSentState {
 
     UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
         // GPS
-        CLLocationManager* gpsManager = [[CLLocationManager alloc] init];
+        CLLocationManager* gpsManager = [CLLocationManager new];
         CLAuthorizationStatus gpsStatus = [gpsManager authorizationStatus];
         if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
             [self displayGPSHUD];
@@ -1618,7 +1618,7 @@ enum msgSentState {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.messageTable performBatchUpdates:^{
                 if(!self.messageList)
-                    self.messageList = [[NSMutableArray alloc] init];
+                    self.messageList = [NSMutableArray new];
                 [self.messageList addObject:messageObj];
                 NSInteger bottom = [self.messageList count]-1;
                 if(bottom>=0)
@@ -1662,7 +1662,7 @@ enum msgSentState {
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(!self.messageList)
-                self.messageList = [[NSMutableArray alloc] init];
+                self.messageList = [NSMutableArray new];
 
             //update already existent message
             for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
@@ -1864,7 +1864,7 @@ enum msgSentState {
 
 -(void) setupDateObjects
 {
-    self.destinationDateFormat = [[NSDateFormatter alloc] init];
+    self.destinationDateFormat = [NSDateFormatter new];
     [self.destinationDateFormat setLocale:[NSLocale currentLocale]];
     [self.destinationDateFormat setDoesRelativeDateFormatting:YES];
 
@@ -2335,7 +2335,7 @@ enum msgSentState {
                 //TODO: fork swiftui image viewer (https://github.com/Jake-Short/swiftui-image-viewer),
                 //TODO: add support for FLAnimatedImage (https://github.com/Flipboard/FLAnimatedImage) using NSViewRepresentable
                 //TODO: or this so answer using quartz: https://stackoverflow.com/a/70369611/3528174
-                self.photos = [[NSMutableArray alloc] init];
+                self.photos = [NSMutableArray new];
                 MLChatImageCell* imageCell = (MLChatImageCell *) cell;
                 IDMPhoto* photo = [IDMPhoto photoWithImage:[imageCell getDisplayedImage]];
                 // photo.caption=[row objectForKey:@"caption"];
@@ -2448,14 +2448,14 @@ enum msgSentState {
     LMCEditAction.image = [[[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     UIContextualAction* quoteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Quote", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        NSMutableString* filteredString = [[NSMutableString alloc] init];
+        NSMutableString* filteredString = [NSMutableString new];
         //first of all: filter out already quoted text
         [message.messageText enumerateLinesUsingBlock:^(NSString* _Nonnull line, BOOL* _Nonnull stop) {
             if(line.length > 0 && [[line substringToIndex:1] isEqualToString:@">"])
                 return;
             [filteredString appendFormat:@"%@\n", line];
         }];
-        NSMutableString* quoteString = [[NSMutableString alloc] init];
+        NSMutableString* quoteString = [NSMutableString new];
         //add datetime before quoting message if message is older than 15 minutes and 8 messages
         NSDate* timestamp = [[DataLayer sharedInstance] returnTimestampForQuote:message.messageDBId];
         if(timestamp != nil)
@@ -2761,7 +2761,7 @@ enum msgSentState {
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         if(!self.messageList)
-            self.messageList = [[NSMutableArray alloc] init];
+            self.messageList = [NSMutableArray new];
 
         CGSize sizeBeforeAddingMessages = [self->_messageTable contentSize];
         // Insert old messages into messageTable
@@ -3154,7 +3154,7 @@ enum msgSentState {
 #pragma mark - MLFileTransferTextCell delegate
 -(void) showData:(NSString *)fileUrlStr withMimeType:(NSString *)mimeType andFileName:(NSString * _Nonnull)fileName andFileEncodeName:(NSString * _Nonnull)encodeName
 {
-    MLFileTransferFileViewController *fileViewController = [[MLFileTransferFileViewController alloc] init];
+    MLFileTransferFileViewController *fileViewController = [MLFileTransferFileViewController new];
     fileViewController.fileUrlStr = fileUrlStr;
     fileViewController.mimeType = mimeType;
     fileViewController.fileName = fileName;
@@ -3198,7 +3198,7 @@ enum msgSentState {
     });
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
-        NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
+        NSFileCoordinator* coordinator = [NSFileCoordinator new];
 
         [coordinator coordinateReadingItemAtURL:fileURL options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
             [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {

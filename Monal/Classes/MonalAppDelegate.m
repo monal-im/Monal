@@ -123,7 +123,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     
     self = [super init];
     _bgTask = UIBackgroundTaskInvalid;
-    _wakeupCompletions = [[NSMutableDictionary alloc] init];
+    _wakeupCompletions = [NSMutableDictionary new];
     DDLogVerbose(@"Setting _shutdownPending to NO...");
     _shutdownPending = NO;
     _wasFreezed = NO;
@@ -190,7 +190,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     });
     
     //initialize callkit
-    _voipProcessor = [[MLVoIPProcessor alloc] init];
+    _voipProcessor = [MLVoIPProcessor new];
     
     //only proceed with launching if the NotificationServiceExtension is *not* running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
@@ -338,7 +338,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, subscriptionCategory , nil]];
 
-    UINavigationBarAppearance* appearance = [[UINavigationBarAppearance alloc] init];
+    UINavigationBarAppearance* appearance = [UINavigationBarAppearance new];
     [appearance configureWithTransparentBackground];
     appearance.backgroundColor = [UIColor systemBackgroundColor];
     

@@ -152,7 +152,7 @@ enum DummySettingsRows {
     self.statusMessageChanged = NO;
     
     //default strings used for edit and new mode
-    self.sectionDictionary = [[NSMutableDictionary alloc] init];
+    self.sectionDictionary = [NSMutableDictionary new];
     for(int entry = 0; entry < kSettingSectionCount; entry++)
         switch(entry)
         {
@@ -316,7 +316,7 @@ enum DummySettingsRows {
         return;
     }
 
-    NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* dic = [NSMutableDictionary new];
     [dic setObject:domain.lowercaseString forKey:kDomain];
     if(user)
         [dic setObject:user.lowercaseString forKey:kUsername];
@@ -988,7 +988,7 @@ enum DummySettingsRows {
 
 -(void) documentPicker:(UIDocumentPickerViewController*) controller didPickDocumentsAtURLs:(NSArray<NSURL*>*) urls
 {
-    NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
+    NSFileCoordinator* coordinator = [NSFileCoordinator new];
     [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL* _Nonnull newURL) {
         NSData* data =[NSData dataWithContentsOfURL:newURL];
         UIImage* pickImg = [UIImage imageWithData:data];
@@ -1007,7 +1007,7 @@ enum DummySettingsRows {
 #if TARGET_OS_MACCATALYST
     [self pickImgFile:nil];
 #else
-    UIImagePickerController* imagePicker = [[UIImagePickerController alloc] init];
+    UIImagePickerController* imagePicker = [UIImagePickerController new];
     imagePicker.delegate = self;
 
     UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {

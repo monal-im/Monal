@@ -31,7 +31,7 @@ AVPlayer *avplayer;
 
 -(void) avplayerVCInit
 {
-    avplayerVC = [[AVPlayerViewController alloc] init];
+    avplayerVC = [AVPlayerViewController new];
     avplayerVC.showsPlaybackControls = YES;
 #if TARGET_OS_MACCATALYST
     avplayerVC.allowsPictureInPicturePlayback = NO;

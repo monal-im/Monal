@@ -18,7 +18,7 @@
     static dispatch_once_t once;
     static MLXEPSlashMeHandler* sharedInstance;
     dispatch_once(&once, ^{
-        sharedInstance = [[MLXEPSlashMeHandler alloc] init] ;        
+        sharedInstance = [MLXEPSlashMeHandler new] ;        
     });
     return sharedInstance;
 }

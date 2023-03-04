@@ -89,7 +89,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
--(BOOL) hasContactRequestForAccount:(NSNumber*) accountNo andBuddyName:(NSString*) buddy;
+-(BOOL) hasContactRequestForContact:(MLContact*) contact;
 -(NSMutableArray*) allContactRequests;
 -(void) addContactRequest:(MLContact *) requestor;
 -(void) deleteContactRequest:(MLContact *) requestor; 
@@ -282,9 +282,7 @@ extern NSString* const kMessageTypeFiletransfer;
 /*
  search message by keyword in message, buddy_name, messageType.
  */
--(NSArray* _Nullable) searchResultOfHistoryMessageWithKeyWords:(NSString* _Nonnull) keyword
-                                             accountNo:(NSNumber*  _Nonnull) accountNo
-                                             betweenBuddy:(NSString* _Nonnull) contactJid;
+-(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword betweenContact:(MLContact* _Nonnull) contact;
 
 -(NSArray<NSDictionary*>*) getAllCachedImages;
 -(void) removeImageCacheTables;

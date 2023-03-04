@@ -29,7 +29,7 @@
     static MLImageManager* sharedInstance;
     dispatch_once(&once, ^{
         DDLogVerbose(@"Creating shared image manager instance...");
-        sharedInstance = [[MLImageManager alloc] init];
+        sharedInstance = [MLImageManager new];
     });
     return sharedInstance;
 }
@@ -55,7 +55,7 @@
 
 +(UIImage*) image:(UIImage*) image withMucOverlay:(UIImage*) overlay
 {
-    UIGraphicsImageRendererFormat* format = [[UIGraphicsImageRendererFormat alloc] init];
+    UIGraphicsImageRendererFormat* format = [UIGraphicsImageRendererFormat new];
     format.opaque = NO;
     format.preferredRange = UIGraphicsImageRendererFormatRangeStandard;
     format.scale = 1.0;
@@ -75,8 +75,8 @@
 -(id) init
 {
     self = [super init];
-    self.iconCache = [[NSCache alloc] init];
-    self.backgroundCache = [[NSCache alloc] init];
+    self.iconCache = [NSCache new];
+    self.backgroundCache = [NSCache new];
     
     NSFileManager* fileManager = [NSFileManager defaultManager];
     

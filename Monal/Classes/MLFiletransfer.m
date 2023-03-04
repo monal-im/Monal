@@ -36,8 +36,8 @@ static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     [HelperTools configureFileProtectionFor:_documentCacheDir];
     
-    _currentlyTransfering = [[NSMutableSet alloc] init];
-    _expectedDownloadSizes = [[NSMutableDictionary alloc] init];
+    _currentlyTransfering = [NSMutableSet new];
+    _expectedDownloadSizes = [NSMutableDictionary new];
 }
 
 +(BOOL) isIdle
@@ -414,7 +414,7 @@ $$
         fromDisplayName = contact.contactDisplayName;
     
     //this resembles to /Files/<account_jid>/<contact_name> for 1:1 contacts and /Files/<account_jid>/<group_name>/<contact_in_group_name> for mucs (channels AND groups)
-    NSMutableArray* hardlinkPathComponents = [[NSMutableArray alloc] init];
+    NSMutableArray* hardlinkPathComponents = [NSMutableArray new];
     [hardlinkPathComponents addObject:account.connectionProperties.identity.jid];
     if(groupDisplayName != nil)
         [hardlinkPathComponents addObject:groupDisplayName];

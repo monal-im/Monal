@@ -38,7 +38,7 @@
 
 -(void) reset
 {
-    _currentStack = [[NSMutableArray alloc] init];
+    _currentStack = [NSMutableArray new];
 }
 
 -(void) parserDidStartDocument:(NSXMLParser*) parser
@@ -82,7 +82,7 @@
         return;
     }
     if(!_currentCharData)
-        _currentCharData = [[NSMutableString alloc] init];
+        _currentCharData = [NSMutableString new];
     [_currentCharData appendString:string];
 }
 

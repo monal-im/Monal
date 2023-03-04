@@ -65,7 +65,7 @@
 -(void) setSSDPMechanisms:(NSArray<NSString*>*) mechanisms andChannelBindingTypes:(NSArray<NSString*>* _Nullable) cbTypes
 {
     DDLogVerbose(@"Creating SDDP string: %@\n%@", mechanisms, cbTypes);
-    NSMutableString* ssdpString = [[NSMutableString alloc] init];
+    NSMutableString* ssdpString = [NSMutableString new];
     [ssdpString appendString:[[mechanisms sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
     if(cbTypes != nil)
     {
@@ -112,7 +112,7 @@
 -(NSString*) clientFinalMessageWithChannelBindingData:(NSData* _Nullable) channelBindingData
 {
     //calculate gss header with optional channel binding data
-    NSMutableData* gssHeaderWithChannelBindingData = [[NSMutableData alloc] init];
+    NSMutableData* gssHeaderWithChannelBindingData = [NSMutableData new];
     [gssHeaderWithChannelBindingData appendData:[_gssHeader dataUsingEncoding:NSUTF8StringEncoding]];
     if(channelBindingData != nil)
         [gssHeaderWithChannelBindingData appendData:channelBindingData];
@@ -218,7 +218,7 @@
 
 -(NSDictionary* _Nullable) parseScramString:(NSString*) str
 {
-    NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* retval = [NSMutableDictionary new];
     for(NSString* component in [str componentsSeparatedByString:@","])
     {
         NSString* attribute = [component substringToIndex:1];

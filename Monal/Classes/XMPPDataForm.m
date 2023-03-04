@@ -135,10 +135,10 @@ static NSRegularExpression* dataFormQueryRegex;
     if(descriptionNode == nil)
         descriptionNode = fieldNode;
     
-    NSMutableDictionary* options = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* options = [NSMutableDictionary new];
     for(MLXMLNode* option in [fieldNode find:@"option"])
         options[[NSString stringWithFormat:@"%@", [option findFirst:@"value#"]]] = [NSString stringWithFormat:@"%@", ([option check:@"/@label"] ? [option findFirst:@"/@label"] : [option findFirst:@"value#"])];
-    NSMutableArray* allValues = [[NSMutableArray alloc] init];
+    NSMutableArray* allValues = [NSMutableArray new];
     for(id value in [fieldNode find:@"value#"])
         if(value != nil)        //only safeguard, should never happen
             [allValues addObject:[NSString stringWithFormat:@"%@", value]];
@@ -225,7 +225,7 @@ static NSRegularExpression* dataFormQueryRegex;
 -(id _Nullable) processDataFormQuery:(NSString*) query
 {
     //parse query
-    NSMutableDictionary* parsedQuery = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* parsedQuery = [NSMutableDictionary new];
     NSArray* matches = [dataFormQueryRegex matchesInString:query options:0 range:NSMakeRange(0, [query length])];
     if(![matches count])
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Could not parse data form query!" userInfo:@{
@@ -286,7 +286,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(NSString*) description
 {
-    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* dict = [NSMutableDictionary new];
     for(NSString* key in [self allKeys])
         dict[key] = [self getField:key];
     return [NSString stringWithFormat:@"XMPPDataForm%@%@ %@",
@@ -405,7 +405,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 -(NSArray*) allKeysForObject:(id) anObject
 {
-    NSMutableArray* retval = [[NSMutableArray alloc] init];
+    NSMutableArray* retval = [NSMutableArray new];
     MLXMLNode* firstItem = [self findFirst:@"item"];
     for(MLXMLNode* field in (firstItem != nil ? [firstItem find:@"field"] : [self find:@"field"]))
         if([anObject isEqual:[field findFirst:@"value#"]])

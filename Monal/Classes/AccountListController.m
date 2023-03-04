@@ -36,7 +36,7 @@
         [self.accountsTable reloadData];
     });
     
-    self.uptimeFormatter = [[NSDateFormatter alloc] init];
+    self.uptimeFormatter = [NSDateFormatter new];
     self.uptimeFormatter.dateStyle = NSDateFormatterShortStyle;
     self.uptimeFormatter.timeStyle = NSDateFormatterShortStyle;
     self.uptimeFormatter.doesRelativeDateFormatting = YES;

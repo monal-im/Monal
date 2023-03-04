@@ -56,8 +56,8 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 +(void) initialize
 {
-    _mamWarningDisplayed = [[NSMutableSet alloc] init];
-    _smacksWarningDisplayed = [[NSMutableSet alloc] init];
+    _mamWarningDisplayed = [NSMutableSet new];
+    _smacksWarningDisplayed = [NSMutableSet new];
 }
 
 #pragma mark view lifecycle
@@ -92,7 +92,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
     appDelegate.activeChats = self;
     
-    self.chatListTable = [[UITableView alloc] init];
+    self.chatListTable = [UITableView new];
     self.chatListTable.delegate = self;
     self.chatListTable.dataSource = self;
     

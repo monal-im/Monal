@@ -70,7 +70,7 @@
 -(instancetype) initWithSharedState:(MLSharedStreamState*) shared
 {
     self = [super initWithSharedState:shared];
-    _buf = [[NSData alloc] init];
+    _buf = [NSData new];
     _reading = YES;
     return self;
 }
@@ -91,7 +91,7 @@
     }
     else
     {
-        _buf = [[NSData alloc] init];
+        _buf = [NSData new];
         [self schedule_read];
     }
     return len;
@@ -539,7 +539,7 @@
         if(cert == nil)
             cert = (__bridge_transfer NSData*)SecCertificateCopyData(sec_certificate_copy_ref(certificate));
     });
-    MLCrypto* crypto = [[MLCrypto alloc] init];
+    MLCrypto* crypto = [MLCrypto new];
     NSString* signatureAlgo = [crypto getSignatureAlgoOfCert:cert];
     DDLogDebug(@"Signature algo OID: %@", signatureAlgo);
     //OIDs taken from https://www.rfc-editor.org/rfc/rfc3279#section-2.2.3 and "Updated by" RFCs

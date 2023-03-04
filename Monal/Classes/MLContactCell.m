@@ -211,7 +211,7 @@
 #pragma mark - date
 -(NSString*) formattedDateWithSource:(NSDate*) sourceDate
 {
-    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    NSDateFormatter* dateFormatter = [NSDateFormatter new];
     if([[NSCalendar currentCalendar] isDateInToday:sourceDate])
     {
         //today just show time

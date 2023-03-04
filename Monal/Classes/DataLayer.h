@@ -241,8 +241,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSNumber*) countUserUnreadMessages:(NSString* _Nullable) buddy forAccount:(NSNumber* _Nullable) accountNo;
 -(NSNumber*) countUnreadMessages;
 
--(void) muteJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
--(void) unMuteJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
+-(void) muteJid:(MLContact*) contact;
+-(void) unMuteJid:(MLContact*) contact;
 -(BOOL) isMutedJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
 
 -(void) setMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSNumber*) accountNo;
@@ -251,7 +251,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(void) blockJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
 -(void) unBlockJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
--(u_int8_t) isBlockedJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
+-(u_int8_t) isBlockedJid:(MLContact*) jid;
 -(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids forAccountNo:(NSNumber*) accountNo;
 -(NSArray<NSDictionary<NSString*, NSString*>*>*) blockedJidsForAccount:(NSNumber*) accountNo;
 

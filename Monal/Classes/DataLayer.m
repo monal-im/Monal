@@ -1999,27 +1999,27 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark mute and block
 
--(void) muteJid:(NSString*) jid onAccount:(NSString*) accountNo
+-(void) muteJid:(MLContact*) contact
 {
-    if(!jid || !accountNo)
+    if(!contact)
     {
         unreachable();
         return;
     }
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"UPDATE buddylist SET muted=1 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, jid]];
+        [self.db executeNonQuery:@"UPDATE buddylist SET muted=1 WHERE account_id=? AND buddy_name=?;" andArguments:@[contact.accountId, contact.contactJid]];
     }];
 }
 
--(void) unMuteJid:(NSString*) jid onAccount:(NSString*) accountNo
+-(void) unMuteJid:(MLContact*) contact
 {
-    if(!jid || !accountNo)
+    if(!contact)
     {
         unreachable();
         return;
     }
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"UPDATE buddylist SET muted=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, jid]];
+        [self.db executeNonQuery:@"UPDATE buddylist SET muted=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[contact.accountId, contact.contactJid]];
     }];
 }
 
@@ -2120,33 +2120,33 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(u_int8_t) isBlockedJid:(NSString*) jid withAccountNo:(NSNumber*) accountNo
+-(u_int8_t) isBlockedJid:(MLContact*) contact
 {
-    if(!jid || accountNo == nil)
+    if(!contact)
         return NO;
 
     return (u_int8_t)[[self.db idReadTransaction:^{
-        NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:jid];
+        NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:contact.contactJid];
         NSNumber* blocked;
         u_int8_t ruleId = kBlockingNoMatch;
         if(parsedJid[@"node"] && parsedJid[@"host"] && parsedJid[@"resource"])
         {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource=?;" andArguments:@[accountNo, parsedJid[@"node"], parsedJid[@"host"], parsedJid[@"resource"]]];
+            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource=?;" andArguments:@[contact.accountId, parsedJid[@"node"], parsedJid[@"host"], parsedJid[@"resource"]]];
             ruleId = kBlockingMatchedNodeHostResource;
         }
         else if(parsedJid[@"node"] && parsedJid[@"host"])
         {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource IS NULL;" andArguments:@[accountNo, parsedJid[@"node"], parsedJid[@"host"]]];
+            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource IS NULL;" andArguments:@[contact.accountId, parsedJid[@"node"], parsedJid[@"host"]]];
             ruleId = kBlockingMatchedNodeHost;
         }
         else if(parsedJid[@"host"] && parsedJid[@"resource"])
         {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource=?;" andArguments:@[accountNo, parsedJid[@"host"], parsedJid[@"resource"]]];
+            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource=?;" andArguments:@[contact.accountId, parsedJid[@"host"], parsedJid[@"resource"]]];
             ruleId = kBlockingMatchedHostResource;
         }
         else if(parsedJid[@"host"])
         {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource IS NULL;" andArguments:@[accountNo, parsedJid[@"host"]]];
+            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource IS NULL;" andArguments:@[contact.accountId, parsedJid[@"host"]]];
             ruleId = kBlockingMatchedHost;
         }
         else

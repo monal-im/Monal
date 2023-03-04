@@ -10,6 +10,9 @@
 #import "XMPPDataForm.h"
 #import "HelperTools.h"
 #import "SignalPreKey.h"
+#import "MLContact.h"
+
+@class MLContact;
 
 NSString* const kiqGetType = @"get";
 NSString* const kiqSetType = @"set";
@@ -249,21 +252,21 @@ NSString* const kiqErrorType = @"error";
     [self addChildNode:queryNode];
 }
 
--(void) setRemoveFromRoster:(NSString*) jid
+-(void) setRemoveFromRoster:(MLContact*) contact
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{
-            @"jid": jid,
+            @"jid": contact.contactJid,
             @"subscription": @"remove"
         } andChildren:@[] andData:nil]
     ] andData:nil]];
 }
 
--(void) setUpdateRosterItem:(NSString* _Nonnull) jid withName:(NSString* _Nonnull) name
+-(void) setUpdateRosterItem:(MLContact* _Nonnull) contact withName:(NSString* _Nonnull) name
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{
-            @"jid": jid,
+            @"jid": contact.contactJid,
             @"name": name,
         } andChildren:@[] andData:nil]
     ] andData:nil]];

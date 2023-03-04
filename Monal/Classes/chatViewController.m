@@ -1086,7 +1086,7 @@ enum msgSentState {
     if(isTyping != _isTyping)       //changed state? --> send typing notification
     {
         DDLogVerbose(@"Sending chatstate isTyping=%@", bool2str(isTyping));
-        [[MLXMPPManager sharedInstance] sendChatState:isTyping fromAccount:self.contact.accountId toJid:self.contact.contactJid];
+        [[MLXMPPManager sharedInstance] sendChatState:isTyping toContact:self.contact];
     }
 
     //set internal state
@@ -1104,7 +1104,7 @@ enum msgSentState {
             {
                 self->_isTyping = NO;
                 DDLogVerbose(@"Sending chatstate isTyping=NO");
-                [[MLXMPPManager sharedInstance] sendChatState:NO fromAccount:self.contact.accountId toJid:self.contact.contactJid];
+                [[MLXMPPManager sharedInstance] sendChatState:NO toContact:self.contact];
             }
         }));
 }

@@ -654,11 +654,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         completion(success, messageId);
 }
 
--(void) sendChatState:(BOOL) isTyping fromAccount:(NSNumber*) accountNo toJid:(NSString*) jid
+-(void) sendChatState:(BOOL) isTyping toContact:(MLContact*) contact
 {
-    xmpp* account = [self getConnectedAccountForID:accountNo];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
-        [account sendChatState:isTyping toJid:jid];
+        [account sendChatState:isTyping toContact:contact];
 }
 
 #pragma mark - login/register

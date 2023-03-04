@@ -258,7 +258,7 @@ NSString *const kAskSubscribe=@"subscribe";
     NSNumber* notificationAccountNo = data[@"accountNo"];
     if(self.accountId.intValue != notificationAccountNo.intValue)
         return;         // ignore other accounts
-    self.isBlocked = [[DataLayer sharedInstance] isBlockedJid:self.contactJid withAccountNo:self.accountId] == kBlockingMatchedNodeHost;
+    self.isBlocked = [[DataLayer sharedInstance] isBlockedJid:self] == kBlockingMatchedNodeHost;
 }
 
 -(void) handleContactRefresh:(NSNotification*) notification
@@ -377,7 +377,7 @@ NSString *const kAskSubscribe=@"subscribe";
     // delay changes because we don't want to update the roster on our server too often while typing
     _cancelNickChange = createTimer(1.0, (^{
         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
-        [account updateRosterItem:self.contactJid withName:self.nickName];
+        [account updateRosterItem:self withName:self.nickName];
     }));
 }
 
@@ -461,9 +461,9 @@ NSString *const kAskSubscribe=@"subscribe";
     if(self.isMuted == mute)
         return;
     if(mute)
-        [[DataLayer sharedInstance] muteJid:self.contactJid onAccount:self.accountId];
+        [[DataLayer sharedInstance] muteJid:self];
     else
-        [[DataLayer sharedInstance] unMuteJid:self.contactJid onAccount:self.accountId];
+        [[DataLayer sharedInstance] unMuteJid:self];
     self.isMuted = mute;
 }
 

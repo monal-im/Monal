@@ -19,7 +19,7 @@ FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
 
 -(XMPPMessage*) init;
 -(XMPPMessage*) initWithType:(NSString*) type to:(NSString*) to;
--(XMPPMessage*) initTo:(NSString*) to;
+-(XMPPMessage*) initToContact:(MLContact*) toContact;
 -(XMPPMessage*) initWithType:(NSString*) type;
 -(XMPPMessage*) initWithXMPPMessage:(XMPPMessage*) msg;
 

@@ -381,7 +381,7 @@
 {
     //send jmi finish with migration before chaning all ids etc.
     DDLogDebug(@"Migrating call using JMI finish: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -664,7 +664,7 @@
 -(void) sendJmiPropose
 {
     DDLogDebug(@"Proposing new call via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"propose" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -681,7 +681,7 @@
 -(void) sendJmiReject
 {
     DDLogDebug(@"Rejecting via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -696,7 +696,7 @@
 -(void) sendJmiRejectWithTieBreak
 {
     DDLogDebug(@"Rejecting with tie-break via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -712,7 +712,7 @@
 -(void) sendJmiRinging
 {
     DDLogDebug(@"Ringing via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"ringing" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[] andData:nil]];
@@ -723,7 +723,7 @@
 -(void) sendJmiProceed
 {
     DDLogDebug(@"Accepting via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"proceed" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[] andData:nil]];
@@ -735,7 +735,7 @@
 -(void) sendJmiFinishWithReason:(NSString*) reason
 {
     DDLogDebug(@"Finishing via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -750,7 +750,7 @@
 -(void) sendJmiRetract
 {
     DDLogDebug(@"Retracting via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -765,7 +765,7 @@
 -(void) sendJmiRetractWithTieBreak
 {
     DDLogDebug(@"Retracting via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[

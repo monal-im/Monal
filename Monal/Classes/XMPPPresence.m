@@ -8,6 +8,9 @@
 
 #import "XMPPPresence.h"
 #import "HelperTools.h"
+#import "MLContact.h"
+
+@class MLContact;
 
 @interface MLXMLNode()
 @property (atomic, strong, readwrite) NSString* element;
@@ -82,32 +85,32 @@
 
 #pragma mark subscription
 
--(void) unsubscribeContact:(NSString*) jid
+-(void) unsubscribeContact:(MLContact*) contact
 {
-    [self.attributes setObject:jid forKey:@"to"];
+    [self.attributes setObject:contact.contactJid forKey:@"to"];
     [self.attributes setObject:@"unsubscribe" forKey:@"type"];
 }
 
--(void) subscribeContact:(NSString*) jid
+-(void) subscribeContact:(MLContact*) contact
 {
-    [self subscribeContact:jid withPreauthToken:nil];
+    [self subscribeContact:contact withPreauthToken:nil];
 }
 
--(void) subscribedContact:(NSString*) jid
+-(void) subscribedContact:(MLContact*) contact
 {
-    [self.attributes setObject:jid forKey:@"to"];
+    [self.attributes setObject:contact.contactJid forKey:@"to"];
     [self.attributes setObject:@"subscribed" forKey:@"type"];
 }
 
--(void) unsubscribedContact:(NSString*) jid
+-(void) unsubscribedContact:(MLContact*) contact
 {
-    [self.attributes setObject:jid forKey:@"to"];
+    [self.attributes setObject:contact.contactJid forKey:@"to"];
     [self.attributes setObject:@"unsubscribed" forKey:@"type"];
 }
 
--(void) subscribeContact:(NSString*) jid withPreauthToken:(NSString* _Nullable) token
+-(void) subscribeContact:(MLContact*) contact withPreauthToken:(NSString* _Nullable) token
 {
-    [self.attributes setObject:jid forKey:@"to"];
+    [self.attributes setObject:contact.contactJid forKey:@"to"];
     [self.attributes setObject:@"subscribe" forKey:@"type"];
     if(token != nil)
         [self addChildNode:[[MLXMLNode alloc] initWithElement:@"preauth" andNamespace:@"urn:xmpp:pars:0" withAttributes:@{

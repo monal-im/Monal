@@ -63,6 +63,9 @@ final class WebRTCClient: NSObject {
         // gatherContinually will let WebRTC to listen to any network changes and send any new candidates to the other client
         config.continualGatheringPolicy = .gatherContinually
         
+        //config.tcpCandidatePolicy = .disabled       // XEP-0176 doesn't support tcp
+        config.rtcpMuxPolicy = .negotiate
+        
         // Define media constraints. DtlsSrtpKeyAgreement is required to be true to be able to connect with web browsers.
         let constraints = RTCMediaConstraints(mandatoryConstraints: [
             "DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue

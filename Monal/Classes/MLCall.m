@@ -44,6 +44,7 @@
 @property (nonatomic, strong) WebRTCClient* _Nullable webRTCClient;
 @property (nonatomic, strong) CXAnswerCallAction* _Nullable providerAnswerAction;
 @property (nonatomic, assign) BOOL isConnected;
+@property (nonatomic, assign) BOOL wasConnectedOnce;
 @property (nonatomic, assign) BOOL isReconnecting;
 @property (nonatomic, assign) BOOL isFinished;
 @property (nonatomic, assign) BOOL tieBreak;
@@ -85,6 +86,7 @@
     self.contact = contact;
     self.direction = direction;
     self.isConnected = NO;
+    self.wasConnectedOnce = NO;
     self.isReconnecting = NO;
     self.durationTime = 0;
     self.isFinished = NO;
@@ -102,6 +104,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingSDP:) name:kMonalIncomingSDP object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingICECandidate:) name:kMonalIncomingICECandidate object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAudioRouteChangeNotification:) name:AVAudioSessionRouteChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleConnectivityChange:) name:kMonalConnectivityChange object:nil];
     
     return self;
 }
@@ -136,7 +139,7 @@
 -(void) setMuted:(BOOL) muted
 {
     @synchronized(self) {
-        if(!self.isConnected)
+        if(self.webRTCClient == nil || self.audioSession == nil)
             return;
         _muted = muted;
         if(_muted)
@@ -156,7 +159,7 @@
 -(void) setSpeaker:(BOOL) speaker
 {
     @synchronized(self) {
-        if(!self.isConnected)
+        if(self.webRTCClient == nil || self.audioSession == nil)
             return;
         if(_speaker == speaker)
             return;
@@ -213,7 +216,7 @@
 
 +(NSSet*) keyPathsForValuesAffectingState
 {
-    return [NSSet setWithObjects:@"direction", @"isConnected", @"jmiProceed", @"webRTCClient", @"providerAnswerAction", @"audioSession", @"isFinished", @"cancelDiscoveringTimeout", @"cancelRingingTimeout", @"cancelConnectingTimeout", nil];
+    return [NSSet setWithObjects:@"direction", @"isConnected", @"jmiProceed", @"webRTCClient", @"providerAnswerAction", @"audioSession", @"isFinished", @"cancelDiscoveringTimeout", @"cancelRingingTimeout", @"cancelConnectingTimeout", @"isReconnecting", nil];
 }
 
 #pragma mark - internals
@@ -233,12 +236,15 @@
 {
     //the timer needs a thread with runloop, see https://stackoverflow.com/a/18098396/3528174
     dispatch_async(dispatch_get_main_queue(), ^{
-        DDLogInfo(@"%@: Starting call duration timer...", [self short]);
         if(self.cancelConnectingTimeout != nil)
             self.cancelConnectingTimeout();
         self.cancelConnectingTimeout = nil;
+        //don't restart our timer if we just reconnected
+        if(self.isReconnecting)
+            return;
         if(self.callDurationTimer != nil)
             [self.callDurationTimer invalidate];
+        DDLogInfo(@"%@: Starting call duration timer...", [self short]);
         self.callDurationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
             DDLogVerbose(@"%@:Call duration timer triggered: %d", [self short], self.durationTime);
             if(self.state == MLCallStateFinished)
@@ -305,6 +311,8 @@
     @synchronized(self) {
         BOOL oldValue = _isConnected;
         _isConnected = isConnected;
+        if(isConnected)
+            self.wasConnectedOnce = YES;
         
         //if switching to connected state: check if we need to activate the already reported audio session now
         if(oldValue == NO && self.isConnected == YES && self.audioSession != nil)
@@ -594,6 +602,18 @@
     }));
 }
 
+-(void) createReconnectingTimeoutTimer
+{
+    if(self.cancelRingingTimeout != nil)
+        self.cancelRingingTimeout();
+    if(self.cancelConnectingTimeout != nil)
+        self.cancelConnectingTimeout();
+    self.cancelConnectingTimeout = createTimer(45.0, (^{
+        DDLogError(@"Failed to connect call, aborting!");
+        [self end];
+    }));
+}
+
 -(void) createRingingTimeoutTimer
 {
     if(self.cancelDiscoveringTimeout != nil)
@@ -630,7 +650,49 @@
     DDLogInfo(@"Now connecting outgoing VoIP call: %@", self);
     [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid startedConnectingAtDate:nil];
     [self createConnectingTimeoutTimer];
-    
+    [self offerSDP];
+}
+
+-(void) restartIce
+{
+    if(self.isReconnecting)
+    {
+        DDLogWarn(@"Not restarting ICE, already reconnecting!");
+        return;
+    }
+    DDLogInfo(@"Restarting ICE...");
+    @synchronized(self) {
+        self.isConnected = NO;
+        self.isReconnecting = YES;
+        [self.webRTCClient.peerConnection restartIce];
+        
+        //we have to decide for a prefered direction because otherwise we'd get a webrtc error on incoming sdp:
+        //Failed to set remote offer sdp: Called in wrong state: have-local-offer
+        if(self.direction == MLCallDirectionOutgoing)
+            [self offerSDP];
+        
+        //start connecting timeout if not already running (but leave it running if so, because we don't want to create endless reconnect loops
+        if(self.cancelConnectingTimeout == nil)
+            [self createReconnectingTimeoutTimer];
+    }
+}
+
+-(void) handleConnectivityChange:(NSNotification*) notification
+{
+    //only handle connectivity change if we switched to unreachable
+    if(self.wasConnectedOnce && self.isConnected && !self.isReconnecting && [notification.userInfo[@"reachable"] boolValue] == NO)
+    {
+        DDLogDebug(@"Connectivity changed, restarting ICE...");
+        //this will reconnect and use the (possibly still working) old connection until
+        //the new connection is usable, then transparently switch over to the new one
+        [self restartIce];
+    }
+    else
+        DDLogDebug(@"Not restarting ICE because of connectivity change: was never connected");
+}
+
+-(void) offerSDP
+{
     //TODO: in our non-jingle protocol the initiator (e.g. we) has to initialize the webrtc session by sending the proper IQs
     [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
         DDLogDebug(@"WebRTC reported local SDP '%@' offer, sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
@@ -803,7 +865,9 @@
         @"jmiProceed": nilWrapper(self.jmiProceed),
         @"webRTCClient": nilWrapper(self.webRTCClient),
         @"providerAnswerAction": nilWrapper(self.providerAnswerAction),
+        @"wasConnectedOnce": bool2str(self.wasConnectedOnce),
         @"isConnected": bool2str(self.isConnected),
+        @"isReconnecting": bool2str(self.isReconnecting),
     }];
 }
 
@@ -875,6 +939,7 @@
             DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for webRTCClient: %@ (call migrated)", (long)state, webRTCClient);
             return;
         }
+        //state enums can be found over here: https://chromium.googlesource.com/external/webrtc/+/9eeb6240c93efe2219d4d6f4cf706030e00f64d7/webrtc/sdk/objc/Framework/Headers/WebRTC/RTCPeerConnection.h
         DDLogDebug(@"New RTCIceConnectionState %ld for webRTCClient: %@", (long)state, webRTCClient);
         switch(state)
         {
@@ -883,6 +948,7 @@
             case RTCIceConnectionStateCompleted:
                 DDLogInfo(@"New WebRTC ICE state: completed: %@", self);
                 self.isConnected = YES;
+                self.isReconnecting = NO;
                 //at this stage this means the call is incoming (--> fulfill callkit answer action to update ui to reflect connected call)
                 if(self.direction == MLCallDirectionIncoming)
                 {
@@ -898,11 +964,17 @@
                 break;
             case RTCIceConnectionStateDisconnected:
                 DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
-                [self end];     //use "end" because this was a successful call
+                if(self.wasConnectedOnce)
+                    [self restartIce];
+                else
+                    [self end];     //use "end" because this was a successful call
                 break;
             case RTCIceConnectionStateFailed:
                 DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
-                [self end];
+                if(self.wasConnectedOnce)
+                    [self restartIce];
+                else
+                    [self end];
                 break;
             //all following states can be ignored
             case RTCIceConnectionStateClosed:

@@ -279,6 +279,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                         DDLogDebug(@"Not trying to reconnect in 0s, parse queue frozen!");
                 }
             }
+            
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalConnectivityChange object:self userInfo:@{@"reachable": @YES}];
         }
         else if(nw_path_get_status(path) != nw_path_status_satisfied && self->_hasConnectivity)
         {
@@ -296,6 +298,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 //don't queue this notification because it should be handled immediately
                 [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @YES}];
             }
+            
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalConnectivityChange object:self userInfo:@{@"reachable": @NO}];
         }
         else if(nw_path_get_status(path) == nw_path_status_satisfied)
         {
@@ -312,6 +316,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 }
                 else
                     DDLogDebug(@"Not pinging after 1s, parse queue frozen!");
+            
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalConnectivityChange object:self userInfo:@{@"reachable": @YES}];
         }
         else
             DDLogVerbose(@"nothing changed, still NOT reachable");

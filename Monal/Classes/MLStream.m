@@ -143,10 +143,16 @@
         if(receive_error)
         {
             NSError* st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(receive_error));
-            @synchronized(self.shared_state) {
-                self.shared_state.error = st_error;
+            //ignore enodata and eagain errors
+            if([st_error.domain isEqualToString:(__bridge NSString *)kNWErrorDomainPOSIX] && (st_error.code == ENODATA || st_error.code == EAGAIN))
+                DDLogWarn(@"Ignoring transient receive error: %@", st_error);
+            else
+            {
+                @synchronized(self.shared_state) {
+                    self.shared_state.error = st_error;
+                }
+                [self generateEvent:NSStreamEventErrorOccurred];
             }
-            [self generateEvent:NSStreamEventErrorOccurred];
         }
         
         //check if we're read-closed and stop our loop if true

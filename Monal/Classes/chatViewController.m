@@ -248,7 +248,9 @@ enum msgSentState {
     if([HelperTools shouldProvideVoip])
     {
         //this has to be done in the main thread because it's ui related
-        [HelperTools dispatchSyncReentrant:^{
+        //use reentrant dispatch to make sure we update the call button in one shot to not let it flicker
+        //this does not matter if we aren't already in the main thread, hence the async dispatch
+        [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
             //these contact types can not be called
             if(self.contact.isGroup || self.contact.isSelfChat || !self.contact.isSubscribedBoth)
             {
@@ -288,7 +290,7 @@ enum msgSentState {
                 [rightBarButtons addObject:self.callButton];
                 self.navigationItem.rightBarButtonItems = rightBarButtons;
             }
-        } onQueue:dispatch_get_main_queue()];
+        }];
     }
 }
 

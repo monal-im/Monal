@@ -93,11 +93,11 @@
     self.cancelRingingTimeout = nil;
     self.cancelConnectingTimeout = nil;
     
-    [HelperTools dispatchSyncReentrant:^{
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
         MLAssert(appDelegate.voipProcessor != nil, @"appDelegate.voipProcessor should never be nil!");
         self.voipProcessor = appDelegate.voipProcessor;
-    } onQueue:dispatch_get_main_queue()];
+    }];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingSDP:) name:kMonalIncomingSDP object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingICECandidate:) name:kMonalIncomingICECandidate object:nil];

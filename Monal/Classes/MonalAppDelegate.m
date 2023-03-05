@@ -1219,7 +1219,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 _shutdownPending = YES;
                 [[MLXMPPManager sharedInstance] disconnectAll];     //disconnect all accounts to prevent TCP buffer leaking
                 [self scheduleBackgroundTask:NO];           //request bg fetch execution in BGFETCH_DEFAULT_INTERVAL seconds
-                [HelperTools dispatchSyncReentrant:^{
+                [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
                     BOOL stopped = NO;
                     //make sure this will be done only once, even if we have an uikit bgtask and a bg fetch running simultaneously
                     if(self->_bgTask != UIBackgroundTaskInvalid || self->_bgProcessing != nil || self->_bgRefreshing != nil)
@@ -1267,7 +1267,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         [DDLog flushLog];
                         [MLUDPLogger flushWithTimeout:0.100];
                     }
-                } onQueue:dispatch_get_main_queue()];
+                }];
             }
         }
     }
@@ -1275,7 +1275,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
 -(void) addBackgroundTask
 {
-    [HelperTools dispatchSyncReentrant:^{
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         //log both cases if present
         if(self->_bgTask != UIBackgroundTaskInvalid)
             DDLogVerbose(@"Not starting UIKit background task, already running: %d", (int)self->_bgTask);
@@ -1337,7 +1337,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 }
             }];
         }
-    } onQueue:dispatch_get_main_queue()];
+    }];
 }
 
 -(void) handleBackgroundProcessingTask:(BGTask*) task
@@ -1352,7 +1352,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         [DDLog flushLog];
         
         DDLogVerbose(@"Dispatching to main queue...");
-        [HelperTools dispatchSyncReentrant:^{
+        [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
             BOOL background = [HelperTools isInBackground];
             DDLogVerbose(@"Waiting for @synchronized(self)...");
             @synchronized(self) {
@@ -1399,7 +1399,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     [MLUDPLogger flushWithTimeout:0.100];
                 }
             }
-        } onQueue:dispatch_get_main_queue()];
+        }];
     };
     
     //only proceed with our BGTASK if the NotificationServiceExtension is not running
@@ -1462,7 +1462,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         [DDLog flushLog];
         
         DDLogVerbose(@"Dispatching to main queue...");
-        [HelperTools dispatchSyncReentrant:^{
+        [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
             BOOL background = [HelperTools isInBackground];
             DDLogVerbose(@"Waiting for @synchronized(self)...");
             @synchronized(self) {
@@ -1509,7 +1509,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     [MLUDPLogger flushWithTimeout:0.100];
                 }
             }
-        } onQueue:dispatch_get_main_queue()];
+        }];
     };
     
     //only proceed with our BGTASK if the NotificationServiceExtension is not running
@@ -1613,7 +1613,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 -(void) scheduleBackgroundTask:(BOOL) force
 {
     DDLogInfo(@"Scheduling new BackgroundTask with force=%@...", bool2str(force));
-    [HelperTools dispatchSyncReentrant:^{
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         NSError* error;
         if(force)
         {
@@ -1650,7 +1650,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             else
                 DDLogVerbose(@"Success submitting BGTask request %@", refreshingRequest);
         }
-    } onQueue:dispatch_get_main_queue()];
+    }];
 }
 
 -(void) connectIfNecessary

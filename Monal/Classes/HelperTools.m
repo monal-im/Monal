@@ -1104,10 +1104,10 @@ static id preprocess(id exception)
         inBackground = [[MLXMPPManager sharedInstance] isBackgrounded];
     /*
     {
-        [HelperTools dispatchSyncReentrant:^{
+        [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                 inBackground = YES;
-        } onQueue:dispatch_get_main_queue()];
+        }];
     }
     */
     return inBackground;
@@ -1123,7 +1123,7 @@ static id preprocess(id exception)
     return isNotInFocus;
 }
 
-+(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue
++(void) dispatchAsync:(BOOL) async reentrantOnQueue:(dispatch_queue_t _Nullable) queue withBlock:(monal_void_block_t) block
 {
     if(!queue)
         queue = dispatch_get_main_queue();
@@ -1144,7 +1144,12 @@ static id preprocess(id exception)
     if(current_queue == queue || (queue == dispatch_get_main_queue() && [NSThread isMainThread]))
         block();
     else
-        dispatch_sync(queue, block);
+    {
+        if(async)
+            dispatch_async(queue, block);
+        else
+            dispatch_sync(queue, block);
+    }
 }
 
 +(void) activityLog

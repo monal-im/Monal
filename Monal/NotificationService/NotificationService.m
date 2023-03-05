@@ -400,7 +400,7 @@
 -(void) scheduleBackgroundTask:(BOOL) force
 {
     DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");
-    [HelperTools dispatchSyncReentrant:^{
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         NSError* error;
         if(force)
         {
@@ -435,7 +435,7 @@
             else
                 DDLogVerbose(@"Success submitting BGTask request %@", refreshingRequest);
         }
-    } onQueue:dispatch_get_main_queue()];
+    }];
 }
 
 @end

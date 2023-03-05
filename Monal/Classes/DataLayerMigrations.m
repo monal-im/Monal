@@ -1005,6 +1005,11 @@
             // mark identities as broken if no session exists
             [db executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=true WHERE (account_id, contactName, contactDeviceId) NOT IN (SELECT account_id, contactName, contactDeviceId FROM signalContactSession);"];
         }];
+        
+        //reintroduce lastInteraction column to buddylist to record the latest interaction independently of online resources
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.007 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN lastInteraction INTEGER DEFAULT NULL;"];
+        }];
 
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

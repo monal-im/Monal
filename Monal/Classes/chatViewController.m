@@ -666,7 +666,7 @@ enum msgSentState {
 
 -(void) updateTypingTime:(NSDate* _Nullable) lastInteractionDate
 {
-    DDLogVerbose(@"LastInteraction updateTime() called");
+    DDLogVerbose(@"LastInteraction updateTime() called: %@", lastInteractionDate);
     NSString* lastInteractionString = @"";      //unknown last interaction because not supported by any remote resource
     if(lastInteractionDate != nil)
         lastInteractionString = [HelperTools formatLastInteraction:lastInteractionDate];
@@ -709,7 +709,7 @@ enum msgSentState {
     // ...or load the latest interaction timestamp from db
     else
         // this is nil if no "urn:xmpp:idle:1" is supported by any devices of this contact
-        lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:jid forAccountNo:self.contact.accountId];
+        lastInteractionDate = self.contact.lastInteractionTime;
 
     // make timestamp human readable (lastInteractionDate will be captured by this block and automatically used by our timer)
     [self updateTypingTime:lastInteractionDate];

@@ -2273,18 +2273,27 @@ static NSDateFormatter* dbFormatter;
     MLAssert(accountNo != nil, @"accountNo should not be null");
     return [self.db idReadTransaction:^{
         //this will only return resources supporting "urn:xmpp:idle:1" and being "online" (e.g. lastInteraction = 0)
-        NSNumber* online = [self.db executeScalar:@"SELECT lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND V.cap='urn:xmpp:idle:1' AND R.lastInteraction=0 ORDER BY lastInteraction ASC LIMIT 1;" andArguments:@[accountNo, jid]];
+        NSNumber* online = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND V.cap='urn:xmpp:idle:1' AND R.lastInteraction=0 ORDER BY R.lastInteraction ASC LIMIT 1;" andArguments:@[accountNo, jid]];
         
         //this will only return resources supporting "urn:xmpp:idle:1" and being "idle since <...>" (e.g. lastInteraction > 0)
-        NSNumber* idle = [self.db executeScalar:@"SELECT lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND cap='urn:xmpp:idle:1' AND R.lastInteraction!=0 ORDER BY lastInteraction DESC LIMIT 1;" andArguments:@[accountNo, jid]];
+        NSNumber* idle = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND cap='urn:xmpp:idle:1' AND R.lastInteraction!=0 ORDER BY R.lastInteraction DESC LIMIT 1;" andArguments:@[accountNo, jid]];
+        
+        //this will only return a value if the buddy has a last interaction not being NULL or 0
+        NSNumber* globalIdle = [self.db executeScalar:@"SELECT lastInteraction FROM buddylist WHERE account_id=? AND buddy_name=? AND NOT (lastInteraction IS NULL OR lastInteraction==0);" andArguments:@[accountNo, jid]];
         
         //at least one online resource means the buddy is online
         //if no online resource can be found use the newest timestamp as "idle since <...>" timestamp
-        DDLogDebug(@"LastInteraction of %@ online=%@, idle=%@", jid, online, idle);
+        //if this can also not be found, use the global timestamp and if this is NULL then return nil
+        //(meaning last interaction is unsupported and was every since we saw presences from this jid)
+        DDLogDebug(@"LastInteraction of %@ online=%@, idle=%@, globalIdle=%@", jid, online, idle, globalIdle);
         if(online != nil)
             return [[NSDate date] initWithTimeIntervalSince1970:0] ;
         if(idle == nil)
-            return (NSDate*)nil;
+        {
+            if(globalIdle == nil)
+                return (NSDate*)nil;
+            return [NSDate dateWithTimeIntervalSince1970:[globalIdle integerValue]];
+        }
         return [NSDate dateWithTimeIntervalSince1970:[idle integerValue]];
     }];
 }
@@ -2295,7 +2304,7 @@ static NSDateFormatter* dbFormatter;
     MLAssert(accountNo != nil, @"accountNo should not be null");
     return [self.db idReadTransaction:^{
         //this will only return resources supporting "urn:xmpp:idle:1"
-        NSNumber* lastInteraction = [self.db executeScalar:@"SELECT lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id WHERE B.account_id=? AND B.buddy_name=? AND R.resource=? AND EXISTS(SELECT * FROM ver_info AS V WHERE V.ver=R.ver AND V.cap='urn:xmpp:idle:1') LIMIT 1;" andArguments:@[accountNo, jid, resource]];
+        NSNumber* lastInteraction = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id WHERE B.account_id=? AND B.buddy_name=? AND R.resource=? AND EXISTS(SELECT * FROM ver_info AS V WHERE V.ver=R.ver AND V.cap='urn:xmpp:idle:1') LIMIT 1;" andArguments:@[accountNo, jid, resource]];
         DDLogDebug(@"LastInteraction of %@/%@ lastInteraction=%@", jid, resource, lastInteraction);
         if(lastInteraction == nil)
             return (NSDate*)nil;
@@ -2312,9 +2321,10 @@ static NSDateFormatter* dbFormatter;
     if(lastInteractionTime != nil)
         timestamp = [HelperTools dateToNSNumberSeconds:lastInteractionTime];
     
-    DDLogDebug(@"Setting lastInteraction timestamp of %@/%@ to %@...", jid, resource, timestamp);
+    DDLogDebug(@"Setting lastInteraction of %@/%@ to %@...", jid, resource, timestamp);
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"UPDATE buddy_resources AS R SET lastInteraction=? WHERE EXISTS(SELECT * FROM buddylist AS B WHERE B.buddy_id=R.buddy_id AND B.account_id=? AND B.buddy_name=?) AND R.resource=?;" andArguments:@[timestamp, accountNo, jid, resource]];
+        [self.db executeNonQuery:@"UPDATE buddylist SET lastInteraction=? WHERE account_id=? AND buddy_name=? AND (lastInteraction IS NULL OR lastInteraction<?);" andArguments:@[timestamp, accountNo, jid, timestamp]];
     }];
 }
 

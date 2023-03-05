@@ -809,7 +809,7 @@ static NSDateFormatter* dbFormatter;
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT subscription, ask from buddylist where buddy_name=? and account_id=?";
         NSArray* params = @[contact, accountNo];
-        NSArray* version=[self.db executeReader:query andArguments:params];
+        NSArray* version = [self.db executeReader:query andArguments:params];
         return version.firstObject;
     }];
 }

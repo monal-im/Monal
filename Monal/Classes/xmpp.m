@@ -4268,11 +4268,11 @@ NSString* const kStanza = @"stanza";
     //delete contact request if it exists
     [[DataLayer sharedInstance] deleteContactRequest:contact];
     
-    XMPPPresence* presence =[XMPPPresence new];
-    [presence unsubscribeContact:contact.contactJid];
+    XMPPPresence* presence = [XMPPPresence new];
+    [presence unsubscribeContact:contact];
     [self send:presence];
     
-    XMPPPresence* presence2 =[XMPPPresence new];
+    XMPPPresence* presence2 = [XMPPPresence new];
     [presence2 unsubscribedContact:contact];
     [self send:presence2];
     
@@ -4288,11 +4288,11 @@ NSString* const kStanza = @"stanza";
     //delete contact request if it exists
     [[DataLayer sharedInstance] deleteContactRequest:contact];
     
-    XMPPPresence* presence =[XMPPPresence new];
+    XMPPPresence* presence = [XMPPPresence new];
     [presence subscribeContact:contact withPreauthToken:preauthToken];
     [self send:presence];
     
-    XMPPPresence* presence2 =[XMPPPresence new];
+    XMPPPresence* presence2 = [XMPPPresence new];
     [presence2 subscribedContact:contact];
     [self send:presence2];
 }
@@ -4310,7 +4310,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) createInvitationWithCompletion:(monal_id_block_t) completion
 {
-    XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType to:self.connectionProperties.identity.domain];
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType to:self.connectionProperties.identity.domain];
     [iq addChildNode:[[MLXMLNode alloc] initWithElement:@"command" andNamespace:@"http://jabber.org/protocol/commands" withAttributes:@{
         @"node": @"urn:xmpp:invite#invite",
         @"action": @"execute",
@@ -4353,7 +4353,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion
 {
-    XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setiqTo:self.connectionProperties.identity.domain];
     [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
     [self sendIq:iq withResponseHandler:^(XMPPIQ* response __unused) {
@@ -4461,7 +4461,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) submitRegForm
 {
-    XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iq registerUser:self.regUser withPassword:self.regPass captcha:self.regCode andHiddenFields:self.regHidden];
 
     [self sendIq:iq withResponseHandler:^(XMPPIQ* result __unused) {
@@ -4722,7 +4722,7 @@ NSString* const kStanza = @"stanza";
         }
         else
         {
-            NSError* error=[_oStream streamError];
+            NSError* error = [_oStream streamError];
             DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
             //reconnect from third party queue to not block send queue
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
@@ -4764,7 +4764,7 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
-        NSError* error=[_oStream streamError];
+        NSError* error = [_oStream streamError];
         DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
         //reconnect from third party queue to not block send queue
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{

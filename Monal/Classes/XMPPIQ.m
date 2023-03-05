@@ -115,7 +115,7 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setAdhocDiscoNode
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items" withAttributes:@{
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items" withAttributes:@{
         @"node": @"http://jabber.org/protocol/commands",
     } andChildren:@[] andData:nil];
     [self addChildNode:queryNode];
@@ -123,13 +123,13 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setDiscoInfoNode
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];
     [self addChildNode:queryNode];
 }
 
 -(void) setDiscoItemNode
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items"];
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items"];
     [self addChildNode:queryNode];
 }
 

@@ -248,9 +248,9 @@ static NSMutableDictionary* currentTransactions;
     DDLogError(@"SQLite Exception: %@ for query '%@' having params %@", error, query ? query : @"", args ? args : @[]);
     DDLogError(@"currentTransactions: %@", currentTransactions);
     @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{
-        @"currentTransactions": currentTransactions,
         @"query": query ? query : [NSNull null],
-        @"args": args ? args : [NSNull null]
+        @"args": args ? args : [NSNull null],
+        @"currentTransactions": currentTransactions,
     }];
 }
 
@@ -388,7 +388,7 @@ static NSMutableDictionary* currentTransactions;
         return;			//begin only outermost transaction
     BOOL retval;
     do {
-        retval=[self executeNonQuery:@"BEGIN IMMEDIATE TRANSACTION;" andArguments:@[] withException:NO];
+        retval = [self executeNonQuery:@"BEGIN IMMEDIATE TRANSACTION;" andArguments:@[] withException:NO];
         if(!retval)
         {
             [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
@@ -451,7 +451,7 @@ static NSMutableDictionary* currentTransactions;
         return;			//begin only outermost transaction
     BOOL retval;
     do {
-        retval=[self executeNonQuery:@"BEGIN DEFERRED TRANSACTION;" andArguments:@[] withException:NO];
+        retval = [self executeNonQuery:@"BEGIN DEFERRED TRANSACTION;" andArguments:@[] withException:NO];
         if(!retval)
         {
             [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again

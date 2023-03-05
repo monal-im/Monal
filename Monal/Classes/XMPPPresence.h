@@ -61,7 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  unsubscribes from presence notfiction
  */
--(void) unsubscribeContact:(NSString*) jid;
+-(void) unsubscribeContact:(MLContact*) contact;
 
 /**
  subscribes from presence notfiction

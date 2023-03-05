@@ -309,9 +309,9 @@ enum MLServerDetailsSections {
     else if(section == TLS_SECTION)
         return NSLocalizedString(@"These are the TLS versions supported by Monal, the one used to connect to your server will be green.", @"");
     else if(section == SASL_SECTION)
-        return NSLocalizedString(@"These are the SASL2 methods your server supports.", @"");
+        return NSLocalizedString(@"These are the SASL2 methods your server supports (used one in green, yellow ones unsupported by Monal).", @"");
     else if(section == CB_SECTION)
-        return NSLocalizedString(@"These are the channel-binding types your server supports to detect attacks on the TLS layer.", @"");
+        return NSLocalizedString(@"These are the channel-binding types your server supports to detect attacks on the TLS layer (used one in green, yellow ones unsupported by Monal).", @"");
     return @"";
 }
 

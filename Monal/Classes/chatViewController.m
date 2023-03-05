@@ -518,7 +518,7 @@ enum msgSentState {
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
-        alert.popoverPresentationController.sourceView = sender;
+        alert.popoverPresentationController.sourceView = self.view;
         [self presentViewController:alert animated:YES completion:nil];
     }
     else

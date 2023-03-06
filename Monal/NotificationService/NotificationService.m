@@ -123,7 +123,7 @@
 -(BOOL) checkForLastHandler
 {
     @synchronized(self.handlerList) {
-        return self.handlerList.count != 0;
+        return self.handlerList.count <= 1;
     }
 }
 
@@ -274,6 +274,8 @@
     BOOL isLastHandler = [self checkForLastHandler];
     if(isLastHandler)
     {
+        DDLogInfo(@"This was the last handler, freezing all parse queues and posting sync errors...");
+        
         //we have to freeze all incoming streams until we know if this handler feeding leads to the termination of our appex or not
         //we MUST do this before feeding the last handler because after feeding the last one apple does not allow us to
         //post any new notifications --> not freezing would lead to lost notifications
@@ -361,6 +363,7 @@
     DDLogInfo(@"Freezing all incoming streams until we know if we are either terminating or got another push");
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         [account freezeParseQueue];
+    DDLogInfo(@"All parse queues frozen now");
 }
 
 -(void) unfreezeAllParseQueues
@@ -368,6 +371,7 @@
     DDLogInfo(@"Unfreezing all incoming streams again, we got another push");
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         [account unfreezeParseQueue];
+    DDLogInfo(@"All parse queues operational again");
 }
 
 -(void) updateUnread

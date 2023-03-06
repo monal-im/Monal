@@ -716,6 +716,7 @@ NSString* const kStanza = @"stanza";
     //this has to be synchronous because we want to be sure no further stanzas are leaking from the parse queue
     //into the receive queue once we leave this method
     _parseQueue.suspended = YES;
+    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
     [self dispatchOnReceiveQueue: ^{
         DDLogWarn(@"Parse queue is frozen now!");
     }];

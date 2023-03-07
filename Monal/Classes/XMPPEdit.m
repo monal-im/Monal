@@ -386,13 +386,25 @@ enum DummySettingsRows {
     {
         [dic setObject:[NSNumber numberWithBool:NO] forKey:kNeedsPasswordMigration];
         DDLogVerbose(@"Updating existing account: %@", dic);
+        //disconnect account before disabling it in db, to avoid assertions when trying to create MLContact instances
+        //for the disabled account (for notifications etc.)
+        if(!self.enabled)
+        {
+            DDLogVerbose(@"Account is not enabled anymore, deleting all SiriKit interactions and making sure it's disconnected: %@", self.accountNo);
+            [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+            [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
+                if(error != nil)
+                    DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+            }];
+        }
+        DDLogVerbose(@"Now updating DB with account dict...");
         BOOL updatedAccount = [[DataLayer sharedInstance] updateAccounWithDictionary:dic];
         if(updatedAccount)
         {
             DDLogVerbose(@"DB update succeeded: %@", self.accountNo);
             if(self.password.length)
             {
-                DDLogVerbose(@"Now setting password for account %@ in SAMKeychain: '%@'", self.accountNo, self.password);
+                DDLogVerbose(@"Now setting password for account %@ in SAMKeychain...", self.accountNo);
                 [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountNo];
             }
             if(self.enabled)
@@ -418,19 +430,12 @@ enum DummySettingsRows {
                 if(self.avatarChanged)
                     [account publishAvatar:self.selectedAvatarImage];
             }
-            else
-            {
-                DDLogVerbose(@"Account is not enabled anymore, deleting all SiriKit interactions and making sure it's disconnected: %@", self.accountNo);
-                [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
-                [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
-                    if(error != nil)
-                        DDLogError(@"Could not delete all SiriKit interactions: %@", error);
-                }];
-            }
             //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             [self showSuccessHUD];
         }
+        else
+            DDLogError(@"DB update failed!");
     }
 }
 

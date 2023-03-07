@@ -828,16 +828,18 @@ $$
     [account getEntitySoftWareVersion:xmppId];
 }
 
--(void) blocked:(BOOL) isBlocked Jid:(MLContact *) contact
+-(void) block:(BOOL) isBlocked contact:(MLContact*) contact
 {
+    DDLogVerbose(@"Blocking %@: %@", contact, bool2str(isBlocked));
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     [account setBlocked:isBlocked forJid:contact.contactJid];
 }
 
--(void) blocked:(BOOL) isBlocked Jid:(NSString *) contact Account:(NSNumber*) accountNo
+-(void) block:(BOOL) isBlocked fullJid:(NSString*) fullJid onAccount:(NSNumber*) accountNo
 {
+    DDLogVerbose(@"Blocking %@ on account %@: %@", fullJid, accountNo, bool2str(isBlocked));
     xmpp* account = [self getConnectedAccountForID:accountNo];
-    [account setBlocked:isBlocked forJid:contact];
+    [account setBlocked:isBlocked forJid:fullJid];
 }
 
 #pragma mark message signals

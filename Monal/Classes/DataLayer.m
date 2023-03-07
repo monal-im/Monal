@@ -2120,15 +2120,15 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(u_int8_t) isBlockedJid:(MLContact*) contact
+-(uint8_t) isBlockedContact:(MLContact*) contact
 {
     if(!contact)
-        return NO;
+        return kBlockingNoMatch;
 
-    return (u_int8_t)[[self.db idReadTransaction:^{
+    return (uint8_t)[[self.db idReadTransaction:^{
         NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:contact.contactJid];
         NSNumber* blocked;
-        u_int8_t ruleId = kBlockingNoMatch;
+        uint8_t ruleId = kBlockingNoMatch;
         if(parsedJid[@"node"] && parsedJid[@"host"] && parsedJid[@"resource"])
         {
             blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource=?;" andArguments:@[contact.accountId, parsedJid[@"node"], parsedJid[@"host"], parsedJid[@"resource"]]];
@@ -2149,11 +2149,7 @@ static NSDateFormatter* dbFormatter;
             blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource IS NULL;" andArguments:@[contact.accountId, parsedJid[@"host"]]];
             ruleId = kBlockingMatchedHost;
         }
-        else
-        {
-            return [NSNumber numberWithInt:kBlockingNoMatch];
-        }
-        if(blocked.intValue == 1)
+        if(blocked.intValue >= 1)
             return [NSNumber numberWithInt:ruleId];
         else
             return [NSNumber numberWithInt:kBlockingNoMatch];

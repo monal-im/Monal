@@ -63,8 +63,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Block  a jid
  */
--(void) blocked:(BOOL) isBlocked Jid:(MLContact *) contact;
--(void) blocked:(BOOL) isBlocked Jid:(NSString *) contact Account:(NSNumber*) accountNo;
+-(void) block:(BOOL) isBlocked contact:(MLContact*) contact;
+-(void) block:(BOOL) isBlocked fullJid:(NSString*) contact onAccount:(NSNumber*) accountNo;
 
 /**
  Returns the user set name of the conencted account

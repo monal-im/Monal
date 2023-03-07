@@ -95,7 +95,7 @@
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         if(!self.xmppAccount.connectionProperties.supportsBlocking) return;
         // unblock jid
-        [[MLXMPPManager sharedInstance] blocked:NO Jid:self.blockedJids[indexPath.row][@"fullBlockedJid"] Account:self.xmppAccount.accountNo];
+        [[MLXMPPManager sharedInstance] block:NO fullJid:self.blockedJids[indexPath.row][@"fullBlockedJid"] onAccount:self.xmppAccount.accountNo];
 
         self.blockingHUD.hidden = NO;
     }
@@ -130,7 +130,7 @@
             self.blockingHUD.hidden = NO;
 
             // block the jid
-            [[MLXMPPManager sharedInstance] blocked:YES Jid:jidToBlock Account:self.xmppAccount.accountNo];
+            [[MLXMPPManager sharedInstance] block:YES fullJid:jidToBlock onAccount:self.xmppAccount.accountNo];
 
             // close form
             [blockJidForm dismissViewControllerAnimated:YES completion:nil];

@@ -251,7 +251,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(void) blockJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
 -(void) unBlockJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
--(u_int8_t) isBlockedJid:(MLContact*) jid;
+-(uint8_t) isBlockedContact:(MLContact*) contact;
 -(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids forAccountNo:(NSNumber*) accountNo;
 -(NSArray<NSDictionary<NSString*, NSString*>*>*) blockedJidsForAccount:(NSNumber*) accountNo;
 

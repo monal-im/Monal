@@ -258,7 +258,9 @@ NSString *const kAskSubscribe=@"subscribe";
     NSNumber* notificationAccountNo = data[@"accountNo"];
     if(self.accountId.intValue != notificationAccountNo.intValue)
         return;         // ignore other accounts
-    self.isBlocked = [[DataLayer sharedInstance] isBlockedJid:self] == kBlockingMatchedNodeHost;
+    long blockingType = [[DataLayer sharedInstance] isBlockedContact:self];
+    self.isBlocked = blockingType == kBlockingMatchedNodeHost;
+    DDLogInfo(@"Updated contact %@ to blocking state %ld => isBlocked=%@", self, blockingType, bool2str(self.isBlocked));
 }
 
 -(void) handleContactRefresh:(NSNotification*) notification
@@ -537,7 +539,7 @@ NSString *const kAskSubscribe=@"subscribe";
         return NO;
     if(!account.connectionProperties.supportsBlocking)
         return NO;
-    [[MLXMPPManager sharedInstance] blocked:block Jid:self];
+    [[MLXMPPManager sharedInstance] block:block contact:self];
     return YES;
 }
 

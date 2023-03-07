@@ -895,7 +895,7 @@ $$
 
 $$instance_handler(handlePublishResultInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(MLXMLNode*, item), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $_HANDLER(handler))
     //invalidate user handler
-    $call(handler, $ID(account), $BOOL(success, NO), $ID(node));
+    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node));
 $$
 
 $$instance_handler(handlePublishResult, account.pubsub, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLXMLNode*, item), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $_HANDLER(handler))

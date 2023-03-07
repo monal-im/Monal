@@ -3115,7 +3115,7 @@ NSString* const kStanza = @"stanza";
                     [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
             }
             @synchronized(self->_stateLockObject) {
-                DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza);
+                [self logStanza:queued_stanza withPrefix:[NSString stringWithFormat:@"ADD UNACKED STANZA: %@", self.lastOutboundStanza]];
                 NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
                 [self.unAckedStanzas addObject:dic];
                 //increment for next call
@@ -3136,22 +3136,30 @@ NSString* const kStanza = @"stanza";
         )
         {
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-#if TARGET_OS_SIMULATOR
-                if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
-                    DDLogDebug(@"SEND: redacted sasl element: %@", [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
-                else if([stanza check:@"/{jabber:client}iq<type=set>/{jabber:iq:register}query"])
-                    DDLogDebug(@"SEND: redacted register/change password iq");
-                else
-#endif
-                    DDLogDebug(@"SEND: %@", stanza);
+                [self logStanza:stanza withPrefix:@"SEND"];
                 [self->_outputQueue addObject:stanza];
                 [self writeFromQueue];      // try to send if there is space
             }]];
         }
         else
-            DDLogDebug(@"NOT ADDING STANZA TO SEND QUEUE: %@", stanza);
+            [self logStanza:stanza withPrefix:@"NOT ADDING STANZA TO SEND QUEUE"];
     }];
 }
+
+-(void) logStanza:(MLXMLNode*) stanza withPrefix:(NSString*) prefix
+{
+#if !TARGET_OS_SIMULATOR
+    if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
+        DDLogDebug(@"%@: redacted sasl element: %@", prefix, [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
+    else if([stanza check:@"/{jabber:client}iq<type=set>/{jabber:iq:register}query"])
+        DDLogDebug(@"%@: redacted register/change password iq", prefix);
+    else
+        DDLogDebug(@"%@: %@", prefix, stanza);
+#else
+    DDLogDebug(@"%@: %@", prefix, stanza);
+#endif
+}
+
 
 #pragma mark messaging
 

@@ -55,6 +55,7 @@
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelDiscoveringTimeout;
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelRingingTimeout;
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelConnectingTimeout;
+@property (nonatomic, strong) monal_void_block_t _Nullable cancelWaitUntilIceRestart;
 
 @property (nonatomic, readonly) xmpp* account;
 @property (nonatomic, strong) MLVoIPProcessor* voipProcessor;
@@ -941,6 +942,12 @@
         }
         //state enums can be found over here: https://chromium.googlesource.com/external/webrtc/+/9eeb6240c93efe2219d4d6f4cf706030e00f64d7/webrtc/sdk/objc/Framework/Headers/WebRTC/RTCPeerConnection.h
         DDLogDebug(@"New RTCIceConnectionState %ld for webRTCClient: %@", (long)state, webRTCClient);
+        //we *always* want to cancel the running iceRestart timer once the state changes
+        if(self.cancelWaitUntilIceRestart != nil)
+        {
+            self.cancelWaitUntilIceRestart();
+            self.cancelWaitUntilIceRestart = nil;
+        }
         switch(state)
         {
             case RTCIceConnectionStateConnected:
@@ -965,9 +972,17 @@
             case RTCIceConnectionStateDisconnected:
                 DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
                 if(self.wasConnectedOnce)
-                    [self restartIce];
+                {
+                    //wait some time before restarting ice (maybe the connection can be reestablished without a new candidate exchange)
+                    //see: https://groups.google.com/g/discuss-webrtc/c/I4K8NwN4Huw
+                    //see: https://webrtccourse.com/course/webrtc-codelab/module/fiddle-of-the-month/lesson/ice-restarts/
+                    //see: https://medium.com/@fippo/ice-restarts-5d759caceda6
+                    self.cancelWaitUntilIceRestart = createTimer(2.0, (^{
+                        [self restartIce];
+                    }));
+                }
                 else
-                    [self end];     //use "end" because this was a successful call
+                    [self end];
                 break;
             case RTCIceConnectionStateFailed:
                 DDLogInfo(@"New WebRTC ICE state: failed: %@", self);

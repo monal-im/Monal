@@ -250,9 +250,10 @@ struct AVCallUI: View {
                                 }
                             }
                             .buttonStyle(BorderlessButtonStyle())
+                            
+                            Spacer().frame(width: 32)
                         }
                         
-                        Spacer().frame(width: 32)
                         Button(action: {
                             call.obj.end()
                             self.delegate.dismissWithoutAnimation()

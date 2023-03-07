@@ -1316,6 +1316,8 @@ static id preprocess(id exception)
         [toreturn appendString:@"<"];
         for(NSString* field in [[form allKeys] sortedArrayUsingSelector:@selector(compare:)])
         {
+            if([@"FORM_TYPE" isEqualToString:field])
+                continue;
             [toreturn appendString:[self _replaceLowerThanInString:field]];
             [toreturn appendString:@"<"];
             for(NSString* value in [[form getField:field][@"allValues"] sortedArrayUsingSelector:@selector(compare:)])

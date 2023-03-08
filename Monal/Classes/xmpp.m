@@ -1363,6 +1363,7 @@ NSString* const kStanza = @"stanza";
     _xmlParser = [[NSXMLParser alloc] initWithStream:[_iPipe getNewEnd]];
     [_xmlParser setShouldProcessNamespaces:YES];
     [_xmlParser setShouldReportNamespacePrefixes:NO];
+    //[_xmlParser setShouldReportNamespacePrefixes:YES];        //for debugging only
     [_xmlParser setShouldResolveExternalEntities:NO];
     [_xmlParser setDelegate:_baseParserDelegate];
     

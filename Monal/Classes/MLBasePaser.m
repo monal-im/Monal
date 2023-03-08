@@ -22,14 +22,14 @@
     //this stak is needed to hold strong references to all nodes until they are dispatched to our _completion callback
     //(the parent references of the MLXMLNodes are weak and don't hold the parents alive)
     NSMutableArray* _currentStack;
-    NSMutableString* _currentCharData;
-    stanzaCompletion _completion;
+    stanza_completion_t _completion;
+    NSMutableArray* _namespacePrefixes;
 }
 @end
 
 @implementation MLBasePaser
 
--(id) initWithCompletion:(stanzaCompletion) completion
+-(id) initWithCompletion:(stanza_completion_t) completion
 {
     self = [super init];
     _completion = completion;
@@ -45,6 +45,16 @@
 {
     DDLogInfo(@"Document start");
     [self reset];
+}
+
+-(void) parser:(NSXMLParser*) parser didStartMappingPrefix:(NSString*) prefix toURI:(NSString*) namespaceURI
+{
+    DebugParser(@"Got new namespace prefix mapping for '%@' to '%@'...", prefix, namespaceURI);
+}
+
+-(void) parser:(NSXMLParser*) parser didEndMappingPrefix:(NSString*) prefix
+{
+    DebugParser(@"Namespace prefix '%@' now out of scope again...", prefix);
 }
 
 -(void) parser:(NSXMLParser*) parser didStartElement:(NSString*) elementName namespaceURI:(NSString*) namespaceURI qualifiedName:(NSString*) qName attributes:(NSDictionary*) attributeDict
@@ -67,13 +77,15 @@
     newNode = [newNode initWithElement:elementName andNamespace:namespaceURI withAttributes:attributeDict andChildren:@[] andData:nil];
     
     DebugParser(@"Current stack: %@", _currentStack);
-    //add new node to tree
-    newNode.parent = [_currentStack lastObject];
-    [_currentStack addObject:newNode];
+    //add new node to tree (each node needs a prototype MLXMLNode element and a mutable string to hold its future
+    //char data added to the MLXMLNode when the xml element is closed
+    newNode.parent = [_currentStack lastObject][@"node"];
+    [_currentStack addObject:@{@"node": newNode, @"charData": [NSMutableString new]}];
 }
 
 -(void) parser:(NSXMLParser*) parser foundCharacters:(NSString*) string
 {
+    DebugParser(@"Got new xml character data: '%@'", string);
     NSInteger depth = [_currentStack count];
     if(depth == 0)
     {
@@ -81,19 +93,19 @@
         [self fakeStreamError];
         return;
     }
-    if(!_currentCharData)
-        _currentCharData = [NSMutableString new];
-    [_currentCharData appendString:string];
+    
+    [[_currentStack lastObject][@"charData"] appendString:string];
+    DebugParser(@"_currentCharData is now: '%@'", [_currentStack lastObject][@"charData"]);
 }
 
 -(void) parser:(NSXMLParser*) parser didEndElement:(NSString*) elementName namespaceURI:(NSString*) namespaceURI qualifiedName:(NSString*) qName
 {
     NSInteger depth = [_currentStack count];
-    MLXMLNode* currentNode = ((MLXMLNode*)[_currentStack lastObject]);
+    NSDictionary* topmostStackElement = [_currentStack lastObject];
+    MLXMLNode* currentNode = ((MLXMLNode*)topmostStackElement[@"node"]);
     
-    if(_currentCharData)
-        currentNode.data = [_currentCharData copy];
-    _currentCharData = nil;
+    if([topmostStackElement[@"charData"] length])
+        currentNode.data = [topmostStackElement[@"charData"] copy];
     
     DebugParser(@"Ended element: %@ :: %@ (%@) depth %ld", elementName, namespaceURI, qName, depth);
     

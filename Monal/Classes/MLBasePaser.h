@@ -18,11 +18,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^stanzaCompletion)(MLXMLNode* _Nullable parsedStanza);
+typedef void (^stanza_completion_t)(MLXMLNode* _Nullable parsedStanza);
 
 @interface MLBasePaser : NSObject <NSXMLParserDelegate>
 
--(id) initWithCompletion:(stanzaCompletion) completion;
+-(id) initWithCompletion:(stanza_completion_t) completion;
 -(void) reset;
 
 @end

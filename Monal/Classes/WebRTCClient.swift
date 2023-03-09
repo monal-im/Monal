@@ -66,6 +66,13 @@ final class WebRTCClient: NSObject {
         //config.tcpCandidatePolicy = .disabled       // XEP-0176 doesn't support tcp
         config.rtcpMuxPolicy = .negotiate
         
+        //aggressive pings to detect wifi - mobile handoffs better
+        config.iceConnectionReceivingTimeout = 1000
+        config.iceBackupCandidatePairPingInterval = 2000
+        
+        //bigger jitter buffer for better audio quality (2s, default: 1s)
+        config.audioJitterBufferMaxPackets = 100;
+        
         // Define media constraints. DtlsSrtpKeyAgreement is required to be true to be able to connect with web browsers.
         let constraints = RTCMediaConstraints(mandatoryConstraints: [
             "DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue

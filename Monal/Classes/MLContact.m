@@ -20,12 +20,12 @@
 
 @import Intents;
 
-NSString *const kSubBoth=@"both";
-NSString *const kSubNone=@"none";
-NSString *const kSubTo=@"to";
-NSString *const kSubFrom=@"from";
-NSString *const kSubRemove=@"remove";
-NSString *const kAskSubscribe=@"subscribe";
+NSString* const kSubBoth = @"both";
+NSString* const kSubNone = @"none";
+NSString* const kSubTo = @"to";
+NSString* const kSubFrom = @"from";
+NSString* const kSubRemove = @"remove";
+NSString* const kAskSubscribe = @"subscribe";
 
 @interface MLContact ()
 {
@@ -463,9 +463,9 @@ NSString *const kAskSubscribe=@"subscribe";
     if(self.isMuted == mute)
         return;
     if(mute)
-        [[DataLayer sharedInstance] muteJid:self];
+        [[DataLayer sharedInstance] muteContact:self];
     else
-        [[DataLayer sharedInstance] unMuteJid:self];
+        [[DataLayer sharedInstance] unMuteContact:self];
     self.isMuted = mute;
 }
 

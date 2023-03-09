@@ -1999,7 +1999,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark mute and block
 
--(void) muteJid:(MLContact*) contact
+-(void) muteContact:(MLContact*) contact
 {
     if(!contact)
     {
@@ -2011,7 +2011,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) unMuteJid:(MLContact*) contact
+-(void) unMuteContact:(MLContact*) contact
 {
     if(!contact)
     {

@@ -236,14 +236,14 @@
 
 #pragma mark - Search Controller
 
--(void) didDismissSearchController:(UISearchController*) searchController;
+-(void) didDismissSearchController:(UISearchController*) searchController
 {
     // reset table to list of all contacts without a filter
     [self loadContactsWithFilter:nil];
     [self reloadTable];
 }
 
--(void) updateSearchResultsForSearchController:(UISearchController*) searchController;
+-(void) updateSearchResultsForSearchController:(UISearchController*) searchController
 {
     [self loadContactsWithFilter:searchController.searchBar.text];
     [self reloadTable];

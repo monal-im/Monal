@@ -241,8 +241,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSNumber*) countUserUnreadMessages:(NSString* _Nullable) buddy forAccount:(NSNumber* _Nullable) accountNo;
 -(NSNumber*) countUnreadMessages;
 
--(void) muteJid:(MLContact*) contact;
--(void) unMuteJid:(MLContact*) contact;
+-(void) muteContact:(MLContact*) contact;
+-(void) unMuteContact:(MLContact*) contact;
 -(BOOL) isMutedJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
 
 -(void) setMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSNumber*) accountNo;

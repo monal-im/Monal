@@ -77,7 +77,7 @@
     self.textInputField.hidden = NO;
 }
 
--(void) initCell:(NSString*) leftLabel withTextFieldDefaultsKey:(NSString*) key andPlaceholder:(NSString*) placeholder;
+-(void) initCell:(NSString*) leftLabel withTextFieldDefaultsKey:(NSString*) key andPlaceholder:(NSString*) placeholder
 {
     [self initCell:leftLabel withTextField:[[HelperTools defaultsDB] stringForKey:key] andPlaceholder:placeholder andTag:0];
     self.defaultsKey = key;

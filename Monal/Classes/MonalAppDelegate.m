@@ -912,8 +912,13 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         DDLogDebug(@"Not opening chat for contact %@", [contact contactJid]);
 }
 
+-(UIInterfaceOrientationMask) application:(UIApplication*) application supportedInterfaceOrientationsForWindow:(UIWindow*) window
+{
+    return self.orientationLock;
+}
+
 #pragma mark - memory
--(void) applicationDidReceiveMemoryWarning:(UIApplication *)application
+-(void) applicationDidReceiveMemoryWarning:(UIApplication*) application
 {
     DDLogWarn(@"Got memory warning!");
 }

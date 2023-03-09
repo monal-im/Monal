@@ -317,6 +317,14 @@ struct AVCallUI: View {
                 Spacer().frame(height: 32)
             }
         }
+        .onAppear {
+            //force portrait mode and lock ui there
+            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+            self.appDelegate.orientationLock = .portrait
+        }.onDisappear {
+            //allow all orientations again
+            self.appDelegate.orientationLock = .all
+        }
     }
 }
 

@@ -75,6 +75,7 @@ final class WebRTCClient: NSObject {
             "VoiceActivityDetection": kRTCMediaConstraintsValueTrue
         ])
         
+        DDLogInfo("iceConnectionReceivingTimeout=\(config.iceConnectionReceivingTimeout), iceBackupCandidatePairPingInterval=\(config.iceBackupCandidatePairPingInterval)");
         return WebRTCClient.factory.peerConnection(with: config, constraints: constraints, delegate: nil)
     }
     

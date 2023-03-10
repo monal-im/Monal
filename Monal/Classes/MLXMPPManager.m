@@ -44,7 +44,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setBool:NO forKey:@"ChatBackgrounds"];
 
         // Privacy Settings
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowImages"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
@@ -64,9 +63,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
         [[HelperTools defaultsDB] synchronize];
     }
-
-    // on upgrade this one needs to be set to yes. Can be removed later.
-    [self upgradeBoolUserSettingsIfUnset:@"ShowImages" toDefault:YES];
 
     [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
 

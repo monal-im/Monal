@@ -136,65 +136,60 @@ const long NotificationPrivacyOptionCnt = 3;
                 }
                 case 4:
                 {
-                    [cell initCell:NSLocalizedString(@"Show Inline Images", @"") withToggleDefaultsKey:@"ShowImages"];
+                    [cell initCell:NSLocalizedString(@"Show Inline Geo Location", @"") withToggleDefaultsKey:@"ShowGeoLocation"];
                     break;
                 }
                 case 5:
                 {
-                    [cell initCell:NSLocalizedString(@"Show Inline Geo Location", @"") withToggleDefaultsKey:@"ShowGeoLocation"];
+                    [cell initCell:NSLocalizedString(@"Send Last Interaction Time", @"") withToggleDefaultsKey:@"SendLastUserInteraction"];
                     break;
                 }
                 case 6:
                 {
-                    [cell initCell:NSLocalizedString(@"Send Last Interaction Time", @"") withToggleDefaultsKey:@"SendLastUserInteraction"];
+                    [cell initCell:NSLocalizedString(@"Send Typing Notifications", @"") withToggleDefaultsKey:@"SendLastChatState"];
                     break;
                 }
                 case 7:
                 {
-                    [cell initCell:NSLocalizedString(@"Send Typing Notifications", @"") withToggleDefaultsKey:@"SendLastChatState"];
+                    [cell initCell:NSLocalizedString(@"Send message received state", @"") withToggleDefaultsKey:@"SendReceivedMarkers"];
                     break;
                 }
                 case 8:
                 {
-                    [cell initCell:NSLocalizedString(@"Send message received state", @"") withToggleDefaultsKey:@"SendReceivedMarkers"];
+                    [cell initCell:NSLocalizedString(@"Sync Read-Markers", @"") withToggleDefaultsKey:@"SendDisplayedMarkers"];
                     break;
                 }
                 case 9:
                 {
-                    [cell initCell:NSLocalizedString(@"Sync Read-Markers", @"") withToggleDefaultsKey:@"SendDisplayedMarkers"];
+                    [cell initCell:NSLocalizedString(@"Show URL previews", @"") withToggleDefaultsKey:@"ShowURLPreview"];
                     break;
                 }
                 case 10:
                 {
-                    [cell initCell:NSLocalizedString(@"Show URL previews", @"") withToggleDefaultsKey:@"ShowURLPreview"];
+                    [cell initTapCell:NSLocalizedString(@"Auto-Download Media Settings", @"")];
                     break;
                 }
                 case 11:
                 {
-                    [cell initTapCell:NSLocalizedString(@"Auto-Download Media Settings", @"")];
+                    [cell initCell:NSLocalizedString(@"Autodelete all messages after 3 days", @"") withToggleDefaultsKey:@"AutodeleteAllMessagesAfter3Days"];
                     break;
                 }
                 case 12:
                 {
-                    [cell initCell:NSLocalizedString(@"Autodelete all messages after 3 days", @"") withToggleDefaultsKey:@"AutodeleteAllMessagesAfter3Days"];
+                    [cell initCell:NSLocalizedString(@"Calls: Allow P2P sessions", @"") withToggleDefaultsKey:@"webrtcAllowP2P"];
                     break;
                 }
                 case 13:
                 {
-                    [cell initCell:NSLocalizedString(@"Calls: Allow P2P sessions", @"") withToggleDefaultsKey:@"webrtcAllowP2P"];
+                    [cell initCell:NSLocalizedString(@"Calls: Allow TURN fallback to Monal-Servers", @"") withToggleDefaultsKey:@"webrtcUseFallbackTurn"];
                     break;
                 }
                 case 14:
                 {
-                    [cell initCell:NSLocalizedString(@"Calls: Allow TURN fallback to Monal-Servers", @"") withToggleDefaultsKey:@"webrtcUseFallbackTurn"];
-                    break;
-                }
-                case 15:
-                {
                     [cell initCell:NSLocalizedString(@"Allow approved contacts to query my Monal and iOS version", @"") withToggleDefaultsKey:@"allowVersionIQ"];
                     break;
                 }
-                case 16:
+                case 15:
                 {
 //flow into default case for non-omemo builds
 #ifndef DISABLE_OMEMO
@@ -246,18 +241,17 @@ const long NotificationPrivacyOptionCnt = 3;
                 case 7:
                 case 8:
                 case 9:
-                case 10:
                     break;
-                case 11:
+                case 10:
                 {
                     [self performSegueWithIdentifier:@"fileTransferSettings" sender:nil];
                     break;
                 }
+                case 11:
                 case 12:
                 case 13:
                 case 14:
                 case 15:
-                case 16:
                     break;
             }
             break;

@@ -76,10 +76,6 @@
 @property (nonatomic, assign) BOOL hardwareKeyboardPresent;
 @property (nonatomic, strong) xmpp* xmppAccount;
 
-// Privacy settings that should not be loaded for each action
-@property (nonatomic, assign) BOOL showGeoLocationsInline;
-@property (nonatomic, assign) BOOL sendLastChatState;
-
 @property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintHWKeyboard;
 @property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintSWKeyboard;
 
@@ -143,9 +139,6 @@ enum msgSentState {
     if(accountDict)
         self.jid = [NSString stringWithFormat:@"%@@%@",[accountDict objectForKey:@"username"], [accountDict objectForKey:@"domain"]];
 
-    // init privacy Settings
-    self.showGeoLocationsInline = [[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"];
-    self.sendLastChatState = [[HelperTools defaultsDB] boolForKey: @"SendLastChatState"];
     self.previewedIds = [NSMutableSet new];
 
     _localMLContactCache = [[NSMutableDictionary<NSString*, MLContact*> alloc] init];
@@ -1082,7 +1075,7 @@ enum msgSentState {
     }
 
     // Do not send when the user disabled the feature
-    if(!self.sendLastChatState)
+    if(![[HelperTools defaultsDB] boolForKey: @"SendLastChatState"])
         return;
 
     if(isTyping != _isTyping)       //changed state? --> send typing notification
@@ -2121,7 +2114,7 @@ enum msgSentState {
             NSString* longitude = [messageText substringWithRange:longitudeRange];
 
             // Display inline map
-            if(self.showGeoLocationsInline) {
+            if([[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"]) {
                 MLChatMapsCell* mapsCell = (MLChatMapsCell*)[self messageTableCellWithIdentifier:@"maps" andInbound:inboundDir fromTable: tableView];
 
                 // Set lat / long used for map view and pin

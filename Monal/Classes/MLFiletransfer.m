@@ -23,12 +23,14 @@ static NSFileManager* _fileManager;
 static NSString* _documentCacheDir;
 static NSMutableSet* _currentlyTransfering;
 static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
+static NSObject* _hardlinkingSyncObject;
 
 @implementation MLFiletransfer
 
 +(void) initialize
 {
     NSError* error;
+    _hardlinkingSyncObject = [NSObject new];
     _fileManager = [NSFileManager defaultManager];
     _documentCacheDir = [[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path];
     
@@ -307,6 +309,10 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
     {
         DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at '%@': we STILL are in the appex, rescheduling this to next account connect", cacheFile, [hardlinkPathComponents componentsJoinedByString:@"/"]);
         //the reconnect handler framework will add $ID(account) to the callerArgs, no need to add an accountNo etc. here
+        //direct=YES is indicating that this hardlinking handler was called directly instead of serializing/unserializing it to/from db
+        //AND that we are in the mainapp currently
+        //always use direct = NO here, to make sure the file is hardlinkable even if the direct handling depicted above changes and
+        //calls from the mainapp are serialized to db, too
         [account addReconnectionHandler:$newHandler(self, handleHardlinking,
             $ID(cacheFile),
             $ID(hardlinkPathComponents),
@@ -321,77 +327,80 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
         return;
     }
     
-    //copy file created in appex to a temporary location and then rename it to be at the original location
-    //this allows hardlinking later on because now the mainapp owns that file while it had only read/write access before
-    if(!direct)
-    {
-        NSString* cacheFileTMP = [NSString stringWithFormat:@"%@.tmp", cacheFile];
-        DDLogInfo(@"Copying appex-created cache file '%@' to '%@' before deleting old file and renaming our copy...", cacheFile, cacheFileTMP);
-        [_fileManager copyItemAtPath:cacheFile toPath:cacheFileTMP error:&error];
-        if(error)
+    @synchronized(_hardlinkingSyncObject) {
+        //copy file created in appex to a temporary location and then rename it to be at the original location
+        //this allows hardlinking later on because now the mainapp owns that file while it had only read/write access before
+        if(!direct)
         {
-            DDLogError(@"Could not copy cache file to tmp file: %@", error);
-#ifdef DEBUG
-            @throw [NSException exceptionWithName:@"ERROR_WHILE_COPYING_CACHEFILE" reason:@"Could not copy cacheFile!" userInfo:@{
-                @"cacheFile": cacheFile,
-                @"cacheFileTMP": cacheFileTMP
-            }];
-#endif
-            return;
+            NSString* cacheFileTMP = [NSString stringWithFormat:@"%@.tmp", cacheFile];
+            DDLogInfo(@"Copying appex-created cache file '%@' to '%@' before deleting old file and renaming our copy...", cacheFile, cacheFileTMP);
+            [_fileManager removeItemAtPath:cacheFileTMP error:nil];     //remove tmp file if already present
+            [_fileManager copyItemAtPath:cacheFile toPath:cacheFileTMP error:&error];
+            if(error)
+            {
+                DDLogError(@"Could not copy cache file to tmp file: %@", error);
+    #ifdef DEBUG
+                @throw [NSException exceptionWithName:@"ERROR_WHILE_COPYING_CACHEFILE" reason:@"Could not copy cacheFile!" userInfo:@{
+                    @"cacheFile": cacheFile,
+                    @"cacheFileTMP": cacheFileTMP
+                }];
+    #endif
+                return;
+            }
+            
+            [_fileManager removeItemAtPath:cacheFile error:&error];
+            if(error)
+            {
+                DDLogError(@"Could not delete original cache file: %@", error);
+    #ifdef DEBUG
+                @throw [NSException exceptionWithName:@"ERROR_WHILE_DELETING_CACHEFILE" reason:@"Could not delete cacheFile!" userInfo:@{
+                    @"cacheFile": cacheFile
+                }];
+    #endif
+                return;
+            }
+            
+            [_fileManager moveItemAtPath:cacheFileTMP toPath:cacheFile error:&error];
+            if(error)
+            {
+                DDLogError(@"Could not rename tmp file to cache file: %@", error);
+    #ifdef DEBUG
+                @throw [NSException exceptionWithName:@"ERROR_WHILE_RENAMING_CACHEFILE" reason:@"Could not rename cacheFileTMP to cacheFile!" userInfo:@{
+                    @"cacheFile": cacheFile,
+                    @"cacheFileTMP": cacheFileTMP
+                }];
+    #endif
+                return;
+            }
         }
         
-        [_fileManager removeItemAtPath:cacheFile error:&error];
-        if(error)
+        NSURL* hardLink = [[_fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+        for(NSString* pathComponent in hardlinkPathComponents)
+            hardLink = [hardLink URLByAppendingPathComponent:pathComponent];
+        
+        DDLogInfo(@"Hardlinking cache file at '%@' into documents directory at '%@'...", cacheFile, hardLink);
+        if(![_fileManager fileExistsAtPath:[hardLink.URLByDeletingLastPathComponent path]])
         {
-            DDLogError(@"Could not delete original cache file: %@", error);
-#ifdef DEBUG
-            @throw [NSException exceptionWithName:@"ERROR_WHILE_DELETING_CACHEFILE" reason:@"Could not delete cacheFile!" userInfo:@{
-                @"cacheFile": cacheFile
-            }];
-#endif
-            return;
+            DDLogVerbose(@"Creating hardlinking dir struct at '%@'...", hardLink.URLByDeletingLastPathComponent); 
+            [_fileManager createDirectoryAtURL:hardLink.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} error:&error];
+            if(error)
+                DDLogWarn(@"Ignoring error creating hardlinking dir struct at '%@': %@", hardLink, error);
+            else
+                [HelperTools configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:[hardLink path]];
         }
         
-        [_fileManager moveItemAtPath:cacheFileTMP toPath:cacheFile error:&error];
-        if(error)
-        {
-            DDLogError(@"Could not rename tmp file to cache file: %@", error);
-#ifdef DEBUG
-            @throw [NSException exceptionWithName:@"ERROR_WHILE_RENAMING_CACHEFILE" reason:@"Could not rename cacheFileTMP to cacheFile!" userInfo:@{
-                @"cacheFile": cacheFile,
-                @"cacheFileTMP": cacheFileTMP
-            }];
-#endif
-            return;
-        }
-    }
-    
-    NSURL* hardLink = [[_fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
-    for(NSString* pathComponent in hardlinkPathComponents)
-        hardLink = [hardLink URLByAppendingPathComponent:pathComponent];
-    
-    DDLogInfo(@"Hardlinking cache file at '%@' into documents directory at '%@'...", cacheFile, hardLink);
-    if(![_fileManager fileExistsAtPath:[hardLink.URLByDeletingLastPathComponent path]])
-    {
-        DDLogVerbose(@"Creating hardlinking dir struct at '%@'...", hardLink.URLByDeletingLastPathComponent); 
-        [_fileManager createDirectoryAtURL:hardLink.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} error:&error];
-        if(error)
-            DDLogWarn(@"Ignoring error creating hardlinking dir struct at '%@': %@", hardLink, error);
+        //don't throw any error if the file aready exists, because it could be a rare collision (we only use 16 bit random numbers to keep the file prefix short)
+        if([_fileManager fileExistsAtPath:[hardLink path]])
+            DDLogWarn(@"Not hardlinking file '%@' to '%@': file already exists (maybe a rare collision?)...", cacheFile, hardLink);
         else
-            [HelperTools configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:[hardLink path]];
-    }
-    
-    //don't throw any error if the file aready exists, because it could be a rare collision (we only use 16 bit random numbers to keep the file prefix short)
-    if([_fileManager fileExistsAtPath:[hardLink path]])
-        DDLogWarn(@"Not hardlinking file '%@' to '%@': file already exists (maybe a rare collision?)...", cacheFile, hardLink);
-    else
-    {
-        DDLogVerbose(@"Hardlinking cache file '%@' to '%@'...", cacheFile, hardLink);
-        error = [HelperTools hardLinkOrCopyFile:cacheFile to:[hardLink path]];
-        if(error)
         {
-            DDLogError(@"Error creating hardlink: %@", error);
-            @throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_FILE" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+            DDLogVerbose(@"Hardlinking cache file '%@' to '%@'...", cacheFile, hardLink);
+            error = [HelperTools hardLinkOrCopyFile:cacheFile to:[hardLink path]];
+            if(error)
+            {
+                DDLogError(@"Error creating hardlink: %@", error);
+                @throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_FILE" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+            }
         }
     }
 $$

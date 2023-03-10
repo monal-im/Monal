@@ -234,6 +234,26 @@ static id preprocess(id exception)
     ];
 }
 
++(NSError* _Nullable) hardLinkOrCopyFile:(NSString*) from to:(NSString*) to
+{
+    NSError* error = nil;
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    DDLogVerbose(@"Trying to hardlink file '%@' to '%@'...", from, to);
+    [fileManager linkItemAtPath:from toPath:to error:&error];
+    if(error)
+    {
+        DDLogWarn(@"Hardlinking failed, trying normal copy operation: %@", error);
+        error = nil;
+        [fileManager copyItemAtPath:from toPath:to error:&error];
+        if(error)
+        {
+            DDLogWarn(@"File copy failed, too: %@", error);
+            return error;
+        }
+    }
+    return nil;
+}
+
 +(NSString*) getQueueThreadLabelFor:(DDLogMessage*) logMessage
 {
     NSString* queueThreadLabel = logMessage.threadName;

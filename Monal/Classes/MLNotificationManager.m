@@ -793,13 +793,13 @@
     //use ".tmp" extension to make sure this file will be garbage collected if the ios notification attachment should leave it behind
     NSString* notificationImage = [[[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.tmp", info[@"cacheId"]]];
     DDLogVerbose(@"Preparing for notification attachment: hardlinking downloaded file from '%@' to '%@'..", info[@"cacheFile"], notificationImage);
-    [[NSFileManager defaultManager] linkItemAtPath:info[@"cacheFile"] toPath:notificationImage error:&error];
-    [HelperTools configureFileProtectionFor:notificationImage];
+    error = [HelperTools hardLinkOrCopyFile:info[@"cacheFile"] to:notificationImage];
     if(error)
     {
         DDLogError(@"Could not hardlink cache file to notification image temp file!");
         return nil;
     }
+    [HelperTools configureFileProtectionFor:notificationImage];
     return [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:notificationImage] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
 }
 

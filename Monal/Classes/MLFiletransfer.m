@@ -242,7 +242,7 @@ static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
                 //hardlink file to our cache directory
                 //it will be removed once this completion returnes, even if moved to a new location (this seems to be a ios16 bug)
                 DDLogInfo(@"Hardlinking downloaded file from '%@' to document cache at '%@'...", [location path], cacheFile);
-                [_fileManager linkItemAtPath:[location path] toPath:cacheFile error:&error];
+                error = [HelperTools hardLinkOrCopyFile:[location path] to:cacheFile];
                 if(error)
                 {
                     DDLogError(@"File download failed: %@", error);
@@ -387,7 +387,7 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
     else
     {
         DDLogVerbose(@"Hardlinking cache file '%@' to '%@'...", cacheFile, hardLink);
-        [_fileManager linkItemAtPath:cacheFile toPath:[hardLink path] error:&error];
+        error = [HelperTools hardLinkOrCopyFile:cacheFile to:[hardLink path]];
         if(error)
         {
             DDLogError(@"Error creating hardlink: %@", error);

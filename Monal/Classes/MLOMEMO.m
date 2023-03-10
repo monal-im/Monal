@@ -267,7 +267,16 @@ $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(
     NSSet<NSNumber*>* deviceIds = [NSSet new];      //default value used for retract, purge and delete
     if([type isEqualToString:@"publish"])
     {
-        MLXMLNode* publishedDevices = data[@"current"];
+        MLXMLNode* publishedDevices = [data objectForKey:@"current"];
+        if(publishedDevices == nil && data.count == 1)
+        {
+            DDLogInfo(@"Client does not use 'current' as item id for it's bundle! keys=%@", [data allKeys]);
+            //some clients do not use <item id="current">
+            publishedDevices = [[data allValues] firstObject];
+        }
+        else if(publishedDevices == nil && data.count > 1)
+            DDLogWarn(@"More than one devicelist item found from %@, ignoring all items!", jid);
+        
         if(publishedDevices != nil)
             deviceIds = [[NSSet<NSNumber*> alloc] initWithArray:[publishedDevices find:@"{eu.siacs.conversations.axolotl}list/device@id|uint"]];
     }

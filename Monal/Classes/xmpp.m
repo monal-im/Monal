@@ -135,6 +135,10 @@ NSString* const kStanza = @"stanza";
     NSSet* _supportedChannelBindings;
     monal_void_block_t _blockToCallOnTCPOpen;
     NSString* _upgradeTask;
+    
+    //catchup statistics
+    uint32_t _catchupStanzaCounter;
+    NSDate* _catchupStartTime;
 }
 
 @property (nonatomic, assign) BOOL smacksRequestInFlight;
@@ -1720,6 +1724,9 @@ NSString* const kStanza = @"stanza";
     else
         DDLogInfo(@"RECV Stanza: %@", parsedStanza);
     
+    //update stanza counter statistics
+    self->_catchupStanzaCounter++;
+    
     //restart logintimer for every incoming stanza when not logged in (don't do anything without a running timer)
     if(!delayedReplay && _cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
         [self reinitLoginTimer];
@@ -2285,6 +2292,9 @@ NSString* const kStanza = @"stanza";
                     }
                 }];
             }
+            
+            //initialize stanza counter for statistics
+            [self initCatchupStats];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound && self.resuming)
         {
@@ -3887,6 +3897,9 @@ NSString* const kStanza = @"stanza";
     }
     
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
+    
+    //initialize stanza counter for statistics
+    [self initCatchupStats];
 }
 
 -(void) addReconnectionHandler:(MLHandler*) handler
@@ -5044,9 +5057,27 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
+-(void) initCatchupStats
+{
+    self->_catchupStanzaCounter = 0;
+    self->_catchupStartTime = [NSDate date];
+}
+
+-(void) logCatchupStats
+{
+    if(self->_catchupStartTime != nil)
+    {
+        NSDate* now = [NSDate date];
+        DDLogInfo(@"Handled %u stanzas in %f seconds...", self->_catchupStanzaCounter, [now timeIntervalSinceDate:self->_catchupStartTime]);
+    }
+}
+
 -(void) handleFinishedCatchup
 {
     self->_catchupDone = YES;
+    
+    //log catchup statistics
+    [self logCatchupStats];
     
     //call all reconnection handlers and clear them afterwards
     @synchronized(_reconnectionHandlers) {

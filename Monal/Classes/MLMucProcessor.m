@@ -113,7 +113,12 @@
     {
         @synchronized(_stateLockObject) {
             _roomFeatures = [NSMutableDictionary new];
-            _joining = [NSMutableDictionary new];
+            
+            //make sure all idle timers get invalidated properly
+            NSDictionary* joiningCopy = [_joining copy];
+            for(NSString* room in joiningCopy)
+                 [self removeRoomFromJoining:room];
+            
             //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
             
             //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
@@ -1127,6 +1132,7 @@ $$
 -(void) removeRoomFromJoining:(NSString*) room
 {
     @synchronized(_stateLockObject) {
+        DDLogVerbose(@"Removing from _joining[%@]: %@", room, _joining[room]);
         [[DataLayer sharedInstance] delIdleTimerWithId:_joining[room]];
         [_joining removeObjectForKey:room];
     }

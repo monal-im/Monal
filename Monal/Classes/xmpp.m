@@ -3804,9 +3804,13 @@ NSString* const kStanza = @"stanza";
                 ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
         }
         
-        //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
-        [self.pubsub invalidateQueue];
     }
+    
+    //invalidate pubsub queue (a pubsub operation will be either invalidated by an iq handler above OR by the invalidation here, but never twice!)
+    [self.pubsub invalidateQueue];
+    
+    //clean up all idle timers
+    [[DataLayer sharedInstance] cleanupIdleTimerOnAccountNo:self.accountNo];
     
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)

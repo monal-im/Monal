@@ -306,6 +306,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(NSNumber*) addIdleTimerWithTimeout:(NSNumber*) timeout andHandler:(MLHandler*) handler onAccountNo:(NSNumber*) accountNo;
 -(void) delIdleTimerWithId:(NSNumber* _Nullable) timerId;
+-(void) cleanupIdleTimerOnAccountNo:(NSNumber*) accountNo;
 -(void) decrementIdleTimersForAccount:(xmpp*) account;
 
 @end

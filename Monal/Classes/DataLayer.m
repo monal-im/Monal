@@ -2369,6 +2369,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) delIdleTimerWithId:(NSNumber* _Nullable) timerId
 {
+    DDLogVerbose(@"Trying to remove idle timer with id: %@", timerId);
     if(timerId == nil)
         return;
     return [self.db voidWriteTransaction:^{
@@ -2387,6 +2388,19 @@ static NSDateFormatter* dbFormatter;
         }));
         $invalidate([HelperTools unserializeData:timer[@"handler"]], $ID(account));
         [self.db executeNonQuery:@"DELETE FROM idle_timers WHERE id=?;" andArguments:@[timerId]];
+    }];
+}
+
+-(void) cleanupIdleTimerOnAccountNo:(NSNumber*) accountNo
+{
+    if(accountNo == nil)
+        return;
+    return [self.db voidWriteTransaction:^{
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+        MLAssert(account != nil, @"Cleaning up idle timers should not be done when an account is disabled!", (@{
+            @"accountNo": nilWrapper(accountNo)
+        }));
+        [self.db executeNonQuery:@"DELETE FROM idle_timers WHERE account_id=?;" andArguments:@[accountNo]];
     }];
 }
 

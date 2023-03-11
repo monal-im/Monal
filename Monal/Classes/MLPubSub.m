@@ -75,6 +75,9 @@ static NSDictionary* _defaultOptions;
 {
     if(_account.accountNo.intValue != ((xmpp*)notification.object).accountNo.intValue)
         return;
+    //we clear the queue so that the invalidation handlers can't get called twice:
+    //once as invalidation of the queued operation handler and once as the invalidation of an iq handler of this operation
+    //note: these are two different handler object, hence the double invalidation would *not* be catched by the handler framework!
     NSArray* queue;
     @synchronized(_queue) {
         queue = [_queue copy];
@@ -417,6 +420,9 @@ $$
 
 -(void) invalidateQueue
 {
+    //we clear the queue so that the invalidation handlers can't get called twice:
+    //once as invalidation of the queued operation handler and once as the invalidation of an iq handler of this operation
+    //note: these are two different handler object, hence the double invalidation would *not* be catched by the handler framework!
     NSArray* queue;
     @synchronized(_queue) {
         queue = [_queue copy];

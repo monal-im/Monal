@@ -29,4 +29,14 @@
     return intrinsicContentSize;
 }
 
+-(NSArray<UIKeyCommand*>*) keyCommands
+{
+    UIKeyCommand* const tabCommand = [UIKeyCommand keyCommandWithInput: @"\t" modifierFlags: 0 action:@selector(ignore)];
+    return @[tabCommand];
+}
+
+-(void) ignore
+{
+}
+
 @end

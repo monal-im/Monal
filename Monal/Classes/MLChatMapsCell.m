@@ -43,14 +43,14 @@ CLLocationCoordinate2D geoLocation;
 }
 
 -(void) handleMapViewGesture {
-    NSMutableArray* mapItems = [[NSMutableArray alloc] init];
+    NSMutableArray* mapItems = [NSMutableArray new];
 
     MKPlacemark* placemark = [[MKPlacemark alloc]initWithCoordinate:geoLocation];
     MKMapItem* location = [[MKMapItem alloc]initWithPlacemark:placemark];
     [location setName:@"📍 A Location"];
     [mapItems addObject:location];
 
-    NSMutableDictionary* launchOptions = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* launchOptions = [NSMutableDictionary new];
     // Open apple maps
     [MKMapItem openMapsWithItems:mapItems launchOptions:launchOptions];
 }

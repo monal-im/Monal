@@ -152,7 +152,7 @@ enum DummySettingsRows {
     self.statusMessageChanged = NO;
     
     //default strings used for edit and new mode
-    self.sectionDictionary = [[NSMutableDictionary alloc] init];
+    self.sectionDictionary = [NSMutableDictionary new];
     for(int entry = 0; entry < kSettingSectionCount; entry++)
         switch(entry)
         {
@@ -316,7 +316,7 @@ enum DummySettingsRows {
         return;
     }
 
-    NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* dic = [NSMutableDictionary new];
     [dic setObject:domain.lowercaseString forKey:kDomain];
     if(user)
         [dic setObject:user.lowercaseString forKey:kUsername];
@@ -386,13 +386,25 @@ enum DummySettingsRows {
     {
         [dic setObject:[NSNumber numberWithBool:NO] forKey:kNeedsPasswordMigration];
         DDLogVerbose(@"Updating existing account: %@", dic);
+        //disconnect account before disabling it in db, to avoid assertions when trying to create MLContact instances
+        //for the disabled account (for notifications etc.)
+        if(!self.enabled)
+        {
+            DDLogVerbose(@"Account is not enabled anymore, deleting all SiriKit interactions and making sure it's disconnected: %@", self.accountNo);
+            [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+            [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
+                if(error != nil)
+                    DDLogError(@"Could not delete all SiriKit interactions: %@", error);
+            }];
+        }
+        DDLogVerbose(@"Now updating DB with account dict...");
         BOOL updatedAccount = [[DataLayer sharedInstance] updateAccounWithDictionary:dic];
         if(updatedAccount)
         {
             DDLogVerbose(@"DB update succeeded: %@", self.accountNo);
             if(self.password.length)
             {
-                DDLogVerbose(@"Now setting password for account %@ in SAMKeychain: '%@'", self.accountNo, self.password);
+                DDLogVerbose(@"Now setting password for account %@ in SAMKeychain...", self.accountNo);
                 [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountNo];
             }
             if(self.enabled)
@@ -418,19 +430,12 @@ enum DummySettingsRows {
                 if(self.avatarChanged)
                     [account publishAvatar:self.selectedAvatarImage];
             }
-            else
-            {
-                DDLogVerbose(@"Account is not enabled anymore, deleting all SiriKit interactions and making sure it's disconnected: %@", self.accountNo);
-                [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
-                [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
-                    if(error != nil)
-                        DDLogError(@"Could not delete all SiriKit interactions: %@", error);
-                }];
-            }
             //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             [self showSuccessHUD];
         }
+        else
+            DDLogError(@"DB update failed!");
     }
 }
 
@@ -988,7 +993,7 @@ enum DummySettingsRows {
 
 -(void) documentPicker:(UIDocumentPickerViewController*) controller didPickDocumentsAtURLs:(NSArray<NSURL*>*) urls
 {
-    NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
+    NSFileCoordinator* coordinator = [NSFileCoordinator new];
     [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL* _Nonnull newURL) {
         NSData* data =[NSData dataWithContentsOfURL:newURL];
         UIImage* pickImg = [UIImage imageWithData:data];
@@ -1007,7 +1012,7 @@ enum DummySettingsRows {
 #if TARGET_OS_MACCATALYST
     [self pickImgFile:nil];
 #else
-    UIImagePickerController* imagePicker = [[UIImagePickerController alloc] init];
+    UIImagePickerController* imagePicker = [UIImagePickerController new];
     imagePicker.delegate = self;
 
     UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
@@ -1046,7 +1051,7 @@ enum DummySettingsRows {
 -(void) imagePickerController:(UIImagePickerController*) picker didFinishPickingMediaWithInfo:(NSDictionary<NSString*, id>*) info
 {
     NSString* mediaType = info[UIImagePickerControllerMediaType];
-    if([mediaType isEqualToString:(NSString*) kUTTypeImage]) {
+    if([mediaType isEqualToString:UTTypeImage.identifier]) {
         UIImage* selectedImage = info[UIImagePickerControllerEditedImage];
         if(!selectedImage) selectedImage = info[UIImagePickerControllerOriginalImage];
         

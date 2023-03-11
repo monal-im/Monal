@@ -637,7 +637,7 @@
                 WHERE \
                 account_id = ? \
         " andArguments:@[self.accountId]];
-        NSMutableSet<NSString*>* danglingJids = [[NSMutableSet alloc] init];
+        NSMutableSet<NSString*>* danglingJids = [NSMutableSet new];
         for(NSString* jid in jidsWithSession) {
             // check if the session is still needed
             if([self checkIfSessionIsStillNeeded:jid] == NO) {

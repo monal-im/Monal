@@ -40,13 +40,13 @@
     }
 }
 
--(void) initTextCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
+-(void) initTextCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate
 {
     [self setupCellWithText:text andPlaceholder:placeholder andDelegate:delegate];
     [self.textInput setKeyboardType:UIKeyboardTypeDefault];
 }
 
--(void) initMailCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
+-(void) initMailCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate
 {
     [self setupCellWithText:text andPlaceholder:placeholder andDelegate:delegate];
     [self.textInput setKeyboardType:UIKeyboardTypeEmailAddress];
@@ -54,7 +54,7 @@
     self.textInput.autocorrectionType = UITextAutocorrectionTypeNo;
 }
 
--(void) initPasswordCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
+-(void) initPasswordCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate
 {
     [self setupCellWithText:text andPlaceholder:placeholder andDelegate:delegate];
     self.textInput.secureTextEntry = YES;

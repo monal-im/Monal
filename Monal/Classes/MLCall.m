@@ -18,7 +18,6 @@
 #import "MLCall.h"
 #import "MonalAppDelegate.h"
 
-@import PushKit;
 @import CallKit;
 @import WebRTC;
 
@@ -45,6 +44,7 @@
 @property (nonatomic, strong) WebRTCClient* _Nullable webRTCClient;
 @property (nonatomic, strong) CXAnswerCallAction* _Nullable providerAnswerAction;
 @property (nonatomic, assign) BOOL isConnected;
+@property (nonatomic, assign) BOOL wasConnectedOnce;
 @property (nonatomic, assign) BOOL isReconnecting;
 @property (nonatomic, assign) BOOL isFinished;
 @property (nonatomic, assign) BOOL tieBreak;
@@ -55,6 +55,7 @@
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelDiscoveringTimeout;
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelRingingTimeout;
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelConnectingTimeout;
+@property (nonatomic, strong) monal_void_block_t _Nullable cancelWaitUntilIceRestart;
 
 @property (nonatomic, readonly) xmpp* account;
 @property (nonatomic, strong) MLVoIPProcessor* voipProcessor;
@@ -86,6 +87,7 @@
     self.contact = contact;
     self.direction = direction;
     self.isConnected = NO;
+    self.wasConnectedOnce = NO;
     self.isReconnecting = NO;
     self.durationTime = 0;
     self.isFinished = NO;
@@ -94,15 +96,16 @@
     self.cancelRingingTimeout = nil;
     self.cancelConnectingTimeout = nil;
     
-    [HelperTools dispatchSyncReentrant:^{
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
         MLAssert(appDelegate.voipProcessor != nil, @"appDelegate.voipProcessor should never be nil!");
         self.voipProcessor = appDelegate.voipProcessor;
-    } onQueue:dispatch_get_main_queue()];
+    }];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingSDP:) name:kMonalIncomingSDP object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(processIncomingICECandidate:) name:kMonalIncomingICECandidate object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAudioRouteChangeNotification:) name:AVAudioSessionRouteChangeNotification object:nil];
+    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleConnectivityChange:) name:kMonalConnectivityChange object:nil];
     
     return self;
 }
@@ -137,7 +140,7 @@
 -(void) setMuted:(BOOL) muted
 {
     @synchronized(self) {
-        if(!self.isConnected)
+        if(self.webRTCClient == nil || self.audioSession == nil)
             return;
         _muted = muted;
         if(_muted)
@@ -157,7 +160,7 @@
 -(void) setSpeaker:(BOOL) speaker
 {
     @synchronized(self) {
-        if(!self.isConnected)
+        if(self.webRTCClient == nil || self.audioSession == nil)
             return;
         if(_speaker == speaker)
             return;
@@ -214,7 +217,7 @@
 
 +(NSSet*) keyPathsForValuesAffectingState
 {
-    return [NSSet setWithObjects:@"direction", @"isConnected", @"jmiProceed", @"webRTCClient", @"providerAnswerAction", @"audioSession", @"isFinished", @"cancelDiscoveringTimeout", @"cancelRingingTimeout", @"cancelConnectingTimeout", nil];
+    return [NSSet setWithObjects:@"direction", @"isConnected", @"jmiProceed", @"webRTCClient", @"providerAnswerAction", @"audioSession", @"isFinished", @"cancelDiscoveringTimeout", @"cancelRingingTimeout", @"cancelConnectingTimeout", @"isReconnecting", nil];
 }
 
 #pragma mark - internals
@@ -234,12 +237,15 @@
 {
     //the timer needs a thread with runloop, see https://stackoverflow.com/a/18098396/3528174
     dispatch_async(dispatch_get_main_queue(), ^{
-        DDLogInfo(@"%@: Starting call duration timer...", [self short]);
         if(self.cancelConnectingTimeout != nil)
             self.cancelConnectingTimeout();
         self.cancelConnectingTimeout = nil;
+        //don't restart our timer if we just reconnected
+        if(self.isReconnecting)
+            return;
         if(self.callDurationTimer != nil)
             [self.callDurationTimer invalidate];
+        DDLogInfo(@"%@: Starting call duration timer...", [self short]);
         self.callDurationTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer* timer) {
             DDLogVerbose(@"%@:Call duration timer triggered: %d", [self short], self.durationTime);
             if(self.state == MLCallStateFinished)
@@ -306,6 +312,8 @@
     @synchronized(self) {
         BOOL oldValue = _isConnected;
         _isConnected = isConnected;
+        if(isConnected)
+            self.wasConnectedOnce = YES;
         
         //if switching to connected state: check if we need to activate the already reported audio session now
         if(oldValue == NO && self.isConnected == YES && self.audioSession != nil)
@@ -382,7 +390,7 @@
 {
     //send jmi finish with migration before chaning all ids etc.
     DDLogDebug(@"Migrating call using JMI finish: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -427,7 +435,7 @@
             __block WebRTCClient* client = self.webRTCClient;
             self.webRTCClient = nil;
             //do this async to not run into a deadlock with the signalling thread
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 [client.peerConnection close];
                 client = nil;
                 
@@ -477,7 +485,7 @@
             WebRTCClient* client = self.webRTCClient;
             self.webRTCClient = nil;
             //do this async to not run into a deadlock with the signalling thread
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 [client.peerConnection close];
             });
         }
@@ -595,6 +603,18 @@
     }));
 }
 
+-(void) createReconnectingTimeoutTimer
+{
+    if(self.cancelRingingTimeout != nil)
+        self.cancelRingingTimeout();
+    if(self.cancelConnectingTimeout != nil)
+        self.cancelConnectingTimeout();
+    self.cancelConnectingTimeout = createTimer(45.0, (^{
+        DDLogError(@"Failed to connect call, aborting!");
+        [self end];
+    }));
+}
+
 -(void) createRingingTimeoutTimer
 {
     if(self.cancelDiscoveringTimeout != nil)
@@ -631,7 +651,49 @@
     DDLogInfo(@"Now connecting outgoing VoIP call: %@", self);
     [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid startedConnectingAtDate:nil];
     [self createConnectingTimeoutTimer];
-    
+    [self offerSDP];
+}
+
+-(void) restartIce
+{
+    if(self.isReconnecting)
+    {
+        DDLogWarn(@"Not restarting ICE, already reconnecting!");
+        return;
+    }
+    DDLogInfo(@"Restarting ICE...");
+    @synchronized(self) {
+        self.isConnected = NO;
+        self.isReconnecting = YES;
+        [self.webRTCClient.peerConnection restartIce];
+        
+        //we have to decide for a prefered direction because otherwise we'd get a webrtc error on incoming sdp:
+        //Failed to set remote offer sdp: Called in wrong state: have-local-offer
+        if(self.direction == MLCallDirectionOutgoing)
+            [self offerSDP];
+        
+        //start connecting timeout if not already running (but leave it running if so, because we don't want to create endless reconnect loops
+        if(self.cancelConnectingTimeout == nil)
+            [self createReconnectingTimeoutTimer];
+    }
+}
+
+-(void) handleConnectivityChange:(NSNotification*) notification
+{
+    //only handle connectivity change if we switched to unreachable
+    if(self.wasConnectedOnce && self.isConnected && !self.isReconnecting && [notification.userInfo[@"reachable"] boolValue] == NO)
+    {
+        DDLogDebug(@"Connectivity changed, restarting ICE...");
+        //this will reconnect and use the (possibly still working) old connection until
+        //the new connection is usable, then transparently switch over to the new one
+        [self restartIce];
+    }
+    else
+        DDLogDebug(@"Not restarting ICE because of connectivity change: was never connected");
+}
+
+-(void) offerSDP
+{
     //TODO: in our non-jingle protocol the initiator (e.g. we) has to initialize the webrtc session by sending the proper IQs
     [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
         DDLogDebug(@"WebRTC reported local SDP '%@' offer, sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
@@ -665,7 +727,7 @@
 -(void) sendJmiPropose
 {
     DDLogDebug(@"Proposing new call via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"propose" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -682,7 +744,7 @@
 -(void) sendJmiReject
 {
     DDLogDebug(@"Rejecting via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -697,7 +759,7 @@
 -(void) sendJmiRejectWithTieBreak
 {
     DDLogDebug(@"Rejecting with tie-break via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -713,7 +775,7 @@
 -(void) sendJmiRinging
 {
     DDLogDebug(@"Ringing via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"ringing" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[] andData:nil]];
@@ -724,7 +786,7 @@
 -(void) sendJmiProceed
 {
     DDLogDebug(@"Accepting via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"proceed" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[] andData:nil]];
@@ -736,7 +798,7 @@
 -(void) sendJmiFinishWithReason:(NSString*) reason
 {
     DDLogDebug(@"Finishing via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -751,7 +813,7 @@
 -(void) sendJmiRetract
 {
     DDLogDebug(@"Retracting via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -766,7 +828,7 @@
 -(void) sendJmiRetractWithTieBreak
 {
     DDLogDebug(@"Retracting via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initTo:self.contact.contactJid];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -804,7 +866,9 @@
         @"jmiProceed": nilWrapper(self.jmiProceed),
         @"webRTCClient": nilWrapper(self.webRTCClient),
         @"providerAnswerAction": nilWrapper(self.providerAnswerAction),
+        @"wasConnectedOnce": bool2str(self.wasConnectedOnce),
         @"isConnected": bool2str(self.isConnected),
+        @"isReconnecting": bool2str(self.isReconnecting),
     }];
 }
 
@@ -844,80 +908,106 @@
 
 -(void) webRTCClient:(WebRTCClient*) webRTCClient didDiscoverLocalCandidate:(RTCIceCandidate*) candidate
 {
-    if(webRTCClient != self.webRTCClient)
-    {
-        DDLogDebug(@"%@: Ignoring discovered local ICE candidate: %@ (call migrated)", [self short], candidate);
-        return;
+    @synchronized(self) {
+        if(webRTCClient != self.webRTCClient)
+        {
+            DDLogDebug(@"%@: Ignoring discovered local ICE candidate: %@ (call migrated)", [self short], candidate);
+            return;
+        }
+        DDLogDebug(@"%@: Discovered local ICE candidate: %@", [self short], candidate);
+        //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCIceCandidate.h
+        DDLogDebug(@"%@: sending new local ICE candidate to '%@'...", [self short], self.fullRemoteJid);
+        XMPPIQ* candidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
+        [candidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"candidate" andNamespace:@"urn:tmp:monal:webrtc:candidate:1" withAttributes:@{
+            @"id": self.jmiid,
+            @"sdpMLineIndex": [[NSNumber numberWithInt:candidate.sdpMLineIndex] stringValue],
+            @"sdpMid": [HelperTools encodeBase64WithString:candidate.sdpMid]
+        } andChildren:@[] andData:[HelperTools encodeBase64WithString:candidate.sdp]]];
+        [self.account sendIq:candidateIQ withResponseHandler:^(XMPPIQ* result) {
+            DDLogDebug(@"%@: Received ICE candidate result: %@", [self short], result);
+        } andErrorHandler:^(XMPPIQ* error) {
+            if(error != nil)
+                DDLogError(@"%@: Got error for ICE candidate: %@", [self short], error);
+        }];
     }
-    DDLogDebug(@"%@: Discovered local ICE candidate: %@", [self short], candidate);
-    //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCIceCandidate.h
-    DDLogDebug(@"%@: sending new local ICE candidate to '%@'...", [self short], self.fullRemoteJid);
-    XMPPIQ* candidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
-    [candidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"candidate" andNamespace:@"urn:tmp:monal:webrtc:candidate:1" withAttributes:@{
-        @"id": self.jmiid,
-        @"sdpMLineIndex": [[NSNumber numberWithInt:candidate.sdpMLineIndex] stringValue],
-        @"sdpMid": [HelperTools encodeBase64WithString:candidate.sdpMid]
-    } andChildren:@[] andData:[HelperTools encodeBase64WithString:candidate.sdp]]];
-    [self.account sendIq:candidateIQ withResponseHandler:^(XMPPIQ* result) {
-        DDLogDebug(@"%@: Received ICE candidate result: %@", [self short], result);
-    } andErrorHandler:^(XMPPIQ* error) {
-        if(error != nil)
-            DDLogError(@"%@: Got error for ICE candidate: %@", [self short], error);
-    }];
 }
     
 -(void) webRTCClient:(WebRTCClient*) webRTCClient didChangeConnectionState:(RTCIceConnectionState) state
 {
-    if(webRTCClient != self.webRTCClient)
-    {
-        DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for webRTCClient: %@ (call migrated)", (long)state, webRTCClient);
-        return;
-    }
-    DDLogDebug(@"New RTCIceConnectionState %ld for webRTCClient: %@", (long)state, webRTCClient);
-    switch(state)
-    {
-        case RTCIceConnectionStateConnected:
-            DDLogInfo(@"New WebRTC ICE state: connected, falling through to completed...");
-        case RTCIceConnectionStateCompleted:
-            DDLogInfo(@"New WebRTC ICE state: completed: %@", self);
-            self.isConnected = YES;
-            //at this stage this means the call is incoming (--> fulfill callkit answer action to update ui to reflect connected call)
-            if(self.direction == MLCallDirectionIncoming)
-            {
-                DDLogInfo(@"Informing CallKit of successful connection of incoming call...");
-                [self.providerAnswerAction fulfill];
-            }
-            //otherwise the call was outgoing (--> initialize callkit ui for outgoing call, we are connected now)
-            else
-            {
-                DDLogInfo(@"Informing CallKit of successful connection of outgoing call...");
-                [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid connectedAtDate:nil];
-            }
-            break;
-        case RTCIceConnectionStateDisconnected:
-            DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
-            [self end];     //use "end" because this was a successful call
-            break;
-        case RTCIceConnectionStateFailed:
-            DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
-            [self end];
-            break;
-        //all following states can be ignored
-        case RTCIceConnectionStateClosed:
-            DDLogInfo(@"New WebRTC ICE state: closed: %@", self);
-            break;
-        case RTCIceConnectionStateNew:
-            DDLogInfo(@"New WebRTC ICE state: new: %@", self);
-            break;
-        case RTCIceConnectionStateChecking:
-            DDLogInfo(@"New WebRTC ICE state: checking: %@", self);
-            break;
-        case RTCIceConnectionStateCount:
-            DDLogInfo(@"New WebRTC ICE state: count: %@", self);
-            break;
-        default:
-            DDLogInfo(@"New WebRTC ICE state: UNKNOWN: %@", self);
-            break;
+    @synchronized(self) {
+        if(webRTCClient != self.webRTCClient)
+        {
+            DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for webRTCClient: %@ (call migrated)", (long)state, webRTCClient);
+            return;
+        }
+        //state enums can be found over here: https://chromium.googlesource.com/external/webrtc/+/9eeb6240c93efe2219d4d6f4cf706030e00f64d7/webrtc/sdk/objc/Framework/Headers/WebRTC/RTCPeerConnection.h
+        DDLogDebug(@"New RTCIceConnectionState %ld for webRTCClient: %@", (long)state, webRTCClient);
+        //we *always* want to cancel the running iceRestart timer once the state changes
+        if(self.cancelWaitUntilIceRestart != nil)
+        {
+            self.cancelWaitUntilIceRestart();
+            self.cancelWaitUntilIceRestart = nil;
+        }
+        switch(state)
+        {
+            case RTCIceConnectionStateConnected:
+                DDLogInfo(@"New WebRTC ICE state: connected, falling through to completed...");
+            case RTCIceConnectionStateCompleted:
+                DDLogInfo(@"New WebRTC ICE state: completed: %@", self);
+                self.isConnected = YES;
+                self.isReconnecting = NO;
+                //at this stage this means the call is incoming (--> fulfill callkit answer action to update ui to reflect connected call)
+                if(self.direction == MLCallDirectionIncoming)
+                {
+                    DDLogInfo(@"Informing CallKit of successful connection of incoming call...");
+                    [self.providerAnswerAction fulfill];
+                }
+                //otherwise the call was outgoing (--> initialize callkit ui for outgoing call, we are connected now)
+                else
+                {
+                    DDLogInfo(@"Informing CallKit of successful connection of outgoing call...");
+                    [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid connectedAtDate:nil];
+                }
+                break;
+            case RTCIceConnectionStateDisconnected:
+                DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
+                if(self.wasConnectedOnce)
+                {
+                    //wait some time before restarting ice (maybe the connection can be reestablished without a new candidate exchange)
+                    //see: https://groups.google.com/g/discuss-webrtc/c/I4K8NwN4Huw
+                    //see: https://webrtccourse.com/course/webrtc-codelab/module/fiddle-of-the-month/lesson/ice-restarts/
+                    //see: https://medium.com/@fippo/ice-restarts-5d759caceda6
+                    self.cancelWaitUntilIceRestart = createTimer(2.0, (^{
+                        [self restartIce];
+                    }));
+                }
+                else
+                    [self end];
+                break;
+            case RTCIceConnectionStateFailed:
+                DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
+                if(self.wasConnectedOnce)
+                    [self restartIce];
+                else
+                    [self end];
+                break;
+            //all following states can be ignored
+            case RTCIceConnectionStateClosed:
+                DDLogInfo(@"New WebRTC ICE state: closed: %@", self);
+                break;
+            case RTCIceConnectionStateNew:
+                DDLogInfo(@"New WebRTC ICE state: new: %@", self);
+                break;
+            case RTCIceConnectionStateChecking:
+                DDLogInfo(@"New WebRTC ICE state: checking: %@", self);
+                break;
+            case RTCIceConnectionStateCount:
+                DDLogInfo(@"New WebRTC ICE state: count: %@", self);
+                break;
+            default:
+                DDLogInfo(@"New WebRTC ICE state: UNKNOWN: %@", self);
+                break;
+        }
     }
 }
     
@@ -938,6 +1028,9 @@
     DDLogInfo(@"Got new incoming ICE candidate...");
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
+    //ignore sdp for disabled accounts
+    if(account != [[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo])
+        return;
     XMPPIQ* iqNode = userInfo[@"iqNode"];
     NSString* jmiid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:candidate:1}candidate@id"];
     if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
@@ -971,7 +1064,6 @@
             [self.account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
         }
     }];
-    
     DDLogDebug(@"Leaving method...");
 }
 
@@ -980,6 +1072,9 @@
     DDLogInfo(@"Got new incoming SDP...");
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
+    //ignore sdp for disabled accounts
+    if(account != [[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo])
+        return;
     XMPPIQ* iqNode = userInfo[@"iqNode"];
     NSString* jmiid = [iqNode findFirst:@"{urn:tmp:monal:webrtc:sdp:1}sdp@id"];
     if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
@@ -1023,7 +1118,6 @@
             }];
         }
     }];
-    
     DDLogDebug(@"Leaving method...");
 }
 

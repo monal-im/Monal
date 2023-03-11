@@ -63,6 +63,16 @@ final class WebRTCClient: NSObject {
         // gatherContinually will let WebRTC to listen to any network changes and send any new candidates to the other client
         config.continualGatheringPolicy = .gatherContinually
         
+        //config.tcpCandidatePolicy = .disabled       // XEP-0176 doesn't support tcp
+        config.rtcpMuxPolicy = .negotiate
+        
+        //aggressive pings to detect wifi - mobile handoffs better
+        config.iceConnectionReceivingTimeout = 1000
+        config.iceBackupCandidatePairPingInterval = 2000
+        
+        //bigger jitter buffer for better audio quality (2s, default: 1s)
+        config.audioJitterBufferMaxPackets = 100;
+        
         // Define media constraints. DtlsSrtpKeyAgreement is required to be true to be able to connect with web browsers.
         let constraints = RTCMediaConstraints(mandatoryConstraints: [
             "DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue
@@ -72,6 +82,7 @@ final class WebRTCClient: NSObject {
             "VoiceActivityDetection": kRTCMediaConstraintsValueTrue
         ])
         
+        DDLogInfo("iceConnectionReceivingTimeout=\(config.iceConnectionReceivingTimeout), iceBackupCandidatePairPingInterval=\(config.iceBackupCandidatePairPingInterval)");
         return WebRTCClient.factory.peerConnection(with: config, constraints: constraints, delegate: nil)
     }
     

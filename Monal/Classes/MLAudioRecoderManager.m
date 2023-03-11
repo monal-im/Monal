@@ -18,7 +18,7 @@ NSURL *audioFileURL = nil;
     static dispatch_once_t once;
     static MLAudioRecoderManager* sharedInstance;
     dispatch_once(&once, ^{
-        sharedInstance = [[MLAudioRecoderManager alloc] init] ;
+        sharedInstance = [MLAudioRecoderManager new] ;
     });
     return sharedInstance;
 }

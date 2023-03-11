@@ -19,7 +19,7 @@ static NSString* appName = @"Monal";
 
 -(NSString*) newLogFileName
 {
-    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    NSDateFormatter* dateFormatter = [NSDateFormatter new];
     [dateFormatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
     [dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     [dateFormatter setDateFormat: @"yyyy'-'MM'-'dd'--'HH'-'mm'-'ss'-'SSS'"];

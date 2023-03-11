@@ -44,7 +44,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setBool:NO forKey:@"ChatBackgrounds"];
 
         // Privacy Settings
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowImages"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
@@ -64,9 +63,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
         [[HelperTools defaultsDB] synchronize];
     }
-
-    // on upgrade this one needs to be set to yes. Can be removed later.
-    [self upgradeBoolUserSettingsIfUnset:@"ShowImages" toDefault:YES];
 
     [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
 
@@ -198,7 +194,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     static dispatch_once_t once;
     static MLXMPPManager* sharedInstance;
     dispatch_once(&once, ^{
-        sharedInstance = [[MLXMPPManager alloc] init] ;
+        sharedInstance = [MLXMPPManager new] ;
     });
     return sharedInstance;
 }
@@ -207,7 +203,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 {
     self = [super init];
 
-    _connectedXMPP = [[NSMutableArray alloc] init];
+    _connectedXMPP = [NSMutableArray new];
     _hasConnectivity = NO;
     _isBackgrounded = NO;
     _isNotInFocus = NO;
@@ -279,6 +275,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                         DDLogDebug(@"Not trying to reconnect in 0s, parse queue frozen!");
                 }
             }
+            
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalConnectivityChange object:self userInfo:@{@"reachable": @YES}];
         }
         else if(nw_path_get_status(path) != nw_path_status_satisfied && self->_hasConnectivity)
         {
@@ -296,6 +294,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 //don't queue this notification because it should be handled immediately
                 [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @YES}];
             }
+            
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalConnectivityChange object:self userInfo:@{@"reachable": @NO}];
         }
         else if(nw_path_get_status(path) == nw_path_status_satisfied)
         {
@@ -312,6 +312,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 }
                 else
                     DDLogDebug(@"Not pinging after 1s, parse queue frozen!");
+            
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalConnectivityChange object:self userInfo:@{@"reachable": @YES}];
         }
         else
             DDLogVerbose(@"nothing changed, still NOT reachable");
@@ -470,7 +472,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         //show notifications for disabled accounts to warn user if in appex
         if([HelperTools isAppExtension])
         {
-            UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+            UNMutableNotificationContent* content = [UNMutableNotificationContent new];
             content.title = NSLocalizedString(@"Account disabled", @"");;
             content.subtitle = jid;
             content.body = NSLocalizedString(@"You restored an iCloud backup of Monal, please open the app to reenable this account.", @"");
@@ -654,11 +656,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         completion(success, messageId);
 }
 
--(void) sendChatState:(BOOL) isTyping fromAccount:(NSNumber*) accountNo toJid:(NSString*) jid
+-(void) sendChatState:(BOOL) isTyping toContact:(MLContact*) contact
 {
-    xmpp* account = [self getConnectedAccountForID:accountNo];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
-        [account sendChatState:isTyping toJid:jid];
+        [account sendChatState:isTyping toContact:contact];
 }
 
 #pragma mark - login/register
@@ -683,7 +685,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         return nil;
     }
 
-    NSMutableDictionary* dic  = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* dic  = [NSMutableDictionary new];
     [dic setObject:domain.lowercaseString forKey:kDomain];
     [dic setObject:user.lowercaseString forKey:kUsername];
     [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
@@ -822,16 +824,18 @@ $$
     [account getEntitySoftWareVersion:xmppId];
 }
 
--(void) blocked:(BOOL) isBlocked Jid:(MLContact *) contact
+-(void) block:(BOOL) isBlocked contact:(MLContact*) contact
 {
+    DDLogVerbose(@"Blocking %@: %@", contact, bool2str(isBlocked));
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     [account setBlocked:isBlocked forJid:contact.contactJid];
 }
 
--(void) blocked:(BOOL) isBlocked Jid:(NSString *) contact Account:(NSNumber*) accountNo
+-(void) block:(BOOL) isBlocked fullJid:(NSString*) fullJid onAccount:(NSNumber*) accountNo
 {
+    DDLogVerbose(@"Blocking %@ on account %@: %@", fullJid, accountNo, bool2str(isBlocked));
     xmpp* account = [self getConnectedAccountForID:accountNo];
-    [account setBlocked:isBlocked forJid:contact];
+    [account setBlocked:isBlocked forJid:fullJid];
 }
 
 #pragma mark message signals

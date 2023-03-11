@@ -53,7 +53,7 @@
         if(self.expirationTimer)
             self.expirationTimer();
         if(self.handler)
-            self.handler([[UNMutableNotificationContent alloc] init]);
+            self.handler([UNMutableNotificationContent new]);
         self.expirationTimer = nil;
         self.handler = nil;
     }
@@ -79,7 +79,7 @@
     static PushSingleton* sharedInstance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [[PushSingleton alloc] init];
+        sharedInstance = [PushSingleton new];
     });
     return sharedInstance;
 }
@@ -88,7 +88,7 @@
 {
     self = [super init];
     DDLogInfo(@"Initializing push singleton");
-    self.handlerList = [[NSMutableArray alloc] init];
+    self.handlerList = [NSMutableArray new];
     self.isFirstPush = YES;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
@@ -123,7 +123,7 @@
 -(BOOL) checkForLastHandler
 {
     @synchronized(self.handlerList) {
-        return self.handlerList.count != 0;
+        return self.handlerList.count <= 1;
     }
 }
 
@@ -274,6 +274,8 @@
     BOOL isLastHandler = [self checkForLastHandler];
     if(isLastHandler)
     {
+        DDLogInfo(@"This was the last handler, freezing all parse queues and posting sync errors...");
+        
         //we have to freeze all incoming streams until we know if this handler feeding leads to the termination of our appex or not
         //we MUST do this before feeding the last handler because after feeding the last one apple does not allow us to
         //post any new notifications --> not freezing would lead to lost notifications
@@ -361,6 +363,7 @@
     DDLogInfo(@"Freezing all incoming streams until we know if we are either terminating or got another push");
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         [account freezeParseQueue];
+    DDLogInfo(@"All parse queues frozen now");
 }
 
 -(void) unfreezeAllParseQueues
@@ -368,12 +371,13 @@
     DDLogInfo(@"Unfreezing all incoming streams again, we got another push");
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         [account unfreezeParseQueue];
+    DDLogInfo(@"All parse queues operational again");
 }
 
 -(void) updateUnread
 {
     DDLogVerbose(@"updating app badge via updateUnread");
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
     NSInteger unread = 0;
@@ -400,7 +404,7 @@
 -(void) scheduleBackgroundTask:(BOOL) force
 {
     DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");
-    [HelperTools dispatchSyncReentrant:^{
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         NSError* error;
         if(force)
         {
@@ -435,7 +439,7 @@
             else
                 DDLogVerbose(@"Success submitting BGTask request %@", refreshingRequest);
         }
-    } onQueue:dispatch_get_main_queue()];
+    }];
 }
 
 @end
@@ -454,7 +458,7 @@ static BOOL warnUnclean = NO;
     //log unhandled exceptions
     [HelperTools installExceptionHandler];
     
-    handlers = [[NSMutableArray alloc] init];
+    handlers = [NSMutableArray new];
     
     //init IPC
     [IPC initializeForProcess:@"NotificationServiceExtension"];
@@ -529,7 +533,7 @@ static BOOL warnUnclean = NO;
         DDLogDebug(@"current build number: %ld, firstGoodBuildNumber: %ld, isKnownGoodBuild: %@", buildNumber, firstGoodBuildNumber, bool2str(isKnownGoodBuild));
         if(buildNumber < firstGoodBuildNumber && !isKnownGoodBuild)
         {
-            UNMutableNotificationContent* tooOldContent = [[UNMutableNotificationContent alloc] init];
+            UNMutableNotificationContent* tooOldContent = [UNMutableNotificationContent new];
             tooOldContent.title = NSLocalizedString(@"Very old app version", @"");
             tooOldContent.subtitle = NSLocalizedString(@"Please update!", @"");
             tooOldContent.body = NSLocalizedString(@"This app is too old and can contain security bugs as well as suddenly cease operation. Please Upgrade!", @"");
@@ -545,7 +549,7 @@ static BOOL warnUnclean = NO;
     
     if(warnUnclean)
     {
-        UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
+        UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
         errorContent.title = NSLocalizedString(@"Unclean appex shutown", @"");
         errorContent.body = NSLocalizedString(@"This should never happen, please contact the developers and provide a logfile!", @"");
         errorContent.sound = [UNNotificationSound defaultSound];
@@ -571,7 +575,7 @@ static BOOL warnUnclean = NO;
     
 /*
 #ifdef DEBUG
-    UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
+    UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
     errorContent.title = @"Unexpected appex expiration";
     errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
     errorContent.sound = [UNNotificationSound defaultSound];
@@ -602,7 +606,7 @@ static BOOL warnUnclean = NO;
         for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
         {
             DDLogError(@"Feeding handler with error notification: %@", _handler);
-            UNMutableNotificationContent* errorContent = [[UNMutableNotificationContent alloc] init];
+            UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
             errorContent.title = NSLocalizedString(@"Unexpected appex expiration", @"");
             errorContent.body = NSLocalizedString(@"This should never happen, please contact the developers and provide a logfile!", @"");
             errorContent.sound = [UNNotificationSound defaultSound];
@@ -621,7 +625,7 @@ static BOOL warnUnclean = NO;
         for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
         {
             DDLogError(@"Feeding handler with silent notification: %@", _handler);
-            UNMutableNotificationContent* emptyContent = [[UNMutableNotificationContent alloc] init];
+            UNMutableNotificationContent* emptyContent = [UNMutableNotificationContent new];
             _handler(emptyContent);
         }
     }

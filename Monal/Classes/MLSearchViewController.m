@@ -58,10 +58,10 @@
     self.curIdxHistory = 0;
     
     if (!self.searchResultMessageDictionary)
-        self.searchResultMessageDictionary = [[NSMutableDictionary alloc] init];
+        self.searchResultMessageDictionary = [NSMutableDictionary new];
     
     if (!self.messageDictionary)
-        self.messageDictionary = [[NSMutableDictionary alloc] init];
+        self.messageDictionary = [NSMutableDictionary new];
     
     [self.searchResultDelegate doGetMsgData];
 }
@@ -243,16 +243,14 @@
     [self setResultIndicatorTitle:@"" onlyHint:NO];
 }
 
-- (void)getSearchData:(NSString*) queryText
+- (void) getSearchData:(NSString*) queryText
 {
-    NSArray* searchResultArray = [[DataLayer sharedInstance] searchResultOfHistoryMessageWithKeyWords:queryText
-                                                                                                   accountNo:self.contact.accountId
-                                                                                                betweenBuddy:self.contact.contactJid];
+    NSArray* searchResultArray = [[DataLayer sharedInstance] searchResultOfHistoryMessageWithKeyWords:queryText betweenContact:self.contact];
     [self.searchResultMessageList removeAllObjects];
     self.searchResultMessageList = [searchResultArray mutableCopy];
 }
 
-- (NSMutableAttributedString*)doSearchKeyword:(NSString*) keyword onText:(NSString*) allText andInbound:(BOOL) inDirection
+-(NSMutableAttributedString*) doSearchKeyword:(NSString*) keyword onText:(NSString*) allText andInbound:(BOOL) inDirection
 {
     NSMutableAttributedString* attributedString = [[NSMutableAttributedString alloc] initWithString:allText];
     NSRange allTextRange = NSMakeRange(0, allText.length);

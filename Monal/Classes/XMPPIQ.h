@@ -7,6 +7,7 @@
 //
 
 #import "XMPPStanza.h"
+#import "MLContact.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -89,9 +90,9 @@ gets Entity SoftWare Version
 /**
 removes a contact from the roster
  */
--(void) setRemoveFromRoster:(NSString*) jid;
+-(void) setRemoveFromRoster:(MLContact*) contact;
 
--(void) setUpdateRosterItem:(NSString*) jid withName:(NSString*) name;
+-(void) setUpdateRosterItem:(MLContact*) contact withName:(NSString*) name;
 
 /**
  Requests a full roster from the server. A null version will not set the ver attribute

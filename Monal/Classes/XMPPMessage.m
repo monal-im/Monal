@@ -7,6 +7,9 @@
 //
 
 #import "XMPPMessage.h"
+#import "MLContact.h"
+
+@class MLContact;
 
 @interface MLXMLNode()
 @property (atomic, strong, readwrite) NSString* element;
@@ -39,10 +42,10 @@ NSString* const kMessageHeadlineType = @"headline";
     return self;
 }
 
--(XMPPMessage*) initTo:(NSString*) to
+-(XMPPMessage*) initToContact:(MLContact*) toContact
 {
     self = [self init];
-    self.attributes[@"to"] = to;
+    self.attributes[@"to"] = toContact.contactJid;
 
     return self;
 }

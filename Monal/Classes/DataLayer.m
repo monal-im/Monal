@@ -71,7 +71,7 @@ static NSDateFormatter* dbFormatter;
     
     //init global state
     dbPath = writableDBPath;
-    dbFormatter = [[NSDateFormatter alloc] init];
+    dbFormatter = [NSDateFormatter new];
     [dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     [dbFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 }
@@ -82,7 +82,7 @@ static NSDateFormatter* dbFormatter;
     static DataLayer* newInstance;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        newInstance = [[self alloc] init];
+        newInstance = [self new];
     });
     return newInstance;
 }
@@ -484,7 +484,7 @@ static NSDateFormatter* dbFormatter;
         NSString* likeString = [NSString stringWithFormat:@"%%%@%%", search];
         NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) AS 'sortkey' FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 AND (B.buddy_name LIKE ? OR B.full_name LIKE ? OR B.nick_name LIKE ?) ORDER BY sortkey COLLATE NOCASE ASC;";
         NSArray* params = @[likeString, likeString, likeString];
-        NSMutableArray<MLContact*>* toReturn = [[NSMutableArray alloc] init];
+        NSMutableArray<MLContact*>* toReturn = [NSMutableArray new];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
             [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
         return toReturn;
@@ -501,7 +501,7 @@ static NSDateFormatter* dbFormatter;
     return [self.db idReadTransaction:^{
         //list all contacts and group chats
         NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) AS 'sortkey' FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 AND (B.buddy_name=? OR ?='') ORDER BY sortkey COLLATE NOCASE ASC;";
-        NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+        NSMutableArray* toReturn = [NSMutableArray new];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:@[jid, jid]])
             [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
         return toReturn;
@@ -567,7 +567,7 @@ static NSDateFormatter* dbFormatter;
             DDLogVerbose(@"caps count: %lu", (unsigned long)[resultArray count]);
             if([resultArray count] == 0)
                 return (NSSet*)nil;
-            NSMutableSet* retval = [[NSMutableSet alloc] init];
+            NSMutableSet* retval = [NSMutableSet new];
             for(NSDictionary* row in resultArray)
                 [retval addObject:row[@"cap"]];
             return (NSSet*)retval;
@@ -718,11 +718,11 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) hasContactRequestForAccount:(NSNumber*) accountNo andBuddyName:(NSString*) buddy
+-(BOOL) hasContactRequestForContact:(MLContact*) contact
 {
     return [self.db boolReadTransaction:^{
         NSString* query = @"SELECT COUNT(*) FROM subscriptionRequests WHERE account_id=? AND buddy_name=?";
-        NSNumber* result = (NSNumber*)[self.db executeScalar:query andArguments:@[accountNo, buddy]];
+        NSNumber* result = (NSNumber*)[self.db executeScalar:query andArguments:@[contact.accountId, contact.contactJid]];
         return (BOOL)(result.intValue == 1);
     }];
 }
@@ -731,7 +731,7 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT subscriptionRequests.account_id, subscriptionRequests.buddy_name FROM subscriptionRequests, account WHERE subscriptionRequests.account_id = account.account_id AND account.enabled;";
-        NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+        NSMutableArray* toReturn = [NSMutableArray new];
         for(NSDictionary* dic in [self.db executeReader:query])
             [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
         return toReturn;
@@ -809,7 +809,7 @@ static NSDateFormatter* dbFormatter;
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT subscription, ask from buddylist where buddy_name=? and account_id=?";
         NSArray* params = @[contact, accountNo];
-        NSArray* version=[self.db executeReader:query andArguments:params];
+        NSArray* version = [self.db executeReader:query andArguments:params];
         return version.firstObject;
     }];
 }
@@ -1200,7 +1200,7 @@ static NSDateFormatter* dbFormatter;
         if(!checkForDuplicates || ![self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound onAccount:accountNo])
         {
             //this is always from a contact
-            NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+            NSDateFormatter* formatter = [NSDateFormatter new];
             [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
             NSDate* sourceDate = [NSDate date];
             NSDate* destinationDate;
@@ -1978,7 +1978,7 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idWriteTransaction:^{
         NSArray* payloadList = [self.db executeReader:@"SELECT * FROM sharesheet_outbox ORDER BY id ASC;"];
-        NSMutableArray* retval = [[NSMutableArray alloc] init];
+        NSMutableArray* retval = [NSMutableArray new];
         for(NSDictionary* entry_ in payloadList)
         {
             NSMutableDictionary* entry = [[NSMutableDictionary alloc] initWithDictionary:entry_];
@@ -1999,27 +1999,27 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark mute and block
 
--(void) muteJid:(NSString*) jid onAccount:(NSString*) accountNo
+-(void) muteContact:(MLContact*) contact
 {
-    if(!jid || !accountNo)
+    if(!contact)
     {
         unreachable();
         return;
     }
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"UPDATE buddylist SET muted=1 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, jid]];
+        [self.db executeNonQuery:@"UPDATE buddylist SET muted=1 WHERE account_id=? AND buddy_name=?;" andArguments:@[contact.accountId, contact.contactJid]];
     }];
 }
 
--(void) unMuteJid:(NSString*) jid onAccount:(NSString*) accountNo
+-(void) unMuteContact:(MLContact*) contact
 {
-    if(!jid || !accountNo)
+    if(!contact)
     {
         unreachable();
         return;
     }
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"UPDATE buddylist SET muted=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, jid]];
+        [self.db executeNonQuery:@"UPDATE buddylist SET muted=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[contact.accountId, contact.contactJid]];
     }];
 }
 
@@ -2120,40 +2120,36 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(u_int8_t) isBlockedJid:(NSString*) jid withAccountNo:(NSNumber*) accountNo
+-(uint8_t) isBlockedContact:(MLContact*) contact
 {
-    if(!jid || accountNo == nil)
-        return NO;
+    if(!contact)
+        return kBlockingNoMatch;
 
-    return (u_int8_t)[[self.db idReadTransaction:^{
-        NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:jid];
+    return (uint8_t)[[self.db idReadTransaction:^{
+        NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:contact.contactJid];
         NSNumber* blocked;
-        u_int8_t ruleId = kBlockingNoMatch;
+        uint8_t ruleId = kBlockingNoMatch;
         if(parsedJid[@"node"] && parsedJid[@"host"] && parsedJid[@"resource"])
         {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource=?;" andArguments:@[accountNo, parsedJid[@"node"], parsedJid[@"host"], parsedJid[@"resource"]]];
+            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource=?;" andArguments:@[contact.accountId, parsedJid[@"node"], parsedJid[@"host"], parsedJid[@"resource"]]];
             ruleId = kBlockingMatchedNodeHostResource;
         }
         else if(parsedJid[@"node"] && parsedJid[@"host"])
         {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource IS NULL;" andArguments:@[accountNo, parsedJid[@"node"], parsedJid[@"host"]]];
+            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource IS NULL;" andArguments:@[contact.accountId, parsedJid[@"node"], parsedJid[@"host"]]];
             ruleId = kBlockingMatchedNodeHost;
         }
         else if(parsedJid[@"host"] && parsedJid[@"resource"])
         {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource=?;" andArguments:@[accountNo, parsedJid[@"host"], parsedJid[@"resource"]]];
+            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource=?;" andArguments:@[contact.accountId, parsedJid[@"host"], parsedJid[@"resource"]]];
             ruleId = kBlockingMatchedHostResource;
         }
         else if(parsedJid[@"host"])
         {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource IS NULL;" andArguments:@[accountNo, parsedJid[@"host"]]];
+            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource IS NULL;" andArguments:@[contact.accountId, parsedJid[@"host"]]];
             ruleId = kBlockingMatchedHost;
         }
-        else
-        {
-            return [NSNumber numberWithInt:kBlockingNoMatch];
-        }
-        if(blocked.intValue == 1)
+        if(blocked.intValue >= 1)
             return [NSNumber numberWithInt:ruleId];
         else
             return [NSNumber numberWithInt:kBlockingNoMatch];
@@ -2164,7 +2160,7 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         NSArray* blockedJidsFromDB = [self.db executeReader:@"SELECT * FROM blocklistCache WHERE account_id=?" andArguments:@[accountNo]];
-        NSMutableArray* blockedJids = [[NSMutableArray alloc] init];
+        NSMutableArray* blockedJids = [NSMutableArray new];
         for(NSDictionary* blockedJid in blockedJidsFromDB)
         {
             NSString* fullJid = @"";
@@ -2258,7 +2254,7 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=? GROUP BY message ORDER BY message_history_id ASC;";
         NSArray* params = @[kMessageTypeFiletransfer, accountNo, contact];
         
-        NSMutableArray* retval = [[NSMutableArray alloc] init];
+        NSMutableArray* retval = [NSMutableArray new];
         for(MLMessage* msg in [self messagesForHistoryIDs:[self.db executeScalarReader:query andArguments:params]])
             [retval addObject:[MLFiletransfer getFileInfoForMessage:msg]];
         return retval;
@@ -2273,18 +2269,27 @@ static NSDateFormatter* dbFormatter;
     MLAssert(accountNo != nil, @"accountNo should not be null");
     return [self.db idReadTransaction:^{
         //this will only return resources supporting "urn:xmpp:idle:1" and being "online" (e.g. lastInteraction = 0)
-        NSNumber* online = [self.db executeScalar:@"SELECT lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND V.cap='urn:xmpp:idle:1' AND R.lastInteraction=0 ORDER BY lastInteraction ASC LIMIT 1;" andArguments:@[accountNo, jid]];
+        NSNumber* online = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND V.cap='urn:xmpp:idle:1' AND R.lastInteraction=0 ORDER BY R.lastInteraction ASC LIMIT 1;" andArguments:@[accountNo, jid]];
         
         //this will only return resources supporting "urn:xmpp:idle:1" and being "idle since <...>" (e.g. lastInteraction > 0)
-        NSNumber* idle = [self.db executeScalar:@"SELECT lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND cap='urn:xmpp:idle:1' AND R.lastInteraction!=0 ORDER BY lastInteraction DESC LIMIT 1;" andArguments:@[accountNo, jid]];
+        NSNumber* idle = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND cap='urn:xmpp:idle:1' AND R.lastInteraction!=0 ORDER BY R.lastInteraction DESC LIMIT 1;" andArguments:@[accountNo, jid]];
+        
+        //this will only return a value if the buddy has a last interaction not being NULL or 0
+        NSNumber* globalIdle = [self.db executeScalar:@"SELECT lastInteraction FROM buddylist WHERE account_id=? AND buddy_name=? AND NOT (lastInteraction IS NULL OR lastInteraction==0);" andArguments:@[accountNo, jid]];
         
         //at least one online resource means the buddy is online
         //if no online resource can be found use the newest timestamp as "idle since <...>" timestamp
-        DDLogDebug(@"LastInteraction of %@ online=%@, idle=%@", jid, online, idle);
+        //if this can also not be found, use the global timestamp and if this is NULL then return nil
+        //(meaning last interaction is unsupported and was every since we saw presences from this jid)
+        DDLogDebug(@"LastInteraction of %@ online=%@, idle=%@, globalIdle=%@", jid, online, idle, globalIdle);
         if(online != nil)
             return [[NSDate date] initWithTimeIntervalSince1970:0] ;
         if(idle == nil)
-            return (NSDate*)nil;
+        {
+            if(globalIdle == nil)
+                return (NSDate*)nil;
+            return [NSDate dateWithTimeIntervalSince1970:[globalIdle integerValue]];
+        }
         return [NSDate dateWithTimeIntervalSince1970:[idle integerValue]];
     }];
 }
@@ -2295,7 +2300,7 @@ static NSDateFormatter* dbFormatter;
     MLAssert(accountNo != nil, @"accountNo should not be null");
     return [self.db idReadTransaction:^{
         //this will only return resources supporting "urn:xmpp:idle:1"
-        NSNumber* lastInteraction = [self.db executeScalar:@"SELECT lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id WHERE B.account_id=? AND B.buddy_name=? AND R.resource=? AND EXISTS(SELECT * FROM ver_info AS V WHERE V.ver=R.ver AND V.cap='urn:xmpp:idle:1') LIMIT 1;" andArguments:@[accountNo, jid, resource]];
+        NSNumber* lastInteraction = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id WHERE B.account_id=? AND B.buddy_name=? AND R.resource=? AND EXISTS(SELECT * FROM ver_info AS V WHERE V.ver=R.ver AND V.cap='urn:xmpp:idle:1') LIMIT 1;" andArguments:@[accountNo, jid, resource]];
         DDLogDebug(@"LastInteraction of %@/%@ lastInteraction=%@", jid, resource, lastInteraction);
         if(lastInteraction == nil)
             return (NSDate*)nil;
@@ -2312,9 +2317,10 @@ static NSDateFormatter* dbFormatter;
     if(lastInteractionTime != nil)
         timestamp = [HelperTools dateToNSNumberSeconds:lastInteractionTime];
     
-    DDLogDebug(@"Setting lastInteraction timestamp of %@/%@ to %@...", jid, resource, timestamp);
+    DDLogDebug(@"Setting lastInteraction of %@/%@ to %@...", jid, resource, timestamp);
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"UPDATE buddy_resources AS R SET lastInteraction=? WHERE EXISTS(SELECT * FROM buddylist AS B WHERE B.buddy_id=R.buddy_id AND B.account_id=? AND B.buddy_name=?) AND R.resource=?;" andArguments:@[timestamp, accountNo, jid, resource]];
+        [self.db executeNonQuery:@"UPDATE buddylist SET lastInteraction=? WHERE account_id=? AND buddy_name=? AND (lastInteraction IS NULL OR lastInteraction<?);" andArguments:@[timestamp, accountNo, jid, timestamp]];
     }];
 }
 
@@ -2363,6 +2369,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) delIdleTimerWithId:(NSNumber* _Nullable) timerId
 {
+    DDLogVerbose(@"Trying to remove idle timer with id: %@", timerId);
     if(timerId == nil)
         return;
     return [self.db voidWriteTransaction:^{
@@ -2381,6 +2388,19 @@ static NSDateFormatter* dbFormatter;
         }));
         $invalidate([HelperTools unserializeData:timer[@"handler"]], $ID(account));
         [self.db executeNonQuery:@"DELETE FROM idle_timers WHERE id=?;" andArguments:@[timerId]];
+    }];
+}
+
+-(void) cleanupIdleTimerOnAccountNo:(NSNumber*) accountNo
+{
+    if(accountNo == nil)
+        return;
+    return [self.db voidWriteTransaction:^{
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+        MLAssert(account != nil, @"Cleaning up idle timers should not be done when an account is disabled!", (@{
+            @"accountNo": nilWrapper(accountNo)
+        }));
+        [self.db executeNonQuery:@"DELETE FROM idle_timers WHERE account_id=?;" andArguments:@[accountNo]];
     }];
 }
 
@@ -2419,14 +2439,14 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword accountNo:(NSNumber*) accountNo betweenBuddy:(NSString* _Nonnull) contactJid
+-(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword betweenContact:(MLContact* _Nonnull) contact
 {
-    if(!keyword || accountNo == nil)
+    if(!keyword)
         return nil;
     return [self.db idReadTransaction:^{
-        NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
+        NSString* likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
         NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND (message LIKE ? OR messageType LIKE ?) AND buddy_name=? ORDER BY timestamp ASC;";
-        NSArray* params = @[accountNo, likeString, contactJid];
+        NSArray* params = @[contact.accountId, likeString, contact.contactJid];
         NSArray* results = [self.db executeScalarReader:query andArguments:params];
         return [self messagesForHistoryIDs:results];
     }];

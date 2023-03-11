@@ -63,8 +63,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Block  a jid
  */
--(void) blocked:(BOOL) isBlocked Jid:(MLContact *) contact;
--(void) blocked:(BOOL) isBlocked Jid:(NSString *) contact Account:(NSNumber*) accountNo;
+-(void) block:(BOOL) isBlocked contact:(MLContact*) contact;
+-(void) block:(BOOL) isBlocked fullJid:(NSString*) contact onAccount:(NSNumber*) accountNo;
 
 /**
  Returns the user set name of the conencted account
@@ -101,7 +101,7 @@ Sends a message to a specified contact in account. Calls completion handler on s
  */
 -(void) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
 -(void)sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
--(void) sendChatState:(BOOL) isTyping fromAccount:(NSNumber*) accountNo toJid:(NSString*) jid;
+-(void) sendChatState:(BOOL) isTyping toContact:(MLContact*) contact;
 
 #pragma mark XMPP settings
 

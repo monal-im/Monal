@@ -21,13 +21,13 @@ static NSMutableDictionary* _RRCache;
 
 +(void) initialize
 {
-    _RRCache = [[NSMutableDictionary alloc] init];
+    _RRCache = [NSMutableDictionary new];
 }
 
 -(id) init
 {
     self = [super init];
-    self.discoveredServers = [[NSMutableArray alloc] init];
+    self.discoveredServers = [NSMutableArray new];
     return self;
 }
 

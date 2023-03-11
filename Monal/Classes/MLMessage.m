@@ -13,7 +13,7 @@
 
 +(MLMessage*) messageFromDictionary:(NSDictionary*) dic
 {
-    MLMessage* message = [[MLMessage alloc] init];
+    MLMessage* message = [MLMessage new];
     message.accountId = [dic objectForKey:@"account_id"];
     
     message.buddyName = [dic objectForKey:@"buddy_name"];

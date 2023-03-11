@@ -89,7 +89,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
--(BOOL) hasContactRequestForAccount:(NSNumber*) accountNo andBuddyName:(NSString*) buddy;
+-(BOOL) hasContactRequestForContact:(MLContact*) contact;
 -(NSMutableArray*) allContactRequests;
 -(void) addContactRequest:(MLContact *) requestor;
 -(void) deleteContactRequest:(MLContact *) requestor; 
@@ -241,8 +241,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSNumber*) countUserUnreadMessages:(NSString* _Nullable) buddy forAccount:(NSNumber* _Nullable) accountNo;
 -(NSNumber*) countUnreadMessages;
 
--(void) muteJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
--(void) unMuteJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
+-(void) muteContact:(MLContact*) contact;
+-(void) unMuteContact:(MLContact*) contact;
 -(BOOL) isMutedJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
 
 -(void) setMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSNumber*) accountNo;
@@ -251,7 +251,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(void) blockJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
 -(void) unBlockJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
--(u_int8_t) isBlockedJid:(NSString *) jid withAccountNo:(NSNumber*) accountNo;
+-(uint8_t) isBlockedContact:(MLContact*) contact;
 -(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids forAccountNo:(NSNumber*) accountNo;
 -(NSArray<NSDictionary<NSString*, NSString*>*>*) blockedJidsForAccount:(NSNumber*) accountNo;
 
@@ -282,9 +282,7 @@ extern NSString* const kMessageTypeFiletransfer;
 /*
  search message by keyword in message, buddy_name, messageType.
  */
--(NSArray* _Nullable) searchResultOfHistoryMessageWithKeyWords:(NSString* _Nonnull) keyword
-                                             accountNo:(NSNumber*  _Nonnull) accountNo
-                                             betweenBuddy:(NSString* _Nonnull) contactJid;
+-(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword betweenContact:(MLContact* _Nonnull) contact;
 
 -(NSArray<NSDictionary*>*) getAllCachedImages;
 -(void) removeImageCacheTables;
@@ -308,6 +306,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(NSNumber*) addIdleTimerWithTimeout:(NSNumber*) timeout andHandler:(MLHandler*) handler onAccountNo:(NSNumber*) accountNo;
 -(void) delIdleTimerWithId:(NSNumber* _Nullable) timerId;
+-(void) cleanupIdleTimerOnAccountNo:(NSNumber*) accountNo;
 -(void) decrementIdleTimersForAccount:(xmpp*) account;
 
 @end

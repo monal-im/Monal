@@ -20,12 +20,12 @@
 
 @import Intents;
 
-NSString *const kSubBoth=@"both";
-NSString *const kSubNone=@"none";
-NSString *const kSubTo=@"to";
-NSString *const kSubFrom=@"from";
-NSString *const kSubRemove=@"remove";
-NSString *const kAskSubscribe=@"subscribe";
+NSString* const kSubBoth = @"both";
+NSString* const kSubNone = @"none";
+NSString* const kSubTo = @"to";
+NSString* const kSubFrom = @"from";
+NSString* const kSubRemove = @"remove";
+NSString* const kAskSubscribe = @"subscribe";
 
 @interface MLContact ()
 {
@@ -258,7 +258,9 @@ NSString *const kAskSubscribe=@"subscribe";
     NSNumber* notificationAccountNo = data[@"accountNo"];
     if(self.accountId.intValue != notificationAccountNo.intValue)
         return;         // ignore other accounts
-    self.isBlocked = [[DataLayer sharedInstance] isBlockedJid:self.contactJid withAccountNo:self.accountId] == kBlockingMatchedNodeHost;
+    long blockingType = [[DataLayer sharedInstance] isBlockedContact:self];
+    self.isBlocked = blockingType == kBlockingMatchedNodeHost;
+    DDLogInfo(@"Updated contact %@ to blocking state %ld => isBlocked=%@", self, blockingType, bool2str(self.isBlocked));
 }
 
 -(void) handleContactRefresh:(NSNotification*) notification
@@ -377,7 +379,7 @@ NSString *const kAskSubscribe=@"subscribe";
     // delay changes because we don't want to update the roster on our server too often while typing
     _cancelNickChange = createTimer(1.0, (^{
         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
-        [account updateRosterItem:self.contactJid withName:self.nickName];
+        [account updateRosterItem:self withName:self.nickName];
     }));
 }
 
@@ -401,7 +403,7 @@ NSString *const kAskSubscribe=@"subscribe";
     if(avatar != nil)
         _avatar = avatar;
     else
-        _avatar = [[UIImage alloc] init];           //empty dummy image, to not save nil (should never happen, MLImageManager has default images)
+        _avatar = [UIImage new];           //empty dummy image, to not save nil (should never happen, MLImageManager has default images)
 }
 
 -(BOOL) isSelfChat
@@ -437,7 +439,7 @@ NSString *const kAskSubscribe=@"subscribe";
 
 -(BOOL) hasIncomingContactRequest
 {
-    return self.isGroup == NO && [[DataLayer sharedInstance] hasContactRequestForAccount:self.accountId andBuddyName:self.contactJid];
+    return self.isGroup == NO && [[DataLayer sharedInstance] hasContactRequestForContact:self];
 }
 
 // this will cache the unread count on first access
@@ -461,9 +463,9 @@ NSString *const kAskSubscribe=@"subscribe";
     if(self.isMuted == mute)
         return;
     if(mute)
-        [[DataLayer sharedInstance] muteJid:self.contactJid onAccount:self.accountId];
+        [[DataLayer sharedInstance] muteContact:self];
     else
-        [[DataLayer sharedInstance] unMuteJid:self.contactJid onAccount:self.accountId];
+        [[DataLayer sharedInstance] unMuteContact:self];
     self.isMuted = mute;
 }
 
@@ -537,7 +539,7 @@ NSString *const kAskSubscribe=@"subscribe";
         return NO;
     if(!account.connectionProperties.supportsBlocking)
         return NO;
-    [[MLXMPPManager sharedInstance] blocked:block Jid:self];
+    [[MLXMPPManager sharedInstance] block:block contact:self];
     return YES;
 }
 
@@ -679,7 +681,7 @@ NSString *const kAskSubscribe=@"subscribe";
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic
 {
-    MLContact* contact = [[MLContact alloc] init];
+    MLContact* contact = [MLContact new];
     contact.contactJid = [dic objectForKey:@"buddy_name"];
     contact.nickName = nilDefault([dic objectForKey:@"nick_name"], @"");
     contact.fullName = nilDefault([dic objectForKey:@"full_name"], @"");

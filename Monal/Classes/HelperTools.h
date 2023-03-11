@@ -46,6 +46,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSArray<NSString*>*) getFailoverStunServers;
 +(NSURL*) getFailoverTurnApiServer;
 
++(NSError* _Nullable) hardLinkOrCopyFile:(NSString*) from to:(NSString*) to;
 +(NSString*) getQueueThreadLabelFor:(DDLogMessage*) logMessage;
 +(BOOL) shouldProvideVoip;
 +(BOOL) isSandboxAPNS;
@@ -72,7 +73,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(BOOL) isInBackground;
 +(BOOL) isNotInFocus;
 
-+(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue;
++(void) dispatchAsync:(BOOL) async reentrantOnQueue:(dispatch_queue_t _Nullable) queue withBlock:(monal_void_block_t) block;
 +(void) activityLog;
 +(NSUserDefaults*) defaultsDB;
 @property (class, nonatomic, strong) DDFileLogger* fileLogger;

@@ -33,13 +33,13 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 
 //this is in seconds
 #if TARGET_OS_MACCATALYST
-	#define SHORT_PING 16.0
-	#define LONG_PING 32.0
+	#define SHORT_PING 4.0
+	#define LONG_PING 8.0
     #define MUC_PING 600
     #define BGFETCH_DEFAULT_INTERVAL 3600*1
 #else
 	#define SHORT_PING 4.0
-	#define LONG_PING 16.0
+	#define LONG_PING 8.0
     #define MUC_PING 3600
     #define BGFETCH_DEFAULT_INTERVAL 3600*3
 #endif
@@ -105,6 +105,8 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
   return s;
 }
 
+#define kServerDoesNotFollowXep0440Error @"__incomplete XEP-0388 support, XEP-0440 MUST be implemented and this mandates that servers MUST at least implement tls-server-end-point__"
+
 //some xmpp related constants
 #define kId @"id"
 #define kMessageId @"kMessageId"
@@ -112,6 +114,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kRegisterNameSpace @"jabber:iq:register"
 
 //all other constants needed
+#define kMonalConnectivityChange @"kMonalConnectivityChange"
 #define kMonalCallRemoved @"kMonalCallRemoved"
 #define kMonalCallAdded @"kMonalCallAdded"
 #define kMonalIncomingJMIStanza @"kMonalIncomingJMIStanza"

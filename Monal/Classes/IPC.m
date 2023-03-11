@@ -44,7 +44,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
 {
     @synchronized(self) {
         MLAssert(_sharedInstance == nil, @"Please don't call [IPC initialize:@\"processName\" twice!");
-        _responseHandlers = [[NSMutableDictionary alloc] init];
+        _responseHandlers = [NSMutableDictionary new];
         _darwinNotificationCenterRef = CFNotificationCenterGetDarwinNotifyCenter();
         _sharedInstance = [[self alloc] initWithProcessName:processName];       //has to be last because it starts the thread which needs those global vars
     }
@@ -105,8 +105,8 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
     
     _dbFile = [[HelperTools getContainerURLForPathComponents:@[@"ipc.sqlite"]] path];
     _processName = processName;
-    _ipcQueues = [[NSMutableDictionary alloc] init];
-    _serverThreadCondition = [[NSCondition alloc] init];
+    _ipcQueues = [NSMutableDictionary new];
+    _serverThreadCondition = [NSCondition new];
     
     static dispatch_once_t once;
     static const int VERSION = 2;
@@ -259,7 +259,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
 {
     //empty data is default if not specified
     if(!data)
-        data = [[NSData alloc] init];
+        data = [NSData new];
     
     DDLogDebug(@"writeIpcMessage:%@ withData:%@ andResponseId:%@ to:%@", name, data, responseId, destination);
     

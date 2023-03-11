@@ -31,7 +31,7 @@ static NSMutableDictionary* _typingNotifications;
 
 +(void) initialize
 {
-    _typingNotifications = [[NSMutableDictionary alloc] init];
+    _typingNotifications = [NSMutableDictionary new];
 }
 
 +(MLMessage* _Nullable) processMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode forAccount:(xmpp*) account
@@ -196,7 +196,7 @@ static NSMutableDictionary* _typingNotifications;
         //ignore muc pms without id attribute (we can't send out errors pointing to this message without an id)
         if([messageNode findFirst:@"/@id"] == nil)
             return message;
-        XMPPMessage* errorReply = [[XMPPMessage alloc] init];
+        XMPPMessage* errorReply = [XMPPMessage new];
         [errorReply.attributes setObject:@"error" forKey:@"type"];
         [errorReply.attributes setObject:messageNode.from forKey:@"to"];                       //this has to be the full jid here
         [errorReply.attributes setObject:[messageNode findFirst:@"/@id"] forKey:@"id"];        //don't set origin id here
@@ -562,7 +562,7 @@ static NSMutableDictionary* _typingNotifications;
                         ([contact.mucType isEqualToString:@"group"] && messageNode.fromResource)
                     )
                     {
-                        XMPPMessage* receiptNode = [[XMPPMessage alloc] init];
+                        XMPPMessage* receiptNode = [XMPPMessage new];
                         //the message type is needed so that the store hint is accepted by the server --> mirror the incoming type
                         receiptNode.attributes[@"type"] = [messageNode findFirst:@"/@type"];
                         receiptNode.attributes[@"to"] = messageNode.fromUser;

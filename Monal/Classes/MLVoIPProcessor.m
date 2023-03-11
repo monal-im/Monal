@@ -73,7 +73,7 @@ static NSMutableDictionary* _pendingCalls;
 {
     self = [super init];
     
-    CXProviderConfiguration* config = [[CXProviderConfiguration alloc] init];
+    CXProviderConfiguration* config = [CXProviderConfiguration new];
     config.maximumCallGroups = 1;
     config.maximumCallsPerCallGroup = 1;
     config.supportedHandleTypes = [NSSet setWithObject:@(CXHandleTypeGeneric)];
@@ -328,7 +328,7 @@ static NSMutableDictionary* _pendingCalls;
 -(void) initWebRTCForPendingCall:(MLCall*) call
 {
     DDLogInfo(@"Initializing WebRTC for: %@", call);
-    NSMutableArray* iceServers = [[NSMutableArray alloc] init];
+    NSMutableArray* iceServers = [NSMutableArray new];
     if([call.account.connectionProperties.discoveredStunTurnServers count] > 0)
     {
         for(NSDictionary* service in call.account.connectionProperties.discoveredStunTurnServers)
@@ -728,7 +728,7 @@ static NSMutableDictionary* _pendingCalls;
 
 -(CXCallUpdate*) constructUpdateForCall:(MLCall*) call
 {
-    CXCallUpdate* update = [[CXCallUpdate alloc] init];
+    CXCallUpdate* update = [CXCallUpdate new];
     update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:call.contact.contactJid];
     update.localizedCallerName = call.contact.contactDisplayName;
     update.supportsDTMF = NO;

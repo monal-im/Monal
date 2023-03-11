@@ -267,7 +267,16 @@ $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(
     NSSet<NSNumber*>* deviceIds = [NSSet new];      //default value used for retract, purge and delete
     if([type isEqualToString:@"publish"])
     {
-        MLXMLNode* publishedDevices = data[@"current"];
+        MLXMLNode* publishedDevices = [data objectForKey:@"current"];
+        if(publishedDevices == nil && data.count == 1)
+        {
+            DDLogInfo(@"Client does not use 'current' as item id for it's bundle! keys=%@", [data allKeys]);
+            //some clients do not use <item id="current">
+            publishedDevices = [[data allValues] firstObject];
+        }
+        else if(publishedDevices == nil && data.count > 1)
+            DDLogWarn(@"More than one devicelist item found from %@, ignoring all items!", jid);
+        
         if(publishedDevices != nil)
             deviceIds = [[NSSet<NSNumber*> alloc] initWithArray:[publishedDevices find:@"{eu.siacs.conversations.axolotl}list/device@id|uint"]];
     }
@@ -285,19 +294,13 @@ $$
 
 -(void) queryOMEMODevices:(NSString*) jid
 {
-    //don't subscribe devicelist twice (could be triggered by multiple useractions in a row)
-    if([self.state.openDevicelistSubscriptions containsObject:jid])
-        DDLogInfo(@"Deduplicated devicelist subscribe from %@", jid);
-    else
-        [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandlerWithInvalidation(self, handleDevicelistSubscribe, handleDevicelistSubscribeInvalidation)];
-    
     //don't fetch devicelist twice (could be triggered by multiple useractions in a row)
     if([self.state.openDevicelistFetches containsObject:jid])
         DDLogInfo(@"Deduplicated devicelist fetches from %@", jid);
     else
     {
         //fetch newest devicelist (this is needed even after a subscribe on at least prosody)
-        [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation)];
+        [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, YES))];
     }
 }
 
@@ -327,7 +330,7 @@ $$instance_handler(handleDevicelistFetchInvalidation, account.omemo, $$ID(xmpp*,
     [self retriggerKeyTransportElementsForJid:jid];
 $$
 
-$$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+$$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $$BOOL(subscribe), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     [self.state.openDevicelistFetches removeObject:jid];
     
     if(success == NO)
@@ -340,6 +343,16 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
     }
     else
     {
+        if(subscribe)
+        {
+            DDLogInfo(@"Successfully fetched devicelist, now subscribing to this node for updates...");
+            //don't subscribe devicelist twice (could be triggered by multiple useractions in a row)
+            if([self.state.openDevicelistSubscriptions containsObject:jid])
+                DDLogInfo(@"Deduplicated devicelist subscribe from %@", jid);
+            else
+                [self.account.pubsub subscribeToNode:@"eu.siacs.conversations.axolotl.devicelist" onJid:jid withHandler:$newHandlerWithInvalidation(self, handleDevicelistSubscribe, handleDevicelistSubscribeInvalidation)];
+        }
+        
         MLXMLNode* publishedDevices = [data objectForKey:@"current"];
         if(publishedDevices == nil && data.count == 1)
         {
@@ -357,6 +370,7 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
 
             [self processOMEMODevices:deviceSet from:jid];
         }
+        
     }
     
     //retrigger queued key transport elements for this jid (if any)
@@ -842,7 +856,7 @@ $$
         [messageNode setStoreHint];
     }
     
-    NSMutableSet<NSString*>* recipients = [[NSMutableSet alloc] init];
+    NSMutableSet<NSString*>* recipients = [NSMutableSet new];
     if([[DataLayer sharedInstance] isBuddyMuc:toContact forAccount:self.account.accountNo])
         for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:toContact forAccountId:self.account.accountNo])
         {
@@ -857,11 +871,11 @@ $$
     //remove own jid from recipients (our own devices get special treatment via myDevices NSSet below)
     [recipients removeObject:self.account.connectionProperties.identity.jid];
     
-    NSMutableDictionary<NSString*, NSSet<NSNumber*>*>* contactDeviceMap = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary<NSString*, NSSet<NSNumber*>*>* contactDeviceMap = [NSMutableDictionary new];
     for(NSString* recipient in recipients)
     {
         //contactDeviceMap
-        NSMutableSet<NSNumber*>* recipientDevices = [[NSMutableSet alloc] init];
+        NSMutableSet<NSNumber*>* recipientDevices = [NSMutableSet new];
         [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithValidSession:recipient]];
         // add devices with known but old broken session to trigger a bundle refetch
         [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:recipient]];
@@ -1172,13 +1186,18 @@ $$
 -(void) subscribeAndFetchDevicelistIfNoSessionExistsForJid:(NSString*) buddyJid
 {
     if([self.monalSignalStore sessionsExistForBuddy:buddyJid] == NO)
-        [self queryOMEMODevices:buddyJid];
+    {
+        MLContact* contact = [MLContact createContactFromJid:buddyJid andAccountNo:self.account.accountNo];
+        //only do so if we don't receive automatic headline pushes of the devicelist
+        if(!contact.isSubscribedTo)
+            [self queryOMEMODevices:buddyJid];
+    }
 }
 
 //called after a buddy was deleted from roster OR by MLMucProcessor after a MUC member was removed
 -(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid isMuc:(BOOL) isMuc
 {
-    NSMutableSet<NSString*>* danglingJids = [[NSMutableSet alloc] init];
+    NSMutableSet<NSString*>* danglingJids = [NSMutableSet new];
     if(isMuc == YES)
         danglingJids = [[NSMutableSet alloc] initWithSet:[self.monalSignalStore removeDanglingMucSessions]];
     else if([self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid] == NO)
@@ -1257,8 +1276,8 @@ $$
         [self deleteDeviceForSource:jid andRid:device];
     }
     [self sendOMEMOBundle];
-    [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation)];
-    [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation)];
+    [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];
+    [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];
 }
 
 @end

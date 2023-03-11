@@ -16,23 +16,22 @@
 
 @implementation MLHTTPRequest
 
-+(NSData  *) httpBodyForDictionary:(NSDictionary *) arguments
++(NSData*) httpBodyForDictionary:(NSDictionary*) arguments
 {
-    unsigned int keyCounter=0;
+    unsigned int keyCounter = 0;
     if(arguments) {
-        NSMutableString *postString =[[ NSMutableString alloc] init];
+        NSMutableString* postString =[NSMutableString new];
         for (NSString *key in arguments) {
             
             NSString *value=[arguments objectForKey:key];
             value= [value stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
             
             [postString appendString:[NSString stringWithFormat:@"%@=%@", key, value]];
-            if(keyCounter<[arguments allKeys].count-1)
+            if(keyCounter < [arguments allKeys].count - 1)
             {
                 [postString appendString:@"&"];
             }
             keyCounter++;
-            
         }
         return [postString dataUsingEncoding:NSUTF8StringEncoding];
     } else
@@ -43,14 +42,14 @@
 }
 
 
-+ (void) sendWithVerb:(NSString *) verb  path:(NSString *)path headers:(NSDictionary *) headers withArguments:(NSDictionary *) arguments  data:(NSData *) postedData andCompletionHandler:(void (^)(NSError *error, id result)) completion
++(void) sendWithVerb:(NSString*) verb  path:(NSString*) path headers:(NSDictionary*) headers withArguments:(NSDictionary*) arguments  data:(NSData*) postedData andCompletionHandler:(void (^)(NSError *error, id result)) completion
 {
-    NSMutableURLRequest *theRequest=[NSMutableURLRequest requestWithURL:[NSURL URLWithString:path]
+    NSMutableURLRequest* theRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:path]
                                                             cachePolicy:NSURLRequestReloadIgnoringCacheData
                                                         timeoutInterval:60.0];
     [theRequest setHTTPMethod:verb];
     
-    NSData *dataToSubmit=postedData;
+    NSData* dataToSubmit = postedData;
     
     [headers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop __unused) {
         [theRequest addValue:obj forHTTPHeaderField:key];
@@ -63,38 +62,38 @@
             [theRequest addValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
             dataToSubmit=jsonData;
         }
-        else  {
-           dataToSubmit =postedData;
+        else
+        {
+           dataToSubmit = postedData;
         }
     }
     
-    
-    
     DDLogVerbose(@"Calling: %@ %@", verb, path);
     
-   NSURLSession *session= [NSURLSession sharedSession];
+   NSURLSession* session= [NSURLSession sharedSession];
 
-    void (^completeBlock)(NSData *,NSURLResponse *,NSError *)= ^(NSData *data,NSURLResponse *response, NSError *connectionError)
+    void (^completeBlock)(NSData*,NSURLResponse*,NSError*)= ^(NSData* data,NSURLResponse* response, NSError* connectionError)
     {
         
-        NSError *errorReply;
+        NSError* errorReply;
         
         if(connectionError)
         {
-            errorReply=connectionError; //[NSError errorWithDomain:@"HTTP" code:0 userInfo:@{@"result":@"connection error"}];
+            errorReply = connectionError; //[NSError errorWithDomain:@"HTTP" code:0 userInfo:@{@"result":@"connection error"}];
         }
-        else {
-            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
-            if(!(httpResponse.statusCode>=200 && httpResponse.statusCode<=399))
+        else
+        {
+            NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*) response;
+            if(!(httpResponse.statusCode >= 200 && httpResponse.statusCode <= 399))
             {
-                errorReply=[NSError errorWithDomain:@"HTTP" code:httpResponse.statusCode userInfo:@{@"result":[NSHTTPURLResponse localizedStringForStatusCode:httpResponse.statusCode]}];
+                errorReply = [NSError errorWithDomain:@"HTTP" code:httpResponse.statusCode userInfo:@{@"result":[NSHTTPURLResponse localizedStringForStatusCode:httpResponse.statusCode]}];
             }
         }
         completion(errorReply,data);
-        
     };
-    
-    if(([verb isEqualToString:kPost]||[verb isEqualToString:kPut])&& dataToSubmit) {
+
+    if(([verb isEqualToString:kPost]||[verb isEqualToString:kPut]) && dataToSubmit)
+    {
         [[session uploadTaskWithRequest:theRequest fromData:dataToSubmit
                     completionHandler:completeBlock] resume];
     }
@@ -102,7 +101,6 @@
         [[session dataTaskWithRequest:theRequest
                     completionHandler:completeBlock] resume];
     }
-
 }
 
 @end

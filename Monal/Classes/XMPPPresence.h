@@ -7,6 +7,7 @@
 //
 
 #import "XMPPStanza.h"
+#import "MLContact.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -60,23 +61,23 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  unsubscribes from presence notfiction
  */
--(void) unsubscribeContact:(NSString*) jid;
+-(void) unsubscribeContact:(MLContact*) contact;
 
 /**
  subscribes from presence notfiction
  */
--(void) subscribeContact:(NSString*) jid;
--(void) subscribeContact:(NSString*) jid withPreauthToken:(NSString* _Nullable) token;
+-(void) subscribeContact:(MLContact*) contact;
+-(void) subscribeContact:(MLContact*) contact withPreauthToken:(NSString* _Nullable) token;
 
 /**
 allow subscription. Called in response to a remote request. 
  */
--(void) subscribedContact:(NSString*) jid;
+-(void) subscribedContact:(MLContact*) contact;
 
 /**
  do not allow subscription.Called in response to a remote request. 
  */
--(void) unsubscribedContact:(NSString*) jid;
+-(void) unsubscribedContact:(MLContact*) contact;
 
 #pragma mark MUC
 /**

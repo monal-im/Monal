@@ -61,7 +61,7 @@ static NSRegularExpression* attributeFilterRegex;
 +(void) initialize
 {
 #ifdef QueryStatistics
-    statistics = [[NSMutableDictionary alloc] init];
+    statistics = [NSMutableDictionary new];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
 #endif
     
@@ -90,7 +90,7 @@ static NSRegularExpression* attributeFilterRegex;
 +(void) nowIdle:(NSNotification*) notification
 {
 #ifdef QueryStatistics
-    NSMutableDictionary* sortedStatistics = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* sortedStatistics = [NSMutableDictionary new];
     @synchronized(statistics) {
         NSArray* sortedKeys = [statistics keysSortedByValueUsingComparator: ^(id obj1, id obj2) {
             if([obj1 integerValue] > [obj2 integerValue])
@@ -109,13 +109,13 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(void) internalInit
 {
-    _attributes = [[NSMutableDictionary alloc] init];
-    _children = [[NSMutableArray alloc] init];
+    _attributes = [NSMutableDictionary new];
+    _children = [NSMutableArray new];
     _parent = nil;
     _data = nil;
     _element = @"";
-    self.cache = [[NSCache alloc] init];
-    self.queryEntryCache = [[NSCache alloc] init];
+    self.cache = [NSCache new];
+    self.queryEntryCache = [NSCache new];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMemoryPressureNotification) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 }
 
@@ -407,7 +407,7 @@ static NSRegularExpression* attributeFilterRegex;
     //shortcut for empty nodesToCheck
     if(![nodesToCheck count])
         return @[];
-    NSMutableArray* results = [[NSMutableArray alloc] init];
+    NSMutableArray* results = [NSMutableArray new];
     //split our path into first component and rest
     NSArray* matches = [pathSplitterRegex matchesInString:queryString options:0 range:NSMakeRange(0, [queryString length])];
     if(![matches count])
@@ -666,7 +666,7 @@ static NSRegularExpression* attributeFilterRegex;
         return [cacheEntry mutableCopy];
     }
     
-    NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* retval = [NSMutableDictionary new];
     NSArray* matches = [componentParserRegex matchesInString:entry options:0 range:NSMakeRange(0, [entry length])];
     if(![matches count])
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Could not parse path component!" userInfo:@{
@@ -685,7 +685,7 @@ static NSRegularExpression* attributeFilterRegex;
         retval[@"elementName"] = [entry substringWithRange:elementNameRange];
     if(attributeFilterRange.location != NSNotFound && attributeFilterRange.length > 0)
     {
-        retval[@"attributeFilters"] = [[NSMutableArray alloc] init];
+        retval[@"attributeFilters"] = [NSMutableArray new];
         NSString* attributeFilters = [entry substringWithRange:attributeFilterRange];
 #ifdef DEBUG_XMLQueryLanguage
         DDLogDebug(@"Extracting attribute filters: '%@'...", attributeFilters);
@@ -795,7 +795,7 @@ static NSRegularExpression* attributeFilterRegex;
     if([_element isEqualToString:@"__xml"])
          return [NSString stringWithFormat:@"<?xml version='1.0'?>"];
     
-    NSMutableString* outputString = [[NSMutableString alloc] init];
+    NSMutableString* outputString = [NSMutableString new];
     [outputString appendString:[NSString stringWithFormat:@"<%@", _element]];
     
     //set attributes

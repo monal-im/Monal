@@ -224,33 +224,36 @@ struct AVCallUI: View {
                     HStack() {
                         Spacer()
                         
-                        Button(action: {
-                            call.muted = !call.muted
-                        }) {
-                            if #available(iOS 15, *) {
-                                Image(systemName: call.muted ? "mic.circle.fill" : "mic.slash.circle.fill")
-                                    .resizable()
-                                    .frame(width: 64.0, height: 64.0)
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(call.muted ? .black : .white, call.muted ? .white : .black)
-                                    .shadow(radius: 7)
-                            } else {
-                                ZStack {
-                                    Image(systemName: "circle.fill")
+                        if MLCallState(rawValue:call.state) == .connected || MLCallState(rawValue:call.state) == .reconnecting {
+                            Button(action: {
+                                call.muted = !call.muted
+                            }) {
+                                if #available(iOS 15, *) {
+                                    Image(systemName: call.muted ? "mic.circle.fill" : "mic.slash.circle.fill")
                                         .resizable()
                                         .frame(width: 64.0, height: 64.0)
-                                        .accentColor(call.muted ? .black : .white)
-                                    Image(systemName: call.muted ? "mic.circle.fill" : "mic.circle.fill")
-                                        .resizable()
-                                        .frame(width: 64.0, height: 64.0)
-                                        .accentColor(call.muted ? .white : .black)
+                                        .symbolRenderingMode(.palette)
+                                        .foregroundStyle(call.muted ? .black : .white, call.muted ? .white : .black)
                                         .shadow(radius: 7)
+                                } else {
+                                    ZStack {
+                                        Image(systemName: "circle.fill")
+                                            .resizable()
+                                            .frame(width: 64.0, height: 64.0)
+                                            .accentColor(call.muted ? .black : .white)
+                                        Image(systemName: call.muted ? "mic.circle.fill" : "mic.circle.fill")
+                                            .resizable()
+                                            .frame(width: 64.0, height: 64.0)
+                                            .accentColor(call.muted ? .white : .black)
+                                            .shadow(radius: 7)
+                                    }
                                 }
                             }
+                            .buttonStyle(BorderlessButtonStyle())
+                            
+                            Spacer().frame(width: 32)
                         }
-                        .buttonStyle(BorderlessButtonStyle())
                         
-                        Spacer().frame(width: 32)
                         Button(action: {
                             call.obj.end()
                             self.delegate.dismissWithoutAnimation()
@@ -278,32 +281,34 @@ struct AVCallUI: View {
                         }
                         .buttonStyle(BorderlessButtonStyle())
                         
-                        Spacer().frame(width: 32)
-                        Button(action: {
-                            call.speaker = !call.speaker
-                        }) {
-                            if #available(iOS 15, *) {
-                                Image(systemName: "speaker.wave.2.circle.fill")
-                                    .resizable()
-                                    .frame(width: 64.0, height: 64.0)
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(call.speaker ? .black : .white, call.speaker ? .white : .black)
-                                    .shadow(radius: 7)
-                            } else {
-                                ZStack {
-                                    Image(systemName: "circle.fill")
-                                        .resizable()
-                                        .frame(width: 64.0, height: 64.0)
-                                        .accentColor(call.speaker ? .black : .white)
+                        if MLCallState(rawValue:call.state) == .connected || MLCallState(rawValue:call.state) == .reconnecting {
+                            Spacer().frame(width: 32)
+                            Button(action: {
+                                call.speaker = !call.speaker
+                            }) {
+                                if #available(iOS 15, *) {
                                     Image(systemName: "speaker.wave.2.circle.fill")
                                         .resizable()
                                         .frame(width: 64.0, height: 64.0)
-                                        .accentColor(call.speaker ? .white : .black)
+                                        .symbolRenderingMode(.palette)
+                                        .foregroundStyle(call.speaker ? .black : .white, call.speaker ? .white : .black)
                                         .shadow(radius: 7)
+                                } else {
+                                    ZStack {
+                                        Image(systemName: "circle.fill")
+                                            .resizable()
+                                            .frame(width: 64.0, height: 64.0)
+                                            .accentColor(call.speaker ? .black : .white)
+                                        Image(systemName: "speaker.wave.2.circle.fill")
+                                            .resizable()
+                                            .frame(width: 64.0, height: 64.0)
+                                            .accentColor(call.speaker ? .white : .black)
+                                            .shadow(radius: 7)
+                                    }
                                 }
                             }
+                            .buttonStyle(BorderlessButtonStyle())
                         }
-                        .buttonStyle(BorderlessButtonStyle())
                         
                         Spacer()
                     }
@@ -311,6 +316,14 @@ struct AVCallUI: View {
                 
                 Spacer().frame(height: 32)
             }
+        }
+        .onAppear {
+            //force portrait mode and lock ui there
+            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+            self.appDelegate.orientationLock = .portrait
+        }.onDisappear {
+            //allow all orientations again
+            self.appDelegate.orientationLock = .all
         }
     }
 }

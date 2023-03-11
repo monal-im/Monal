@@ -26,7 +26,7 @@
 
 +(MLEncryptedPayload*) encrypt:(NSData*) body withKey:(NSData*) gcmKey
 {
-    MLCrypto* crypto = [[MLCrypto alloc] init];
+    MLCrypto* crypto = [MLCrypto new];
     EncryptedPayload* payload = [crypto encryptGCMWithKey:gcmKey decryptedContent:body];
     if(payload == nil)
     {
@@ -43,7 +43,7 @@
 
 +(NSData*) genIV
 {
-    MLCrypto* crypto = [[MLCrypto alloc] init];
+    MLCrypto* crypto = [MLCrypto new];
     return [crypto genIV];
 }
 
@@ -57,9 +57,9 @@
 
 +(NSData*) decrypt:(NSData*) body withKey:(NSData*) key andIv:(NSData*) iv withAuth:(NSData* _Nullable) auth
 {
-    MLCrypto* crypto = [[MLCrypto alloc] init];
+    MLCrypto* crypto = [MLCrypto new];
     
-    NSMutableData* combined = [[NSMutableData alloc] init];
+    NSMutableData* combined = [NSMutableData new];
     [combined appendData:iv];
     [combined appendData:body];
     [combined appendData:auth]; //if auth is nil assume it already was apended to body

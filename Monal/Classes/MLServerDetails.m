@@ -38,11 +38,11 @@ enum MLServerDetailsSections {
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.serverCaps = [[NSMutableArray alloc] init];
-    self.srvRecords = [[NSMutableArray alloc] init];
-    self.tlsVersions = [[NSMutableArray alloc] init];
-    self.saslMethods = [[NSMutableArray alloc] init];
-    self.channelBindingTypes = [[NSMutableArray alloc] init];
+    self.serverCaps = [NSMutableArray new];
+    self.srvRecords = [NSMutableArray new];
+    self.tlsVersions = [NSMutableArray new];
+    self.saslMethods = [NSMutableArray new];
+    self.channelBindingTypes = [NSMutableArray new];
 
     self.navigationItem.title = self.xmppAccount.connectionProperties.identity.domain;
     self.tableView.allowsSelection = NO;
@@ -249,15 +249,15 @@ enum MLServerDetailsSections {
 -(NSInteger) tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
 {
     if(section == SUPPORTED_SERVER_XEPS_SECTION)
-        return self.serverCaps.count;
+        return (NSInteger)self.serverCaps.count;
     else if(section == SRV_RECORS_SECTION)
-        return self.srvRecords.count;
+        return (NSInteger)self.srvRecords.count;
     else if(section == TLS_SECTION)
-        return self.tlsVersions.count;
+        return (NSInteger)self.tlsVersions.count;
     else if(section == SASL_SECTION)
-        return self.saslMethods.count;
+        return (NSInteger)self.saslMethods.count;
     else if(section == CB_SECTION)
-        return self.channelBindingTypes.count;
+        return (NSInteger)self.channelBindingTypes.count;
     return 0;
 }
 
@@ -267,15 +267,15 @@ enum MLServerDetailsSections {
 
     NSDictionary* dic;
     if(indexPath.section == SUPPORTED_SERVER_XEPS_SECTION)
-        dic = [self.serverCaps objectAtIndex:indexPath.row];
+        dic = [self.serverCaps objectAtIndex:(NSUInteger)indexPath.row];
     else if(indexPath.section == SRV_RECORS_SECTION)
-        dic = [self.srvRecords objectAtIndex:indexPath.row];
+        dic = [self.srvRecords objectAtIndex:(NSUInteger)indexPath.row];
     else if(indexPath.section == TLS_SECTION)
-        dic = [self.tlsVersions objectAtIndex:indexPath.row];
+        dic = [self.tlsVersions objectAtIndex:(NSUInteger)indexPath.row];
     else if(indexPath.section == SASL_SECTION)
-        dic = [self.saslMethods objectAtIndex:indexPath.row];
+        dic = [self.saslMethods objectAtIndex:(NSUInteger)indexPath.row];
     else if(indexPath.section == CB_SECTION)
-        dic = [self.channelBindingTypes objectAtIndex:indexPath.row];
+        dic = [self.channelBindingTypes objectAtIndex:(NSUInteger)indexPath.row];
 
     cell.textLabel.text = [dic objectForKey:@"Title"];
     cell.detailTextLabel.text = [dic objectForKey:@"Description"];
@@ -309,9 +309,9 @@ enum MLServerDetailsSections {
     else if(section == TLS_SECTION)
         return NSLocalizedString(@"These are the TLS versions supported by Monal, the one used to connect to your server will be green.", @"");
     else if(section == SASL_SECTION)
-        return NSLocalizedString(@"These are the SASL2 methods your server supports.", @"");
+        return NSLocalizedString(@"These are the SASL2 methods your server supports (used one in green, yellow ones unsupported by Monal).", @"");
     else if(section == CB_SECTION)
-        return NSLocalizedString(@"These are the channel-binding types your server supports to detect attacks on the TLS layer.", @"");
+        return NSLocalizedString(@"These are the channel-binding types your server supports to detect attacks on the TLS layer (used one in green, yellow ones unsupported by Monal).", @"");
     return @"";
 }
 

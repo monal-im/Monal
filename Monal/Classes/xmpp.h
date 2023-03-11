@@ -123,7 +123,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) retractMessage:(NSString*) messageId toContact:(MLContact*) contact;
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId;
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId withLMCId:(NSString* _Nullable) LMCId;
--(void) sendChatState:(BOOL) isTyping toJid:(NSString*) jid;
+-(void) sendChatState:(BOOL) isTyping toContact:(nonnull MLContact*) contact;
 
 /**
  crafts a  ping and sends it
@@ -153,7 +153,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
  */
 -(void) addToRoster:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken;
 
--(void) updateRosterItem:(NSString*) jid withName:(NSString*) name;
+-(void) updateRosterItem:(MLContact*) contact withName:(NSString*) name;
 
 -(void) checkJidType:(NSString*) jid withCompletion:(void (^)(NSString* type, NSString* _Nullable errorMessage)) completion;
 

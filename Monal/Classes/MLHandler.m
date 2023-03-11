@@ -53,7 +53,7 @@
             @"handlerSelector": NSStringFromSelector([self handlerNameToSelector:handlerName]),
             @"invalidationSelector": NSStringFromSelector([self handlerNameToSelector:invalidationHandlerName]),
         }];
-    _internalData = [[NSMutableDictionary alloc] init];
+    _internalData = [NSMutableDictionary new];
     _invalidated = NO;
     [_internalData addEntriesFromDictionary:@{
         @"version": @(HANDLER_VERSION),
@@ -176,7 +176,7 @@
 //this removes NSNull references from arguments altogether
 -(NSMutableDictionary*) sanitizeArguments:(NSDictionary* _Nullable) args
 {
-    NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* retval = [NSMutableDictionary new];
     if(args)
         for(NSString* key in args)
             if(args[key] != [NSNull null])

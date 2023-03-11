@@ -70,7 +70,7 @@
 -(instancetype) initWithSharedState:(MLSharedStreamState*) shared
 {
     self = [super initWithSharedState:shared];
-    _buf = [[NSData alloc] init];
+    _buf = [NSData new];
     _reading = YES;
     return self;
 }
@@ -91,7 +91,7 @@
     }
     else
     {
-        _buf = [[NSData alloc] init];
+        _buf = [NSData new];
         [self schedule_read];
     }
     return len;
@@ -143,10 +143,16 @@
         if(receive_error)
         {
             NSError* st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(receive_error));
-            @synchronized(self.shared_state) {
-                self.shared_state.error = st_error;
+            //ignore enodata and eagain errors
+            if([st_error.domain isEqualToString:(__bridge NSString *)kNWErrorDomainPOSIX] && (st_error.code == ENODATA || st_error.code == EAGAIN))
+                DDLogWarn(@"Ignoring transient receive error: %@", st_error);
+            else
+            {
+                @synchronized(self.shared_state) {
+                    self.shared_state.error = st_error;
+                }
+                [self generateEvent:NSStreamEventErrorOccurred];
             }
-            [self generateEvent:NSStreamEventErrorOccurred];
         }
         
         //check if we're read-closed and stop our loop if true
@@ -503,6 +509,8 @@
         return [self channelBindingData_TLSExporter];
     else if([@"tls-server-end-point" isEqualToString:type])
         return [self channelBindingData_TLSServerEndPoint];
+    else if([kServerDoesNotFollowXep0440Error isEqualToString:type])
+        return [kServerDoesNotFollowXep0440Error dataUsingEncoding:NSUTF8StringEncoding];
     
     MLAssert(NO, @"Trying to use unknown channel-binding type!", (@{@"type":type}));
 }
@@ -537,7 +545,7 @@
         if(cert == nil)
             cert = (__bridge_transfer NSData*)SecCertificateCopyData(sec_certificate_copy_ref(certificate));
     });
-    MLCrypto* crypto = [[MLCrypto alloc] init];
+    MLCrypto* crypto = [MLCrypto new];
     NSString* signatureAlgo = [crypto getSignatureAlgoOfCert:cert];
     DDLogDebug(@"Signature algo OID: %@", signatureAlgo);
     //OIDs taken from https://www.rfc-editor.org/rfc/rfc3279#section-2.2.3 and "Updated by" RFCs

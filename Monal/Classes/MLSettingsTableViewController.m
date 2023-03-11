@@ -413,7 +413,7 @@ enum DummySettingsRows {
 
 
 -(void) openStoreProductViewControllerWithITunesItemIdentifier:(NSInteger) iTunesItemIdentifier {
-    SKStoreProductViewController *storeViewController = [[SKStoreProductViewController alloc] init];
+    SKStoreProductViewController *storeViewController = [SKStoreProductViewController new];
     
     storeViewController.delegate = self;
     
@@ -436,7 +436,7 @@ enum DummySettingsRows {
 -(void) composeMail
 {
     if([MFMailComposeViewController canSendMail]) {
-        MFMailComposeViewController* composeVC = [[MFMailComposeViewController alloc] init];
+        MFMailComposeViewController* composeVC = [MFMailComposeViewController new];
         composeVC.mailComposeDelegate = self;
         [composeVC setToRecipients:@[@"info@monal-im.org"]];
         [self presentViewController:composeVC animated:YES completion:nil];

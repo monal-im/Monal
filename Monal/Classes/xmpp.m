@@ -135,6 +135,10 @@ NSString* const kStanza = @"stanza";
     NSSet* _supportedChannelBindings;
     monal_void_block_t _blockToCallOnTCPOpen;
     NSString* _upgradeTask;
+    
+    //catchup statistics
+    uint32_t _catchupStanzaCounter;
+    NSDate* _catchupStartTime;
 }
 
 @property (nonatomic, assign) BOOL smacksRequestInFlight;
@@ -236,7 +240,7 @@ NSString* const kStanza = @"stanza";
     //init muc processor
     self.mucProcessor = [[MLMucProcessor alloc] initWithAccount:self];
     
-    _stateLockObject = [[NSObject alloc] init];
+    _stateLockObject = [NSObject new];
     [self initSM3];
     
     _accountState = kStateLoggedOut;
@@ -247,37 +251,37 @@ NSString* const kStanza = @"stanza";
     _reconnectInProgress = NO;
     _disconnectInProgres = NO;
     _lastIdleState = NO;
-    _outputQueue = [[NSMutableArray alloc] init];
-    _iqHandlers = [[NSMutableDictionary alloc] init];
-    _reconnectionHandlers = [[NSMutableArray alloc] init];
-    _mamPageArrays = [[NSMutableDictionary alloc] init];
+    _outputQueue = [NSMutableArray new];
+    _iqHandlers = [NSMutableDictionary new];
+    _reconnectionHandlers = [NSMutableArray new];
+    _mamPageArrays = [NSMutableDictionary new];
     _runningCapsQueries = [NSMutableSet new];
-    _runningMamQueries = [[NSMutableDictionary alloc] init];
-    _inCatchup = [[NSMutableDictionary alloc] init];
+    _runningMamQueries = [NSMutableDictionary new];
+    _inCatchup = [NSMutableDictionary new];
     _pipeliningState = kPipelinedNothing;
     _cachedStreamFeaturesBeforeAuth = nil;
     _cachedStreamFeaturesAfterAuth = nil;
-    _timersToCancelOnDisconnect = [[NSMutableArray alloc] init];
+    _timersToCancelOnDisconnect = [NSMutableArray new];
 
     _SRVDiscoveryDone = NO;
-    _discoveredServersList = [[NSMutableArray alloc] init];
+    _discoveredServersList = [NSMutableArray new];
     if(!_usableServersList)
-        _usableServersList = [[NSMutableArray alloc] init];
+        _usableServersList = [NSMutableArray new];
     _reconnectBackoffTime = 0;
     
-    _parseQueue = [[NSOperationQueue alloc] init];
+    _parseQueue = [NSOperationQueue new];
     _parseQueue.name = [NSString stringWithFormat:@"parseQueue[%@:%@]", self.accountNo, _internalID];
     _parseQueue.qualityOfService = NSQualityOfServiceUtility;
     _parseQueue.maxConcurrentOperationCount = 1;
     [_parseQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
     
-    _receiveQueue = [[NSOperationQueue alloc] init];
+    _receiveQueue = [NSOperationQueue new];
     _receiveQueue.name = [NSString stringWithFormat:@"receiveQueue[%@:%@]", self.accountNo, _internalID];
     _receiveQueue.qualityOfService = NSQualityOfServiceUserInitiated;
     _receiveQueue.maxConcurrentOperationCount = 1;
     [_receiveQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
 
-    _sendQueue = [[NSOperationQueue alloc] init];
+    _sendQueue = [NSOperationQueue new];
     _sendQueue.name = [NSString stringWithFormat:@"sendQueue[%@:%@]", self.accountNo, _internalID];
     _sendQueue.qualityOfService = NSQualityOfServiceUserInitiated;
     _sendQueue.maxConcurrentOperationCount = 1;
@@ -530,7 +534,7 @@ NSString* const kStanza = @"stanza";
     [_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
         DDLogVerbose(@"Cleaning up sendQueue [internal]");
         [self->_sendQueue cancelAllOperations];
-        self->_outputQueue = [[NSMutableArray alloc] init];
+        self->_outputQueue = [NSMutableArray new];
         if(self->_outputBuffer)
             free(self->_outputBuffer);
         self->_outputBuffer = nil;
@@ -637,7 +641,7 @@ NSString* const kStanza = @"stanza";
     if(!_SRVDiscoveryDone)
     {
         DDLogInfo(@"Querying for SRV records");
-        _discoveredServersList = [[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
+        _discoveredServersList = [[MLDNSLookup new] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
         _SRVDiscoveryDone = YES;
         // no SRV records found, update server to directly connect to specified domain
         if([_discoveredServersList count] == 0)
@@ -716,6 +720,7 @@ NSString* const kStanza = @"stanza";
     //this has to be synchronous because we want to be sure no further stanzas are leaking from the parse queue
     //into the receive queue once we leave this method
     _parseQueue.suspended = YES;
+    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
     [self dispatchOnReceiveQueue: ^{
         DDLogWarn(@"Parse queue is frozen now!");
     }];
@@ -969,7 +974,7 @@ NSString* const kStanza = @"stanza";
                             else if(self->_iqHandlers[iqid][@"errorHandler"])
                                 ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                         }
-                        self->_iqHandlers = [[NSMutableDictionary alloc] init];
+                        self->_iqHandlers = [NSMutableDictionary new];
                     }
                     
                     //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
@@ -1056,7 +1061,7 @@ NSString* const kStanza = @"stanza";
                         else if(self->_iqHandlers[iqid][@"errorHandler"])
                             ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                     }
-                    self->_iqHandlers = [[NSMutableDictionary alloc] init];
+                    self->_iqHandlers = [NSMutableDictionary new];
                 }
                 
                 //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
@@ -1362,6 +1367,7 @@ NSString* const kStanza = @"stanza";
     _xmlParser = [[NSXMLParser alloc] initWithStream:[_iPipe getNewEnd]];
     [_xmlParser setShouldProcessNamespaces:YES];
     [_xmlParser setShouldReportNamespacePrefixes:NO];
+    //[_xmlParser setShouldReportNamespacePrefixes:YES];        //for debugging only
     [_xmlParser setShouldResolveExternalEntities:NO];
     [_xmlParser setDelegate:_baseParserDelegate];
     
@@ -1717,6 +1723,9 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"delayedReplay of Stanza: %@", parsedStanza);
     else
         DDLogInfo(@"RECV Stanza: %@", parsedStanza);
+    
+    //update stanza counter statistics
+    self->_catchupStanzaCounter++;
     
     //restart logintimer for every incoming stanza when not logged in (don't do anything without a running timer)
     if(!delayedReplay && _cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
@@ -2283,6 +2292,9 @@ NSString* const kStanza = @"stanza";
                     }
                 }];
             }
+            
+            //initialize stanza counter for statistics
+            [self initCatchupStats];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound && self.resuming)
         {
@@ -2381,7 +2393,7 @@ NSString* const kStanza = @"stanza";
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
             
-            _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
+            _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_cancelLoginTimer)
             {
                 _cancelLoginTimer();        //we are now logged in --> cancel running login timer
@@ -2501,14 +2513,14 @@ NSString* const kStanza = @"stanza";
                 //display sasl mechanism list and list of channel-binding types even if SASL2 failed
                 
                 //build mechanism list displayed in ui (mark _scramHandler.method as used)
-                NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary* mechanismList = [NSMutableDictionary new];
                 for(NSString* mechanism in _supportedSaslMechanisms)
                     mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
                 DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
                 self.connectionProperties.saslMethods = mechanismList;
                 
                 //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
-                NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary* channelBindings = [NSMutableDictionary new];
                 if(_supportedChannelBindings != nil)
                     for(NSString* cbType in _supportedChannelBindings)
                         channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
@@ -2538,14 +2550,14 @@ NSString* const kStanza = @"stanza";
                 [self handleScramInSuccessOrContinue:parsedStanza];
             
             //build mechanism list displayed in ui (mark _scramHandler.method as used)
-            NSMutableDictionary* mechanismList = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* mechanismList = [NSMutableDictionary new];
             for(NSString* mechanism in _supportedSaslMechanisms)
                 mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
             DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
             self.connectionProperties.saslMethods = mechanismList;
             
             //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
-            NSMutableDictionary* channelBindings = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* channelBindings = [NSMutableDictionary new];
             if(_supportedChannelBindings != nil)
                 for(NSString* cbType in _supportedChannelBindings)
                     channelBindings[cbType] = @([cbType isEqualToString:[self channelBindingToUse]]);
@@ -2571,7 +2583,7 @@ NSString* const kStanza = @"stanza";
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
             self->_accountState = kStateLoggedIn;
-            _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
+            _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_cancelLoginTimer)
             {
                 _cancelLoginTimer();        //we are now logged in --> cancel running login timer
@@ -2721,7 +2733,7 @@ NSString* const kStanza = @"stanza";
             //this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
             DDLogInfo(@"configuring/starting tls handshake");
             self->_streamHasSpace = NO;         //make sure we do not try to send any data while the tls handshake is still performed
-            NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* settings = [NSMutableDictionary new];
             [settings setObject:(NSNumber*)kCFBooleanTrue forKey:(NSString*)kCFStreamSSLValidatesCertificateChain];
             [settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
             [settings setObject:@"kCFStreamSocketSecurityLevelTLSv1_2" forKey:(NSString*)kCFStreamSSLLevel];
@@ -3040,7 +3052,7 @@ NSString* const kStanza = @"stanza";
             return type;
     
     DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory!");
-    return @"_no_supported_binding_mitm_possible_";     //this will make sure the authentication fails
+    return kServerDoesNotFollowXep0440Error;     //this will make sure the authentication fails
 }
 
 //proxy this to ostream if directTLS is used
@@ -3114,7 +3126,7 @@ NSString* const kStanza = @"stanza";
                     [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
             }
             @synchronized(self->_stateLockObject) {
-                DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza);
+                [self logStanza:queued_stanza withPrefix:[NSString stringWithFormat:@"ADD UNACKED STANZA: %@", self.lastOutboundStanza]];
                 NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
                 [self.unAckedStanzas addObject:dic];
                 //increment for next call
@@ -3135,28 +3147,36 @@ NSString* const kStanza = @"stanza";
         )
         {
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-#if TARGET_OS_SIMULATOR
-                if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
-                    DDLogDebug(@"SEND: redacted sasl element: %@", [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
-                else if([stanza check:@"/{jabber:client}iq<type=set>/{jabber:iq:register}query"])
-                    DDLogDebug(@"SEND: redacted register/change password iq");
-                else
-#endif
-                    DDLogDebug(@"SEND: %@", stanza);
+                [self logStanza:stanza withPrefix:@"SEND"];
                 [self->_outputQueue addObject:stanza];
                 [self writeFromQueue];      // try to send if there is space
             }]];
         }
         else
-            DDLogDebug(@"NOT ADDING STANZA TO SEND QUEUE: %@", stanza);
+            [self logStanza:stanza withPrefix:@"NOT ADDING STANZA TO SEND QUEUE"];
     }];
 }
+
+-(void) logStanza:(MLXMLNode*) stanza withPrefix:(NSString*) prefix
+{
+#if !TARGET_OS_SIMULATOR
+    if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
+        DDLogDebug(@"%@: redacted sasl element: %@", prefix, [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
+    else if([stanza check:@"/{jabber:client}iq<type=set>/{jabber:iq:register}query"])
+        DDLogDebug(@"%@: redacted register/change password iq", prefix);
+    else
+        DDLogDebug(@"%@: %@", prefix, stanza);
+#else
+    DDLogDebug(@"%@: %@", prefix, stanza);
+#endif
+}
+
 
 #pragma mark messaging
 
 -(void) retractMessage:(NSString*) messageId toContact:(MLContact*) contact
 {
-    XMPPMessage* messageNode = [[XMPPMessage alloc] initTo:contact.contactJid];
+    XMPPMessage* messageNode = [[XMPPMessage alloc] initToContact:contact];
     
     //fasten retraction
     [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"apply-to" andNamespace:@"urn:xmpp:fasten:0" withAttributes:@{
@@ -3197,7 +3217,7 @@ NSString* const kStanza = @"stanza";
 {
     DDLogVerbose(@"sending new outgoing message %@ to %@", messageId, contact.contactJid);
     
-    XMPPMessage* messageNode = [[XMPPMessage alloc] initTo:contact.contactJid];
+    XMPPMessage* messageNode = [[XMPPMessage alloc] initToContact:contact];
     if(messageId)       //use the uuid autogenerated when our message node was created above if no id was supplied
         messageNode.id = messageId;
 
@@ -3250,13 +3270,13 @@ NSString* const kStanza = @"stanza";
     [self send:messageNode];
 }
 
--(void) sendChatState:(BOOL) isTyping toJid:(NSString*) jid
+-(void) sendChatState:(BOOL) isTyping toContact:(nonnull MLContact*) contact
 {
     if(self.accountState < kStateBound)
         return;
 
-    XMPPMessage* messageNode = [[XMPPMessage alloc] init];
-    messageNode.attributes[@"to"] = jid;
+    XMPPMessage* messageNode = [XMPPMessage new];
+    messageNode.attributes[@"to"] = contact.contactJid;
     [messageNode setNoStoreHint];
     if(isTyping)
         [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"composing" andNamespace:@"http://jabber.org/protocol/chatstates"]];
@@ -3283,7 +3303,7 @@ NSString* const kStanza = @"stanza";
         @synchronized(self->_stateLockObject) {
             DDLogVerbose(@"%@ --> realPersistState before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
             //state dictionary
-            NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* values = [NSMutableDictionary new];
 
             //collect smacks state
             [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
@@ -3292,8 +3312,8 @@ NSString* const kStanza = @"stanza";
             [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
             [values setValue:self.streamID forKey:@"streamID"];
 
-            NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
-            NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* persistentIqHandlers = [NSMutableDictionary new];
+            NSMutableDictionary* persistentIqHandlerDescriptions = [NSMutableDictionary new];
             @synchronized(self->_iqHandlers) {
                 for(NSString* iqid in self->_iqHandlers)
                     if(self->_iqHandlers[iqid][@"handler"] != nil)
@@ -3428,7 +3448,7 @@ NSString* const kStanza = @"stanza";
             }
             
             NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
-            NSMutableDictionary* persistentIqHandlerDescriptions = [[NSMutableDictionary alloc] init];
+            NSMutableDictionary* persistentIqHandlerDescriptions = [NSMutableDictionary new];
             @synchronized(_iqHandlers) {
                 //remove all current persistent handlers...
                 NSMutableDictionary* handlersCopy = [_iqHandlers copy];
@@ -3601,7 +3621,7 @@ NSString* const kStanza = @"stanza";
         }
         
         //always reset handler and smacksRequestInFlight when loading smacks state
-        _smacksAckHandler = [[NSMutableArray alloc] init];
+        _smacksAckHandler = [NSMutableArray new];
         self.smacksRequestInFlight = NO;
         
         DDLogVerbose(@"%@ --> realReadState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
@@ -3612,7 +3632,7 @@ NSString* const kStanza = @"stanza";
 {
     NSArray* toKeep = @[@"lastHandledInboundStanza", @"lastHandledOutboundStanza", @"lastOutboundStanza", @"unAckedStanzas", @"loggedInOnce", @"lastInteractionDate", @"inCatchup"];
     
-    NSMutableDictionary* newState = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* newState = [NSMutableDictionary new];
     if(dic)
     {
         for(NSString* entry in toKeep)
@@ -3628,7 +3648,7 @@ NSString* const kStanza = @"stanza";
     if(newState[@"lastOutboundStanza"] == nil)
         newState[@"lastOutboundStanza"] = [NSNumber numberWithInteger:0];
     if(newState[@"unAckedStanzas"] == nil)
-        newState[@"unAckedStanzas"] = [[NSMutableArray alloc] init];
+        newState[@"unAckedStanzas"] = [NSMutableArray new];
     
     newState[@"stateSavedAt"] = [NSDate date];
     newState[@"VERSION"] = @(STATE_VERSION);
@@ -3660,9 +3680,9 @@ NSString* const kStanza = @"stanza";
         self.lastHandledInboundStanza = [NSNumber numberWithInteger:0];
         self.lastHandledOutboundStanza = [NSNumber numberWithInteger:0];
         self.lastOutboundStanza = [NSNumber numberWithInteger:0];
-        self.unAckedStanzas = [[NSMutableArray alloc] init];
+        self.unAckedStanzas = [NSMutableArray new];
         self.streamID = nil;
-        _smacksAckHandler = [[NSMutableArray alloc] init];
+        _smacksAckHandler = [NSMutableArray new];
         DDLogDebug(@"initSM3 done");
     }
 }
@@ -3794,9 +3814,13 @@ NSString* const kStanza = @"stanza";
                 ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
         }
         
-        //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
-        [self.pubsub invalidateQueue];
     }
+    
+    //invalidate pubsub queue (a pubsub operation will be either invalidated by an iq handler above OR by the invalidation here, but never twice!)
+    [self.pubsub invalidateQueue];
+    
+    //clean up all idle timers
+    [[DataLayer sharedInstance] cleanupIdleTimerOnAccountNo:self.accountNo];
     
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
@@ -3822,7 +3846,7 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.supportsRosterPreApproval = NO;
     
     //clear list of running mam queries
-    _runningMamQueries = [[NSMutableDictionary alloc] init];
+    _runningMamQueries = [NSMutableDictionary new];
     
     //clear list of running caps queries
     _runningCapsQueries = [NSMutableSet new];
@@ -3830,7 +3854,7 @@ NSString* const kStanza = @"stanza";
     //clear old catchup state (technically all stanzas still in delayedMessageStanzas could have also been
     //in the parseQueue in the last run and deleted there)
     //--> no harm in deleting them when starting a new session (but DON'T DELETE them when resuming the old smacks session)
-    _inCatchup = [[NSMutableDictionary alloc] init];
+    _inCatchup = [NSMutableDictionary new];
     [[DataLayer sharedInstance] deleteDelayedMessageStanzasForAccount:self.accountNo];
     
     //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
@@ -3873,6 +3897,9 @@ NSString* const kStanza = @"stanza";
     }
     
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
+    
+    //initialize stanza counter for statistics
+    [self initCatchupStats];
 }
 
 -(void) addReconnectionHandler:(MLHandler*) handler
@@ -3938,7 +3965,7 @@ NSString* const kStanza = @"stanza";
     [self sendIq:httpSlotRequest withResponseHandler:^(XMPPIQ* response) {
         DDLogInfo(@"Got slot for upload: %@", [response findFirst:@"{urn:xmpp:http:upload:0}slot/put@url"]);
         //upload to server using HTTP PUT
-        NSMutableDictionary* headers = [[NSMutableDictionary alloc] init];
+        NSMutableDictionary* headers = [NSMutableDictionary new];
         headers[@"Content-Type"] = params[@"contentType"];
         for(MLXMLNode* header in [response find:@"{urn:xmpp:http:upload:0}slot/put/header"])
             headers[[header findFirst:@"/@name"]] = [header findFirst:@"/#"];
@@ -4073,7 +4100,7 @@ NSString* const kStanza = @"stanza";
     //the completion handler will get nil, if an error prevented us toget any messaes, an empty array, if the upper end of our archive was reached or an array
     //of newly loaded mlmessages in all other cases
     unsigned int __block retrievedBodies = 0;
-    NSMutableArray* __block pageList = [[NSMutableArray alloc] init];
+    NSMutableArray* __block pageList = [NSMutableArray new];
     void __block (^query)(NSString* before);
     monal_iq_handler_t __block responseHandler;
     monal_void_block_t callUI = ^{
@@ -4086,7 +4113,7 @@ NSString* const kStanza = @"stanza";
             return;
         }
         
-        NSMutableArray* __block historyIdList = [[NSMutableArray alloc] init];
+        NSMutableArray* __block historyIdList = [NSMutableArray new];
         NSNumber* __block historyId = [NSNumber numberWithInt:[[[DataLayer sharedInstance] getSmallestHistoryId] intValue] - retrievedBodies];
         
         //ignore all notifications generated while processing the queued stanzas
@@ -4268,16 +4295,16 @@ NSString* const kStanza = @"stanza";
     //delete contact request if it exists
     [[DataLayer sharedInstance] deleteContactRequest:contact];
     
-    XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence unsubscribeContact:contact.contactJid];
+    XMPPPresence* presence = [XMPPPresence new];
+    [presence unsubscribeContact:contact];
     [self send:presence];
     
-    XMPPPresence* presence2 =[[XMPPPresence alloc] init];
-    [presence2 unsubscribedContact:contact.contactJid];
+    XMPPPresence* presence2 = [XMPPPresence new];
+    [presence2 unsubscribedContact:contact];
     [self send:presence2];
     
     XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [iq setRemoveFromRoster:contact.contactJid];
+    [iq setRemoveFromRoster:contact];
     [self send:iq];
 }
 
@@ -4288,20 +4315,20 @@ NSString* const kStanza = @"stanza";
     //delete contact request if it exists
     [[DataLayer sharedInstance] deleteContactRequest:contact];
     
-    XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence subscribeContact:contact.contactJid withPreauthToken:preauthToken];
+    XMPPPresence* presence = [XMPPPresence new];
+    [presence subscribeContact:contact withPreauthToken:preauthToken];
     [self send:presence];
     
-    XMPPPresence* presence2 =[[XMPPPresence alloc] init];
-    [presence2 subscribedContact:contact.contactJid];
+    XMPPPresence* presence2 = [XMPPPresence new];
+    [presence2 subscribedContact:contact];
     [self send:presence2];
 }
 
--(void) updateRosterItem:(NSString*) jid withName:(NSString*) name
+-(void) updateRosterItem:(MLContact*) contact withName:(NSString*) name
 {
-    DDLogVerbose(@"Updating roster item of jid: %@", jid);
+    DDLogVerbose(@"Updating roster item of jid: %@", contact.contactJid);
     XMPPIQ* roster = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [roster setUpdateRosterItem:jid withName:name];
+    [roster setUpdateRosterItem:contact withName:name];
     //this delegate will handle errors (result responses don't include any data that could be processed and will be ignored)
     [self sendIq:roster withHandler:$newHandler(MLIQProcessor, handleRoster)];
 }
@@ -4310,7 +4337,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) createInvitationWithCompletion:(monal_id_block_t) completion
 {
-    XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType to:self.connectionProperties.identity.domain];
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType to:self.connectionProperties.identity.domain];
     [iq addChildNode:[[MLXMLNode alloc] initWithElement:@"command" andNamespace:@"http://jabber.org/protocol/commands" withAttributes:@{
         @"node": @"urn:xmpp:invite#invite",
         @"action": @"execute",
@@ -4353,7 +4380,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion
 {
-    XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setiqTo:self.connectionProperties.identity.domain];
     [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
     [self sendIq:iq withResponseHandler:^(XMPPIQ* response __unused) {
@@ -4445,7 +4472,7 @@ NSString* const kStanza = @"stanza";
         //dispatch completion handler outside of the receiveQueue
         if(self->_regFormCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSMutableDictionary* hiddenFormFields = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary* hiddenFormFields = [NSMutableDictionary new];
                 for(MLXMLNode* field in [result find:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/field<type=hidden>"])
                     hiddenFormFields[[field findFirst:@"/@var"]] = [field findFirst:@"value#"];
                 self->_regFormCompletion([result findFirst:@"{jabber:iq:register}query/{urn:xmpp:bob}data#|base64"], hiddenFormFields);
@@ -4461,7 +4488,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) submitRegForm
 {
-    XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
+    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iq registerUser:self.regUser withPassword:self.regPass captcha:self.regCode andHiddenFields:self.regHidden];
 
     [self sendIq:iq withResponseHandler:^(XMPPIQ* result __unused) {
@@ -4722,7 +4749,7 @@ NSString* const kStanza = @"stanza";
         }
         else
         {
-            NSError* error=[_oStream streamError];
+            NSError* error = [_oStream streamError];
             DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
             //reconnect from third party queue to not block send queue
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
@@ -4764,7 +4791,7 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
-        NSError* error=[_oStream streamError];
+        NSError* error = [_oStream streamError];
         DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
         //reconnect from third party queue to not block send queue
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
@@ -5030,9 +5057,27 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
+-(void) initCatchupStats
+{
+    self->_catchupStanzaCounter = 0;
+    self->_catchupStartTime = [NSDate date];
+}
+
+-(void) logCatchupStats
+{
+    if(self->_catchupStartTime != nil)
+    {
+        NSDate* now = [NSDate date];
+        DDLogInfo(@"Handled %u stanzas in %f seconds...", self->_catchupStanzaCounter, [now timeIntervalSinceDate:self->_catchupStartTime]);
+    }
+}
+
 -(void) handleFinishedCatchup
 {
     self->_catchupDone = YES;
+    
+    //log catchup statistics
+    [self logCatchupStats];
     
     //call all reconnection handlers and clear them afterwards
     @synchronized(_reconnectionHandlers) {
@@ -5051,7 +5096,7 @@ NSString* const kStanza = @"stanza";
 {
     @synchronized(_mamPageArrays) {
         if(!_mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]])
-            _mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]] = [[NSMutableArray alloc] init];
+            _mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]] = [NSMutableArray new];
         [_mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]] addObject:messageDictionary];
     }
 }
@@ -5061,7 +5106,7 @@ NSString* const kStanza = @"stanza";
     NSMutableArray* array;
     @synchronized(_mamPageArrays) {
         if(_mamPageArrays[mamQueryId] == nil)
-            return [[NSMutableArray alloc] init];       //return empty array if nothing can be found (after app crash etc.)
+            return [NSMutableArray new];       //return empty array if nothing can be found (after app crash etc.)
         array = _mamPageArrays[mamQueryId];
         [_mamPageArrays removeObjectForKey:mamQueryId];
     }
@@ -5091,7 +5136,7 @@ NSString* const kStanza = @"stanza";
         return;
     }
     
-    XMPPMessage* displayedNode = [[XMPPMessage alloc] init];
+    XMPPMessage* displayedNode = [XMPPMessage new];
     //the message type is needed so that the store hint is accepted by the server
     displayedNode.attributes[@"type"] = msg.isMuc ? @"groupchat" : @"chat";
     displayedNode.attributes[@"to"] = msg.inbound ? msg.buddyName : self.connectionProperties.identity.jid;

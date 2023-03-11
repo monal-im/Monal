@@ -204,7 +204,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         return;
     }
     
-    NSMutableDictionary* ownFavorites = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* ownFavorites = [NSMutableDictionary new];
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
         ownFavorites[entry[@"room"]] = entry;
     
@@ -314,7 +314,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     if(account.connectionProperties.supportsPubSubMax)
         max_items = @"max";
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-    NSMutableDictionary* ownFavorites = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* ownFavorites = [NSMutableDictionary new];
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
         ownFavorites[entry[@"room"]] = entry;
     
@@ -443,7 +443,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
         return;
     }
     
-    NSMutableDictionary* ownFavorites = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* ownFavorites = [NSMutableDictionary new];
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
         ownFavorites[entry[@"room"]] = entry;
     
@@ -453,7 +453,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
         for(NSString* itemId in data)
         {
             //iterate through all conference elements provided
-            NSMutableSet* bookmarkedMucs = [[NSMutableSet alloc] init];
+            NSMutableSet* bookmarkedMucs = [NSMutableSet new];
             for(MLXMLNode* conference in [data[itemId] find:@"{storage:bookmarks}storage/conference"])
             {
                 //we ignore the conference name (the name will be taken from the muc itself)
@@ -563,7 +563,7 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
     }
     
     BOOL changed = NO;
-    NSMutableDictionary* ownFavorites = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* ownFavorites = [NSMutableDictionary new];
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
         ownFavorites[entry[@"room"]] = entry;
     
@@ -576,7 +576,7 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
             break;
         }
         
-        NSMutableSet* bookmarkedMucs = [[NSMutableSet alloc] init];
+        NSMutableSet* bookmarkedMucs = [NSMutableSet new];
         for(MLXMLNode* conference in [data[itemId] find:@"{storage:bookmarks}storage/conference"])
         {
             //we ignore the conference name (the name will be taken from the muc itself)
@@ -654,7 +654,7 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
     }
     
     DDLogInfo(@"no pep item was found: publish our bookmarks the first time");
-    NSMutableArray* conferences = [[NSMutableArray alloc] init];
+    NSMutableArray* conferences = [NSMutableArray new];
     for(NSString* room in ownFavorites)
     {
         DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);

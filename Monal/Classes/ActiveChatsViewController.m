@@ -56,8 +56,8 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 +(void) initialize
 {
-    _mamWarningDisplayed = [[NSMutableSet alloc] init];
-    _smacksWarningDisplayed = [[NSMutableSet alloc] init];
+    _mamWarningDisplayed = [NSMutableSet new];
+    _smacksWarningDisplayed = [NSMutableSet new];
 }
 
 #pragma mark view lifecycle
@@ -86,13 +86,13 @@ static NSMutableSet* _smacksWarningDisplayed;
     self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
     self.spinner.hidesWhenStopped = YES;
     
-    self.view.backgroundColor=[UIColor lightGrayColor];
-    self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    self.view.backgroundColor = [UIColor lightGrayColor];
+    self.view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
     MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
     appDelegate.activeChats = self;
     
-    self.chatListTable = [[UITableView alloc] init];
+    self.chatListTable = [UITableView new];
     self.chatListTable.delegate = self;
     self.chatListTable.dataSource = self;
     
@@ -356,8 +356,12 @@ static NSMutableSet* _smacksWarningDisplayed;
             else
             {
                 // Chats does not exists in active Chats yet
+                NSUInteger oldCount = [insertContactToArray count];
                 [insertContactToArray insertObject:contact atIndex:0];
                 [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationRight];
+                //make sure to fully refresh to remove the empty dataset (yes this will trigger on first chat pinning, too, but that does no harm)
+                if(oldCount == 0)
+                    [self refreshDisplay];
             }
         } completion:^(BOOL finished) {
             if(completion) completion(finished);
@@ -797,7 +801,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         tableFrame.origin.y += (_portraitTop + _landscapeTop * 2);
         tableFrame.size.height -= _portraitTop;
     }
-    //sarted in any orientation, moved to same orientation (or just started)
+    //started in any orientation, moved to same orientation (or just started)
     else
     {
         tableFrame.origin.y += headerFrame.size.height;

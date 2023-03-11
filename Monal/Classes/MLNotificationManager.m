@@ -21,6 +21,7 @@
 @import CoreServices;
 @import Intents;
 @import AVFoundation;
+@import UniformTypeIdentifiers;
 
 @interface MLNotificationManager ()
 @property (nonatomic, assign) NotificationPrivacySettingOption notificationPrivacySetting;
@@ -33,7 +34,7 @@
     static dispatch_once_t once;
     static MLNotificationManager* sharedInstance;
     dispatch_once(&once, ^{
-        sharedInstance = [[MLNotificationManager alloc] init] ;
+        sharedInstance = [MLNotificationManager new] ;
     });
     return sharedInstance;
 }
@@ -60,8 +61,8 @@
     static NSMutableSet* removed;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        displayed = [[NSMutableSet alloc] init];
-        removed = [[NSMutableSet alloc] init];
+        displayed = [NSMutableSet new];
+        removed = [NSMutableSet new];
     });
     xmpp* xmppAccount = notification.object;
     MLContact* contact = notification.userInfo[@"contact"];
@@ -107,7 +108,7 @@
     if([displayed containsObject:idval])
         return;
     
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     content.title = xmppAccount.connectionProperties.identity.jid;
     content.body = [NSString stringWithFormat:NSLocalizedString(@"The user %@ (%@) wants to add you to their contact list", @""), contact.contactDisplayName, contact.contactJid];
     content.threadIdentifier = [self threadIdentifierWithContact:contact];
@@ -135,7 +136,7 @@
 #else
         NSString* idval = xmppAccount.connectionProperties.identity.jid;        //use this to only show the newest error notification per account
 #endif
-        UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+        UNMutableNotificationContent* content = [UNMutableNotificationContent new];
         content.title = xmppAccount.connectionProperties.identity.jid;
         content.body = notification.userInfo[@"message"];
         content.sound = [UNNotificationSound defaultSound];
@@ -318,7 +319,7 @@
 
 -(void) playNotificationSoundForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
 {
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     NSString* idval = [self identifierWithMessage:message];
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
@@ -359,7 +360,7 @@
 
 -(void) showModernNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     NSString* idval = [self identifierWithMessage:message];
     
     INSendMessageAttachment* audioAttachment = nil;
@@ -406,35 +407,12 @@
                 
                 if(![info[@"needsDownloading"] boolValue])
                 {
-                    /*
-                    if([mimeType hasPrefix:@"audio/"])
-                    {
-                        NSString* typeHint = (NSString*)kUTTypeMPEG4Audio;
-                        if([mimeType isEqualToString:@"audio/mpeg"])
-                            typeHint = (NSString*)kUTTypeMP3;
-                        if([mimeType isEqualToString:@"audio/mp4"])
-                            typeHint = (NSString*)kUTTypeMPEG4Audio;
-                        if([mimeType isEqualToString:@"audio/wav"])
-                            typeHint = (NSString*)kUTTypeWaveformAudio;
-                        if([mimeType isEqualToString:@"audio/x-aiff"])
-                            typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
-                        
-                        if(typeHint != nil)
-                            audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
-                        msgText = NSLocalizedString(@"🎵 A Audiomessage", @"");
-                    }
-                    */
-                    
                     if([mimeType hasPrefix:@"image/"])
                     {
                         UNNotificationAttachment* attachment;
-                        NSString* typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/jpeg"])
-                            typeHint = (NSString*)kUTTypeJPEG;
-                        if([mimeType isEqualToString:@"image/png"])
-                            typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/gif"])
-                            typeHint = (NSString*)kUTTypeGIF;
+                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
+                        if(typeHint == nil)
+                            typeHint = UTTypeImage;
                         attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
                         if(attachment)
                             content.attachments = @[attachment];
@@ -442,16 +420,10 @@
                     else if([mimeType hasPrefix:@"audio/"])
                     {
                         UNNotificationAttachment* attachment;
-                        NSString* typeHint = (NSString*)kUTTypeMPEG4Audio;
-                        if([mimeType isEqualToString:@"audio/mpeg"])
-                            typeHint = (NSString*)kUTTypeMP3;
-                        if([mimeType isEqualToString:@"audio/mp4"])
-                            typeHint = (NSString*)kUTTypeMPEG4Audio;
-                        if([mimeType isEqualToString:@"audio/wav"])
-                            typeHint = (NSString*)kUTTypeWaveformAudio;
-                        if([mimeType isEqualToString:@"audio/x-aiff"])
-                            typeHint = (NSString*)kUTTypeAudioInterchangeFileFormat;
-                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint]];
+                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
+                        if(typeHint == nil)
+                            typeHint = UTTypeAudio;
+                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint.identifier]];
                         DDLogVerbose(@"Added audio attachment(%@ = %@): %@", mimeType, typeHint, audioAttachment);
                         attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
                         if(attachment)
@@ -460,17 +432,9 @@
                     else if([mimeType hasPrefix:@"video/"])
                     {
                         UNNotificationAttachment* attachment;
-                        NSString* typeHint = @"public.mpeg-4";
-                        if([mimeType isEqualToString:@"video/mpeg"])
-                            typeHint = @"public.mpeg";
-                        if([mimeType isEqualToString:@"video/mp4"])
-                            typeHint = @"public.mpeg-4";
-                        if([mimeType isEqualToString:@"video/x-msvideo"])
-                            typeHint = @"public.avi";
-                        if([mimeType isEqualToString:@"video/quicktime"])
-                            typeHint = @"com.apple.quicktime-movie";
-                        if([mimeType isEqualToString:@"video/3gpp"])
-                            typeHint = (NSString*)AVFileType3GPP;
+                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
+                        if(typeHint == nil)
+                            typeHint = UTTypeMovie;
                         attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
                         if(attachment)
                             content.attachments = @[attachment];
@@ -556,7 +520,7 @@
     MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     INPerson* sender = nil;
     NSString* groupDisplayName = nil;
-    NSMutableArray* recipients = [[NSMutableArray alloc] init];
+    NSMutableArray* recipients = [NSMutableArray new];
     if(message.isMuc)
     {
         groupDisplayName = contact.contactDisplayName;
@@ -663,7 +627,7 @@
 {
     DDLogDebug(@"Building INPerson for self contact...");
     INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:account.connectionProperties.identity.jid type:INPersonHandleTypeUnknown label:@"Monal IM"];
-    NSPersonNameComponents* nameComponents = [[NSPersonNameComponents alloc] init];
+    NSPersonNameComponents* nameComponents = [NSPersonNameComponents new];
     nameComponents.nickname = [MLContact ownDisplayNameForAccount:account];
     MLContact* ownContact = [MLContact createContactFromJid:account.connectionProperties.identity.jid andAccountNo:account.accountNo];
     INImage* contactImage = nil;
@@ -692,7 +656,7 @@
     if(displayName == nil)
         displayName = contact.contactDisplayName;
     INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:contact.contactJid type:INPersonHandleTypeUnknown label:@"Monal IM"];
-    NSPersonNameComponents* nameComponents = [[NSPersonNameComponents alloc] init];
+    NSPersonNameComponents* nameComponents = [NSPersonNameComponents new];
     nameComponents.nickname = displayName;
     INImage* contactImage = nil;
     if(contact.avatar != nil)
@@ -720,7 +684,7 @@
 
 -(void) showLegacyNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound
 {
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     NSString* idval = [self identifierWithMessage:message];
     
@@ -783,13 +747,9 @@
                     UNNotificationAttachment* attachment;
                     if(![info[@"needsDownloading"] boolValue])
                     {
-                        NSString* typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/jpeg"])
-                            typeHint = (NSString*)kUTTypeJPEG;
-                        if([mimeType isEqualToString:@"image/png"])
-                            typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/gif"])
-                            typeHint = (NSString*)kUTTypeGIF;
+                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
+                        if(typeHint == nil)
+                            typeHint = UTTypeImage;
                         attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
                         if(attachment)
                         {
@@ -827,19 +787,19 @@
     [self publishNotificationContent:[self updateBadgeForContent:content] withID:idval];
 }
 
--(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(NSDictionary*) info havingTypeHint:(NSString*) typeHint
+-(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(NSDictionary*) info havingTypeHint:(UTType*) typeHint
 {
     NSError* error;
     //use ".tmp" extension to make sure this file will be garbage collected if the ios notification attachment should leave it behind
     NSString* notificationImage = [[[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.tmp", info[@"cacheId"]]];
     DDLogVerbose(@"Preparing for notification attachment: hardlinking downloaded file from '%@' to '%@'..", info[@"cacheFile"], notificationImage);
-    [[NSFileManager defaultManager] linkItemAtPath:info[@"cacheFile"] toPath:notificationImage error:&error];
-    [HelperTools configureFileProtectionFor:notificationImage];
+    error = [HelperTools hardLinkOrCopyFile:info[@"cacheFile"] to:notificationImage];
     if(error)
     {
         DDLogError(@"Could not hardlink cache file to notification image temp file!");
         return nil;
     }
+    [HelperTools configureFileProtectionFor:notificationImage];
     return [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:notificationImage] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
 }
 

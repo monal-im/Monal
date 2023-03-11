@@ -21,6 +21,7 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 
 @import Intents;
+@import UniformTypeIdentifiers;
 
 @interface ShareViewController ()
 
@@ -152,7 +153,7 @@
         {
             if(self.contentText && [self.contentText length] > 0)
             {
-                NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary* payload = [NSMutableDictionary new];
                 payload[@"account_id"] = self.recipient.accountId;
                 payload[@"recipient"] = self.recipient.contactJid;
                 payload[@"type"] = @"text";
@@ -168,7 +169,7 @@
     for(NSItemProvider* provider in item.attachments)
     {
         //text shares are also shared via comment field, so ignore them
-        if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
+        if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
             continue;
         DDLogVerbose(@"handling(%u) %@", loading, provider);
         loading++;
@@ -206,10 +207,10 @@
 
 -(NSArray*) configurationItems
 {
-    NSMutableArray* toreturn = [[NSMutableArray alloc] init];
+    NSMutableArray* toreturn = [NSMutableArray new];
     if(self.accounts.count > 1)
     {
-        SLComposeSheetConfigurationItem* accountSelector = [[SLComposeSheetConfigurationItem alloc] init];
+        SLComposeSheetConfigurationItem* accountSelector = [SLComposeSheetConfigurationItem new];
         accountSelector.title = NSLocalizedString(@"Account", @"ShareViewController: Account");
 
         accountSelector.value = [NSString stringWithFormat:@"%@@%@", [self.account objectForKey:@"username"], [self.account objectForKey:@"domain"]];
@@ -237,7 +238,7 @@
     if(!self.account && self.accounts.count > 0)
         self.account = [self.accounts objectAtIndex:0];
 
-    SLComposeSheetConfigurationItem* recipient = [[SLComposeSheetConfigurationItem alloc] init];
+    SLComposeSheetConfigurationItem* recipient = [SLComposeSheetConfigurationItem new];
     recipient.title = NSLocalizedString(@"Recipient", @"shareViewController: recipient");
     recipient.value = [NSString stringWithFormat:@"%@ (%@)", self.recipient.contactDisplayName, self.recipient.contactJid];
     recipient.tapHandler = ^{
@@ -245,7 +246,7 @@
         MLSelectionController* controller = (MLSelectionController *)[iosShareStoryboard instantiateViewControllerWithIdentifier:@"contacts"];
 
         // Create list of recipients for the selected account
-        NSMutableArray<NSDictionary*>* recipientsToShow = [[NSMutableArray alloc] init];
+        NSMutableArray<NSDictionary*>* recipientsToShow = [NSMutableArray new];
         for (MLContact* contact in self.recipients)
         {
             // only show contacts from the selected account

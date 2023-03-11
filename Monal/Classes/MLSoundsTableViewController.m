@@ -14,7 +14,7 @@
 
 @interface MLSoundsTableViewController ()
 @property (nonatomic, strong) NSArray* soundList;
-@property (nonatomic, assign) NSUInteger selectedIndex;
+@property (nonatomic, assign) NSInteger selectedIndex;
 @property (nonatomic, strong) AVAudioPlayer* audioPlayer;
 @end
 
@@ -55,10 +55,10 @@
 
 -(NSInteger) tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
 {
-    if(section==0)
+    if(section == 0)
         return 1;
     else
-        return self.soundList.count;
+        return (NSInteger)self.soundList.count;
 }
 
 -(NSString*) tableView:(UITableView*) tableView titleForHeaderInSection:(NSInteger) section
@@ -70,7 +70,7 @@
 
 -(NSString*) tableView:(UITableView*) tableView titleForFooterInSection:(NSInteger) section
 {
-    if(section==1)
+    if(section == 1)
         return NSLocalizedString(@"Sounds courtesy Emrah", @"");
     return nil;
 }
@@ -89,7 +89,7 @@
     else
     {
         UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"soundCell"];
-        cell.textLabel.text = self.soundList[indexPath.row];
+        cell.textLabel.text = self.soundList[(NSUInteger)indexPath.row];
         NSString* filename = [NSString stringWithFormat:@"alert%ld", (long)indexPath.row];
         if(
             (indexPath.row == 0 && [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"] == nil) ||

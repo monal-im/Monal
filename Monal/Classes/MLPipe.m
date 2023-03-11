@@ -104,7 +104,7 @@
 -(NSNumber*) drainInputStream
 {
     NSInteger drainedBytes = 0;
-    uint8_t* buf=malloc(kPipeBufferSize+1);
+    uint8_t* buf = malloc(kPipeBufferSize+1);
     NSInteger len = 0;
     do
     {
@@ -114,7 +114,7 @@
         DDLogVerbose(@"Pipe drained %ld bytes", (long)len);
         if(len>0) {
             drainedBytes += len;
-            buf[len]='\0';      //null termination for log output of raw string
+            buf[len] = '\0';      //null termination for log output of raw string
             DDLogVerbose(@"Pipe got raw drained string '%s'", buf);
         }
     } while(len>0 && [_input hasBytesAvailable]);
@@ -154,7 +154,7 @@
             if((NSUInteger) writtenLen != _outputBufferByteCount)        //some bytes remaining to send
             {
                 memmove(_outputBuffer, _outputBuffer+(size_t)writtenLen, _outputBufferByteCount-(size_t)writtenLen);
-                _outputBufferByteCount-=writtenLen;
+                _outputBufferByteCount -= writtenLen;
                 DDLogVerbose(@"pipe processing sent part of buffered data");
                 return;
             }
@@ -162,14 +162,14 @@
             {
                 //dealloc empty buffer
                 free(_outputBuffer);
-                _outputBuffer=nil;
-                _outputBufferByteCount=0;        //everything sent
+                _outputBuffer = nil;
+                _outputBufferByteCount = 0;        //everything sent
                 DDLogVerbose(@"pipe processing sent all buffered data");
             }
         }
         else
         {
-            NSError* error=[_output streamError];
+            NSError* error = [_output streamError];
             DDLogError(@"pipe sending failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
             return;
         }
@@ -182,7 +182,7 @@
         return;
     }
     
-    uint8_t* buf=malloc(kPipeBufferSize+1);
+    uint8_t* buf = malloc(kPipeBufferSize+1);
     NSInteger readLen = 0;
     NSInteger writtenLen = 0;
     do
@@ -190,12 +190,12 @@
         readLen = [_input read:buf maxLength:kPipeBufferSize];
         DDLogVerbose(@"pipe read %ld bytes", (long)readLen);
         if(readLen>0) {
-            buf[readLen]='\0';      //null termination for log output of raw string
+            buf[readLen] = '\0';      //null termination for log output of raw string
             DDLogVerbose(@"RECV: %s", buf);
             writtenLen = [_output write:buf maxLength:readLen];
             if(writtenLen == -1)
             {
-                NSError* error=[_output streamError];
+                NSError* error = [_output streamError];
                 DDLogError(@"pipe sending failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
                 break;
             }
@@ -203,10 +203,10 @@
             {
                 DDLogVerbose(@"pipe could only write %ld of %ld bytes, buffering", (long)writtenLen, (long)readLen);
                 //allocate new _outputBuffer
-                _outputBuffer=malloc(sizeof(uint8_t) * (readLen-writtenLen));
+                _outputBuffer = malloc(sizeof(uint8_t) * (readLen-writtenLen));
                 //copy the remaining data into the buffer and set the buffer pointer accordingly
                 memcpy(_outputBuffer, buf+(size_t)writtenLen, (size_t)(readLen-writtenLen));
-                _outputBufferByteCount=(size_t)(readLen-writtenLen);
+                _outputBufferByteCount = (size_t)(readLen-writtenLen);
                 break;
             }
         }
@@ -220,7 +220,7 @@
     //DDLogVerbose(@"Pipe stream %@ has event", stream);
     
     //ignore events from stale streams
-    if(stream!=_input && stream!=_output)
+    if(stream != _input && stream != _output)
         return;
     
     switch(eventCode)

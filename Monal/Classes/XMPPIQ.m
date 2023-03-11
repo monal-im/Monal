@@ -10,6 +10,9 @@
 #import "XMPPDataForm.h"
 #import "HelperTools.h"
 #import "SignalPreKey.h"
+#import "MLContact.h"
+
+@class MLContact;
 
 NSString* const kiqGetType = @"get";
 NSString* const kiqSetType = @"set";
@@ -62,7 +65,7 @@ NSString* const kiqErrorType = @"error";
 // direct push registration at xmpp server without registration at appserver
 -(void) setPushEnableWithNode:(NSString*) node onAppserver:(NSString*) jid
 {
-    NSMutableString* pushModule = [[NSMutableString alloc] init];
+    NSMutableString* pushModule = [NSMutableString new];
 #ifdef IS_ALPHA
     [pushModule appendString:@"monalAlpha"];
 #else //IS_ALPHA
@@ -112,7 +115,7 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setAdhocDiscoNode
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items" withAttributes:@{
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items" withAttributes:@{
         @"node": @"http://jabber.org/protocol/commands",
     } andChildren:@[] andData:nil];
     [self addChildNode:queryNode];
@@ -120,13 +123,13 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setDiscoInfoNode
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];
     [self addChildNode:queryNode];
 }
 
 -(void) setDiscoItemNode
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items"];
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items"];
     [self addChildNode:queryNode];
 }
 
@@ -249,21 +252,21 @@ NSString* const kiqErrorType = @"error";
     [self addChildNode:queryNode];
 }
 
--(void) setRemoveFromRoster:(NSString*) jid
+-(void) setRemoveFromRoster:(MLContact*) contact
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{
-            @"jid": jid,
+            @"jid": contact.contactJid,
             @"subscription": @"remove"
         } andChildren:@[] andData:nil]
     ] andData:nil]];
 }
 
--(void) setUpdateRosterItem:(NSString* _Nonnull) jid withName:(NSString* _Nonnull) name
+-(void) setUpdateRosterItem:(MLContact* _Nonnull) contact withName:(NSString* _Nonnull) name
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{
-            @"jid": jid,
+            @"jid": contact.contactJid,
             @"name": name,
         } andChildren:@[] andData:nil]
     ] andData:nil]];

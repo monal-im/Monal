@@ -44,6 +44,8 @@
 @import CoreImage.CIFilterBuiltins;
 @import UIKit;
 @import AVFoundation;
+@import UniformTypeIdentifiers;
+@import QuickLookThumbnailing;
 
 static DDFileLogger* _fileLogger = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
@@ -232,6 +234,26 @@ static id preprocess(id exception)
     ];
 }
 
++(NSError* _Nullable) hardLinkOrCopyFile:(NSString*) from to:(NSString*) to
+{
+    NSError* error = nil;
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    DDLogVerbose(@"Trying to hardlink file '%@' to '%@'...", from, to);
+    [fileManager linkItemAtPath:from toPath:to error:&error];
+    if(error)
+    {
+        DDLogWarn(@"Hardlinking failed, trying normal copy operation: %@", error);
+        error = nil;
+        [fileManager copyItemAtPath:from toPath:to error:&error];
+        if(error)
+        {
+            DDLogWarn(@"File copy failed, too: %@", error);
+            return error;
+        }
+    }
+    return nil;
+}
+
 +(NSString*) getQueueThreadLabelFor:(DDLogMessage*) logMessage
 {
     NSString* queueThreadLabel = logMessage.threadName;
@@ -410,7 +432,7 @@ static id preprocess(id exception)
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request
 {
     __block NSError* retval = nil;
-    NSCondition* condition = [[NSCondition alloc] init];
+    NSCondition* condition = [NSCondition new];
     [condition lock];
     monal_void_block_t cancelTimeout = createTimer(1.0, (^{
         DDLogError(@"Waiting for notification center took more than 1.0 second, continuing anyways");
@@ -436,7 +458,7 @@ static id preprocess(id exception)
 #pragma clang diagnostic ignored "-Wcompletion-handler"
 +(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion
 {
-    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* payload = [NSMutableDictionary new];
     //for a list of types, see UTCoreTypes.h in MobileCoreServices framework
     DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
     if(provider.suggestedName != nil)
@@ -444,18 +466,23 @@ static id preprocess(id exception)
     void (^addPreview)(NSURL* _Nullable) = ^(NSURL* url) {
         if(url != nil)
         {
-            NSError* error;
-            NSDictionary* thumbnails = nil;
-            BOOL success = [url getResourceValue:&thumbnails forKey:NSThumbnail1024x1024SizeKey error:&error];
-            if(success == YES && thumbnails.count > 0)
-            {
-                NSArray<UIImage*>* values = [thumbnails allValues];
-                payload[@"preview"] = values.firstObject;
-                return completion(payload);
-            }
-            else
-            {
-                DDLogVerbose(@"Extracting thumbnail from document failed: %@", error);
+            QLThumbnailGenerationRequest* request = [[QLThumbnailGenerationRequest alloc] initWithFileAtURL:url size:CGSizeMake(64, 64) scale:1.0 representationTypes:QLThumbnailGenerationRequestRepresentationTypeThumbnail];
+            NSURL* tmpURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory: YES];
+            tmpURL = [tmpURL URLByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
+            [QLThumbnailGenerator.sharedGenerator saveBestRepresentationForRequest:request toFileAtURL:tmpURL withContentType:UTTypePNG.identifier completionHandler:^(NSError *error) {
+                if(error == nil)
+                {
+                    UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
+                    [[NSFileManager defaultManager] removeItemAtURL:tmpURL error:nil];      //remove temporary file, we don't need it anymore
+                    if(result != nil)
+                    {
+                        payload[@"preview"] = result;
+                        return completion(payload);     //don't fall through on success
+                    }
+                }
+                //if we fall through to this point, either the thumbnail generation or the imageWithContentsOfFile above failed
+                //--> try something else
+                DDLogVerbose(@"Extracting thumbnail using quick look framework failed, retrying with imageWithContentsOfFile: %@", error);
                 UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
                 if(result != nil)
                 {
@@ -472,14 +499,14 @@ static id preprocess(id exception)
                         return completion(payload);
                     }
                 }
-            }
+            }];
         }
         [provider loadPreviewImageWithOptions:nil completionHandler:^(UIImage*  _Nullable previewImage, NSError* _Null_unspecified error) {
             if(error != nil || previewImage == nil)
             {
                 if(url == nil)
                 {
-                    DDLogWarn(@"Error creating preview image via item provider, ignoring: %@", error);
+                    DDLogWarn(@"Error creating preview image via item provider, using generic doc image instead: %@", error);
                     payload[@"preview"] = [UIImage systemImageNamed:@"doc"];
                 }
             }
@@ -491,7 +518,7 @@ static id preprocess(id exception)
     void (^prepareFile)(NSURL*) = ^(NSURL* item) {
         NSError* error;
         [item startAccessingSecurityScopedResource];
-        [[[NSFileCoordinator alloc] init] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
+        [[NSFileCoordinator new] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
             DDLogDebug(@"NSFileCoordinator called accessor: %@", newURL);
             payload[@"data"] = [MLFiletransfer prepareFileUpload:newURL];
             [item stopAccessingSecurityScopedResource];
@@ -533,10 +560,10 @@ static id preprocess(id exception)
         }];
     }
     //the apple-private autoloop gif type has a bug that does not allow to load this as normal gif --> try audiovisual content below
-    else if([provider hasItemConformingToTypeIdentifier:@"com.compuserve.gif"] && ![provider hasItemConformingToTypeIdentifier:@"com.apple.private.auto-loop-gif"])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeGIF.identifier] && ![provider hasItemConformingToTypeIdentifier:@"com.apple.private.auto-loop-gif"])
     {
         /*
-        [provider loadDataRepresentationForTypeIdentifier:@"com.compuserve.gif" completionHandler:^(NSData* data, NSError* error) {
+        [provider loadDataRepresentationForTypeIdentifier:UTTypeGIF.identifier completionHandler:^(NSData* data, NSError* error) {
             if(error != nil || data == nil)
             {
                 DDLogError(@"Error extracting gif image from NSItemProvider: %@", error);
@@ -549,7 +576,7 @@ static id preprocess(id exception)
             return addPreview(nil);
         }];
         */
-        [provider loadInPlaceFileRepresentationForTypeIdentifier:@"com.compuserve.gif" completionHandler:^(NSURL*  _Nullable item, BOOL isInPlace, NSError* _Null_unspecified error) {
+        [provider loadInPlaceFileRepresentationForTypeIdentifier:UTTypeGIF.identifier completionHandler:^(NSURL*  _Nullable item, BOOL isInPlace, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting gif image from NSItemProvider: %@", error);
@@ -561,9 +588,9 @@ static id preprocess(id exception)
             return prepareFile(item);
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeAudiovisualContent])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeAudiovisualContent.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeAudiovisualContent options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeAudiovisualContent.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -575,14 +602,14 @@ static id preprocess(id exception)
             return prepareFile(item);
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeImage])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeImage.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeImage.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 //for example: image shared directly from screenshots
                 DDLogWarn(@"Got error, retrying with UIImage: %@", error);
-                [provider loadItemForTypeIdentifier:(NSString*)kUTTypeImage options:nil completionHandler:^(UIImage*  _Nullable item, NSError* _Null_unspecified error) {
+                [provider loadItemForTypeIdentifier:UTTypeImage.identifier options:nil completionHandler:^(UIImage*  _Nullable item, NSError* _Null_unspecified error) {
                     if(error != nil || item == nil)
                     {
                         DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -602,7 +629,7 @@ static id preprocess(id exception)
                 DDLogInfo(@"Got image item: %@", item);
                 payload[@"type"] = @"image";
                 [item startAccessingSecurityScopedResource];
-                [[[NSFileCoordinator alloc] init] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
+                [[NSFileCoordinator new] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
                     DDLogDebug(@"NSFileCoordinator called accessor for image: %@", newURL);
                     UIImage* image = [UIImage imageWithContentsOfFile:[newURL path]];
                     DDLogDebug(@"Created UIImage: %@", image);
@@ -627,9 +654,9 @@ static id preprocess(id exception)
     else if([provider hasItemConformingToTypeIdentifier:(NSString*)])
     {
     }*/
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeContact])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeContact.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeContact options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeContact.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -641,9 +668,9 @@ static id preprocess(id exception)
             return prepareFile(item);
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeFileURL])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeFileURL.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeFileURL options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeFileURL.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -657,7 +684,7 @@ static id preprocess(id exception)
     }
     else if([provider hasItemConformingToTypeIdentifier:(NSString*)@"com.apple.finder.node"])
     {
-        [provider loadItemForTypeIdentifier:(NSString*) kUTTypeItem options:nil completionHandler:^(id <NSSecureCoding> item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeItem.identifier options:nil completionHandler:^(id <NSSecureCoding> item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -678,9 +705,9 @@ static id preprocess(id exception)
             }
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypeURL])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypeURL.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypeURL options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypeURL.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -693,9 +720,9 @@ static id preprocess(id exception)
             return addPreview(nil);
         }];
     }
-    else if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
+    else if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
     {
-        [provider loadItemForTypeIdentifier:(NSString*)kUTTypePlainText options:nil completionHandler:^(NSString*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadItemForTypeIdentifier:UTTypePlainText.identifier options:nil completionHandler:^(NSString*  _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
@@ -744,12 +771,12 @@ static id preprocess(id exception)
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length
 {
     if(!image)
-        return [[NSData alloc] init];
+        return [NSData new];
     
     int destinationSize = 480;
     int epsilon = 8;
     UIImage* clippedImage = image;
-    UIGraphicsImageRendererFormat* format = [[UIGraphicsImageRendererFormat alloc] init];
+    UIGraphicsImageRendererFormat* format = [UIGraphicsImageRendererFormat new];
     format.opaque = NO;
     format.preferredRange = UIGraphicsImageRendererFormatRangeStandard;
     format.scale = 1.0;
@@ -865,7 +892,7 @@ static id preprocess(id exception)
     static NSMutableDictionary* cache;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        cache = [[NSMutableDictionary alloc] init];
+        cache = [NSMutableDictionary new];
     });
     if(cache[jid] != nil)
         return cache[jid];
@@ -903,7 +930,7 @@ static id preprocess(id exception)
 +(NSString*) stringFromToken:(NSData*) tokenIn
 {
     unsigned char* tokenBytes = (unsigned char*)[tokenIn bytes];
-    NSMutableString* token = [[NSMutableString alloc] init];
+    NSMutableString* token = [NSMutableString new];
     NSUInteger counter = 0;
     while(counter < tokenIn.length)
     {
@@ -953,7 +980,7 @@ static id preprocess(id exception)
             return [cache objectForKey:jid];
     }
     
-    NSMutableDictionary<NSString*, NSString*>* retval = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary<NSString*, NSString*>* retval = [NSMutableDictionary new];
     NSArray* parts = [jid componentsSeparatedByString:@"/"];
     
     retval[@"user"] = [[parts objectAtIndex:0] lowercaseString];        //intended to not break code that expects lowercase
@@ -1057,7 +1084,7 @@ static id preprocess(id exception)
                         continue;
                     }
                     DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);
-                    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+                    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
                     content.title = NSLocalizedString(@"Could not synchronize", @"");
                     content.subtitle = account.connectionProperties.identity.jid;
                     content.body = NSLocalizedString(@"Please open the app to retry", @"");
@@ -1097,10 +1124,10 @@ static id preprocess(id exception)
         inBackground = [[MLXMPPManager sharedInstance] isBackgrounded];
     /*
     {
-        [HelperTools dispatchSyncReentrant:^{
+        [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                 inBackground = YES;
-        } onQueue:dispatch_get_main_queue()];
+        }];
     }
     */
     return inBackground;
@@ -1116,7 +1143,7 @@ static id preprocess(id exception)
     return isNotInFocus;
 }
 
-+(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue
++(void) dispatchAsync:(BOOL) async reentrantOnQueue:(dispatch_queue_t _Nullable) queue withBlock:(monal_void_block_t) block
 {
     if(!queue)
         queue = dispatch_get_main_queue();
@@ -1137,7 +1164,12 @@ static id preprocess(id exception)
     if(current_queue == queue || (queue == dispatch_get_main_queue() && [NSThread isMainThread]))
         block();
     else
-        dispatch_sync(queue, block);
+    {
+        if(async)
+            dispatch_async(queue, block);
+        else
+            dispatch_sync(queue, block);
+    }
 }
 
 +(void) activityLog
@@ -1176,7 +1208,7 @@ static id preprocess(id exception)
 +(void) configureLogging
 {
     //create log formatter
-    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
+    MLLogFormatter* formatter = [MLLogFormatter new];
     
     //console logger (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
 #if TARGET_OS_SIMULATOR
@@ -1200,7 +1232,7 @@ static id preprocess(id exception)
     [DDLog addLogger:self.fileLogger];
     
     //network logger
-    MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
+    MLUDPLogger* udpLogger = [MLUDPLogger new];
     [udpLogger setLogFormatter:formatter];
     [DDLog addLogger:udpLogger];
     
@@ -1227,7 +1259,7 @@ static id preprocess(id exception)
 +(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features andForms:(NSArray*) forms
 {
     // see https://xmpp.org/extensions/xep-0115.html#ver
-    NSMutableString* unhashed = [[NSMutableString alloc] init];
+    NSMutableString* unhashed = [NSMutableString new];
     
     //generate identities string (must be sorted according to XEP-0115)
     identities = [identities sortedArrayUsingSelector:@selector(compare:)];
@@ -1285,7 +1317,7 @@ static id preprocess(id exception)
 {
     // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
     NSArray* featuresArray = [[features allObjects] sortedArrayUsingSelector:@selector(compare:)];
-    NSMutableString* toreturn = [[NSMutableString alloc] init];
+    NSMutableString* toreturn = [NSMutableString new];
     for(NSString* feature in featuresArray)
     {
         [toreturn appendString:[self _replaceLowerThanInString:feature]];
@@ -1297,13 +1329,15 @@ static id preprocess(id exception)
 +(NSString*) generateStringOfCapsForms:(NSArray*) forms
 {
     // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
-    NSMutableString* toreturn = [[NSMutableString alloc] init];
+    NSMutableString* toreturn = [NSMutableString new];
     for(XMPPDataForm* form in [forms sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"formType" ascending:YES selector:@selector(compare:)]]])
     {
         [toreturn appendString:[self _replaceLowerThanInString:form.formType]];
         [toreturn appendString:@"<"];
         for(NSString* field in [[form allKeys] sortedArrayUsingSelector:@selector(compare:)])
         {
+            if([@"FORM_TYPE" isEqualToString:field])
+                continue;
             [toreturn appendString:[self _replaceLowerThanInString:field]];
             [toreturn appendString:@"<"];
             for(NSString* value in [[form getField:field][@"allValues"] sortedArrayUsingSelector:@selector(compare:)])
@@ -1391,8 +1425,8 @@ static id preprocess(id exception)
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-        rfc3339DateFormatter = [[NSDateFormatter alloc] init];
-        rfc3339DateFormatter2 = [[NSDateFormatter alloc] init];
+        rfc3339DateFormatter = [NSDateFormatter new];
+        rfc3339DateFormatter2 = [NSDateFormatter new];
         
         [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
         [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSSSSSXXXXX"];
@@ -1415,7 +1449,7 @@ static id preprocess(id exception)
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-        rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+        rfc3339DateFormatter = [NSDateFormatter new];
         
         [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
         [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z"];
@@ -1484,9 +1518,9 @@ static id preprocess(id exception)
 {
     u_int32_t i=arc4random();
 #if TARGET_OS_MACCATALYST
-    NSString* resource=[NSString stringWithFormat:@"Monal-macOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
+    NSString* resource = [NSString stringWithFormat:@"Monal-macOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
 #else
-    NSString* resource=[NSString stringWithFormat:@"Monal-iOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
+    NSString* resource = [NSString stringWithFormat:@"Monal-iOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
 #endif
     return resource;
 }
@@ -1667,7 +1701,7 @@ static id preprocess(id exception)
     
     if([hex length] % 2 != 00) {
         DDLogError(@"Hex strings should have an even number of digits");
-        return [[NSData alloc] init];
+        return [NSData new];
     }
     unsigned char* bytes = malloc([hex length] / 2);
     unsigned char* bp = bytes;
@@ -1679,7 +1713,7 @@ static id preprocess(id exception)
         if(b2 != buf + 2) {
             DDLogError(@"String should be all hex digits");
             free(bytes);
-            return [[NSData alloc] init];
+            return [NSData new];
         }
     }
     return [NSData dataWithBytesNoCopy:bytes length:[hex length]/2 freeWhenDone:YES];
@@ -1691,7 +1725,7 @@ static id preprocess(id exception)
     const char* data1Bytes = [data1 bytes];
     const char* data2Bytes = [data2 bytes];
     // Mutable data that individual xor'd bytes will be added to
-    NSMutableData* xorData = [[NSMutableData alloc] init];
+    NSMutableData* xorData = [NSMutableData new];
     for(NSUInteger i = 0; i < data1.length; i++)
     {
         const char xorByte = data1Bytes[i] ^ data2Bytes[i];

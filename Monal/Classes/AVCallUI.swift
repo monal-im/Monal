@@ -12,13 +12,17 @@ import CocoaLumberjack
 import WebRTC
 import AVFoundation
 import CallKit
+import AVKit
 
 struct AVCallUI: View {
     @StateObject private var call: ObservableKVOWrapper<MLCall>
     @StateObject private var contact: ObservableKVOWrapper<MLContact>
+    @State private var audioPlayer: AVAudioPlayer!
     private var delegate: SheetDismisserProtocol
     private var appDelegate: MonalAppDelegate
     private var formatter: DateComponentsFormatter
+    
+    var someValue:Int?
 
     init(delegate: SheetDismisserProtocol, call: MLCall) {
         _call = StateObject(wrappedValue: ObservableKVOWrapper(call))
@@ -193,7 +197,8 @@ struct AVCallUI: View {
                         Spacer().frame(width: 64)
 
                         Button(action: {
-                            delegate.dismissWithoutAnimation()
+                            //delegate.dismissWithoutAnimation()
+                            print("\(String(describing:someValue!))")
                         }) {
                             if #available(iOS 15, *) {
                                 Image(systemName: "x.circle.fill")
@@ -256,7 +261,9 @@ struct AVCallUI: View {
                         
                         Button(action: {
                             call.obj.end()
-                            self.delegate.dismissWithoutAnimation()
+                            //self.delegate.dismissWithoutAnimation()
+                            self.audioPlayer.play()
+                            DDLogError("player: \(String(describing:self.audioPlayer))")
                         }) {
                             if #available(iOS 15, *) {
                                 Image(systemName: "phone.down.circle.fill")
@@ -321,7 +328,10 @@ struct AVCallUI: View {
             //force portrait mode and lock ui there
             UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
             self.appDelegate.orientationLock = .portrait
-        }.onDisappear {
+            let sound = Bundle.main.url(forResource:"alert3", withExtension:"aif", subdirectory:"AlertSounds")
+            self.audioPlayer = try! AVAudioPlayer(contentsOf:sound!)
+        }
+        .onDisappear {
             //allow all orientations again
             self.appDelegate.orientationLock = .all
         }

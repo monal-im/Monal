@@ -290,7 +290,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
     }
 $$
 
-$$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), _data))
+$$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     if(!account.connectionProperties.supportsBookmarksCompat)
     {
         DDLogWarn(@"Ignoring new XEP-0402 bookmarks, server does not support syncing between XEP-0048 and XEP-0402!");
@@ -301,7 +301,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     {
         //item-not-found means: no bookmarks in storage --> use an empty data dict
         if([errorIq check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
-            _data = @{};
+            data = @{};
         else
         {
             DDLogWarn(@"Could not fetch bookmarks from pep prior to publishing!");
@@ -314,26 +314,33 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     if(account.connectionProperties.supportsPubSubMax)
         max_items = @"max";
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    
     NSMutableDictionary* ownFavorites = [NSMutableDictionary new];
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
         ownFavorites[entry[@"room"]] = entry;
+    DDLogVerbose(@"Own favorites: %@", [ownFavorites allKeys]);
     
-    //filter passwort protected mucs
-    NSMutableDictionary* data = [_data mutableCopy];
-    for(NSString* itemId in _data)
-    {
-        if([data[itemId] check:@"{urn:xmpp:bookmarks:1}conference/password"])
-            [data removeObjectForKey:itemId];
-    }
-    
+    //filter passwort protected mucs and make sure jids (the item ids) are always lowercase
+    NSMutableDictionary* _data = [NSMutableDictionary new];
     for(NSString* itemId in data)
     {
-        MLXMLNode* item = data[itemId];
+        if([data[itemId] check:@"{urn:xmpp:bookmarks:1}conference/password"])
+        {
+            DDLogVerbose(@"Not copying muc %@ to bookmark data: password protected", itemId);
+            continue;
+        }
+        _data[[itemId lowercaseString]] = data[itemId];
+    }
+    DDLogVerbose(@"Mucs listed in bookmarks2: %@", [_data allKeys]);
+    
+    //handle all changes of existing bookmarks
+    for(NSString* room in _data)
+    {
+        MLXMLNode* item = _data[room];
         
         //we ignore the conference name (the name will be taken from the muc itself)
-        //NSString* name = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference@name"];
-        NSString* room = [itemId lowercaseString];
-        //NSString* nick = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference/nick#"];
+        //NSString* name = [_data[room] findFirst:@"{urn:xmpp:bookmarks:1}conference@name"];
+        //NSString* nick = [_data[room] findFirst:@"{urn:xmpp:bookmarks:1}conference/nick#"];
         NSNumber* autojoin = [item findFirst:@"{urn:xmpp:bookmarks:1}conference@autojoin|bool"];
         if(autojoin == nil)
             autojoin = @NO;     //default value specified in xep
@@ -362,7 +369,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
         
     //add all mucs not yet listed in bookmarks
     NSMutableSet* toAdd = [NSMutableSet setWithArray:[ownFavorites allKeys]];
-    [toAdd  minusSet:[NSSet setWithArray:[data allKeys]]];
+    [toAdd  minusSet:[NSSet setWithArray:[_data allKeys]]];
     for(NSString* room in toAdd)
     {
         DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
@@ -389,7 +396,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     }
     
     //remove all mucs not listed in local favorites table
-    NSMutableSet* toRemove = [NSMutableSet setWithArray:[data allKeys]];
+    NSMutableSet* toRemove = [NSMutableSet setWithArray:[_data allKeys]];
     [toRemove  minusSet:[NSSet setWithArray:[ownFavorites allKeys]]];
     for(NSString* room in toRemove)
     {

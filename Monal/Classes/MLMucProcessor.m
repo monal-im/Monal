@@ -1099,6 +1099,11 @@ $$
 -(void) deleteMuc:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry
 {
     DDLogInfo(@"Deleting muc %@ on account %@...", room, _account);
+    
+    //create contact object before deleting it to retain the muc specific settings
+    //(after deleting it from our db, the contact for this jid will look like an ordinary 1:1 contact)
+    MLContact* contact = [MLContact createContactFromJid:room andAccountNo:_account.accountNo];
+    
     //delete muc from favorites table and update bookmarks if requested
     [[DataLayer sharedInstance] deleteMuc:room forAccountId:_account.accountNo];
     if(updateBookmarks)
@@ -1110,9 +1115,9 @@ $$
     else
     {
         [[DataLayer sharedInstance] removeBuddy:room forAccount:_account.accountNo];
-        [[MLContact createContactFromJid:room andAccountNo:_account.accountNo] removeShareInteractions];
+        [contact removeShareInteractions];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:_account userInfo:@{
-            @"contact": [MLContact createContactFromJid:room andAccountNo:_account.accountNo]
+            @"contact": contact
         }];
     }
 }

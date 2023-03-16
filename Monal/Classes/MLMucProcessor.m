@@ -913,7 +913,8 @@ $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $$ID(xmp
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
-        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query newest stanzaid for Group/Channel %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for Group/Channel (stanzaid) %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
+        [_account mamFinishedFor:iqNode.fromUser];
         return;
     }
     DDLogVerbose(@"Got latest muc stanza id to prime database with: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
@@ -944,7 +945,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
         }
         else
         {
-            [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for Group/Channel %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
+            [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for Group/Channel (catchup) %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
             [_account mamFinishedFor:iqNode.fromUser];
         }
         return;

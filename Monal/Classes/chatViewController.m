@@ -2828,6 +2828,8 @@ enum msgSentState {
     UIKeyCommand* shiftEnterKey = [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(shiftEnterKeyPressed:)];
     // enter
     UIKeyCommand* enterKey = [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterKeyPressed:)];
+    UIKeyCommand* escapeKey = [UIKeyCommand
+                               keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(closePhotos)];
     // prefer our key commands over the system defaults
     if (@available(iOS 15.0, macCatalyst 15.0, *)) {
         shiftEnterKey.wantsPriorityOverSystemBehavior = true;
@@ -2836,6 +2838,7 @@ enum msgSentState {
     return @[
             shiftEnterKey,
             enterKey,
+            escapeKey,
             // command + i
             [UIKeyCommand keyCommandWithInput:@"i" modifierFlags:UIKeyModifierCommand action:@selector(commandIPressed:)],
             // command + f

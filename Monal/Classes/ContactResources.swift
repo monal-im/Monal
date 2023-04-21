@@ -43,32 +43,30 @@ struct ContactResources: View {
 
     var body: some View {
         List {
-            ForEach(self.contactVersionInfos.sorted(by:{ $0.0 < $1.0 }), id: \.key) { key, value in
-                if let versionInfo = value {
-                    Section {
-                        VStack {
-                            resourceRowElement("Resource:", Text(versionInfo.resource as String))
-                            resourceRowElement("Client Name:", Text(versionInfo.appName as String? ?? ""))
-                            resourceRowElement("Client Version:", Text(versionInfo.appVersion as String? ?? ""))
-                            resourceRowElement("OS:", Text(versionInfo.platformOs as String? ?? ""))
-                            if let lastInteraction = versionInfo.lastInteraction as Date? {
-                                if lastInteraction.timeIntervalSince1970 == 0 {
-                                    resourceRowElement("Last Interaction:", Text("Currently Online"))
-                                } else {
-                                    if #available(iOS 15, *) {
-                                        resourceRowElement("Last Interaction:", Text(lastInteraction.formatted(date:.numeric, time:.standard)))
-                                    } else {
-                                        resourceRowElement("Last Interaction:", Text("\(String(describing:lastInteraction))"))
-                                    }
-                                }
+            ForEach(self.contactVersionInfos.sorted(by:{ $0.0 < $1.0 }), id: \.key) { key, versionInfo in
+                Section {
+                    VStack {
+                        resourceRowElement("Resource:", Text(versionInfo.resource as String))
+                        resourceRowElement("Client Name:", Text(versionInfo.appName as String? ?? ""))
+                        resourceRowElement("Client Version:", Text(versionInfo.appVersion as String? ?? ""))
+                        resourceRowElement("OS:", Text(versionInfo.platformOs as String? ?? ""))
+                        if let lastInteraction = versionInfo.lastInteraction as Date? {
+                            if lastInteraction.timeIntervalSince1970 == 0 {
+                                resourceRowElement("Last Interaction:", Text("Currently Online"))
                             } else {
-                                resourceRowElement("Last Interaction:", Text("unsupported"))
+                                if #available(iOS 15, *) {
+                                    resourceRowElement("Last Interaction:", Text(lastInteraction.formatted(date:.numeric, time:.standard)))
+                                } else {
+                                    resourceRowElement("Last Interaction:", Text("\(String(describing:lastInteraction))"))
+                                }
                             }
+                        } else {
+                            resourceRowElement("Last Interaction:", Text("unsupported"))
                         }
-                        .onTapGesture(count: 2, perform: {
-                            showCaps = versionInfo.resource
-                        })
                     }
+                    .onTapGesture(count: 2, perform: {
+                        showCaps = versionInfo.resource
+                    })
                 }
             }
         }

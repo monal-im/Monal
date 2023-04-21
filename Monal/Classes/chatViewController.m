@@ -2624,9 +2624,6 @@ enum msgSentState {
 
 -(void) scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    if(self.contact.isGroup)
-        return;
-
     // Only load old msgs if the view appeared
     if(!self.viewDidAppear)
         return;

@@ -2802,7 +2802,7 @@ enum msgSentState {
 // Send message with 'enter' if chatInput is first repsonder
 -(void) enterKeyPressed:(UIKeyCommand*)keyCommand
 {
-    if([self.chatInput isFirstResponder] && self.chatInput.text.length > 0) {
+    if([self.chatInput isFirstResponder]) {
         [self resignTextView];
     }
 }

@@ -129,6 +129,7 @@ static const int KEY_SIZE = 16;
 {
 #ifndef DISABLE_OMEMO
     MLContact* removedContact = notification.userInfo[@"contact"];
+    DDLogVerbose(@"Got kMonalContactRemoved event for contact: %@", removedContact);
     if(removedContact == nil || removedContact.accountId.intValue != self.account.accountNo.intValue)
        return;
 
@@ -1203,6 +1204,7 @@ $$
     else if([self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid] == NO)
         [danglingJids addObject:buddyJid];
 
+    DDLogVerbose(@"Unsubscribing from dangling jids: %@", danglingJids);
     for(NSString* jid in danglingJids)
         [self.account.pubsub unsubscribeFromNode:@"eu.siacs.conversations.axolotl.devicelist" forJid:jid withHandler:$newHandler(self, handleDevicelistUnsubscribe)];
 }

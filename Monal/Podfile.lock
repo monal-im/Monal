@@ -12,7 +12,7 @@ PODS:
     - SDWebImage (= 4.0.0)
   - MarqueeLabel (4.3.0)
   - MBProgressHUD (1.2.0)
-  - NotificationBannerSwift (3.2.0):
+  - NotificationBannerSwift (3.2.1):
     - MarqueeLabel (~> 4.3.0)
     - SnapKit (~> 5.6.0)
   - pop (1.0.12)
@@ -24,11 +24,11 @@ PODS:
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
   - SnapKit (5.6.0)
-  - sqlite3/common (3.41.0)
-  - sqlite3/perf-threadsafe (3.41.0):
+  - sqlite3/common (3.42.0)
+  - sqlite3/perf-threadsafe (3.42.0):
     - sqlite3/common
   - TOCropViewController (2.6.1)
-  - WebRTC-lib (111.0.0)
+  - WebRTC-lib (114.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -89,17 +89,17 @@ SPEC CHECKSUMS:
   IDMPhotoBrowser: b96159fe4adb991a844068eb17dab9c0b7d7e51a
   MarqueeLabel: 02f5ac8fd6877c94564556cb93fa86c70c08baeb
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  NotificationBannerSwift: 437e135298d297fcb03f3eec4466f45cdb128d3d
+  NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: 76a6348bdc74eb5a55dd08a091ef298e56b55e41
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  sqlite3: d31b2b69d59bd1b4ab30e5c92eb18fd8e82fa392
+  sqlite3: f163dbbb7aa3339ad8fc622782c2d9d7b72f7e9c
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
-  WebRTC-lib: 7e7f08b0062e5610599a73c0c232ed22662c0bf1
+  WebRTC-lib: d83df8976fa608b980f1d85796b3de66d60a1953
 
 PODFILE CHECKSUM: 724c45c4ab700d4fcb4895b70836aa32e4a0a8ba
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.12.1

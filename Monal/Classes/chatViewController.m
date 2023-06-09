@@ -1233,13 +1233,14 @@ enum msgSentState {
         return;
     for(NSURL* url in urls)
     {
-        [url startAccessingSecurityScopedResource];
-        [self addToUIQueue:@[@{
+        [url startAccessingSecurityScopedResource];     //call to stopAccessingSecurityScopedResource will be done in addUploadItemPreviewForItem
+        [HelperTools addUploadItemPreviewForItem:url provider:nil andPayload:[@{
             @"type": @"file",
             @"filename": [url lastPathComponent],
             @"data": [MLFiletransfer prepareFileUpload:url],
-        }]];
-        [url stopAccessingSecurityScopedResource];
+        } mutableCopy] withCompletionHandler:^(NSMutableDictionary* payload) {
+            [self addToUIQueue:@[payload]];
+        }];
     }
 }
 
@@ -1533,7 +1534,10 @@ enum msgSentState {
                     [self presentViewController:unknownItemWarning animated:YES completion:nil];
                 }
                 else
+                {
+                    DDLogDebug(@"Adding payload to UI upload queue: %@", payload);
                     [self addToUIQueue:@[payload]];
+                }
             });
         }];
     }
@@ -1559,11 +1563,14 @@ enum msgSentState {
     else if([info[UIImagePickerControllerMediaType] isEqualToString:UTTypeMovie.identifier])
     {
         NSURL* url = info[UIImagePickerControllerMediaURL];
-        [self addToUIQueue:@[@{
+        [url startAccessingSecurityScopedResource];     //call to stopAccessingSecurityScopedResource will be done in addUploadItemPreviewForItem
+        [HelperTools addUploadItemPreviewForItem:url provider:nil andPayload:[@{
             @"type": @"audiovisual",
             @"filename": [url lastPathComponent],
             @"data": [MLFiletransfer prepareFileUpload:url],
-        }]];
+        } mutableCopy] withCompletionHandler:^(NSMutableDictionary* payload) {
+            [self addToUIQueue:@[payload]];
+        }];
     }
     else
     {
@@ -3345,7 +3352,8 @@ enum msgSentState {
     dispatch_async(dispatch_get_main_queue(), ^{
         if(self.uploadQueue.count == 0 && newItems.count > 0) // Queue was previously empty but will be filled now
         {
-            // Force reload of view because this fails after the queue was emptied once otherwise. The '+' cell may also not be in the collection view yet when this function is called.
+            // Force reload of view because this fails after the queue was emptied once otherwise.
+            // The '+' cell may also not be in the collection view yet when this function is called.
             [CATransaction begin];
             [UIView setAnimationsEnabled:NO];
             [self showUploadQueue];
@@ -3356,6 +3364,7 @@ enum msgSentState {
                 {
                     newInd[i] = [NSIndexPath indexPathForItem:i inSection:0];
                 }
+                DDLogVerbose(@"Inserting items at index paths: %@", newInd);
                 [self.uploadMenuView insertItemsAtIndexPaths:newInd];
             } completion:^(BOOL finished) {
                 [CATransaction commit];
@@ -3376,6 +3385,7 @@ enum msgSentState {
                 {
                     newInd[i] = [NSIndexPath indexPathForItem:start + i + 1 inSection:0];
                 }
+                DDLogVerbose(@"Inserting items at index paths: %@", newInd);
                 [self.uploadMenuView insertItemsAtIndexPaths:newInd];
             } completion:^(BOOL finished) {
                 [self.uploadMenuView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.uploadQueue.count inSection:0] atScrollPosition:UICollectionViewScrollPositionRight animated:YES];

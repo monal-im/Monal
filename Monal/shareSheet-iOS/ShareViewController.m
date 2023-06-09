@@ -144,10 +144,8 @@
     NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
     DDLogVerbose(@"Attachments = %@", item.attachments);
 
-    //text shares are also shared via comment field, so ignore them
-    //if([provider hasItemConformingToTypeIdentifier:(NSString*)kUTTypePlainText])
-    
     __block uint32_t loading = 0;       //no need for @synchronized etc., because we access this var exclusively from the main thread
+    __block uint32_t saved = 0;         //no need for @synchronized etc., because we access this var exclusively from the main thread
     monal_void_block_t checkIfDone = ^{
         if(loading == 0)
         {
@@ -160,17 +158,19 @@
                 payload[@"data"] = self.contentText;
                 DDLogDebug(@"Adding shareSheet comment payload: %@", payload);
                 [[DataLayer sharedInstance] addShareSheetPayload:payload];
+                saved++;
             }
             [self.extensionContext completeRequestReturningItems:@[] completionHandler:^(BOOL expired __unused) {
-                [self openMainApp];
+                if(saved > 0)
+                    [self openMainApp];
             }];
         }
     };
     for(NSItemProvider* provider in item.attachments)
     {
-        //text shares are also shared via comment field, so ignore them
-        if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
-            continue;
+//         //text shares are also shared via comment field, so ignore them
+//         if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
+//             continue;
         DDLogVerbose(@"handling(%u) %@", loading, provider);
         loading++;
         [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* payload) {
@@ -187,17 +187,28 @@
                     [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                         [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
                         [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+                        loading--;
+                        checkIfDone();
                     }]];
                     [self presentViewController:unknownItemWarning animated:YES completion:nil];
+                    return;
+                }
+                
+                //text shares are also shared via comment field, so ignore them, if they contain the same contents
+                if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier] && self.contentText && [self.contentText length] > 0 && [self.contentText isEqualToString:payload[@"data"]])
+                {
+                    DDLogWarn(@"Ignoring text payload because already sent via comment field");
                     loading--;
+                    checkIfDone();
                     return;
                 }
                 
                 payload[@"account_id"] = self.recipient.accountId;
                 payload[@"recipient"] = self.recipient.contactJid;
-                loading--;
                 DDLogDebug(@"Adding shareSheet payload(%u): %@", loading, payload);
                 [[DataLayer sharedInstance] addShareSheetPayload:payload];
+                saved++;
+                loading--;
                 checkIfDone();
             });
         }];

@@ -456,6 +456,89 @@ static id preprocess(id exception)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcompletion-handler"
++(void) addUploadItemPreviewForItem:(NSURL* _Nullable) url provider:(NSItemProvider* _Nullable) provider andPayload:(NSMutableDictionary*) payload withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion
+{
+    void (^useProvider)() = ^() {
+        if(provider == nil)
+        {
+            DDLogWarn(@"Can not creating preview image via item provider, no provider present: using generic doc image instead");
+            payload[@"preview"] = [UIImage systemImageNamed:@"doc"];
+            [url stopAccessingSecurityScopedResource];
+            return completion(payload);
+        }
+        else
+            [provider loadPreviewImageWithOptions:nil completionHandler:^(UIImage*  _Nullable previewImage, NSError* _Null_unspecified error) {
+                if(error != nil || previewImage == nil)
+                {
+                    if(url == nil)
+                    {
+                        DDLogWarn(@"Error creating preview image via item provider, using generic doc image instead: %@", error);
+                        payload[@"preview"] = [UIImage systemImageNamed:@"doc"];
+                    }
+                }
+                else
+                {
+                    DDLogVerbose(@"Managed to generate thumbnail for url=%@ using loadPreviewImageWithOptions: %@", url, previewImage);
+                    payload[@"preview"] = previewImage;
+                }
+                [url stopAccessingSecurityScopedResource];
+                return completion(payload);
+            }];
+    };
+    if(url != nil)
+    {
+        DDLogVerbose(@"Generating thumbnail for url=%@", url);
+        QLThumbnailGenerationRequest* request = [[QLThumbnailGenerationRequest alloc] initWithFileAtURL:url size:CGSizeMake(64, 64) scale:1.0 representationTypes:QLThumbnailGenerationRequestRepresentationTypeThumbnail];
+        NSURL* tmpURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory: YES];
+        tmpURL = [tmpURL URLByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
+        [QLThumbnailGenerator.sharedGenerator saveBestRepresentationForRequest:request toFileAtURL:tmpURL withContentType:UTTypePNG.identifier completionHandler:^(NSError *error) {
+            if(error == nil)
+            {
+                UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
+                [[NSFileManager defaultManager] removeItemAtURL:tmpURL error:nil];      //remove temporary file, we don't need it anymore
+                if(result != nil)
+                {
+                    payload[@"preview"] = result;
+                    DDLogVerbose(@"Managed to generate thumbnail for url=%@ using QLThumbnailGenerator: %@", url, result);
+                    [url stopAccessingSecurityScopedResource];
+                    return completion(payload);     //don't fall through on success
+                }
+            }
+            //if we fall through to this point, either the thumbnail generation or the imageWithContentsOfFile above failed
+            //--> try something else
+            DDLogVerbose(@"Extracting thumbnail using imageWithContentsOfFile failed, retrying with imageWithContentsOfFile: %@", error);
+            UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
+            if(result != nil)
+            {
+                payload[@"preview"] = result;
+                DDLogVerbose(@"Managed to generate thumbnail for url=%@ using imageWithContentsOfFile: %@", url, result);
+                [url stopAccessingSecurityScopedResource];
+                return completion(payload);
+            }
+            else
+            {
+                DDLogVerbose(@"Thumbnail generation not successful - reverting to generic image for file: %@", error);
+                UIDocumentInteractionController* imgCtrl = [UIDocumentInteractionController interactionControllerWithURL:url];
+                if(imgCtrl != nil && imgCtrl.icons.count > 0)
+                {
+                    payload[@"preview"] = imgCtrl.icons.firstObject;
+                    DDLogVerbose(@"Managed to generate thumbnail for url=%@ using generic image for file: %@", url, imgCtrl.icons.firstObject);
+                    [url stopAccessingSecurityScopedResource];
+                    return completion(payload);
+                }
+            }
+            
+            //last resort
+            useProvider();
+        }];
+    }
+    else
+        useProvider();
+}
+#pragma clang diagnostic pop
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcompletion-handler"
 +(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion
 {
     NSMutableDictionary* payload = [NSMutableDictionary new];
@@ -463,66 +546,15 @@ static id preprocess(id exception)
     DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
     if(provider.suggestedName != nil)
         payload[@"filename"] = provider.suggestedName;
-    void (^addPreview)(NSURL* _Nullable) = ^(NSURL* url) {
-        if(url != nil)
-        {
-            QLThumbnailGenerationRequest* request = [[QLThumbnailGenerationRequest alloc] initWithFileAtURL:url size:CGSizeMake(64, 64) scale:1.0 representationTypes:QLThumbnailGenerationRequestRepresentationTypeThumbnail];
-            NSURL* tmpURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory: YES];
-            tmpURL = [tmpURL URLByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
-            [QLThumbnailGenerator.sharedGenerator saveBestRepresentationForRequest:request toFileAtURL:tmpURL withContentType:UTTypePNG.identifier completionHandler:^(NSError *error) {
-                if(error == nil)
-                {
-                    UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
-                    [[NSFileManager defaultManager] removeItemAtURL:tmpURL error:nil];      //remove temporary file, we don't need it anymore
-                    if(result != nil)
-                    {
-                        payload[@"preview"] = result;
-                        return completion(payload);     //don't fall through on success
-                    }
-                }
-                //if we fall through to this point, either the thumbnail generation or the imageWithContentsOfFile above failed
-                //--> try something else
-                DDLogVerbose(@"Extracting thumbnail using quick look framework failed, retrying with imageWithContentsOfFile: %@", error);
-                UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
-                if(result != nil)
-                {
-                    payload[@"preview"] = result;
-                    return completion(payload);
-                }
-                else
-                {
-                    DDLogVerbose(@"Thumbnail generation not successful - reverting to generic image for file: %@", error);
-                    UIDocumentInteractionController* imgCtrl = [UIDocumentInteractionController interactionControllerWithURL:url];
-                    if(imgCtrl != nil && imgCtrl.icons.count > 0)
-                    {
-                        payload[@"preview"] = imgCtrl.icons.firstObject;
-                        return completion(payload);
-                    }
-                }
-            }];
-        }
-        [provider loadPreviewImageWithOptions:nil completionHandler:^(UIImage*  _Nullable previewImage, NSError* _Null_unspecified error) {
-            if(error != nil || previewImage == nil)
-            {
-                if(url == nil)
-                {
-                    DDLogWarn(@"Error creating preview image via item provider, using generic doc image instead: %@", error);
-                    payload[@"preview"] = [UIImage systemImageNamed:@"doc"];
-                }
-            }
-            else
-                payload[@"preview"] = previewImage;
-            return completion(payload);
-        }];
-    };
+    
     void (^prepareFile)(NSURL*) = ^(NSURL* item) {
         NSError* error;
         [item startAccessingSecurityScopedResource];
         [[NSFileCoordinator new] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
             DDLogDebug(@"NSFileCoordinator called accessor: %@", newURL);
             payload[@"data"] = [MLFiletransfer prepareFileUpload:newURL];
-            [item stopAccessingSecurityScopedResource];
-            return addPreview(newURL);
+            //we can not use newURL here, because it will fall out of scope while the preview is rendered in another thread
+            return [HelperTools addUploadItemPreviewForItem:item provider:provider andPayload:payload withCompletionHandler:completion];
         }];
         if(error != nil)
         {
@@ -532,6 +564,7 @@ static id preprocess(id exception)
             return completion(payload);
         }
     };
+    
     if([provider hasItemConformingToTypeIdentifier:@"com.apple.mapkit.map-item"])
     {
         // convert map item to geo:
@@ -555,7 +588,7 @@ static id preprocess(id exception)
                 DDLogInfo(@"Got mapkit item: %@", item);
                 payload[@"type"] = @"geo";
                 payload[@"data"] = [NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude];
-                return addPreview(nil);
+                return [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload withCompletionHandler:completion];
             }
         }];
     }
@@ -573,7 +606,7 @@ static id preprocess(id exception)
             DDLogInfo(@"Got gif image data: %@", data);
             payload[@"type"] = @"file";
             payload[@"data"] = [MLFiletransfer prepareDataUpload:data withFileExtension:@"gif"];
-            return addPreview(nil);
+            return [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload withCompletionHandler:completion];
         }];
         */
         [provider loadInPlaceFileRepresentationForTypeIdentifier:UTTypeGIF.identifier completionHandler:^(NSURL*  _Nullable item, BOOL isInPlace, NSError* _Null_unspecified error) {
@@ -635,8 +668,8 @@ static id preprocess(id exception)
                     DDLogDebug(@"Created UIImage: %@", image);
                     //use prepareUIImageUpload to resize the image to the configured quality (instead of just uploading the raw image file)
                     payload[@"data"] = [MLFiletransfer prepareUIImageUpload:image];
-                    [item stopAccessingSecurityScopedResource];
-                    return addPreview(newURL);
+                    //we can not use newURL here, because it will fall out of scope while the preview is rendered in another thread
+                    return [HelperTools addUploadItemPreviewForItem:item provider:provider andPayload:payload withCompletionHandler:completion];
                 }];
                 if(error != nil)
                 {
@@ -717,7 +750,7 @@ static id preprocess(id exception)
             DDLogInfo(@"Got internet url item: %@", item);
             payload[@"type"] = @"url";
             payload[@"data"] = item.absoluteString;
-            return addPreview(nil);
+            return [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload withCompletionHandler:completion];
         }];
     }
     else if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
@@ -732,7 +765,7 @@ static id preprocess(id exception)
             DDLogInfo(@"Got direct text item: %@", item);
             payload[@"type"] = @"text";
             payload[@"data"] = item;
-            return addPreview(nil);
+            return [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload withCompletionHandler:completion];
         }];
     }
     else

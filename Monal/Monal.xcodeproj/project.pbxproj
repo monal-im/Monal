@@ -139,6 +139,7 @@
 		841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */; };
 		8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */ = {isa = PBXBuildFile; fileRef = 8420EA9A2915E4FE0038FF40 /* OmemoState.h */; };
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
+		842790852A32D16D005C18CC /* CallSounds in Resources */ = {isa = PBXBuildFile; fileRef = 842790842A32D16C005C18CC /* CallSounds */; };
 		8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8441EFF82921B53500E851E9 /* BackgroundSettings.swift */; };
 		844EEC6D28E718DB00CB5EF9 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
@@ -553,6 +554,7 @@
 		841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVCallUI.swift; sourceTree = "<group>"; };
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
+		842790842A32D16C005C18CC /* CallSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CallSounds; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
 		846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPlaceholder.swift; sourceTree = "<group>"; };
 		848717F1295ED64500B8D288 /* MLCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLCall.m; path = Classes/MLCall.m; sourceTree = SOURCE_ROOT; };
@@ -1248,6 +1250,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				842790842A32D16C005C18CC /* CallSounds */,
 				26B0CA8A21AE410E0080B133 /* AlertSounds */,
 				26158AF31FFA8A6A00E53BDC /* opensource.html */,
 				26470F511835C4080069E3E0 /* Media.xcassets */,
@@ -1681,6 +1684,7 @@
 				2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */,
 				264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */,
 				26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */,
+				842790852A32D16D005C18CC /* CallSounds in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				26E8462824EABAED00ECE419 /* Main.storyboard in Resources */,

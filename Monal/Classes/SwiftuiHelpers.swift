@@ -234,6 +234,31 @@ extension View {
     }
 }
 
+//see https://exyte.com/blog/swiftui-tutorial-popupview-library
+struct FrameGetterModifier: ViewModifier {
+    @Binding var frame: CGRect
+    func body(content: Content) -> some View {
+        content
+        .background(
+            GeometryReader { proxy -> AnyView in
+                let rect = proxy.frame(in: .global)
+                // This avoids an infinite layout loop
+                if rect.integral != self.frame.integral {
+                    DispatchQueue.main.async {
+                        self.frame = rect
+                    }
+                }
+            return AnyView(EmptyView())
+            }
+        )
+    }
+}
+extension View { 
+    func frameGetter(_ frame: Binding<CGRect>) -> some View {
+        modifier(FrameGetterModifier(frame: frame))
+    }
+}
+
 // //see https://stackoverflow.com/a/68291983
 // struct OverflowContentViewModifier: ViewModifier {
 //     @State private var contentOverflow: Bool = false

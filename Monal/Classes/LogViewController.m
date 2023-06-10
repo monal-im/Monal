@@ -14,7 +14,6 @@
 #import "MLXMPPManager.h"
 #import "MLUDPLogger.h"
 
-
 @interface LogViewController ()
 @property (weak, nonatomic) IBOutlet UITextField* logUDPHostname;
 @property (weak, nonatomic) IBOutlet UITextField* logUDPPort;

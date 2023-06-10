@@ -6,7 +6,7 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
-#include "hsluv.h"
+#include <stdio.h>
 #include <mach/mach.h>
 #include <mach/mach_error.h>
 #include <mach/mach_traps.h>
@@ -15,10 +15,14 @@
 #include <objc/message.h>
 #include <objc/objc-exception.h>
 
+#import <KSCrash/KSCrash.h>
+#import <KSCrash/KSCrashC.h>
+
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import <MapKit/MapKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
+#import "hsluv.h"
 #import "HelperTools.h"
 #import "MLXMPPManager.h"
 #import "MLPubSub.h"
@@ -48,15 +52,88 @@
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
 
+@interface KSCrash()
+@property(nonatomic,readwrite,retain) NSString* basePath;
+@end
+
 
 static NSString* _processID;
 static DDFileLogger* _fileLogger = nil;
+static char logfilePath[1024];
+static char logfileCopy[1024];
 static NSObject* _isAppExtensionLock = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
 #if TARGET_OS_MACCATALYST
 static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
 #endif
 
+
+//see https://stackoverflow.com/a/2180788
+int asyncSafeCopyFile(const char* from, const char* to)
+{
+    int fd_to, fd_from;
+    char buf[4096];
+    ssize_t nread;
+    int saved_errno;
+
+    fd_from = open(from, O_RDONLY);
+    if (fd_from < 0)
+        return -1;
+
+    fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0660);
+    if (fd_to < 0)
+        goto out_error;
+
+    while((nread = read(fd_from, buf, sizeof buf)) > 0)
+    {
+        char *out_ptr = buf;
+        ssize_t nwritten;
+
+        do {
+            nwritten = write(fd_to, out_ptr, nread);
+
+            if (nwritten >= 0)
+            {
+                nread -= nwritten;
+                out_ptr += nwritten;
+            }
+            else if (errno != EINTR)
+            {
+                goto out_error;
+            }
+        } while (nread > 0);
+    }
+
+    if (nread == 0)
+    {
+        if (close(fd_to) < 0)
+        {
+            fd_to = -1;
+            goto out_error;
+        }
+        close(fd_from);
+
+        /* Success! */
+        return 0;
+    }
+
+out_error:
+    saved_errno = errno;
+
+    close(fd_from);
+    if (fd_to >= 0)
+        close(fd_to);
+
+    errno = saved_errno;
+    return -1;
+}
+
+static void crash_callback(const KSCrashReportWriter* writer)
+{
+    writer->addStringElement(writer, "currentLogfile", logfilePath);
+    writer->addStringElement(writer, "logfileCopy", logfileCopy);
+    asyncSafeCopyFile(logfilePath, logfileCopy);
+}
 
 void logException(NSException* exception)
 {
@@ -1343,6 +1420,49 @@ static id preprocess(id exception)
     NSArray* directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:containerUrl error:nil];
     for(NSString* file in directoryContents)
         DDLogVerbose(@"File %@/%@", containerUrl, file);
+}
+
++(void) installCrashHandler
+{
+#ifdef DEBUG
+    //store data globally for later retrieval by our crash_callback()
+    strncpy(logfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(logfilePath)-1);
+    logfilePath[sizeof(logfilePath)-1] = '\0';
+    NSString* crashlogPath = [[[self getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"crashlog-%@.tmp", [[NSUUID UUID] UUIDString]]];
+    strncpy(logfileCopy, crashlogPath.UTF8String, sizeof(logfileCopy)-1);
+    logfilePath[sizeof(logfileCopy)-1] = '\0';
+    
+    DDLogVerbose(@"KSCrash callback: %p", crash_callback);
+    KSCrash* handler = [KSCrash sharedInstance];
+    handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
+    handler.monitoring = KSCrashMonitorTypeProductionSafe;     //KSCrashMonitorTypeAll
+    handler.onCrash = crash_callback;
+    //[handler enableSwapOfCxaThrow];
+    handler.searchQueueNames = YES;
+    handler.introspectMemory = NO;
+    handler.addConsoleLogToReport = YES;
+    handler.demangleLanguages = KSCrashDemangleLanguageAll;
+    if(![self isAppExtension])
+        handler.deadlockWatchdogInterval = 12;
+    handler.userInfo = @{
+        @"isAppex": @([self isAppExtension]),
+        @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
+    };
+    //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different in appex and mainapp
+    //use the lowlevel C api instead
+    handler.monitoring = kscrash_install("UnifiedReport", handler.basePath.UTF8String);
+    if(handler.monitoring == 0)
+        DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");
+    
+    NSArray* directoryContentsData = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Data"]] path] error:nil];
+    for(NSString* file in directoryContentsData)
+        DDLogDebug(@"KSCrash file: CrashReports/Data/%@", file);
+    NSArray* directoryContentsReports = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Reports"]] path] error:nil];
+    for(NSString* file in directoryContentsReports)
+        DDLogDebug(@"KSCrash file: CrashReports/Reports/%@", file);
+    
+    //[[KSCrash sharedInstance] reportUserException:@"test" reason:@"dummy test" language:@"dylang" lineOfCode:nil stackTrace:nil logAllThreads:NO terminateProgram:NO];
+#endif
 }
 
 +(BOOL) isAppExtension

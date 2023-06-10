@@ -454,6 +454,7 @@ static BOOL warnUnclean = NO;
 {
     [HelperTools configureLogging];
     [HelperTools activityLog];
+    [HelperTools installCrashHandler];
     
     //log unhandled exceptions
     [HelperTools installExceptionHandler];

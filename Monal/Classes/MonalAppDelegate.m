@@ -7,7 +7,6 @@
 //
 
 #import <BackgroundTasks/BackgroundTasks.h>
-
 #import "MonalAppDelegate.h"
 #import "MLConstants.h"
 #import "HelperTools.h"
@@ -25,6 +24,7 @@
 #import "MBProgressHUD.h"
 #import "MLVoIPProcessor.h"
 #import "MLUDPLogger.h"
+#import "MLCrashReporter.h"
 
 @import NotificationBannerSwift;
 
@@ -444,6 +444,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         DDLogError(@"intent: %@", userActivity.interaction);
     }
     */
+    
     return YES;
 }
 
@@ -542,6 +543,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         //hide spinner
         [self.activeChats.spinner stopAnimating];
     }
+    
+    //report pending crashes
+    [MLCrashReporter reportPendingCrashesWithViewController:[self getTopViewController]];
 }
 
 -(void) setActiveChats:(UIViewController*) activeChats

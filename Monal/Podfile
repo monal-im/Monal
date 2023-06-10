@@ -33,6 +33,7 @@ def monalxmpp
   pod 'ASN1Decoder'
   #pod 'GoogleWebRTC'
   pod 'WebRTC-lib'
+  pod 'KSCrash', git: 'https://github.com/monal-im/KSCrash', branch: 'master'
   signalDeps
 end
 
@@ -48,7 +49,6 @@ target 'NotificationService' do
   use_frameworks!
   inhibit_all_warnings!
   pod 'CocoaLumberjack/Swift'
-  signalDeps
 end
 
 target 'Monal' do

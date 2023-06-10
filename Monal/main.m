@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
     @autoreleasepool {
         [HelperTools configureLogging];
         [HelperTools activityLog];
+        [HelperTools installCrashHandler];
         
         //log unhandled exceptions
         [HelperTools installExceptionHandler];

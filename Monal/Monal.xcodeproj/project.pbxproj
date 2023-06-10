@@ -139,6 +139,7 @@
 		841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */; };
 		841EE4292A3F46F700D3AF14 /* MLFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 841EE4282A3F46F700D3AF14 /* MLFileLogger.m */; };
 		841EE42B2A3F471100D3AF14 /* MLFileLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 841EE42A2A3F471100D3AF14 /* MLFileLogger.h */; };
+		841EE4302A426F2300D3AF14 /* MLCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */; };
 		8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */ = {isa = PBXBuildFile; fileRef = 8420EA9A2915E4FE0038FF40 /* OmemoState.h */; };
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
 		842790852A32D16D005C18CC /* CallSounds in Resources */ = {isa = PBXBuildFile; fileRef = 842790842A32D16C005C18CC /* CallSounds */; };
@@ -556,6 +557,8 @@
 		841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVCallUI.swift; sourceTree = "<group>"; };
 		841EE4282A3F46F700D3AF14 /* MLFileLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLFileLogger.m; sourceTree = "<group>"; };
 		841EE42A2A3F471100D3AF14 /* MLFileLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLFileLogger.h; sourceTree = "<group>"; };
+		841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLCrashReporter.m; path = Classes/MLCrashReporter.m; sourceTree = "<group>"; };
+		841EE4312A426F3D00D3AF14 /* MLCrashReporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLCrashReporter.h; path = Classes/MLCrashReporter.h; sourceTree = "<group>"; };
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
 		842790842A32D16C005C18CC /* CallSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CallSounds; sourceTree = "<group>"; };
@@ -1084,6 +1087,7 @@
 		26B2A4B41B73040000272E63 /* Monal-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				841EE42E2A426F0900D3AF14 /* tools */,
 				84D31CDA28653AA9006D7926 /* WebRTC */,
 				C1E4654424EE515200CA5AAF /* localization */,
 				2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */,
@@ -1221,7 +1225,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA = {
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
 				C1F0AD15288BCE6F00BB0182 /* Alpha.Monal.ios.entitlements */,
@@ -1328,6 +1332,15 @@
 				841B6F19297B18720074F9B7 /* AccountPicker.swift */,
 			);
 			name = Calls;
+			sourceTree = "<group>";
+		};
+		841EE42E2A426F0900D3AF14 /* tools */ = {
+			isa = PBXGroup;
+			children = (
+				841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */,
+				841EE4312A426F3D00D3AF14 /* MLCrashReporter.h */,
+			);
+			name = tools;
 			sourceTree = "<group>";
 		};
 		84D31CDA28653AA9006D7926 /* WebRTC */ = {
@@ -1519,6 +1532,8 @@
 			dependencies = (
 			);
 			name = monalxmpp;
+			packageProductDependencies = (
+			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
 			productType = "com.apple.product-type.framework";
@@ -1662,10 +1677,10 @@
 				ko,
 				eu,
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			packageReferences = (
-				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections.git" */,
-				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */,
+				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */,
+				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
@@ -2015,6 +2030,7 @@
 				841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */,
 				840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
+				841EE4302A426F2300D3AF14 /* MLCrashReporter.m in Sources */,
 				E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */,
 				C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */,
 				E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */,
@@ -3944,7 +3960,7 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-		C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */ = {
+		C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
 			requirement = {
@@ -3952,7 +3968,7 @@
 				minimumVersion = 2.4.3;
 			};
 		};
-		C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections.git" */ = {
+		C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-collections.git";
 			requirement = {
@@ -3970,12 +3986,12 @@
 		};
 		C1E1EC7A286A025F0097EC74 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */;
+			package = C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
 			productName = SwiftSoup;
 		};
 		C1F5C7AE2777638B0001F295 /* OrderedCollections */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections.git" */;
+			package = C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */;
 			productName = OrderedCollections;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -47,17 +47,14 @@
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
 
+
 static DDFileLogger* _fileLogger = nil;
+static NSObject* _isAppExtensionLock = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
 #if TARGET_OS_MACCATALYST
 static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
 #endif
 
-@interface xmpp()
--(void) dispatchOnReceiveQueue: (void (^)(void)) operation;
-@end
-
-@implementation HelperTools
 
 void logException(NSException* exception)
 {
@@ -94,6 +91,14 @@ static id preprocess(id exception)
     return preprocessed;
 }
 #endif
+
+
+@implementation HelperTools
+
++(void) initialize
+{
+    _isAppExtensionLock = [NSObject new];
+}
 
 +(void) installExceptionHandler
 {
@@ -1286,7 +1291,15 @@ static id preprocess(id exception)
 +(BOOL) isAppExtension
 {
     //dispatch once seems to corrupt this check (nearly always return mainapp even if in appex) --> don't use dispatch once
-    return [[[NSBundle mainBundle] executablePath] containsString:@".appex/"];
+    static BOOL result = NO;
+    static BOOL calculated = NO;
+    @synchronized(_isAppExtensionLock) {
+        if(calculated)
+            return result;
+        result = [[[NSBundle mainBundle] executablePath] containsString:@".appex/"];
+        calculated = YES;
+        return result;
+    }
 }
 
 +(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features andForms:(NSArray*) forms

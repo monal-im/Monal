@@ -137,6 +137,8 @@
 		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
 		841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F19297B18720074F9B7 /* AccountPicker.swift */; };
 		841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */; };
+		841EE4292A3F46F700D3AF14 /* MLFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 841EE4282A3F46F700D3AF14 /* MLFileLogger.m */; };
+		841EE42B2A3F471100D3AF14 /* MLFileLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 841EE42A2A3F471100D3AF14 /* MLFileLogger.h */; };
 		8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */ = {isa = PBXBuildFile; fileRef = 8420EA9A2915E4FE0038FF40 /* OmemoState.h */; };
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
 		842790852A32D16D005C18CC /* CallSounds in Resources */ = {isa = PBXBuildFile; fileRef = 842790842A32D16C005C18CC /* CallSounds */; };
@@ -552,6 +554,8 @@
 		841898AB2957DBAC00FEC77D /* RichAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichAlert.swift; sourceTree = "<group>"; };
 		841B6F19297B18720074F9B7 /* AccountPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountPicker.swift; sourceTree = "<group>"; };
 		841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVCallUI.swift; sourceTree = "<group>"; };
+		841EE4282A3F46F700D3AF14 /* MLFileLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLFileLogger.m; sourceTree = "<group>"; };
+		841EE42A2A3F471100D3AF14 /* MLFileLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLFileLogger.h; sourceTree = "<group>"; };
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
 		842790842A32D16C005C18CC /* CallSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CallSounds; sourceTree = "<group>"; };
@@ -1211,11 +1215,13 @@
 				541E4CBF254AA0E700FD7B28 /* MLHandler.m */,
 				C10490482612ED2F0054AC9E /* MLEmoji.swift */,
 				54A22D2426185C2900B56EAD /* MLNotificationQueue.m */,
+				841EE4282A3F46F700D3AF14 /* MLFileLogger.m */,
+				841EE42A2A3F471100D3AF14 /* MLFileLogger.h */,
 			);
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+		29B97314FDCFA39411CA2CEA = {
 			isa = PBXGroup;
 			children = (
 				C1F0AD15288BCE6F00BB0182 /* Alpha.Monal.ios.entitlements */,
@@ -1413,6 +1419,7 @@
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
 				540E13A924CF78D00038FDA0 /* MLLogFormatter.h in Headers */,
 				C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */,
+				841EE42B2A3F471100D3AF14 /* MLFileLogger.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 				C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */,
 				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
@@ -1439,8 +1446,8 @@
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
 				26AA70212146BBB900598605 /* Embed Foundation Extensions */,
 				261E542723A0A1D300394F59 /* Embed Frameworks */,
-				B76834F7D41432AA1A41545E /* [CP] Embed Pods Frameworks */,
 				C19CC5E028E85527007AD33E /* Fix catalyst aps-enviromnent */,
+				E09BC3B194F91D0DE538C310 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1655,10 +1662,10 @@
 				ko,
 				eu,
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			mainGroup = 29B97314FDCFA39411CA2CEA;
 			packageReferences = (
-				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */,
-				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections.git" */,
+				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
@@ -1823,23 +1830,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		B76834F7D41432AA1A41545E /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		B79D5724FB4B51022BCFD6E9 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1896,6 +1886,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E09BC3B194F91D0DE538C310 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E29F37602913131122522B1F /* [CP] Check Pods Manifest.lock */ = {
@@ -2072,6 +2079,7 @@
 				26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */,
 				541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */,
 				540E13A724CF78900038FDA0 /* MLLogFormatter.m in Sources */,
+				841EE4292A3F46F700D3AF14 /* MLFileLogger.m in Sources */,
 				C158D41425A0AC630005AA40 /* MLMucProcessor.m in Sources */,
 				C16D18362792A4AF00F869A0 /* DataLayerMigrations.m in Sources */,
 				54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */,
@@ -3936,7 +3944,7 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-		C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+		C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
 			requirement = {
@@ -3944,7 +3952,7 @@
 				minimumVersion = 2.4.3;
 			};
 		};
-		C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+		C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-collections.git";
 			requirement = {
@@ -3962,12 +3970,12 @@
 		};
 		C1E1EC7A286A025F0097EC74 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			package = C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */;
 			productName = SwiftSoup;
 		};
 		C1F5C7AE2777638B0001F295 /* OrderedCollections */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */;
+			package = C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections.git" */;
 			productName = OrderedCollections;
 		};
 /* End XCSwiftPackageProductDependency section */

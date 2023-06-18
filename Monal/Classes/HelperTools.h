@@ -26,12 +26,17 @@ NS_ASSUME_NONNULL_BEGIN
 @class xmpp;
 @class XMPPStanza;
 @class UNNotificationRequest;
+@class DDLogFormatter;
+@class DDLogMessage;
 
 void logException(NSException* exception);
 void swizzle(Class c, SEL orig, SEL new);
 
 @interface HelperTools : NSObject
 
+@property (class, nonatomic, strong) DDFileLogger* fileLogger;
++(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage usingFormatter:(id<DDLogFormatter> _Nullable) formatter counter:(uint64_t*) counter andError:(NSError** _Nullable) error;
++(void) configureLogging;
 +(void) installExceptionHandler;
 +(void) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount;

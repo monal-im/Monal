@@ -103,7 +103,7 @@ while True:
     
     # log to RAW file
     if rawfd:
-        size = struct.pack("!Q", len(payload))
+        size = struct.pack("!L", len(payload))
         rawfd.write(size+payload)
     
     # decode raw json encoded data

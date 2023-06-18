@@ -38,6 +38,7 @@
 #import "DataLayer.h"
 #import "OmemoState.h"
 #import "MLUDPLogger.h"
+#import "MLFileLogger.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -48,6 +49,7 @@
 @import QuickLookThumbnailing;
 
 
+static NSString* _processID;
 static DDFileLogger* _fileLogger = nil;
 static NSObject* _isAppExtensionLock = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
@@ -98,6 +100,9 @@ static id preprocess(id exception)
 +(void) initialize
 {
     _isAppExtensionLock = [NSObject new];
+    
+    u_int32_t i = arc4random();
+    _processID = [self hexadecimalString:[NSData dataWithBytes:&i length:sizeof(i)]];
 }
 
 +(void) installExceptionHandler
@@ -1243,12 +1248,63 @@ static id preprocess(id exception)
     _fileLogger = fileLogger;
 }
 
++(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage usingFormatter:(id<DDLogFormatter> _Nullable) formatter counter:(uint64_t*) counter andError:(NSError** _Nullable) error
+{
+    //format message using given formatter
+    NSString* logMsg = logMessage.message;
+    NSString* timestamp = [[NSISO8601DateFormatter new] stringFromDate:logMessage.timestamp];
+    if(formatter)
+    {
+        logMsg = [NSString stringWithFormat:@"%@", [formatter formatLogMessage:logMessage]];
+        timestamp = [(MLLogFormatter*)formatter stringFromDate:logMessage.timestamp];
+    }
+    
+    //construct json dictionary
+    (*counter)++;
+    NSDictionary* representedObject = @{
+        @"queueThreadLabel": [self getQueueThreadLabelFor:logMessage],
+        @"processType": [self isAppExtension] ? @"appex" : @"mainapp",
+        @"representedObject": logMessage.representedObject ? logMessage.representedObject : [NSNull null]
+    };
+    NSDictionary* msgDict = @{
+        @"formattedMessage": logMsg,
+        @"message": logMessage.message,
+        @"level": [NSNumber numberWithInteger:logMessage.level],
+        @"flag": [NSNumber numberWithInteger:logMessage.flag],
+        @"context": [NSNumber numberWithInteger:logMessage.context],
+        @"file": logMessage.file,
+        @"fileName": logMessage.fileName,
+        @"function": logMessage.function,
+        @"line": [NSNumber numberWithInteger:logMessage.line],
+        @"tag": representedObject,
+        @"options": [NSNumber numberWithInteger:logMessage.options],
+        @"timestamp": timestamp,
+        @"threadID": logMessage.threadID,
+        @"threadName": logMessage.threadName,
+        @"queueLabel": logMessage.queueLabel,
+        @"qos": [NSNumber numberWithInteger:logMessage.qos],
+        @"_counter": [NSNumber numberWithUnsignedLongLong:*counter],
+        @"_processID": _processID,
+    };
+    
+    //encode json into NSData
+    NSError* writeError = nil; 
+    NSData* rawData = [NSJSONSerialization dataWithJSONObject:msgDict options:NSJSONWritingSortedKeys error:&writeError];
+    if(writeError)
+    {
+        if(error != nil)
+            *error = writeError;
+        return nil;
+    }
+    return rawData;
+}
+
 +(void) configureLogging
 {
     //create log formatter
     MLLogFormatter* formatter = [MLLogFormatter new];
     
-    //console logger (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
+    //start console logger first (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
 #if TARGET_OS_SIMULATOR
     [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
@@ -1257,22 +1313,23 @@ static id preprocess(id exception)
     [DDLog addLogger:[DDOSLogger sharedInstance]];
 #endif
     
+    //network logger (start as early as possible)
+    MLUDPLogger* udpLogger = [MLUDPLogger new];
+    [udpLogger setLogFormatter:formatter];
+    [DDLog addLogger:udpLogger];
+    
     NSString* containerUrl = [[HelperTools getContainerURLForPathComponents:@[]] path];
     DDLogInfo(@"Logfile dir: %@", containerUrl);
     
     //file logger
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:containerUrl];
-    self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
+    self.fileLogger = [[MLFileLogger alloc] initWithLogFileManager:logFileManager];
     [self.fileLogger setLogFormatter:formatter];
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
-    self.fileLogger.maximumFileSize = 1024 * 1024 * 1024;
+    self.fileLogger.maximumFileSize = 256 * 1024 * 1024;
     [DDLog addLogger:self.fileLogger];
-    
-    //network logger
-    MLUDPLogger* udpLogger = [MLUDPLogger new];
-    [udpLogger setLogFormatter:formatter];
-    [DDLog addLogger:udpLogger];
+    DDLogDebug(@"Current logfile: %@", self.fileLogger.currentLogFileInfo.filePath);
     
     //log version info as early as possible
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];

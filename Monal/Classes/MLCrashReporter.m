@@ -268,7 +268,7 @@
             if(logfileData == nil)
                 logfileData = [NSData new];
         }
-        [filteredReports addObject:[HelperTools encodeBase64WithData:logfileData]];
+        [filteredReports addObject:[HelperTools hexadecimalString:logfileData]];
     }
     kscrash_callCompletion(onCompletion, filteredReports, YES, nil);
 }

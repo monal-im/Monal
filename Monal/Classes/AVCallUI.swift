@@ -12,10 +12,14 @@ import CocoaLumberjack
 import WebRTC
 import AVFoundation
 import CallKit
+import AVKit
 
 struct AVCallUI: View {
     @StateObject private var call: ObservableKVOWrapper<MLCall>
     @StateObject private var contact: ObservableKVOWrapper<MLContact>
+    private var ringingPlayer: AVAudioPlayer!
+    private var busyPlayer: AVAudioPlayer!
+    private var errorPlayer: AVAudioPlayer!
     private var delegate: SheetDismisserProtocol
     private var appDelegate: MonalAppDelegate
     private var formatter: DateComponentsFormatter
@@ -29,6 +33,10 @@ struct AVCallUI: View {
         self.formatter.allowedUnits = [.hour, .minute, .second]
         self.formatter.unitsStyle = .positional
         self.formatter.zeroFormattingBehavior = .pad
+        
+        self.ringingPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"ringing", withExtension:"wav", subdirectory:"CallSounds")!)
+        self.busyPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"busy", withExtension:"wav", subdirectory:"CallSounds")!)
+        self.errorPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"error", withExtension:"wav", subdirectory:"CallSounds")!)
     }
 
     var body: some View {
@@ -321,9 +329,75 @@ struct AVCallUI: View {
             //force portrait mode and lock ui there
             UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
             self.appDelegate.orientationLock = .portrait
-        }.onDisappear {
+            self.ringingPlayer.numberOfLoops = -1
+            self.busyPlayer.numberOfLoops = -1
+            self.errorPlayer.numberOfLoops = -1
+        }
+        .onDisappear {
             //allow all orientations again
             self.appDelegate.orientationLock = .all
+        }
+        .onChange(of: MLCallState(rawValue:call.state)) { state in
+            DDLogVerbose("state changed: \(String(describing:call.state as NSNumber))")
+            switch state {
+//                 case .discovering:
+                case .ringing:
+                    DDLogDebug("state: ringing")
+                    busyPlayer.stop()
+                    errorPlayer.stop()
+                    ringingPlayer.play()
+//                 case .connecting:
+//                 case .reconnecting:
+//                 case .connected:
+                case .finished:
+                    DDLogDebug("state: finished: \(String(describing:call.finishReason as NSNumber))")
+                    switch MLCallFinishReason(rawValue:call.finishReason) {
+                        case .unknown:
+                            DDLogDebug("state: finished: unknown")
+                            ringingPlayer.stop()
+                            busyPlayer.stop()
+                            errorPlayer.play()
+//                         case .normal:
+                        case .connectivityError:
+                            DDLogDebug("state: finished: connectivityError")
+                            ringingPlayer.stop()
+                            busyPlayer.stop()
+                            errorPlayer.play()
+                        case .unanswered:
+                            DDLogDebug("state: finished: unanswered")
+                            ringingPlayer.stop()
+                            errorPlayer.stop()
+                            busyPlayer.play()
+//                         case .answeredElsewhere:
+                        case .retracted:
+                            DDLogDebug("state: finished: retracted")
+                            //this will only be displayed for timer-induced retractions,
+                            //reflect that in our text instead of using some generic "hung up"
+                            ringingPlayer.stop()
+                            errorPlayer.stop()
+                            busyPlayer.play()
+                        case .rejected:
+                            DDLogDebug("state: finished: rejected")
+                            ringingPlayer.stop()
+                            errorPlayer.stop()
+                            busyPlayer.play()
+                        case .declined:
+                            DDLogDebug("state: finished: declined")
+                            ringingPlayer.stop()
+                            errorPlayer.stop()
+                            busyPlayer.play()
+                        default:
+                            DDLogDebug("state: finished: default")
+                            ringingPlayer.stop()
+                            busyPlayer.stop()
+                            errorPlayer.stop()
+                    }
+                default:
+                    DDLogDebug("state: default")
+                    ringingPlayer.stop()
+                    busyPlayer.stop()
+                    errorPlayer.stop()
+            }
         }
     }
 }

@@ -19,8 +19,7 @@
 #import "MLContact.h"
 #import "xmpp.h"
 
-
-static NSString* _processID;
+static NSData* _key;
 static volatile MLUDPLogger* _self;
 
 @interface MLUDPLogger ()
@@ -39,8 +38,12 @@ static volatile MLUDPLogger* _self;
 
 +(void) initialize
 {
-    u_int32_t i = arc4random();
-    _processID = [HelperTools hexadecimalString:[NSData dataWithBytes:&i length:sizeof(i)]];
+    //hash raw key string with sha256 to get the correct 256 bit length needed for AES-256
+    //WARNING: THIS DOES NOT ENHANCE ENTROPY!! PLEASE MAKE SURE TO USE A KEY WITH PROPER ENTROPY!!
+    NSData* rawKey = [[[HelperTools defaultsDB] stringForKey:@"udpLoggerKey"] dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableData* key = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
+    CC_SHA256(rawKey.bytes, (unsigned int)rawKey.length, key.mutableBytes);
+    _key = [key copy];
 }
 
 +(void) flushWithTimeout:(double) timeout
@@ -223,47 +226,17 @@ static volatile MLUDPLogger* _self;
 
 -(void) logMessage:(DDLogMessage*) logMessage
 {
+    static uint64_t counter = 0;
+    
     //early return if deactivated
     if(![[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"])
         return;
     
-    //calculate formatted log message
-    NSString* logMsg = logMessage.message;
-    if(self->_logFormatter)
-        logMsg = [NSString stringWithFormat:@"%@\n", [self->_logFormatter formatLogMessage:logMessage]];
-    
-    NSDictionary* representedObject = @{
-        @"queueThreadLabel": [HelperTools getQueueThreadLabelFor:logMessage],
-        @"processType": [HelperTools isAppExtension] ? @"appex" : @"mainapp",
-        @"representedObject": logMessage.representedObject ? logMessage.representedObject : [NSNull null]
-    };
-    
-    _counter++;
-    NSDictionary* msgDict = @{
-        @"formattedMessage": logMsg,
-        @"message": logMessage.message,
-        @"level": [NSNumber numberWithInteger:logMessage.level],
-        @"flag": [NSNumber numberWithInteger:logMessage.flag],
-        @"context": [NSNumber numberWithInteger:logMessage.context],
-        @"file": logMessage.file,
-        @"fileName": logMessage.fileName,
-        @"function": logMessage.function,
-        @"line": [NSNumber numberWithInteger:logMessage.line],
-        @"tag": representedObject,
-        @"options": [NSNumber numberWithInteger:logMessage.options],
-        @"timestamp": [[NSISO8601DateFormatter new] stringFromDate:logMessage.timestamp],
-        @"threadID": logMessage.threadID,
-        @"threadName": logMessage.threadName,
-        @"queueLabel": logMessage.queueLabel,
-        @"qos": [NSNumber numberWithInteger:logMessage.qos],
-        @"_counter": [NSNumber numberWithUnsignedLongLong:_counter],
-        @"_processID": _processID,
-    };
-    NSError* writeError = nil; 
-    NSData* rawData = [NSJSONSerialization dataWithJSONObject:msgDict options:NSJSONWritingPrettyPrinted error:&writeError];
-    if(writeError)
+    NSError* error = nil; 
+    NSData* rawData = [HelperTools convertLogmessageToJsonData:logMessage usingFormatter:self->_logFormatter counter:&counter andError:&error];
+    if(error != nil || rawData == nil)
     {
-        [[self class] logError:@"json encode error: %@", writeError];
+        [[self class] logError:@"json encode error: %@", error];
         return;
     }
     
@@ -273,14 +246,8 @@ static volatile MLUDPLogger* _self;
     //compress data to account for udp size limits
     rawData = [self gzipDeflate:rawData];
     
-    //hash raw key string with sha256 to get the correct 256 bit length needed for AES-256
-    //WARNING: THIS DOES NOT ENHANCE ENTROPY!! PLEASE MAKE SURE TO USE A KEY WITH PROPER ENTROPY!!
-    NSData* rawKey = [[[HelperTools defaultsDB] stringForKey:@"udpLoggerKey"] dataUsingEncoding:NSUTF8StringEncoding];
-    NSMutableData* key = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256(rawKey.bytes, (unsigned int)rawKey.length, key.mutableBytes);
-    
     //encrypt rawData using the "derived" key (see warning above!)
-    MLEncryptedPayload* payload = [AESGcm encrypt:rawData withKey:key];
+    MLEncryptedPayload* payload = [AESGcm encrypt:rawData withKey:_key];
     NSMutableData* data  = [NSMutableData dataWithData:payload.iv];
     [data appendData:payload.authTag];
     [data appendData:payload.body];
@@ -289,7 +256,7 @@ static volatile MLUDPLogger* _self;
         [[self class] logError:@"not sending message, too big: %lu", (unsigned long)data.length];
     else
         dispatch_async(_send_queue, ^{
-            [self sendData:data withOriginalMessage:logMsg];
+            [self sendData:data withOriginalMessage:logMessage->_message];
         });
 }
 
@@ -307,7 +274,7 @@ static volatile MLUDPLogger* _self;
             [[self class] logError:@"send error: %@\n%@", error, msg];
             
         }
-        [[self class] logError:@"unlocking send condition (%@: %@)...", _processID, [NSNumber numberWithUnsignedLongLong:self->_counter]];
+        [[self class] logError:@"unlocking send condition (%@)...", [NSNumber numberWithUnsignedLongLong:self->_counter]];
         [self->_send_condition lock];
         [self->_send_condition signal];
         [self->_send_condition unlock];

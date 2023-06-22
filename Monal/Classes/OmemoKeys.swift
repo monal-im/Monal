@@ -5,16 +5,17 @@
 //  Created by Jan on 04.05.22.
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
-import monalxmpp
-
+import UniformTypeIdentifiers
 import SwiftUI
 import OrderedCollections
+import monalxmpp
 
 struct OmemoKeysEntry: View {
     private let contactJid: String
     
     @State private var trustLevel: NSNumber
     @State private var showEntryInfo = false
+    @State private var showClipboardCopy = false
 
     private let deviceId: NSNumber
     private let fingerprint: Data
@@ -139,6 +140,8 @@ struct OmemoKeysEntry: View {
             self.trustLevel = self.account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
         })
 
+        let fingerprintString = HelperTools.signalHexKeyWithSpaces(with: fingerprint)
+        let clipboardValue = "OMEMO fingerprint of \(self.contactJid), device \(self.deviceId): \(fingerprintString)"
         GroupBox {
             HStack(alignment:.bottom) {
                 VStack(alignment:.leading) {
@@ -148,7 +151,6 @@ struct OmemoKeysEntry: View {
                     }
                     Spacer()
                     HStack(alignment:.center) {
-                        let fingerprintString = HelperTools.signalHexKeyWithSpaces(with: fingerprint)
                         Text(fingerprintString)
                             .font(Font.init(
                                 UIFont.monospacedSystemFont(ofSize: 11.0, weight: .regular)
@@ -157,6 +159,10 @@ struct OmemoKeysEntry: View {
                             Text("Encrypted session to this device broken beyond repair.").foregroundColor(.red)
                         }
                     }
+                }
+                .onTapGesture(count: 2) {
+                    UIPasteboard.general.setValue(clipboardValue, forPasteboardType:UTType.utf8PlainText.identifier)
+                    showClipboardCopy = true
                 }
                 Spacer()
                 // the trust level of our own device should not be displayed
@@ -180,6 +186,13 @@ struct OmemoKeysEntry: View {
             }
             .alert(isPresented: $showEntryInfo) {
                 getEntryInfoAlert()
+            }
+            .alert(isPresented: $showClipboardCopy) {
+                Alert(
+                    title: Text("Copied to clipboard"),
+                    message: Text(clipboardValue),
+                    dismissButton: nil
+                );
             }
         }
     }
@@ -314,8 +327,8 @@ struct OmemoKeys: View {
         }
         List {
             let helpDescription = (self.ownKeys == true) ?
-            Text("These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it.") :
-            Text("You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen.")
+            Text("These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it. Double tap onto a fingerprint to copy to clipboard.") :
+            Text("You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen. Double tap onto a fingerprint to copy to clipboard.")
 
             Section(header:helpDescription) {
                 if(self.contacts.count == 0) {

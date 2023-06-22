@@ -6,7 +6,7 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
-#include "hsluv.h"
+#include <stdio.h>
 #include <mach/mach.h>
 #include <mach/mach_error.h>
 #include <mach/mach_traps.h>
@@ -15,10 +15,14 @@
 #include <objc/message.h>
 #include <objc/objc-exception.h>
 
+#import <KSCrash/KSCrash.h>
+#import <KSCrash/KSCrashC.h>
+
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import <MapKit/MapKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
+#import "hsluv.h"
 #import "HelperTools.h"
 #import "MLXMPPManager.h"
 #import "MLPubSub.h"
@@ -38,6 +42,7 @@
 #import "DataLayer.h"
 #import "OmemoState.h"
 #import "MLUDPLogger.h"
+#import "MLFileLogger.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -47,17 +52,88 @@
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
 
+@interface KSCrash()
+@property(nonatomic,readwrite,retain) NSString* basePath;
+@end
+
+
+static NSString* _processID;
 static DDFileLogger* _fileLogger = nil;
+static char logfilePath[1024];
+static char logfileCopy[1024];
+static NSObject* _isAppExtensionLock = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
 #if TARGET_OS_MACCATALYST
 static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
 #endif
 
-@interface xmpp()
--(void) dispatchOnReceiveQueue: (void (^)(void)) operation;
-@end
 
-@implementation HelperTools
+//see https://stackoverflow.com/a/2180788
+int asyncSafeCopyFile(const char* from, const char* to)
+{
+    int fd_to, fd_from;
+    char buf[4096];
+    ssize_t nread;
+    int saved_errno;
+
+    fd_from = open(from, O_RDONLY);
+    if (fd_from < 0)
+        return -1;
+
+    fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0660);
+    if (fd_to < 0)
+        goto out_error;
+
+    while((nread = read(fd_from, buf, sizeof buf)) > 0)
+    {
+        char *out_ptr = buf;
+        ssize_t nwritten;
+
+        do {
+            nwritten = write(fd_to, out_ptr, nread);
+
+            if (nwritten >= 0)
+            {
+                nread -= nwritten;
+                out_ptr += nwritten;
+            }
+            else if (errno != EINTR)
+            {
+                goto out_error;
+            }
+        } while (nread > 0);
+    }
+
+    if (nread == 0)
+    {
+        if (close(fd_to) < 0)
+        {
+            fd_to = -1;
+            goto out_error;
+        }
+        close(fd_from);
+
+        /* Success! */
+        return 0;
+    }
+
+out_error:
+    saved_errno = errno;
+
+    close(fd_from);
+    if (fd_to >= 0)
+        close(fd_to);
+
+    errno = saved_errno;
+    return -1;
+}
+
+static void crash_callback(const KSCrashReportWriter* writer)
+{
+    writer->addStringElement(writer, "currentLogfile", logfilePath);
+    writer->addStringElement(writer, "logfileCopy", logfileCopy);
+    asyncSafeCopyFile(logfilePath, logfileCopy);
+}
 
 void logException(NSException* exception)
 {
@@ -94,6 +170,17 @@ static id preprocess(id exception)
     return preprocessed;
 }
 #endif
+
+
+@implementation HelperTools
+
++(void) initialize
+{
+    _isAppExtensionLock = [NSObject new];
+    
+    u_int32_t i = arc4random();
+    _processID = [self hexadecimalString:[NSData dataWithBytes:&i length:sizeof(i)]];
+}
 
 +(void) installExceptionHandler
 {
@@ -456,6 +543,89 @@ static id preprocess(id exception)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcompletion-handler"
++(void) addUploadItemPreviewForItem:(NSURL* _Nullable) url provider:(NSItemProvider* _Nullable) provider andPayload:(NSMutableDictionary*) payload withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion
+{
+    void (^useProvider)() = ^() {
+        if(provider == nil)
+        {
+            DDLogWarn(@"Can not creating preview image via item provider, no provider present: using generic doc image instead");
+            payload[@"preview"] = [UIImage systemImageNamed:@"doc"];
+            [url stopAccessingSecurityScopedResource];
+            return completion(payload);
+        }
+        else
+            [provider loadPreviewImageWithOptions:nil completionHandler:^(UIImage*  _Nullable previewImage, NSError* _Null_unspecified error) {
+                if(error != nil || previewImage == nil)
+                {
+                    if(url == nil)
+                    {
+                        DDLogWarn(@"Error creating preview image via item provider, using generic doc image instead: %@", error);
+                        payload[@"preview"] = [UIImage systemImageNamed:@"doc"];
+                    }
+                }
+                else
+                {
+                    DDLogVerbose(@"Managed to generate thumbnail for url=%@ using loadPreviewImageWithOptions: %@", url, previewImage);
+                    payload[@"preview"] = previewImage;
+                }
+                [url stopAccessingSecurityScopedResource];
+                return completion(payload);
+            }];
+    };
+    if(url != nil)
+    {
+        DDLogVerbose(@"Generating thumbnail for url=%@", url);
+        QLThumbnailGenerationRequest* request = [[QLThumbnailGenerationRequest alloc] initWithFileAtURL:url size:CGSizeMake(64, 64) scale:1.0 representationTypes:QLThumbnailGenerationRequestRepresentationTypeThumbnail];
+        NSURL* tmpURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory: YES];
+        tmpURL = [tmpURL URLByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
+        [QLThumbnailGenerator.sharedGenerator saveBestRepresentationForRequest:request toFileAtURL:tmpURL withContentType:UTTypePNG.identifier completionHandler:^(NSError *error) {
+            if(error == nil)
+            {
+                UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
+                [[NSFileManager defaultManager] removeItemAtURL:tmpURL error:nil];      //remove temporary file, we don't need it anymore
+                if(result != nil)
+                {
+                    payload[@"preview"] = result;
+                    DDLogVerbose(@"Managed to generate thumbnail for url=%@ using QLThumbnailGenerator: %@", url, result);
+                    [url stopAccessingSecurityScopedResource];
+                    return completion(payload);     //don't fall through on success
+                }
+            }
+            //if we fall through to this point, either the thumbnail generation or the imageWithContentsOfFile above failed
+            //--> try something else
+            DDLogVerbose(@"Extracting thumbnail using imageWithContentsOfFile failed, retrying with imageWithContentsOfFile: %@", error);
+            UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
+            if(result != nil)
+            {
+                payload[@"preview"] = result;
+                DDLogVerbose(@"Managed to generate thumbnail for url=%@ using imageWithContentsOfFile: %@", url, result);
+                [url stopAccessingSecurityScopedResource];
+                return completion(payload);
+            }
+            else
+            {
+                DDLogVerbose(@"Thumbnail generation not successful - reverting to generic image for file: %@", error);
+                UIDocumentInteractionController* imgCtrl = [UIDocumentInteractionController interactionControllerWithURL:url];
+                if(imgCtrl != nil && imgCtrl.icons.count > 0)
+                {
+                    payload[@"preview"] = imgCtrl.icons.firstObject;
+                    DDLogVerbose(@"Managed to generate thumbnail for url=%@ using generic image for file: %@", url, imgCtrl.icons.firstObject);
+                    [url stopAccessingSecurityScopedResource];
+                    return completion(payload);
+                }
+            }
+            
+            //last resort
+            useProvider();
+        }];
+    }
+    else
+        useProvider();
+}
+#pragma clang diagnostic pop
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcompletion-handler"
 +(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion
 {
     NSMutableDictionary* payload = [NSMutableDictionary new];
@@ -463,66 +633,15 @@ static id preprocess(id exception)
     DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
     if(provider.suggestedName != nil)
         payload[@"filename"] = provider.suggestedName;
-    void (^addPreview)(NSURL* _Nullable) = ^(NSURL* url) {
-        if(url != nil)
-        {
-            QLThumbnailGenerationRequest* request = [[QLThumbnailGenerationRequest alloc] initWithFileAtURL:url size:CGSizeMake(64, 64) scale:1.0 representationTypes:QLThumbnailGenerationRequestRepresentationTypeThumbnail];
-            NSURL* tmpURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory: YES];
-            tmpURL = [tmpURL URLByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
-            [QLThumbnailGenerator.sharedGenerator saveBestRepresentationForRequest:request toFileAtURL:tmpURL withContentType:UTTypePNG.identifier completionHandler:^(NSError *error) {
-                if(error == nil)
-                {
-                    UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
-                    [[NSFileManager defaultManager] removeItemAtURL:tmpURL error:nil];      //remove temporary file, we don't need it anymore
-                    if(result != nil)
-                    {
-                        payload[@"preview"] = result;
-                        return completion(payload);     //don't fall through on success
-                    }
-                }
-                //if we fall through to this point, either the thumbnail generation or the imageWithContentsOfFile above failed
-                //--> try something else
-                DDLogVerbose(@"Extracting thumbnail using quick look framework failed, retrying with imageWithContentsOfFile: %@", error);
-                UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
-                if(result != nil)
-                {
-                    payload[@"preview"] = result;
-                    return completion(payload);
-                }
-                else
-                {
-                    DDLogVerbose(@"Thumbnail generation not successful - reverting to generic image for file: %@", error);
-                    UIDocumentInteractionController* imgCtrl = [UIDocumentInteractionController interactionControllerWithURL:url];
-                    if(imgCtrl != nil && imgCtrl.icons.count > 0)
-                    {
-                        payload[@"preview"] = imgCtrl.icons.firstObject;
-                        return completion(payload);
-                    }
-                }
-            }];
-        }
-        [provider loadPreviewImageWithOptions:nil completionHandler:^(UIImage*  _Nullable previewImage, NSError* _Null_unspecified error) {
-            if(error != nil || previewImage == nil)
-            {
-                if(url == nil)
-                {
-                    DDLogWarn(@"Error creating preview image via item provider, using generic doc image instead: %@", error);
-                    payload[@"preview"] = [UIImage systemImageNamed:@"doc"];
-                }
-            }
-            else
-                payload[@"preview"] = previewImage;
-            return completion(payload);
-        }];
-    };
+    
     void (^prepareFile)(NSURL*) = ^(NSURL* item) {
         NSError* error;
         [item startAccessingSecurityScopedResource];
         [[NSFileCoordinator new] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
             DDLogDebug(@"NSFileCoordinator called accessor: %@", newURL);
             payload[@"data"] = [MLFiletransfer prepareFileUpload:newURL];
-            [item stopAccessingSecurityScopedResource];
-            return addPreview(newURL);
+            //we can not use newURL here, because it will fall out of scope while the preview is rendered in another thread
+            return [HelperTools addUploadItemPreviewForItem:item provider:provider andPayload:payload withCompletionHandler:completion];
         }];
         if(error != nil)
         {
@@ -532,6 +651,7 @@ static id preprocess(id exception)
             return completion(payload);
         }
     };
+    
     if([provider hasItemConformingToTypeIdentifier:@"com.apple.mapkit.map-item"])
     {
         // convert map item to geo:
@@ -555,7 +675,7 @@ static id preprocess(id exception)
                 DDLogInfo(@"Got mapkit item: %@", item);
                 payload[@"type"] = @"geo";
                 payload[@"data"] = [NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude];
-                return addPreview(nil);
+                return [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload withCompletionHandler:completion];
             }
         }];
     }
@@ -573,7 +693,7 @@ static id preprocess(id exception)
             DDLogInfo(@"Got gif image data: %@", data);
             payload[@"type"] = @"file";
             payload[@"data"] = [MLFiletransfer prepareDataUpload:data withFileExtension:@"gif"];
-            return addPreview(nil);
+            return [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload withCompletionHandler:completion];
         }];
         */
         [provider loadInPlaceFileRepresentationForTypeIdentifier:UTTypeGIF.identifier completionHandler:^(NSURL*  _Nullable item, BOOL isInPlace, NSError* _Null_unspecified error) {
@@ -635,8 +755,8 @@ static id preprocess(id exception)
                     DDLogDebug(@"Created UIImage: %@", image);
                     //use prepareUIImageUpload to resize the image to the configured quality (instead of just uploading the raw image file)
                     payload[@"data"] = [MLFiletransfer prepareUIImageUpload:image];
-                    [item stopAccessingSecurityScopedResource];
-                    return addPreview(newURL);
+                    //we can not use newURL here, because it will fall out of scope while the preview is rendered in another thread
+                    return [HelperTools addUploadItemPreviewForItem:item provider:provider andPayload:payload withCompletionHandler:completion];
                 }];
                 if(error != nil)
                 {
@@ -717,7 +837,7 @@ static id preprocess(id exception)
             DDLogInfo(@"Got internet url item: %@", item);
             payload[@"type"] = @"url";
             payload[@"data"] = item.absoluteString;
-            return addPreview(nil);
+            return [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload withCompletionHandler:completion];
         }];
     }
     else if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
@@ -732,7 +852,7 @@ static id preprocess(id exception)
             DDLogInfo(@"Got direct text item: %@", item);
             payload[@"type"] = @"text";
             payload[@"data"] = item;
-            return addPreview(nil);
+            return [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload withCompletionHandler:completion];
         }];
     }
     else
@@ -1205,12 +1325,63 @@ static id preprocess(id exception)
     _fileLogger = fileLogger;
 }
 
++(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage usingFormatter:(id<DDLogFormatter> _Nullable) formatter counter:(uint64_t*) counter andError:(NSError** _Nullable) error
+{
+    //format message using given formatter
+    NSString* logMsg = logMessage.message;
+    NSString* timestamp = [[NSISO8601DateFormatter new] stringFromDate:logMessage.timestamp];
+    if(formatter)
+    {
+        logMsg = [NSString stringWithFormat:@"%@", [formatter formatLogMessage:logMessage]];
+        timestamp = [(MLLogFormatter*)formatter stringFromDate:logMessage.timestamp];
+    }
+    
+    //construct json dictionary
+    (*counter)++;
+    NSDictionary* representedObject = @{
+        @"queueThreadLabel": [self getQueueThreadLabelFor:logMessage],
+        @"processType": [self isAppExtension] ? @"appex" : @"mainapp",
+        @"representedObject": logMessage.representedObject ? logMessage.representedObject : [NSNull null]
+    };
+    NSDictionary* msgDict = @{
+        @"formattedMessage": logMsg,
+        @"message": logMessage.message,
+        @"level": [NSNumber numberWithInteger:logMessage.level],
+        @"flag": [NSNumber numberWithInteger:logMessage.flag],
+        @"context": [NSNumber numberWithInteger:logMessage.context],
+        @"file": logMessage.file,
+        @"fileName": logMessage.fileName,
+        @"function": logMessage.function,
+        @"line": [NSNumber numberWithInteger:logMessage.line],
+        @"tag": representedObject,
+        @"options": [NSNumber numberWithInteger:logMessage.options],
+        @"timestamp": timestamp,
+        @"threadID": logMessage.threadID,
+        @"threadName": logMessage.threadName,
+        @"queueLabel": logMessage.queueLabel,
+        @"qos": [NSNumber numberWithInteger:logMessage.qos],
+        @"_counter": [NSNumber numberWithUnsignedLongLong:*counter],
+        @"_processID": _processID,
+    };
+    
+    //encode json into NSData
+    NSError* writeError = nil; 
+    NSData* rawData = [NSJSONSerialization dataWithJSONObject:msgDict options:NSJSONWritingSortedKeys error:&writeError];
+    if(writeError)
+    {
+        if(error != nil)
+            *error = writeError;
+        return nil;
+    }
+    return rawData;
+}
+
 +(void) configureLogging
 {
     //create log formatter
     MLLogFormatter* formatter = [MLLogFormatter new];
     
-    //console logger (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
+    //start console logger first (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
 #if TARGET_OS_SIMULATOR
     [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
@@ -1219,22 +1390,23 @@ static id preprocess(id exception)
     [DDLog addLogger:[DDOSLogger sharedInstance]];
 #endif
     
+    //network logger (start as early as possible)
+    MLUDPLogger* udpLogger = [MLUDPLogger new];
+    [udpLogger setLogFormatter:formatter];
+    [DDLog addLogger:udpLogger];
+    
     NSString* containerUrl = [[HelperTools getContainerURLForPathComponents:@[]] path];
     DDLogInfo(@"Logfile dir: %@", containerUrl);
     
     //file logger
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:containerUrl];
-    self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
+    self.fileLogger = [[MLFileLogger alloc] initWithLogFileManager:logFileManager];
     [self.fileLogger setLogFormatter:formatter];
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
-    self.fileLogger.maximumFileSize = 1024 * 1024 * 1024;
+    self.fileLogger.maximumFileSize = 256 * 1024 * 1024;
     [DDLog addLogger:self.fileLogger];
-    
-    //network logger
-    MLUDPLogger* udpLogger = [MLUDPLogger new];
-    [udpLogger setLogFormatter:formatter];
-    [DDLog addLogger:udpLogger];
+    DDLogDebug(@"Current logfile: %@", self.fileLogger.currentLogFileInfo.filePath);
     
     //log version info as early as possible
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
@@ -1250,10 +1422,61 @@ static id preprocess(id exception)
         DDLogVerbose(@"File %@/%@", containerUrl, file);
 }
 
++(void) installCrashHandler
+{
+#ifdef DEBUG
+    //store data globally for later retrieval by our crash_callback()
+    strncpy(logfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(logfilePath)-1);
+    logfilePath[sizeof(logfilePath)-1] = '\0';
+    NSString* crashlogPath = [[[self getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"crashlog-%@.tmp", [[NSUUID UUID] UUIDString]]];
+    strncpy(logfileCopy, crashlogPath.UTF8String, sizeof(logfileCopy)-1);
+    logfilePath[sizeof(logfileCopy)-1] = '\0';
+    
+    DDLogVerbose(@"KSCrash callback: %p", crash_callback);
+    KSCrash* handler = [KSCrash sharedInstance];
+    handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
+    handler.monitoring = KSCrashMonitorTypeProductionSafe;     //KSCrashMonitorTypeAll
+    handler.onCrash = crash_callback;
+    //[handler enableSwapOfCxaThrow];
+    handler.searchQueueNames = YES;
+    handler.introspectMemory = NO;
+    handler.addConsoleLogToReport = YES;
+    handler.demangleLanguages = KSCrashDemangleLanguageAll;
+    if(![self isAppExtension])
+        handler.deadlockWatchdogInterval = 12;
+    handler.userInfo = @{
+        @"isAppex": @([self isAppExtension]),
+        @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
+    };
+    //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different in appex and mainapp
+    //use the lowlevel C api instead
+    handler.monitoring = kscrash_install("UnifiedReport", handler.basePath.UTF8String);
+    if(handler.monitoring == 0)
+        DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");
+    
+    NSArray* directoryContentsData = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Data"]] path] error:nil];
+    for(NSString* file in directoryContentsData)
+        DDLogDebug(@"KSCrash file: CrashReports/Data/%@", file);
+    NSArray* directoryContentsReports = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Reports"]] path] error:nil];
+    for(NSString* file in directoryContentsReports)
+        DDLogDebug(@"KSCrash file: CrashReports/Reports/%@", file);
+    
+    //[[KSCrash sharedInstance] reportUserException:@"test" reason:@"dummy test" language:@"dylang" lineOfCode:nil stackTrace:nil logAllThreads:NO terminateProgram:NO];
+#endif
+}
+
 +(BOOL) isAppExtension
 {
     //dispatch once seems to corrupt this check (nearly always return mainapp even if in appex) --> don't use dispatch once
-    return [[[NSBundle mainBundle] executablePath] containsString:@".appex/"];
+    static BOOL result = NO;
+    static BOOL calculated = NO;
+    @synchronized(_isAppExtensionLock) {
+        if(calculated)
+            return result;
+        result = [[[NSBundle mainBundle] executablePath] containsString:@".appex/"];
+        calculated = YES;
+        return result;
+    }
 }
 
 +(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features andForms:(NSArray*) forms

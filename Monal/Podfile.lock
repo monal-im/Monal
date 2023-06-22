@@ -10,9 +10,72 @@ PODS:
     - DACircularProgress
     - pop
     - SDWebImage (= 4.0.0)
+  - KSCrash (1.15.27):
+    - KSCrash/Installations (= 1.15.27)
+  - KSCrash/Installations (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting
+  - KSCrash/Recording (1.15.27):
+    - KSCrash/Recording/Tools (= 1.15.27)
+  - KSCrash/Recording/Tools (1.15.27)
+  - KSCrash/Reporting (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters (= 1.15.27)
+    - KSCrash/Reporting/MessageUI (= 1.15.27)
+    - KSCrash/Reporting/Sinks (= 1.15.27)
+    - KSCrash/Reporting/Tools (= 1.15.27)
+  - KSCrash/Reporting/Filters (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters/Alert (= 1.15.27)
+    - KSCrash/Reporting/Filters/AppleFmt (= 1.15.27)
+    - KSCrash/Reporting/Filters/Base (= 1.15.27)
+    - KSCrash/Reporting/Filters/Basic (= 1.15.27)
+    - KSCrash/Reporting/Filters/GZip (= 1.15.27)
+    - KSCrash/Reporting/Filters/JSON (= 1.15.27)
+    - KSCrash/Reporting/Filters/Sets (= 1.15.27)
+    - KSCrash/Reporting/Filters/Stringify (= 1.15.27)
+    - KSCrash/Reporting/Filters/Tools (= 1.15.27)
+  - KSCrash/Reporting/Filters/Alert (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters/Base
+  - KSCrash/Reporting/Filters/AppleFmt (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters/Base
+  - KSCrash/Reporting/Filters/Base (1.15.27):
+    - KSCrash/Recording
+  - KSCrash/Reporting/Filters/Basic (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters/Base
+  - KSCrash/Reporting/Filters/GZip (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters/Base
+  - KSCrash/Reporting/Filters/JSON (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters/Base
+  - KSCrash/Reporting/Filters/Sets (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters/AppleFmt
+    - KSCrash/Reporting/Filters/Base
+    - KSCrash/Reporting/Filters/Basic
+    - KSCrash/Reporting/Filters/GZip
+    - KSCrash/Reporting/Filters/JSON
+    - KSCrash/Reporting/Filters/Stringify
+  - KSCrash/Reporting/Filters/Stringify (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters/Base
+  - KSCrash/Reporting/Filters/Tools (1.15.27):
+    - KSCrash/Recording
+  - KSCrash/Reporting/MessageUI (1.15.27):
+    - KSCrash/Recording
+  - KSCrash/Reporting/Sinks (1.15.27):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters
+    - KSCrash/Reporting/Tools
+  - KSCrash/Reporting/Tools (1.15.27):
+    - KSCrash/Recording
   - MarqueeLabel (4.3.0)
   - MBProgressHUD (1.2.0)
-  - NotificationBannerSwift (3.2.0):
+  - NotificationBannerSwift (3.2.1):
     - MarqueeLabel (~> 4.3.0)
     - SnapKit (~> 5.6.0)
   - pop (1.0.12)
@@ -24,11 +87,11 @@ PODS:
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
   - SnapKit (5.6.0)
-  - sqlite3/common (3.41.0)
-  - sqlite3/perf-threadsafe (3.41.0):
+  - sqlite3/common (3.42.0)
+  - sqlite3/perf-threadsafe (3.42.0):
     - sqlite3/common
   - TOCropViewController (2.6.1)
-  - WebRTC-lib (111.0.0)
+  - WebRTC-lib (114.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -36,6 +99,7 @@ DEPENDENCIES:
   - DZNEmptyDataSet
   - FLAnimatedImage (~> 1.0)
   - IDMPhotoBrowser
+  - KSCrash (from `https://github.com/monal-im/KSCrash`, branch `master`)
   - MBProgressHUD (~> 1.2.0)
   - NotificationBannerSwift (~> 3.2.0)
   - SAMKeychain
@@ -65,6 +129,9 @@ SPEC REPOS:
     - WebRTC-lib
 
 EXTERNAL SOURCES:
+  KSCrash:
+    :branch: master
+    :git: https://github.com/monal-im/KSCrash
   SignalProtocolC:
     :branch: master
     :git: https://github.com/monal-im/libsignal-protocol-c
@@ -73,6 +140,9 @@ EXTERNAL SOURCES:
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
 
 CHECKOUT OPTIONS:
+  KSCrash:
+    :commit: 522312f975ad5acbb479d0a8ccd558fae8c6df75
+    :git: https://github.com/monal-im/KSCrash
   SignalProtocolC:
     :commit: 560504888d9c0ba4be860275d206dcef07e0761e
     :git: https://github.com/monal-im/libsignal-protocol-c
@@ -87,19 +157,20 @@ SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
   IDMPhotoBrowser: b96159fe4adb991a844068eb17dab9c0b7d7e51a
+  KSCrash: 202a2dd3a1a3a1aa0783056a42d7db8ea8bf3a56
   MarqueeLabel: 02f5ac8fd6877c94564556cb93fa86c70c08baeb
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  NotificationBannerSwift: 437e135298d297fcb03f3eec4466f45cdb128d3d
+  NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: 76a6348bdc74eb5a55dd08a091ef298e56b55e41
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  sqlite3: d31b2b69d59bd1b4ab30e5c92eb18fd8e82fa392
+  sqlite3: f163dbbb7aa3339ad8fc622782c2d9d7b72f7e9c
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
-  WebRTC-lib: 7e7f08b0062e5610599a73c0c232ed22662c0bf1
+  WebRTC-lib: d83df8976fa608b980f1d85796b3de66d60a1953
 
-PODFILE CHECKSUM: 724c45c4ab700d4fcb4895b70836aa32e4a0a8ba
+PODFILE CHECKSUM: 2a09a5bd65710585fcd2e0de1d9cf403f3b245bb
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.12.1

@@ -78,9 +78,9 @@ sock = socket.socket(socket.AF_INET6 if ipaddress.ip_address(args.listen).versio
 sock.bind((args.listen, args.port))
 last_counter = None
 last_processID = None
-
 logfd = None
 rawfd = None
+receiveCounter = 0
 if args.file:
     print(colorize("Opening logfile '%s' for writing..." % args.file, ansi=15, ansi_bg=0), flush=True)
     logfd = open(args.file, "w")
@@ -103,11 +103,15 @@ while True:
     
     # log to RAW file
     if rawfd:
-        size = struct.pack("!Q", len(payload))
+        size = struct.pack("!L", len(payload))
         rawfd.write(size+payload)
     
     # decode raw json encoded data
     decoded = json.loads(str(payload, "UTF-8"))
+    
+    # increment local receive counter and add it to data
+    receiveCounter += 1
+    decoded["_receiveCounter"] = receiveCounter
     
     # check if _counter jumped over some lines
     logline = ""

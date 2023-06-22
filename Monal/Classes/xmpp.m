@@ -1660,17 +1660,11 @@ NSString* const kStanza = @"stanza";
     MLXMLNode* rNode;
     @synchronized(_stateLockObject) {
         unsigned long unackedCount = (unsigned long)[self.unAckedStanzas count];
-        NSDictionary* dic = @{
-            @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
-            @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
-            @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
-            @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", unackedCount],
-        };
         if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
             ((!self.smacksRequestInFlight && unackedCount>0) || force)
         ) {
             DDLogVerbose(@"requesting smacks ack...");
-            rNode = [[MLXMLNode alloc] initWithElement:@"r" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
+            rNode = [[MLXMLNode alloc] initWithElement:@"r" andNamespace:@"urn:xmpp:sm:3" withAttributes:@{} andChildren:@[] andData:nil];
             self.smacksRequestInFlight = YES;
         }
         else
@@ -1696,16 +1690,10 @@ NSString* const kStanza = @"stanza";
     if(self.accountState<kStateBound || !self.connectionProperties.supportsSM3)
         return;
     
-    unsigned long unackedCount = 0;
     NSDictionary* dic;
     @synchronized(_stateLockObject) {
-        unackedCount = (unsigned long)[self.unAckedStanzas count];
         dic = @{
             @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
-            @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
-            @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
-            @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
-            @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", unackedCount],
         };
     }
     MLXMLNode* aNode = [[MLXMLNode alloc] initWithElement:@"a" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
@@ -2998,11 +2986,6 @@ NSString* const kStanza = @"stanza";
             NSDictionary* dic = @{
                 @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
                 @"previd":self.streamID,
-                
-                @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
-                @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
-                @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
-                @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long)[self.unAckedStanzas count]]
             };
             resumeNode = [[MLXMLNode alloc] initWithElement:@"resume" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
             self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on

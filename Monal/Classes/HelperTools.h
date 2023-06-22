@@ -26,12 +26,18 @@ NS_ASSUME_NONNULL_BEGIN
 @class xmpp;
 @class XMPPStanza;
 @class UNNotificationRequest;
+@class DDLogFormatter;
+@class DDLogMessage;
 
 void logException(NSException* exception);
 void swizzle(Class c, SEL orig, SEL new);
 
 @interface HelperTools : NSObject
 
+@property (class, nonatomic, strong) DDFileLogger* fileLogger;
++(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage usingFormatter:(id<DDLogFormatter> _Nullable) formatter counter:(uint64_t*) counter andError:(NSError** _Nullable) error;
++(void) configureLogging;
++(void) installCrashHandler;
 +(void) installExceptionHandler;
 +(void) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount;
@@ -56,6 +62,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSData*) serializeObject:(id) obj;
 +(id) unserializeData:(NSData*) data;
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request;
++(void) addUploadItemPreviewForItem:(NSURL* _Nullable) url provider:(NSItemProvider* _Nullable) provider andPayload:(NSMutableDictionary*) payload withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion;
 +(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void (^)(NSMutableDictionary* _Nullable)) completion;
 +(UIView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler;
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length;
@@ -76,8 +83,6 @@ void swizzle(Class c, SEL orig, SEL new);
 +(void) dispatchAsync:(BOOL) async reentrantOnQueue:(dispatch_queue_t _Nullable) queue withBlock:(monal_void_block_t) block;
 +(void) activityLog;
 +(NSUserDefaults*) defaultsDB;
-@property (class, nonatomic, strong) DDFileLogger* fileLogger;
-+(void) configureLogging;
 +(BOOL) isAppExtension;
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features;
 +(NSSet*) getOwnFeatureSet;

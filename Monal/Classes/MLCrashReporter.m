@@ -227,13 +227,16 @@
             [auxData appendString:[NSString stringWithFormat:@"%@: %@\n", userKey, report[@"user"][userKey]]];
         
         //add crash_info_message and crash_info_message2 to aux data
+        NSMutableString* crashInfos = [NSMutableString new];
         for(NSDictionary* binaryImage in report[@"binary_images"])
         {
             if(binaryImage[@"crash_info_message"] != nil)
-                [auxData appendString:[NSString stringWithFormat:@"%@: %@\n", binaryImage[@"name"], binaryImage[@"crash_info_message"]]];
+                [crashInfos appendString:[NSString stringWithFormat:@"%@:\n%@\n\n", binaryImage[@"name"], binaryImage[@"crash_info_message"]]];
             if(binaryImage[@"crash_info_message2"] != nil)
-                [auxData appendString:[NSString stringWithFormat:@"%@: %@\n", binaryImage[@"name"], binaryImage[@"crash_info_message2"]]];
+                [crashInfos appendString:[NSString stringWithFormat:@"%@:\n%@\n\n", binaryImage[@"name"], binaryImage[@"crash_info_message2"]]];
         }
+        if([crashInfos length] > 0)
+            [auxData appendString:[NSString stringWithFormat:@"\nAvailable crash info messages:\n\n%@", crashInfos]];
         
         [filteredReports addObject:auxData];
     }

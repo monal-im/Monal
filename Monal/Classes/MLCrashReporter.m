@@ -135,7 +135,7 @@
         if(![report isKindOfClass:[NSData class]])
             DDLogError(@"Report was of unsupported data type %@", [report class]);
         else
-            [mailController addAttachmentData:report mimeType:@"binary" fileName:[NSString stringWithFormat:@"CrashReport-%d.txt.gz", i++]];
+            [mailController addAttachmentData:report mimeType:@"binary" fileName:[NSString stringWithFormat:@"CrashReport-%d.mcrash.gz", i++]];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.viewController presentViewController:mailController animated:YES completion:nil];

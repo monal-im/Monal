@@ -196,7 +196,7 @@
                 }
                 
                 //text shares are also shared via comment field, so ignore them, if they contain the same contents
-                if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier] && self.contentText && [self.contentText length] > 0 && [self.contentText isEqualToString:payload[@"data"]])
+                if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier] && self.contentText && [self.contentText length] > 0 && [payload[@"data"] isKindOfClass:[NSString class]] && [self.contentText isEqualToString:payload[@"data"]])
                 {
                     DDLogWarn(@"Ignoring text payload because already sent via comment field");
                     loading--;

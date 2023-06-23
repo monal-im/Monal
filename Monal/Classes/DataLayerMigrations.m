@@ -1013,7 +1013,7 @@
 
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs
-        if(![HelperTools isSandboxAPNS])
+        if(![[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"])
         {
             NSString* stored_id = (NSString*)[db executeScalar:@"SELECT value FROM flags WHERE name='device_id';"];
             NSString* current_id = UIDevice.currentDevice.identifierForVendor.UUIDString;

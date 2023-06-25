@@ -872,13 +872,13 @@ $$
         _pushToken.length
     )
     {
-        DDLogInfo(@"push token valid, current push settings: token=%@", _pushToken);
+        DDLogInfo(@"push token valid, current push settings: token=%@, isSandboxAPNS=%@", _pushToken, [[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"] ? @"YES" : @"NO");
         self.hasAPNSToken = YES;
     }
     else
     {
         self.hasAPNSToken = NO;
-        DDLogWarn(@"push token invalid, current push settings: token=%@", _pushToken);
+        DDLogWarn(@"push token invalid, current push settings: token=%@, isSandboxAPNS=%@", _pushToken, [[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"] ? @"YES" : @"NO");
     }
 
     //only try to enable push if we have a node and secret value

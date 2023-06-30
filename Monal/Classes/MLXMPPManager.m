@@ -136,6 +136,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     //jabber:iq:version
     [self upgradeBoolUserSettingsIfUnset:@"allowVersionIQ" toDefault:YES];
+    
+    //default value for sanbox is no (e.g. production)
+    [self upgradeBoolUserSettingsIfUnset:@"isSandboxAPNS" toDefault:NO];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -856,6 +859,9 @@ $$
     {
         _pushToken = token;
         [[HelperTools defaultsDB] setObject:_pushToken forKey:@"pushToken"];
+        //this will be used by XMPPIQ setPushEnableWithNode and DataLayerMigrations
+        //save it when the token changes, to keep token and type in sync
+        [[HelperTools defaultsDB] setBool:[HelperTools isSandboxAPNS] forKey:@"isSandboxAPNS"];
     }
     else    //use saved one if we are in NSE appex --> we can't get a new token and the old token might still be valid
         _pushToken = [[HelperTools defaultsDB] objectForKey:@"pushToken"];
@@ -866,13 +872,13 @@ $$
         _pushToken.length
     )
     {
-        DDLogInfo(@"push token valid, current push settings: token=%@", _pushToken);
+        DDLogInfo(@"push token valid, current push settings: token=%@, isSandboxAPNS=%@", _pushToken, [[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"] ? @"YES" : @"NO");
         self.hasAPNSToken = YES;
     }
     else
     {
         self.hasAPNSToken = NO;
-        DDLogWarn(@"push token invalid, current push settings: token=%@", _pushToken);
+        DDLogWarn(@"push token invalid, current push settings: token=%@, isSandboxAPNS=%@", _pushToken, [[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"] ? @"YES" : @"NO");
     }
 
     //only try to enable push if we have a node and secret value

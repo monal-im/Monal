@@ -76,7 +76,7 @@ NSString* const kiqErrorType = @"error";
 #endif //NOT TARGET_OS_MACCATALYST
 #endif //NOT IS_ALPHA
 
-    if([HelperTools isSandboxAPNS])
+    if([[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"])
     {
         [pushModule appendString:@"-sandbox"];
         DDLogInfo(@"Detected APNS sandbox, using sandbox push module: %@", pushModule);

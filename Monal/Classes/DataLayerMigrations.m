@@ -1010,14 +1010,20 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:6.007 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN lastInteraction INTEGER DEFAULT NULL;"];
         }];
+        
+        //friedrich said: do this to make sure we reregister push with the right type and token
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.008 withBlock:^{
+        }];
 
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs
-        if(![HelperTools isSandboxAPNS])
+        if(![[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"])
         {
             NSString* stored_id = (NSString*)[db executeScalar:@"SELECT value FROM flags WHERE name='device_id';"];
             NSString* current_id = UIDevice.currentDevice.identifierForVendor.UUIDString;
-            if(![current_id isEqualToString:stored_id])
+            if(current_id == nil)
+                DDLogWarn(@"Deviceid is nil, not checking for deviceid change");
+            else if(![current_id isEqualToString:stored_id])
             {
                 DDLogWarn(@"Device id has changed (%@ --> %@), invalidating state AND omemo identity keys!", stored_id, current_id);
                 //invalidate account state because the app was migrated to a new device

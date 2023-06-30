@@ -1010,6 +1010,10 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:6.007 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN lastInteraction INTEGER DEFAULT NULL;"];
         }];
+        
+        //friedrich said: do this to make sure we reregister push with the right type and token
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.008 withBlock:^{
+        }];
 
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

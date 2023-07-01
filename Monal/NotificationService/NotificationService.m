@@ -471,12 +471,9 @@ static BOOL warnUnclean = NO;
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     
-#ifdef DEBUG
-    BOOL shutdownStatus = [NotificationService getAppexCleanShutdownStatus];
-    warnUnclean = !shutdownStatus;
+    warnUnclean = ![NotificationService getAppexCleanShutdownStatus];
     if(warnUnclean)
         DDLogError(@"detected unclean appex shutdown!");
-#endif
     
     //mark this appex as unclean (will be cleared directly before calling exit(0))
     [NotificationService setAppexCleanShutdownStatus:NO];
@@ -548,6 +545,7 @@ static BOOL warnUnclean = NO;
         }
     }
     
+#ifdef DEBUG
     if(warnUnclean)
     {
         UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
@@ -561,6 +559,7 @@ static BOOL warnUnclean = NO;
         else
             warnUnclean = NO;       //try again on error
     }
+#endif
     
     //proxy to push singleton
     DDLogDebug(@"proxying to incomingPush");

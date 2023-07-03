@@ -524,9 +524,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     //another process tells us to disconnect all accounts
     //this could happen if we are connecting (or even connected) in the background and the NotificationServiceExtension got started
     //BUT: only do this if we are in background (we should never receive this if we are foregrounded)
-    if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
-        MLAssert(NO, @"Got 'Monal.disconnectAll' while in mainapp. This should NEVER happen!", message);
-    else if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])
+    MLAssert(![message[@"name"] isEqualToString:@"Monal.disconnectAll"], @"Got 'Monal.disconnectAll' while in mainapp. This should NEVER happen!", message);
+    if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])
     {
         DDLogInfo(@"Got connectIfNecessary IPC message");
         //(re)connect all accounts
@@ -1912,7 +1911,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             });
         }
         else
-            MLAssert(NO, @"Outbox payload type unknown", payload);
+            unreachable(@"Outbox payload type unknown", payload);
     }
 }
 

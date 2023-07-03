@@ -16,6 +16,7 @@
 #define _createQueuedTimer(timeout, queue, handler, cancelHandler, ...)		[HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue]
 
 #define MLAssert(check, text, ...)                                          do { if(!(check)) { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools MLAssertWithText:text andUserData:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__];)([HelperTools MLAssertWithText:text andUserData:metamacro_head(__VA_ARGS__) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__];) while(YES); } } while(0)
+#define unreachable(...)                                                    do { DDLogError(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))(MLAssert(NO, @"unreachable", __VA_ARGS__);)(MLAssert(NO, __VA_ARGS__);); } while(0)
 
 #define showErrorOnAlpha(account, description, ...)                         do { [HelperTools showErrorOnAlpha:[NSString stringWithFormat:description, ##__VA_ARGS__] withNode:nil andAccount:account andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; } while(0)
 #define showXMLErrorOnAlpha(account, node, description, ...)                do { [HelperTools showErrorOnAlpha:[NSString stringWithFormat:description, ##__VA_ARGS__] withNode:node andAccount:account andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; } while(0)

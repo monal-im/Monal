@@ -204,7 +204,7 @@ const long NotificationPrivacyOptionCnt = 3;
             break;
         }
         default:
-            unreachable()
+            unreachable();
             break;
     }
     return cell;

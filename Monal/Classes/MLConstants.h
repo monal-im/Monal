@@ -93,12 +93,6 @@ typedef enum NotificationPrivacySettingOption {
     #define __VAN__ISH
 #endif
 
-#define unreachable() { \
-    DDLogError(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
-    NSAssert(NO, @"unreachable"); \
-    while(1); \
-}
-
 // https://clang-analyzer.llvm.org/faq.html#unlocalized_string
 __attribute__((annotate("returns_localized_nsstring")))
 static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)

@@ -25,6 +25,7 @@ extension MLContact : Identifiable {}
 
 
 func unreachable(_ text: String = "unreachable", _ auxData: [String:AnyObject] = [String:AnyObject](), file: String = #file, line: Int = #line, function: String = #function) -> Never {
+    DDLogError("unreachable: \(file) \(line) \(function)")
     HelperTools.mlAssert(withText:text, andUserData:auxData, andFile:(file as NSString).utf8String!, andLine:Int32(line), andFunc:(function as NSString).utf8String!)
     while true {}       //should never be reached
 }
@@ -248,7 +249,7 @@ struct FrameGetterModifier: ViewModifier {
                         self.frame = rect
                     }
                 }
-            return AnyView(EmptyView())
+                return AnyView(EmptyView())
             }
         )
     }
@@ -535,7 +536,7 @@ class SwiftuiInterface : NSObject {
             case "ChatPlaceholder":
                 host.rootView = AnyView(ChatPlaceholder())
             default:
-                assert(false, "unreachable"); // TODO port unreachable macro to swift
+                unreachable()
         }
         return host
     }

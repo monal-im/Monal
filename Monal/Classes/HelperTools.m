@@ -1424,45 +1424,53 @@ static id preprocess(id exception)
 
 +(void) installCrashHandler
 {
+    //only record crashes if either debuggin is turned on (alpha/beta releases) or the log export row was activated in settings by the user
+    BOOL record_crashes = NO;
 #ifdef DEBUG
-    //store data globally for later retrieval by our crash_callback()
-    strncpy(logfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(logfilePath)-1);
-    logfilePath[sizeof(logfilePath)-1] = '\0';
-    NSString* crashlogPath = [[[self getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"crashlog-%@.tmp", [[NSUUID UUID] UUIDString]]];
-    strncpy(logfileCopy, crashlogPath.UTF8String, sizeof(logfileCopy)-1);
-    logfilePath[sizeof(logfileCopy)-1] = '\0';
-    
-    DDLogVerbose(@"KSCrash callback: %p", crash_callback);
-    KSCrash* handler = [KSCrash sharedInstance];
-    handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
-    handler.monitoring = KSCrashMonitorTypeProductionSafe;     //KSCrashMonitorTypeAll
-    handler.onCrash = crash_callback;
-    //[handler enableSwapOfCxaThrow];
-    handler.searchQueueNames = YES;
-    handler.introspectMemory = NO;
-    handler.addConsoleLogToReport = YES;
-    handler.demangleLanguages = KSCrashDemangleLanguageAll;
-    if(![self isAppExtension])
-        handler.deadlockWatchdogInterval = 12;
-    handler.userInfo = @{
-        @"isAppex": @([self isAppExtension]),
-        @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
-    };
-    //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different in appex and mainapp
-    //use the lowlevel C api instead
-    handler.monitoring = kscrash_install("UnifiedReport", handler.basePath.UTF8String);
-    if(handler.monitoring == 0)
-        DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");
-    
-    NSArray* directoryContentsData = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Data"]] path] error:nil];
-    for(NSString* file in directoryContentsData)
-        DDLogDebug(@"KSCrash file: CrashReports/Data/%@", file);
-    NSArray* directoryContentsReports = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Reports"]] path] error:nil];
-    for(NSString* file in directoryContentsReports)
-        DDLogDebug(@"KSCrash file: CrashReports/Reports/%@", file);
-    
-    //[[KSCrash sharedInstance] reportUserException:@"test" reason:@"dummy test" language:@"dylang" lineOfCode:nil stackTrace:nil logAllThreads:NO terminateProgram:NO];
+    record_crashes = YES;
+#else
+    record_crashes = [[HelperTools defaultsDB] boolForKey:@"showLogInSettings"];
 #endif
+    if(record_crashes)
+    {
+        //store data globally for later retrieval by our crash_callback()
+        strncpy(logfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(logfilePath)-1);
+        logfilePath[sizeof(logfilePath)-1] = '\0';
+        NSString* crashlogPath = [[[self getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"crashlog-%@.tmp", [[NSUUID UUID] UUIDString]]];
+        strncpy(logfileCopy, crashlogPath.UTF8String, sizeof(logfileCopy)-1);
+        logfilePath[sizeof(logfileCopy)-1] = '\0';
+        
+        DDLogVerbose(@"KSCrash callback: %p", crash_callback);
+        KSCrash* handler = [KSCrash sharedInstance];
+        handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
+        handler.monitoring = KSCrashMonitorTypeProductionSafe;     //KSCrashMonitorTypeAll
+        handler.onCrash = crash_callback;
+        //[handler enableSwapOfCxaThrow];
+        handler.searchQueueNames = YES;
+        handler.introspectMemory = NO;
+        handler.addConsoleLogToReport = YES;
+        handler.demangleLanguages = KSCrashDemangleLanguageAll;
+        if(![self isAppExtension])
+            handler.deadlockWatchdogInterval = 12;
+        handler.userInfo = @{
+            @"isAppex": @([self isAppExtension]),
+            @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
+        };
+        //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different in appex and mainapp
+        //use the lowlevel C api with dummy bundle name "UnifiedReport" instead
+        handler.monitoring = kscrash_install("UnifiedReport", handler.basePath.UTF8String);
+        if(handler.monitoring == 0)
+            DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");
+        
+        NSArray* directoryContentsData = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Data"]] path] error:nil];
+        for(NSString* file in directoryContentsData)
+            DDLogDebug(@"KSCrash file: CrashReports/Data/%@", file);
+        NSArray* directoryContentsReports = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Reports"]] path] error:nil];
+        for(NSString* file in directoryContentsReports)
+            DDLogDebug(@"KSCrash file: CrashReports/Reports/%@", file);
+        
+        //[[KSCrash sharedInstance] reportUserException:@"test" reason:@"dummy test" language:@"dylang" lineOfCode:nil stackTrace:nil logAllThreads:NO terminateProgram:NO];
+    }
 }
 
 +(BOOL) isAppExtension

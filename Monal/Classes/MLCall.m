@@ -119,6 +119,16 @@
 
 #pragma mark - public interface
 
+-(void) startCaptureLocalVideoWithRenderer:(id<RTCVideoRenderer>) renderer
+{
+    [self.webRTCClient startCaptureLocalVideoWithRenderer:renderer];
+}
+
+-(void) renderRemoteVideoWithRenderer:(id<RTCVideoRenderer>) renderer
+{
+    [self.webRTCClient renderRemoteVideoTo:renderer];
+}
+
 -(void) end
 {
     DDLogVerbose(@"Requesting end call transaction for %@", [self short]);

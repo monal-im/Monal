@@ -36,6 +36,7 @@
 @property (nonatomic, strong) NSUUID* uuid;
 @property (nonatomic, strong) NSString* jmiid;
 @property (nonatomic, strong) MLContact* contact;
+@property (nonatomic) MLCallType callType;
 @property (nonatomic) MLCallDirection direction;
 
 @property (nonatomic, strong) MLXMLNode* _Nullable jmiPropose;
@@ -74,10 +75,10 @@
 +(instancetype) makeDummyCall:(int) type
 {
     NSUUID* uuid = [NSUUID UUID];
-    return [[self alloc] initWithUUID:uuid jmiid:uuid.UUIDString contact:[MLContact makeDummyContact:type] andDirection:MLCallDirectionOutgoing];
+    return [[self alloc] initWithUUID:uuid jmiid:uuid.UUIDString contact:[MLContact makeDummyContact:type] callType:MLCallTypeAudio andDirection:MLCallDirectionOutgoing];
 }
 
--(instancetype) initWithUUID:(NSUUID*) uuid jmiid:(NSString*) jmiid contact:(MLContact*) contact andDirection:(MLCallDirection) direction
+-(instancetype) initWithUUID:(NSUUID*) uuid jmiid:(NSString*) jmiid contact:(MLContact*) contact callType:(MLCallType) callType andDirection:(MLCallDirection) direction
 {
     self = [super init];
     MLAssert(uuid != nil, @"Call UUIDs must not be nil!");
@@ -85,6 +86,7 @@
     self.uuid = uuid;
     self.jmiid = jmiid;
     self.contact = contact;
+    self.callType = callType;
     self.direction = direction;
     self.isConnected = NO;
     self.wasConnectedOnce = NO;
@@ -118,6 +120,16 @@
 }
 
 #pragma mark - public interface
+
+-(void) startCaptureLocalVideoWithRenderer:(id<RTCVideoRenderer>) renderer
+{
+    [self.webRTCClient startCaptureLocalVideoWithRenderer:renderer];
+}
+
+-(void) renderRemoteVideoWithRenderer:(id<RTCVideoRenderer>) renderer
+{
+    [self.webRTCClient renderRemoteVideoTo:renderer];
+}
 
 -(void) end
 {
@@ -694,7 +706,6 @@
 
 -(void) offerSDP
 {
-    //TODO: in our non-jingle protocol the initiator (e.g. we) has to initialize the webrtc session by sending the proper IQs
     [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
         DDLogDebug(@"WebRTC reported local SDP '%@' offer, sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
@@ -727,12 +738,14 @@
 -(void) sendJmiPropose
 {
     DDLogDebug(@"Proposing new call via JMI: %@", self);
+    NSMutableArray* descriptions = [NSMutableArray new];
+    [descriptions addObject:[[MLXMLNode alloc] initWithElement:@"description" andNamespace:@"urn:xmpp:jingle:apps:rtp:1" withAttributes:@{@"media": @"audio"} andChildren:@[] andData:nil]];
+    if(self.callType == MLCallTypeVideo)
+        [descriptions addObject:[[MLXMLNode alloc] initWithElement:@"description" andNamespace:@"urn:xmpp:jingle:apps:rtp:1" withAttributes:@{@"media": @"video"} andChildren:@[] andData:nil]];
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"propose" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
-    } andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"description" andNamespace:@"urn:xmpp:jingle:apps:rtp:1" withAttributes:@{@"media": @"audio"} andChildren:@[] andData:nil]
-    ] andData:nil]];
+    } andChildren:descriptions andData:nil]];
     [jmiNode setStoreHint];
     self.jmiPropose = jmiNode;
     [self.account send:jmiNode];

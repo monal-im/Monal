@@ -51,7 +51,7 @@ static NSMutableDictionary* _pendingCalls;
 @property (nonatomic, readonly) xmpp* account;
 @property (nonatomic, readonly) MLVoIPProcessor* voipProcessor;
 
--(instancetype) initWithUUID:(NSUUID*) uuid jmiid:(NSString*) jmiid contact:(MLContact*) contact andDirection:(MLCallDirection) direction;
+-(instancetype) initWithUUID:(NSUUID*) uuid jmiid:(NSString*) jmiid contact:(MLContact*) contact callType:(MLCallType) callType andDirection:(MLCallDirection) direction;
 -(void) migrateTo:(MLCall*) otherCall;
 -(NSString*) short;
 -(void) reportRinging;
@@ -77,7 +77,7 @@ static NSMutableDictionary* _pendingCalls;
     config.maximumCallGroups = 1;
     config.maximumCallsPerCallGroup = 1;
     config.supportedHandleTypes = [NSSet setWithObject:@(CXHandleTypeGeneric)];
-    config.supportsVideo = NO;
+    config.supportsVideo = YES;
     config.includesCallsInRecents = YES;
     //see https://stackoverflow.com/a/45823730/3528174
     config.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:@"CallKitLogo"]);
@@ -159,20 +159,20 @@ static NSMutableDictionary* _pendingCalls;
     return nil;
 }
 
--(MLCall*) initiateAudioCallToContact:(MLContact*) contact
+-(MLCall*) initiateCallWithType:(MLCallType) callType toContact:(MLContact*) contact
 {
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
-    MLAssert(account != nil, @"account is nil in initiateAudioCallToContact!", (@{@"contact": contact}));
+    MLAssert(account != nil, @"account is nil in initiateCallWithType:ToContact:!", (@{@"contact": contact}));
     
     NSUUID* uuid = [NSUUID UUID];
-    MLCall* call = [[MLCall alloc] initWithUUID:uuid jmiid:uuid.UUIDString contact:contact andDirection:MLCallDirectionOutgoing];
-    DDLogInfo(@"Initiating audio call to %@: %@", contact, call);
+    MLCall* call = [[MLCall alloc] initWithUUID:uuid jmiid:uuid.UUIDString contact:contact callType:callType andDirection:MLCallDirectionOutgoing];
+    DDLogInfo(@"Initiating %@ call to %@: %@", (callType==MLCallTypeAudio ? @"audio" : @"video"), contact, call);
     [self addCall:call];
     
     CXHandle* handle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:contact.contactJid];
     CXStartCallAction* startCallAction = [[CXStartCallAction alloc] initWithCallUUID:call.uuid handle:handle];
     startCallAction.contactIdentifier = call.contact.contactDisplayName;
-    startCallAction.video = NO;
+    startCallAction.video = call.callType == MLCallTypeVideo;
     CXTransaction* transaction = [[CXTransaction alloc] initWithAction:startCallAction];
     [self.callController requestTransaction:transaction completion:^(NSError* error) {
         if(error != nil)
@@ -437,7 +437,7 @@ static NSMutableDictionary* _pendingCalls;
     BOOL forceRelay = ![[HelperTools defaultsDB] boolForKey:@"webrtcAllowP2P"];
     DDLogInfo(@"Initializing webrtc with forceRelay=%@ using ice servers: %@", bool2str(forceRelay), iceServers);
     MLAssert(call.webRTCClient == nil, @"Call does already have a webrtc client object!", (@{@"old_client": call.webRTCClient}));
-    WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers forceRelay:forceRelay];
+    WebRTCClient* webRTCClient = [[WebRTCClient alloc] initWithIceServers:iceServers audioOnly:call.callType==MLCallTypeAudio forceRelay:forceRelay];
     call.webRTCClient = webRTCClient;
     webRTCClient.delegate = call;
 }
@@ -732,7 +732,7 @@ static NSMutableDictionary* _pendingCalls;
     update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:call.contact.contactJid];
     update.localizedCallerName = call.contact.contactDisplayName;
     update.supportsDTMF = NO;
-    update.hasVideo = NO;
+    update.hasVideo = call.callType == MLCallTypeVideo;
     update.supportsHolding = NO;
     update.supportsGrouping = NO;
     update.supportsUngrouping = NO;
@@ -746,7 +746,11 @@ static NSMutableDictionary* _pendingCalls;
     NSString* jmiid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id"];
     MLAssert(uuid != nil, @"call uuid invalid!", (@{@"propose@id": nilWrapper(jmiid)}));
     
-    MLCall* call = [[MLCall alloc] initWithUUID:uuid jmiid:jmiid contact:[MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo] andDirection:MLCallDirectionIncoming];
+    MLCallType callType = MLCallTypeAudio;
+    if([messageNode check:@"{urn:xmpp:jingle-message:0}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=video>"])
+        callType = MLCallTypeVideo;
+    
+    MLCall* call = [[MLCall alloc] initWithUUID:uuid jmiid:jmiid contact:[MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo] callType:callType andDirection:MLCallDirectionIncoming];
     //order matters here!
     call.fullRemoteJid = messageNode.from;
     call.jmiPropose = messageNode;

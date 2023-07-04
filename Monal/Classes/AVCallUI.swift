@@ -10,6 +10,22 @@ import AVFoundation
 import CallKit
 import AVKit
 
+struct VideoView: UIViewRepresentable {
+    var renderer: RTCMTLVideoView
+ 
+    init(renderer: RTCMTLVideoView) {
+        self.renderer = renderer
+    }
+    
+    func makeUIView(context: Context) -> RTCMTLVideoView {
+        return self.renderer
+    }
+ 
+    func updateUIView(_ renderer: RTCMTLVideoView, context: Context) {
+        //do nothing
+    }
+}
+
 struct AVCallUI: View {
     @StateObject private var call: ObservableKVOWrapper<MLCall>
     @StateObject private var contact: ObservableKVOWrapper<MLContact>
@@ -19,6 +35,8 @@ struct AVCallUI: View {
     private var delegate: SheetDismisserProtocol
     private var appDelegate: MonalAppDelegate
     private var formatter: DateComponentsFormatter
+    private var localRenderer: RTCMTLVideoView
+    private var remoteRenderer: RTCMTLVideoView
 
     init(delegate: SheetDismisserProtocol, call: MLCall) {
         _call = StateObject(wrappedValue: ObservableKVOWrapper(call))
@@ -30,6 +48,15 @@ struct AVCallUI: View {
         self.formatter.unitsStyle = .positional
         self.formatter.zeroFormattingBehavior = .pad
         
+        //use the complete screen and resize later using swiftui
+        self.localRenderer = RTCMTLVideoView(frame: CGRect(
+            origin: CGPoint.zero,
+            size: CGSize(width:320, height:200)
+        ))
+        self.remoteRenderer = RTCMTLVideoView(frame: UIScreen.main.bounds)
+        self.localRenderer.videoContentMode = .scaleAspectFill
+        self.remoteRenderer.videoContentMode = .scaleAspectFill
+        
         self.ringingPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"ringing", withExtension:"wav", subdirectory:"CallSounds")!)
         self.busyPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"busy", withExtension:"wav", subdirectory:"CallSounds")!)
         self.errorPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"error", withExtension:"wav", subdirectory:"CallSounds")!)
@@ -39,6 +66,19 @@ struct AVCallUI: View {
         ZStack {
             Color.background
                 .edgesIgnoringSafeArea(.all)
+            
+            if MLCallType(rawValue:call.callType) == .video {
+                if MLCallState(rawValue:call.state) == .connected {
+                    VideoView(renderer:self.remoteRenderer)
+                        .border(.green)
+                }
+                
+                if MLCallState(rawValue:call.state) == .connected {
+                    VideoView(renderer:self.localRenderer)
+                        .frame(width: 320.0, height: 200.0)
+                        .border(.red)
+                }
+            }
             
             VStack {
                 Group {
@@ -344,7 +384,12 @@ struct AVCallUI: View {
                     ringingPlayer.play()
 //                 case .connecting:
 //                 case .reconnecting:
-//                 case .connected:
+                case .connected:
+                    DDLogDebug("state: connected")
+                    if MLCallType(rawValue:call.callType) == .video {
+                        call.obj.startCaptureLocalVideo(withRenderer: self.localRenderer)
+                        call.obj.renderRemoteVideo(withRenderer: self.remoteRenderer)
+                    }
                 case .finished:
                     DDLogDebug("state: finished: \(String(describing:call.finishReason as NSNumber))")
                     switch MLCallFinishReason(rawValue:call.finishReason) {

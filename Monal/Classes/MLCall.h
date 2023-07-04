@@ -8,14 +8,22 @@
 
 #ifndef MLCall_h
 #define MLCall_h
+
 NS_ASSUME_NONNULL_BEGIN
 
-@class MLXMLNode;
 @class WebRTCClient;
+@protocol RTCVideoRenderer;
 @class CXAnswerCallAction;
 @class CXEndCallAction;
 @class xmpp;
 @class MLVoIPProcessor;
+@class MLContact;
+
+
+typedef NS_ENUM(NSUInteger, MLCallType) {
+    MLCallTypeAudio,
+    MLCallTypeVideo,
+};
 
 typedef NS_ENUM(NSUInteger, MLCallDirection) {
     MLCallDirectionIncoming,
@@ -49,6 +57,7 @@ typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
 @property (nonatomic, strong, readonly) NSUUID* uuid;
 @property (nonatomic, strong, readonly) NSString* jmiid;
 @property (nonatomic, strong, readonly) MLContact* contact;
+@property (nonatomic, readonly) MLCallType callType;
 @property (nonatomic, readonly) MLCallDirection direction;
 @property (nonatomic, readonly) MLCallState state;
 @property (nonatomic, readonly) MLCallFinishReason finishReason;
@@ -58,6 +67,11 @@ typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
 
 +(instancetype) makeDummyCall:(int) type;
 -(void) end;
+//these will not use the correct RTCVideoRenderer protocol like in the implementation because the forward declaration of
+//RTCVideoRenderer will not be visible to swift until we have swift 5.9 (feature flag ImportObjcForwardDeclarations) or swift 6.0 support
+//see https://github.com/apple/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md
+-(void) startCaptureLocalVideoWithRenderer:(id) renderer;
+-(void) renderRemoteVideoWithRenderer:(id) renderer;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
 -(BOOL) isEqualToCall:(MLCall*) call;

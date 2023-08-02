@@ -1294,15 +1294,24 @@ static id preprocess(id exception)
 
 +(void) activityLog
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        BOOL appex = [HelperTools isAppExtension];
-        unsigned long counter = 1;
-        while(counter++)
-        {
-            DDLogInfo(@"activity(%@): %lu, memory used / available: %.3fMiB / %.3fMiB", appex ? @"APPEX" : @"MAINAPP", counter, [self report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-            [NSThread sleepForTimeInterval:1];
-        }
-    });
+    BOOL log_activity = NO;
+#ifdef DEBUG
+    log_activity = YES;
+#else
+    log_activity = [[HelperTools defaultsDB] boolForKey:@"showLogInSettings"];
+#endif
+    if(log_activity)
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            BOOL appex = [HelperTools isAppExtension];
+            unsigned long counter = 1;
+            while(counter++)
+            {
+                DDLogInfo(@"activity(%@): %lu, memory used / available: %.3fMiB / %.3fMiB", appex ? @"APPEX" : @"MAINAPP", counter, [self report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+                [NSThread sleepForTimeInterval:1];
+            }
+        });
+    }
 }
 
 +(NSUserDefaults*) defaultsDB

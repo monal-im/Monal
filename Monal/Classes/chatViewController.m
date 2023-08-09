@@ -2694,6 +2694,15 @@ enum msgSentState {
                 }
             }
         }
+        
+        //history database for this contact is completely empty, use global last stanza id for this mam archive
+        if(oldestStanzaId == nil)
+        {
+            if(self.contact.isGroup)
+                oldestStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:self.contact.contactJid andAccount:self.contact.accountId];
+            else
+                oldestStanzaId = [[DataLayer sharedInstance] lastStanzaIdForAccount:self.contact.accountId];
+        }
 
         //now load more (older) messages from mam
         DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);

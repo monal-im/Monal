@@ -121,8 +121,8 @@
     }
     [_currentStack removeLastObject];
     
-    //only call completion for stanzas and stream start, not for inner elements inside stanzas
-    if(depth <= 2)
+    //only call completion for stanzas, not for inner elements inside stanzas and not for our outermost stream start element
+    if(depth == 2)
         _completion(currentNode);
 }
 

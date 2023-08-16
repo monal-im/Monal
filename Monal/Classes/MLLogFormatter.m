@@ -60,6 +60,10 @@ static inline NSString* _loglevel_name(NSUInteger flag) {
     if(![queueThreadLabel isEqualToString:logMessage.threadID])
         queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage.threadID, queueThreadLabel];
     
+    //don't format stdout and stderr logmessages, e.g. don't add metadata to logline (only to json)
+    if(logMessage.flag & LOG_FLAG_STDOUT || logMessage.flag & LOG_FLAG_STDERR)
+        return logMessage.message;
+    
     return [NSString stringWithFormat:@"%@ [%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", timestamp, _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
 }
 

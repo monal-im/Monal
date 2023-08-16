@@ -43,6 +43,7 @@
 #import "OmemoState.h"
 #import "MLUDPLogger.h"
 #import "MLFileLogger.h"
+#import "MLStreamRedirect.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -59,9 +60,11 @@
 
 static NSString* _processID;
 static DDFileLogger* _fileLogger = nil;
-static char logfilePath[1024];
-static char logfileCopy[1024];
+static char _logfilePath[1024];
+static char _logfilePath[1024];
 static NSObject* _isAppExtensionLock = nil;
+static MLStreamRedirect* _stdoutRedirector = nil;
+static MLStreamRedirect* _stderrRedirector = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
 #if TARGET_OS_MACCATALYST
 static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
@@ -130,9 +133,9 @@ out_error:
 
 static void crash_callback(const KSCrashReportWriter* writer)
 {
-    writer->addStringElement(writer, "currentLogfile", logfilePath);
-    writer->addStringElement(writer, "logfileCopy", logfileCopy);
-    asyncSafeCopyFile(logfilePath, logfileCopy);
+    writer->addStringElement(writer, "currentLogfile", _logfilePath);
+    writer->addStringElement(writer, "_logfilePath", _logfilePath);
+    asyncSafeCopyFile(_logfilePath, _logfilePath);
 }
 
 void logException(NSException* exception)
@@ -146,7 +149,7 @@ void logException(NSException* exception)
     [DDLog flushLog];
     DDLogError(@"*****************\n%@(%@): %@\nUserInfo: %@\nStack Trace: %@", prefix, [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
-    [MLUDPLogger flushWithTimeout:0.100];
+    [HelperTools flushLogsWithTimeout:0.1];
 }
 
 void swizzle(Class c, SEL orig, SEL new)
@@ -215,7 +218,7 @@ static id preprocess(id exception)
     NSArray* filePathComponents = [fileStr pathComponents];
     if([filePathComponents count]>1)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
-    DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
+    //DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
     @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
 }
 
@@ -1385,36 +1388,12 @@ static id preprocess(id exception)
     return rawData;
 }
 
-//see https://stackoverflow.com/a/16395493 and https://stackoverflow.com/q/53978091
-//and https://medium.com/@thesaadismail/eavesdropping-on-swifts-print-statements-57f0215efb42
-+(void) redirectOutStream:(FILE*) stream
++(void) flushLogsWithTimeout:(double) timeout
 {
-    NSPipe* pipe = [NSPipe pipe];
-    if(pipe == nil)
-    {
-        DDLogError(@"Failed to create stderr/stdout pipe!");
-        return;
-    }
-    
-    //reassign stream
-    setvbuf(stream, nil, _IONBF, 0);
-    dup2([[pipe fileHandleForWriting] fileDescriptor], fileno(stream));
-    
-    //read other end of pipe and copy data into cocoa lumberjack
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        DDLogDebug(@"Starting outfd %d reading loop...", fileno(stream));
-        while(YES)
-        {
-            NSString* data = [[NSString alloc] initWithData:[pipe fileHandleForReading].availableData encoding:NSUTF8StringEncoding];
-            if(stream == stdout) 
-                DDLogStdout(@"%@", data);
-            else if(stream == stderr) 
-                DDLogStderr(@"%@", data);
-            else
-                unreachable(@"unknown stream!");
-        }
-        DDLogDebug(@"Stopped outfd %d reading loop...", fileno(stream));
-    });
+    [_stderrRedirector flushWithTimeout:timeout];
+    [_stdoutRedirector flushWithTimeout:timeout];
+    [DDLog flushLog];
+    [MLUDPLogger flushWithTimeout:timeout];
 }
 
 +(void) configureLogging
@@ -1437,26 +1416,36 @@ static id preprocess(id exception)
     [udpLogger setLogFormatter:formatter];
     [DDLog addLogger:udpLogger];
     
+    //redirect stderr containing NSLog() messages
+    _stderrRedirector = [[MLStreamRedirect alloc] initWithStream:stderr];
+    NSLog(@"stderr redirection complete...");
+    
+    //redirect stdout for good measure
+    _stdoutRedirector = [[MLStreamRedirect alloc] initWithStream:stdout];
+    printf("stdout redirection complete...");
+    
     NSString* containerUrl = [[HelperTools getContainerURLForPathComponents:@[]] path];
     DDLogInfo(@"Logfile dir: %@", containerUrl);
     
     //file logger
-    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:containerUrl];
+    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:containerUrl defaultFileProtectionLevel:NSFileProtectionCompleteUntilFirstUserAuthentication];
+    logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger = [[MLFileLogger alloc] initWithLogFileManager:logFileManager];
-    [self.fileLogger setLogFormatter:formatter];
+    self.fileLogger.doNotReuseLogFiles = NO;
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
-    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger.maximumFileSize = 256 * 1024 * 1024;
+    self.fileLogger.logFormatter = formatter;
+    self.fileLogger.archiveAllowed = YES;               //everything is configured now, engage logfile archiving
     [DDLog addLogger:self.fileLogger];
+    
+    DDLogDebug(@"Sorted logfiles: %@", [logFileManager sortedLogFileInfos]);
     DDLogDebug(@"Current logfile: %@", self.fileLogger.currentLogFileInfo.filePath);
-    
-    //redirect stderr containing NSLog() messages
-    [self redirectOutStream:stderr];
-    NSLog(@"stderr redirection complete...");
-    
-    //redirect stdout for good measure
-    [self redirectOutStream:stdout];
-    printf("stdout redirection complete...");
+    NSError* error;
+    NSDictionary* attrs = [[NSFileManager defaultManager] attributesOfItemAtPath:self.fileLogger.currentLogFileInfo.filePath error:&error];
+    if(error)
+        DDLogError(@"File attributes error: %@", error);
+    else
+        DDLogDebug(@"File attributes: %@", attrs);
     
     //log version info as early as possible
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
@@ -1484,11 +1473,11 @@ static id preprocess(id exception)
     if(record_crashes)
     {
         //store data globally for later retrieval by our crash_callback()
-        strncpy(logfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(logfilePath)-1);
-        logfilePath[sizeof(logfilePath)-1] = '\0';
+        strncpy(_logfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(_logfilePath)-1);
+        _logfilePath[sizeof(_logfilePath)-1] = '\0';
         NSString* crashlogPath = [[[self getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"crashlog-%@.tmp", [[NSUUID UUID] UUIDString]]];
-        strncpy(logfileCopy, crashlogPath.UTF8String, sizeof(logfileCopy)-1);
-        logfilePath[sizeof(logfileCopy)-1] = '\0';
+        strncpy(_logfilePath, crashlogPath.UTF8String, sizeof(_logfilePath)-1);
+        _logfilePath[sizeof(_logfilePath)-1] = '\0';
         
         DDLogVerbose(@"KSCrash callback: %p", crash_callback);
         KSCrash* handler = [KSCrash sharedInstance];

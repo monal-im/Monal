@@ -1315,8 +1315,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     {
                         DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
-                        [DDLog flushLog];
-                        [MLUDPLogger flushWithTimeout:0.100];
+                        [HelperTools flushLogsWithTimeout:0.100];
                     }
                 }];
             }
@@ -1382,8 +1381,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     {
                         DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
-                        [DDLog flushLog];
-                        [MLUDPLogger flushWithTimeout:0.100];
+                        [HelperTools flushLogsWithTimeout:0.100];
                     }
                 }
             }];
@@ -1446,8 +1444,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 {
                     DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
-                    [DDLog flushLog];
-                    [MLUDPLogger flushWithTimeout:0.100];
+                    [HelperTools flushLogsWithTimeout:0.100];
                 }
             }
         }];
@@ -1556,8 +1553,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 {
                     DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
-                    [DDLog flushLog];
-                    [MLUDPLogger flushWithTimeout:0.100];
+                    [HelperTools flushLogsWithTimeout:0.100];
                 }
             }
         }];
@@ -1798,8 +1794,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         {
                             DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
-                            [DDLog flushLog];
-                            [MLUDPLogger flushWithTimeout:0.100];
+                            [HelperTools flushLogsWithTimeout:0.100];
                         }
                     }
                 });

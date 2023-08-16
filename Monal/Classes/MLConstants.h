@@ -15,7 +15,8 @@
 #define LOG_FLAG_STDOUT         (1 << 6)
 #define LOG_LEVEL_STDERR        (DDLogLevelVerbose | LOG_FLAG_STDERR)
 #define LOG_LEVEL_STDOUT        (LOG_LEVEL_STDERR | LOG_FLAG_STDOUT)
-#define DDLogStderr(frmt, ...)  LOG_MAYBE(NO,  ddLogLevel, LOG_FLAG_STDERR,  0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
+//behave like DDLogError and flush log on DDLogStderr
+#define DDLogStderr(frmt, ...)  do { LOG_MAYBE(NO,  ddLogLevel, LOG_FLAG_STDERR,  0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__); [DDLog flushLog]; } while(0)
 #define DDLogStdout(frmt, ...)  LOG_MAYBE(NO,  ddLogLevel, LOG_FLAG_STDOUT,  0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
 static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
 #import "MLLogFileManager.h"

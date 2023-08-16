@@ -1385,19 +1385,52 @@ static id preprocess(id exception)
     return rawData;
 }
 
+//see https://stackoverflow.com/a/16395493 and https://stackoverflow.com/q/53978091
+//and https://medium.com/@thesaadismail/eavesdropping-on-swifts-print-statements-57f0215efb42
++(void) redirectOutStream:(FILE*) stream
+{
+    NSPipe* pipe = [NSPipe pipe];
+    if(pipe == nil)
+    {
+        DDLogError(@"Failed to create stderr/stdout pipe!");
+        return;
+    }
+    
+    //reassign stream
+    setvbuf(stream, nil, _IONBF, 0);
+    dup2([[pipe fileHandleForWriting] fileDescriptor], fileno(stream));
+    
+    //read other end of pipe and copy data into cocoa lumberjack
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        DDLogDebug(@"Starting outfd %d reading loop...", fileno(stream));
+        while(YES)
+        {
+            NSString* data = [[NSString alloc] initWithData:[pipe fileHandleForReading].availableData encoding:NSUTF8StringEncoding];
+            if(stream == stdout) 
+                DDLogStdout(@"%@", data);
+            else if(stream == stderr) 
+                DDLogStderr(@"%@", data);
+            else
+                unreachable(@"unknown stream!");
+        }
+        DDLogDebug(@"Stopped outfd %d reading loop...", fileno(stream));
+    });
+}
+
 +(void) configureLogging
 {
     //create log formatter
     MLLogFormatter* formatter = [MLLogFormatter new];
     
-    //start console logger first (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
-#if TARGET_OS_SIMULATOR
-    [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
-    [DDLog addLogger:[DDTTYLogger sharedInstance]];
-#else
-    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
-    [DDLog addLogger:[DDOSLogger sharedInstance]];
-#endif
+    //don't log to the console (aka stderr) to not create loops with our redirected stderr
+//     //start console logger first (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
+// #if TARGET_OS_SIMULATOR
+//     [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
+//     [DDLog addLogger:[DDTTYLogger sharedInstance]];
+// #else
+//     [[DDOSLogger sharedInstance] setLogFormatter:formatter];
+//     [DDLog addLogger:[DDOSLogger sharedInstance]];
+// #endif
     
     //network logger (start as early as possible)
     MLUDPLogger* udpLogger = [MLUDPLogger new];
@@ -1416,6 +1449,14 @@ static id preprocess(id exception)
     self.fileLogger.maximumFileSize = 256 * 1024 * 1024;
     [DDLog addLogger:self.fileLogger];
     DDLogDebug(@"Current logfile: %@", self.fileLogger.currentLogFileInfo.filePath);
+    
+    //redirect stderr containing NSLog() messages
+    [self redirectOutStream:stderr];
+    NSLog(@"stderr redirection complete...");
+    
+    //redirect stdout for good measure
+    [self redirectOutStream:stdout];
+    printf("stdout redirection complete...");
     
     //log version info as early as possible
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];

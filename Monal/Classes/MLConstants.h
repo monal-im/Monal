@@ -11,7 +11,13 @@
 #import "MLHandler.h"
 
 @import CocoaLumberjack;
-static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
+#define LOG_FLAG_STDERR         (1 << 5)
+#define LOG_FLAG_STDOUT         (1 << 6)
+#define LOG_LEVEL_STDERR        (DDLogLevelVerbose | LOG_FLAG_STDERR)
+#define LOG_LEVEL_STDOUT        (LOG_LEVEL_STDERR | LOG_FLAG_STDOUT)
+#define DDLogStderr(frmt, ...)  LOG_MAYBE(NO,  ddLogLevel, LOG_FLAG_STDERR,  0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
+#define DDLogStdout(frmt, ...)  LOG_MAYBE(NO,  ddLogLevel, LOG_FLAG_STDOUT,  0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
+static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
 #import "MLLogFileManager.h"
 #import "MLLogFormatter.h"
 #import "MLFileLogger.h"

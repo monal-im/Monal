@@ -87,6 +87,7 @@
                         [[self alloc] initWithViewController:viewController],           //this is the last filter sending out all stuff via mail
                         nil
                    ];
+    DDLogVerbose(@"Trying to send crash reports...");
     [handler sendAllReportsWithCompletion:^(NSArray* reports, BOOL completed, NSError* error){
         if(completed)
             DDLogWarn(@"Sent %d reports", (int)[reports count]);
@@ -125,6 +126,7 @@
     self.kscrashCompletion = onCompletion;
     self.kscrashReports = reports;
 
+    DDLogVerbose(@"Preparing MFMailComposeViewController...");
     MFMailComposeViewController* mailController = [[MFMailComposeViewController alloc] init];
     mailController.mailComposeDelegate = self;
     [mailController setToRecipients:@[@"info@monal-im.org"]];
@@ -135,9 +137,13 @@
         if(![report isKindOfClass:[NSData class]])
             DDLogError(@"Report was of unsupported data type %@", [report class]);
         else
+        {
+            DDLogVerbose(@"Adding mail attachment...");
             [mailController addAttachmentData:report mimeType:@"binary" fileName:[NSString stringWithFormat:@"CrashReport-%d.mcrash.gz", i++]];
+        }
     
     dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogVerbose(@"Presenting MFMailComposeViewController...");
         [self.viewController presentViewController:mailController animated:YES completion:nil];
     });
 }
@@ -200,9 +206,11 @@
 
 -(void) filterReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
 {
+    DDLogVerbose(@"KSCrashReportFilterEmpty started...");
     NSMutableArray* filteredReports = [NSMutableArray arrayWithCapacity:[reports count]];
     for(NSUInteger i = 0; i < reports.count; i++)
         [filteredReports addObject:@""];
+    DDLogVerbose(@"KSCrashReportFilterEmpty finished...");
     kscrash_callCompletion(onCompletion, filteredReports, YES, nil);
 }
 
@@ -217,6 +225,7 @@
 
 -(void) filterReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
 {
+    DDLogVerbose(@"KSCrashReportFilterAddAuxInfo started...");
     NSMutableArray* filteredReports = [NSMutableArray arrayWithCapacity:[reports count]];
     for(NSDictionary* report in reports)
     {
@@ -240,6 +249,7 @@
         
         [filteredReports addObject:auxData];
     }
+    DDLogVerbose(@"KSCrashReportFilterAddAuxInfo finished...");
     kscrash_callCompletion(onCompletion, filteredReports, YES, nil);
 }
 
@@ -254,6 +264,7 @@
 
 -(void) filterReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
 {
+    DDLogVerbose(@"KSCrashReportFilterAddMLLogfile started...");
     NSMutableArray* filteredReports = [NSMutableArray arrayWithCapacity:[reports count]];
     for(NSDictionary* report in reports)
     {
@@ -271,8 +282,10 @@
             if(logfileData == nil)
                 logfileData = [NSData new];
         }
+        DDLogVerbose(@"Converting logfile data to hex...");
         [filteredReports addObject:[HelperTools hexadecimalString:logfileData]];
     }
+    DDLogVerbose(@"KSCrashReportFilterAddMLLogfile finished...");
     kscrash_callCompletion(onCompletion, filteredReports, YES, nil);
 }
 

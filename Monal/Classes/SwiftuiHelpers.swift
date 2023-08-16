@@ -13,28 +13,24 @@ import monalxmpp
 import Combine
 import CocoaLumberjack
 
-typealias monal_void_block_t = @convention(block) () -> Void;
-typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
+extension MLContact : Identifiable {}       //make MLContact be usable in swiftui ForEach clauses
 
 let monalGreen = Color(UIColor(red:128.0/255, green:203.0/255, blue:182.0/255, alpha:1.0));
 let monalDarkGreen = Color(UIColor(red:20.0/255, green:138.0/255, blue:103.0/255, alpha:1.0));
 
 let swiftuiTranslationDummyString = Text("Dummy string to test SwiftUI translation support.")
 
-extension MLContact : Identifiable {}
-
-
-func unreachable(_ text: String = "unreachable", _ auxData: [String:AnyObject] = [String:AnyObject](), file: String = #file, line: Int = #line, function: String = #function) -> Never {
-    DDLogError("unreachable: \(file) \(line) \(function)")
-    HelperTools.mlAssert(withText:text, andUserData:auxData, andFile:(file as NSString).utf8String!, andLine:Int32(line), andFunc:(function as NSString).utf8String!)
-    while true {}       //should never be reached
-}
-
-func MLAssert(_ predicate: @autoclosure() -> Bool, _ text: String = "", _ auxData: [String:AnyObject] = [String:AnyObject](), file: String = #file, line: Int = #line, function: String = #function) {
-    if !predicate() {
-        HelperTools.mlAssert(withText:text, andUserData:auxData, andFile:(file as NSString).utf8String!, andLine:Int32(line), andFunc:(function as NSString).utf8String!)
-        while true {}       //should never be reached
-    }
+//see https://stackoverflow.com/a/62207329/3528174
+public extension Color {
+#if os(macOS)
+    static let background = Color(NSColor.windowBackgroundColor)
+    static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
+    static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
+#else
+    static let background = Color(UIColor.systemBackground)
+    static let secondaryBackground = Color(UIColor.secondarySystemBackground)
+    static let tertiaryBackground = Color(UIColor.tertiarySystemBackground)
+#endif
 }
 
 class SheetDismisserProtocol: ObservableObject {
@@ -48,95 +44,6 @@ class SheetDismisserProtocol: ObservableObject {
     func replace<V>(with view: V) where V: View {
         host?.rootView = AnyView(view)
     }
-}
-
-class KVOObserver: NSObject {
-    var obj: NSObject
-    var keyPath: String
-    var objectWillChange: ()->Void
-    
-    init(obj:NSObject, keyPath:String, objectWillChange: @escaping ()->Void) {
-        self.obj = obj
-        self.keyPath = keyPath
-        self.objectWillChange = objectWillChange
-        super.init()
-        self.obj.addObserver(self, forKeyPath: keyPath, options: [], context: nil)
-    }
-    
-    deinit {
-        self.obj.removeObserver(self, forKeyPath:self.keyPath)
-    }
-    
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-        //DDLogVerbose("\(String(describing:object)): keyPath \(String(describing:keyPath)) changed: \(String(describing:change))")
-        self.objectWillChange()
-    }
-}
-
-@dynamicMemberLookup
-class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
-    public var obj: ObjType
-    private var observedMembers: NSMutableSet = NSMutableSet()
-    private var observers: [KVOObserver] = Array()
-    
-    init(_ obj: ObjType) {
-        self.obj = obj
-    }
-
-    private func addObserverForMember(_ member: String){
-        if(!self.observedMembers.contains(member)) {
-            DDLogDebug("Adding observer for member '\(member)'...")
-            self.observers.append(KVOObserver(obj:self.obj, keyPath:member, objectWillChange: {
-                DDLogDebug("Observer said '\(member)' has changed...")
-                DispatchQueue.main.async {
-                    DDLogDebug("Calling self.objectWillChange.send()...")
-                    self.objectWillChange.send()
-                }
-            }))
-            self.observedMembers.add(member)
-        }
-    }
-    
-    private func getWrapper(for member:String) -> AnyObject? {
-        addObserverForMember(member)
-        DDLogDebug("Returning value for dynamicMember \(member): \(String(describing:self.obj.value(forKey:member)))")
-        return self.obj.value(forKey:member) as AnyObject?
-    }
-    
-    private func setWrapper(for member:String, value:AnyObject?) {
-        self.obj.setValue(value, forKey:member)
-    }
-
-    subscript<T>(member: String) -> T {
-        get {
-            return self.getWrapper(for:member) as! T
-        }
-        set {
-            self.setWrapper(for:member, value:newValue as AnyObject?)
-        }
-    }
-    
-    subscript<T>(dynamicMember member: String) -> T {
-        get {
-            return self.getWrapper(for:member) as! T
-        }
-        set {
-            self.setWrapper(for:member, value:newValue as AnyObject?)
-        }
-    }
-}
-
-//see https://stackoverflow.com/a/62207329/3528174
-public extension Color {
-#if os(macOS)
-    static let background = Color(NSColor.windowBackgroundColor)
-    static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
-    static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
-#else
-    static let background = Color(UIColor.systemBackground)
-    static let secondaryBackground = Color(UIColor.secondarySystemBackground)
-    static let tertiaryBackground = Color(UIColor.tertiarySystemBackground)
-#endif
 }
 
 //see https://www.hackingwithswift.com/books/ios-swiftui/importing-an-image-into-swiftui-using-phpickerviewcontroller
@@ -371,22 +278,6 @@ struct AlertPrompt {
     var title: Text = Text("")
     var message: Text = Text("")
     var dismissLabel: Text = Text("Close")
-}
-
-func nilWrapper(_ value: Any?) -> Any {
-    if let value = value {
-        return value
-    } else {
-        return NSNull()
-    }
-}
-
-func nilExtractor(_ value: Any?) -> Any? {
-    if value is NSNull {
-        return nil
-    } else {
-        return value
-    }
 }
 
 //see https://www.avanderlee.com/swiftui/conditional-view-modifier/

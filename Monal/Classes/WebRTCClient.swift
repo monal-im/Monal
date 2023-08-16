@@ -9,6 +9,7 @@
 
 import Foundation
 import WebRTC
+import monalxmpp
 import CocoaLumberjack
 
 @objc

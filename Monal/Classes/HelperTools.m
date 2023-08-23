@@ -7,6 +7,7 @@
 //
 
 #include <stdio.h>
+#include <sys/stat.h>
 #include <mach/mach.h>
 #include <mach/mach_error.h>
 #include <mach/mach_traps.h>
@@ -60,7 +61,7 @@
 
 static NSString* _processID;
 static DDFileLogger* _fileLogger = nil;
-static char _logfilePath[1024];
+static char _origLogfilePath[1024];
 static char _logfilePath[1024];
 static NSObject* _isAppExtensionLock = nil;
 static MLStreamRedirect* _stdoutRedirector = nil;
@@ -131,11 +132,26 @@ out_error:
     return -1;
 }
 
+static void addFilePathWithSize(const KSCrashReportWriter* writer, char* name, char* filePath)
+{
+    struct stat st;
+    char name_size[64];
+    strncpy(name_size, name, 64);
+    name_size[63] = '\0';
+    strncat(name_size, "_size", 64);
+    name_size[63] = '\0';
+    
+    writer->addStringElement(writer, name, filePath);
+    stat(filePath, &st);
+    writer->addUIntegerElement(writer, name_size, st.st_size);
+}
+
 static void crash_callback(const KSCrashReportWriter* writer)
 {
-    writer->addStringElement(writer, "currentLogfile", _logfilePath);
-    writer->addStringElement(writer, "_logfilePath", _logfilePath);
-    asyncSafeCopyFile(_logfilePath, _logfilePath);
+    addFilePathWithSize(writer, "currentLogfile", _origLogfilePath);
+    asyncSafeCopyFile(_origLogfilePath, _logfilePath);
+    writer->addStringElement(writer, "logfileCopied", "YES");
+    addFilePathWithSize(writer, "logfileCopy", _logfilePath);
 }
 
 void logException(NSException* exception)
@@ -149,7 +165,7 @@ void logException(NSException* exception)
     [DDLog flushLog];
     DDLogError(@"*****************\n%@(%@): %@\nUserInfo: %@\nStack Trace: %@", prefix, [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
-    [HelperTools flushLogsWithTimeout:0.1];
+    [HelperTools flushLogsWithTimeout:0.250];
 }
 
 void swizzle(Class c, SEL orig, SEL new)
@@ -1473,11 +1489,12 @@ static id preprocess(id exception)
     if(record_crashes)
     {
         //store data globally for later retrieval by our crash_callback()
-        strncpy(_logfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(_logfilePath)-1);
-        _logfilePath[sizeof(_logfilePath)-1] = '\0';
+        strncpy(_origLogfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(_logfilePath)-1);
+        _origLogfilePath[sizeof(_origLogfilePath)-1] = '\0';
         NSString* crashlogPath = [[[self getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"crashlog-%@.tmp", [[NSUUID UUID] UUIDString]]];
         strncpy(_logfilePath, crashlogPath.UTF8String, sizeof(_logfilePath)-1);
         _logfilePath[sizeof(_logfilePath)-1] = '\0';
+        DDLogVerbose(@"KSCrash: _origLogfilePath=%s, _logfilePath=%s", _origLogfilePath, _logfilePath);
         
         DDLogVerbose(@"KSCrash callback: %p", crash_callback);
         KSCrash* handler = [KSCrash sharedInstance];
@@ -1491,9 +1508,14 @@ static id preprocess(id exception)
         handler.demangleLanguages = KSCrashDemangleLanguageAll;
         if(![self isAppExtension])
             handler.deadlockWatchdogInterval = 12;
+        NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+        NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
+        NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
+        NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
         handler.userInfo = @{
             @"isAppex": @([self isAppExtension]),
             @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
+            @"appVersion": [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @""), version, buildDate, buildTime],
         };
         //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different in appex and mainapp
         //use the lowlevel C api with dummy bundle name "UnifiedReport" instead

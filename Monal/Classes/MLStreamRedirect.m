@@ -139,9 +139,9 @@
     fflush(self->_stream);
     
     //wait for this flush to complete and flush our DDLog afterwards to make sure everything reached the log sinks
-    DDLogVerbose(@"Waiing for flush to complete...");
+    DDLogVerbose(@"Waiting for flush of fd %d to complete...", fileno(self->_stream));
     waitBlock();
-    DDLogVerbose(@"Flush completed...");
+    DDLogVerbose(@"Flush on fd %d completed...", fileno(self->_stream));
     [DDLog flushLog];
 }
 

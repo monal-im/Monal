@@ -129,9 +129,9 @@
     DDLogVerbose(@"Preparing MFMailComposeViewController...");
     MFMailComposeViewController* mailController = [[MFMailComposeViewController alloc] init];
     mailController.mailComposeDelegate = self;
-    [mailController setToRecipients:@[@"info@monal-im.org"]];
+    [mailController setToRecipients:@[@"crash@monal-im.org"]];
     [mailController setSubject:@"Crash Reports"];
-    [mailController setMessageBody:@"Monal crashed, last actions that led to this crash:\n" isHTML:NO];
+    [mailController setMessageBody:@"> Please fill in your last actions that led to this crash\n" isHTML:NO];
     int i = 1;
     for(NSData* report in reports)
         if(![report isKindOfClass:[NSData class]])

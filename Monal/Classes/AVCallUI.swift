@@ -5,10 +5,6 @@
 //  Created by Thilo Molitor on 20.12.22.
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
-import monalxmpp
-
-import SwiftUI
-import CocoaLumberjack
 import WebRTC
 import AVFoundation
 import CallKit

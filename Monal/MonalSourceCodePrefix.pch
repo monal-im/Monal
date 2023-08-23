@@ -2,12 +2,3 @@
 // Prefix header for all source files of the 'SworIM' target in the 'SworIM' project
 //
 
-
-#ifdef __OBJC__
-    #import <Foundation/Foundation.h>
-    #import <UIKit/UIKit.h>
-    
-    #define LOG_LEVEL_DEF ddLogLevel
-    #import <CocoaLumberjack/CocoaLumberjack.h>
-#endif
-

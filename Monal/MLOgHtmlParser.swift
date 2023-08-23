@@ -6,9 +6,7 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import Foundation
 import SwiftSoup;
-import CocoaLumberjack
 
 @objc class MLOgHtmlParser: NSObject {
     var og_title: String?

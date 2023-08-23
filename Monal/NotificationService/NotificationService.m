@@ -450,12 +450,7 @@ static BOOL warnUnclean = NO;
 
 +(void) initialize
 {
-    [HelperTools configureLogging];
-    [HelperTools activityLog];
-    [HelperTools installCrashHandler];
-    
-    //log unhandled exceptions
-    [HelperTools installExceptionHandler];
+    [HelperTools initSystem];
     
     handlers = [NSMutableArray new];
     

@@ -6,10 +6,8 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import SwiftUI
 import SafariServices
 import WebKit
-import monalxmpp
 
 struct WebView: UIViewRepresentable {
     var url: URL

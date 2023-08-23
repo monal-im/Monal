@@ -18,6 +18,7 @@
 
 @import MobileCoreServices;
 @import UniformTypeIdentifiers;
+@import UIKit.UIImage;
 
 static NSFileManager* _fileManager;
 static NSString* _documentCacheDir;

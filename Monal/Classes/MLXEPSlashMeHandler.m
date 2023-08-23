@@ -10,6 +10,8 @@
 #import "MLMessage.h"
 #import "MLXMPPManager.h"
 
+@import UIKit.NSAttributedString;
+
 @implementation MLXEPSlashMeHandler
 
 #pragma mark initilization

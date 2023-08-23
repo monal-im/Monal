@@ -6,12 +6,13 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 
-import Foundation
-import SwiftUI
+//see https://davedelong.com/blog/2018/01/19/simplifying-swift-framework-development/ for explanation of @_exported
+@_exported import Foundation
+@_exported import SwiftUI
+@_exported import monalxmpp
+@_exported import CocoaLumberjack
 import PhotosUI
-import monalxmpp
 import Combine
-import CocoaLumberjack
 
 extension MLContact : Identifiable {}       //make MLContact be usable in swiftui ForEach clauses
 

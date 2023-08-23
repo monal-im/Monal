@@ -15,14 +15,13 @@
 #include <objc/runtime.h> 
 #include <objc/message.h>
 #include <objc/objc-exception.h>
-
-#import <KSCrash/KSCrash.h>
-#import <KSCrash/KSCrashC.h>
-
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import <MapKit/MapKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
+#import <KSCrash/KSCrash.h>
+#import <KSCrash/KSCrashC.h>
+#import <monalxmpp/monalxmpp-Swift.h>
 #import "hsluv.h"
 #import "HelperTools.h"
 #import "MLXMPPManager.h"
@@ -285,6 +284,15 @@ static id preprocess(id exception)
     if(errorText && ![errorText isEqualToString:@""])
         message = [NSString stringWithFormat:@"%@: %@ (%@)", description, errorReason, errorText];
     return message;
+}
+
++(void) initSystem
+{
+    [self configureLogging];
+    [SwiftHelpers initSwiftHelpers];
+    [self installCrashHandler];
+    [self installExceptionHandler];
+    [self activityLog];
 }
 
 +(NSDictionary<NSString*, NSString*>*) getInvalidPushServers

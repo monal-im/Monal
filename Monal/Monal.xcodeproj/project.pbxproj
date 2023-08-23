@@ -157,6 +157,9 @@
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
 		84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		84E55E8029644279003E191A /* ActiveChatsViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E55E7F2964426D003E191A /* ActiveChatsViewController.h */; };
+		84F498CD2A97A44B00821033 /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 84F498CC2A97A44B00821033 /* CocoaLumberjack */; };
+		84F498CF2A97A44B00821033 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 84F498CE2A97A44B00821033 /* CocoaLumberjackSwift */; };
+		84F498D12A97A44B00821033 /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 84F498D02A97A44B00821033 /* CocoaLumberjackSwiftLogBackend */; };
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
@@ -779,7 +782,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84F498CD2A97A44B00821033 /* CocoaLumberjack in Frameworks */,
 				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
+				84F498D12A97A44B00821033 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
+				84F498CF2A97A44B00821033 /* CocoaLumberjackSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1543,6 +1549,9 @@
 			);
 			name = monalxmpp;
 			packageProductDependencies = (
+				84F498CC2A97A44B00821033 /* CocoaLumberjack */,
+				84F498CE2A97A44B00821033 /* CocoaLumberjackSwift */,
+				84F498D02A97A44B00821033 /* CocoaLumberjackSwiftLogBackend */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1692,6 +1701,7 @@
 				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */,
 				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
+				84F498CB2A97A44B00821033 /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -3972,6 +3982,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		84F498CB2A97A44B00821033 /* XCRemoteSwiftPackageReference "cocoalumberjack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/cocoalumberjack/cocoalumberjack";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 		C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
@@ -3995,6 +4013,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */;
 			productName = ViewExtractor;
+		};
+		84F498CC2A97A44B00821033 /* CocoaLumberjack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84F498CB2A97A44B00821033 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
+			productName = CocoaLumberjack;
+		};
+		84F498CE2A97A44B00821033 /* CocoaLumberjackSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84F498CB2A97A44B00821033 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
+			productName = CocoaLumberjackSwift;
+		};
+		84F498D02A97A44B00821033 /* CocoaLumberjackSwiftLogBackend */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84F498CB2A97A44B00821033 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
+			productName = CocoaLumberjackSwiftLogBackend;
 		};
 		C1E1EC7A286A025F0097EC74 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;

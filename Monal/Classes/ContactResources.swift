@@ -5,9 +5,6 @@
 //  Created by Friedrich Altheide on 24.12.21.
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
-import monalxmpp
-
-import SwiftUI
 import OrderedCollections
 
 @ViewBuilder

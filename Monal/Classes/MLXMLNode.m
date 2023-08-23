@@ -16,6 +16,8 @@
 #import "XMPPPresence.h"
 #import "XMPPDataForm.h"
 
+@import UIKit.UIApplication;
+
 //#define DEBUG_XMLQueryLanguage 1
 
 //this is the required prototype from Holger's snprintf.c

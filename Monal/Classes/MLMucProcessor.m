@@ -653,7 +653,7 @@
                 self->_lastPing = lastPing;
             return;
         }
-        DDLogWarn([HelperTools extractXMPPError:error withDescription:@"Muc ping returned error"]);
+        DDLogWarn(@"%@", [HelperTools extractXMPPError:error withDescription:@"Muc ping returned error"]);
         if([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}not-acceptable"])
         {
             DDLogWarn(@"Ping failed with 'not-acceptable' --> we have to re-join %@", roomJid);

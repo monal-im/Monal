@@ -30,6 +30,8 @@ NS_ASSUME_NONNULL_BEGIN
 @class DDLogFormatter;
 @class DDLogMessage;
 @class MLFileLogger;
+@class UIView;
+@class UITapGestureRecognizer;
 
 void logException(NSException* exception);
 void swizzle(Class c, SEL orig, SEL new);
@@ -37,11 +39,11 @@ void swizzle(Class c, SEL orig, SEL new);
 @interface HelperTools : NSObject
 
 @property (class, nonatomic, strong) MLFileLogger* fileLogger;
+
 +(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage usingFormatter:(id<DDLogFormatter> _Nullable) formatter counter:(uint64_t*) counter andError:(NSError** _Nullable) error;
-+(void) configureLogging;
-+(void) flushLogsWithTimeout:(double) timeout;
-+(void) installCrashHandler;
++(void) initSystem;
 +(void) installExceptionHandler;
++(void) flushLogsWithTimeout:(double) timeout;
 +(void) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
@@ -84,7 +86,6 @@ void swizzle(Class c, SEL orig, SEL new);
 +(BOOL) isNotInFocus;
 
 +(void) dispatchAsync:(BOOL) async reentrantOnQueue:(dispatch_queue_t _Nullable) queue withBlock:(monal_void_block_t) block;
-+(void) activityLog;
 +(NSUserDefaults*) defaultsDB;
 +(BOOL) isAppExtension;
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features;

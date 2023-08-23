@@ -6,8 +6,11 @@
 //  Copyright © 2023 monal-im.org. All rights reserved.
 //
 
-import Foundation
-import CocoaLumberjack
+//see https://davedelong.com/blog/2018/01/19/simplifying-swift-framework-development/ for explanation of @_exported
+@_exported import Foundation
+@_exported import CocoaLumberjackSwift
+@_exported import Logging
+import CocoaLumberjackSwiftLogBackend
 
 public typealias monal_void_block_t = @convention(block) () -> Void;
 public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
@@ -114,5 +117,13 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
         set {
             self.setWrapper(for:member, value:newValue as AnyObject?)
         }
+    }
+}
+
+@objcMembers
+public class SwiftHelpers: NSObject {
+    public static func initSwiftHelpers() {
+        // Use CocoaLumberjack as swift-log backend
+        LoggingSystem.bootstrapWithCocoaLumberjack(for: DDLog.sharedInstance, defaultLogLevel:Logger.Level.debug)
     }
 }

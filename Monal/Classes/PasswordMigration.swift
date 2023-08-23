@@ -6,9 +6,6 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-import monalxmpp
-
 struct PasswordMigration: View {
     let delegate: SheetDismisserProtocol
     @State var needingMigration: [Int:[String:NSObject]]

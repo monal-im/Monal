@@ -7,18 +7,25 @@
 //
 
 #import <Foundation/Foundation.h>
+#include <sys/file.h>
+#include <errno.h>
+
 #import "MLFileLogger.h"
 #import "HelperTools.h"
+
 
 extern BOOL doesAppRunInBackground(void);
 @interface DDFileLogger ()
 -(BOOL) lt_shouldLogFileBeArchived:(DDLogFileInfo*) mostRecentLogFileInfo;
+-(void) lt_logData:(NSData*) data;
+-(NSFileHandle*) lt_currentLogFileHandle;
 @end
 
 @interface MLFileLogger () {
     BOOL _archiveAllowed;
 }
 @end
+
 
 @implementation MLFileLogger
 
@@ -123,6 +130,24 @@ extern BOOL doesAppRunInBackground(void);
     
     //return length_prefix + json_encoded_data
     return data;
+}
+
+-(void) lt_logData:(NSData*) data
+{
+    NSFileHandle* handle = [self lt_currentLogFileHandle];
+    //this is an error case, just call the super implementation right away (should never happen)
+    if(handle == nil)
+    {
+        NSLog(@"Could not get file handle in lt_logData wrapper!");
+        return [super lt_logData:data];
+    }
+    int fd = [handle fileDescriptor];
+    while(flock(fd, LOCK_EX | LOCK_NB) != 0)
+    {
+        usleep(1000);
+    }
+    [super lt_logData:data];
+    flock(fd, LOCK_UN);
 }
 
 @end

@@ -2271,10 +2271,10 @@ enum msgSentState {
         if(priorRow.inbound != row.inbound)
             newSender = YES;
     }
-    cell.date.text = [self formattedTimeStampWithSource:row.delayTimeStamp ? row.delayTimeStamp : row.timestamp];
+    cell.date.text = [self formattedTimeStampWithSource:row.timestamp];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
 
-    cell.dividerDate.text = [self formattedDateWithSource:row.delayTimeStamp?row.delayTimeStamp:row.timestamp andPriorDate:priorRow.timestamp];
+    cell.dividerDate.text = [self formattedDateWithSource:row.timestamp andPriorDate:priorRow.timestamp];
 
     // Do not hide the lockImage if the message was encrypted
     cell.lockImage.hidden = !row.encrypted;

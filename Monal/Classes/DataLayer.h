@@ -171,6 +171,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSArray<MLMessage*>*) messagesForHistoryIDs:(NSArray<NSNumber*>*) historyIDs;
 -(MLMessage* _Nullable) messageForHistoryID:(NSNumber* _Nullable) historyID;
 -(NSNumber*) getSmallestHistoryId;
+-(NSNumber*) getBiggestHistoryId;
 
 /*
  adds a specified message to the database

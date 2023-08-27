@@ -66,6 +66,12 @@
             isEnabled = "YES">
          </AdditionalOption>
       </AdditionalOptions>
+      <TestPlans>
+         <TestPlanReference
+            reference = "container:Monal.xctestplan"
+            default = "YES">
+         </TestPlanReference>
+      </TestPlans>
       <Testables>
          <TestableReference
             skipped = "NO">

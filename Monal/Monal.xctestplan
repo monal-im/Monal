@@ -1,7 +1,7 @@
 {
   "configurations" : [
     {
-      "id" : "22AC57B3-E817-44FE-B3F9-25137606AFD7",
+      "id" : "92909719-78F2-4EC0-9B93-ECCDB123A83F",
       "name" : "Configuration 1",
       "options" : {
 
@@ -13,17 +13,23 @@
       "detectStackUseAfterReturn" : true,
       "enabled" : true
     },
+    "environmentVariableEntries" : [
+      {
+        "key" : "OS_ACTIVITY_MODE ",
+        "value" : "disable"
+      }
+    ],
     "language" : "en",
-    "locationScenario" : {
-      "identifier" : "London, England",
-      "referenceType" : "built-in"
-    },
-    "region" : "DE",
-    "undefinedBehaviorSanitizerEnabled" : true
+    "mallocScribbleEnabled" : true,
+    "nsZombieEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Monal.xcodeproj",
+      "identifier" : "1D6058900D05DD3D006BFB54",
+      "name" : "Monal"
+    }
   },
   "testTargets" : [
     {
-      "enabled" : false,
       "target" : {
         "containerPath" : "container:Monal.xcodeproj",
         "identifier" : "C1850EB425F38A2D003D506A",

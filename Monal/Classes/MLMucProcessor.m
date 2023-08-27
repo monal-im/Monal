@@ -938,9 +938,12 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
         //handle weird XEP-0313 monkey-patching XEP-0059 behaviour (WHY THE HELL??)
         if(!secondTry && [iqNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
         {
+            //latestMessage can be nil, thus [latestMessage timestamp] will return nil and setMAMQueryAfterTimestamp:nil
+            //will query the whole archive since dawn of time
+            MLMessage* latestMessage = [[DataLayer sharedInstance] lastMessageForContact:iqNode.fromUser forAccount:_account.accountNo];
+            DDLogInfo(@"Querying COMPLETE muc mam:2 archive at %@ after timestamp %@ for catchup", iqNode.fromUser, [latestMessage timestamp]);
             XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType to:iqNode.fromUser];
-            DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
-            [mamQuery setCompleteMAMQuery];
+            [mamQuery setMAMQueryAfterTimestamp:[latestMessage timestamp]];
             [_account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, YES))];
         }
         else
@@ -952,7 +955,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
     }
     if(![[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] && [iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
     {
-        DDLogVerbose(@"Paging through muc mam catchup results with after: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
+        DDLogVerbose(@"Paging through muc mam catchup results at %@ with after: %@", iqNode.fromUser, [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
         //do RSM forward paging
         XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType to:iqNode.fromUser];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
@@ -960,7 +963,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
     }
     else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
     {
-        DDLogVerbose(@"Muc mam catchup finished");
+        DDLogVerbose(@"Muc mam catchup of %@ finished", iqNode.fromUser);
         [_account mamFinishedFor:iqNode.fromUser];
     }
 $$

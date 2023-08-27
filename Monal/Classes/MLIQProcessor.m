@@ -185,9 +185,12 @@ $$class_handler(handleCatchup, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$BO
         //handle weird XEP-0313 monkey-patching XEP-0059 behaviour (WHY THE HELL??)
         if(!secondTry && [iqNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
         {
+            //latestMessage can be nil, thus [latestMessage timestamp] will return nil and setMAMQueryAfterTimestamp:nil
+            //will query the whole archive since dawn of time
+            MLMessage* latestMessage = [[DataLayer sharedInstance] messageForHistoryID:[[DataLayer sharedInstance] getBiggestHistoryId]];
+            DDLogInfo(@"Querying COMPLETE muc mam:2 archive at %@ after timestamp %@ for catchup", account.connectionProperties.identity.jid, [latestMessage timestamp]);
             XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
-            DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
-            [mamQuery setCompleteMAMQuery];
+            [mamQuery setMAMQueryAfterTimestamp:[latestMessage timestamp]];
             [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, YES))];
         }
         else
@@ -199,7 +202,7 @@ $$class_handler(handleCatchup, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$BO
     }
     if(![[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] && [iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
     {
-        DDLogVerbose(@"Paging through mam catchup results with after: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
+        DDLogVerbose(@"Paging through mam catchup results at %@ with after: %@", account.connectionProperties.identity.jid, [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
         //do RSM forward paging
         XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
@@ -207,7 +210,7 @@ $$class_handler(handleCatchup, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$BO
     }
     else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
     {
-        DDLogVerbose(@"Mam catchup finished");
+        DDLogVerbose(@"Mam catchup finished for %@", account.connectionProperties.identity.jid);
         [account mamFinishedFor:account.connectionProperties.identity.jid];
     }
 $$

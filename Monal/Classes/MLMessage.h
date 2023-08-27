@@ -81,8 +81,6 @@ The of the message in the DB , should be int
  for message type status. The MUC subeject
  */
 @property (nonatomic, copy) NSString* groupSubject;
-
-@property (nonatomic, copy) NSDate* delayTimeStamp;
 @property (nonatomic, copy) NSDate* timestamp;
 
 /*

@@ -56,7 +56,7 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 
 -(void) setMAMQueryLatestMessagesForJid:(NSString* _Nullable) jid before:(NSString* _Nullable) uid;
 -(void) setMAMQueryAfter:(NSString*) uid;
--(void) setCompleteMAMQuery;
+-(void) setMAMQueryAfterTimestamp:(NSDate* _Nullable) timestamp;
 -(void) setMAMQueryForLatestId;
 
 -(void) setMucListQueryFor:(NSString*) listType;

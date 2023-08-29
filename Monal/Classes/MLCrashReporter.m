@@ -48,7 +48,7 @@
 {
     //send out pending KSCrash reports
     KSCrash* handler = [KSCrash sharedInstance];
-    handler.deleteBehaviorAfterSendAll = KSCDeleteAlways;
+    handler.deleteBehaviorAfterSendAll = KSCDeleteAlways;       //KSCDeleteNever
     id<KSCrashReportFilter> dummyFilter = [KSCrashReportFilterEmpty filter];
     NSString* dummyFilterName = @"dummy not printed";
     id<KSCrashReportFilter> auxInfoFilter = [KSCrashReportFilterAddAuxInfo filter];
@@ -131,7 +131,7 @@
     mailController.mailComposeDelegate = self;
     [mailController setToRecipients:@[@"crash@monal-im.org"]];
     [mailController setSubject:@"Crash Reports"];
-    [mailController setMessageBody:@"> Please fill in your last actions that led to this crash\n" isHTML:NO];
+    [mailController setMessageBody:@"> Please fill in your last actions that led to this crash:\n" isHTML:NO];
     int i = 1;
     for(NSData* report in reports)
         if(![report isKindOfClass:[NSData class]])

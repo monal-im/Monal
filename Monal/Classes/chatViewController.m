@@ -832,6 +832,13 @@ enum msgSentState {
 {
     //stop editing (if there is some)
     [self stopEditing];
+    
+    //stop audio recording, if currently running
+    if(self->_isRecording)
+    {
+        [[MLAudioRecoderManager sharedInstance] stop:NO];
+        self->_isRecording = NO;
+    }
 
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc removeObserver:self];

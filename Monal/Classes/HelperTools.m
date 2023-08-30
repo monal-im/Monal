@@ -1549,12 +1549,11 @@ static id preprocess(id exception)
         handler.monitoring = KSCrashMonitorTypeAll;     //KSCrashMonitorTypeProductionSafe;
         handler.onCrash = crash_callback;
         [handler enableSwapOfCxaThrow];
-        handler.searchQueueNames = YES;
-        handler.introspectMemory = NO;
+        handler.searchQueueNames = NO;      //this is not async safe and can crash :(
+        handler.introspectMemory = YES;
         handler.addConsoleLogToReport = YES;
         handler.demangleLanguages = KSCrashDemangleLanguageAll;
         handler.maxReportCount = 4;
-        //if(![self isAppExtension])
         handler.deadlockWatchdogInterval = 12;
         NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
         NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];

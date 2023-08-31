@@ -1385,6 +1385,7 @@ static id preprocess(id exception)
     };
     NSDictionary* msgDict = @{
         @"formattedMessage": logMsg,
+        @"messageFormat": logMessage.messageFormat,
         @"message": logMessage.message,
         @"level": [NSNumber numberWithInteger:logMessage.level],
         @"flag": [NSNumber numberWithInteger:logMessage.flag],

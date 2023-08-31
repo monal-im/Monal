@@ -159,6 +159,132 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 #endif
 }
 
+-(void) runSDPTests
+{
+    DDLogVerbose(@"SDP2XML: %@", [HelperTools sdp2xml:@"v=0\n\
+o=- 2005859539484728435 2 IN IP4 127.0.0.1\n\
+s=-\n\
+t=0 0\n\
+a=group:BUNDLE 0 1 2\n\
+a=extmap-allow-mixed\n\
+a=msid-semantic: WMS stream\n\
+m=audio 9 UDP/TLS/RTP/SAVPF 111 63 9 102 0 8 13 110 126\n\
+c=IN IP4 0.0.0.0\n\
+a=rtcp:9 IN IP4 0.0.0.0\n\
+a=ice-ufrag:Pt2c\n\
+a=ice-pwd:XKe021opw+vupIkkLCI1+kP4\n\
+a=ice-options:trickle renomination\n\
+a=fingerprint:sha-256 1F:CE:47:40:5F:F2:FC:66:F2:21:F7:7D:3D:D6:0D:B0:67:6F:BD:CF:8B:0E:B7:90:5D:8C:33:9E:AD:F2:CB:FC\n\
+a=setup:actpass\n\
+a=mid:0\n\
+a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\n\
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time\n\
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01\n\
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid\n\
+a=sendrecv\n\
+a=msid:stream audio0\n\
+a=rtcp-mux\n\
+a=rtpmap:111 opus/48000/2\n\
+a=rtcp-fb:111 transport-cc\n\
+a=fmtp:111 minptime=10;useinbandfec=1\n\
+a=rtpmap:63 red/48000/2\n\
+a=fmtp:63 111/111\n\
+a=rtpmap:9 G722/8000\n\
+a=rtpmap:102 ILBC/8000\n\
+a=rtpmap:0 PCMU/8000\n\
+a=rtpmap:8 PCMA/8000\n\
+a=rtpmap:13 CN/8000\n\
+a=rtpmap:110 telephone-event/48000\n\
+a=rtpmap:126 telephone-event/8000\n\
+a=ssrc:109112503 cname:vUpPwDICjVuwEwGO\n\
+a=ssrc:109112503 msid:stream audio0\n\
+m=video 9 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127 103 35 36 104 105 106\n\
+c=IN IP4 0.0.0.0\n\
+a=rtcp:9 IN IP4 0.0.0.0\n\
+a=ice-ufrag:Pt2c\n\
+a=ice-pwd:XKe021opw+vupIkkLCI1+kP4\n\
+a=ice-options:trickle renomination\n\
+a=fingerprint:sha-256 1F:CE:47:40:5F:F2:FC:66:F2:21:F7:7D:3D:D6:0D:B0:67:6F:BD:CF:8B:0E:B7:90:5D:8C:33:9E:AD:F2:CB:FC\n\
+a=setup:actpass\n\
+a=mid:1\n\
+a=extmap:14 urn:ietf:params:rtp-hdrext:toffset\n\
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time\n\
+a=extmap:13 urn:3gpp:video-orientation\n\
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01\n\
+a=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay\n\
+a=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type\n\
+a=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing\n\
+a=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space\n\
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid\n\
+a=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id\n\
+a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id\n\
+a=sendrecv\n\
+a=msid:stream video0\n\
+a=rtcp-mux\n\
+a=rtcp-rsize\n\
+a=rtpmap:96 H264/90000\n\
+a=rtcp-fb:96 goog-remb\n\
+a=rtcp-fb:96 transport-cc\n\
+a=rtcp-fb:96 ccm fir\n\
+a=rtcp-fb:96 nack\n\
+a=rtcp-fb:96 nack pli\n\
+a=fmtp:96 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=640c34\n\
+a=rtpmap:97 rtx/90000\n\
+a=fmtp:97 apt=96\n\
+a=rtpmap:98 H264/90000\n\
+a=rtcp-fb:98 goog-remb\n\
+a=rtcp-fb:98 transport-cc\n\
+a=rtcp-fb:98 ccm fir\n\
+a=rtcp-fb:98 nack\n\
+a=rtcp-fb:98 nack pli\n\
+a=fmtp:98 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e034\n\
+a=rtpmap:99 rtx/90000\n\
+a=fmtp:99 apt=98\n\
+a=rtpmap:100 VP8/90000\n\
+a=rtcp-fb:100 goog-remb\n\
+a=rtcp-fb:100 transport-cc\n\
+a=rtcp-fb:100 ccm fir\n\
+a=rtcp-fb:100 nack\n\
+a=rtcp-fb:100 nack pli\n\
+a=rtpmap:101 rtx/90000\n\
+a=fmtp:101 apt=100\n\
+a=rtpmap:127 VP9/90000\n\
+a=rtcp-fb:127 goog-remb\n\
+a=rtcp-fb:127 transport-cc\n\
+a=rtcp-fb:127 ccm fir\n\
+a=rtcp-fb:127 nack\n\
+a=rtcp-fb:127 nack pli\n\
+a=rtpmap:103 rtx/90000\n\
+a=fmtp:103 apt=127\n\
+a=rtpmap:35 AV1/90000\n\
+a=rtcp-fb:35 goog-remb\n\
+a=rtcp-fb:35 transport-cc\n\
+a=rtcp-fb:35 ccm fir\n\
+a=rtcp-fb:35 nack\n\
+a=rtcp-fb:35 nack pli\n\
+a=rtpmap:36 rtx/90000\n\
+a=fmtp:36 apt=35\n\
+a=rtpmap:104 red/90000\n\
+a=rtpmap:105 rtx/90000\n\
+a=fmtp:105 apt=104\n\
+a=rtpmap:106 ulpfec/90000\n\
+a=ssrc-group:FID 3733210709 4025710505\n\
+a=ssrc:3733210709 cname:vUpPwDICjVuwEwGO\n\
+a=ssrc:3733210709 msid:stream video0\n\
+a=ssrc:4025710505 cname:vUpPwDICjVuwEwGO\n\
+a=ssrc:4025710505 msid:stream video0\n\
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel\n\
+c=IN IP4 0.0.0.0\n\
+a=ice-ufrag:Pt2c\n\
+a=ice-pwd:XKe021opw+vupIkkLCI1+kP4\n\
+a=ice-options:trickle renomination\n\
+a=fingerprint:sha-256 1F:CE:47:40:5F:F2:FC:66:F2:21:F7:7D:3D:D6:0D:B0:67:6F:BD:CF:8B:0E:B7:90:5D:8C:33:9E:AD:F2:CB:FC\n\
+a=setup:actpass\n\
+a=mid:2\n\
+a=sctp-port:5000\n\
+a=max-message-size:262144" withInitiator:YES]);
+}
+
 -(id) init
 {
     //someone (suspect: AppKit) resets our exception handler between the call to [MonalAppDelegate initialize] and [MonalAppDelegate init]
@@ -172,6 +298,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     _wasFreezed = NO;
     
     //[self runParserTests];
+    [self runSDPTests];
     return self;
 }
 

@@ -31,6 +31,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "MLPubSub.h"
 #import "MLUDPLogger.h"
 #import "MLHandler.h"
+#import "MLBasePaser.h"
 #import "MLXMLNode.h"
 #import "XMPPStanza.h"
 #import "XMPPIQ.h"
@@ -1895,6 +1896,32 @@ static id preprocess(id exception)
 +(NSNumber*) dateToNSNumberSeconds:(NSDate*) date
 {
     return [NSNumber numberWithUnsignedLong:(unsigned long)date.timeIntervalSince1970];
+}
+
++(MLXMLNode*) sdp2xml:(NSString*) sdp withInitiator:(BOOL) initiator
+{
+    __block MLXMLNode* retval = nil;
+    MLBasePaser* delegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
+        DDLogVerbose(@"Parsed Stanza: %@", parsedStanza);
+        //only use the first parsed "stanza" (the <root/> inside <outerRoot/>), not the <outerRoot/> element iself
+        //(reported as parsed "stanza" after the <root/> element was reported)
+        if(retval == nil)
+            retval = parsedStanza;
+    }];
+    NSString* xmlString = [NSString stringWithFormat:@"<outerRoot>%@</outerRoot>", [JingleSDPBridge getJingleStringForSDPString:sdp withInitiator:initiator]];
+    DDLogVerbose(@"Parsing XML string produced by rust sdp parser: %@", xmlString);
+    NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
+    [xmlParser setShouldProcessNamespaces:YES];
+    [xmlParser setShouldReportNamespacePrefixes:YES];       //for debugging only
+    [xmlParser setShouldResolveExternalEntities:NO];
+    [xmlParser setDelegate:delegate];
+    [xmlParser parse];     //blocking operation
+    return retval;
+}
+
++(NSString*) xml2sdp:(MLXMLNode*) xml
+{
+    return [JingleSDPBridge getSDPStringForJingleString:[xml XMLString]];
 }
 
 #pragma mark Hashes

@@ -97,6 +97,9 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSString*) generateDateTimeString:(NSDate*) datetime;
 +(NSString*) encodeRandomResource;
 
++(MLXMLNode*) sdp2xml:(NSString*) sdp withInitiator:(BOOL) initiator;
++(NSString*) xml2sdp:(MLXMLNode*) xml;
+
 +(NSData* _Nullable) sha1:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha1:(NSString* _Nullable) data;
 +(NSData* _Nullable) sha1HmacForKey:(NSData* _Nullable) key andData:(NSData* _Nullable) data;

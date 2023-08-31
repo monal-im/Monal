@@ -112,13 +112,13 @@ DDLogFileInfo* _logInfo;
 
 -(IBAction) rewindButton:(id)sender {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [DDLog flushLog];
-        [MLUDPLogger flushWithTimeout:0.100];
+        [HelperTools flushLogsWithTimeout:0.100];
         $call($newHandler(self, IDontKwnowThis));
     });
 }
 
 -(IBAction) fastForwardButton:(id)sender {
+    [HelperTools flushLogsWithTimeout:0.100];
     //[[NSArray arrayWithObject:@"object"] objectAtIndex:1];
     id delegate = NSClassFromString(@"MonalAppDelegate");
     SEL sel = NSSelectorFromString(@"UnknownSelectorExample");
@@ -129,6 +129,7 @@ DDLogFileInfo* _logInfo;
 }
 
 -(IBAction) refreshButton:(id)sender {
+    [HelperTools flushLogsWithTimeout:0.100];
     NSAssert(NO, @"assertion_example");
 }
 

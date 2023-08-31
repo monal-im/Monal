@@ -11,6 +11,7 @@
 #import "MLImageManager.h"
 #import "MLFiletransfer.h"
 #import "MLMessage.h"
+#import "HelperTools.h"
 
 @import QuartzCore;
 @import UIKit;

@@ -17,7 +17,6 @@
 #import "MLNotificationManager.h"
 #import "MLFiletransfer.h"
 #import "xmpp.h"
-#import "MLUDPLogger.h"
 
 @import CallKit;
 
@@ -136,8 +135,7 @@
     [NotificationService setAppexCleanShutdownStatus:YES];
     
     DDLogInfo(@"Now killing appex process, goodbye...");
-    [DDLog flushLog];
-    [MLUDPLogger flushWithTimeout:0.100];
+    [HelperTools flushLogsWithTimeout:0.100];
     exit(0);
 }
 
@@ -452,12 +450,7 @@ static BOOL warnUnclean = NO;
 
 +(void) initialize
 {
-    [HelperTools configureLogging];
-    [HelperTools activityLog];
-    [HelperTools installCrashHandler];
-    
-    //log unhandled exceptions
-    [HelperTools installExceptionHandler];
+    [HelperTools initSystem];
     
     handlers = [NSMutableArray new];
     
@@ -471,12 +464,9 @@ static BOOL warnUnclean = NO;
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     
-#ifdef DEBUG
-    BOOL shutdownStatus = [NotificationService getAppexCleanShutdownStatus];
-    warnUnclean = !shutdownStatus;
+    warnUnclean = ![NotificationService getAppexCleanShutdownStatus];
     if(warnUnclean)
         DDLogError(@"detected unclean appex shutdown!");
-#endif
     
     //mark this appex as unclean (will be cleared directly before calling exit(0))
     [NotificationService setAppexCleanShutdownStatus:NO];
@@ -548,6 +538,7 @@ static BOOL warnUnclean = NO;
         }
     }
     
+#ifdef DEBUG
     if(warnUnclean)
     {
         UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
@@ -561,6 +552,7 @@ static BOOL warnUnclean = NO;
         else
             warnUnclean = NO;       //try again on error
     }
+#endif
     
     //proxy to push singleton
     DDLogDebug(@"proxying to incomingPush");

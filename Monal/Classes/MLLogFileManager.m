@@ -25,14 +25,14 @@ static NSString* appName = @"Monal";
     [dateFormatter setDateFormat: @"yyyy'-'MM'-'dd'--'HH'-'mm'-'ss'-'SSS'"];
     
     NSString* formattedDate = [dateFormatter stringFromDate:[NSDate date]];
-    return [NSString stringWithFormat:@"%@ %@.log", appName, formattedDate];
+    return [NSString stringWithFormat:@"%@ %@.rawlog", appName, formattedDate];
 }
 
 -(BOOL) isLogFile:(NSString*) fileName
 {
     // We need to add a space to the name as otherwise we could match applications that have the name prefix.
     BOOL hasProperPrefix = [fileName hasPrefix:[appName stringByAppendingString:@" "]];
-    BOOL hasProperSuffix = [fileName hasSuffix:@".log"];
+    BOOL hasProperSuffix = [fileName hasSuffix:@".rawlog"];
 
     return (hasProperPrefix && hasProperSuffix);
 }

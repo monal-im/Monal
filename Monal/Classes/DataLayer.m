@@ -1191,6 +1191,13 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(NSNumber*) getBiggestHistoryId
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT MAX(message_history_id) FROM message_history;"];
+    }];
+}
+
 -(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSNumber*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates
 {
     if(!buddyName || !message)

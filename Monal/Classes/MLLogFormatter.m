@@ -25,20 +25,24 @@ static DDQualityOfServiceName _qos_name(NSUInteger qos) {
 
 static inline NSString* _loglevel_name(NSUInteger flag) {
     if(flag & DDLogLevelOff)
-        return @"  OFF";
+        return @"   OFF";
     else if(flag & DDLogLevelError)
-        return @"ERROR";
+        return @" ERROR";
     else if(flag & DDLogLevelWarning)
-        return @" WARN";
+        return @"  WARN";
     else if(flag & DDLogLevelInfo)
-        return @" INFO";
+        return @"  INFO";
     else if(flag & DDLogLevelDebug)
-        return @"DEBUG";
+        return @" DEBUG";
     else if(flag & DDLogLevelVerbose)
-        return @" VERB";
+        return @"  VERB";
+    else if(flag & LOG_LEVEL_STDERR)
+        return @"STDERR";
+    else if(flag & LOG_LEVEL_STDOUT)
+        return @"STDOUT";
     else if(flag & DDLogLevelAll)
-        return @"  ALL";
-    return @" UNKN";
+        return @"   ALL";
+    return @"  UNKN";
 }
 
 @implementation MLLogFormatter
@@ -55,6 +59,10 @@ static inline NSString* _loglevel_name(NSUInteger flag) {
     //append the mach thread id if not already present
     if(![queueThreadLabel isEqualToString:logMessage.threadID])
         queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage.threadID, queueThreadLabel];
+    
+    //don't format stdout and stderr logmessages, e.g. don't add metadata to logline (only to json)
+    if(logMessage.flag & LOG_FLAG_STDOUT || logMessage.flag & LOG_FLAG_STDERR)
+        return logMessage.message;
     
     return [NSString stringWithFormat:@"%@ [%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", timestamp, _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
 }

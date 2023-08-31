@@ -524,7 +524,7 @@
                         [self sendJmiReject];
                 }
                 else
-                    MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
+                    unreachable(@"Unexpected finish reason!", (@{@"call": self}));
             }
             else
             {
@@ -540,7 +540,7 @@
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                 }
                 else
-                    MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
+                    unreachable(@"Unexpected finish reason!", (@{@"call": self}));
             }
         }
         else
@@ -561,7 +561,7 @@
                             [self sendJmiRetract];
                     }
                     else
-                        MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
+                        unreachable(@"Unexpected finish reason!", (@{@"call": self}));
                 }
                 else
                 {
@@ -577,7 +577,7 @@
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                     }
                     else
-                        MLAssert(NO, @"Unexpected finish reason!", (@{@"call": self}));
+                        unreachable(@"Unexpected finish reason!", (@{@"call": self}));
                 }
             }
             else

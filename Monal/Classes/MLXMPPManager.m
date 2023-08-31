@@ -211,6 +211,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     _isBackgrounded = NO;
     _isNotInFocus = NO;
     _onMobile = NO;
+    _isConnectBlocked = NO;
     
     [self defaultSettings];
     [self setPushToken:nil];       //load push settings from defaultsDB (can be overwritten later on in mainapp, but *not* in appex)
@@ -450,6 +451,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             DDLogInfo(@"existing but disabled account, ignoring");
             return;
         }
+        if(_isConnectBlocked)
+        {
+            DDLogWarn(@"connect blocked, ignoring");
+            return;
+        }
         DDLogInfo(@"existing account, calling unfreeze");
         [existing unfreeze];
         DDLogInfo(@"existing account, just pinging.");
@@ -505,8 +511,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             DDLogInfo(@"existing but disabled account, not connecting");
             return;
         }
-        DDLogInfo(@"starting connect");
-        [xmppAccount connect];
+        if(!self.isConnectBlocked)
+        {
+            DDLogInfo(@"starting connect");
+            [xmppAccount connect];
+        }
+        else
+            DDLogWarn(@"connect blocked, not connecting newly created xmpp* instance");
     }
     else
         DDLogWarn(@"NOT connecting because no connectivity.");

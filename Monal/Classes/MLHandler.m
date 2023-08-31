@@ -204,7 +204,7 @@
     if([filePathComponents count]>1)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
     NSString* text = [NSString stringWithFormat:@"Dynamic unpacking exception triggered for '%@' var '%@' at %@:%d in %s", type, varName, fileStr, line, func];
-    DDLogError(text);
+    DDLogError(@"%@", text);
     @throw [NSException exceptionWithName:text reason:text userInfo:userInfo];
 }
 

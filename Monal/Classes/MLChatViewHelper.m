@@ -10,6 +10,8 @@
 #import "DataLayer.h"
 #import "MLContact.h"
 
+@import UIKit.UIAlertController;
+
 @implementation MLChatViewHelper
 
 +(void) toggleEncryptionForContact:(MLContact*) contact withSelf:(id) andSelf afterToggle:(void (^)(void)) afterToggle

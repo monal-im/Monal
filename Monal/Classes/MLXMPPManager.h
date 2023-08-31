@@ -116,6 +116,8 @@ Sends a message to a specified contact in account. Calls completion handler on s
 
 @property (nonatomic, readonly) BOOL onMobile;
 
+@property (nonatomic, assign) BOOL isConnectBlocked;
+
 /**
  updates delivery status after message has been sent
  */

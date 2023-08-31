@@ -7,10 +7,104 @@
 //
 
 #import <Foundation/Foundation.h>
+#include <sys/file.h>
+#include <errno.h>
+
 #import "MLFileLogger.h"
 #import "HelperTools.h"
 
+
+extern BOOL doesAppRunInBackground(void);
+@interface DDFileLogger ()
+-(BOOL) lt_shouldLogFileBeArchived:(DDLogFileInfo*) mostRecentLogFileInfo;
+-(void) lt_logData:(NSData*) data;
+-(NSFileHandle*) lt_currentLogFileHandle;
+@end
+
+@interface MLFileLogger () {
+    BOOL _archiveAllowed;
+}
+@end
+
+
 @implementation MLFileLogger
+
+//overwrite constructor to make sure archiveAllowed is NO when creating this instance
+-(instancetype) initWithLogFileManager:(id <DDLogFileManager>) aLogFileManager completionQueue:(nullable dispatch_queue_t) dispatchQueue
+{
+    self = [super initWithLogFileManager:aLogFileManager completionQueue:dispatchQueue];
+    self.archiveAllowed = NO;
+    return self;
+}
+
+-(BOOL) archiveAllowed
+{
+    //reading an atomic bool does not need to be synchronized
+    return self->_archiveAllowed;
+}
+
+-(void) setArchiveAllowed:(BOOL) archiveAllowed
+{
+    //this must be done on the same queue as lt_shouldLogFileBeArchived is running on to prevent race conditions
+    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_async(globalLoggingQueue, ^{
+        dispatch_async(self.loggerQueue, ^{
+            NSLog(@"Setting archiveAllowed = %@", bool2str(archiveAllowed));
+            self->_archiveAllowed = archiveAllowed;
+        });
+    });
+}
+    
+//patch DDFileLogger to think that this logfile can be reused
+-(BOOL) lt_shouldLogFileBeArchived:(DDLogFileInfo*) mostRecentLogFileInfo
+{
+    //just hand over to official implementation once everything is properly configured
+    if(self.archiveAllowed)
+    {
+        NSLog(@"lt_shouldLogFileBeArchived: handing over to super implementation");
+        return [super lt_shouldLogFileBeArchived:mostRecentLogFileInfo];
+    }
+    
+    NSLog(@"lt_shouldLogFileBeArchived: running patched implementation, archiveAllowed==NO");
+    
+    NSAssert([self isOnInternalLoggerQueue], @"lt_ methods should be on logger queue.");
+
+    //this is our change (but the file protection check below is still needed)
+//     if ([self shouldArchiveRecentLogFileInfo:mostRecentLogFileInfo]) {
+//         return YES;
+//     } else if (_maximumFileSize > 0 && mostRecentLogFileInfo.fileSize >= _maximumFileSize) {
+//         return YES;
+//     } else if (_rollingFrequency > 0.0 && mostRecentLogFileInfo.age >= _rollingFrequency) {
+//         return YES;
+//     }
+
+    //this has still to be active, to rotate the logfile if the file protection is wrong (should never happen with our configuration)
+#if TARGET_OS_IPHONE
+    // When creating log file on iOS we're setting NSFileProtectionKey attribute to NSFileProtectionCompleteUnlessOpen.
+    //
+    // But in case if app is able to launch from background we need to have an ability to open log file any time we
+    // want (even if device is locked). Thats why that attribute have to be changed to
+    // NSFileProtectionCompleteUntilFirstUserAuthentication.
+    //
+    // If previous log was created when app wasn't running in background, but now it is - we archive it and create
+    // a new one.
+    //
+    // If user has overwritten to NSFileProtectionNone there is no need to create a new one.
+    NSFileProtectionType key = mostRecentLogFileInfo.fileAttributes[NSFileProtectionKey];
+    BOOL isUntilFirstAuth = [key isEqualToString:NSFileProtectionCompleteUntilFirstUserAuthentication];
+    BOOL isNone = [key isEqualToString:NSFileProtectionNone];
+
+    if (key != nil && !isUntilFirstAuth && !isNone) {
+        NSLog(@"File protection type not sufficient: %@", key);
+#ifdef is_ALPHA
+        unreachable(@"File protection type not sufficient", mostRecentLogFileInfo.fileAttributes);
+#endif
+        return YES;
+    }
+#endif
+
+    return NO;
+}
 
 -(NSData*) lt_dataForMessage:(DDLogMessage*) logMessage
 {
@@ -29,13 +123,31 @@
     }
     
     //add 32bit length prefix
-    NSAssert(rawData.length < (NSUInteger)1<<32, @"LogMessage is longer than 1<<32 bytes!");
+    NSAssert(rawData.length < (NSUInteger)1<<30, @"LogMessage is longer than 1<<30 bytes!");
     uint32_t length = CFSwapInt32HostToBig((uint32_t)rawData.length);
     NSMutableData* data = [[NSMutableData alloc] initWithBytes:&length length:sizeof(length)];
     [data appendData:rawData];
     
     //return length_prefix + json_encoded_data
     return data;
+}
+
+-(void) lt_logData:(NSData*) data
+{
+    NSFileHandle* handle = [self lt_currentLogFileHandle];
+    //this is an error case, just call the super implementation right away (should never happen)
+    if(handle == nil)
+    {
+        NSLog(@"Could not get file handle in lt_logData wrapper!");
+        return [super lt_logData:data];
+    }
+    int fd = [handle fileDescriptor];
+    while(flock(fd, LOCK_EX | LOCK_NB) != 0)
+    {
+        usleep(1000);
+    }
+    [super lt_logData:data];
+    flock(fd, LOCK_UN);
 }
 
 @end

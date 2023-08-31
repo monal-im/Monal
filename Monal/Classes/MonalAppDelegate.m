@@ -424,8 +424,14 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     else
         [[MLXMPPManager sharedInstance] nowForegrounded];
     
+    @synchronized(self) {
+        DDLogVerbose(@"Setting _shutdownPending to NO...");
+        _shutdownPending = NO;
+    }
+    [self addBackgroundTask];
+    
     //should any accounts connect?
-    [self connectIfNecessary];
+    [self connectIfNecessaryWithOptions:launchOptions];
     
     //handle IPC messages (this should be done *after* calling connectIfNecessary to make sure any disconnectAll messages are handled properly
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
@@ -524,13 +530,12 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     //another process tells us to disconnect all accounts
     //this could happen if we are connecting (or even connected) in the background and the NotificationServiceExtension got started
     //BUT: only do this if we are in background (we should never receive this if we are foregrounded)
-    if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
-        MLAssert(NO, @"Got 'Monal.disconnectAll' while in mainapp. This should NEVER happen!", message);
-    else if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])
+    MLAssert(![message[@"name"] isEqualToString:@"Monal.disconnectAll"], @"Got 'Monal.disconnectAll' while in mainapp. This should NEVER happen!", message);
+    if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])
     {
         DDLogInfo(@"Got connectIfNecessary IPC message");
         //(re)connect all accounts
-        [self connectIfNecessary];
+        [self connectIfNecessaryWithOptions:nil];
     }
 }
 
@@ -1316,8 +1321,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     {
                         DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
-                        [DDLog flushLog];
-                        [MLUDPLogger flushWithTimeout:0.100];
+                        [HelperTools flushLogsWithTimeout:0.100];
                     }
                 }];
             }
@@ -1383,8 +1387,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     {
                         DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
-                        [DDLog flushLog];
-                        [MLUDPLogger flushWithTimeout:0.100];
+                        [HelperTools flushLogsWithTimeout:0.100];
                     }
                 }
             }];
@@ -1447,8 +1450,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 {
                     DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
-                    [DDLog flushLog];
-                    [MLUDPLogger flushWithTimeout:0.100];
+                    [HelperTools flushLogsWithTimeout:0.100];
                 }
             }
         }];
@@ -1557,8 +1559,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 {
                     DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
-                    [DDLog flushLog];
-                    [MLUDPLogger flushWithTimeout:0.100];
+                    [HelperTools flushLogsWithTimeout:0.100];
                 }
             }
         }];
@@ -1705,13 +1706,41 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     }];
 }
 
--(void) connectIfNecessary
+-(void) connectIfNecessaryWithOptions:(NSDictionary*) options
 {
-    @synchronized(self) {
-        DDLogVerbose(@"Setting _shutdownPending to NO...");
-        _shutdownPending = NO;
+    static NSUInteger applicationState;
+    static monal_void_block_t cancelEmergencyTimer;
+    static monal_void_block_t cancelCurrentTimer = nil;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        applicationState = [UIApplication sharedApplication].applicationState;
+        cancelEmergencyTimer = createTimer(16.0, (^{
+            DDLogError(@"Emergency: crashlogs are still blocking connect after 16 seconds, connecting anyways!");
+            if(cancelCurrentTimer != nil)
+                cancelCurrentTimer();
+            [MLXMPPManager sharedInstance].isConnectBlocked = NO;
+            [[MLXMPPManager sharedInstance] connectIfNecessary];
+        }));
+    });
+    //this method is called by didFinishLaunchingWithOptions: and our ipc handler (but this is currently unused)
+    //we block the reconnect while the crash reports have not been processed yet, to avoid a crash loop preventing
+    //the user from sending the crash report
+    int count = [HelperTools pendingCrashreportCount];
+    if(count > 0 && options == nil && applicationState != UIApplicationStateBackground)
+    {
+        [MLXMPPManager sharedInstance].isConnectBlocked = YES;
+        DDLogWarn(@"Blocking connect of connectIfNecessary: crash reports still pending: %d, retrying in 1 second...", count);
+        cancelCurrentTimer = createTimer(1.0, (^{ [self connectIfNecessaryWithOptions:options]; }));
     }
-    [self addBackgroundTask];
+    else
+    {
+        [MLXMPPManager sharedInstance].isConnectBlocked = NO;
+        DDLogInfo(@"Now unblocking connect of connectIfNecessary (applicationState%@UIApplicationStateBackground, count=%d, options=%@)...",
+                    applicationState == UIApplicationStateBackground ? @"==" : @"!=",
+                    count,
+                    options
+        );
+    }
     [[MLXMPPManager sharedInstance] connectIfNecessary];
 }
 
@@ -1799,8 +1828,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         {
                             DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
-                            [DDLog flushLog];
-                            [MLUDPLogger flushWithTimeout:0.100];
+                            [HelperTools flushLogsWithTimeout:0.100];
                         }
                     }
                 });
@@ -1912,7 +1940,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             });
         }
         else
-            MLAssert(NO, @"Outbox payload type unknown", payload);
+            unreachable(@"Outbox payload type unknown", payload);
     }
 }
 

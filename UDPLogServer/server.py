@@ -36,6 +36,12 @@ def flag_to_kwargs(flag):
             kwargs = {"ansi": 39, "ansi_bg": None}
         elif flag & 16:  # verbose
             kwargs = {"ansi": 7, "ansi_bg": None}
+        elif flag & 32:  # stderr
+            kwargs = {"ansi": 9, "ansi_bg": None}
+        elif flag & 64:  # stdout
+            kwargs = {"ansi": 0, "ansi_bg": None}
+        else:
+            kwargs = {"ansi": 0, "ansi_bg": None}
     return kwargs
 
 def decrypt(ciphertext, key):

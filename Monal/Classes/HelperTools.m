@@ -7,6 +7,7 @@
 //
 
 #include <stdio.h>
+#include <sys/stat.h>
 #include <mach/mach.h>
 #include <mach/mach_error.h>
 #include <mach/mach_traps.h>
@@ -14,14 +15,16 @@
 #include <objc/runtime.h> 
 #include <objc/message.h>
 #include <objc/objc-exception.h>
-
-#import <KSCrash/KSCrash.h>
-#import <KSCrash/KSCrashC.h>
-
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import <MapKit/MapKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
+#import <KSCrash/KSCrash.h>
+#import <KSCrash/KSCrashC.h>
+//can not be imported, use extern declaration instead
+//#import <KSCrash/Recording/KSCrashReportStore.h>
+extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
+#import <monalxmpp/monalxmpp-Swift.h>
 #import "hsluv.h"
 #import "HelperTools.h"
 #import "MLXMPPManager.h"
@@ -43,6 +46,7 @@
 #import "OmemoState.h"
 #import "MLUDPLogger.h"
 #import "MLFileLogger.h"
+#import "MLStreamRedirect.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -57,11 +61,14 @@
 @end
 
 
+static char* _crashBundleName = "UnifiedReport";
 static NSString* _processID;
 static DDFileLogger* _fileLogger = nil;
-static char logfilePath[1024];
-static char logfileCopy[1024];
+static char _origLogfilePath[1024] = "";
+static char _logfilePath[1024] = "";
 static NSObject* _isAppExtensionLock = nil;
+static MLStreamRedirect* _stdoutRedirector = nil;
+static MLStreamRedirect* _stderrRedirector = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
 #if TARGET_OS_MACCATALYST
 static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
@@ -128,11 +135,26 @@ out_error:
     return -1;
 }
 
+static void addFilePathWithSize(const KSCrashReportWriter* writer, char* name, char* filePath)
+{
+    struct stat st;
+    char name_size[64];
+    strncpy(name_size, name, 64);
+    name_size[63] = '\0';
+    strncat(name_size, "_size", 64);
+    name_size[63] = '\0';
+    
+    writer->addStringElement(writer, name, filePath);
+    stat(filePath, &st);
+    writer->addUIntegerElement(writer, name_size, st.st_size);
+}
+
 static void crash_callback(const KSCrashReportWriter* writer)
 {
-    writer->addStringElement(writer, "currentLogfile", logfilePath);
-    writer->addStringElement(writer, "logfileCopy", logfileCopy);
-    asyncSafeCopyFile(logfilePath, logfileCopy);
+    addFilePathWithSize(writer, "currentLogfile", _origLogfilePath);
+    asyncSafeCopyFile(_origLogfilePath, _logfilePath);
+    writer->addStringElement(writer, "logfileCopied", "YES");
+    addFilePathWithSize(writer, "logfileCopy", _logfilePath);
 }
 
 void logException(NSException* exception)
@@ -146,7 +168,7 @@ void logException(NSException* exception)
     [DDLog flushLog];
     DDLogError(@"*****************\n%@(%@): %@\nUserInfo: %@\nStack Trace: %@", prefix, [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
-    [MLUDPLogger flushWithTimeout:0.100];
+    [HelperTools flushLogsWithTimeout:0.250];
 }
 
 void swizzle(Class c, SEL orig, SEL new)
@@ -215,7 +237,7 @@ static id preprocess(id exception)
     NSArray* filePathComponents = [fileStr pathComponents];
     if([filePathComponents count]>1)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
-    DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
+    //DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
     @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
 }
 
@@ -266,6 +288,15 @@ static id preprocess(id exception)
     if(errorText && ![errorText isEqualToString:@""])
         message = [NSString stringWithFormat:@"%@: %@ (%@)", description, errorReason, errorText];
     return message;
+}
+
++(void) initSystem
+{
+    [self configureLogging];
+    [SwiftHelpers initSwiftHelpers];
+    [self installCrashHandler];
+    [self installExceptionHandler];
+    [self activityLog];
 }
 
 +(NSDictionary<NSString*, NSString*>*) getInvalidPushServers
@@ -1294,15 +1325,24 @@ static id preprocess(id exception)
 
 +(void) activityLog
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        BOOL appex = [HelperTools isAppExtension];
-        unsigned long counter = 1;
-        while(counter++)
-        {
-            DDLogInfo(@"activity(%@): %lu, memory used / available: %.3fMiB / %.3fMiB", appex ? @"APPEX" : @"MAINAPP", counter, [self report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-            [NSThread sleepForTimeInterval:1];
-        }
-    });
+    BOOL log_activity = NO;
+#ifdef DEBUG
+    log_activity = YES;
+#else
+    log_activity = [[HelperTools defaultsDB] boolForKey:@"showLogInSettings"];
+#endif
+    if(log_activity)
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            BOOL appex = [HelperTools isAppExtension];
+            unsigned long counter = 1;
+            while(counter++)
+            {
+                DDLogInfo(@"activity(%@): %lu, memory used / available: %.3fMiB / %.3fMiB", appex ? @"APPEX" : @"MAINAPP", counter, [self report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+                [NSThread sleepForTimeInterval:1];
+            }
+        });
+    }
 }
 
 +(NSUserDefaults*) defaultsDB
@@ -1345,6 +1385,7 @@ static id preprocess(id exception)
     };
     NSDictionary* msgDict = @{
         @"formattedMessage": logMsg,
+        @"messageFormat": logMessage.messageFormat,
         @"message": logMessage.message,
         @"level": [NSNumber numberWithInteger:logMessage.level],
         @"flag": [NSNumber numberWithInteger:logMessage.flag],
@@ -1376,37 +1417,64 @@ static id preprocess(id exception)
     return rawData;
 }
 
++(void) flushLogsWithTimeout:(double) timeout
+{
+    [_stderrRedirector flushWithTimeout:timeout];
+    [_stdoutRedirector flushWithTimeout:timeout];
+    [DDLog flushLog];
+    [MLUDPLogger flushWithTimeout:timeout];
+}
+
 +(void) configureLogging
 {
     //create log formatter
     MLLogFormatter* formatter = [MLLogFormatter new];
     
-    //start console logger first (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
-#if TARGET_OS_SIMULATOR
-    [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
-    [DDLog addLogger:[DDTTYLogger sharedInstance]];
-#else
-    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
-    [DDLog addLogger:[DDOSLogger sharedInstance]];
-#endif
+    //don't log to the console (aka stderr) to not create loops with our redirected stderr
+//     //start console logger first (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
+// #if TARGET_OS_SIMULATOR
+//     [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
+//     [DDLog addLogger:[DDTTYLogger sharedInstance]];
+// #else
+//     [[DDOSLogger sharedInstance] setLogFormatter:formatter];
+//     [DDLog addLogger:[DDOSLogger sharedInstance]];
+// #endif
     
     //network logger (start as early as possible)
     MLUDPLogger* udpLogger = [MLUDPLogger new];
     [udpLogger setLogFormatter:formatter];
     [DDLog addLogger:udpLogger];
     
+    //redirect stderr containing NSLog() messages
+    _stderrRedirector = [[MLStreamRedirect alloc] initWithStream:stderr];
+    NSLog(@"stderr redirection complete...");
+    
+    //redirect stdout for good measure
+    _stdoutRedirector = [[MLStreamRedirect alloc] initWithStream:stdout];
+    printf("stdout redirection complete...");
+    
     NSString* containerUrl = [[HelperTools getContainerURLForPathComponents:@[]] path];
     DDLogInfo(@"Logfile dir: %@", containerUrl);
     
     //file logger
-    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:containerUrl];
+    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:containerUrl defaultFileProtectionLevel:NSFileProtectionCompleteUntilFirstUserAuthentication];
+    logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger = [[MLFileLogger alloc] initWithLogFileManager:logFileManager];
-    [self.fileLogger setLogFormatter:formatter];
+    self.fileLogger.doNotReuseLogFiles = NO;
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
-    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger.maximumFileSize = 256 * 1024 * 1024;
+    self.fileLogger.logFormatter = formatter;
+    self.fileLogger.archiveAllowed = YES;               //everything is configured now, engage logfile archiving
     [DDLog addLogger:self.fileLogger];
+    
+    DDLogDebug(@"Sorted logfiles: %@", [logFileManager sortedLogFileInfos]);
     DDLogDebug(@"Current logfile: %@", self.fileLogger.currentLogFileInfo.filePath);
+    NSError* error;
+    NSDictionary* attrs = [[NSFileManager defaultManager] attributesOfItemAtPath:self.fileLogger.currentLogFileInfo.filePath error:&error];
+    if(error)
+        DDLogError(@"File attributes error: %@", error);
+    else
+        DDLogDebug(@"File attributes: %@", attrs);
     
     //log version info as early as possible
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
@@ -1422,47 +1490,107 @@ static id preprocess(id exception)
         DDLogVerbose(@"File %@/%@", containerUrl, file);
 }
 
++(int) pendingCrashreportCount
+{
+    KSCrash* handler = [KSCrash sharedInstance];
+    return handler.reportCount;
+}
+
++(void) cleanupRawlogCrashcopies
+{
+    NSError* error;
+    KSCrash* handler = [KSCrash sharedInstance];
+    NSSet* reportIds = [NSSet setWithArray:[handler reportIDs]];
+    NSString* reportpath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Reports"]] path];
+    NSArray* directoryContentsReports = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:reportpath error:&error];
+    if(error != nil)
+    {
+        DDLogError(@"Failed to get directory contents while cleaning up rawlog crashcopies...");
+        return;
+    }
+    
+    //parts taken from https://github.com/kstenerud/KSCrash/blob/9e72c018a0ba455a89cf5770dea6e1d5258744b6/Source/KSCrash/Recording/KSCrashReportStore.c#L75
+    char scanFormat[100];
+    snprintf(scanFormat, sizeof(scanFormat), "%s-log-%%" PRIx64 ".rawlog", _crashBundleName);
+    for(NSString* filename in [directoryContentsReports filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF LIKE %@", [NSString stringWithFormat:@"%s-log-*.rawlog", _crashBundleName]]])
+    {
+        NSString* file = [NSString stringWithFormat:@"%@/%@", reportpath, filename];
+        int64_t reportID = 0;
+        sscanf(filename.UTF8String, scanFormat, &reportID);
+        if(reportID == 0)
+        {
+            DDLogError(@"Could not extract crash report id from '%@', ignoring file!", file);
+            continue;
+        }
+        if(![reportIds containsObject:[NSNumber numberWithLongLong:reportID]])
+        {
+            DDLogInfo(@"Deleting orphan rawlog copy at '%@'...", file);
+            [[NSFileManager defaultManager] removeItemAtPath:file error:&error];
+            if(error != nil)
+                DDLogError(@"Error cleaning up orphan rawlog copy at '%@', ignoring file!", file);
+        }
+    }
+}
+
 +(void) installCrashHandler
 {
+    
+    //only record crashes if either debuggin is turned on (alpha/beta releases) or the log export row was activated in settings by the user
+    BOOL record_crashes = NO;
 #ifdef DEBUG
-    //store data globally for later retrieval by our crash_callback()
-    strncpy(logfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(logfilePath)-1);
-    logfilePath[sizeof(logfilePath)-1] = '\0';
-    NSString* crashlogPath = [[[self getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"crashlog-%@.tmp", [[NSUUID UUID] UUIDString]]];
-    strncpy(logfileCopy, crashlogPath.UTF8String, sizeof(logfileCopy)-1);
-    logfilePath[sizeof(logfileCopy)-1] = '\0';
-    
-    DDLogVerbose(@"KSCrash callback: %p", crash_callback);
-    KSCrash* handler = [KSCrash sharedInstance];
-    handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
-    handler.monitoring = KSCrashMonitorTypeProductionSafe;     //KSCrashMonitorTypeAll
-    handler.onCrash = crash_callback;
-    //[handler enableSwapOfCxaThrow];
-    handler.searchQueueNames = YES;
-    handler.introspectMemory = NO;
-    handler.addConsoleLogToReport = YES;
-    handler.demangleLanguages = KSCrashDemangleLanguageAll;
-    if(![self isAppExtension])
-        handler.deadlockWatchdogInterval = 12;
-    handler.userInfo = @{
-        @"isAppex": @([self isAppExtension]),
-        @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
-    };
-    //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different in appex and mainapp
-    //use the lowlevel C api instead
-    handler.monitoring = kscrash_install("UnifiedReport", handler.basePath.UTF8String);
-    if(handler.monitoring == 0)
-        DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");
-    
-    NSArray* directoryContentsData = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Data"]] path] error:nil];
-    for(NSString* file in directoryContentsData)
-        DDLogDebug(@"KSCrash file: CrashReports/Data/%@", file);
-    NSArray* directoryContentsReports = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Reports"]] path] error:nil];
-    for(NSString* file in directoryContentsReports)
-        DDLogDebug(@"KSCrash file: CrashReports/Reports/%@", file);
-    
-    //[[KSCrash sharedInstance] reportUserException:@"test" reason:@"dummy test" language:@"dylang" lineOfCode:nil stackTrace:nil logAllThreads:NO terminateProgram:NO];
+    record_crashes = YES;
+#else
+    record_crashes = [[HelperTools defaultsDB] boolForKey:@"showLogInSettings"];
 #endif
+    if(record_crashes)
+    {
+        DDLogVerbose(@"KSCrash installing handler with callback: %p", crash_callback);
+        KSCrash* handler = [KSCrash sharedInstance];
+        handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
+        handler.monitoring = KSCrashMonitorTypeAll;     //KSCrashMonitorTypeProductionSafe;
+        handler.onCrash = crash_callback;
+        [handler enableSwapOfCxaThrow];
+        handler.searchQueueNames = NO;      //this is not async safe and can crash :(
+        handler.introspectMemory = YES;
+        handler.addConsoleLogToReport = YES;
+        handler.demangleLanguages = KSCrashDemangleLanguageAll;
+        handler.maxReportCount = 4;
+        handler.deadlockWatchdogInterval = 12;
+        NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+        NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
+        NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
+        NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
+        handler.userInfo = @{
+            @"isAppex": @([self isAppExtension]),
+            @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
+            @"appVersion": [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @""), version, buildDate, buildTime],
+        };
+        //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different
+        //in appex and mainapp use the lowlevel C api with dummy bundle name "UnifiedReport" instead
+        handler.monitoring = kscrash_install(_crashBundleName, handler.basePath.UTF8String);
+        if(handler.monitoring == KSCrashMonitorTypeNone)
+            DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");
+        
+        //store data globally for later retrieval by our crash_callback() (_origLogfilePath and _logfilePath)
+        strncpy(_origLogfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(_logfilePath)-1);
+        _origLogfilePath[sizeof(_origLogfilePath)-1] = '\0';
+        //use the same id for our logfile copy as for the main report (allows to delete all logfile copies for which no crash report exists)
+        //KSCrash increments the id by one every new crash --> the next id used by kscrash will be this one
+        uint64_t nextCrashId = kscrs_getNextCrashReport(NULL) + 1;
+        snprintf(_logfilePath, sizeof(_logfilePath)-1, "%s/Reports/%s-log-%016llx.rawlog", handler.basePath.UTF8String, _crashBundleName, nextCrashId);
+        _logfilePath[sizeof(_logfilePath)-1] = '\0';
+        DDLogVerbose(@"KSCrash: _origLogfilePath=%s, _logfilePath=%s", _origLogfilePath, _logfilePath);
+        
+        //clean up orphan rawlog copies
+        [self cleanupRawlogCrashcopies];
+        
+        NSArray* directoryContentsData = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Data"]] path] error:nil];
+        DDLogDebug(@"KSCrash data files: %@", directoryContentsData);
+        NSArray* directoryContentsReports = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Reports"]] path] error:nil];
+        DDLogDebug(@"KSCrash report files: %@", directoryContentsReports);
+        
+        //[[KSCrash sharedInstance] reportUserException:@"test" reason:@"dummy test" language:@"dylang" lineOfCode:nil stackTrace:nil logAllThreads:NO terminateProgram:YES];
+    }
 }
 
 +(BOOL) isAppExtension
@@ -1899,22 +2027,29 @@ static id preprocess(id exception)
     return [[NSData alloc] initWithBase64EncodedString:string options:NSDataBase64DecodingIgnoreUnknownCharacters];
 }
 
+//very fast, taken from https://stackoverflow.com/a/33501154
 +(NSString*) hexadecimalString:(NSData*) data
 {
-    /* Returns hexadecimal string of NSData. Empty string if data is empty.   */
-    
-    const unsigned char* dataBuffer = (const unsigned char *)[data bytes];
-    
-    if (!dataBuffer)
-        return [NSString string];
-    
-    NSUInteger dataLength  = [data length];
-    NSMutableString* hexString = [NSMutableString stringWithCapacity:(dataLength * 2)];
-    
-    for (unsigned int i = 0; i < dataLength; ++i)
-        [hexString appendString:[NSString stringWithFormat:@"%02x", (unsigned int)dataBuffer[i]]];
-    
-    return [NSString stringWithString:hexString];
+    static char _NSData_BytesConversionString_[512] = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff";
+    UInt16*  mapping = (UInt16*)_NSData_BytesConversionString_;
+    register NSUInteger len = data.length;
+    char*    hexChars = (char*)malloc( sizeof(char) * (len*2) );
+
+    // --- Coeur's contribution - a safe way to check the allocation
+    if (hexChars == NULL) {
+    // we directly raise an exception instead of using NSAssert to make sure assertion is not disabled as this is irrecoverable
+        [NSException raise:@"NSInternalInconsistencyException" format:@"failed malloc" arguments:nil];
+        return nil;
+    }
+    // ---
+
+    register UInt16* dst = ((UInt16*)hexChars) + len-1;
+    register unsigned char* src = (unsigned char*)data.bytes + len-1;
+
+    while (len--) *dst-- = mapping[*src--];
+
+    NSString* retVal = [[NSString alloc] initWithBytesNoCopy:hexChars length:data.length*2 encoding:NSASCIIStringEncoding freeWhenDone:YES];
+    return retVal;
 }
 
 +(NSData*) dataWithHexString:(NSString*) hex

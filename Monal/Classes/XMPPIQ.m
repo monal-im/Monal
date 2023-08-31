@@ -237,14 +237,25 @@ NSString* const kiqErrorType = @"error";
     [self addChildNode:queryNode];
 }
 
--(void) setCompleteMAMQuery
+-(void) setMAMQueryAfterTimestamp:(NSDate* _Nullable) timestamp
 {
+#ifdef IS_ALPHA
+    MLAssert(timestamp!=nil, @"setMAMQueryAfterTimestamp: called with nil timestamp!", @{@"self": self});
+#endif
     //set iq id to mam query id
     self.id = [NSString stringWithFormat:@"MLcatchup:%@", [[NSUUID UUID] UUIDString]];
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
         @"queryid": self.id
     } andChildren:@[
-        [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"urn:xmpp:mam:2"],
+        //query whole archive if the timestamp is nil (e.g. we never received any message contained in this archive
+        //nor did our stanzaid priming archive query succeed)
+        (timestamp==nil ?
+            [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"urn:xmpp:mam:2"]
+            :
+            [[XMPPDataForm alloc] initWithType:@"submit" formType:@"urn:xmpp:mam:2" andDictionary:@{
+                @"start": [HelperTools generateDateTimeString:timestamp]
+            }]
+        ),
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"max" andData:@"50"]
         ] andData:nil]

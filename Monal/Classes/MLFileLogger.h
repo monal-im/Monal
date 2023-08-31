@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLFileLogger : DDFileLogger
 
+@property (atomic, assign) BOOL archiveAllowed;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -11,7 +11,14 @@
 #import "MLHandler.h"
 
 @import CocoaLumberjack;
-static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
+#define LOG_FLAG_STDERR         (1 << 5)
+#define LOG_FLAG_STDOUT         (1 << 6)
+#define LOG_LEVEL_STDERR        (DDLogLevelVerbose | LOG_FLAG_STDERR)
+#define LOG_LEVEL_STDOUT        (LOG_LEVEL_STDERR | LOG_FLAG_STDOUT)
+//behave like DDLogError and flush log on DDLogStderr
+#define DDLogStderr(frmt, ...)  do { LOG_MAYBE(NO,  ddLogLevel, LOG_FLAG_STDERR,  0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__); [DDLog flushLog]; } while(0)
+#define DDLogStdout(frmt, ...)  LOG_MAYBE(NO,  ddLogLevel, LOG_FLAG_STDOUT,  0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
+static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
 #import "MLLogFileManager.h"
 #import "MLLogFormatter.h"
 #import "MLFileLogger.h"
@@ -92,12 +99,6 @@ typedef enum NotificationPrivacySettingOption {
     #define __ESC_(...) __VAN ## __VA_ARGS__
     #define __VAN__ISH
 #endif
-
-#define unreachable() { \
-    DDLogError(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
-    NSAssert(NO, @"unreachable"); \
-    while(1); \
-}
 
 // https://clang-analyzer.llvm.org/faq.html#unlocalized_string
 __attribute__((annotate("returns_localized_nsstring")))

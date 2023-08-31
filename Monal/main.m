@@ -14,12 +14,7 @@
 
 int main(int argc, char *argv[]) {
     @autoreleasepool {
-        [HelperTools configureLogging];
-        [HelperTools activityLog];
-        [HelperTools installCrashHandler];
-        
-        //log unhandled exceptions
-        [HelperTools installExceptionHandler];
+        [HelperTools initSystem];
         
         // check start arguments
         // reset sworim and ipc database for UI Tests

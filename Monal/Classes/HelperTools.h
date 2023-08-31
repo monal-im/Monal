@@ -16,6 +16,7 @@
 #define _createQueuedTimer(timeout, queue, handler, cancelHandler, ...)		[HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue]
 
 #define MLAssert(check, text, ...)                                          do { if(!(check)) { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools MLAssertWithText:text andUserData:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__];)([HelperTools MLAssertWithText:text andUserData:metamacro_head(__VA_ARGS__) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__];) while(YES); } } while(0)
+#define unreachable(...)                                                    do { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))(MLAssert(NO, @"unreachable", __VA_ARGS__);)(MLAssert(NO, __VA_ARGS__);); } while(0)
 
 #define showErrorOnAlpha(account, description, ...)                         do { [HelperTools showErrorOnAlpha:[NSString stringWithFormat:description, ##__VA_ARGS__] withNode:nil andAccount:account andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; } while(0)
 #define showXMLErrorOnAlpha(account, node, description, ...)                do { [HelperTools showErrorOnAlpha:[NSString stringWithFormat:description, ##__VA_ARGS__] withNode:node andAccount:account andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]; } while(0)
@@ -28,17 +29,22 @@ NS_ASSUME_NONNULL_BEGIN
 @class UNNotificationRequest;
 @class DDLogFormatter;
 @class DDLogMessage;
+@class MLFileLogger;
+@class UIView;
+@class UITapGestureRecognizer;
 
 void logException(NSException* exception);
 void swizzle(Class c, SEL orig, SEL new);
 
 @interface HelperTools : NSObject
 
-@property (class, nonatomic, strong) DDFileLogger* fileLogger;
+@property (class, nonatomic, strong) MLFileLogger* fileLogger;
+
 +(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage usingFormatter:(id<DDLogFormatter> _Nullable) formatter counter:(uint64_t*) counter andError:(NSError** _Nullable) error;
-+(void) configureLogging;
-+(void) installCrashHandler;
++(void) initSystem;
 +(void) installExceptionHandler;
++(int) pendingCrashreportCount;
++(void) flushLogsWithTimeout:(double) timeout;
 +(void) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
@@ -81,7 +87,6 @@ void swizzle(Class c, SEL orig, SEL new);
 +(BOOL) isNotInFocus;
 
 +(void) dispatchAsync:(BOOL) async reentrantOnQueue:(dispatch_queue_t _Nullable) queue withBlock:(monal_void_block_t) block;
-+(void) activityLog;
 +(NSUserDefaults*) defaultsDB;
 +(BOOL) isAppExtension;
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features;

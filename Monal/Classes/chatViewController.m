@@ -832,6 +832,13 @@ enum msgSentState {
 {
     //stop editing (if there is some)
     [self stopEditing];
+    
+    //stop audio recording, if currently running
+    if(self->_isRecording)
+    {
+        [[MLAudioRecoderManager sharedInstance] stop:NO];
+        self->_isRecording = NO;
+    }
 
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc removeObserver:self];
@@ -2271,10 +2278,10 @@ enum msgSentState {
         if(priorRow.inbound != row.inbound)
             newSender = YES;
     }
-    cell.date.text = [self formattedTimeStampWithSource:row.delayTimeStamp ? row.delayTimeStamp : row.timestamp];
+    cell.date.text = [self formattedTimeStampWithSource:row.timestamp];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
 
-    cell.dividerDate.text = [self formattedDateWithSource:row.delayTimeStamp?row.delayTimeStamp:row.timestamp andPriorDate:priorRow.timestamp];
+    cell.dividerDate.text = [self formattedDateWithSource:row.timestamp andPriorDate:priorRow.timestamp];
 
     // Do not hide the lockImage if the message was encrypted
     cell.lockImage.hidden = !row.encrypted;
@@ -2693,6 +2700,15 @@ enum msgSentState {
                     break;
                 }
             }
+        }
+        
+        //history database for this contact is completely empty, use global last stanza id for this mam archive
+        if(oldestStanzaId == nil)
+        {
+            if(self.contact.isGroup)
+                oldestStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:self.contact.contactJid andAccount:self.contact.accountId];
+            else
+                oldestStanzaId = [[DataLayer sharedInstance] lastStanzaIdForAccount:self.contact.accountId];
         }
 
         //now load more (older) messages from mam

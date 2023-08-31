@@ -6,8 +6,6 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import SwiftUI
-import monalxmpp
 import OrderedCollections
 
 struct NotificationSettings: View {

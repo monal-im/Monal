@@ -603,5 +603,21 @@
         <xmpp:note>XEP-0454: OMEMO Media sharing</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0474.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:note>XEP-0474: SASL SCRAM Downgrade Protection</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0480.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:note>XEP-0480: SASL Upgrade Tasks</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
   </Project>
 </rdf:RDF>

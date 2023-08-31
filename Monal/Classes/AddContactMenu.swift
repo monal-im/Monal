@@ -8,9 +8,6 @@
 
 import MobileCoreServices
 import UniformTypeIdentifiers
-import SwiftUI
-import monalxmpp
-
 
 struct AddContactMenu: View {
     var delegate: SheetDismisserProtocol

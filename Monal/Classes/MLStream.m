@@ -512,7 +512,7 @@
     else if([kServerDoesNotFollowXep0440Error isEqualToString:type])
         return [kServerDoesNotFollowXep0440Error dataUsingEncoding:NSUTF8StringEncoding];
     
-    MLAssert(NO, @"Trying to use unknown channel-binding type!", (@{@"type":type}));
+    unreachable(@"Trying to use unknown channel-binding type!", (@{@"type":type}));
 }
 
 -(BOOL) isTLS13

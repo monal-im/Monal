@@ -12,6 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class MLMessage;
+@class UIFont;
 
 @interface MLXEPSlashMeHandler : NSObject
 

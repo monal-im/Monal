@@ -38,12 +38,7 @@
 
 +(void) initialize
 {
-    [HelperTools configureLogging];
-    [HelperTools activityLog];
-    [HelperTools installCrashHandler];
-    
-    //log unhandled exceptions
-    [HelperTools installExceptionHandler];
+    [HelperTools initSystem];
     
     //init IPC
     [IPC initializeForProcess:@"ShareSheetExtension"];

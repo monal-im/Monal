@@ -75,6 +75,22 @@ static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
 static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
 #endif
 
+//add own crash info (used by rust panic handler)
+//see https://alastairs-place.net/blog/2013/01/10/interesting-os-x-crash-report-tidbits/
+//and kscrash sources (KSDynamicLinker.c)
+#pragma pack(8)
+static struct {
+    unsigned version;
+    const char* message;
+    const char* signature;
+    const char* backtrace;
+    const char* message2;
+    void* reserved;
+    void* reserved2;
+    void* reserved3; // First introduced in version 5
+} _crash_info __attribute__((section("__DATA, __crash_info"))) = { 5, 0, 0, 0, 0, 0, 0, 0 };
+#pragma pack()
+
 
 //see https://stackoverflow.com/a/2180788
 int asyncSafeCopyFile(const char* from, const char* to)
@@ -152,10 +168,11 @@ static void addFilePathWithSize(const KSCrashReportWriter* writer, char* name, c
 
 static void crash_callback(const KSCrashReportWriter* writer)
 {
-    addFilePathWithSize(writer, "currentLogfile", _origLogfilePath);
     asyncSafeCopyFile(_origLogfilePath, _logfilePath);
     writer->addStringElement(writer, "logfileCopied", "YES");
     addFilePathWithSize(writer, "logfileCopy", _logfilePath);
+    //this comes last to make sure we see size differences if the logfile got written during crash data collection (could be other processes)
+    addFilePathWithSize(writer, "currentLogfile", _origLogfilePath);
 }
 
 void logException(NSException* exception)
@@ -240,6 +257,27 @@ static id preprocess(id exception)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
     //DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
     @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
+}
+
++(void) __attribute__((noreturn)) handleRustPanicWithText:(NSString*) text andBacktrace:(NSString*) backtrace
+{
+    NSString* abort_msg = [NSString stringWithFormat:@"RUST_PANIC: %@", text];
+    
+    //set crash_info_message in DATA section of our binary image
+    //see https://alastairs-place.net/blog/2013/01/10/interesting-os-x-crash-report-tidbits/
+    _crash_info.message = abort_msg.UTF8String;
+    _crash_info.signature = abort_msg.UTF8String;       //use signature for apple crash reporter which does not handle message field
+    _crash_info.backtrace = backtrace.UTF8String;
+    _crash_info.message2 = backtrace.UTF8String;        //use message2 for kscrash which does not handle backtrace field
+    
+    //log error and flush all logs
+    [DDLog flushLog];
+    DDLogError(@"*****************\n%@\n%@", abort_msg, backtrace);
+    [DDLog flushLog];
+    [HelperTools flushLogsWithTimeout:0.250];
+    
+    //now abort everything
+    abort();
 }
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount
@@ -1554,6 +1592,7 @@ static id preprocess(id exception)
         handler.searchQueueNames = NO;      //this is not async safe and can crash :(
         handler.introspectMemory = YES;
         handler.addConsoleLogToReport = YES;
+        handler.printPreviousLog = NO;     //debug kscrash itself?
         handler.demangleLanguages = KSCrashDemangleLanguageAll;
         handler.maxReportCount = 4;
         handler.deadlockWatchdogInterval = 12;
@@ -1919,9 +1958,9 @@ static id preprocess(id exception)
     return retval;
 }
 
-+(NSString*) xml2sdp:(MLXMLNode*) xml
++(NSString*) xml2sdp:(MLXMLNode*) xml withInitiator:(BOOL) initiator
 {
-    return [JingleSDPBridge getSDPStringForJingleString:[xml XMLString]];
+    return [JingleSDPBridge getSDPStringForJingleString:[xml XMLString] withInitiator:initiator];
 }
 
 #pragma mark Hashes

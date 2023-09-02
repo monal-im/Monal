@@ -133,7 +133,6 @@
 		54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81B282316F5003664BD /* RegisterAccount.swift */; };
 		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
 		840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */; };
-		8414ADFE2A7ABC0700EFFCCC /* LibSdpToJingleMapper in Frameworks */ = {isa = PBXBuildFile; productRef = 8414ADFD2A7ABC0700EFFCCC /* LibSdpToJingleMapper */; };
 		8414AE002A7ABC4300EFFCCC /* LibSdpToJingleMapper in Frameworks */ = {isa = PBXBuildFile; productRef = 8414ADFF2A7ABC4300EFFCCC /* LibSdpToJingleMapper */; };
 		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
 		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
@@ -760,7 +759,6 @@
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
 				841898AA2957712000FEC77D /* ViewExtractor in Frameworks */,
 				7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */,
-				8414ADFE2A7ABC0700EFFCCC /* LibSdpToJingleMapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1504,7 +1502,6 @@
 				C1F5C7AE2777638B0001F295 /* OrderedCollections */,
 				C1E1EC7A286A025F0097EC74 /* SwiftSoup */,
 				841898A92957712000FEC77D /* ViewExtractor */,
-				8414ADFD2A7ABC0700EFFCCC /* LibSdpToJingleMapper */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -4025,10 +4022,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		8414ADFD2A7ABC0700EFFCCC /* LibSdpToJingleMapper */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = LibSdpToJingleMapper;
-		};
 		8414ADFF2A7ABC4300EFFCCC /* LibSdpToJingleMapper */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LibSdpToJingleMapper;

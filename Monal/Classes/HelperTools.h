@@ -45,7 +45,8 @@ void swizzle(Class c, SEL orig, SEL new);
 +(void) installExceptionHandler;
 +(int) pendingCrashreportCount;
 +(void) flushLogsWithTimeout:(double) timeout;
-+(void) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func;
++(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func;
++(void) __attribute__((noreturn)) handleRustPanicWithText:(NSString*) text andBacktrace:(NSString*) backtrace;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
@@ -98,7 +99,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSString*) encodeRandomResource;
 
 +(MLXMLNode*) sdp2xml:(NSString*) sdp withInitiator:(BOOL) initiator;
-+(NSString*) xml2sdp:(MLXMLNode*) xml;
++(NSString*) xml2sdp:(MLXMLNode*) xml withInitiator:(BOOL) initiator;
 
 +(NSData* _Nullable) sha1:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha1:(NSString* _Nullable) data;

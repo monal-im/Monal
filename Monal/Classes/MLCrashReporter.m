@@ -107,6 +107,25 @@
 {
     if(![MFMailComposeViewController canSendMail])
     {
+#if TARGET_OS_SIMULATOR
+        u_int32_t runid_raw = arc4random();
+        NSString* runid = [HelperTools hexadecimalString:[NSData dataWithBytes:&runid_raw length:sizeof(runid_raw)]];
+        int i = 1;
+        for(NSData* report in reports)
+            if(![report isKindOfClass:[NSData class]])
+                DDLogError(@"Report was of unsupported data type %@", [report class]);
+            else
+            {
+                NSString* path = [[HelperTools getContainerURLForPathComponents:@[[NSString stringWithFormat:@"CrashReport-%@-%d.mcrash.gz", runid, i++]]] path];
+                DDLogWarn(@"Writing report %d to file: %@", i, path);
+                [report writeToFile:path atomically:YES];
+            }
+        kscrash_callCompletion(onCompletion, reports, YES,
+                                 [NSError errorWithDomain:[[self class] description]
+                                                     code:0
+                                              description:@"Crashreports written to simulator container..."]);
+        return;
+#else
         UIAlertController* alertController = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Email Error", @"Crash report error dialog")
                                                                        message:NSLocalizedString(@"This device is not configured to send email.", @"Crash report error dialog")
                                                                 preferredStyle:UIAlertControllerStyleAlert];
@@ -121,6 +140,7 @@
                                                      code:0
                                               description:NSLocalizedString(@"E-Mail not enabled on device", @"Crash report error dialog")]);
         return;
+#endif
     }
     
     self.kscrashCompletion = onCompletion;
@@ -240,9 +260,13 @@
         for(NSDictionary* binaryImage in report[@"binary_images"])
         {
             if(binaryImage[@"crash_info_message"] != nil)
-                [crashInfos appendString:[NSString stringWithFormat:@"%@:\n%@\n\n", binaryImage[@"name"], binaryImage[@"crash_info_message"]]];
+                [crashInfos appendString:[NSString stringWithFormat:@"message at %@:\n%@\n\n", binaryImage[@"name"], binaryImage[@"crash_info_message"]]];
             if(binaryImage[@"crash_info_message2"] != nil)
-                [crashInfos appendString:[NSString stringWithFormat:@"%@:\n%@\n\n", binaryImage[@"name"], binaryImage[@"crash_info_message2"]]];
+                [crashInfos appendString:[NSString stringWithFormat:@"message2 at %@:\n%@\n\n", binaryImage[@"name"], binaryImage[@"crash_info_message2"]]];
+            if(binaryImage[@"crash_info_signature"] != nil)
+                [crashInfos appendString:[NSString stringWithFormat:@"signature at %@:\n%@\n\n", binaryImage[@"name"], binaryImage[@"crash_info_signature"]]];
+            if(binaryImage[@"crash_info_backtrace"] != nil)
+                [crashInfos appendString:[NSString stringWithFormat:@"backtrace at %@:\n%@\n\n", binaryImage[@"name"], binaryImage[@"crash_info_backtrace"]]];
         }
         if([crashInfos length] > 0)
             [auxData appendString:[NSString stringWithFormat:@"\nAvailable crash info messages:\n\n%@", crashInfos]];

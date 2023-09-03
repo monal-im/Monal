@@ -183,6 +183,10 @@ struct AVCallUI: View {
                                     Text("Call ended: declined")
                                     .bold()
                                     .foregroundColor(.primary)
+                                case .error:
+                                    Text("Call ended: application error")
+                                    .bold()
+                                    .foregroundColor(.primary)
                                 default:        //should never be reached
                                     Text("")
                             }
@@ -427,6 +431,11 @@ struct AVCallUI: View {
                             ringingPlayer.stop()
                             errorPlayer.stop()
                             busyPlayer.play()
+                        case .error:
+                            DDLogDebug("state: finished: error")
+                            ringingPlayer.stop()
+                            busyPlayer.stop()
+                            errorPlayer.play()
                         default:
                             DDLogDebug("state: finished: default")
                             ringingPlayer.stop()

@@ -1693,11 +1693,27 @@ static id preprocess(id exception)
             @"urn:xmpp:eme:0",
             @"urn:xmpp:message-retract:0",
             @"urn:xmpp:message-correct:0",
+            
+            
         ] mutableCopy];
         if([[HelperTools defaultsDB] boolForKey: @"allowVersionIQ"])
             [featuresArray addObject:@"jabber:iq:version"];
+        //voip stuff
         if([HelperTools shouldProvideVoip])
-            [featuresArray addObject:@"urn:tmp:monal:webrtc"];  //TODO: tmp implementation, to be replaced by urn:xmpp:jingle-message:0 later on
+        {
+            [featuresArray addObject:@"urn:xmpp:jingle-message:0"];
+            [featuresArray addObject:@"urn:xmpp:jingle:1"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:1"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:audio"];
+            //[featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:video"];
+            [featuresArray addObject:@"urn:xmpp:jingle:transports:ice-udp:1"];
+            [featuresArray addObject:@"urn:ietf:rfc:5888"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:dtls:0"];
+            [featuresArray addObject:@"urn:ietf:rfc:5576"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:rtp-hdrext:0"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:rtcp-fb:0"];
+            [featuresArray addObject:@"urn:tmp:monal:webrtc"];  //TODO: write xep for this
+        }
         
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });
@@ -1937,17 +1953,14 @@ static id preprocess(id exception)
     return [NSNumber numberWithUnsignedLong:(unsigned long)date.timeIntervalSince1970];
 }
 
-+(MLXMLNode*) sdp2xml:(NSString*) sdp withInitiator:(BOOL) initiator
++(NSArray<MLXMLNode*>*) sdp2xml:(NSString*) sdp withInitiator:(BOOL) initiator
 {
-    __block MLXMLNode* retval = nil;
-    MLBasePaser* delegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
-        DDLogVerbose(@"Parsed Stanza: %@", parsedStanza);
-        //only use the first parsed "stanza" (the <root/> inside <outerRoot/>), not the <outerRoot/> element iself
-        //(reported as parsed "stanza" after the <root/> element was reported)
-        if(retval == nil)
-            retval = parsedStanza;
+    __block NSMutableArray<MLXMLNode*>* retval = [NSMutableArray new];
+    MLBasePaser* delegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedElement) {
+        DDLogVerbose(@"Parsed jingle sdp element: %@", parsedElement);
+        [retval addObject:parsedElement];
     }];
-    NSString* xmlString = [NSString stringWithFormat:@"<outerRoot>%@</outerRoot>", [JingleSDPBridge getJingleStringForSDPString:sdp withInitiator:initiator]];
+    NSString* xmlString = [JingleSDPBridge getJingleStringForSDPString:sdp withInitiator:initiator];
     DDLogVerbose(@"Parsing XML string produced by rust sdp parser: %@", xmlString);
     NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
     [xmlParser setShouldProcessNamespaces:YES];
@@ -1960,7 +1973,8 @@ static id preprocess(id exception)
 
 +(NSString*) xml2sdp:(MLXMLNode*) xml withInitiator:(BOOL) initiator
 {
-    return [JingleSDPBridge getSDPStringForJingleString:[xml XMLString] withInitiator:initiator];
+    NSString* xmlstr = [[[MLXMLNode alloc] initWithElement:@"root" withAttributes:@{} andChildren:xml.children andData:nil] XMLString];
+    return [JingleSDPBridge getSDPStringForJingleString:xmlstr withInitiator:initiator];
 }
 
 #pragma mark Hashes

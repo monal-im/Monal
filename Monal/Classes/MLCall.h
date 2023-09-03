@@ -49,6 +49,7 @@ typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
     MLCallFinishReasonRetracted,            //used for a call retracted locally (always own acount)
     MLCallFinishReasonRejected,             //used for a call rejected remotely (own account OR remote party)
     MLCallFinishReasonDeclined,             //used for a call rejected locally (always own account)
+    MLCallFinishReasonError,                //used for a call error
 };
 
 @interface MLCall : NSObject

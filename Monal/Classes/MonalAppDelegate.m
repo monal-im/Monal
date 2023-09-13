@@ -170,6 +170,7 @@ a=extmap-allow-mixed\n\
 a=msid-semantic: WMS stream\n\
 m=audio 9 UDP/TLS/RTP/SAVPF 111 63 9 102 0 8 13 110 126\n\
 c=IN IP4 0.0.0.0\n\
+a=candidate:1076231993 2 udp 41885694 198.51.100.52 50002 typ relay raddr 0.0.0.0 rport 0 generation 0 ufrag V4as network-id 2 network-cost 10\n\
 a=rtcp:9 IN IP4 0.0.0.0\n\
 a=ice-ufrag:Pt2c\n\
 a=ice-pwd:XKe021opw+vupIkkLCI1+kP4\n\
@@ -282,7 +283,7 @@ a=fingerprint:sha-256 1F:CE:47:40:5F:F2:FC:66:F2:21:F7:7D:3D:D6:0D:B0:67:6F:BD:C
 a=setup:actpass\n\
 a=mid:2\n\
 a=sctp-port:5000\n\
-a=max-message-size:262144" withInitiator:YES]);
+a=max-message-size:262144\n" withInitiator:YES]);
 }
 
 -(id) init
@@ -298,7 +299,8 @@ a=max-message-size:262144" withInitiator:YES]);
     _wasFreezed = NO;
     
     //[self runParserTests];
-    [self runSDPTests];
+    //[self runSDPTests];
+    //[HelperTools flushLogsWithTimeout:0.250];
     return self;
 }
 
@@ -1867,6 +1869,7 @@ a=max-message-size:262144" withInitiator:YES]);
                     count,
                     options
         );
+        cancelEmergencyTimer();
     }
     [[MLXMPPManager sharedInstance] connectIfNecessary];
 }

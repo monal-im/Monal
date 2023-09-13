@@ -448,6 +448,12 @@ static NSMutableDictionary* _pendingCalls;
     MLAssert(messageNode != nil, @"messageNode is nil in handleIncomingJMIStanza!", notification.userInfo);
     xmpp* account = notification.object;
     MLAssert(account != nil, @"account is nil in handleIncomingJMIStanza!", notification.userInfo);
+    
+    return [self handleIncomingJMIStanza:messageNode onAccount:account];
+}
+
+-(void) handleIncomingJMIStanza:(XMPPMessage*) messageNode onAccount:(xmpp*) account
+{
     NSString* jmiid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id"];
     MLAssert(jmiid != nil, @"call jmiid invalid!", (@{@"*@id": nilWrapper([messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id"])}));
     MLCall* call = [self getCallForJmiid:jmiid];

@@ -68,6 +68,7 @@
 @property (nonatomic, strong) CXProvider* _Nullable cxProvider;
 -(void) removeCall:(MLCall*) call;
 -(void) initWebRTCForPendingCall:(MLCall*) call;
+-(void) handleIncomingJMIStanza:(MLXMLNode*) messageNode onAccount:(xmpp*) account;
 @end
 
 @implementation MLCall
@@ -1185,9 +1186,20 @@
             type = @"offer";
             rawSDP = [HelperTools xml2sdp:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:YES];
         }
+        else if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>"])
+        {
+            DDLogDebug(@"Got jingle session-terminate, faking jmi:finish for Conversations compatibility...");
+            XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.account.connectionProperties.identity.jid];
+            [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
+                @"id": self.jmiid,
+            } andChildren:[iqNode find:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>/reason"] andData:nil]];
+            [jmiNode setStoreHint];
+            [self.voipProcessor handleIncomingJMIStanza:jmiNode onAccount:self.account];
+            return;
+        }
         else
         {
-            DDLogWarn(@"Unexpected incoming jingle data, ignoring: %@", iqNode);
+            DDLogWarn(@"Unexpected incoming jingle type, ignoring: %@", iqNode);
             return;
         }
     }

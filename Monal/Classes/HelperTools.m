@@ -1953,7 +1953,7 @@ static id preprocess(id exception)
     return [NSNumber numberWithUnsignedLong:(unsigned long)date.timeIntervalSince1970];
 }
 
-+(NSArray<MLXMLNode*>*) sdp2xml:(NSString*) sdp withInitiator:(BOOL) initiator
++(NSArray<MLXMLNode*>* _Nullable) sdp2xml:(NSString*) sdp withInitiator:(BOOL) initiator
 {
     __block NSMutableArray<MLXMLNode*>* retval = [NSMutableArray new];
     MLBasePaser* delegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedElement) {
@@ -1961,6 +1961,8 @@ static id preprocess(id exception)
         [retval addObject:parsedElement];
     }];
     NSString* xmlString = [JingleSDPBridge getJingleStringForSDPString:sdp withInitiator:initiator];
+    if(xmlString == nil)
+        return nil;
     DDLogVerbose(@"Parsing XML string produced by rust sdp parser: %@", xmlString);
     NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
     [xmlParser setShouldProcessNamespaces:YES];
@@ -1971,10 +1973,58 @@ static id preprocess(id exception)
     return retval;
 }
 
-+(NSString*) xml2sdp:(MLXMLNode*) xml withInitiator:(BOOL) initiator
++(NSString* _Nullable) xml2sdp:(MLXMLNode*) xml withInitiator:(BOOL) initiator
 {
     NSString* xmlstr = [[[MLXMLNode alloc] initWithElement:@"root" withAttributes:@{} andChildren:xml.children andData:nil] XMLString];
     return [JingleSDPBridge getSDPStringForJingleString:xmlstr withInitiator:initiator];
+}
+
++(MLXMLNode* _Nullable) candidate2xml:(NSString*) candidate withMid:(NSString*) mid pwd:(NSString* _Nullable) pwd ufrag:(NSString* _Nullable) ufrag andInitiator:(BOOL) initiator
+{
+    //use some dummy sdp string to make our rust sdp parser happy
+    //always use "audio" for our dummy media
+    NSMutableString* sdp = [NSMutableString stringWithFormat:@"v=0\r\n\
+o=- 2005859539484728435 2 IN IP4 127.0.0.1\r\n\
+s=-\r\n\
+t=0 0\r\n\
+m=audio 9 UDP/TLS/RTP/SAVPF 0\r\n\
+c=IN IP4 0.0.0.0\r\n\
+a=mid:%@\r\n\
+a=%@\r\n", mid, candidate];
+    if(pwd != nil)
+        [sdp appendString:[NSString stringWithFormat:@"a=ice-pwd:%@\r\n", pwd]];
+    if(ufrag != nil)
+        [sdp appendString:[NSString stringWithFormat:@"a=ice-ufrag:%@\r\n", ufrag]];
+    DDLogVerbose(@"Dummy sdp candidate string for rust parser: %@", sdp);
+    
+    //this result array should only contain one single content node or be nil on parser errors
+    NSArray* xml = [self sdp2xml:sdp withInitiator:initiator];
+    if(xml == nil)
+        return nil;
+    MLAssert([xml count] == 1, @"Only one single content node expected!", (@{@"xml": xml}));
+    MLXMLNode* contentNode = xml[0];
+    MLAssert([contentNode check:@"/{urn:xmpp:jingle:1}content"], @"Content node not present!", (@{@"xml": xml}));
+    
+    //remove unwanted description node resulting from our dummy sdp media line above (which is needed for the sdp parser)
+    for(MLXMLNode* node in [contentNode find:@"{urn:xmpp:jingle:apps:rtp:1}description"])
+        [contentNode removeChildNode:node];
+    return contentNode;
+}
+
++(NSString* _Nullable) xml2candidate:(MLXMLNode*) xml withInitiator:(BOOL) initiator
+{
+    //don't change the original
+    MLXMLNode* node = [xml copy];
+    for(MLXMLNode* contentNode in [node find:@"{urn:xmpp:jingle:1}content"])
+        [contentNode addChildNode:[[MLXMLNode alloc] initWithElement:@"description" andNamespace:@"urn:xmpp:jingle:apps:rtp:1" withAttributes:@{@"media": @"audio"} andChildren:@[] andData:nil]];
+    NSString* xmlString = [self xml2sdp:node withInitiator:initiator];
+    //the candidate attribute line should always be the last one given our rust parser code, but we try to be more robust here
+    NSArray* lines = [xmlString componentsSeparatedByString:@"\r\n"];
+    NSString* prefix = @"a=candidate";
+    for(NSString* line in lines)
+        if(line.length >= prefix.length && [prefix isEqualToString:[line substringWithRange:NSMakeRange(0, prefix.length)]])
+            return [line substringWithRange:NSMakeRange(2, line.length - 2)];
+    return nil;
 }
 
 #pragma mark Hashes

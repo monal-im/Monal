@@ -143,6 +143,7 @@ public class JingleSDPBridge : NSObject {
             //see https://www.reddit.com/r/rust/comments/rqr0aj/swiftbridge_generate_ffi_bindings_between_rust/hqdud0b
             return retval.toString()
         }
+        DDLogDebug("Got empty optional from rust!")
         return nil
     }
     
@@ -153,6 +154,7 @@ public class JingleSDPBridge : NSObject {
             //see https://www.reddit.com/r/rust/comments/rqr0aj/swiftbridge_generate_ffi_bindings_between_rust/hqdud0b
             return retval.toString()
         }
+        DDLogDebug("Got empty optional from rust!")
         return nil
     }
 }

@@ -113,6 +113,10 @@ static NSMutableDictionary* _typingNotifications;
         return message;
     }
     
+    if(![messageNode check:@"/<type=groupchat>"] && [[messageNode from] isEqualToString:account.connectionProperties.identity.fullJid] && [[messageNode toUser] isEqualToString:account.connectionProperties.identity.jid]) {
+        return nil;
+    }
+
     //handle incoming jmi calls (TODO: add entry to local history, once the UI for this is implemented)
     //only handle incoming propose messages if not older than 60 seconds
     

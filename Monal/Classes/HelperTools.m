@@ -1955,6 +1955,7 @@ static id preprocess(id exception)
 
 +(NSArray<MLXMLNode*>* _Nullable) sdp2xml:(NSString*) sdp withInitiator:(BOOL) initiator
 {
+    DDLogVerbose(@"Parsing SDP string using rust(withInitiator=%@): %@", bool2str(initiator), sdp);
     __block NSMutableArray<MLXMLNode*>* retval = [NSMutableArray new];
     MLBasePaser* delegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedElement) {
         DDLogVerbose(@"Parsed jingle sdp element: %@", parsedElement);
@@ -1963,7 +1964,7 @@ static id preprocess(id exception)
     NSString* xmlString = [JingleSDPBridge getJingleStringForSDPString:sdp withInitiator:initiator];
     if(xmlString == nil)
         return nil;
-    DDLogVerbose(@"Parsing XML string produced by rust sdp parser: %@", xmlString);
+    DDLogVerbose(@"Parsing XML string produced by rust sdp parser(withInitiator=%@): %@", bool2str(initiator), xmlString);
     NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
     [xmlParser setShouldProcessNamespaces:YES];
     [xmlParser setShouldReportNamespacePrefixes:YES];       //for debugging only
@@ -1976,7 +1977,9 @@ static id preprocess(id exception)
 +(NSString* _Nullable) xml2sdp:(MLXMLNode*) xml withInitiator:(BOOL) initiator
 {
     NSString* xmlstr = [[[MLXMLNode alloc] initWithElement:@"root" withAttributes:@{} andChildren:xml.children andData:nil] XMLString];
-    return [JingleSDPBridge getSDPStringForJingleString:xmlstr withInitiator:initiator];
+    NSString* retval = [JingleSDPBridge getSDPStringForJingleString:xmlstr withInitiator:initiator];
+    DDLogVerbose(@"Got sdp string from rust(withInitiator=%@): %@", bool2str(initiator), retval);
+    return retval;
 }
 
 +(MLXMLNode* _Nullable) candidate2xml:(NSString*) candidate withMid:(NSString*) mid pwd:(NSString* _Nullable) pwd ufrag:(NSString* _Nullable) ufrag andInitiator:(BOOL) initiator
@@ -2013,12 +2016,12 @@ a=%@\r\n", mid, candidate];
 
 +(NSString* _Nullable) xml2candidate:(MLXMLNode*) xml withInitiator:(BOOL) initiator
 {
-    //don't change the original
+    //add dummy description childs to each content element, but don't change the original xml node
     MLXMLNode* node = [xml copy];
     for(MLXMLNode* contentNode in [node find:@"{urn:xmpp:jingle:1}content"])
         [contentNode addChildNode:[[MLXMLNode alloc] initWithElement:@"description" andNamespace:@"urn:xmpp:jingle:apps:rtp:1" withAttributes:@{@"media": @"audio"} andChildren:@[] andData:nil]];
     NSString* xmlString = [self xml2sdp:node withInitiator:initiator];
-    //the candidate attribute line should always be the last one given our rust parser code, but we try to be more robust here
+    //the candidate attribute line should always be the last one (given our current rust parser code), but we try to be more robust here
     NSArray* lines = [xmlString componentsSeparatedByString:@"\r\n"];
     NSString* prefix = @"a=candidate";
     for(NSString* line in lines)

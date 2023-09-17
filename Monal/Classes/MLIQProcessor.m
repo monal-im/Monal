@@ -82,14 +82,12 @@
     {
         if(([iqNode check:@"{urn:xmpp:jingle:1}jingle"] && ![iqNode check:@"{urn:xmpp:jingle:1}jingle<action=transport-info>"]))
         {
-            DDLogDebug(@"Received Monal SDP offer: %@", iqNode);
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingSDP object:account userInfo:@{@"iqNode": iqNode}];
             return;
         }
         
         if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=transport-info>"])
         {
-            DDLogDebug(@"Received ICE candidate: %@", iqNode);
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingICECandidate object:account userInfo:@{@"iqNode": iqNode}];
             return;
         }

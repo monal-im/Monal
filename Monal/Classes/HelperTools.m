@@ -1586,7 +1586,7 @@ static id preprocess(id exception)
         DDLogVerbose(@"KSCrash installing handler with callback: %p", crash_callback);
         KSCrash* handler = [KSCrash sharedInstance];
         handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
-        handler.monitoring = KSCrashMonitorTypeAll;     //KSCrashMonitorTypeProductionSafe;
+        handler.monitoring = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
         handler.onCrash = crash_callback;
         [handler enableSwapOfCxaThrow];
         handler.searchQueueNames = NO;      //this is not async safe and can crash :(
@@ -1595,7 +1595,7 @@ static id preprocess(id exception)
         handler.printPreviousLog = NO;     //debug kscrash itself?
         handler.demangleLanguages = KSCrashDemangleLanguageAll;
         handler.maxReportCount = 4;
-        handler.deadlockWatchdogInterval = 12;
+        handler.deadlockWatchdogInterval = 0;       // no main thread watchdog
         NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
         NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
         NSString* buildDate = [NSString stringWithUTF8String:__DATE__];

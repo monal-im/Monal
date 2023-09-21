@@ -2208,7 +2208,7 @@ enum msgSentState {
             {
                 UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize*3];
                 [cell.messageBody setFont:originalFont];
-
+                [cell.messageBody setAttributedText:nil];
                 [cell.messageBody setText:messageText];
                 cell.bubbleImage.hidden=YES;
             }
@@ -2225,7 +2225,7 @@ enum msgSentState {
                 // Reset attributes
                 UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize];
                 [cell.messageBody setFont:originalFont];
-
+                [cell.messageBody setAttributedText:nil];
                 [cell.messageBody setText:messageText];
             }
             cell.link = nil;

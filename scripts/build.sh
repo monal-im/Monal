@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function exportMacOS {
     local EXPORT_OPTIONS_CATALYST="$1"
@@ -28,6 +28,13 @@ echo "*******************************************"
 echo "*     Update localizations submodules     *"
 echo "*******************************************"
 git submodule update -f --init --remote
+
+echo ""
+echo "*******************************************"
+echo "*     Building rust packages & bridge     *"
+echo "*******************************************"
+
+bash ../rust/build-rust.sh
 
 echo ""
 echo "***************************************"

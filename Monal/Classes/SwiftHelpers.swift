@@ -11,7 +11,7 @@
 @_exported import CocoaLumberjackSwift
 @_exported import Logging
 import CocoaLumberjackSwiftLogBackend
-import LibSdpToJingleMapper
+import LibMonalRustSwiftBridge
 
 public typealias monal_void_block_t = @convention(block) () -> Void;
 public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;

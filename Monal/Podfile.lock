@@ -1,5 +1,5 @@
 PODS:
-  - ASN1Decoder (1.8.0)
+  - ASN1Decoder (1.9.0)
   - DACircularProgress (2.3.1)
   - DZNEmptyDataSet (1.8.1)
   - FLAnimatedImage (1.0.17)
@@ -84,11 +84,11 @@ PODS:
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
   - SnapKit (5.6.0)
-  - sqlite3/common (3.42.0)
-  - sqlite3/perf-threadsafe (3.42.0):
+  - sqlite3/common (3.43.1)
+  - sqlite3/perf-threadsafe (3.43.1):
     - sqlite3/common
   - TOCropViewController (2.6.1)
-  - WebRTC-lib (116.0.0)
+  - WebRTC-lib (117.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -146,7 +146,7 @@ CHECKOUT OPTIONS:
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
 
 SPEC CHECKSUMS:
-  ASN1Decoder: 6110fdeacfdb41559b1481457a1645be716610aa
+  ASN1Decoder: 4f4bbcaf1d1b8be56daa3280e82863a607f5bda9
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
@@ -161,9 +161,9 @@ SPEC CHECKSUMS:
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  sqlite3: f163dbbb7aa3339ad8fc622782c2d9d7b72f7e9c
+  sqlite3: e0a0623a33a20a47cb5921552aebc6e9e437dc91
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
-  WebRTC-lib: a7f14febc57a4bb334505ea33eb4f797ef9e3ac9
+  WebRTC-lib: 8e6d3ec41aea480ef844bb5d537cbefb83e7c2c2
 
 PODFILE CHECKSUM: bf3a219fe79a10968ef750b2aeba39a10793cda6
 

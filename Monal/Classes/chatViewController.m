@@ -2231,17 +2231,6 @@ enum msgSentState {
             cell.link = nil;
         }
     }
-
-    if(cell == nil)
-    {
-        DDLogError(@"Using fallback cell for message text: '%@'", messageText);
-        //this is just a dummy to display something usable (the filetransfer url as link cell)
-        MLLinkCell* toreturn = (MLLinkCell*)[self messageTableCellWithIdentifier:@"link" andInbound:inboundDir fromTable: tableView];;
-        toreturn.link = row.messageText;
-        toreturn.messageBody.text = toreturn.link;
-
-        cell = toreturn;
-    }
     MLMessage* priorRow = nil;
     if(indexPath.row > 0)
         priorRow = [self.messageList objectAtIndex:indexPath.row-1];

@@ -163,7 +163,7 @@ static void addFilePathWithSize(const KSCrashReportWriter* writer, char* name, c
     
     writer->addStringElement(writer, name, filePath);
     stat(filePath, &st);
-    writer->addUIntegerElement(writer, name_size, st.st_size);
+    writer->addIntegerElement(writer, name_size, st.st_size);
 }
 
 static void crash_callback(const KSCrashReportWriter* writer)

@@ -1106,6 +1106,15 @@
         return;
     }
     
+    @synchronized(self.candidateQueue) {
+        //queue candidate if sdp offer or answer have not been processed yet
+        if(self.remoteSDP == nil || self.localSDP == nil)
+        {
+            DDLogDebug(@"Adding incoming ICE candidate iq to candidate queue: %@", iqNode);
+            [self.candidateQueue addObject:iqNode];
+            return;
+        }
+    }
     [self processRemoteICECandidate:iqNode];
 }
 
@@ -1349,7 +1358,9 @@
         else
         {
             DDLogDebug(@"Successfully passed SDP to webRTCClient...");
-            self.remoteSDP = iqNode;
+            @synchronized(self.candidateQueue) {
+                self.remoteSDP = iqNode;
+            }
             [self.account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
             //only send a "session-accept" if the remote is the initiator (e.g. this is an incoming call)
             if(self.direction == MLCallDirectionIncoming)
@@ -1364,10 +1375,11 @@
                             @"sid": self.jmiid,
                         } andChildren:[HelperTools sdp2xml:localSdp.sdp withInitiator:NO]
                         andData:nil]];
-                        self.localSDP = sdpIQ;
                         [self.account send:sdpIQ];
                         
                         @synchronized(self.candidateQueue) {
+                            self.localSDP = sdpIQ;
+                            
                             DDLogDebug(@"Now handling queued candidate iqs: %lu", (unsigned long)self.candidateQueue.count);
                             for(XMPPIQ* candidateIq in self.candidateQueue)
                                 [self processRemoteICECandidate:candidateIq];

@@ -717,17 +717,19 @@ impl JingleRtpSessions {
         // timing values are always zero when the offer/answer model is used
         sdp.set_timing(SdpTiming { start: 0, stop: 0 });
 
-        //hardcoded because webrtc needs this but there is no xep for it!
-        sdp.add_attribute(SdpAttribute::MsidSemantic(SdpAttributeMsidSemantic {
-            semantic: " WMS".to_string(),
-            msids: vec!["stream".to_string()],
-        }))?;
         for root_entry in root.childs() {
             match root_entry {
                 RootEnum::Group(jingle_group) => {
                     if let Err(e) = sdp.add_attribute(SdpAttribute::Group(jingle_group.to_sdp())) {
                         eprintln!("Could not add ContentGroup attribute to sdp: {}", e);
                         return Err(e);
+                    } else {
+                        //hardcoded because webrtc needs this but there is no xep for it!
+                        //only add this if we use xep-0338 content groups
+                        sdp.add_attribute(SdpAttribute::MsidSemantic(SdpAttributeMsidSemantic {
+                            semantic: " WMS".to_string(),
+                            msids: vec!["stream".to_string()],
+                        }))?;
                     }
                 }
                 RootEnum::Content(jingle_content) => {

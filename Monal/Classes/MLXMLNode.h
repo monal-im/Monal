@@ -44,6 +44,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 -(void) setXMLNS:(NSString*) xmlns;
 
+-(id) shallowCopy;
+-(id) shallowCopyWithData:(BOOL) copyData;
+
 /**
  Generates an XML String suitable for writing based on the node
  */

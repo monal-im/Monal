@@ -227,6 +227,20 @@ static NSRegularExpression* attributeFilterRegex;
     return copy;
 }
 
+-(id) shallowCopy
+{
+    return [self shallowCopyWithData:NO];
+}
+
+-(id) shallowCopyWithData:(BOOL) copyData
+{
+    MLXMLNode* copy = [[[self class] alloc] initWithElement:_element];
+    copy.attributes = [[NSMutableDictionary alloc] initWithDictionary:_attributes copyItems:YES];
+    if(copyData)
+        copy.data = _data ? [_data copy] : nil;
+    return copy;
+}
+
 -(void) handleMemoryPressureNotification
 {
     [self.cache removeAllObjects];

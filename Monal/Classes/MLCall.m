@@ -59,6 +59,7 @@
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelWaitUntilIceRestart;
 @property (nonatomic, strong) MLXMLNode* localSDP;
 @property (nonatomic, strong) MLXMLNode* remoteSDP;
+@property (nonatomic, strong) NSMutableArray<XMPPIQ*>* candidateQueue;
 
 @property (nonatomic, readonly) xmpp* account;
 @property (nonatomic, strong) MLVoIPProcessor* voipProcessor;
@@ -102,6 +103,7 @@
     self.cancelConnectingTimeout = nil;
     self.localSDP = nil;
     self.remoteSDP = nil;
+    self.candidateQueue = [NSMutableArray new];
     
     [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
@@ -754,7 +756,9 @@
             @"type": [RTCSessionDescription stringForType:sdp.type]
         } andChildren:@[] andData:[HelperTools encodeBase64WithString:sdp.sdp]]
         */
-        self.localSDP = sdpIQ;
+        @synchronized(self.candidateQueue) {
+            self.localSDP = sdpIQ;
+        }
         [self.account sendIq:sdpIQ withResponseHandler:^(XMPPIQ* result) {
             DDLogDebug(@"Received SDP response for offer: %@", result);
         } andErrorHandler:^(XMPPIQ* error) {
@@ -1102,6 +1106,11 @@
         return;
     }
     
+    [self processRemoteICECandidate:iqNode];
+}
+
+-(void) processRemoteICECandidate:(XMPPIQ*) iqNode
+{
     //TODO: all code in this method only allows for one single candidate per jingle transport-info iq, but the xep allows multiple candidates!
     
     RTCIceCandidate* incomingCandidate = nil;
@@ -1226,6 +1235,37 @@
     }
     else
     {
+        //handle candidates in initial sdp (our webrtc lib does not like them --> fake transport-info iqs for these)
+        //(candidates in initial jingle are allowed by xep!)
+        if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"] || [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
+        {
+            // don't change iqNode directly to not influence code outside of this method
+            MLXMLNode* copyWithoutCandidates = [iqNode copy];
+            @synchronized(self.candidateQueue) {
+                for(MLXMLNode* content in [copyWithoutCandidates find:@"{urn:xmpp:jingle:1}jingle/content"])
+                {
+                    MLXMLNode* transport = [content findFirst:@"{urn:xmpp:jingle:transports:ice-udp:1}transport"];
+                    for(MLXMLNode* candidate in [transport find:@"{urn:xmpp:jingle:transports:ice-udp:1}candidate"])
+                    {
+                        XMPPIQ* fakeCandidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType];
+                        fakeCandidateIQ.from = self.fullRemoteJid;
+                        fakeCandidateIQ.to = self.account.connectionProperties.identity.fullJid;
+                        MLXMLNode* shallowTransport = [transport shallowCopyWithData:YES];
+                        [shallowTransport addChildNode:[transport removeChildNode:candidate]];
+                        MLXMLNode* shallowContent = [content shallowCopyWithData:YES];
+                        [shallowContent addChildNode:shallowTransport];
+                        [fakeCandidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+                            @"action": @"transport-info",
+                            @"sid": self.jmiid,
+                        } andChildren:@[shallowContent] andData:nil]];
+                        DDLogDebug(@"Adding fake candidate iq to candidate queue: %@", fakeCandidateIQ);
+                        [self.candidateQueue addObject:fakeCandidateIQ];
+                    }
+                }
+            }
+            // don't change iqNode directly to not influence code outside of this method
+            iqNode = (XMPPIQ*)copyWithoutCandidates;
+        }
         if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
         {
             if(self.direction != MLCallDirectionOutgoing)
@@ -1326,8 +1366,22 @@
                         andData:nil]];
                         self.localSDP = sdpIQ;
                         [self.account send:sdpIQ];
+                        
+                        @synchronized(self.candidateQueue) {
+                            DDLogDebug(@"Now handling queued candidate iqs: %lu", (unsigned long)self.candidateQueue.count);
+                            for(XMPPIQ* candidateIq in self.candidateQueue)
+                                [self processRemoteICECandidate:candidateIq];
+                        }
                     }];
                 }];
+            }
+            else
+            {
+                @synchronized(self.candidateQueue) {
+                    DDLogDebug(@"Now handling queued candidate iqs: %lu", (unsigned long)self.candidateQueue.count);
+                    for(XMPPIQ* candidateIq in self.candidateQueue)
+                        [self processRemoteICECandidate:candidateIq];
+                }
             }
         }
     }];

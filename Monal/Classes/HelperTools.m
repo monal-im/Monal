@@ -1523,6 +1523,13 @@ static id preprocess(id exception)
     DDLogInfo(@"Starting: Version %@ (%@ %@ UTC, %@)", version, buildDate, buildTime, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]);
     [DDLog flushLog];
     
+    //remove old ascii based logfiles
+    for(NSString* file in [[[NSFileManager defaultManager] contentsOfDirectoryAtPath:containerUrl error:nil] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self LIKE %@", @"Monal *.log"]])
+    {
+        DDLogWarn(@"Removing old ascii logfile: %@/%@", containerUrl, file);
+        [[NSFileManager defaultManager] removeItemAtPath:[containerUrl stringByAppendingPathComponent:file] error:nil];
+    }
+    
     //for debugging when upgrading the app
     NSArray* directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:containerUrl error:nil];
     for(NSString* file in directoryContents)

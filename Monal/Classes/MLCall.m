@@ -1098,6 +1098,10 @@
     //ignore sdp for disabled accounts
     if(account != [[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo])
         return;
+    //don't use self.account because that asserts on nil
+    if([[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] == nil)
+        return;
+    
     XMPPIQ* iqNode = userInfo[@"iqNode"];
     NSString* jmiid = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle@sid"];
     if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
@@ -1224,6 +1228,9 @@
     NSDictionary* userInfo = notification.userInfo;
     //ignore sdp for disabled accounts
     if(account != [[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo])
+        return;
+    //don't use self.account because that asserts on nil
+    if([[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] == nil)
         return;
     XMPPIQ* iqNode = userInfo[@"iqNode"];
     

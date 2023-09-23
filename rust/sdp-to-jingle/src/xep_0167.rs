@@ -109,16 +109,54 @@ pub struct JingleRtpSessionsPayloadType {
     id: u8,
     #[serde(rename = "@name", skip_serializing_if = "Option::is_none")]
     name: Option<String>,
-    #[serde(rename = "@clockrate", default)]
-    clockrate: u32,
-    #[serde(rename = "@channels")]
-    channels: Option<u8>,
-    #[serde(rename = "@maxptime", default)]
-    maxptime: u32,
-    #[serde(rename = "@ptime", default)]
-    ptime: u32,
+    #[serde(rename = "@clockrate", skip_serializing_if = "Option::is_none", default)]
+    clockrate: Option<u32>,
+    #[serde(rename = "@channels", skip_serializing_if = "Option::is_none")]
+    channels: Option<u32>,
+    #[serde(rename = "@maxptime", skip_serializing_if = "Option::is_none")]
+    maxptime: Option<u32>,
+    #[serde(rename = "@ptime", skip_serializing_if = "Option::is_none")]
+    ptime: Option<u32>,
     #[serde(rename = "$value", skip_serializing_if = "Vec::is_empty", default)]
     parameter: Vec<JingleRtpSessionsPayloadTypeValue>,
+}
+
+macro_rules! add_nondefault_parameter {
+    ( $self: expr, $params: expr, $name: ident ) => {
+        if $params.$name != Default::default() {
+            $self.add_parameter(stringify!($name), $params.$name.to_string())
+        }
+    };
+}
+
+macro_rules! set_nondefault_value {
+    ( $to: expr, $from: expr ) => {
+        $to = match $from {
+            None => None,
+            Some(v) => {
+                if v != Default::default() {
+                    Some(v)
+                } else {
+                    None
+                }
+            },
+        };
+    };
+}
+
+macro_rules! set_nondefault_string {
+    ( $to: expr, $from: expr ) => {
+        $to = match $from {
+            None => None,
+            Some(v) => {
+                if v != String::default() {
+                    Some(v)
+                } else {
+                    None
+                }
+            },
+        };
+    };
 }
 
 impl JingleRtpSessionsPayloadType {
@@ -146,46 +184,49 @@ impl JingleRtpSessionsPayloadType {
 
     pub fn fill_from_sdp_rtpmap(&mut self, rtpmap: &SdpAttributeRtpmap) {
         self.id = rtpmap.payload_type;
-        self.name = Some(rtpmap.codec_name.clone());
-        self.clockrate = rtpmap.frequency;
-        self.channels = rtpmap.channels.map(|channels| channels as u8);
+        set_nondefault_string!(self.name, Some(rtpmap.codec_name.clone()));
+        set_nondefault_value!(self.clockrate, Some(rtpmap.frequency));
+        set_nondefault_value!(self.channels, rtpmap.channels);
     }
 
     pub fn fill_from_sdp_fmtp(&mut self, params: &SdpAttributeFmtpParameters) {
-        self.maxptime = params.maxptime;
-        self.ptime = params.ptime;
+        set_nondefault_value!(self.maxptime, Some(params.maxptime));
+        set_nondefault_value!(self.ptime, Some(params.ptime));
 
-        self.add_parameter("packetization_mode", params.packetization_mode.to_string());
-        self.add_parameter(
-            "level_asymmetry_allowed",
-            params.level_asymmetry_allowed.to_string(),
-        );
-        self.add_parameter("profile_level_id", params.profile_level_id.to_string());
-        self.add_parameter("max_fs", params.max_fs.to_string());
-        self.add_parameter("max_cpb", params.max_cpb.to_string());
-        self.add_parameter("max_dpb", params.max_dpb.to_string());
-        self.add_parameter("max_br", params.max_br.to_string());
-        self.add_parameter("max_mbps", params.max_mbps.to_string());
+        add_nondefault_parameter!(self, params, packetization_mode);
+        add_nondefault_parameter!(self, params, level_asymmetry_allowed);
+
+        add_nondefault_parameter!(self, params, profile_level_id);
+        add_nondefault_parameter!(self, params, max_fs);
+        add_nondefault_parameter!(self, params, max_cpb);
+        add_nondefault_parameter!(self, params, max_dpb);
+        add_nondefault_parameter!(self, params, max_br);
+        add_nondefault_parameter!(self, params, max_mbps);
 
         // VP8 and VP9
         // max_fs, already defined in H264
-        self.add_parameter("max_fr", params.max_mbps.to_string());
+        add_nondefault_parameter!(self, params, max_fr);
 
         // Opus https://tools.ietf.org/html/rfc7587
-        self.add_parameter("maxplaybackrate", params.maxplaybackrate.to_string());
-        self.add_parameter("maxaveragebitrate", params.maxaveragebitrate.to_string());
-        self.add_parameter("usedtx", params.usedtx.to_string());
-        self.add_parameter("stereo", params.stereo.to_string());
-        self.add_parameter("useinbandfec", params.useinbandfec.to_string());
-        self.add_parameter("cbr", params.cbr.to_string());
+        // this has a default of 48000 which is different to the datatype-default of 0
+        if params.maxplaybackrate != 48000 && params.maxplaybackrate != 0 {
+            self.add_parameter("maxplaybackrate", params.maxplaybackrate.to_string());
+        }
+        add_nondefault_parameter!(self, params, maxaveragebitrate);
+        add_nondefault_parameter!(self, params, usedtx);
+        add_nondefault_parameter!(self, params, stereo);
+        add_nondefault_parameter!(self, params, useinbandfec);
+        add_nondefault_parameter!(self, params, cbr);
         // ptime already set in payload type
-        self.add_parameter("minptime", params.minptime.to_string());
+        add_nondefault_parameter!(self, params, minptime);
         // maxptime already set in payload type
 
         for i in &params.encodings {
             self.add_parameter("encodings", i.to_string());
         }
-        self.add_parameter("dtmf_tones", params.dtmf_tones.to_string());
+        if params.dtmf_tones != String::default() {
+            self.add_parameter("dtmp_tones", params.dtmf_tones.to_string());
+        }
 
         // rtx
         match params.rtx {
@@ -302,7 +343,12 @@ impl JingleRtpSessionsPayloadType {
         retval
     }
 
-    pub fn to_sdp_fmtp(&self) -> Result<SdpAttributeFmtp, SdpParserInternalError> {
+    pub fn to_sdp_fmtp(&self) -> Result<Option<SdpAttributeFmtp>, SdpParserInternalError> {
+        // don't return any SdpAttributeFmtp if no attributes are present in xml
+        // this avoids returning default values for everything, which results in bogus sdp
+        if self.parameter.is_empty() {
+            return Ok(None);
+        }
         let mut known_param_names: HashSet<String> = HashSet::new();
         let mut retval = SdpAttributeFmtp {
             payload_type: self.id,
@@ -324,9 +370,9 @@ impl JingleRtpSessionsPayloadType {
                 stereo: self.get_fmtp_param(&mut known_param_names, "stereo"),
                 useinbandfec: self.get_fmtp_param(&mut known_param_names, "useinbandfec"),
                 cbr: self.get_fmtp_param(&mut known_param_names, "cbr"),
-                ptime: self.ptime,
+                ptime: self.ptime.unwrap_or_default(),
                 minptime: self.get_fmtp_param(&mut known_param_names, "minptime"),
-                maxptime: self.maxptime,
+                maxptime: self.maxptime.unwrap_or_default(),
                 encodings: self.get_fmtp_param_vec(&mut known_param_names, "encodings"),
                 dtmf_tones: self.get_fmtp_param(&mut known_param_names, "dtmf_tones"),
                 // use get_fmtp_param_vec() to search for existence because get_fmtp_param() does not return an Option() but a default value for T
@@ -352,7 +398,7 @@ impl JingleRtpSessionsPayloadType {
             },
         };
         retval.parameters.unknown_tokens = self.get_fmtp_unknown_tokens_vec(&known_param_names);
-        Ok(retval)
+        Ok(Some(retval))
     }
 
     pub fn to_sdp_rtpmap(&self) -> SdpAttributeRtpmap {
@@ -362,8 +408,8 @@ impl JingleRtpSessionsPayloadType {
                 Some(name) => name.to_string(),
                 None => "".to_string(),
             },
-            frequency: self.clockrate,
-            channels: self.channels.map(|channels| channels as u32),
+            frequency: self.clockrate.unwrap_or_default(),
+            channels: self.channels,
         }
     }
 }
@@ -865,9 +911,11 @@ impl JingleRtpSessions {
                                                 }
                                             }
 
-                                            media.add_attribute(SdpAttribute::Fmtp(
-                                                payload_type.to_sdp_fmtp()?,
-                                            ))
+                                            if let Some(fmtp) = payload_type.to_sdp_fmtp()? {
+                                                media.add_attribute(SdpAttribute::Fmtp(fmtp))?
+                                            }
+
+                                            Ok(())
                                         }
                                         JingleRtpSessionsValue::Bandwidth(bandwidth) => {
                                             media.add_bandwidth(bandwidth.to_sdp());

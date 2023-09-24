@@ -392,6 +392,15 @@
 {
     DDLogInfo(@"Activating audio session now: %@", audioSession);
     [[RTCAudioSession sharedInstance] lockForConfiguration];
+    NSUInteger options = 0;
+    options |= AVAudioSessionCategoryOptionAllowBluetooth;
+    options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+    options |= AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
+    options |= AVAudioSessionCategoryOptionAllowAirPlay;
+    NSError* error = nil;
+    [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:options error:&error];
+    if(error != nil)
+        DDLogError(@"Failed to configure AVAudioSession: %@", error);
     [[RTCAudioSession sharedInstance] audioSessionDidActivate:audioSession];
     [[RTCAudioSession sharedInstance] setIsAudioEnabled:YES];
     [[RTCAudioSession sharedInstance] unlockForConfiguration];

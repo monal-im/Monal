@@ -146,5 +146,7 @@
 			</dict>
 		</dict>
 	</array>
+	<key>SRResearchDataGeneration</key>
+	<false/>
 </dict>
 </plist>

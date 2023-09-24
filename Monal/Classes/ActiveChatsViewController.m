@@ -18,6 +18,7 @@
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
 #import "MLVoIPProcessor.h"
+#import "MLCall.h"      //for MLCallType
 #import "UIColor+Theme.h"
 #import <Monal-Swift.h>
 
@@ -499,7 +500,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     if(activeCall != nil)
         [self presentCall:activeCall];
     else
-        [self presentCall:[appDelegate.voipProcessor initiateAudioCallToContact:contact]];
+        [self presentCall:[appDelegate.voipProcessor initiateCallWithType:MLCallTypeAudio toContact:contact]];
 }
 
 -(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts

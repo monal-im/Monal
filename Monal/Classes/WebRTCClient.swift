@@ -32,8 +32,8 @@ final class WebRTCClient: NSObject {
     @objc public let peerConnection: RTCPeerConnection
     private let rtcAudioSession =  RTCAudioSession.sharedInstance()
     private let audioQueue = DispatchQueue(label: "audio")
-    private let mediaConstrains = [kRTCMediaConstraintsOfferToReceiveAudio: kRTCMediaConstraintsValueTrue,
-                                   kRTCMediaConstraintsOfferToReceiveVideo: kRTCMediaConstraintsValueTrue]    
+    private let streamId = "stream"
+    private var mediaConstrains: [String:String] = [:]
     private var videoCapturer: RTCVideoCapturer?
     private var localVideoTrack: RTCVideoTrack?
     private var remoteVideoTrack: RTCVideoTrack?
@@ -85,7 +85,7 @@ final class WebRTCClient: NSObject {
     }
     
     @objc
-    required init(iceServers: [RTCIceServer], forceRelay: Bool) {
+    required init(iceServers: [RTCIceServer], audioOnly: Bool, forceRelay: Bool) {
         var peerConnection = WebRTCClient.createPeerConnection(iceServers: iceServers, forceRelay: forceRelay)
         if peerConnection == nil {
             // try again with empty ice server list
@@ -100,9 +100,21 @@ final class WebRTCClient: NSObject {
         self.peerConnection = peerConnection!
         super.init()
         
-        self.createMediaSenders()
+        self.createMediaSenders(audioOnly: audioOnly)
         self.configureAudioSession()
         self.peerConnection.delegate = self
+        
+        if audioOnly {
+            self.mediaConstrains = [
+                kRTCMediaConstraintsOfferToReceiveAudio: kRTCMediaConstraintsValueTrue,
+                kRTCMediaConstraintsOfferToReceiveVideo: kRTCMediaConstraintsValueFalse,
+            ]
+        } else {
+            self.mediaConstrains = [
+                kRTCMediaConstraintsOfferToReceiveAudio: kRTCMediaConstraintsValueTrue,
+                kRTCMediaConstraintsOfferToReceiveVideo: kRTCMediaConstraintsValueTrue,
+            ]
+        }
     }
     
     // MARK: Signaling
@@ -180,6 +192,14 @@ final class WebRTCClient: NSObject {
         self.remoteVideoTrack?.add(renderer)
     }
     
+    @objc
+    func addVideo() {
+        let videoTrack = self.createVideoTrack()
+        self.localVideoTrack = videoTrack
+        self.peerConnection.add(videoTrack, streamIds: [self.streamId])
+        self.remoteVideoTrack = self.peerConnection.transceivers.first { $0.mediaType == .video }?.receiver.track as? RTCVideoTrack
+    }
+    
     private func configureAudioSession() {
         self.rtcAudioSession.lockForConfiguration()
         do {
@@ -193,24 +213,23 @@ final class WebRTCClient: NSObject {
         self.rtcAudioSession.unlockForConfiguration()
     }
     
-    private func createMediaSenders() {
-        let streamId = "stream"
-        
-        // Audio
+    private func createMediaSenders(audioOnly: Bool) {
+        //Audio
         let audioTrack = self.createAudioTrack()
-        self.peerConnection.add(audioTrack, streamIds: [streamId])
+        self.peerConnection.add(audioTrack, streamIds: [self.streamId])
         
-        // Video
-        let videoTrack = self.createVideoTrack()
-        self.localVideoTrack = videoTrack
-        self.peerConnection.add(videoTrack, streamIds: [streamId])
-        self.remoteVideoTrack = self.peerConnection.transceivers.first { $0.mediaType == .video }?.receiver.track as? RTCVideoTrack
-        
-        // Data
-        if let dataChannel = createDataChannel() {
-            dataChannel.delegate = self
-            self.localDataChannel = dataChannel
+        //Video
+        if !audioOnly {
+            // see https://stackoverflow.com/a/43765394
+            self.addVideo()
         }
+        
+        //we don't use any data channels for A/V calls
+//         // Data
+//         if let dataChannel = createDataChannel() {
+//             dataChannel.delegate = self
+//             self.localDataChannel = dataChannel
+//         }
     }
     
     private func createAudioTrack() -> RTCAudioTrack {

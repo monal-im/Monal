@@ -496,7 +496,7 @@ enum msgSentState {
 
 -(void) openCallScreen:(id) sender
 {
-    if(![[DataLayer sharedInstance] checkCap:@"urn:tmp:monal:webrtc" forUser:self.contact.contactJid onAccountNo:self.contact.accountId])
+    if(![[DataLayer sharedInstance] checkCap:@"urn:xmpp:jingle-message:0" forUser:self.contact.contactJid onAccountNo:self.contact.accountId])
     {
         NSInteger style = UIAlertControllerStyleActionSheet;
 #if TARGET_OS_MACCATALYST
@@ -2208,7 +2208,7 @@ enum msgSentState {
             {
                 UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize*3];
                 [cell.messageBody setFont:originalFont];
-
+                [cell.messageBody setAttributedText:nil];
                 [cell.messageBody setText:messageText];
                 cell.bubbleImage.hidden=YES;
             }
@@ -2225,22 +2225,11 @@ enum msgSentState {
                 // Reset attributes
                 UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize];
                 [cell.messageBody setFont:originalFont];
-
+                [cell.messageBody setAttributedText:nil];
                 [cell.messageBody setText:messageText];
             }
             cell.link = nil;
         }
-    }
-
-    if(cell == nil)
-    {
-        DDLogError(@"Using fallback cell for message text: '%@'", messageText);
-        //this is just a dummy to display something usable (the filetransfer url as link cell)
-        MLLinkCell* toreturn = (MLLinkCell*)[self messageTableCellWithIdentifier:@"link" andInbound:inboundDir fromTable: tableView];;
-        toreturn.link = row.messageText;
-        toreturn.messageBody.text = toreturn.link;
-
-        cell = toreturn;
     }
     MLMessage* priorRow = nil;
     if(indexPath.row > 0)

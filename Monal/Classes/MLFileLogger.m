@@ -142,8 +142,8 @@ extern BOOL doesAppRunInBackground(void);
         return [super lt_logData:data];
     }
     int fd = [handle fileDescriptor];
-    while(flock(fd, LOCK_EX | LOCK_NB) != 0)
-    {
+    while(flock(fd, LOCK_EX) != 0) {
+        NSLog(@"Could not lock logfile, retrying in 1ms: %s (%d)", strerror(errno), errno);
         usleep(1000);
     }
     [super lt_logData:data];

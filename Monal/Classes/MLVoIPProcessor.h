@@ -11,12 +11,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class MLCall;
 @class CXCallController;
 @class CXProvider;
+@class MLCall;
+@class MLContact;
+typedef NS_ENUM(NSUInteger, MLCallType);
 
 @interface MLVoIPProcessor : NSObject
--(MLCall*) initiateAudioCallToContact:(MLContact*) contact;
+-(MLCall*) initiateCallWithType:(MLCallType) callType toContact:(MLContact*) contact;
 
 @property (nonatomic, readonly) NSUInteger pendingCallsCount;
 -(NSDictionary<NSString*, MLCall*>*) getActiveCalls;

@@ -106,7 +106,7 @@
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0055.html" />
         <xmpp:status>wontfix</xmpp:status>
-        <xmpp:note>XEP-0055: Jabber Search</xmpp:note>  
+        <xmpp:note>XEP-0055: Jabber Search</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -210,7 +210,7 @@
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0162.html" />
         <xmpp:status>complete</xmpp:status>
-        <xmpp:note>XEP-0162: Best Practices for Roster and Subscription Management</xmpp:note>  
+        <xmpp:note>XEP-0162: Best Practices for Roster and Subscription Management</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -218,7 +218,23 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0163.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.9</xmpp:since>
-        <xmpp:note>XEP-0163: Personal Eventing Protocol</xmpp:note>  
+        <xmpp:note>XEP-0163: Personal Eventing Protocol</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0167.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:note>XEP-0167: Jingle RTP Sessions</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0176.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:note>XEP-0176: Jingle ICE-UDP Transport Method</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -226,7 +242,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0172.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.9</xmpp:since>
-        <xmpp:note>XEP-0172: User Nickname</xmpp:note>  
+        <xmpp:note>XEP-0172: User Nickname</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -234,7 +250,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0184.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.7</xmpp:since>
-        <xmpp:note>XEP-0184: Message Receipts</xmpp:note>     
+        <xmpp:note>XEP-0184: Message Receipts</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -250,7 +266,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0198.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.6</xmpp:since>
-        <xmpp:note>XEP-0198: Stream Management</xmpp:note>  
+        <xmpp:note>XEP-0198: Stream Management</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -258,7 +274,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0199.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.7</xmpp:since>
-        <xmpp:note>XEP-0199: XMPP Ping</xmpp:note>  
+        <xmpp:note>XEP-0199: XMPP Ping</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -266,7 +282,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0215.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>6.0</xmpp:since>
-        <xmpp:note>XEP-0215: External Service Discovery</xmpp:note>  
+        <xmpp:note>XEP-0215: External Service Discovery</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -274,7 +290,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0223.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.9</xmpp:since>
-        <xmpp:note>XEP-0223: Persistent Storage of Private Data via PubSub</xmpp:note>   
+        <xmpp:note>XEP-0223: Persistent Storage of Private Data via PubSub</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -340,6 +356,22 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0293.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:note>XEP-0293: Jingle RTP Feedback Negotiation</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0294.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:note>XEP-0294: Jingle RTP Header Extensions Negotiation</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0305.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>5.1.1</xmpp:since>
@@ -372,10 +404,34 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0320.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:note>XEP-0320: Use of DTLS-SRTP in Jingle Sessions</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0333.html" />
         <xmpp:status>partial</xmpp:status>
         <xmpp:since>4.8</xmpp:since>
         <xmpp:note>XEP-0333: Chat Markers (received markers won't ever be implemented, use XEP-0184 instead)</xmpp:note> 
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0338.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:note>XEP-0338: Jingle Grouping Framework</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0339.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:note>XEP-0339: Source-Specific Media Attributes in Jingle</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -391,7 +447,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0353.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>6.0</xmpp:since>
-        <xmpp:version>0.6.0</xmpp:version>
+        <xmpp:version>6.0</xmpp:version>
         <xmpp:note>XEP-0353: Jingle Message Initiation</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>
@@ -461,7 +517,7 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0380.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>5.1</xmpp:since>
-        <xmpp:note>XEP-0380: Explicit Message Encryption</xmpp:note>   
+        <xmpp:note>XEP-0380: Explicit Message Encryption</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>

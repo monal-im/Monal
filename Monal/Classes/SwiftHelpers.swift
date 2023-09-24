@@ -11,6 +11,7 @@
 @_exported import CocoaLumberjackSwift
 @_exported import Logging
 import CocoaLumberjackSwiftLogBackend
+import LibMonalRustSwiftBridge
 
 public typealias monal_void_block_t = @convention(block) () -> Void;
 public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
@@ -125,5 +126,35 @@ public class SwiftHelpers: NSObject {
     public static func initSwiftHelpers() {
         // Use CocoaLumberjack as swift-log backend
         LoggingSystem.bootstrapWithCocoaLumberjack(for: DDLog.sharedInstance, defaultLogLevel:Logger.Level.debug)
+        // Set rust panic handler to this closure
+        setRustPanicHandler({(text: String, backtrace: String) in
+            HelperTools.handleRustPanic(withText: text, andBacktrace:backtrace)
+        });
+    }
+}
+
+@objcMembers
+public class JingleSDPBridge : NSObject {
+    @objc(getJingleStringForSDPString:withInitiator:)
+    public static func getJingleStringForSDPString(_ sdp: String, with initiator:Bool) -> String? {
+        if let retval = sdp_str_to_jingle_str(sdp, initiator) {
+            //trigger_panic()
+            //interesting: https://gist.github.com/martinmroz/5905c65e129d22a1b56d84f08b35a0f4 to extract rust string
+            //see https://www.reddit.com/r/rust/comments/rqr0aj/swiftbridge_generate_ffi_bindings_between_rust/hqdud0b
+            return retval.toString()
+        }
+        DDLogDebug("Got empty optional from rust!")
+        return nil
+    }
+    
+    @objc(getSDPStringForJingleString:withInitiator:)
+    public static func getSDPStringForJingleString(_ jingle: String, with initiator:Bool) -> String? {
+        if let retval = jingle_str_to_sdp_str(jingle, initiator) {
+            //interesting: https://gist.github.com/martinmroz/5905c65e129d22a1b56d84f08b35a0f4 to extract rust string
+            //see https://www.reddit.com/r/rust/comments/rqr0aj/swiftbridge_generate_ffi_bindings_between_rust/hqdud0b
+            return retval.toString()
+        }
+        DDLogDebug("Got empty optional from rust!")
+        return nil
     }
 }

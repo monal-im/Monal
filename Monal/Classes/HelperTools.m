@@ -31,6 +31,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "MLPubSub.h"
 #import "MLUDPLogger.h"
 #import "MLHandler.h"
+#import "MLBasePaser.h"
 #import "MLXMLNode.h"
 #import "XMPPStanza.h"
 #import "XMPPIQ.h"
@@ -73,6 +74,22 @@ static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
 #if TARGET_OS_MACCATALYST
 static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
 #endif
+
+//add own crash info (used by rust panic handler)
+//see https://alastairs-place.net/blog/2013/01/10/interesting-os-x-crash-report-tidbits/
+//and kscrash sources (KSDynamicLinker.c)
+#pragma pack(8)
+static struct {
+    unsigned version;
+    const char* message;
+    const char* signature;
+    const char* backtrace;
+    const char* message2;
+    void* reserved;
+    void* reserved2;
+    void* reserved3; // First introduced in version 5
+} _crash_info __attribute__((section("__DATA, __crash_info"))) = { 5, 0, 0, 0, 0, 0, 0, 0 };
+#pragma pack()
 
 
 //see https://stackoverflow.com/a/2180788
@@ -146,15 +163,16 @@ static void addFilePathWithSize(const KSCrashReportWriter* writer, char* name, c
     
     writer->addStringElement(writer, name, filePath);
     stat(filePath, &st);
-    writer->addUIntegerElement(writer, name_size, st.st_size);
+    writer->addIntegerElement(writer, name_size, st.st_size);
 }
 
 static void crash_callback(const KSCrashReportWriter* writer)
 {
-    addFilePathWithSize(writer, "currentLogfile", _origLogfilePath);
     asyncSafeCopyFile(_origLogfilePath, _logfilePath);
     writer->addStringElement(writer, "logfileCopied", "YES");
     addFilePathWithSize(writer, "logfileCopy", _logfilePath);
+    //this comes last to make sure we see size differences if the logfile got written during crash data collection (could be other processes)
+    addFilePathWithSize(writer, "currentLogfile", _origLogfilePath);
 }
 
 void logException(NSException* exception)
@@ -239,6 +257,27 @@ static id preprocess(id exception)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
     //DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
     @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
+}
+
++(void) __attribute__((noreturn)) handleRustPanicWithText:(NSString*) text andBacktrace:(NSString*) backtrace
+{
+    NSString* abort_msg = [NSString stringWithFormat:@"RUST_PANIC: %@", text];
+    
+    //set crash_info_message in DATA section of our binary image
+    //see https://alastairs-place.net/blog/2013/01/10/interesting-os-x-crash-report-tidbits/
+    _crash_info.message = abort_msg.UTF8String;
+    _crash_info.signature = abort_msg.UTF8String;       //use signature for apple crash reporter which does not handle message field
+    _crash_info.backtrace = backtrace.UTF8String;
+    _crash_info.message2 = backtrace.UTF8String;        //use message2 for kscrash which does not handle backtrace field
+    
+    //log error and flush all logs
+    [DDLog flushLog];
+    DDLogError(@"*****************\n%@\n%@", abort_msg, backtrace);
+    [DDLog flushLog];
+    [HelperTools flushLogsWithTimeout:0.250];
+    
+    //now abort everything
+    abort();
 }
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount
@@ -1481,8 +1520,15 @@ static id preprocess(id exception)
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    DDLogInfo(@"Starting: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    DDLogInfo(@"Starting: Version %@ (%@ %@ UTC, %@)", version, buildDate, buildTime, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]);
     [DDLog flushLog];
+    
+    //remove old ascii based logfiles
+    for(NSString* file in [[[NSFileManager defaultManager] contentsOfDirectoryAtPath:containerUrl error:nil] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self LIKE %@", @"Monal *.log"]])
+    {
+        DDLogWarn(@"Removing old ascii logfile: %@/%@", containerUrl, file);
+        [[NSFileManager defaultManager] removeItemAtPath:[containerUrl stringByAppendingPathComponent:file] error:nil];
+    }
     
     //for debugging when upgrading the app
     NSArray* directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:containerUrl error:nil];
@@ -1547,15 +1593,16 @@ static id preprocess(id exception)
         DDLogVerbose(@"KSCrash installing handler with callback: %p", crash_callback);
         KSCrash* handler = [KSCrash sharedInstance];
         handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
-        handler.monitoring = KSCrashMonitorTypeAll;     //KSCrashMonitorTypeProductionSafe;
+        handler.monitoring = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
         handler.onCrash = crash_callback;
         [handler enableSwapOfCxaThrow];
         handler.searchQueueNames = NO;      //this is not async safe and can crash :(
         handler.introspectMemory = YES;
         handler.addConsoleLogToReport = YES;
+        handler.printPreviousLog = NO;     //debug kscrash itself?
         handler.demangleLanguages = KSCrashDemangleLanguageAll;
         handler.maxReportCount = 4;
-        handler.deadlockWatchdogInterval = 12;
+        handler.deadlockWatchdogInterval = 0;       // no main thread watchdog
         NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
         NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
         NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
@@ -1653,11 +1700,27 @@ static id preprocess(id exception)
             @"urn:xmpp:eme:0",
             @"urn:xmpp:message-retract:0",
             @"urn:xmpp:message-correct:0",
+            
+            
         ] mutableCopy];
         if([[HelperTools defaultsDB] boolForKey: @"allowVersionIQ"])
             [featuresArray addObject:@"jabber:iq:version"];
+        //voip stuff
         if([HelperTools shouldProvideVoip])
-            [featuresArray addObject:@"urn:tmp:monal:webrtc"];  //TODO: tmp implementation, to be replaced by urn:xmpp:jingle-message:0 later on
+        {
+            [featuresArray addObject:@"urn:xmpp:jingle-message:0"];
+            [featuresArray addObject:@"urn:xmpp:jingle:1"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:1"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:audio"];
+            //[featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:video"];
+            [featuresArray addObject:@"urn:xmpp:jingle:transports:ice-udp:1"];
+            [featuresArray addObject:@"urn:ietf:rfc:5888"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:dtls:0"];
+            [featuresArray addObject:@"urn:ietf:rfc:5576"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:rtp-hdrext:0"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:rtcp-fb:0"];
+            [featuresArray addObject:@"urn:tmp:monal:webrtc"];  //TODO: write xep for this
+        }
         
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });
@@ -1895,6 +1958,83 @@ static id preprocess(id exception)
 +(NSNumber*) dateToNSNumberSeconds:(NSDate*) date
 {
     return [NSNumber numberWithUnsignedLong:(unsigned long)date.timeIntervalSince1970];
+}
+
++(NSArray<MLXMLNode*>* _Nullable) sdp2xml:(NSString*) sdp withInitiator:(BOOL) initiator
+{
+    DDLogVerbose(@"Parsing SDP string using rust(withInitiator=%@): %@", bool2str(initiator), sdp);
+    __block NSMutableArray<MLXMLNode*>* retval = [NSMutableArray new];
+    MLBasePaser* delegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedElement) {
+        DDLogVerbose(@"Parsed jingle sdp element: %@", parsedElement);
+        [retval addObject:parsedElement];
+    }];
+    NSString* xmlString = [JingleSDPBridge getJingleStringForSDPString:sdp withInitiator:initiator];
+    if(xmlString == nil)
+        return nil;
+    DDLogVerbose(@"Parsing XML string produced by rust sdp parser(withInitiator=%@): %@", bool2str(initiator), xmlString);
+    NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
+    [xmlParser setShouldProcessNamespaces:YES];
+    [xmlParser setShouldReportNamespacePrefixes:YES];       //for debugging only
+    [xmlParser setShouldResolveExternalEntities:NO];
+    [xmlParser setDelegate:delegate];
+    [xmlParser parse];     //blocking operation
+    return retval;
+}
+
++(NSString* _Nullable) xml2sdp:(MLXMLNode*) xml withInitiator:(BOOL) initiator
+{
+    NSString* xmlstr = [[[MLXMLNode alloc] initWithElement:@"root" withAttributes:@{} andChildren:xml.children andData:nil] XMLString];
+    NSString* retval = [JingleSDPBridge getSDPStringForJingleString:xmlstr withInitiator:initiator];
+    DDLogVerbose(@"Got sdp string from rust(withInitiator=%@): %@", bool2str(initiator), retval);
+    return retval;
+}
+
++(MLXMLNode* _Nullable) candidate2xml:(NSString*) candidate withMid:(NSString*) mid pwd:(NSString* _Nullable) pwd ufrag:(NSString* _Nullable) ufrag andInitiator:(BOOL) initiator
+{
+    //use some dummy sdp string to make our rust sdp parser happy
+    //always use "audio" for our dummy media
+    NSMutableString* sdp = [NSMutableString stringWithFormat:@"v=0\r\n\
+o=- 2005859539484728435 2 IN IP4 127.0.0.1\r\n\
+s=-\r\n\
+t=0 0\r\n\
+m=audio 9 UDP/TLS/RTP/SAVPF 0\r\n\
+c=IN IP4 0.0.0.0\r\n\
+a=mid:%@\r\n\
+a=%@\r\n", mid, candidate];
+    if(pwd != nil)
+        [sdp appendString:[NSString stringWithFormat:@"a=ice-pwd:%@\r\n", pwd]];
+    if(ufrag != nil)
+        [sdp appendString:[NSString stringWithFormat:@"a=ice-ufrag:%@\r\n", ufrag]];
+    DDLogVerbose(@"Dummy sdp candidate string for rust parser: %@", sdp);
+    
+    //this result array should only contain one single content node or be nil on parser errors
+    NSArray* xml = [self sdp2xml:sdp withInitiator:initiator];
+    if(xml == nil)
+        return nil;
+    MLAssert([xml count] == 1, @"Only one single content node expected!", (@{@"xml": xml}));
+    MLXMLNode* contentNode = xml[0];
+    MLAssert([contentNode check:@"/{urn:xmpp:jingle:1}content"], @"Content node not present!", (@{@"xml": xml}));
+    
+    //remove unwanted description node resulting from our dummy sdp media line above (which is needed for the sdp parser)
+    for(MLXMLNode* node in [contentNode find:@"{urn:xmpp:jingle:apps:rtp:1}description"])
+        [contentNode removeChildNode:node];
+    return contentNode;
+}
+
++(NSString* _Nullable) xml2candidate:(MLXMLNode*) xml withInitiator:(BOOL) initiator
+{
+    //add dummy description childs to each content element, but don't change the original xml node
+    MLXMLNode* node = [xml copy];
+    for(MLXMLNode* contentNode in [node find:@"{urn:xmpp:jingle:1}content"])
+        [contentNode addChildNode:[[MLXMLNode alloc] initWithElement:@"description" andNamespace:@"urn:xmpp:jingle:apps:rtp:1" withAttributes:@{@"media": @"audio"} andChildren:@[] andData:nil]];
+    NSString* xmlString = [self xml2sdp:node withInitiator:initiator];
+    //the candidate attribute line should always be the last one (given our current rust parser code), but we try to be more robust here
+    NSArray* lines = [xmlString componentsSeparatedByString:@"\r\n"];
+    NSString* prefix = @"a=candidate";
+    for(NSString* line in lines)
+        if(line.length >= prefix.length && [prefix isEqualToString:[line substringWithRange:NSMakeRange(0, prefix.length)]])
+            return [line substringWithRange:NSMakeRange(2, line.length - 2)];
+    return nil;
 }
 
 #pragma mark Hashes

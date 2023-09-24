@@ -1502,7 +1502,7 @@ static id preprocess(id exception)
     self.fileLogger = [[MLFileLogger alloc] initWithLogFileManager:logFileManager];
     self.fileLogger.doNotReuseLogFiles = NO;
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
-    self.fileLogger.maximumFileSize = 256 * 1024 * 1024;
+    self.fileLogger.maximumFileSize = 128 * 1024 * 1024;
     self.fileLogger.logFormatter = formatter;
     self.fileLogger.archiveAllowed = YES;               //everything is configured now, engage logfile archiving
     [DDLog addLogger:self.fileLogger];

@@ -18,6 +18,7 @@ use webrtc_sdp::{
 };
 
 use crate::{
+    is_none_or_default,
     jingle::{GenericParameter, JingleRtpSessionsValue, Root, RootEnum},
     xep_0176::{JingleTransport, JingleTransportCandidate, JingleTransportItems},
     xep_0293::{RtcpFb, RtcpFbTrrInt},
@@ -107,15 +108,19 @@ impl JingleRtpSessionMedia {
 pub struct JingleRtpSessionsPayloadType {
     #[serde(rename = "@id")]
     id: u8,
-    #[serde(rename = "@name", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@name", skip_serializing_if = "is_none_or_default")]
     name: Option<String>,
-    #[serde(rename = "@clockrate", skip_serializing_if = "Option::is_none", default)]
+    #[serde(
+        rename = "@clockrate",
+        skip_serializing_if = "is_none_or_default",
+        default
+    )]
     clockrate: Option<u32>,
-    #[serde(rename = "@channels", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@channels", skip_serializing_if = "is_none_or_default")]
     channels: Option<u32>,
-    #[serde(rename = "@maxptime", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@maxptime", skip_serializing_if = "is_none_or_default")]
     maxptime: Option<u32>,
-    #[serde(rename = "@ptime", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@ptime", skip_serializing_if = "is_none_or_default")]
     ptime: Option<u32>,
     #[serde(rename = "$value", skip_serializing_if = "Vec::is_empty", default)]
     parameter: Vec<JingleRtpSessionsPayloadTypeValue>,
@@ -126,36 +131,6 @@ macro_rules! add_nondefault_parameter {
         if $params.$name != Default::default() {
             $self.add_parameter(stringify!($name), $params.$name.to_string())
         }
-    };
-}
-
-macro_rules! set_nondefault_value {
-    ( $to: expr, $from: expr ) => {
-        $to = match $from {
-            None => None,
-            Some(v) => {
-                if v != Default::default() {
-                    Some(v)
-                } else {
-                    None
-                }
-            },
-        };
-    };
-}
-
-macro_rules! set_nondefault_string {
-    ( $to: expr, $from: expr ) => {
-        $to = match $from {
-            None => None,
-            Some(v) => {
-                if v != String::default() {
-                    Some(v)
-                } else {
-                    None
-                }
-            },
-        };
     };
 }
 
@@ -184,14 +159,14 @@ impl JingleRtpSessionsPayloadType {
 
     pub fn fill_from_sdp_rtpmap(&mut self, rtpmap: &SdpAttributeRtpmap) {
         self.id = rtpmap.payload_type;
-        set_nondefault_string!(self.name, Some(rtpmap.codec_name.clone()));
-        set_nondefault_value!(self.clockrate, Some(rtpmap.frequency));
-        set_nondefault_value!(self.channels, rtpmap.channels);
+        self.name = Some(rtpmap.codec_name.clone());
+        self.clockrate = Some(rtpmap.frequency);
+        self.channels = rtpmap.channels;
     }
 
     pub fn fill_from_sdp_fmtp(&mut self, params: &SdpAttributeFmtpParameters) {
-        set_nondefault_value!(self.maxptime, Some(params.maxptime));
-        set_nondefault_value!(self.ptime, Some(params.ptime));
+        self.maxptime = Some(params.maxptime);
+        self.ptime = Some(params.ptime);
 
         add_nondefault_parameter!(self, params, packetization_mode);
         add_nondefault_parameter!(self, params, level_asymmetry_allowed);

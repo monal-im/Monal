@@ -61,3 +61,13 @@ pub fn jingle_str_to_sdp_str(jingle_str: &str, initiator: bool) -> Option<String
             + "\r\n",
     )
 }
+
+pub(crate) fn is_none_or_default<T>(value: &Option<T>) -> bool
+where
+    T: Default + std::cmp::PartialEq,
+{
+    if let Some(inner_value) = value {
+        return *inner_value == T::default();
+    }
+    true
+}

@@ -416,7 +416,7 @@
 {
     //send jmi finish with migration before chaning all ids etc.
     DDLogDebug(@"Migrating call using JMI finish: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.fullRemoteJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -789,7 +789,7 @@
 -(void) sendJmiReject
 {
     DDLogDebug(@"Rejecting via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.fullRemoteJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -804,7 +804,7 @@
 -(void) sendJmiRejectWithTieBreak
 {
     DDLogDebug(@"Rejecting with tie-break via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.fullRemoteJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[
@@ -820,7 +820,7 @@
 -(void) sendJmiRinging
 {
     DDLogDebug(@"Ringing via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.fullRemoteJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"ringing" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[] andData:nil]];
@@ -831,8 +831,8 @@
 -(void) sendJmiProceed
 {
     DDLogDebug(@"Accepting via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
-    //TODO: XEP says bare jid, but full jid is needed for conversations: jmiNode.to = self.fullRemoteJid;
+    //xep 0353 mandates bare jid, but daniel will update it to mandate full jid
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.fullRemoteJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"proceed" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[] andData:nil]];
@@ -856,7 +856,7 @@
     [self.account send:jingleIQ];
     
     DDLogDebug(@"Finishing via JMI: %@", self);
-    XMPPMessage* jmiNode = [[XMPPMessage alloc] initToContact:self.contact];
+    XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.fullRemoteJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
     } andChildren:@[

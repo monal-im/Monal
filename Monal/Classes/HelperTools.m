@@ -168,8 +168,9 @@ static void addFilePathWithSize(const KSCrashReportWriter* writer, char* name, c
 
 static void crash_callback(const KSCrashReportWriter* writer)
 {
-    asyncSafeCopyFile(_origLogfilePath, _logfilePath);
+    int copyRetval = asyncSafeCopyFile(_origLogfilePath, _logfilePath);
     writer->addStringElement(writer, "logfileCopied", "YES");
+    writer->addIntegerElement(writer, "logfileCopyResult", copyRetval);
     addFilePathWithSize(writer, "logfileCopy", _logfilePath);
     //this comes last to make sure we see size differences if the logfile got written during crash data collection (could be other processes)
     addFilePathWithSize(writer, "currentLogfile", _origLogfilePath);

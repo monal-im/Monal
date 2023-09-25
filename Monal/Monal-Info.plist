@@ -83,7 +83,7 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Monal uses your location when you send a location message in a conversation.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Monal uses the microphone to transmit your voice in audio calls.</string>
+	<string>Monal uses the microphone to transmit your voice in audio messages or calls.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Monal allows users to save photos received in conversations.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

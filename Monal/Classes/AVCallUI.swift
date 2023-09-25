@@ -29,6 +29,7 @@ struct VideoView: UIViewRepresentable {
 struct AVCallUI: View {
     @StateObject private var call: ObservableKVOWrapper<MLCall>
     @StateObject private var contact: ObservableKVOWrapper<MLContact>
+    @State private var showMicAlert = false
     private var ringingPlayer: AVAudioPlayer!
     private var busyPlayer: AVAudioPlayer!
     private var errorPlayer: AVAudioPlayer!
@@ -365,6 +366,13 @@ struct AVCallUI: View {
                 Spacer().frame(height: 32)
             }
         }
+        .alert(isPresented: $showMicAlert) {
+            Alert(
+                title: Text("Missing permission"),
+                message: Text("You need to grant microphone access in iOS Settings-> Privacy-> Microphone, if you want that others can hear you."),
+                dismissButton: .default(Text("OK"))
+            )
+        }
         .onAppear {
             //force portrait mode and lock ui there
             UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
@@ -372,6 +380,13 @@ struct AVCallUI: View {
             self.ringingPlayer.numberOfLoops = -1
             self.busyPlayer.numberOfLoops = -1
             self.errorPlayer.numberOfLoops = -1
+            
+            //ask for mic permissions
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                if !granted {
+                    showMicAlert = true
+                }
+            }
         }
         .onDisappear {
             //allow all orientations again

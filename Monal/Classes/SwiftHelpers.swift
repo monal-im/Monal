@@ -81,7 +81,10 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
     private func addObserverForMember(_ member: String){
         if(!self.observedMembers.contains(member)) {
             DDLogDebug("Adding observer for member '\(member)'...")
-            self.observers.append(KVOObserver(obj:self.obj, keyPath:member, objectWillChange: {
+            self.observers.append(KVOObserver(obj:self.obj, keyPath:member, objectWillChange: { [weak self] in
+                guard let self = self else {
+                    return
+                }
                 DDLogDebug("Observer said '\(member)' has changed...")
                 DispatchQueue.main.async {
                     DDLogDebug("Calling self.objectWillChange.send()...")

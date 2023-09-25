@@ -119,9 +119,9 @@
     return self;
 }
 
--(void) deinit
+-(void) dealloc
 {
-    DDLogInfo(@"Call deinit: %@", self);
+    DDLogInfo(@"Called dealloc: %@", self);
     [self.callDurationTimer invalidate];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -1011,7 +1011,7 @@
 -(void) webRTCClient:(WebRTCClient*) webRTCClient didChangeConnectionState:(RTCIceConnectionState) state
 {
     @synchronized(self) {
-        if(webRTCClient != self.webRTCClient)
+        if(webRTCClient != self.webRTCClient && !self.isFinished)
         {
             DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for webRTCClient: %@ (call migrated)", (long)state, webRTCClient);
             return;

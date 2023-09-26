@@ -172,6 +172,11 @@ impl JingleRtpSessionsPayloadType {
         add_nondefault_parameter!(self, params, level_asymmetry_allowed);
 
         add_nondefault_parameter!(self, params, profile_level_id);
+        // this has a default of 0x420010 which is different to the datatype-default of 0
+        // see: https://stackoverflow.com/questions/20634476/is-sprop-parameter-sets-or-profile-level-id-the-sdp-parameter-required-to-decode
+        if params.profile_level_id != 0x420010 && params.profile_level_id != 0 {
+            self.add_parameter("profile_level_id", params.profile_level_id.to_string());
+        }
         add_nondefault_parameter!(self, params, max_fs);
         add_nondefault_parameter!(self, params, max_cpb);
         add_nondefault_parameter!(self, params, max_dpb);
@@ -332,7 +337,15 @@ impl JingleRtpSessionsPayloadType {
                     .get_fmtp_param(&mut known_param_names, "packetization_mode"),
                 level_asymmetry_allowed: self
                     .get_fmtp_param(&mut known_param_names, "level_asymmetry_allowed"),
-                profile_level_id: self.get_fmtp_param(&mut known_param_names, "profile_level_id"),
+                // this has a default of 0x420010 which is different to the datatype-default of 0
+                // see: https://stackoverflow.com/questions/20634476/is-sprop-parameter-sets-or-profile-level-id-the-sdp-parameter-required-to-decode
+                profile_level_id: match self
+                    .get_fmtp_param_vec::<u32>(&mut known_param_names, "profile_level_id")
+                    .is_empty()
+                {
+                    true => 0x420010,
+                    false => self.get_fmtp_param(&mut known_param_names, "profile_level_id"),
+                },
                 max_fs: self.get_fmtp_param(&mut known_param_names, "max_fs"),
                 max_cpb: self.get_fmtp_param(&mut known_param_names, "max_cpb"),
                 max_dpb: self.get_fmtp_param(&mut known_param_names, "max_dpb"),

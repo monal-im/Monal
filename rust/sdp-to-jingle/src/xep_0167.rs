@@ -339,7 +339,14 @@ impl JingleRtpSessionsPayloadType {
                 max_br: self.get_fmtp_param(&mut known_param_names, "max_br"),
                 max_mbps: self.get_fmtp_param(&mut known_param_names, "max_mbps"),
                 max_fr: self.get_fmtp_param(&mut known_param_names, "max_fr"),
-                maxplaybackrate: self.get_fmtp_param(&mut known_param_names, "maxplaybackrate"),
+                // this has a default of 48000 which is different to the datatype-default of 0
+                maxplaybackrate: match self
+                    .get_fmtp_param_vec::<u32>(&mut known_param_names, "maxplaybackrate")
+                    .is_empty()
+                {
+                    true => 48000,
+                    false => self.get_fmtp_param(&mut known_param_names, "maxplaybackrate"),
+                },
                 maxaveragebitrate: self.get_fmtp_param(&mut known_param_names, "maxaveragebitrate"),
                 usedtx: self.get_fmtp_param(&mut known_param_names, "usedtx"),
                 stereo: self.get_fmtp_param(&mut known_param_names, "stereo"),

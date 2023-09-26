@@ -81,6 +81,13 @@ enum MLServerDetailsSections {
         @"Color": connection.supportsPing ? @"Green" : @"Red"
     }];
 
+    // supportsExternalServiceDiscovery
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0215: External Service Discovery", @""),
+        @"Description":NSLocalizedString(@"XMPP protocol extension for discovering services external to the XMPP network, like STUN or TURN servers needed for A/V calls.", @""),
+        @"Color": connection.supportsPing ? @"Green" : @"Red"
+    }];
+    
     // supportsRosterVersion
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0237: Roster Versioning", @""),

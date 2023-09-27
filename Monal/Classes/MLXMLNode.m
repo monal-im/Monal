@@ -819,9 +819,9 @@ static NSRegularExpression* attributeFilterRegex;
     for(NSString* key in [_attributes allKeys])
     {
         //handle xmlns inheritance (don't add namespace to childs if it should be the same like the parent's one)
-        if([key isEqualToString:@"xmlns"] && parent && [_attributes[@"xmlns"] isEqualToString:parent.attributes[@"xmlns"]])
+        if([key isEqualToString:@"xmlns"] && parent && [[NSString stringWithFormat:@"%@", _attributes[@"xmlns"]] isEqualToString:[NSString stringWithFormat:@"%@", parent.attributes[@"xmlns"]]])
             continue;
-        [outputString appendString:[NSString stringWithFormat:@" %@='%@'", key, [MLXMLNode escapeForXMPP:(NSString*)_attributes[key]]]];
+        [outputString appendString:[NSString stringWithFormat:@" %@='%@'", key, [MLXMLNode escapeForXMPP:[NSString stringWithFormat:@"%@", _attributes[key]]]]];
     }
     
     if([_children count] || (_data && ![_data isEqualToString:@""]))

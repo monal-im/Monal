@@ -1175,16 +1175,19 @@
     }
     if(incomingCandidate == nil)
     {
-        DDLogError(@"incomingCandidate is unexpectedly nil!");
-        XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-        [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"bad-request" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-        ] andData:nil]];
-        [self.account send:errorIq];
-        
-        //don't be too harsh and not end the call here
-        //[self handleEndCallActionWithReason:MLCallFinishReasonError];
+        DDLogError(@"incomingCandidate is unexpectedly nil, ignoring!");
+        [self.account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
         return;
+        
+//         XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+//         [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
+//             [[MLXMLNode alloc] initWithElement:@"bad-request" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+//         ] andData:nil]];
+//         [self.account send:errorIq];
+//         
+//         //don't be too harsh and not end the call here
+//         //[self handleEndCallActionWithReason:MLCallFinishReasonError];
+//         return;
     }
     DDLogInfo(@"%@: Got remote ICE candidate for call: %@", self, incomingCandidate);
     NSString* remoteUfrag = [self.remoteSDP findFirst:@"{urn:xmpp:jingle:1}jingle/content<name=%@>/{urn:xmpp:jingle:transports:ice-udp:1}transport@ufrag", incomingCandidate.sdpMid];

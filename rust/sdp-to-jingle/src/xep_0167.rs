@@ -566,7 +566,7 @@ impl JingleRtpSessions {
             .push(JingleRtpSessionsValue::RtcpFbTrrInt(rtcp_fb_trr_int));
     }
 
-    pub fn from_sdp(sdp: &SdpSession, initiator: bool) -> Root {
+    pub fn from_sdp(sdp: &SdpSession, initiator: bool) -> Result<Root, SdpParserInternalError> {
         let mut root = Root::default();
 
         let mut has_global_extmap_allow_mixed: bool = false; //translate global ExtmapAllowMixed to media-local ExtmapAllowMixed values
@@ -608,7 +608,7 @@ impl JingleRtpSessions {
                     SdpAttribute::BundleOnly => {}
                     SdpAttribute::Candidate(candidate) => {
                         media_transport
-                            .add_candidate(JingleTransportCandidate::new_from_sdp(candidate));
+                            .add_candidate(JingleTransportCandidate::new_from_sdp(candidate)?);
                         //use ufrag from candidate if not (yet) set by dedicated ufrag attribute
                         //(may be be overwritten if we encounter a dedicated ufrag attribute later on)
                         if media_transport.get_ufrag().is_none() {
@@ -743,7 +743,7 @@ impl JingleRtpSessions {
             content.childs.push(JingleDes::Description(jingle));
             root.push(RootEnum::Content(content));
         }
-        root
+        Ok(root)
     }
 
     pub fn to_sdp(root: &Root, initiator: bool) -> Result<SdpSession, SdpParserInternalError> {

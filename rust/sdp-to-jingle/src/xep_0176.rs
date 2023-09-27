@@ -102,12 +102,12 @@ pub struct JingleTransportCandidate {
 }
 
 impl JingleTransportCandidate {
-    pub fn new_from_sdp(candidate: &SdpAttributeCandidate) -> Self {
+    pub fn new_from_sdp(candidate: &SdpAttributeCandidate) -> Result<Self, SdpParserInternalError> {
         let id = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .subsec_nanos();
-        Self {
+        Ok(Self {
             xmlns: "urn:xmpp:jingle:transports:ice-udp:1".to_string(),
             id: Some(format!("{}", id)),
             component: candidate.component,
@@ -125,12 +125,18 @@ impl JingleTransportCandidate {
             priority: candidate.priority,
             protocol: match candidate.transport {
                 SdpAttributeCandidateTransport::Udp => "udp".to_string(),
-                SdpAttributeCandidateTransport::Tcp => "tcp".to_string(), //not specced in any xep
+                //SdpAttributeCandidateTransport::Tcp => "tcp".to_string(), //not specced in xep-0176
+                _ => {
+                    return Err(SdpParserInternalError::Generic(
+                        "Encountered some candidate transport (like tcp) not specced in XEP-0176!"
+                            .to_string(),
+                    ));
+                }
             },
             raddr: candidate.raddr.as_ref().map(|addr| format!("{}", addr)),
             rport: candidate.rport,
             c_type: JingleTransportCandidateType::new_from_sdp(&candidate.c_type),
-        }
+        })
     }
 
     pub fn to_sdp(
@@ -142,8 +148,10 @@ impl JingleTransportCandidate {
             component: self.component,
             transport: match self.protocol.as_str() {
                 "udp" => Ok(SdpAttributeCandidateTransport::Udp),
+                //"tcp" => Ok(SdpAttributeCandidateTransport::Tcp),
                 _ => Err(SdpParserInternalError::Generic(
-                    "TCP or any other candidate transports not specced in an XEP-0176!".to_string(),
+                    "Encountered some candidate transport (like tcp) not specced in XEP-0176!"
+                        .to_string(),
                 )),
             }?,
             priority: self.priority,

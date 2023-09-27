@@ -843,6 +843,59 @@ $$
     return NO;
 }
 
+-(MLXMLNode* _Nullable) encryptString:(NSString* _Nullable) message toDeviceids:(NSDictionary<NSString*, NSSet<NSNumber*>*>*) contactDeviceMap
+{
+    
+    MLXMLNode* encrypted = [[MLXMLNode alloc] initWithElement:@"encrypted" andNamespace:@"eu.siacs.conversations.axolotl"];
+
+    MLEncryptedPayload* encryptedPayload;
+    if(message)
+    {
+        // Encrypt message
+        encryptedPayload = [AESGcm encrypt:[message dataUsingEncoding:NSUTF8StringEncoding] keySize:KEY_SIZE];
+        if(encryptedPayload == nil)
+        {
+            showErrorOnAlpha(self.account, @"Could not encrypt normal message: AESGcm error");
+            return nil;
+        }
+        [encrypted addChildNode:[[MLXMLNode alloc] initWithElement:@"payload" andData:[HelperTools encodeBase64WithData:encryptedPayload.body]]];
+    }
+    else
+    {
+        //there is no message that can be encrypted -> create new session keys (e.g. this is a key transport message)
+        NSData* newKey = [AESGcm genKey:KEY_SIZE];
+        NSData* newIv = [AESGcm genIV];
+        if(newKey == nil || newIv == nil)
+        {
+            showErrorOnAlpha(self.account, @"Could not create key or iv");
+            return nil;
+        }
+        encryptedPayload = [[MLEncryptedPayload alloc] initWithKey:newKey iv:newIv];
+        if(encryptedPayload == nil)
+        {
+            showErrorOnAlpha(self.account, @"Could not encrypt transport message: AESGcm error");
+            return nil;
+        }
+    }
+
+    //add crypto header with our own deviceid
+    MLXMLNode* header = [[MLXMLNode alloc] initWithElement:@"header" withAttributes:@{
+        @"sid": [NSString stringWithFormat:@"%u", self.monalSignalStore.deviceid],
+    } andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"iv" andData:[HelperTools encodeBase64WithData:encryptedPayload.iv]],
+    ] andData:nil];
+
+    //add encryption for all given contacts' devices
+    for(NSString* recipient in contactDeviceMap)
+    {
+        DDLogVerbose(@"Adding encryption for devices of %@: %@", recipient, contactDeviceMap[recipient]);
+        [self addEncryptionKeyForAllDevices:contactDeviceMap[recipient] encryptForJid:recipient withEncryptedPayload:encryptedPayload withXMLHeader:header];
+    }
+    
+    [encrypted addChildNode:header];
+    return encrypted;
+}
+
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString* _Nullable) message toContact:(NSString*) toContact
 {
     MLAssert(self.signalContext != nil, @"signalContext should be initiated.");
@@ -884,63 +937,23 @@ $$
          if(recipientDevices && recipientDevices.count > 0)
             contactDeviceMap[recipient] = recipientDevices;
     }
-    NSSet<NSNumber*>* myDevices = [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:self.account.connectionProperties.identity.jid]];
 
     //check if we found omemo keys of at least one of the recipients or more than 1 own device, otherwise don't encrypt anything
+    NSSet<NSNumber*>* myDevices = [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:self.account.connectionProperties.identity.jid]];
     if(contactDeviceMap.count > 0 || myDevices.count > 1)
     {
-        MLXMLNode* encrypted = [[MLXMLNode alloc] initWithElement:@"encrypted" andNamespace:@"eu.siacs.conversations.axolotl"];
-
-        MLEncryptedPayload* encryptedPayload;
-        if(message)
-        {
-            // Encrypt message
-            encryptedPayload = [AESGcm encrypt:[message dataUsingEncoding:NSUTF8StringEncoding] keySize:KEY_SIZE];
-            if(encryptedPayload == nil)
-            {
-                showErrorOnAlpha(self.account, @"Could not encrypt message: AESGcm error");
-                return;
-            }
-            [encrypted addChildNode:[[MLXMLNode alloc] initWithElement:@"payload" andData:[HelperTools encodeBase64WithData:encryptedPayload.body]]];
-        }
-        else
-        {
-            //there is no message that can be encrypted -> create new session keys (e.g. this is a key transport message)
-            NSData* newKey = [AESGcm genKey:KEY_SIZE];
-            NSData* newIv = [AESGcm genIV];
-            if(newKey == nil || newIv == nil)
-            {
-                showErrorOnAlpha(self.account, @"Could not create key or iv");
-                return;
-            }
-            encryptedPayload = [[MLEncryptedPayload alloc] initWithKey:newKey iv:newIv];
-            if(encryptedPayload == nil)
-            {
-                showErrorOnAlpha(self.account, @"Could not encrypt message: AESGcm error");
-                return;
-            }
-        }
-
-        //add crypto header with our own deviceid
-        MLXMLNode* header = [[MLXMLNode alloc] initWithElement:@"header" withAttributes:@{
-            @"sid": [NSString stringWithFormat:@"%u", self.monalSignalStore.deviceid],
-        } andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"iv" andData:[HelperTools encodeBase64WithData:encryptedPayload.iv]],
-        ] andData:nil];
-
-        //add encryption for all of our recipients' devices
-        for(NSString* recipient in contactDeviceMap)
-        {
-            DDLogVerbose(@"Adding encryption for devices of %@: %@", recipient, contactDeviceMap[recipient]);
-            [self addEncryptionKeyForAllDevices:contactDeviceMap[recipient] encryptForJid:recipient withEncryptedPayload:encryptedPayload withXMLHeader:header];
-        }
+        //add encryption for all of our own devices to contactDeviceMap
+        DDLogVerbose(@"Adding encryption for OWN (%@) devices to contactDeviceMap: %@", self.account.connectionProperties.identity.jid, myDevices);
+        contactDeviceMap[self.account.connectionProperties.identity.jid] = myDevices;
         
-        //add encryption for all of our own devices
-        DDLogVerbose(@"Adding encryption for OWN (%@) devices: %@", self.account.connectionProperties.identity.jid, myDevices);
-        [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self.account.connectionProperties.identity.jid withEncryptedPayload:encryptedPayload withXMLHeader:header];
-
-        [encrypted addChildNode:header];
-        [messageNode addChildNode:encrypted];
+        //now encrypt everything to all collected deviceids
+        MLXMLNode* envelope = [self encryptString:message toDeviceids:contactDeviceMap];
+        if(envelope == nil)
+        {
+            DDLogError(@"Got nil envelope!");
+            return;
+        }
+        [messageNode addChildNode:envelope];
     }
 }
 
@@ -996,48 +1009,33 @@ $$
     [self removeQueuedKeyTransportElementsFor:encryptForJid andDevices:usedRids];
 }
 
--(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid
+-(NSString* _Nullable) decryptOmemoEnvelope:(MLXMLNode*) envelope forSenderJid:(NSString*) senderJid andReturnErrorString:(BOOL) returnErrorString
 {
-    if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
+    DDLogVerbose(@"OMEMO envelope: %@", envelope);
+    
+    if(![envelope check:@"header"])
     {
-        showErrorOnAlpha(self.account, @"DecryptMessage called but the message has no encryption header");
+        showErrorOnAlpha(self.account, @"decryptOmemoEnvelope called but the envelope has no encryption header");
         return nil;
     }
-    BOOL isKeyTransportElement = ![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload"];
-
-    NSNumber* sid = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"];
-    NSString* senderJid = nil;
-    if([messageNode check:@"/<type=groupchat>"])
-    {
-        if(mucParticipantJid == nil)
-        {
-            DDLogError(@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipantJid);
-#ifdef IS_ALPHA
-            return [NSString stringWithFormat:@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipantJid];
-#else
-            return nil;
-#endif
-        }
-        else
-            senderJid = mucParticipantJid;
-    }
-    else
-        senderJid = messageNode.fromUser;
+    
+    BOOL isKeyTransportElement = ![envelope check:@"payload"];
+    NSNumber* sid = [envelope findFirst:@"header@sid|uint"];
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:senderJid deviceId:(uint32_t)sid.unsignedIntValue];
 
     if(!self.signalContext)
     {
         showErrorOnAlpha(self.account, @"Missing signal context in decrypt!");
-        return NSLocalizedString(@"Error decrypting message", @"");
+        return !returnErrorString ? nil : NSLocalizedString(@"Error decrypting message", @"");
     }
     
     //don't try to decrypt our own messages (could be mirrored by MUC etc.)
     if([senderJid isEqualToString:self.account.connectionProperties.identity.jid] && sid.unsignedIntValue == self.monalSignalStore.deviceid)
         return nil;
 
-    NSData* messageKey = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
-    BOOL devicePreKey = [[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid] boolValue];
+    NSData* messageKey = [envelope findFirst:@"header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
+    BOOL devicePreKey = [[envelope findFirst:@"header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid] boolValue];
     
     DDLogVerbose(@"Decrypting using:\nrid=%u --> messageKey=%@\nrid=%u --> isPreKey=%@", self.monalSignalStore.deviceid, messageKey, self.monalSignalStore.deviceid, bool2str(devicePreKey));
 
@@ -1050,7 +1048,7 @@ $$
     {
         DDLogError(@"Message was not encrypted for this device: %u", self.monalSignalStore.deviceid);
         [self rebuildSessionWithJid:senderJid forRid:sid];
-        return [NSString stringWithFormat:NSLocalizedString(@"Message was not encrypted for this device. Please make sure the sender trusts deviceid %u.", @""), self.monalSignalStore.deviceid];
+        return !returnErrorString ? nil : [NSString stringWithFormat:NSLocalizedString(@"Message was not encrypted for this device. Please make sure the sender trusts deviceid %u.", @""), self.monalSignalStore.deviceid];
     }
     else
     {
@@ -1080,10 +1078,10 @@ $$
             [self rebuildSessionWithJid:senderJid forRid:sid];
 #ifdef IS_ALPHA
             if(isKeyTransportElement)
-                return [NSString stringWithFormat:@"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
+                return !returnErrorString ? nil : [NSString stringWithFormat:@"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
 #endif
             if(!isKeyTransportElement)
-                return [NSString stringWithFormat:NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", @""), error];
+                return !returnErrorString ? nil : [NSString stringWithFormat:NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", @""), error];
             return nil;
         }
         NSData* key;
@@ -1095,10 +1093,10 @@ $$
             [self rebuildSessionWithJid:senderJid forRid:sid];
 #ifdef IS_ALPHA
             if(isKeyTransportElement)
-                return @"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person.";
+                return !returnErrorString ? nil : @"There was an error decrypting this encrypted KEY TRANSPORT message (Signal error). To resolve this, try sending an encrypted message to this person.";
 #endif
             if(!isKeyTransportElement)
-                return NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.", @"");
+                return !returnErrorString ? nil : NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.", @"");
             return nil;
         }
         else
@@ -1124,7 +1122,7 @@ $$
             {
                 DDLogInfo(@"KeyTransportElement received from jid: %@ device: %@", senderJid, sid);
 #ifdef IS_ALPHA
-                return [NSString stringWithFormat:@"ALPHA_DEBUG_MESSAGE: KeyTransportElement received from jid: %@ device: %@", senderJid, sid];
+                return !returnErrorString ? nil : [NSString stringWithFormat:@"ALPHA_DEBUG_MESSAGE: KeyTransportElement received from jid: %@ device: %@", senderJid, sid];
 #else
                 return nil;
 #endif
@@ -1141,23 +1139,23 @@ $$
 
             if(key != nil)
             {
-                NSData* iv = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/iv#|base64"];
-                NSData* decodedPayload = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/payload#|base64"];
+                NSData* iv = [envelope findFirst:@"header/iv#|base64"];
+                NSData* decodedPayload = [envelope findFirst:@"payload#|base64"];
                 if(iv == nil || iv.length != 12)
                 {
                     showErrorOnAlpha(self.account, @"Could not decrypt message: iv length: %lu", (unsigned long)iv.length);
-                    return NSLocalizedString(@"Error while decrypting: iv.length != 12", @"");
+                    return !returnErrorString ? nil : NSLocalizedString(@"Error while decrypting: iv.length != 12", @"");
                 }
                 if(decodedPayload == nil)
                 {
-                    return NSLocalizedString(@"Error: Received OMEMO message is empty", @"");
+                    return !returnErrorString ? nil : NSLocalizedString(@"Error: Received OMEMO message is empty", @"");
                 }
                 
                 NSData* decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                 if(decData == nil)
                 {
                     showErrorOnAlpha(self.account, @"Could not decrypt message with key that was decrypted. (GCM error)");
-                    return NSLocalizedString(@"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)", @"");
+                    return !returnErrorString ? nil : NSLocalizedString(@"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)", @"");
                 }
                 else
                     DDLogInfo(@"Successfully decrypted message, passing back cleartext string...");
@@ -1166,10 +1164,33 @@ $$
             else
             {
                 showErrorOnAlpha(self.account, @"Could not get omemo decryption key");
-                return NSLocalizedString(@"Could not decrypt message", @"");
+                return !returnErrorString ? nil : NSLocalizedString(@"Could not decrypt message", @"");
             }
         }
     }
+}
+
+-(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid
+{
+    NSString* senderJid = nil;
+    if([messageNode check:@"/<type=groupchat>"])
+    {
+        if(mucParticipantJid == nil)
+        {
+            DDLogError(@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipantJid);
+#ifdef IS_ALPHA
+            return [NSString stringWithFormat:@"Could not get muc participant jid and corresponding signal address of muc participant '%@': %@", messageNode.from, mucParticipantJid];
+#else
+            return nil;
+#endif
+        }
+        else
+            senderJid = mucParticipantJid;
+    }
+    else
+        senderJid = messageNode.fromUser;
+    
+    return [self decryptOmemoEnvelope:[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted"] forSenderJid:senderJid andReturnErrorString:YES];
 }
 
 $$instance_handler(handleDevicelistUnsubscribe, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))

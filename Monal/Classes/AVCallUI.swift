@@ -161,6 +161,10 @@ struct AVCallUI: View {
                                     Text("Call ended: connection failed")
                                     .bold()
                                     .foregroundColor(.primary)
+                                case .securityError:
+                                    Text("Call ended: could establish call encryption")
+                                    .bold()
+                                    .foregroundColor(.primary)
                                 case .unanswered:
                                     Text("Call was not answered")
                                     .bold()
@@ -420,6 +424,11 @@ struct AVCallUI: View {
 //                         case .normal:
                         case .connectivityError:
                             DDLogDebug("state: finished: connectivityError")
+                            ringingPlayer.stop()
+                            busyPlayer.stop()
+                            errorPlayer.play()
+                        case .securityError:
+                            DDLogDebug("state: finished: securityError")
                             ringingPlayer.stop()
                             busyPlayer.stop()
                             errorPlayer.play()

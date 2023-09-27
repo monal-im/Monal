@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class xmpp;
 @class XMPPMessage;
 @class XMPPIQ;
+@class MLXMLNode;
 
 @interface MLOMEMO : NSObject
 @property (nonatomic, strong) OmemoState* state;
@@ -28,7 +29,9 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  * encrypting / decrypting messages
  */
+-(MLXMLNode* _Nullable) encryptString:(NSString* _Nullable) message toDeviceids:(NSDictionary<NSString*, NSSet<NSNumber*>*>*) contactDeviceMap;
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString* _Nullable) message toContact:(NSString*) toContact;
+-(NSString* _Nullable) decryptOmemoEnvelope:(MLXMLNode*) envelope forSenderJid:(NSString*) senderJid andReturnErrorString:(BOOL) returnErrorString;
 -(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid;
 
 -(NSSet<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName;

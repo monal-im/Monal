@@ -39,6 +39,7 @@
 @property (nonatomic, strong) MLContact* contact;
 @property (nonatomic) MLCallType callType;
 @property (nonatomic) MLCallDirection direction;
+@property (nonatomic) MLCallEncryptionState encryptionState;
 
 @property (nonatomic, strong) MLXMLNode* _Nullable jmiPropose;
 @property (nonatomic, strong) MLXMLNode* _Nullable jmiProceed;
@@ -62,6 +63,8 @@
 @property (nonatomic, strong) MLXMLNode* remoteSDP;
 @property (nonatomic, strong) NSNumber* remoteOmemoDeviceId;
 @property (nonatomic, strong) NSMutableArray<XMPPIQ*>* candidateQueue;
+@property (nonatomic, assign) BOOL isEncrypted;
+
 
 @property (nonatomic, readonly) xmpp* account;
 @property (nonatomic, strong) MLVoIPProcessor* voipProcessor;
@@ -94,6 +97,7 @@
     self.contact = contact;
     self.callType = callType;
     self.direction = direction;
+    self.encryptionState = MLCallEncryptionStateUnknown;
     self.isConnected = NO;
     self.wasConnectedOnce = NO;
     self.isReconnecting = NO;
@@ -293,12 +297,12 @@
 {
     @synchronized(self) {
         _jmiProceed = jmiProceed;
-        //try the style implemented in conversations
-        self.remoteOmemoDeviceId = [jmiProceed findFirst:@"{urn:xmpp:jingle-message:0}proceed/{http://gultsch.de/xmpp/drafts/omemo/dlts-srtp-verification}device@id|uint"];
-        //try the style documented by daniel at https://gist.github.com/iNPUTmice/aa4fc0aeea6ce5fb0e0fe04baca842cd
-        if(self.remoteOmemoDeviceId == nil)
-            self.remoteOmemoDeviceId = [jmiProceed findFirst:@"{http://gultsch.de/xmpp/drafts/omemo/dlts-srtp-verification}device@id|uint"];
-        DDLogInfo(@"Proceed set remote omemo deviceid to: %@", self.remoteOmemoDeviceId);
+        if(self.direction == MLCallDirectionOutgoing)
+        {
+            //see https://gist.github.com/iNPUTmice/aa4fc0aeea6ce5fb0e0fe04baca842cd
+            self.remoteOmemoDeviceId = [jmiProceed findFirst:@"{urn:xmpp:jingle-message:0}proceed/{http://gultsch.de/xmpp/drafts/omemo/dlts-srtp-verification}device@id|uint"];
+            DDLogInfo(@"Proceed set remote omemo deviceid to: %@", self.remoteOmemoDeviceId);
+        }
         if(self.direction == MLCallDirectionOutgoing && self.webRTCClient != nil)
             [self establishOutgoingConnection];
     }
@@ -463,7 +467,8 @@
         self.localSDP = otherCall.localSDP;     //should be nil
         self.remoteSDP = otherCall.remoteSDP;   //should be nil
         self.candidateQueue = otherCall.candidateQueue;             //should be empty
-        self.remoteOmemoDeviceId = otherCall.remoteOmemoDeviceId;   //depends on jmiPropose
+        self.remoteOmemoDeviceId = otherCall.remoteOmemoDeviceId;   //depends on jmiProceed and should be empty
+        self.encryptionState = MLCallEncryptionStateUnknown;        //depends on callstate >= connecting
         otherCall = nil;
         
         DDLogDebug(@"%@: Stopping all running timers...", [self short]);
@@ -777,12 +782,15 @@
         DDLogDebug(@"WebRTC reported local SDP '%@', sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
         NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:sdp.sdp withInitiator:YES];
-        if(![self encryptFingerprintsInChildren:children])
+        //we don't encrypt anything if the remote did not send us their deviceid
+        //we try to encrypt using omemo even if this contact is unencrypted (and continue without omemo, if it did not work out)
+        if(/*self.contact.isEncrypted &&*/ self.remoteOmemoDeviceId != nil && [self encryptFingerprintsInChildren:children])
         {
-            DDLogError(@"Could not encrypt local SDP offer fingerprint with OMEMO!");
-            [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
-            return;
+            //we are encrypted now (if the remote can't decrypt this or answers with a cleartext fingerprint, we throw a security error later on)
+            self.encryptionState = [self encryptionTypeForDeviceid:self.remoteOmemoDeviceId];
         }
+        else
+            self.encryptionState = MLCallEncryptionStateClear;
         XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
         [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
             @"action": @"session-initiate",
@@ -871,13 +879,18 @@
     DDLogDebug(@"Accepting via JMI: %@", self);
     //xep 0353 mandates bare jid, but daniel will update it to mandate full jid
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.fullRemoteJid];
-    [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"proceed" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
+    MLXMLNode* proceedElement = [[MLXMLNode alloc] initWithElement:@"proceed" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
         @"id": self.jmiid,
-    } andChildren:@[] andData:nil]];
+    } andChildren:@[] andData:nil];
+    //only offer omemo deviceid for encryption if encryption is enabled for this contact
     if(self.contact.isEncrypted)
-        [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"device" andNamespace:@"http://gultsch.de/xmpp/drafts/omemo/dlts-srtp-verification" withAttributes:@{
+    {
+        //see https://gist.github.com/iNPUTmice/aa4fc0aeea6ce5fb0e0fe04baca842cd
+        [proceedElement addChildNode:[[MLXMLNode alloc] initWithElement:@"device" andNamespace:@"http://gultsch.de/xmpp/drafts/omemo/dlts-srtp-verification" withAttributes:@{
             @"id": [self.account.omemo getDeviceId],
         } andChildren:@[] andData:nil]];
+    }
+    [jmiNode addChildNode:proceedElement];
     [jmiNode setStoreHint];
     self.jmiProceed = jmiNode;
     [self.account send:jmiNode];
@@ -975,6 +988,7 @@
             @"hasLocalSDP": bool2str(self.localSDP != nil),
             @"hasRemoteSDP": bool2str(self.remoteSDP != nil),
             @"remoteOmemoDeviceId": nilWrapper(self.remoteOmemoDeviceId),
+            @"encryptionState": @(self.encryptionState),
         }
     ];
 }
@@ -1317,7 +1331,7 @@
         if(self.direction == MLCallDirectionIncoming && [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"])
             self.remoteOmemoDeviceId = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>/{urn:xmpp:jingle:1}content/{urn:xmpp:jingle:transports:ice-udp:1}transport/{http://gultsch.de/xmpp/drafts/omemo/dlts-srtp-verification}fingerprint/{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"];
         
-        if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action~^session-(initiate|accept)$>"])
+        if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action~^session-(initiate|accept)$>"])
         {
             //don't change iqNode directly to not influence code outside of this method
             iqNode = [iqNode copy];
@@ -1346,18 +1360,39 @@
                 }
             }
             //decrypt fingerprint, if needed (use iqNode copy created above to not influence code outside of this method)
-            if(![self decryptFingerprintsInIqNode:iqNode])
+            //only encrypt if encryption is enabled for this contact
+            if(self.contact.isEncrypted)
             {
-                DDLogError(@"Could not decrypt remote SDP offer/response fingerprint with OMEMO!");
-                XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-                [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-                    [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" andData:@"Could not decrypt call with OMEMO!"],
-                ] andData:nil]];
-                [self.account send:errorIq];
+                //if this is a session-initiate and we can decrypt the fingerprint, this call is encrypted now
+                //(if we can NOT decrypt anything we are simply unencrypted, but still continue)
+                if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"])
+                {
+                    if(self.remoteOmemoDeviceId != nil && [self decryptFingerprintsInIqNode:iqNode])
+                        self.encryptionState = [self encryptionTypeForDeviceid:self.remoteOmemoDeviceId];
+                    else
+                        self.encryptionState = MLCallEncryptionStateClear;
+                }
                 
-                [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
-                return;
+                //if this is a session-accept after sending an encrypted session-initiate and we can NOT decrypt the fingerprint,
+                //this call is a security error (if we can decrypt it, everything is fine and the call is secured)
+                if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
+                {
+                    //we don't need to check self.remoteOmemoDeviceId, because self.encryptionState will only be different to
+                    //MLCallEncryptionStateClear if the deviceid is not nil
+                    if(self.encryptionState != MLCallEncryptionStateClear && ![self decryptFingerprintsInIqNode:iqNode])
+                    {
+                        DDLogError(@"Could not decrypt remote SDP offer/response fingerprint with OMEMO!");
+                        XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+                        [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
+                            [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+                            [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" andData:@"Could not decrypt call with OMEMO!"],
+                        ] andData:nil]];
+                        [self.account send:errorIq];
+                        
+                        [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
+                        return;
+                    }
+                }
             }
         }
         
@@ -1454,41 +1489,44 @@
             //only send a "session-accept" if the remote is the initiator (e.g. this is an incoming call)
             if(self.direction == MLCallDirectionIncoming)
             {
-                //it seems we have to create an offer and ignore it before we can create the desired answer
-                [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* _) {
-                    [self.webRTCClient answerWithCompletion:^(RTCSessionDescription* localSdp) {
-                        DDLogDebug(@"Sending SDP answer back...");
-                        NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:localSdp.sdp withInitiator:NO];
-                        if(![self encryptFingerprintsInChildren:children])
-                        {
-                            DDLogError(@"Could not encrypt local SDP response fingerprint with OMEMO!");
-                            XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-                            [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
-                                [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-                                [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" andData:@"Could not encrypt call with OMEMO!"],
-                            ] andData:nil]];
-                            [self.account send:errorIq];
-                            
-                            [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
-                            return;
-                        }
-                        [self.account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
+                [self.webRTCClient answerWithCompletion:^(RTCSessionDescription* localSdp) {
+                    DDLogDebug(@"Sending SDP answer back...");
+                    NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:localSdp.sdp withInitiator:NO];
+                    //we got a session-initiate jingle iq
+                    //--> self.encryptionState will NOT be MLCallEncryptionStateClear, if that iq contained an encrypted fingerprint,
+                    //--> self.encryptionState WILL be MLCallEncryptionStateClear, if it did not contain such an encrypted fingerprint
+                    //(in this case we just don't try to decrypt anything, the call will simply be unencrypted but continue)
+                    //we don't need to check self.remoteOmemoDeviceId, because self.encryptionState will only be different to
+                    //MLCallEncryptionStateClear if the deviceid is not nil
+                    if(self.encryptionState != MLCallEncryptionStateClear && ![self encryptFingerprintsInChildren:children])
+                    {
+                        DDLogError(@"Could not encrypt local SDP response fingerprint with OMEMO!");
+                        XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+                        [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
+                            [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+                            [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" andData:@"Could not encrypt call with OMEMO!"],
+                        ] andData:nil]];
+                        [self.account send:errorIq];
                         
-                        XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
-                        [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
-                            @"action": @"session-accept",
-                            @"sid": self.jmiid,
-                        } andChildren:children andData:nil]];
-                        [self.account send:sdpIQ];
+                        [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
+                        return;
+                    }
+                    [self.account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
+                    
+                    XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
+                    [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+                        @"action": @"session-accept",
+                        @"sid": self.jmiid,
+                    } andChildren:children andData:nil]];
+                    [self.account send:sdpIQ];
+                    
+                    @synchronized(self.candidateQueue) {
+                        self.localSDP = sdpIQ;
                         
-                        @synchronized(self.candidateQueue) {
-                            self.localSDP = sdpIQ;
-                            
-                            DDLogDebug(@"Now handling queued candidate iqs: %lu", (unsigned long)self.candidateQueue.count);
-                            for(XMPPIQ* candidateIq in self.candidateQueue)
-                                [self processRemoteICECandidate:candidateIq];
-                        }
-                    }];
+                        DDLogDebug(@"Now handling queued candidate iqs: %lu", (unsigned long)self.candidateQueue.count);
+                        for(XMPPIQ* candidateIq in self.candidateQueue)
+                            [self processRemoteICECandidate:candidateIq];
+                    }
                 }];
             }
             else
@@ -1520,15 +1558,24 @@
         self.speaker = NO;
 }
 
+-(MLCallEncryptionState) encryptionTypeForDeviceid:(NSNumber* _Nonnull) deviceid
+{
+    NSNumber* trustLevel = [self.account.omemo getTrustLevelForJid:self.contact.contactJid andDeviceId:deviceid];
+    if(trustLevel == nil)
+        return MLCallEncryptionStateClear;
+    switch(trustLevel.intValue)
+    {
+        case MLOmemoTrusted: return MLCallEncryptionStateTrusted;
+        case MLOmemoToFU: return MLCallEncryptionStateToFU;
+        default: return MLCallEncryptionStateClear;
+    }
+}
+
 -(BOOL) encryptFingerprintsInChildren:(NSArray<MLXMLNode*>*) children
 {
-    if(!self.contact.isEncrypted)
-        return YES;
-    if(self.remoteOmemoDeviceId == nil)
-    {
-        DDLogWarn(@"No remoteOmemoDeviceId given, but trying to encrypt fingerprint!");
+    //don't try to encrypt if the remote deviceid is not trusted
+    if([self encryptionTypeForDeviceid:self.remoteOmemoDeviceId] == MLCallEncryptionStateClear)
         return NO;
-    }
     
     //see https://gist.github.com/iNPUTmice/aa4fc0aeea6ce5fb0e0fe04baca842cd
     BOOL retval = NO;
@@ -1548,18 +1595,15 @@
             fingerprint.data = nil;
             retval = YES;
         }
-    return retval;      //this is only true if at least one fingerprint could be found and encrypted
+    //this is only true if at least one fingerprint could be found and encrypted (this is normally true)
+    return retval;
 }
 
 -(BOOL) decryptFingerprintsInIqNode:(XMPPIQ*) iqNode
 {
-    if(!self.contact.isEncrypted)
-        return YES;
-    if(self.remoteOmemoDeviceId == nil)
-    {
-        DDLogWarn(@"No remoteOmemoDeviceId given, but trying to decrypt fingerprint!");
+    //don't try to decrypt if the remote deviceid is not trusted
+    if([self encryptionTypeForDeviceid:self.remoteOmemoDeviceId] == MLCallEncryptionStateClear)
         return NO;
-    }
     
     //see https://gist.github.com/iNPUTmice/aa4fc0aeea6ce5fb0e0fe04baca842cd
     BOOL retval = NO;
@@ -1571,7 +1615,7 @@
             DDLogWarn(@"More than one OMEMO envelope found!");
             return NO;
         }
-        NSString* decryptedFingerprint = [self.account.omemo decryptOmemoEnvelope:[fingerprintNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted"] forSenderJid:iqNode.fromUser andReturnErrorString:NO];
+        NSString* decryptedFingerprint = [self.account.omemo decryptOmemoEnvelope:[fingerprintNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted"] forSenderJid:self.contact.contactJid andReturnErrorString:NO];
         if(decryptedFingerprint == nil)
         {
             DDLogWarn(@"Could not decrypt OMEMO encrypted fingerprint!");
@@ -1583,7 +1627,9 @@
         fingerprintNode.data = decryptedFingerprint;
         retval = YES;
     }
-    return retval;      //this is only true if at least one fingerprint could be found and deencrypted
+    //this is only true if at least one fingerprint could be found and decrypted
+    //(that could be false, if the remote did something weird or a MITM changed something)
+    return retval;
 }
 
 @end

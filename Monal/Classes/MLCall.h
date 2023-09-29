@@ -53,6 +53,13 @@ typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
     MLCallFinishReasonError,                //used for a call error
 };
 
+typedef NS_ENUM(NSUInteger, MLCallEncryptionState) {
+    MLCallEncryptionStateUnknown,
+    MLCallEncryptionStateClear,
+    MLCallEncryptionStateToFU,
+    MLCallEncryptionStateTrusted,
+};
+
 @interface MLCall : NSObject
 @property (strong, readonly) NSString* description;
 
@@ -61,6 +68,7 @@ typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
 @property (nonatomic, strong, readonly) MLContact* contact;
 @property (nonatomic, readonly) MLCallType callType;
 @property (nonatomic, readonly) MLCallDirection direction;
+@property (nonatomic, readonly) MLCallEncryptionState encryptionState;
 @property (nonatomic, readonly) MLCallState state;
 @property (nonatomic, readonly) MLCallFinishReason finishReason;
 @property (nonatomic, readonly) uint32_t durationTime;

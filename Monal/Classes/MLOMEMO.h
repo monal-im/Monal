@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "OmemoState.h"
+#import "MLSignalStore.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -39,6 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) addIdentityManually:(SignalAddress*) address identityKey:(NSData* _Nonnull) identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
+-(NSNumber* _Nullable) getTrustLevelForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceid;
 -(NSData*) getIdentityForAddress:(SignalAddress*) address;
 -(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) rid;
 -(void) deleteDeviceForSource:(NSString*) source andRid:(NSNumber*) rid;

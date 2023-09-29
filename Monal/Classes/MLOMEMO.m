@@ -957,6 +957,18 @@ $$
     }
 }
 
+-(NSNumber* _Nullable) getTrustLevelForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceid
+{
+    SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)deviceid.unsignedIntValue];
+    NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
+    if(!identity)
+    {
+        showErrorOnAlpha(self.account, @"Could not get Identity for: %@ device id %@", jid, deviceid);
+        return nil;
+    }
+    return [self getTrustLevel:address identityKey:identity];
+}
+
 -(void) addEncryptionKeyForAllDevices:(NSSet<NSNumber*>*) devices encryptForJid:(NSString*) encryptForJid withEncryptedPayload:(MLEncryptedPayload*) encryptedPayload withXMLHeader:(MLXMLNode*) xmlHeader
 {
     NSMutableSet* usedRids = [NSMutableSet new];

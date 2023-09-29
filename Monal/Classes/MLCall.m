@@ -451,6 +451,9 @@
         self.jmiProceed = nil;
         [self.callDurationTimer invalidate];
         self.callDurationTimer = nil;
+        self.localSDP = otherCall.localSDP;     //should be nil
+        self.remoteSDP = otherCall.remoteSDP;   //should be nil
+        self.candidateQueue = otherCall.candidateQueue;     //should be empty
         otherCall = nil;
         
         DDLogDebug(@"%@: Stopping all running timers...", [self short]);

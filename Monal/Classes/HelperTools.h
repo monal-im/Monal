@@ -27,7 +27,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class xmpp;
 @class XMPPStanza;
 @class UNNotificationRequest;
-@class DDLogFormatter;
 @class DDLogMessage;
 @class MLFileLogger;
 @class UIView;
@@ -40,7 +39,7 @@ void swizzle(Class c, SEL orig, SEL new);
 
 @property (class, nonatomic, strong) MLFileLogger* fileLogger;
 
-+(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage usingFormatter:(id<DDLogFormatter> _Nullable) formatter counter:(uint64_t*) counter andError:(NSError** _Nullable) error;
++(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage counter:(uint64_t*) counter andError:(NSError** _Nullable) error;
 +(void) initSystem;
 +(void) installExceptionHandler;
 +(int) pendingCrashreportCount;

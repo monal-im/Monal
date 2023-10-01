@@ -20,7 +20,6 @@
 #define DDLogStdout(frmt, ...)  LOG_MAYBE(NO,  ddLogLevel, LOG_FLAG_STDOUT,  0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
 static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
 #import "MLLogFileManager.h"
-#import "MLLogFormatter.h"
 #import "MLFileLogger.h"
 
 

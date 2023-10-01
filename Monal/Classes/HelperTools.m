@@ -15,6 +15,7 @@
 #include <objc/runtime.h> 
 #include <objc/message.h>
 #include <objc/objc-exception.h>
+#import <sys/qos.h>
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import <MapKit/MapKit.h>
@@ -1374,11 +1375,10 @@ static id preprocess(id exception)
     if(log_activity)
     {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            BOOL appex = [HelperTools isAppExtension];
             unsigned long counter = 1;
             while(counter++)
             {
-                DDLogInfo(@"activity(%@): %lu, memory used / available: %.3fMiB / %.3fMiB", appex ? @"APPEX" : @"MAINAPP", counter, [self report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+                DDLogInfo(@"activity: %lu, memory used / available: %.3fMiB / %.3fMiB", counter, [self report_memory], (CGFloat)os_proc_available_memory() / 1048576);
                 [NSThread sleepForTimeInterval:1];
             }
         });
@@ -1405,26 +1405,42 @@ static id preprocess(id exception)
     _fileLogger = fileLogger;
 }
 
-+(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage usingFormatter:(id<DDLogFormatter> _Nullable) formatter counter:(uint64_t*) counter andError:(NSError** _Nullable) error
++(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage counter:(uint64_t*) counter andError:(NSError** _Nullable) error
 {
-    //format message using given formatter
-    NSString* logMsg = logMessage.message;
-    NSString* timestamp = [[NSISO8601DateFormatter new] stringFromDate:logMessage.timestamp];
-    if(formatter)
-    {
-        logMsg = [NSString stringWithFormat:@"%@", [formatter formatLogMessage:logMessage]];
-        timestamp = [(MLLogFormatter*)formatter stringFromDate:logMessage.timestamp];
-    }
+    static NSDateFormatter* dateFormatter = nil;
+    static NSString* (^qos2name)(NSUInteger) = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss:SSS"];
+        [dateFormatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
+        [dateFormatter setCalendar:[[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian]];
+        
+        qos2name = ^(NSUInteger qos) {
+            switch ((qos_class_t) qos) {
+                case QOS_CLASS_USER_INTERACTIVE: return @"QOS_CLASS_USER_INTERACTIVE";
+                case QOS_CLASS_USER_INITIATED:   return @"QOS_CLASS_USER_INITIATED";
+                case QOS_CLASS_DEFAULT:          return @"QOS_CLASS_DEFAULT";
+                case QOS_CLASS_UTILITY:          return @"QOS_CLASS_UTILITY";
+                case QOS_CLASS_BACKGROUND:       return @"QOS_CLASS_BACKGROUND";
+                default:                         return [NSString stringWithFormat:@"QOS_UNKNOWN(%lu)", (unsigned long)qos];
+            }
+        };
+    });
     
     //construct json dictionary
     (*counter)++;
     NSDictionary* representedObject = @{
         @"queueThreadLabel": [self getQueueThreadLabelFor:logMessage],
         @"processType": [self isAppExtension] ? @"appex" : @"mainapp",
-        @"representedObject": logMessage.representedObject ? logMessage.representedObject : [NSNull null]
+        @"processName": [[[NSBundle mainBundle] executablePath] lastPathComponent],
+        @"counter": [NSNumber numberWithUnsignedLongLong:*counter],
+        @"processID": _processID,
+        @"qosName": qos2name(logMessage.qos),
+        @"representedObject": logMessage.representedObject ? logMessage.representedObject : [NSNull null],
     };
     NSDictionary* msgDict = @{
-        @"formattedMessage": logMsg,
         @"messageFormat": logMessage.messageFormat,
         @"message": logMessage.message,
         @"level": [NSNumber numberWithInteger:logMessage.level],
@@ -1436,13 +1452,11 @@ static id preprocess(id exception)
         @"line": [NSNumber numberWithInteger:logMessage.line],
         @"tag": representedObject,
         @"options": [NSNumber numberWithInteger:logMessage.options],
-        @"timestamp": timestamp,
+        @"timestamp": [dateFormatter stringFromDate:logMessage.timestamp],
         @"threadID": logMessage.threadID,
         @"threadName": logMessage.threadName,
         @"queueLabel": logMessage.queueLabel,
         @"qos": [NSNumber numberWithInteger:logMessage.qos],
-        @"_counter": [NSNumber numberWithUnsignedLongLong:*counter],
-        @"_processID": _processID,
     };
     
     //encode json into NSData
@@ -1467,22 +1481,16 @@ static id preprocess(id exception)
 
 +(void) configureLogging
 {
-    //create log formatter
-    MLLogFormatter* formatter = [MLLogFormatter new];
-    
     //don't log to the console (aka stderr) to not create loops with our redirected stderr
 //     //start console logger first (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
 // #if TARGET_OS_SIMULATOR
-//     [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
 //     [DDLog addLogger:[DDTTYLogger sharedInstance]];
 // #else
-//     [[DDOSLogger sharedInstance] setLogFormatter:formatter];
 //     [DDLog addLogger:[DDOSLogger sharedInstance]];
 // #endif
     
     //network logger (start as early as possible)
     MLUDPLogger* udpLogger = [MLUDPLogger new];
-    [udpLogger setLogFormatter:formatter];
     [DDLog addLogger:udpLogger];
     
     //redirect stderr containing NSLog() messages
@@ -1503,7 +1511,6 @@ static id preprocess(id exception)
     self.fileLogger.doNotReuseLogFiles = NO;
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
     self.fileLogger.maximumFileSize = 128 * 1024 * 1024;
-    self.fileLogger.logFormatter = formatter;
     self.fileLogger.archiveAllowed = YES;               //everything is configured now, engage logfile archiving
     [DDLog addLogger:self.fileLogger];
     
@@ -1523,6 +1530,12 @@ static id preprocess(id exception)
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"Starting: Version %@ (%@ %@ UTC, %@)", version, buildDate, buildTime, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]);
     [DDLog flushLog];
+    
+    DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_USER_INTERACTIVE", QOS_CLASS_USER_INTERACTIVE);
+    DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_USER_INITIATED", QOS_CLASS_USER_INITIATED);
+    DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_DEFAULT", QOS_CLASS_DEFAULT);
+    DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_UTILITY", QOS_CLASS_UTILITY);
+    DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_BACKGROUND", QOS_CLASS_BACKGROUND);
     
     //remove old ascii based logfiles
     for(NSString* file in [[[NSFileManager defaultManager] contentsOfDirectoryAtPath:containerUrl error:nil] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self LIKE %@", @"Monal *.log"]])
@@ -1610,6 +1623,7 @@ static id preprocess(id exception)
         NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
         handler.userInfo = @{
             @"isAppex": @([self isAppExtension]),
+            @"processName": [[[NSBundle mainBundle] executablePath] lastPathComponent],
             @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
             @"appVersion": [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @""), version, buildDate, buildTime],
         };

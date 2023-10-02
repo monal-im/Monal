@@ -85,9 +85,9 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
                 guard let self = self else {
                     return
                 }
-                DDLogDebug("Observer said '\(member)' has changed...")
+                //DDLogDebug("Observer said '\(member)' has changed...")
                 DispatchQueue.main.async {
-                    DDLogDebug("Calling self.objectWillChange.send()...")
+                    DDLogDebug("Calling self.objectWillChange.send() for '\(member)'...")
                     self.objectWillChange.send()
                 }
             }))
@@ -97,7 +97,7 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
     
     private func getWrapper(for member:String) -> AnyObject? {
         addObserverForMember(member)
-        DDLogDebug("Returning value for dynamicMember \(member): \(String(describing:self.obj.value(forKey:member)))")
+        //DDLogDebug("Returning value for dynamicMember \(member): \(String(describing:self.obj.value(forKey:member)))")
         return self.obj.value(forKey:member) as AnyObject?
     }
     

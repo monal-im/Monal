@@ -87,38 +87,7 @@ struct AVCallUI: View {
                     Spacer().frame(height: 24)
                     
                     HStack(alignment: .top) {
-                        VStack {
-                            Spacer().frame(height: 8)
-                            Button(action: {
-                                //show dialog explaining different encryption states
-                                self.showSecurityHelpAlert = MLCallEncryptionState(rawValue:call.encryptionState)
-                            }, label: {
-                                switch MLCallEncryptionState(rawValue:call.encryptionState) {
-                                    case .unknown:
-                                        Text("")
-                                    case .clear:
-                                        Image(systemName: "xmark.shield.fill")
-                                            .resizable()
-                                            .frame(width: 20.0, height: 20.0)
-                                            .foregroundColor(.red)
-                                        Spacer().frame(width: 10)
-                                    case .toFU:
-                                        Image(systemName: "checkmark.shield.fill")
-                                            .resizable()
-                                            .frame(width: 20.0, height: 20.0)
-                                            .foregroundColor(.yellow)
-                                        Spacer().frame(width: 10)
-                                    case .trusted:
-                                        Image(systemName: "checkmark.shield.fill")
-                                            .resizable()
-                                            .frame(width: 20.0, height: 20.0)
-                                            .foregroundColor(.green)
-                                        Spacer().frame(width: 10)
-                                    default:        //should never be reached
-                                        Text("")
-                                }
-                            })
-                        }
+                        Spacer().frame(width:20)
                         
                         VStack {
                             Spacer().frame(height: 8)
@@ -138,13 +107,46 @@ struct AVCallUI: View {
                             }
                         }
                         
-                        Spacer().frame(width: 20)
+                        VStack {
+                            Spacer().frame(height: 8)
+                            Button(action: {
+                                //show dialog explaining different encryption states
+                                self.showSecurityHelpAlert = MLCallEncryptionState(rawValue:call.encryptionState)
+                            }, label: {
+                                switch MLCallEncryptionState(rawValue:call.encryptionState) {
+                                    case .unknown:
+                                        Text("")
+                                    case .clear:
+                                        Spacer().frame(width: 10)
+                                        Image(systemName: "xmark.shield.fill")
+                                            .resizable()
+                                            .frame(width: 20.0, height: 20.0)
+                                            .foregroundColor(.red)
+                                    case .toFU:
+                                        Spacer().frame(width: 10)
+                                        Image(systemName: "checkmark.shield.fill")
+                                            .resizable()
+                                            .frame(width: 20.0, height: 20.0)
+                                            .foregroundColor(.yellow)
+                                    case .trusted:
+                                        Spacer().frame(width: 10)
+                                        Image(systemName: "checkmark.shield.fill")
+                                            .resizable()
+                                            .frame(width: 20.0, height: 20.0)
+                                            .foregroundColor(.green)
+                                    default:        //should never be reached
+                                        Text("")
+                                }
+                            })
+                        }
+                        
+                        Spacer().frame(minWidth:20)
                         
                         Text(contact.contactDisplayName as String)
                             .font(.largeTitle)
                             .foregroundColor(.primary)
                         
-                        Spacer().frame(width: 20)
+                        Spacer().frame(minWidth:20)
                         
                         VStack {
                             Spacer().frame(height: 8)
@@ -160,6 +162,8 @@ struct AVCallUI: View {
                                     .foregroundColor(.primary)
                             })
                         }
+                        
+                        Spacer().frame(width:20)
                     }
                     
                     Spacer().frame(height: 16)

@@ -32,6 +32,8 @@ impl Root {
 pub enum RootEnum {
     Content(Content),
     Group(ContentGroup),
+    #[serde(other)]
+    Invalid,
 }
 
 // *** global
@@ -47,6 +49,8 @@ pub enum JingleRtpSessionsValue {
     SsrcGroup(JingleSsrcGroup),
     ExtmapAllowMixed,
     RtpHdrext(JingleHdrext),
+    #[serde(other)]
+    Invalid,
 }
 
 // *** generic enum for multiple xeps (e.g. global)
@@ -54,6 +58,8 @@ pub enum JingleRtpSessionsValue {
 #[serde(rename_all = "lowercase")]
 pub enum GenericParameterEnum {
     Parameter(GenericParameter),
+    #[serde(other)]
+    Invalid,
 }
 
 // *** generic struct for multiple xeps (e.g. global)

@@ -70,7 +70,7 @@ PODS:
     - KSCrash/Reporting/Tools
   - KSCrash/Reporting/Tools (1.15.27):
     - KSCrash/Recording
-  - MarqueeLabel (4.3.1)
+  - MarqueeLabel (4.3.2)
   - MBProgressHUD (1.2.0)
   - NotificationBannerSwift (3.2.1):
     - MarqueeLabel (~> 4.3.0)
@@ -152,7 +152,7 @@ SPEC CHECKSUMS:
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
   IDMPhotoBrowser: b96159fe4adb991a844068eb17dab9c0b7d7e51a
   KSCrash: 202a2dd3a1a3a1aa0783056a42d7db8ea8bf3a56
-  MarqueeLabel: da4b9cf619fe70c75d7bab4580b0b4a0b868aa6b
+  MarqueeLabel: 15e524a6762552bb279cb17438b8a94990269fb9
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
@@ -167,4 +167,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: bf3a219fe79a10968ef750b2aeba39a10793cda6
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.13.0

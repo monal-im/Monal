@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "OmemoState.h"
+#import "MLSignalStore.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -16,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class xmpp;
 @class XMPPMessage;
 @class XMPPIQ;
+@class MLXMLNode;
 
 @interface MLOMEMO : NSObject
 @property (nonatomic, strong) OmemoState* state;
@@ -28,7 +30,9 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  * encrypting / decrypting messages
  */
+-(MLXMLNode* _Nullable) encryptString:(NSString* _Nullable) message toDeviceids:(NSDictionary<NSString*, NSSet<NSNumber*>*>*) contactDeviceMap;
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString* _Nullable) message toContact:(NSString*) toContact;
+-(NSString* _Nullable) decryptOmemoEnvelope:(MLXMLNode*) envelope forSenderJid:(NSString*) senderJid andReturnErrorString:(BOOL) returnErrorString;
 -(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid;
 
 -(NSSet<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName;
@@ -36,6 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) addIdentityManually:(SignalAddress*) address identityKey:(NSData* _Nonnull) identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
+-(NSNumber* _Nullable) getTrustLevelForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceid;
 -(NSData*) getIdentityForAddress:(SignalAddress*) address;
 -(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) rid;
 -(void) deleteDeviceForSource:(NSString*) source andRid:(NSNumber*) rid;

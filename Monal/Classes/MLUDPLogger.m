@@ -233,15 +233,12 @@ static volatile MLUDPLogger* _self;
         return;
     
     NSError* error = nil; 
-    NSData* rawData = [HelperTools convertLogmessageToJsonData:logMessage usingFormatter:self->_logFormatter counter:&counter andError:&error];
+    NSData* rawData = [HelperTools convertLogmessageToJsonData:logMessage counter:&counter andError:&error];
     if(error != nil || rawData == nil)
     {
         [[self class] logError:@"json encode error: %@", error];
         return;
     }
-    
-    //you have to uncomment the following line to send only the formatted logline
-    //rawData = [logMsg dataUsingEncoding:NSUTF8StringEncoding];
     
     //compress data to account for udp size limits
     rawData = [self gzipDeflate:rawData];

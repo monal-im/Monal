@@ -14,21 +14,27 @@ mod xep_0339;
 pub fn sdp_str_to_jingle_str(sdp_str: &str, initiator: bool) -> Option<String> {
     let sdp_session = match parse_sdp(sdp_str, true) {
         Err(e) => {
-            eprintln!("Could not parse sdp: {}", e);
+            eprintln!("Could not parse sdpstring: {}", e);
             return None;
         }
         Ok(sdp) => sdp,
     };
 
     for warning in &sdp_session.warnings {
-        eprintln!("sdp parser warning: {}", warning);
+        eprintln!("mozilla sdp parser warning: {}", warning);
     }
 
-    let jingle = JingleRtpSessions::from_sdp(&sdp_session, initiator);
+    let jingle = match JingleRtpSessions::from_sdp(&sdp_session, initiator) {
+        Err(e) => {
+            eprintln!("Could not convert sdp to jingle: {}", e);
+            return None;
+        }
+        Ok(jingle) => jingle,
+    };
 
     match quick_xml::se::to_string(&jingle) {
         Err(e) => {
-            eprintln!("Could not serialize jingle to xml: {}", e);
+            eprintln!("Could not serialize jingle to xmlstring: {}", e);
             None
         }
         Ok(jingle_xml) => Some(jingle_xml),
@@ -38,7 +44,7 @@ pub fn sdp_str_to_jingle_str(sdp_str: &str, initiator: bool) -> Option<String> {
 pub fn jingle_str_to_sdp_str(jingle_str: &str, initiator: bool) -> Option<String> {
     let jingle: Root = match quick_xml::de::from_str(jingle_str) {
         Err(e) => {
-            eprintln!("Error parsing xml: {}", e);
+            eprintln!("Could not parse xmlstring: {}", e);
             return None;
         }
         Ok(j) => j,
@@ -46,7 +52,7 @@ pub fn jingle_str_to_sdp_str(jingle_str: &str, initiator: bool) -> Option<String
 
     let sdp = match JingleRtpSessions::to_sdp(&jingle, initiator) {
         Err(e) => {
-            eprintln!("Error converting parsed xml into sdp: {}", e);
+            eprintln!("Could not convert jingle to sdp: {}", e);
             return None;
         }
         Ok(j) => j,

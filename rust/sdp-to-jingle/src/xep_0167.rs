@@ -74,6 +74,8 @@ pub enum ContentCreator {
 pub enum JingleDes {
     Description(JingleRtpSessions),
     Transport(JingleTransport),
+    #[serde(other)]
+    Invalid,
 }
 
 // *** xep-0167
@@ -172,6 +174,11 @@ impl JingleRtpSessionsPayloadType {
         add_nondefault_parameter!(self, params, level_asymmetry_allowed);
 
         add_nondefault_parameter!(self, params, profile_level_id);
+        // this has a default of 0x420010 which is different to the datatype-default of 0
+        // see: https://stackoverflow.com/questions/20634476/is-sprop-parameter-sets-or-profile-level-id-the-sdp-parameter-required-to-decode
+        if params.profile_level_id != 0x420010 && params.profile_level_id != 0 {
+            self.add_parameter("profile_level_id", params.profile_level_id.to_string());
+        }
         add_nondefault_parameter!(self, params, max_fs);
         add_nondefault_parameter!(self, params, max_cpb);
         add_nondefault_parameter!(self, params, max_dpb);
@@ -332,14 +339,29 @@ impl JingleRtpSessionsPayloadType {
                     .get_fmtp_param(&mut known_param_names, "packetization_mode"),
                 level_asymmetry_allowed: self
                     .get_fmtp_param(&mut known_param_names, "level_asymmetry_allowed"),
-                profile_level_id: self.get_fmtp_param(&mut known_param_names, "profile_level_id"),
+                // this has a default of 0x420010 which is different to the datatype-default of 0
+                // see: https://stackoverflow.com/questions/20634476/is-sprop-parameter-sets-or-profile-level-id-the-sdp-parameter-required-to-decode
+                profile_level_id: match self
+                    .get_fmtp_param_vec::<u32>(&mut known_param_names, "profile_level_id")
+                    .is_empty()
+                {
+                    true => 0x420010,
+                    false => self.get_fmtp_param(&mut known_param_names, "profile_level_id"),
+                },
                 max_fs: self.get_fmtp_param(&mut known_param_names, "max_fs"),
                 max_cpb: self.get_fmtp_param(&mut known_param_names, "max_cpb"),
                 max_dpb: self.get_fmtp_param(&mut known_param_names, "max_dpb"),
                 max_br: self.get_fmtp_param(&mut known_param_names, "max_br"),
                 max_mbps: self.get_fmtp_param(&mut known_param_names, "max_mbps"),
                 max_fr: self.get_fmtp_param(&mut known_param_names, "max_fr"),
-                maxplaybackrate: self.get_fmtp_param(&mut known_param_names, "maxplaybackrate"),
+                // this has a default of 48000 which is different to the datatype-default of 0
+                maxplaybackrate: match self
+                    .get_fmtp_param_vec::<u32>(&mut known_param_names, "maxplaybackrate")
+                    .is_empty()
+                {
+                    true => 48000,
+                    false => self.get_fmtp_param(&mut known_param_names, "maxplaybackrate"),
+                },
                 maxaveragebitrate: self.get_fmtp_param(&mut known_param_names, "maxaveragebitrate"),
                 usedtx: self.get_fmtp_param(&mut known_param_names, "usedtx"),
                 stereo: self.get_fmtp_param(&mut known_param_names, "stereo"),
@@ -396,6 +418,8 @@ pub enum JingleRtpSessionsPayloadTypeValue {
     Parameter(JingleRtpSessionsPayloadTypeParam),
     RtcpFbTrrInt(RtcpFbTrrInt),
     RtcpFb(RtcpFb),
+    #[serde(other)]
+    Invalid,
 }
 
 // *** xep-0167
@@ -546,7 +570,7 @@ impl JingleRtpSessions {
             .push(JingleRtpSessionsValue::RtcpFbTrrInt(rtcp_fb_trr_int));
     }
 
-    pub fn from_sdp(sdp: &SdpSession, initiator: bool) -> Root {
+    pub fn from_sdp(sdp: &SdpSession, initiator: bool) -> Result<Root, SdpParserInternalError> {
         let mut root = Root::default();
 
         let mut has_global_extmap_allow_mixed: bool = false; //translate global ExtmapAllowMixed to media-local ExtmapAllowMixed values
@@ -588,7 +612,7 @@ impl JingleRtpSessions {
                     SdpAttribute::BundleOnly => {}
                     SdpAttribute::Candidate(candidate) => {
                         media_transport
-                            .add_candidate(JingleTransportCandidate::new_from_sdp(candidate));
+                            .add_candidate(JingleTransportCandidate::new_from_sdp(candidate)?);
                         //use ufrag from candidate if not (yet) set by dedicated ufrag attribute
                         //(may be be overwritten if we encounter a dedicated ufrag attribute later on)
                         if media_transport.get_ufrag().is_none() {
@@ -723,7 +747,7 @@ impl JingleRtpSessions {
             content.childs.push(JingleDes::Description(jingle));
             root.push(RootEnum::Content(content));
         }
-        root
+        Ok(root)
     }
 
     pub fn to_sdp(root: &Root, initiator: bool) -> Result<SdpSession, SdpParserInternalError> {
@@ -762,6 +786,7 @@ impl JingleRtpSessions {
                             JingleDes::Description(rtp_session) => {
                                 media_type = Some(rtp_session.media().to_sdp());
                             }
+                            JingleDes::Invalid => continue,
                         }
                     }
                     let direction = match jingle_content.senders {
@@ -852,6 +877,7 @@ impl JingleRtpSessions {
                                                 candidate.to_sdp(transport.get_ufrag())?,
                                             ))?;
                                         }
+                                        JingleTransportItems::Invalid => {}
                                     }
                                 }
                             }
@@ -883,6 +909,7 @@ impl JingleRtpSessions {
                                                     JingleRtpSessionsPayloadTypeValue::RtcpFbTrrInt(trr_int) => {
                                                         media.add_attribute(SdpAttribute::Rtcpfb(trr_int.to_sdp(SdpAttributePayloadType::PayloadType(payload_type.id()))))?;
                                                     },
+                                                    JingleRtpSessionsPayloadTypeValue::Invalid => continue,
                                                 }
                                             }
 
@@ -935,15 +962,18 @@ impl JingleRtpSessions {
                                             .add_attribute(SdpAttribute::Extmap(
                                                 hdrext.to_sdp(initiator),
                                             )),
+                                        JingleRtpSessionsValue::Invalid => Ok(()),
                                     } {
                                         eprintln!("Could not add attribute to sdp: {}", e);
                                         return Err(e);
                                     }
                                 }
                             }
+                            JingleDes::Invalid => continue,
                         }
                     }
                 }
+                RootEnum::Invalid => {}
             }
         }
         Ok(sdp)

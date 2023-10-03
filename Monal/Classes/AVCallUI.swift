@@ -29,6 +29,8 @@ struct VideoView: UIViewRepresentable {
 struct AVCallUI: View {
     @StateObject private var call: ObservableKVOWrapper<MLCall>
     @StateObject private var contact: ObservableKVOWrapper<MLContact>
+    @State private var showMicAlert = false
+    @State private var showSecurityHelpAlert: MLCallEncryptionState? = nil
     private var ringingPlayer: AVAudioPlayer!
     private var busyPlayer: AVAudioPlayer!
     private var errorPlayer: AVAudioPlayer!
@@ -84,41 +86,84 @@ struct AVCallUI: View {
                 Group {
                     Spacer().frame(height: 24)
                     
-                    HStack {
-                        switch MLCallDirection(rawValue:call.direction) {
-                            case .incoming:
-                                Image(systemName: "phone.arrow.down.left")
-                                    .resizable()
-                                    .frame(width: 20.0, height: 20.0)
-                                    .foregroundColor(.primary)
-                            case .outgoing:
-                                Image(systemName: "phone.arrow.up.right")
-                                    .resizable()
-                                    .frame(width: 20.0, height: 20.0)
-                                    .foregroundColor(.primary)
-                            default:        //should never be reached
-                                Text("")
+                    HStack(alignment: .top) {
+                        Spacer().frame(width:20)
+                        
+                        VStack {
+                            Spacer().frame(height: 8)
+                            switch MLCallDirection(rawValue:call.direction) {
+                                case .incoming:
+                                    Image(systemName: "phone.arrow.down.left")
+                                        .resizable()
+                                        .frame(width: 20.0, height: 20.0)
+                                        .foregroundColor(.primary)
+                                case .outgoing:
+                                    Image(systemName: "phone.arrow.up.right")
+                                        .resizable()
+                                        .frame(width: 20.0, height: 20.0)
+                                        .foregroundColor(.primary)
+                                default:        //should never be reached
+                                    Text("")
+                            }
                         }
                         
-                        Spacer().frame(width: 20)
+                        VStack {
+                            Spacer().frame(height: 8)
+                            Button(action: {
+                                //show dialog explaining different encryption states
+                                self.showSecurityHelpAlert = MLCallEncryptionState(rawValue:call.encryptionState)
+                            }, label: {
+                                switch MLCallEncryptionState(rawValue:call.encryptionState) {
+                                    case .unknown:
+                                        Text("")
+                                    case .clear:
+                                        Spacer().frame(width: 10)
+                                        Image(systemName: "xmark.shield.fill")
+                                            .resizable()
+                                            .frame(width: 20.0, height: 20.0)
+                                            .foregroundColor(.red)
+                                    case .toFU:
+                                        Spacer().frame(width: 10)
+                                        Image(systemName: "checkmark.shield.fill")
+                                            .resizable()
+                                            .frame(width: 20.0, height: 20.0)
+                                            .foregroundColor(.yellow)
+                                    case .trusted:
+                                        Spacer().frame(width: 10)
+                                        Image(systemName: "checkmark.shield.fill")
+                                            .resizable()
+                                            .frame(width: 20.0, height: 20.0)
+                                            .foregroundColor(.green)
+                                    default:        //should never be reached
+                                        Text("")
+                                }
+                            })
+                        }
+                        
+                        Spacer()
                         
                         Text(contact.contactDisplayName as String)
                             .font(.largeTitle)
                             .foregroundColor(.primary)
                         
-                        Spacer().frame(width: 20)
+                        Spacer()
                         
-                        Button(action: {
-                            self.delegate.dismissWithoutAnimation()
-                            if let activeChats = self.appDelegate.activeChats {
-                                activeChats.presentChat(with:self.contact.obj)
-                            }
-                        }, label: {
-                            Image(systemName: "text.bubble")
-                                .resizable()
-                                .frame(width: 28.0, height: 28.0)
-                                .foregroundColor(.primary)
-                        })
+                        VStack {
+                            Spacer().frame(height: 8)
+                            Button(action: {
+                                self.delegate.dismissWithoutAnimation()
+                                if let activeChats = self.appDelegate.activeChats {
+                                    activeChats.presentChat(with:self.contact.obj)
+                                }
+                            }, label: {
+                                Image(systemName: "text.bubble")
+                                    .resizable()
+                                    .frame(width: 28.0, height: 28.0)
+                                    .foregroundColor(.primary)
+                            })
+                        }
+                        
+                        Spacer().frame(width:20)
                     }
                     
                     Spacer().frame(height: 16)
@@ -158,6 +203,10 @@ struct AVCallUI: View {
                                     .foregroundColor(.primary)
                                 case .connectivityError:
                                     Text("Call ended: connection failed")
+                                    .bold()
+                                    .foregroundColor(.primary)
+                                case .securityError:
+                                    Text("Call ended: couldn't establish encryption")
                                     .bold()
                                     .foregroundColor(.primary)
                                 case .unanswered:
@@ -365,6 +414,49 @@ struct AVCallUI: View {
                 Spacer().frame(height: 32)
             }
         }
+        .alert(isPresented: $showMicAlert) {
+            Alert(
+                title: Text("Missing permission"),
+                message: Text("You need to grant microphone access in iOS Settings-> Privacy-> Microphone, if you want that others can hear you."),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+        .richAlert(isPresented:$showSecurityHelpAlert, title:Text("Call security help").foregroundColor(.black)) {
+            VStack(alignment: .leading) {
+                HStack {
+                    Image(systemName: "xmark.shield.fill")
+                        .resizable()
+                        .frame(width: 20.0, height: 20.0)
+                        .foregroundColor(.red)
+                    Spacer().frame(width: 10)
+                    Text("Red x-mark shield:")
+                }.font(Font.body.weight(showSecurityHelpAlert == .clear ? .heavy : .medium))
+                Text("This means your call is encrypted, but the remote party could not be verified using OMEMO encryption.\nYour or the callee's XMPP server could possibly Man-In-The-Middle you.")
+                Spacer().frame(height: 20)
+                
+                HStack {
+                    Image(systemName: "checkmark.shield.fill")
+                        .resizable()
+                        .frame(width: 20.0, height: 20.0)
+                        .foregroundColor(.yellow)
+                    Spacer().frame(width: 10)
+                    Text("Yellow checkmark shield:")
+                }.font(Font.body.weight(showSecurityHelpAlert == .toFU ? .heavy : .medium))
+                Text("This means your call is encrypted and the remote party was verified using OMEMO encryption.\nBut since you did not manually verify the callee's OMEMO fingerprints, your or the callee's XMPP server could possibly have inserted their own OMEMO keys to Man-In-The-Middle you.")
+                Spacer().frame(height: 20)
+                
+                HStack {
+                    Image(systemName: "checkmark.shield.fill")
+                        .resizable()
+                        .frame(width: 20.0, height: 20.0)
+                        .foregroundColor(.green)
+                    Spacer().frame(width: 10)
+                    Text("Green checkmark shield:")
+                }.font(Font.body.weight(showSecurityHelpAlert == .trusted ? .heavy : .medium))
+                Text("This means your call is encrypted and the remote party was verified using OMEMO encryption.\nYou manually verified the used OMEMO keys and no Man-In-The-Middle can take place.")
+                Spacer().frame(height: 20)
+            }.foregroundColor(.black)
+        }
         .onAppear {
             //force portrait mode and lock ui there
             UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
@@ -372,6 +464,13 @@ struct AVCallUI: View {
             self.ringingPlayer.numberOfLoops = -1
             self.busyPlayer.numberOfLoops = -1
             self.errorPlayer.numberOfLoops = -1
+            
+            //ask for mic permissions
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                if !granted {
+                    showMicAlert = true
+                }
+            }
         }
         .onDisappear {
             //allow all orientations again
@@ -405,6 +504,11 @@ struct AVCallUI: View {
 //                         case .normal:
                         case .connectivityError:
                             DDLogDebug("state: finished: connectivityError")
+                            ringingPlayer.stop()
+                            busyPlayer.stop()
+                            errorPlayer.play()
+                        case .securityError:
+                            DDLogDebug("state: finished: securityError")
                             ringingPlayer.stop()
                             busyPlayer.stop()
                             errorPlayer.play()

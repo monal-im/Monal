@@ -38,9 +38,11 @@ impl JingleSsrc {
                 id: self.id,
                 attribute: Some(match entry {
                     GenericParameterEnum::Parameter(p) => p.name().to_string(),
+                    GenericParameterEnum::Invalid => continue,
                 }),
                 value: match entry {
                     GenericParameterEnum::Parameter(p) => p,
+                    GenericParameterEnum::Invalid => continue,
                 }
                 .value()
                 .map(|value| value.to_string()),

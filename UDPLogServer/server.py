@@ -7,6 +7,7 @@ import json
 import zlib
 import hashlib
 import struct
+import pathlib
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -65,6 +66,30 @@ def decrypt(ciphertext, key):
         raise Exception("Cipher text is damaged: {}".format(e))
     return plaintext
 
+def formatLogline(entry):
+    LOGLEVELS = {v: k for k, v in {
+        "ERROR": 1,
+        "WARNING": 2,
+        "INFO": 4,
+        "DEBUG": 8,
+        "VERBOSE": 16,
+        "STDERR": 32,
+        "STDOUT": 64,
+        "STATUS": 256,
+    }.items()}
+    file = pathlib.PurePath(entry["file"])
+    return "%s [%s] %s [%s (QOS:%s)] %s at %s:%lu: %s" % (
+        entry["timestamp"],
+        LOGLEVELS[entry["flag"]].rjust(6),
+        entry["tag"]["processName"],
+        "%s:%s" % (entry["threadID"], entry["tag"]["queueThreadLabel"]) if entry["threadID"] != entry["tag"]["queueThreadLabel"] else entry["threadID"],
+        entry["tag"]["qosName"],
+        entry["function"],
+        "%s/%s" % (file.parent.name, file.name),
+        entry["line"],
+        entry["message"],
+    )
+
 # parse commandline
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description="Monal UDP-Logserver.", epilog="WARNING: WE DO NOT ENHANCE ENTROPY!! PLEASE MAKE SURE TO USE A ENCRYPTION KEY WITH PROPER ENTROPY!!")
 parser.add_argument("-k", "--key", type=str, required=True, metavar='KEY', help="AES-Key to use for decription of incoming data")
@@ -119,14 +144,14 @@ while True:
     receiveCounter += 1
     decoded["_receiveCounter"] = receiveCounter
     
-    # check if _counter jumped over some lines
+    # check if counter jumped over some lines
     logline = ""
-    if "_processID" in decoded and last_processID != None and decoded["_processID"] != last_processID:
-        logline += "PROCESS SWITCH FROM %s TO %s" % (last_processID, decoded["_processID"])
-    if "_counter" in decoded and last_counter != None and decoded["_counter"] != last_counter + 1:
+    if last_processID != None and decoded["tag"]["processID"] != last_processID:
+        logline += "PROCESS SWITCH FROM %s TO %s" % (last_processID, decoded["tag"]["processID"])
+    if last_counter != None and decoded["tag"]["counter"] != last_counter + 1:
         if len(logline) != 0:
             logline += ": "
-        logline += "counter jumped from %d to %d leaving out %d lines" % (last_counter, decoded["_counter"], decoded["_counter"] - last_counter - 1)
+        logline += "counter jumped from %d to %d leaving out %d lines" % (last_counter, decoded["tag"]["counter"], decoded["tag"]["counter"] - last_counter - 1)
     if len(logline) != 0:
         if logfd:
             print(logline, file=logfd)
@@ -136,13 +161,11 @@ while True:
     kwargs = flag_to_kwargs(decoded["flag"] if "flag" in decoded else None)
     
     # print original formatted log message
-    logline = ("%d: %s" % (decoded["_counter"], str(decoded["formattedMessage"]).rstrip()))
+    logline = ("%d: %s" % (decoded["tag"]["counter"], formatLogline(decoded)))
     if logfd:
         print(logline, file=logfd)
     print(colorize(logline, **kwargs), flush=True)
     
     # update state
-    if "_processID" in decoded:
-        last_processID = decoded["_processID"]
-    if "_counter" in decoded:
-        last_counter = decoded["_counter"]
+    last_processID = decoded["tag"]["processID"]
+    last_counter = decoded["tag"]["counter"]

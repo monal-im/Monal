@@ -115,7 +115,7 @@ extern BOOL doesAppRunInBackground(void);
     
     //encode log message
     NSError* error;
-    NSData* rawData = [HelperTools convertLogmessageToJsonData:logMessage usingFormatter:_logFormatter counter:&counter andError:&error];
+    NSData* rawData = [HelperTools convertLogmessageToJsonData:logMessage counter:&counter andError:&error];
     if(error != nil || rawData == nil)
     {
         NSLog(@"Error jsonifying log message: %@, logMessage: %@", error, logMessage);

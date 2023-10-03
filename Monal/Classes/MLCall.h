@@ -44,12 +44,20 @@ typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
     MLCallFinishReasonUnknown,              //dummy default value
     MLCallFinishReasonNormal,               //used for a call answered and finished locally (call direction etc. don't matter here)
     MLCallFinishReasonConnectivityError,    //used for a call accepted but not connected (call direction etc. don't matter here)
+    MLCallFinishReasonSecurityError,        //used for a call that could not be encrypted using OMEMO
     MLCallFinishReasonUnanswered,           //used for a call retracted remotely (always remote party)
     MLCallFinishReasonAnsweredElsewhere,    //used for a call answered and finished remotely (own account OR remote party)
     MLCallFinishReasonRetracted,            //used for a call retracted locally (always own acount)
     MLCallFinishReasonRejected,             //used for a call rejected remotely (own account OR remote party)
     MLCallFinishReasonDeclined,             //used for a call rejected locally (always own account)
     MLCallFinishReasonError,                //used for a call error
+};
+
+typedef NS_ENUM(NSUInteger, MLCallEncryptionState) {
+    MLCallEncryptionStateUnknown,
+    MLCallEncryptionStateClear,
+    MLCallEncryptionStateToFU,
+    MLCallEncryptionStateTrusted,
 };
 
 @interface MLCall : NSObject
@@ -60,6 +68,7 @@ typedef NS_ENUM(NSUInteger, MLCallFinishReason) {
 @property (nonatomic, strong, readonly) MLContact* contact;
 @property (nonatomic, readonly) MLCallType callType;
 @property (nonatomic, readonly) MLCallDirection direction;
+@property (nonatomic, readonly) MLCallEncryptionState encryptionState;
 @property (nonatomic, readonly) MLCallState state;
 @property (nonatomic, readonly) MLCallFinishReason finishReason;
 @property (nonatomic, readonly) uint32_t durationTime;

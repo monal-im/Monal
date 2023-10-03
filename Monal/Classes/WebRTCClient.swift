@@ -45,6 +45,10 @@ final class WebRTCClient: NSObject {
         unreachable("WebRTCClient:init is unavailable")
     }
     
+    deinit {
+        DDLogDebug("Deinit of webrtc client for delegate: \(String(describing:self.delegate))")
+    }
+    
     @objc
     static func createPeerConnection(iceServers: [RTCIceServer], forceRelay: Bool) -> RTCPeerConnection? {
         let config = RTCConfiguration()
@@ -86,6 +90,8 @@ final class WebRTCClient: NSObject {
     
     @objc
     required init(iceServers: [RTCIceServer], audioOnly: Bool, forceRelay: Bool) {
+        RTCSetMinDebugLogLevel(.info)
+        
         var peerConnection = WebRTCClient.createPeerConnection(iceServers: iceServers, forceRelay: forceRelay)
         if peerConnection == nil {
             // try again with empty ice server list

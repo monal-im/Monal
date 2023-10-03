@@ -14,15 +14,37 @@
 
     <homepage rdf:resource="https://monal-im.org" />
     <bug-database rdf:resource="https://github.com/monal-im/Monal/issues" />
-    <license rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/develop/LICENSE" />
+    <download-page rdf:resource="https://monal-im.org/install/"/>
+    <!-- See https://github.com/ewilderj/doap/issues/53 -->
+    <developer-forum rdf:resource="xmpp:monal@chat.yax.im?join"/>
+    <support-forum rdf:resource="xmpp:monal@chat.yax.im?join"/>
     <schema:documentation rdf:resource="https://github.com/monal-im/Monal/wiki"/>
-    <category rdf:resource="https://linkmauve.fr/ns/xmpp-doap#category-client"/>
+    <license rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/stable/LICENSE"/>
     <category rdf:resource="http://api.gnome.org/doap-extensions#apps"/>
-    <schema:logo rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/develop/Art/monal.svg"/>
+    <category rdf:resource="https://linkmauve.fr/ns/xmpp-doap#category-client"/>
+    <category rdf:resource="https://linkmauve.fr/ns/xmpp-doap#category-xmpp"/>
+    <category rdf:resource="https://linkmauve.fr/ns/xmpp-doap#category-jabber"/>
+    <schema:logo rdf:resource="https://raw.githubusercontent.com/monal-im/Monal/stable/Art/logo.png"/>
+    <schema:screenshot rdf:resource='https://raw.githubusercontent.com/monal-im/Monal/stable/Art/screenshots/01_groupchats.png'/>
+    <schema:screenshot rdf:resource='https://raw.githubusercontent.com/monal-im/Monal/stable/Art/screenshots/02_chats.png'/>
+    <schema:screenshot rdf:resource='https://raw.githubusercontent.com/monal-im/Monal/stable/Art/screenshots/04_contacts.png'/>
+    <schema:screenshot rdf:resource='https://raw.githubusercontent.com/monal-im/Monal/stable/Art/screenshots/ipad_01_groupchats.png'/>
     
     <programming-language>Objective C</programming-language>
     <os>iOS</os>
     <os>MacOS</os>
+
+    <maintainer>
+      <foaf:Person>
+          <foaf:name>Thilo Molitor</foaf:name>
+      </foaf:Person>
+    </maintainer>
+    
+    <maintainer>
+      <foaf:Person>
+          <foaf:name>Friedrich Altheide</foaf:name>
+      </foaf:Person>
+    </maintainer>
 
     <repository>
       <GitRepository>

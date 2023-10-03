@@ -140,13 +140,13 @@ struct AVCallUI: View {
                             })
                         }
                         
-                        Spacer().frame(minWidth:20)
+                        Spacer()
                         
                         Text(contact.contactDisplayName as String)
                             .font(.largeTitle)
                             .foregroundColor(.primary)
                         
-                        Spacer().frame(minWidth:20)
+                        Spacer()
                         
                         VStack {
                             Spacer().frame(height: 8)

@@ -74,6 +74,8 @@ pub enum ContentCreator {
 pub enum JingleDes {
     Description(JingleRtpSessions),
     Transport(JingleTransport),
+    #[serde(other)]
+    Invalid,
 }
 
 // *** xep-0167
@@ -416,6 +418,8 @@ pub enum JingleRtpSessionsPayloadTypeValue {
     Parameter(JingleRtpSessionsPayloadTypeParam),
     RtcpFbTrrInt(RtcpFbTrrInt),
     RtcpFb(RtcpFb),
+    #[serde(other)]
+    Invalid,
 }
 
 // *** xep-0167
@@ -782,6 +786,7 @@ impl JingleRtpSessions {
                             JingleDes::Description(rtp_session) => {
                                 media_type = Some(rtp_session.media().to_sdp());
                             }
+                            JingleDes::Invalid => continue,
                         }
                     }
                     let direction = match jingle_content.senders {
@@ -904,6 +909,7 @@ impl JingleRtpSessions {
                                                     JingleRtpSessionsPayloadTypeValue::RtcpFbTrrInt(trr_int) => {
                                                         media.add_attribute(SdpAttribute::Rtcpfb(trr_int.to_sdp(SdpAttributePayloadType::PayloadType(payload_type.id()))))?;
                                                     },
+                                                    JingleRtpSessionsPayloadTypeValue::Invalid => continue,
                                                 }
                                             }
 
@@ -956,15 +962,18 @@ impl JingleRtpSessions {
                                             .add_attribute(SdpAttribute::Extmap(
                                                 hdrext.to_sdp(initiator),
                                             )),
+                                        JingleRtpSessionsValue::Invalid => Ok(()),
                                     } {
                                         eprintln!("Could not add attribute to sdp: {}", e);
                                         return Err(e);
                                     }
                                 }
                             }
+                            JingleDes::Invalid => continue,
                         }
                     }
                 }
+                RootEnum::Invalid => {}
             }
         }
         Ok(sdp)

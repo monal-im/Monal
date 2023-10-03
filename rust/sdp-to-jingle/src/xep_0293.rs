@@ -49,8 +49,9 @@ impl RtcpFb {
                     .parameter
                     .clone()
                     .into_iter()
-                    .map(|p| match p {
-                        GenericParameterEnum::Parameter(p) => p,
+                    .filter_map(|p| match p {
+                        GenericParameterEnum::Parameter(p) => Some(p),
+                        GenericParameterEnum::Invalid => None,
                     })
                     .collect::<Vec<GenericParameter>>(),
             ),

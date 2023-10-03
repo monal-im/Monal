@@ -245,7 +245,7 @@ enum msgSentState {
         //this does not matter if we aren't already in the main thread, hence the async dispatch
         [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
             //these contact types can not be called
-            if(self.contact.isGroup || self.contact.isSelfChat || !self.contact.isSubscribedBoth)
+            if(self.contact.isGroup || self.contact.isSelfChat)
             {
                 self.callButton = nil;
                 

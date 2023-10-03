@@ -67,6 +67,8 @@ impl JingleTransport {
 pub enum JingleTransportItems {
     Fingerprint(JingleTranportFingerprint),
     Candidate(JingleTransportCandidate),
+    #[serde(other)]
+    Invalid,
 }
 
 // *** xep-0176

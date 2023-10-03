@@ -872,6 +872,7 @@ impl JingleRtpSessions {
                                                 candidate.to_sdp(transport.get_ufrag())?,
                                             ))?;
                                         }
+                                        JingleTransportItems::Invalid => {}
                                     }
                                 }
                             }

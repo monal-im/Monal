@@ -53,6 +53,28 @@ impl JingleTransport {
             .push(JingleTransportItems::Fingerprint(fingerprint));
     }
 
+    // see https://codeberg.org/iNPUTmice/Conversations/commit/fd4b8ba1885a9f6e24a87e47c3a6a730f9ed15f8
+    pub fn add_ice_option(&mut self, option: &String) {
+        match option.as_str() {
+            "trickle" => {
+                self.items
+                    .push(JingleTransportItems::Trickle(JingleICEOptionTrickle {
+                        xmlns: gultsch_ice_options_ns(),
+                    }));
+            }
+            "renomination" => {
+                self.items.push(JingleTransportItems::Renomination(
+                    JingleICEOptionRenomination {
+                        xmlns: gultsch_ice_options_ns(),
+                    },
+                ));
+            }
+            &_ => {
+                eprintln!("*** Encountered unknown ice option: {}", option);
+            }
+        }
+    }
+
     pub fn add_candidate(&mut self, candidate: JingleTransportCandidate) {
         self.items.push(JingleTransportItems::Candidate(candidate));
     }
@@ -67,8 +89,32 @@ impl JingleTransport {
 pub enum JingleTransportItems {
     Fingerprint(JingleTranportFingerprint),
     Candidate(JingleTransportCandidate),
+    Trickle(JingleICEOptionTrickle),
+    Renomination(JingleICEOptionRenomination),
     #[serde(other)]
     Invalid,
+}
+
+//the next two structs are only needed because quick-xml does not support xml namespaces
+
+fn gultsch_ice_options_ns() -> String {
+    "http://gultsch.de/xmpp/drafts/jingle/transports/ice-udp/option".to_string()
+}
+
+// *** xep-gultsch (see https://codeberg.org/iNPUTmice/Conversations/commit/fd4b8ba1885a9f6e24a87e47c3a6a730f9ed15f8)
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "kebab-case")]
+pub struct JingleICEOptionTrickle {
+    #[serde(rename = "@xmlns", default = "gultsch_ice_options_ns")]
+    xmlns: String,
+}
+
+// *** xep-gultsch (see https://codeberg.org/iNPUTmice/Conversations/commit/fd4b8ba1885a9f6e24a87e47c3a6a730f9ed15f8)
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "kebab-case")]
+pub struct JingleICEOptionRenomination {
+    #[serde(rename = "@xmlns", default = "gultsch_ice_options_ns")]
+    xmlns: String,
 }
 
 // *** xep-0176

@@ -1002,7 +1002,7 @@ $$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, accoun
         if([HelperTools isAppExtension] && imageData.length > 128 * 1024)
         {
             DDLogWarn(@"Not processing avatar image data of muc '%@' because it is too big to be handled in appex (%lu bytes), rescheduling it to be fetched in mainapp", iqNode.fromUser, (unsigned long)imageData.length);
-            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(iqNode.fromUser))];
+            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid, iqNode.fromUser))];
             return;
         }
         
@@ -1025,7 +1025,7 @@ $$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, accoun
         else
         {
             DDLogWarn(@"Not loading avatar image of muc '%@' because it is too big to be processed in appex (%lux%lu pixels), rescheduling it to be fetched in mainapp", iqNode.fromUser, (unsigned long)image.size.width, (unsigned long)image.size.height);
-            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(iqNode.fromUser))];
+            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid, iqNode.fromUser))];
         }
     }
 $$

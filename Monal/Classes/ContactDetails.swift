@@ -132,7 +132,7 @@ struct ContactDetails: View {
 #if !DISABLE_OMEMO
                 if(!contact.isGroup) {
                     NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
-                        Text(contact.isSelfChat ? "Own Encryption Keys" : "Encryption Keys")
+                        contact.isSelfChat ? Text("Own Encryption Keys") : Text("Encryption Keys")
                     }
                 } else if(contact.mucType == "group") {
                     NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {

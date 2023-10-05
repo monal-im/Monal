@@ -226,10 +226,12 @@ static NSMutableDictionary* _pendingCalls;
     if(existingCall == nil || existingCall.state == MLCallStateFinished)
         return [self processIncomingCall:notification.userInfo withCompletion:nil];
     
-    DDLogDebug(@"Found existing call, trying to break the tie: %@", existingCall);
     MLCall* newCall = [self createCallWithJmiPropose:messageNode onAccountNo:accountNo];
+    if(newCall == nil)
+        return;
     
     //handle tie breaking: both parties call each other "simultaneously"
+    DDLogDebug(@"Found existing call, trying to break the tie: %@", existingCall);
     if(existingCall.state < MLCallStateConnecting)          //e.g. MLCallStateDiscovering or MLCallStateRinging
     {
         //determine call sort order
@@ -275,8 +277,15 @@ static NSMutableDictionary* _pendingCalls;
     //TODO: handle jmi propose coming from other devices on our account (see TODO in MLMessageProcessor.m)
     XMPPMessage* messageNode =  userInfo[@"messageNode"];
     NSNumber* accountNo = userInfo[@"accountNo"];
-    MLCall* call = [self createCallWithJmiPropose:messageNode onAccountNo:accountNo];
     
+    MLCall* call = [self createCallWithJmiPropose:messageNode onAccountNo:accountNo];
+    if(call == nil)
+    {
+        //call pushkit completion if given
+        if(completion != nil)
+            completion();
+        return;
+    }
     DDLogInfo(@"Now processing new incoming call: %@", call);
     
     //add call to pending calls list
@@ -745,12 +754,20 @@ static NSMutableDictionary* _pendingCalls;
     return update;
 }
 
--(MLCall*) createCallWithJmiPropose:(XMPPMessage*) messageNode onAccountNo:(NSNumber*) accountNo
+-(MLCall* _Nullable) createCallWithJmiPropose:(XMPPMessage*) messageNode onAccountNo:(NSNumber*) accountNo
 {
     //if the jmi id is a uuid, just use it, otherwise infer a uuid from the given jmi id
     NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id|uuidcast"];
     NSString* jmiid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id"];
     MLAssert(uuid != nil, @"call uuid invalid!", (@{@"propose@id": nilWrapper(jmiid)}));
+    
+    //check if we are in a loop (both accounts participating in this call on the same monal instance)
+    //--> ignore this incoming call if that is true
+    if([self getCallForJmiid:jmiid] != nil)
+    {
+        DDLogWarn(@"Call loop detected, ignoring incoming call...");
+        return nil;
+    }
     
     MLCallType callType = MLCallTypeAudio;
     if([messageNode check:@"{urn:xmpp:jingle-message:0}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=video>"])

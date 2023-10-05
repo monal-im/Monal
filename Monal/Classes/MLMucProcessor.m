@@ -137,6 +137,7 @@
     if(_account == ((xmpp*)notification.object))
     {
         //fake incoming bookmarks push by pulling all bookmarks2 items (but only if we want to use bookmarks2 instead of old-style boommarks)
+        //don't use [self updateBookmarks] to not update anything (e.g. readd a bookmark removed by another client)
         if(!_hasFetchedBookmarks && _account.connectionProperties.supportsBookmarksCompat)
             [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler, $ID(type, @"publish"))];
     }

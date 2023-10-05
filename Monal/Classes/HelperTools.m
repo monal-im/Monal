@@ -1511,7 +1511,6 @@ static id preprocess(id exception)
     self.fileLogger.doNotReuseLogFiles = NO;
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
     self.fileLogger.maximumFileSize = 128 * 1024 * 1024;
-    self.fileLogger.archiveAllowed = YES;               //everything is configured now, engage logfile archiving
     [DDLog addLogger:self.fileLogger];
     
     DDLogDebug(@"Sorted logfiles: %@", [logFileManager sortedLogFileInfos]);

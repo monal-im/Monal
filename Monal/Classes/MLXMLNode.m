@@ -256,7 +256,7 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(MLXMLNode*) addChildNode:(MLXMLNode*) child
 {
-    if(!child)
+    if(nilExtractor(child) == nil)
         return nil;
     return [self addChildNodeWithoutCopy:[child copy]];
 }

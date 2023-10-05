@@ -724,6 +724,7 @@
 -(void) establishIncomingConnection
 {
     DDLogInfo(@"Now connecting incoming VoIP call: %@", self);
+    [self.webRTCClient configureAudioSession];
     [self createConnectingTimeoutTimer];
     //the remote (e.g. "initiator") will send a jingle "session-initiate" as soon as it receives our jmi proceed
     [self sendJmiProceed];
@@ -732,6 +733,7 @@
 -(void) establishOutgoingConnection
 {
     DDLogInfo(@"Now connecting outgoing VoIP call: %@", self);
+    [self.webRTCClient configureAudioSession];
     [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid startedConnectingAtDate:nil];
     [self createConnectingTimeoutTimer];
     [self offerSDP];

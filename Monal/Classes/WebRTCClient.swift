@@ -107,7 +107,6 @@ final class WebRTCClient: NSObject {
         super.init()
         
         self.createMediaSenders(audioOnly: audioOnly)
-        self.configureAudioSession()
         self.peerConnection.delegate = self
         
         if audioOnly {
@@ -206,7 +205,9 @@ final class WebRTCClient: NSObject {
         self.remoteVideoTrack = self.peerConnection.transceivers.first { $0.mediaType == .video }?.receiver.track as? RTCVideoTrack
     }
     
-    private func configureAudioSession() {
+    @objc
+    func configureAudioSession() {
+        DDLogInfo("Configuring shared rtcAudioSession...")
         self.rtcAudioSession.lockForConfiguration()
         do {
             try self.rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord)

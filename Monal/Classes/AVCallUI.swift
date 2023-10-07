@@ -475,6 +475,9 @@ struct AVCallUI: View {
         .onDisappear {
             //allow all orientations again
             self.appDelegate.orientationLock = .all
+            ringingPlayer.stop()
+            busyPlayer.stop()
+            errorPlayer.stop()
         }
         .onChange(of: MLCallState(rawValue:call.state)) { state in
             DDLogVerbose("state changed: \(String(describing:call.state as NSNumber))")

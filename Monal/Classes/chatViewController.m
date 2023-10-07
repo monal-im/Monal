@@ -502,7 +502,7 @@ enum msgSentState {
 #if TARGET_OS_MACCATALYST
         style = UIAlertControllerStyleAlert;
 #endif
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact may to not support Monal-Style calls. Your call might never reach its destination.", @"") preferredStyle:style];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact may not support calls. Your call might never reach its destination.", @"") preferredStyle:style];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Try nevertheless", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
             

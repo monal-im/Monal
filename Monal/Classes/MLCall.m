@@ -62,8 +62,9 @@
 @property (nonatomic, strong) MLXMLNode* localSDP;
 @property (nonatomic, strong) MLXMLNode* remoteSDP;
 @property (nonatomic, strong) NSNumber* remoteOmemoDeviceId;
-@property (nonatomic, strong) NSMutableArray<XMPPIQ*>* candidateQueue;
-@property (nonatomic, assign) BOOL isEncrypted;
+@property (nonatomic, strong) NSObject* candidateQueueLock;
+@property (nonatomic, strong) NSMutableArray<XMPPIQ*>* incomingCandidateQueue;
+@property (nonatomic, strong) NSMutableArray<XMPPIQ*>* outgoingCandidateQueue;
 
 
 @property (nonatomic, readonly) xmpp* account;
@@ -110,7 +111,9 @@
     self.localSDP = nil;
     self.remoteSDP = nil;
     self.remoteOmemoDeviceId = nil;
-    self.candidateQueue = [NSMutableArray new];
+    self.candidateQueueLock = [NSObject new];
+    self.incomingCandidateQueue = [NSMutableArray new];
+    self.outgoingCandidateQueue = [NSMutableArray new];
     
     [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
@@ -466,7 +469,8 @@
         self.callDurationTimer = nil;
         self.localSDP = otherCall.localSDP;     //should be nil
         self.remoteSDP = otherCall.remoteSDP;   //should be nil
-        self.candidateQueue = otherCall.candidateQueue;             //should be empty
+        self.incomingCandidateQueue = otherCall.incomingCandidateQueue;             //should be empty
+        self.outgoingCandidateQueue = otherCall.outgoingCandidateQueue;             //should be empty
         self.remoteOmemoDeviceId = otherCall.remoteOmemoDeviceId;   //depends on jmiProceed and should be empty
         self.encryptionState = MLCallEncryptionStateUnknown;        //depends on callstate >= connecting
         otherCall = nil;
@@ -797,13 +801,7 @@
             @"action": @"session-initiate",
             @"sid": self.jmiid,
         } andChildren:children andData:nil]];
-        /* TODO: implement raw sdp alongside jingle and write xep
-        [[MLXMLNode alloc] initWithElement:@"sdp" andNamespace:@"urn:tmp:monal:webrtc:sdp:0" withAttributes:@{
-            @"id": self.jmiid,
-            @"type": [RTCSessionDescription stringForType:sdp.type]
-        } andChildren:@[] andData:[HelperTools encodeBase64WithString:sdp.sdp]]
-        */
-        @synchronized(self.candidateQueue) {
+        @synchronized(self.candidateQueueLock) {
             self.localSDP = sdpIQ;
         }
         [self.account sendIq:sdpIQ withResponseHandler:^(XMPPIQ* result) {
@@ -1037,8 +1035,6 @@
         }
         DDLogDebug(@"%@: Discovered local ICE candidate destined for '%@': %@", [self short], self.fullRemoteJid, candidate);
         
-        //TODO: implement raw sdp mode (candidate.sdpMLineIndex, candidate.sdpMid, candidate.sdp)
-        
         //set ufrag to nil, it will be automatically filled via candidate.sdp
         //extract the pwd from our outgoing offer using the sdpMid to identify the correct <content/> element
         NSString* localPwd = [self.localSDP findFirst:@"{urn:xmpp:jingle:1}jingle/content<name=%@>/{urn:xmpp:jingle:transports:ice-udp:1}transport@pwd", candidate.sdpMid];
@@ -1049,15 +1045,24 @@
             return;
         }
         //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCIceCandidate.h
-        XMPPIQ* candidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
-        [candidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+        XMPPIQ* candidateIq = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
+        [candidateIq addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
             @"action": @"transport-info",
             @"sid": self.jmiid,
         } andChildren:@[contentNode] andData:nil]];
-        [self.account sendIq:candidateIQ withResponseHandler:^(XMPPIQ* result) {
-            DDLogDebug(@"%@: Received ICE candidate result: %@", [self short], result);
+        @synchronized(self.candidateQueueLock) {
+            //queue candidate if sdp offer or answer have not been processed yet
+            if(self.remoteSDP == nil || self.localSDP == nil)
+            {
+                DDLogDebug(@"Adding outgoing ICE candidate iq to candidate queue: %@", candidateIq);
+                [self.outgoingCandidateQueue addObject:candidateIq];
+                return;
+            }
+        }
+        [self.account sendIq:candidateIq withResponseHandler:^(XMPPIQ* result) {
+            DDLogDebug(@"%@: Received outgoing ICE candidate result: %@", [self short], result);
         } andErrorHandler:^(XMPPIQ* error) {
-            DDLogError(@"%@: Got error for ICE candidate: %@", [self short], error);
+            DDLogError(@"%@: Got error for outgoing ICE candidate: %@", [self short], error);
         }];
     }
 }
@@ -1173,12 +1178,12 @@
         return;
     }
     
-    @synchronized(self.candidateQueue) {
+    @synchronized(self.candidateQueueLock) {
         //queue candidate if sdp offer or answer have not been processed yet
         if(self.remoteSDP == nil || self.localSDP == nil)
         {
             DDLogDebug(@"Adding incoming ICE candidate iq to candidate queue: %@", iqNode);
-            [self.candidateQueue addObject:iqNode];
+            [self.incomingCandidateQueue addObject:iqNode];
             return;
         }
     }
@@ -1188,44 +1193,34 @@
 -(void) processRemoteICECandidate:(XMPPIQ*) iqNode
 {
     RTCIceCandidate* incomingCandidate = nil;
-    /*
-    if([iqNode check:@"{urn:xmpp:jingle:1}jingle/{urn:tmp:monal:webrtc:candidate:0}candidate"])
+    NSString* rawSdp = [HelperTools xml2candidate:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:self.direction==MLCallDirectionIncoming];
+    if(rawSdp == nil)
     {
-        NSString* rawSDP = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/{urn:tmp:monal:webrtc:candidate:0}candidate#|base64"] encoding:NSUTF8StringEncoding];
-        NSNumber* sdpMLineIndex = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/{urn:tmp:monal:webrtc:candidate:0}candidate@sdpMLineIndex|int"];
-        NSString* sdpMid = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/{urn:tmp:monal:webrtc:candidate:0}candidate@sdpMid|base64"] encoding:NSUTF8StringEncoding];
-        incomingCandidate = [[RTCIceCandidate alloc] initWithSdp:rawSDP sdpMLineIndex:[sdpMLineIndex intValue] sdpMid:sdpMid];
-    }
-    else*/
-    {
-        NSString* rawSdp = [HelperTools xml2candidate:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:self.direction==MLCallDirectionIncoming];
-        if(rawSdp == nil)
-        {
-            DDLogError(@"Failed to convert jingle candidate to raw sdp!");
-            XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-            [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"bad-request" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-            ] andData:nil]];
-            [self.account send:errorIq];
-            
-            //don't be too harsh and not end the call here
-            //[self handleEndCallActionWithReason:MLCallFinishReasonError];
-            return;
-        }
+        DDLogError(@"Failed to convert jingle candidate to raw sdp!");
+        XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+        [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"bad-request" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+        ] andData:nil]];
+        [self.account send:errorIq];
         
-        //calculate correct mLineIndex by searching for the corresponding mid (e.g. content@name) in the list of contents advertised in our offer
-        NSString* sdpMid = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/content@name"];
-        NSArray<MLXMLNode*>* offeredMedia = [self.remoteSDP find:@"{urn:xmpp:jingle:1}jingle/content"];
-        NSUInteger mLineIndex = 0;
-        for(; mLineIndex < [offeredMedia count]; mLineIndex++)
-            if([sdpMid isEqualToString:offeredMedia[mLineIndex].attributes[@"name"]])
-            {
-                incomingCandidate = [[RTCIceCandidate alloc] initWithSdp:rawSdp sdpMLineIndex:(int)mLineIndex sdpMid:sdpMid];
-                break;
-            }
-        if(mLineIndex == [offeredMedia count])
-            DDLogError(@"Could not find content element with mid='%@' in remoteSDP!", sdpMid);
+        //don't be too harsh and not end the call here
+        //[self handleEndCallActionWithReason:MLCallFinishReasonError];
+        return;
     }
+    
+    //calculate correct mLineIndex by searching for the corresponding mid (e.g. content@name) in the list of contents advertised in our offer
+    NSString* sdpMid = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/content@name"];
+    NSArray<MLXMLNode*>* offeredMedia = [self.remoteSDP find:@"{urn:xmpp:jingle:1}jingle/content"];
+    NSUInteger mLineIndex = 0;
+    for(; mLineIndex < [offeredMedia count]; mLineIndex++)
+        if([sdpMid isEqualToString:offeredMedia[mLineIndex].attributes[@"name"]])
+        {
+            incomingCandidate = [[RTCIceCandidate alloc] initWithSdp:rawSdp sdpMLineIndex:(int)mLineIndex sdpMid:sdpMid];
+            break;
+        }
+    if(mLineIndex == [offeredMedia count])
+        DDLogError(@"Could not find content element with mid='%@' in remoteSDP!", sdpMid);
+    
     if(incomingCandidate == nil)
     {
         DDLogError(@"incomingCandidate is unexpectedly nil, ignoring!");
@@ -1320,91 +1315,59 @@
     
     NSString* rawSDP;
     NSString* type;
-    /*//raw sdp alongside jingle mode
-    if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/{urn:tmp:monal:webrtc:sdp:0}sdp"])
+    if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action~^session-(initiate|accept)$>"])
     {
-        rawSDP = [[NSString alloc] initWithData:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/{urn:tmp:monal:webrtc:sdp:0}sdp#|base64"] encoding:NSUTF8StringEncoding];
-        type = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/{urn:tmp:monal:webrtc:sdp:0}sdp@type"];
-    }
-    else*/
-    {
-        if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action~^session-(initiate|accept)$>"])
-        {
-            if(
-                ([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"] && self.direction != MLCallDirectionOutgoing) ||
-                ([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"] && self.direction != MLCallDirectionIncoming)
-            ) {
-                DDLogWarn(@"Unexpected incoming jingle data direction, ignoring: %@", iqNode);
-                return;
-            }
-            
-            //don't change iqNode directly to not influence code outside of this method
-            iqNode = [iqNode copy];
-            //handle candidates in initial sdp (our webrtc lib does not like them --> fake transport-info iqs for these)
-            //(candidates in initial jingle are allowed by xep!)
-            @synchronized(self.candidateQueue) {
-                for(MLXMLNode* content in [iqNode find:@"{urn:xmpp:jingle:1}jingle/content"])
-                {
-                    MLXMLNode* transport = [content findFirst:@"{urn:xmpp:jingle:transports:ice-udp:1}transport"];
-                    for(MLXMLNode* candidate in [transport find:@"{urn:xmpp:jingle:transports:ice-udp:1}candidate"])
-                    {
-                        XMPPIQ* fakeCandidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType];
-                        fakeCandidateIQ.from = self.fullRemoteJid;
-                        fakeCandidateIQ.to = self.account.connectionProperties.identity.fullJid;
-                        MLXMLNode* shallowTransport = [transport shallowCopyWithData:YES];
-                        [shallowTransport addChildNode:[transport removeChildNode:candidate]];
-                        MLXMLNode* shallowContent = [content shallowCopyWithData:YES];
-                        [shallowContent addChildNode:shallowTransport];
-                        [fakeCandidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
-                            @"action": @"transport-info",
-                            @"sid": self.jmiid,
-                        } andChildren:@[shallowContent] andData:nil]];
-                        DDLogDebug(@"Adding fake candidate iq to candidate queue: %@", fakeCandidateIQ);
-                        [self.candidateQueue addObject:fakeCandidateIQ];
-                    }
-                }
-            }
-            //decrypt fingerprint, if needed (use iqNode copy created above to not influence code outside of this method)
-            //only decrypt if encryption is enabled for this contact
-            if(self.contact.isEncrypted)
+        if(
+            ([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"] && self.direction != MLCallDirectionOutgoing) ||
+            ([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"] && self.direction != MLCallDirectionIncoming)
+        ) {
+            DDLogWarn(@"Unexpected incoming jingle data direction, ignoring: %@", iqNode);
+            return;
+        }
+        
+        //don't change iqNode directly to not influence code outside of this method
+        iqNode = [iqNode copy];
+        //handle candidates in initial sdp (our webrtc lib does not like them --> fake transport-info iqs for these)
+        //(candidates in initial jingle are allowed by xep!)
+        @synchronized(self.candidateQueueLock) {
+            for(MLXMLNode* content in [iqNode find:@"{urn:xmpp:jingle:1}jingle/content"])
             {
-                //if this is a session-initiate and we can decrypt the fingerprint using the given deviceid, this call is encrypted now
-                //if we can NOT decrypt anything, but have a remote deviceid (e.g. the iq contains an omemo envelope), this is a security error
-                if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"])
+                MLXMLNode* transport = [content findFirst:@"{urn:xmpp:jingle:transports:ice-udp:1}transport"];
+                for(MLXMLNode* candidate in [transport find:@"{urn:xmpp:jingle:transports:ice-udp:1}candidate"])
                 {
-                    //save omemo deviceid if we got a session-initiate for this (incoming) call
-                    self.remoteOmemoDeviceId = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>/{urn:xmpp:jingle:1}content/{urn:xmpp:jingle:transports:ice-udp:1}transport/{http://gultsch.de/xmpp/drafts/omemo/dlts-srtp-verification}fingerprint/{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"];
-                    if(self.remoteOmemoDeviceId != nil)
-                    {
-                        if([self decryptFingerprintsInIqNode:iqNode])
-                            self.encryptionState = [self encryptionTypeForDeviceid:self.remoteOmemoDeviceId];
-                        else
-                        {
-                            DDLogError(@"Could not decrypt remote SDP session-initiate fingerprint with OMEMO!");
-                            XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
-                            [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
-                                [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-                                [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" andData:@"Could not decrypt call with OMEMO!"],
-                            ] andData:nil]];
-                            [self.account send:errorIq];
-                            
-                            [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
-                            return;
-                        }
-                    }
-                    else
-                        self.encryptionState = MLCallEncryptionStateClear;
+                    XMPPIQ* fakeCandidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType];
+                    fakeCandidateIQ.from = self.fullRemoteJid;
+                    fakeCandidateIQ.to = self.account.connectionProperties.identity.fullJid;
+                    MLXMLNode* shallowTransport = [transport shallowCopyWithData:YES];
+                    [shallowTransport addChildNode:[transport removeChildNode:candidate]];
+                    MLXMLNode* shallowContent = [content shallowCopyWithData:YES];
+                    [shallowContent addChildNode:shallowTransport];
+                    [fakeCandidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+                        @"action": @"transport-info",
+                        @"sid": self.jmiid,
+                    } andChildren:@[shallowContent] andData:nil]];
+                    DDLogDebug(@"Adding fake candidate iq to candidate queue: %@", fakeCandidateIQ);
+                    [self.incomingCandidateQueue addObject:fakeCandidateIQ];
                 }
-                
-                //if this is a session-accept after sending an encrypted session-initiate and we can NOT decrypt the fingerprint,
-                //this call is a security error (if we can decrypt it, everything is fine and the call is secured)
-                if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
+            }
+        }
+        //decrypt fingerprint, if needed (use iqNode copy created above to not influence code outside of this method)
+        //only decrypt if encryption is enabled for this contact
+        if(self.contact.isEncrypted)
+        {
+            //if this is a session-initiate and we can decrypt the fingerprint using the given deviceid, this call is encrypted now
+            //if we can NOT decrypt anything, but have a remote deviceid (e.g. the iq contains an omemo envelope), this is a security error
+            if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"])
+            {
+                //save omemo deviceid if we got a session-initiate for this (incoming) call
+                self.remoteOmemoDeviceId = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>/{urn:xmpp:jingle:1}content/{urn:xmpp:jingle:transports:ice-udp:1}transport/{http://gultsch.de/xmpp/drafts/omemo/dlts-srtp-verification}fingerprint/{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"];
+                if(self.remoteOmemoDeviceId != nil)
                 {
-                    //we don't need to check self.remoteOmemoDeviceId, because self.encryptionState will only be different to
-                    //MLCallEncryptionStateClear if the deviceid is not nil
-                    if(self.encryptionState != MLCallEncryptionStateClear && ![self decryptFingerprintsInIqNode:iqNode])
+                    if([self decryptFingerprintsInIqNode:iqNode])
+                        self.encryptionState = [self encryptionTypeForDeviceid:self.remoteOmemoDeviceId];
+                    else
                     {
-                        DDLogError(@"Could not decrypt remote SDP session-accept fingerprint with OMEMO!");
+                        DDLogError(@"Could not decrypt remote SDP session-initiate fingerprint with OMEMO!");
                         XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
                         [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
                             [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
@@ -1416,12 +1379,35 @@
                         return;
                     }
                 }
+                else
+                    self.encryptionState = MLCallEncryptionStateClear;
             }
-            else
-                self.encryptionState = MLCallEncryptionStateClear;
+            
+            //if this is a session-accept after sending an encrypted session-initiate and we can NOT decrypt the fingerprint,
+            //this call is a security error (if we can decrypt it, everything is fine and the call is secured)
+            if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
+            {
+                //we don't need to check self.remoteOmemoDeviceId, because self.encryptionState will only be different to
+                //MLCallEncryptionStateClear if the deviceid is not nil
+                if(self.encryptionState != MLCallEncryptionStateClear && ![self decryptFingerprintsInIqNode:iqNode])
+                {
+                    DDLogError(@"Could not decrypt remote SDP session-accept fingerprint with OMEMO!");
+                    XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+                    [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
+                        [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+                        [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" andData:@"Could not decrypt call with OMEMO!"],
+                    ] andData:nil]];
+                    [self.account send:errorIq];
+                    
+                    [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
+                    return;
+                }
+            }
         }
+        else
+            self.encryptionState = MLCallEncryptionStateClear;
         
-        //now handle the jingle offer/response or terminate nodes and convert jingle xml to sdp
+        //now handle the jingle offer/response nodes and convert jingle xml to sdp
         if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
         {
             type = @"answer";
@@ -1432,23 +1418,25 @@
             type = @"offer";
             rawSDP = [HelperTools xml2sdp:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:YES];
         }
-        else if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>"])
-        {
-            DDLogDebug(@"Got jingle session-terminate, faking incoming jmi:finish for Conversations compatibility...");
-            XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.account.connectionProperties.identity.jid];
-            [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
-                @"id": self.jmiid,
-            } andChildren:[iqNode find:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>/reason"] andData:nil]];
-            [jmiNode setStoreHint];
-            [self.voipProcessor handleIncomingJMIStanza:jmiNode onAccount:self.account];
-            return;
-        }
-        else
-        {
-            DDLogWarn(@"Unexpected incoming jingle type, ignoring: %@", iqNode);
-            return;
-        }
     }
+    //handle session-terminate: fake jmi finish message and handle it
+    else if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>"])
+    {
+        DDLogDebug(@"Got jingle session-terminate, faking incoming jmi:finish for Conversations compatibility...");
+        XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.account.connectionProperties.identity.jid];
+        [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
+            @"id": self.jmiid,
+        } andChildren:[iqNode find:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>/reason"] andData:nil]];
+        [jmiNode setStoreHint];
+        [self.voipProcessor handleIncomingJMIStanza:jmiNode onAccount:self.account];
+        return;
+    }
+    else
+    {
+        DDLogWarn(@"Unexpected incoming jingle type, ignoring: %@", iqNode);
+        return;
+    }
+    
     DDLogVerbose(@"rawSDP(%@)=%@", type, rawSDP);
     if(rawSDP == nil)
     {
@@ -1478,7 +1466,7 @@
         return;
     }
     DDLogInfo(@"%@: Got remote SDP for call: %@", self, resultSDP);
-    @synchronized(self.candidateQueue) {
+    @synchronized(self.candidateQueueLock) {
         self.remoteSDP = iqNode;
     }
     
@@ -1535,11 +1523,11 @@
                     } andChildren:children andData:nil]];
                     [self.account send:sdpIQ];
                     
-                    @synchronized(self.candidateQueue) {
+                    @synchronized(self.candidateQueueLock) {
                         self.localSDP = sdpIQ;
                         
-                        DDLogDebug(@"Now handling queued candidate iqs: %lu", (unsigned long)self.candidateQueue.count);
-                        for(XMPPIQ* candidateIq in self.candidateQueue)
+                        DDLogDebug(@"Now handling queued incoming candidate iqs: %lu", (unsigned long)self.incomingCandidateQueue.count);
+                        for(XMPPIQ* candidateIq in self.incomingCandidateQueue)
                             [self processRemoteICECandidate:candidateIq];
                     }
                 }];
@@ -1547,11 +1535,20 @@
             else
             {
                 [self.account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
-                @synchronized(self.candidateQueue) {
-                    DDLogDebug(@"Now handling queued candidate iqs: %lu", (unsigned long)self.candidateQueue.count);
-                    for(XMPPIQ* candidateIq in self.candidateQueue)
+                @synchronized(self.candidateQueueLock) {
+                    DDLogDebug(@"Now handling queued incoming candidate iqs: %lu", (unsigned long)self.incomingCandidateQueue.count);
+                    for(XMPPIQ* candidateIq in self.incomingCandidateQueue)
                         [self processRemoteICECandidate:candidateIq];
                 }
+            }
+            @synchronized(self.candidateQueueLock) {
+                DDLogDebug(@"Now sending queued outgoing candidate iqs: %lu", (unsigned long)self.outgoingCandidateQueue.count);
+                for(XMPPIQ* candidateIq in self.outgoingCandidateQueue)
+                    [self.account sendIq:candidateIq withResponseHandler:^(XMPPIQ* result) {
+                        DDLogDebug(@"%@: Received outgoing ICE candidate result: %@", [self short], result);
+                    } andErrorHandler:^(XMPPIQ* error) {
+                        DDLogError(@"%@: Got error for outgoing ICE candidate: %@", [self short], error);
+                    }];
             }
         }
     }];

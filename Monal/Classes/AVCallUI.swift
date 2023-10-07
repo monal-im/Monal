@@ -504,7 +504,6 @@ struct AVCallUI: View {
                             ringingPlayer.stop()
                             busyPlayer.stop()
                             errorPlayer.play()
-//                         case .normal:
                         case .connectivityError:
                             DDLogDebug("state: finished: connectivityError")
                             ringingPlayer.stop()
@@ -520,7 +519,6 @@ struct AVCallUI: View {
                             ringingPlayer.stop()
                             errorPlayer.stop()
                             busyPlayer.play()
-//                         case .answeredElsewhere:
                         case .retracted:
                             DDLogDebug("state: finished: retracted")
                             //this will only be displayed for timer-induced retractions,
@@ -543,6 +541,8 @@ struct AVCallUI: View {
                             ringingPlayer.stop()
                             busyPlayer.stop()
                             errorPlayer.play()
+//                         case .normal:
+//                         case .answeredElsewhere:
                         default:
                             DDLogDebug("state: finished: default")
                             ringingPlayer.stop()

@@ -105,15 +105,15 @@ struct AddContactMenu: View {
                 MLXMPPManager.sharedInstance().add(contact, withPreauthToken:preauthToken)
                 successAlert(title: Text("Permission Requested"), message: Text("The new contact will be added to your contacts list when the person you've added has approved your request."))
             } else if(type == "muc") {
-                showLoadingOverlay(overlay, headline: NSLocalizedString("Adding MUC...", comment: ""))
+                showLoadingOverlay(overlay, headline: NSLocalizedString("Adding Group/Channel...", comment: ""))
                 account.mucProcessor.addUIHandler({data in
                     let success : Bool = (data as! NSDictionary)["success"] as! Bool;
                     hideLoadingOverlay(overlay)
                     if(success) {
                         self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
-                        successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined MUC %@!", jid)))
+                        successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined group/channel %@!", jid)))
                     } else {
-                        errorAlert(title: Text("Error entering MUC!"))
+                        errorAlert(title: Text("Error entering group/channel!"))
                     }
                 }, forMuc: jid)
                 account.joinMuc(jid)

@@ -354,13 +354,13 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
             NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
             if(nick != nil)
             {
-                if(![item check:@"nick"])
-                    [item addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
-                ((MLXMLNode*)[item findFirst:@"nick"]).data = nick;
+                if(![item check:@"{urn:xmpp:bookmarks:1}conference/nick"])
+                    [[item findFirst:@"{urn:xmpp:bookmarks:1}conference"] addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
+                ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference/nick"]).data = nick;
             }
             
             //update autojoin value to true
-            item.attributes[@"autojoin"] = @"true";
+            ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference"]).attributes[@"autojoin"] = @"true";
             
             //publish this bookmark item again
             [account.pubsub publishItem:item onNode:@"urn:xmpp:bookmarks:1" withConfigOptions:@{

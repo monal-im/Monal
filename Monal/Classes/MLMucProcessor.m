@@ -867,7 +867,10 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         DDLogInfo(@"Clearing muc participants and members tables for %@", iqNode.fromUser);
         [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser forAccountId:_account.accountNo];
     
-        //load members/admins/owners list
+        //now try to join this room if requested
+        [self sendJoinPresenceFor:iqNode.fromUser];
+        
+        //load members/admins/owners list (this has to be done *after* joining the muc to not get auth errors)
         DDLogInfo(@"Querying members/admin/owner lists for muc %@...", iqNode.fromUser);
         for(NSString* type in @[@"member", @"admin", @"owner"])
         {
@@ -875,9 +878,6 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
             [discoInfo setMucListQueryFor:type];
             [_account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
         }
-    
-        //now try to join this room if requested
-        [self sendJoinPresenceFor:iqNode.fromUser];
     }
 $$
 

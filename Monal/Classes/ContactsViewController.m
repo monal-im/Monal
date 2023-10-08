@@ -221,14 +221,17 @@
     {
         contacts = [[DataLayer sharedInstance] contactList];
         BOOL onlySelfChats = YES;
+        NSMutableArray<MLContact*>* contactsToDisplay = [NSMutableArray new];
         for(MLContact* contact in contacts)
+        {
             if(!contact.isSelfChat)
-            {
                 onlySelfChats = NO;
-                break;
-            }
+            //ignore all contacts not at least in subscribedTo or asking state
+            if(contact.isInRoster)
+                [contactsToDisplay addObject:contact];
+        }
         if(!onlySelfChats)
-            self.contacts = contacts;
+            self.contacts = contactsToDisplay;
         else
             self.contacts = [NSMutableArray new];
     }

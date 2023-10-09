@@ -193,7 +193,7 @@ struct XMPPLoginQRCode : Codable
                 do
                 {
                     let loginData = try jsonDecoder.decode(XMPPLoginQRCode.self, from: qrCodeData)
-                    handleOmemoAccountLogin(loginData: loginData)
+                    handleAccountLogin(loginData: loginData)
                     return
                 } catch
                 {
@@ -225,7 +225,7 @@ struct XMPPLoginQRCode : Codable
         }
     }
 
-    func handleOmemoAccountLogin(loginData: XMPPLoginQRCode)
+    func handleAccountLogin(loginData: XMPPLoginQRCode)
     {
         if(loginData.usedProtocol == "xmpp")
         {

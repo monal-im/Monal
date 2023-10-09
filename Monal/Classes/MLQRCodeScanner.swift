@@ -10,16 +10,12 @@ import CocoaLumberjack
 import AVFoundation
 import UIKit
 import SwiftUI
+import SafariServices
 
 @objc protocol MLLQRCodeScannerAccountLoginDelegate : AnyObject
 {
     func MLQRCodeAccountLoginScanned(jid: String, password: String)
     func closeQRCodeScanner()
-}
-
-@objc protocol MLLQRCodeScannerContactDelegate : AnyObject
-{
-    func MLQRCodeContactScanned(jid: String, fingerprints: Dictionary<NSInteger, String>)
 }
 
 struct XMPPLoginQRCode : Codable
@@ -34,12 +30,9 @@ struct XMPPLoginQRCode : Codable
     }
 }
 
-@available(macCatalyst 14.0, *)
-@available(iOS 14.0, *)
 @objc class MLQRCodeScannerController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
 {
     @objc weak var loginDelegate : MLLQRCodeScannerAccountLoginDelegate?
-    @objc weak var contactDelegate : MLLQRCodeScannerContactDelegate?
 
     var videoPreviewLayer: AVCaptureVideoPreviewLayer!;
     var captureSession: AVCaptureSession!;
@@ -166,40 +159,37 @@ struct XMPPLoginQRCode : Codable
         if let metadataObject = metadataObjects.first {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
 
-            guard let qrCodeAsString = readableObject.stringValue
-            else
-            {
-                handleQRCodeError()
-                return
+            guard let qrCodeAsString = readableObject.stringValue else {
+                return handleQRCodeError()
             }
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
 
-            if(qrCodeAsString.hasPrefix("xmpp:"))
-            {
-                handleNewContactRequest(contactString: qrCodeAsString)
-                return
-            }
-            else
-            {
+            //open https?:// urls in safari view controller just as they would if the qrcode was scanned using the camera app
+            if qrCodeAsString.hasPrefix("https://") || qrCodeAsString.hasPrefix("http://") {
+                if let url = URL(string:qrCodeAsString) {
+                    let vc = SFSafariViewController(url:url, configuration:SFSafariViewController.Configuration())
+                    present(vc, animated: true)
+                }
+            //let our app delegate handle all xmpp: urls
+            } else if qrCodeAsString.hasPrefix("xmpp:") {
+                guard let url = URL(string:qrCodeAsString) else {
+                    return handleQRCodeError()
+                }
+                return (UIApplication.shared.delegate as! MonalAppDelegate).handleXMPPURL(url)
+            //if none of the above: handle json provisioning qrcodes, see: https://github.com/iNPUTmice/Conversations/issues/3796
+            } else {
                 // check if we have a json object
-                // https://github.com/iNPUTmice/Conversations/issues/3796
-                guard let qrCodeData = qrCodeAsString.data(using: .utf8)
-                else
-                {
-                    handleQRCodeError()
-                    return
+                guard let qrCodeData = qrCodeAsString.data(using:.utf8) else {
+                    return handleQRCodeError()
                 }
                 let jsonDecoder = JSONDecoder()
-                do
-                {
-                    let loginData = try jsonDecoder.decode(XMPPLoginQRCode.self, from: qrCodeData)
-                    handleAccountLogin(loginData: loginData)
-                    return
-                } catch
-                {
+                do {
+                    let loginData = try jsonDecoder.decode(XMPPLoginQRCode.self, from:qrCodeData)
+                    handleAccountLogin(loginData:loginData)
+                } catch {
                     handleQRCodeError()
-                    return
                 }
+                return
             }
         }
     }
@@ -236,70 +226,9 @@ struct XMPPLoginQRCode : Codable
             }
             else
             {
-                errorMsg(title: NSLocalizedString("Wrong menu", comment: "QR-Code-Scanner: account scan wrong menu"), msg: NSLocalizedString("The qrcode contains login credentials for a acount. Go to settings and rescan the qrcode", comment: "QR-Code-Scanner: account scan wrong menu"), startCaptureOnClose: true)
+                errorMsg(title: NSLocalizedString("Wrong menu", comment: "QR-Code-Scanner: account scan wrong menu"), msg: NSLocalizedString("The qrcode contains login credentials for an acount. Go to settings -> new account and rescan the qrcode", comment: "QR-Code-Scanner: account scan wrong menu"), startCaptureOnClose: true)
             }
         }
-    }
-
-    func handleNewContactRequest(contactString: String)
-    {
-        let XMPP_PREFIX : String = "xmpp:"
-        let OMEMO_SID_PREFIX : String = "omemo-sid-"
-
-        var omemoFingerprints = Dictionary<NSInteger, String>()
-        var parsedJid : String
-        // parse contact string
-        if(contactString.hasPrefix(XMPP_PREFIX))
-        {
-            let shortendContactString = contactString.suffix(contactString.count - XMPP_PREFIX.count)
-            let contactStringParts = shortendContactString.components(separatedBy: "?")
-            if(contactStringParts.count >= 1 && contactStringParts.count <= 2)
-            {
-                // check if contactStringParts[0] is a valid jid
-                let jidParts = contactStringParts[0].components(separatedBy: "@")
-                if(jidParts.count == 2 && jidParts[0].count > 0 && jidParts[1].count > 0)
-                {
-                    parsedJid = contactStringParts[0]
-                    // parse omemo fingerprints if present
-                    if(contactStringParts.count == 2)
-                    {
-                        let omemoParts = contactStringParts[1].components(separatedBy: ";")
-                        for omemoPart in omemoParts
-                        {
-                            let keyParts = omemoPart.components(separatedBy: "=")
-                            if(keyParts.count == 2 && keyParts[0].hasPrefix(OMEMO_SID_PREFIX))
-                            {
-                                let sidStr = keyParts[0].suffix(keyParts[0].count - OMEMO_SID_PREFIX.count)
-                                // parse string sid to int
-                                let sid = Int(sidStr) ?? -1
-                                if(sid > 0)
-                                {
-                                    // valid sid
-                                    if(keyParts[1].count > 0)
-                                    {
-                                        // todo append
-                                        omemoFingerprints[sid] = keyParts[1]
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    // call handler
-                    if(self.contactDelegate != nil)
-                    {
-						self.navigationController?.popViewController(animated: true)
-						self.contactDelegate?.MLQRCodeContactScanned(jid: parsedJid, fingerprints: omemoFingerprints)
-                        return
-                    }
-                    else
-                    {
-                        errorMsg(title: NSLocalizedString("Wrong menu", comment: "QR-Code-Scanner: jid scan wrong menu"), msg: NSLocalizedString("The qrcode contains a jid. Rescan the qrcode in the add user menu", comment: "QR-Code-Scanner: jid scan wrong menu"), startCaptureOnClose: true)
-                        return
-                    }
-                }
-            }
-        }
-        handleQRCodeError()
     }
 
     func handleQRCodeError()
@@ -310,12 +239,10 @@ struct XMPPLoginQRCode : Codable
 
 struct MLQRCodeScanner : UIViewControllerRepresentable {
     let handleLogin: ((String, String) -> Void)?
-    let handleContact: ((String, Dictionary<NSInteger, String>) -> Void)?
     let handleClose: (() -> Void)
 
-    class Coordinator: NSObject, MLLQRCodeScannerContactDelegate, MLLQRCodeScannerAccountLoginDelegate {
+    class Coordinator: NSObject, MLLQRCodeScannerAccountLoginDelegate {
         let handleLogin: ((String, String) -> Void)?
-        let handleContact: ((String, Dictionary<NSInteger, String>) -> Void)?
         let handleClose: (() -> Void)
 
         func MLQRCodeAccountLoginScanned(jid: String, password: String) {
@@ -324,19 +251,12 @@ struct MLQRCodeScanner : UIViewControllerRepresentable {
             }
         }
 
-        func MLQRCodeContactScanned(jid: String, fingerprints: Dictionary<NSInteger, String>) {
-            if(self.handleContact != nil) {
-                self.handleContact!(jid, fingerprints)
-            }
-        }
-
         func closeQRCodeScanner() {
             self.handleClose()
         }
 
-        init(handleLogin: ((String, String) -> Void)?, handleContact: ((String, Dictionary<NSInteger, String>) -> Void)?, handleClose: @escaping () -> Void) {
+        init(handleLogin: ((String, String) -> Void)?, handleClose: @escaping () -> Void) {
             self.handleLogin = handleLogin
-            self.handleContact = handleContact
             self.handleClose = handleClose
         }
     }
@@ -346,9 +266,6 @@ struct MLQRCodeScanner : UIViewControllerRepresentable {
         if(self.handleLogin != nil) {
             qrCodeScannerViewController.loginDelegate = context.coordinator
         }
-        if(self.handleContact != nil) {
-            qrCodeScannerViewController.contactDelegate = context.coordinator
-        }
         return qrCodeScannerViewController
     }
 
@@ -356,18 +273,16 @@ struct MLQRCodeScanner : UIViewControllerRepresentable {
     }
 
     func makeCoordinator() -> MLQRCodeScanner.Coordinator {
-        Coordinator(handleLogin: self.handleLogin, handleContact: self.handleContact, handleClose: self.handleClose);
+        Coordinator(handleLogin: self.handleLogin, handleClose: self.handleClose);
     }
 
-    init(handleContact: @escaping (String, Dictionary<NSInteger, String>) -> Void, handleClose: @escaping () -> Void) {
-        self.handleContact = handleContact
+    init(handleClose: @escaping () -> Void) {
         self.handleLogin = nil
         self.handleClose = handleClose
     }
 
     init(handleLogin: @escaping (String, String) -> Void, handleClose: @escaping () -> Void) {
         self.handleLogin = handleLogin
-        self.handleContact = nil
         self.handleClose = handleClose
     }
 }

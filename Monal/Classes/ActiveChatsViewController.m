@@ -428,17 +428,20 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
--(void) showAddContactWithJid:(NSString*) jid andPreauthToken:(NSString* _Nullable) preauthToken
+-(void) showAddContactWithJid:(NSString*) jid preauthToken:(NSString* _Nullable) preauthToken prefillAccount:(xmpp* _Nullable) account andOmemoFingerprints:(NSDictionary* _Nullable) fingerprints
 {
-    UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewForJid:jid andPreauthToken:preauthToken withDismisser:^(MLContact* _Nonnull newContact) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self presentChatWithContact:newContact];
-        });
-    }];
-    [self presentViewController:addContactMenuView animated:YES completion:^{}];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+            UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewForJid:jid preauthToken:preauthToken prefillAccount:account andOmemoFingerprints:fingerprints withDismisser:^(MLContact* _Nonnull newContact) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self presentChatWithContact:newContact];
+                });
+            }];
+            [self presentViewController:addContactMenuView animated:NO completion:^{}];
+        }];
+    });
 }
 
 -(void) segueToIntroScreensIfNeeded

@@ -28,7 +28,7 @@ struct OmemoKeysEntry: View {
         self.contactJid = contactJid
         self.deviceId = deviceId
         self.isOwnDevice = isOwnDevice
-        self.address = SignalAddress.init(name: contactJid, deviceId: deviceId.int32Value)
+        self.address = SignalAddress.init(name: contactJid, deviceId: Int32(deviceId.int32Value))
         self.fingerprint = account.omemo.getIdentityFor(self.address)
         self.trustLevel = account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
         self.account = account
@@ -291,8 +291,9 @@ struct OmemoKeys: View {
     }
 
     func resetTrustFromQR(scannedJid : String, scannedFingerprints : Dictionary<NSInteger, String>) {
-        // untrust all devices from jid
-        self.account!.omemo.untrustAllDevices(from: scannedJid)
+        //don't untrust other devices not included in here, because conversations only exports its own fingerprint
+//         // untrust all devices from jid
+//         self.account!.omemo.untrustAllDevices(from: scannedJid)
         // trust all devices that were part of the qr code
         let knownDevices = Array(self.account!.omemo.knownDevices(forAddressName: scannedJid))
         for (qrDeviceId, fingerprint) in scannedFingerprints {
@@ -316,14 +317,14 @@ struct OmemoKeys: View {
         // workaround for the fact that NavigationLink inside a form forces a formatting we don't want
         if(self.selectedContact != nil) { // selectedContact is set to a value either when the user presses a QR code button or if there is only a single contact to choose from (-> user views a single account)
             NavigationLink(destination:LazyClosureView(OmemoQrCodeView(contact: self.selectedContact!)), isActive: $navigateToQRCodeView){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
-            NavigationLink(destination: LazyClosureView(MLQRCodeScanner(
-                handleContact: { jid, fingerprints in
-                    // we scanned a contact but it was not in the contact list, show the alert...
-                    self.scannedJid = jid
-                    self.scannedFingerprints = fingerprints
-                    showScannedContactMissmatchAlert = true
-                }, handleClose: {}
-            )), isActive: $navigateToQRCodeScanner){}.hidden().disabled(true)
+//             NavigationLink(destination: LazyClosureView(MLQRCodeScanner(
+//                 handleContact: { jid, fingerprints in
+//                     // we scanned a contact but it was not in the contact list, show the alert...
+//                     self.scannedJid = jid
+//                     self.scannedFingerprints = fingerprints
+//                     showScannedContactMissmatchAlert = true
+//                 }, handleClose: {}
+//             )), isActive: $navigateToQRCodeScanner){}.hidden().disabled(true)
         }
         List {
             let helpDescription = (self.ownKeys == true) ?

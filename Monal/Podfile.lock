@@ -1,12 +1,7 @@
 PODS:
   - ASN1Decoder (1.9.0)
-  - DACircularProgress (2.3.1)
   - DZNEmptyDataSet (1.8.1)
   - FLAnimatedImage (1.0.17)
-  - IDMPhotoBrowser (1.11.3):
-    - DACircularProgress
-    - pop
-    - SDWebImage (= 4.0.0)
   - KSCrash (1.15.27):
     - KSCrash/Installations (= 1.15.27)
   - KSCrash/Installations (1.15.27):
@@ -75,11 +70,10 @@ PODS:
   - NotificationBannerSwift (3.2.1):
     - MarqueeLabel (~> 4.3.0)
     - SnapKit (~> 5.6.0)
-  - pop (1.0.12)
   - SAMKeychain (1.5.3)
-  - SDWebImage (4.0.0):
-    - SDWebImage/Core (= 4.0.0)
-  - SDWebImage/Core (4.0.0)
+  - SDWebImage (5.18.2):
+    - SDWebImage/Core (= 5.18.2)
+  - SDWebImage/Core (5.18.2)
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
@@ -94,11 +88,11 @@ DEPENDENCIES:
   - ASN1Decoder
   - DZNEmptyDataSet
   - FLAnimatedImage (~> 1.0)
-  - IDMPhotoBrowser
   - KSCrash (from `https://github.com/monal-im/KSCrash`, branch `master`)
   - MBProgressHUD (~> 1.2.0)
   - NotificationBannerSwift (~> 3.2.0)
   - SAMKeychain
+  - SDWebImage
   - SignalProtocolC (from `https://github.com/monal-im/libsignal-protocol-c`, branch `master`)
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
   - sqlite3/perf-threadsafe
@@ -108,14 +102,11 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - ASN1Decoder
-    - DACircularProgress
     - DZNEmptyDataSet
     - FLAnimatedImage
-    - IDMPhotoBrowser
     - MarqueeLabel
     - MBProgressHUD
     - NotificationBannerSwift
-    - pop
     - SAMKeychain
     - SDWebImage
     - SnapKit
@@ -147,17 +138,14 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   ASN1Decoder: 4f4bbcaf1d1b8be56daa3280e82863a607f5bda9
-  DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
-  IDMPhotoBrowser: b96159fe4adb991a844068eb17dab9c0b7d7e51a
   KSCrash: 202a2dd3a1a3a1aa0783056a42d7db8ea8bf3a56
   MarqueeLabel: 15e524a6762552bb279cb17438b8a94990269fb9
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
-  pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: 76a6348bdc74eb5a55dd08a091ef298e56b55e41
+  SDWebImage: c0de394d7cf7f9838aed1fd6bb6037654a4572e4
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
@@ -165,6 +153,6 @@ SPEC CHECKSUMS:
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   WebRTC-lib: 8e6d3ec41aea480ef844bb5d537cbefb83e7c2c2
 
-PODFILE CHECKSUM: bf3a219fe79a10968ef750b2aeba39a10793cda6
+PODFILE CHECKSUM: 99af97fbdbc651c2f1c5558cb9ba7107ef30aa28
 
 COCOAPODS: 1.13.0

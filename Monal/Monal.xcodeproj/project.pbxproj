@@ -171,6 +171,7 @@
 		C104918B261301530054AC9E /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049198261301710054AC9E /* MLCryptoTest.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
+		C13252E42AD45FDB00E7C068 /* ImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13252E32AD45FDB00E7C068 /* ImageViewer.swift */; };
 		C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */; };
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
@@ -605,6 +606,7 @@
 		C1049198261301710054AC9E /* MLCryptoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCryptoTest.swift; sourceTree = "<group>"; };
 		C12436122434AB5D00B8F074 /* MLAttributedLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAttributedLabel.h; sourceTree = "<group>"; };
 		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
+		C13252E32AD45FDB00E7C068 /* ImageViewer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageViewer.swift; sourceTree = "<group>"; };
 		C132EA9426C92DD900BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/Main.strings; sourceTree = "<group>"; };
 		C132EA9626C92DD900BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/Settings.strings; sourceTree = "<group>"; };
 		C132EA9926C92DDA00BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1348,6 +1350,7 @@
 		841B6F16297AFB340074F9B7 /* Calls */ = {
 			isa = PBXGroup;
 			children = (
+				C13252E32AD45FDB00E7C068 /* ImageViewer.swift */,
 				841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */,
 				841B6F19297B18720074F9B7 /* AccountPicker.swift */,
 			);
@@ -2027,6 +2030,7 @@
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */,
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
+				C13252E42AD45FDB00E7C068 /* ImageViewer.swift in Sources */,
 				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
 				3D06A515281FFCC000DDAE90 /* NotificationSettings.swift in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,

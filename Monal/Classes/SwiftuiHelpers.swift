@@ -350,6 +350,15 @@ class SwiftuiInterface : NSObject {
     }
     
     @objc
+    func makeImageViewer(_ image: UIImage) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:ImageViewer(delegate:delegate, image: image)))
+        return host
+    }
+    
+    @objc
     func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))

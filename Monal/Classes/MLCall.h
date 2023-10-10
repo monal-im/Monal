@@ -72,6 +72,7 @@ typedef NS_ENUM(NSUInteger, MLCallEncryptionState) {
 @property (nonatomic, readonly) MLCallState state;
 @property (nonatomic, readonly) MLCallFinishReason finishReason;
 @property (nonatomic, readonly) uint32_t durationTime;
+@property (nonatomic, readonly) BOOL wasConnectedOnce;
 @property (nonatomic, assign) BOOL muted;
 @property (nonatomic, assign) BOOL speaker;
 

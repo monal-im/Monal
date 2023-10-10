@@ -150,6 +150,11 @@
 
 -(void) end
 {
+    if(self.isFinished)
+    {
+        DDLogInfo(@"Not requesting end call action: call already in finished state...");
+        return;
+    }
     DDLogVerbose(@"Requesting end call transaction for %@", [self short]);
     CXEndCallAction* endCallAction = [[CXEndCallAction alloc] initWithCallUUID:self.uuid];
     CXTransaction* transaction = [[CXTransaction alloc] initWithAction:endCallAction];
@@ -164,6 +169,16 @@
         else
             DDLogInfo(@"Successfully created end call transaction for CallKit..");
     }];
+}
+
+-(void) delayedEnd:(double) delay withDisconnectedState:(BOOL) disconnected
+{
+    createTimer(delay, (^{
+        //isConnected = NO will result in MLCallFinishReasonConnectivityError if wasConnectedOnce == YES
+        if(disconnected)
+            self.isConnected = NO;
+        [self end];
+    }));
 }
 
 -(void) setMuted:(BOOL) muted
@@ -540,7 +555,7 @@
         if(self.webRTCClient != nil)
         {
             WebRTCClient* client = self.webRTCClient;
-            self.webRTCClient = nil;
+            self.webRTCClient = nil;                    //this will prevent the new webrtc state from being handled
             //do this async to not run into a deadlock with the signalling thread
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 [client.peerConnection close];
@@ -743,6 +758,7 @@
     [self offerSDP];
 }
 
+/*
 -(void) restartIce
 {
     if(self.isReconnecting)
@@ -780,6 +796,7 @@
     else
         DDLogDebug(@"Not restarting ICE because of connectivity change: was never connected");
 }
+*/
 
 -(void) offerSDP
 {
@@ -1070,9 +1087,14 @@
 -(void) webRTCClient:(WebRTCClient*) webRTCClient didChangeConnectionState:(RTCIceConnectionState) state
 {
     @synchronized(self) {
-        if(webRTCClient != self.webRTCClient && !self.isFinished)
+        if(webRTCClient != self.webRTCClient)
         {
             DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for webRTCClient: %@ (call migrated)", (long)state, webRTCClient);
+            return;
+        }
+        if(self.isFinished)
+        {
+            DDLogInfo(@"Ignoring new RTCIceConnectionState %ld for webRTCClient: %@ (call already finished)", (long)state, webRTCClient);
             return;
         }
         //state enums can be found over here: https://chromium.googlesource.com/external/webrtc/+/9eeb6240c93efe2219d4d6f4cf706030e00f64d7/webrtc/sdk/objc/Framework/Headers/WebRTC/RTCPeerConnection.h
@@ -1106,7 +1128,7 @@
                 break;
             case RTCIceConnectionStateDisconnected:
                 DDLogInfo(@"New WebRTC ICE state: disconnected: %@", self);
-                if(self.wasConnectedOnce)
+                /*if(self.wasConnectedOnce)
                 {
                     //wait some time before restarting ice (maybe the connection can be reestablished without a new candidate exchange)
                     //see: https://groups.google.com/g/discuss-webrtc/c/I4K8NwN4Huw
@@ -1117,14 +1139,18 @@
                     }));
                 }
                 else
-                    [self end];
+                    [self end];*/
+                //wait some time for other jmi and jingle stanzas to arrive (these may contain call end reasons we want to process)
+                [self delayedEnd:2.0 withDisconnectedState:YES];
                 break;
             case RTCIceConnectionStateFailed:
                 DDLogInfo(@"New WebRTC ICE state: failed: %@", self);
-                if(self.wasConnectedOnce)
+                /*if(self.wasConnectedOnce)
                     [self restartIce];
                 else
-                    [self end];
+                    [self end];*/
+                self.isConnected = NO;      //will result in MLCallFinishReasonConnectivityError if wasConnectedOnce == YES
+                [self end];
                 break;
             //all following states can be ignored
             case RTCIceConnectionStateClosed:

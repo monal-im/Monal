@@ -198,13 +198,25 @@ struct AVCallUI: View {
                                     .bold()
                                     .foregroundColor(.primary)
                                 case .normal:
-                                    Text("Call ended, duration: \(formatter.string(from: TimeInterval(call.durationTime as UInt))!)")
-                                    .bold()
-                                    .foregroundColor(.primary)
+                                    if call.wasConnectedOnce {
+                                        Text("Call ended, duration: \(formatter.string(from: TimeInterval(call.durationTime as UInt))!)")
+                                        .bold()
+                                        .foregroundColor(.primary)
+                                    } else {
+                                        Text("Call ended")
+                                        .bold()
+                                        .foregroundColor(.primary)
+                                    }
                                 case .connectivityError:
-                                    Text("Call ended: connection failed")
-                                    .bold()
-                                    .foregroundColor(.primary)
+                                    if call.wasConnectedOnce {
+                                        Text("Call ended: connection failed\nDuration: \(formatter.string(from: TimeInterval(call.durationTime as UInt))!)")
+                                        .bold()
+                                        .foregroundColor(.primary)
+                                    } else {
+                                        Text("Call ended: connection failed")
+                                        .bold()
+                                        .foregroundColor(.primary)
+                                    }
                                 case .securityError:
                                     Text("Call ended: couldn't establish encryption")
                                     .bold()

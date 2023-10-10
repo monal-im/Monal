@@ -532,13 +532,9 @@ a=max-message-size:262144\n" withInitiator:YES]);
     [self configureBackgroundTasks];
     
     // Play audio even if phone is in silent mode
-    NSError* audioSessionError;
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&audioSessionError];
-    if(audioSessionError != nil)
-    {
-        DDLogWarn(@"Couldn't set AVAudioSession to AVAudioSessionCategoryPlayback: %@", audioSessionError);
-    }
-
+    [HelperTools configureDefaultAudioSession];
+    self.audioState = MLAudioStateNormal;
+    
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];

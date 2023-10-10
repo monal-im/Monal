@@ -348,6 +348,26 @@ void swizzle(Class c, SEL orig, SEL new)
     [self activityLog];
 }
 
++(void) configureDefaultAudioSession
+{
+    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+    NSError* error;
+    DDLogDebug(@"configuring default audio session...");
+    AVAudioSessionCategoryOptions options = 0;
+    //options |= AVAudioSessionCategoryOptionMixWithOthers;
+    //options |= AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
+    //options |= AVAudioSessionCategoryOptionAllowBluetooth;
+    //options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+    //options |= AVAudioSessionCategoryOptionAllowAirPlay;
+    [audioSession setCategory:AVAudioSessionCategoryPlayback mode:AVAudioSessionModeDefault options:options error:&error];
+    if(error != nil)
+        DDLogError(@"failed to configure audio session: %@", error);
+    [audioSession setActive:YES withOptions:0 error:&error];
+    if(error != nil)
+        DDLogError(@"error activating audio session: %@", error);
+    DDLogVerbose(@"current audio route: %@", audioSession.currentRoute);
+}
+
 +(NSDictionary<NSString*, NSString*>*) getInvalidPushServers
 {
     return @{

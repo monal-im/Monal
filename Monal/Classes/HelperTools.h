@@ -55,6 +55,8 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSString*) getSelectedPushServerBasedOnLocale;
 +(NSDictionary<NSString*, NSString*>*) getAvailablePushServers;
 
++(void) configureDefaultAudioSession;
+
 +(NSArray<NSString*>*) getFailoverStunServers;
 +(NSURL*) getFailoverTurnApiServer;
 +(NSArray<MLXMLNode*>* _Nullable) sdp2xml:(NSString*) sdp withInitiator:(BOOL) initiator;

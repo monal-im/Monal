@@ -66,7 +66,6 @@
 @property (nonatomic, strong) NSMutableArray<XMPPIQ*>* incomingCandidateQueue;
 @property (nonatomic, strong) NSMutableArray<XMPPIQ*>* outgoingCandidateQueue;
 
-
 @property (nonatomic, readonly) xmpp* account;
 @property (nonatomic, strong) MLVoIPProcessor* voipProcessor;
 @end
@@ -421,6 +420,7 @@
 
 -(void) didActivateAudioSession:(AVAudioSession*) audioSession
 {
+    NSError* error = nil;
     DDLogInfo(@"Activating audio session now: %@", audioSession);
     [[RTCAudioSession sharedInstance] lockForConfiguration];
     NSUInteger options = 0;
@@ -428,10 +428,12 @@
     options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
     options |= AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
     options |= AVAudioSessionCategoryOptionAllowAirPlay;
-    NSError* error = nil;
-    [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:options error:&error];
+    [[RTCAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:options error:&error];
     if(error != nil)
-        DDLogError(@"Failed to configure AVAudioSession: %@", error);
+        DDLogError(@"Failed to configure AVAudioSession category: %@", error);
+    [[RTCAudioSession sharedInstance] setMode:AVAudioSessionModeVoiceChat error:&error];
+    if(error != nil)
+        DDLogError(@"Failed to configure AVAudioSession mode: %@", error);
     [[RTCAudioSession sharedInstance] audioSessionDidActivate:audioSession];
     [[RTCAudioSession sharedInstance] setIsAudioEnabled:YES];
     [[RTCAudioSession sharedInstance] unlockForConfiguration];

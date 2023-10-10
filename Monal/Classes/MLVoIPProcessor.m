@@ -295,7 +295,7 @@ static NSMutableDictionary* _pendingCalls;
         //add our completion handler to handler queue to initiate xmpp connections
         //this must be done in main thread because the app delegate is only allowed in main thread
         dispatch_async(dispatch_get_main_queue(), ^{
-            MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+            MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
             [appDelegate incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
                 DDLogWarn(@"VoIP push wakeup handler timed out");
             }];
@@ -656,7 +656,7 @@ static NSMutableDictionary* _pendingCalls;
     }
     call.providerAnswerAction = action;
     
-    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
     [appDelegate.activeChats presentCall:call];
 }
 
@@ -726,6 +726,12 @@ static NSMutableDictionary* _pendingCalls;
             MLCall* call = [self getCallForUUID:uuid];
             call.audioSession = audioSession;
         }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
+            DDLogVerbose(@"Setting audio state to MLAudioStateCall...");
+            appDelegate.audioState = MLAudioStateCall;
+        });
     }
 }
 
@@ -738,6 +744,14 @@ static NSMutableDictionary* _pendingCalls;
             MLCall* call = [self getCallForUUID:uuid];
             call.audioSession = nil;
         }
+        
+        //switch back to default audio settings destroyed by callkit
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [HelperTools configureDefaultAudioSession];
+            MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
+            DDLogVerbose(@"Setting audio state to MLAudioStateNormal...");
+            appDelegate.audioState = MLAudioStateNormal;
+        });
     }
 }
 

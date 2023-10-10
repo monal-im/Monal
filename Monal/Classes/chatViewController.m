@@ -2328,13 +2328,15 @@ enum msgSentState {
                 DDLogVerbose(@"Trying to open link in chat cell");
                 [(MLChatCell *)cell openlink:self];
             } else  {
-                //TODO: fork swiftui image viewer (https://github.com/Jake-Short/swiftui-image-viewer),
-                //TODO: add support for FLAnimatedImage (https://github.com/Flipboard/FLAnimatedImage) using NSViewRepresentable
-                //TODO: or this so answer using quartz: https://stackoverflow.com/a/70369611/3528174
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    MLChatImageCell* imageCell = (MLChatImageCell *) cell;
-                    UIViewController* photosViewer = [[SwiftuiInterface new] makeImageViewer:[imageCell getDisplayedImage]];
-                    [self presentViewController:photosViewer animated:YES completion:^{}];
+                    NSDictionary* info = [MLFiletransfer getFileInfoForMessage:[self.messageList objectAtIndex:indexPath.row]];
+                    UIImage* image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
+                    NSData* animatedImageData = nil;
+                    if([info[@"mimeType"] hasPrefix:@"image/gif"])
+                        animatedImageData = [NSData dataWithContentsOfFile:info[@"cacheFile"]];
+                    UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewer:image withFilename:info[@"filename"] andAnimatedImageData:animatedImageData];
+                    imageViewer.modalPresentationStyle = UIModalPresentationFullScreen;
+                    [self presentViewController:imageViewer animated:YES completion:^{}];
                 });
             }
         }

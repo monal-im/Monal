@@ -8,11 +8,13 @@
 
 //see https://davedelong.com/blog/2018/01/19/simplifying-swift-framework-development/ for explanation of @_exported
 @_exported import Foundation
+@_exported import CocoaLumberjack
+@_exported import Logging
 @_exported import SwiftUI
 @_exported import monalxmpp
-@_exported import CocoaLumberjack
 import PhotosUI
 import Combine
+import FLAnimatedImage
 
 extension MLContact : Identifiable {}       //make MLContact be usable in swiftui ForEach clauses
 
@@ -44,6 +46,43 @@ class SheetDismisserProtocol: ObservableObject {
     }
     func replace<V>(with view: V) where V: View {
         host?.rootView = AnyView(view)
+    }
+}
+
+//see here for some ideas used herein: https://blog.logrocket.com/adding-gifs-ios-app-flanimatedimage-swiftui/#using-flanimatedimage-with-swift
+struct GIFViewer: UIViewRepresentable {
+    typealias UIViewType = FLAnimatedImageView
+    @Binding var data: Data
+
+    func makeUIView(context: Context) -> FLAnimatedImageView {
+        let imageView = FLAnimatedImageView(frame:.zero)
+        let animatedImage = FLAnimatedImage(animatedGIFData:data)
+        imageView.animatedImage = animatedImage
+        //imageView.translatesAutoresizingMaskIntoConstraints = false
+        //imageView.contentMode = .scaleAspectFit
+        //imageView.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+        
+//         imageView.translatesAutoresizingMaskIntoConstraints = false
+//         imageView.layer.cornerRadius = 24
+//         imageView.layer.masksToBounds = true
+//         imageView.setContentHuggingPriority(.required, for: .vertical)
+//         imageView.setContentHuggingPriority(.required, for: .horizontal)
+        
+        return imageView
+    }
+
+    func updateUIView(_ imageView: FLAnimatedImageView, context: Context) {
+        let animatedImage = FLAnimatedImage(animatedGIFData:data)
+        imageView.animatedImage = animatedImage
+    }
+    
+    @available(iOS 16.0, macCatalyst 16.0, *)
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextField, context: Context) -> CGSize? {
+        guard
+            let width = proposal.width,
+            let height = proposal.height
+        else { return nil }
+        return CGSize(width: width, height: height)
     }
 }
 
@@ -350,11 +389,11 @@ class SwiftuiInterface : NSObject {
     }
     
     @objc
-    func makeImageViewer(_ image: UIImage) -> UIViewController {
+    func makeImageViewer(_ image: UIImage, withFilename filename:String = "", andAnimatedImageData animatedImageData:Data?) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:ImageViewer(delegate:delegate, image: image)))
+        host.rootView = AnyView(ImageViewer(delegate:delegate, image:image, filename:filename, animatedImageData:animatedImageData))
         return host
     }
     

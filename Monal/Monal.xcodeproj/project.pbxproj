@@ -148,11 +148,13 @@
 		843AD3AB2AA55CE20036844D /* MLOgHtmlParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */; };
 		8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8441EFF82921B53500E851E9 /* BackgroundSettings.swift */; };
 		844EEC6D28E718DB00CB5EF9 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
+		845D636B2AD4AEDA0066EFFB /* ImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845D636A2AD4AEDA0066EFFB /* ImageViewer.swift */; };
 		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		846DF27C2937FAA600AAB9C0 /* ChatPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */; };
 		848717F3295ED64600B8D288 /* MLCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 848717F1295ED64500B8D288 /* MLCall.m */; };
 		848904A9289C82C30097E19C /* SCRAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 848904A8289C82C30097E19C /* SCRAM.m */; };
+		849248492AD4CEC400986C1A /* ZoomableContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849248482AD4CEC400986C1A /* ZoomableContainer.swift */; };
 		849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 849A53E3287135B2007E941A /* MLVoIPProcessor.m */; };
 		84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */; };
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
@@ -171,7 +173,6 @@
 		C104918B261301530054AC9E /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049198261301710054AC9E /* MLCryptoTest.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
-		C13252E42AD45FDB00E7C068 /* ImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13252E32AD45FDB00E7C068 /* ImageViewer.swift */; };
 		C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */; };
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
@@ -569,11 +570,13 @@
 		842790842A32D16C005C18CC /* CallSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CallSounds; sourceTree = "<group>"; };
 		843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MLOgHtmlParser.swift; path = Classes/MLOgHtmlParser.swift; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
+		845D636A2AD4AEDA0066EFFB /* ImageViewer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageViewer.swift; sourceTree = "<group>"; };
 		846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPlaceholder.swift; sourceTree = "<group>"; };
 		848717F1295ED64500B8D288 /* MLCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLCall.m; path = Classes/MLCall.m; sourceTree = SOURCE_ROOT; };
 		848717F2295ED64500B8D288 /* MLCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLCall.h; path = Classes/MLCall.h; sourceTree = SOURCE_ROOT; };
 		848904A8289C82C30097E19C /* SCRAM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SCRAM.m; sourceTree = "<group>"; };
 		848904AA289C82DB0097E19C /* SCRAM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SCRAM.h; sourceTree = "<group>"; };
+		849248482AD4CEC400986C1A /* ZoomableContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoomableContainer.swift; sourceTree = "<group>"; };
 		849A53E3287135B2007E941A /* MLVoIPProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLVoIPProcessor.m; path = Classes/MLVoIPProcessor.m; sourceTree = SOURCE_ROOT; };
 		849A53E5287135D7007E941A /* MLVoIPProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLVoIPProcessor.h; path = Classes/MLVoIPProcessor.h; sourceTree = SOURCE_ROOT; };
 		84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftHelpers.swift; sourceTree = "<group>"; };
@@ -606,7 +609,6 @@
 		C1049198261301710054AC9E /* MLCryptoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCryptoTest.swift; sourceTree = "<group>"; };
 		C12436122434AB5D00B8F074 /* MLAttributedLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAttributedLabel.h; sourceTree = "<group>"; };
 		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
-		C13252E32AD45FDB00E7C068 /* ImageViewer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageViewer.swift; sourceTree = "<group>"; };
 		C132EA9426C92DD900BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/Main.strings; sourceTree = "<group>"; };
 		C132EA9626C92DD900BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/Settings.strings; sourceTree = "<group>"; };
 		C132EA9926C92DDA00BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1031,6 +1033,8 @@
 		26715E5E17650AF900684F3D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				849248482AD4CEC400986C1A /* ZoomableContainer.swift */,
+				845D636A2AD4AEDA0066EFFB /* ImageViewer.swift */,
 				841B6F16297AFB340074F9B7 /* Calls */,
 				3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */,
 				C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */,
@@ -1350,7 +1354,6 @@
 		841B6F16297AFB340074F9B7 /* Calls */ = {
 			isa = PBXGroup;
 			children = (
-				C13252E32AD45FDB00E7C068 /* ImageViewer.swift */,
 				841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */,
 				841B6F19297B18720074F9B7 /* AccountPicker.swift */,
 			);
@@ -2030,9 +2033,9 @@
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */,
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
-				C13252E42AD45FDB00E7C068 /* ImageViewer.swift in Sources */,
 				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
 				3D06A515281FFCC000DDAE90 /* NotificationSettings.swift in Sources */,
+				845D636B2AD4AEDA0066EFFB /* ImageViewer.swift in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */,
 				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
@@ -2054,6 +2057,7 @@
 				843AD3AB2AA55CE20036844D /* MLOgHtmlParser.swift in Sources */,
 				3D27D958290B0BC80014748B /* ContactRequestsMenu.swift in Sources */,
 				3D5A91422842B4AE008CE57E /* MemberList.swift in Sources */,
+				849248492AD4CEC400986C1A /* ZoomableContainer.swift in Sources */,
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */,

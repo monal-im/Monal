@@ -191,14 +191,12 @@ void logException(NSException* exception)
     [HelperTools flushLogsWithTimeout:0.250];
 }
 
-void swizzle(Class c, SEL orig, SEL new)
+void uncaughtExceptionHandler(NSException* exception)
 {
-    Method origMethod = class_getInstanceMethod(c, orig);
-    Method newMethod = class_getInstanceMethod(c, new);
-    if(class_addMethod(c, orig, method_getImplementation(newMethod), method_getTypeEncoding(newMethod)))
-        class_replaceMethod(c, new, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
-    else
-    method_exchangeImplementations(origMethod, newMethod);
+    logException(exception);
+    //make sure this crash will be recorded by kscrash using the NSException rather than the c++ exception thrown by the objc runtime
+    //this will make sure that the stacktrace matches the objc exception rather than being a top level c++ stacktrace
+    KSCrash.sharedInstance.uncaughtExceptionHandler(exception);
 }
 
 //this function will only be in use under macos alpha builds to log every exception (even when catched with @try-@catch constructs)
@@ -212,6 +210,16 @@ static id preprocess(id exception)
     return preprocessed;
 }
 #endif
+
+void swizzle(Class c, SEL orig, SEL new)
+{
+    Method origMethod = class_getInstanceMethod(c, orig);
+    Method newMethod = class_getInstanceMethod(c, new);
+    if(class_addMethod(c, orig, method_getImplementation(newMethod), method_getTypeEncoding(newMethod)))
+        class_replaceMethod(c, new, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
+    else
+    method_exchangeImplementations(origMethod, newMethod);
+}
 
 
 @implementation HelperTools
@@ -228,10 +236,10 @@ static id preprocess(id exception)
 {
     //only install our exception handler if not yet installed
     _oldExceptionHandler = (volatile void (*)(NSException*))NSGetUncaughtExceptionHandler();
-    if((void*)_oldExceptionHandler != (void*)logException)
+    if((void*)_oldExceptionHandler != (void*)uncaughtExceptionHandler)
     {
-        DDLogVerbose(@"Replaced unhandled exception handler, old handler: %p, new handler: %p", NSGetUncaughtExceptionHandler(), &logException);
-        NSSetUncaughtExceptionHandler(logException);
+        DDLogVerbose(@"Replaced unhandled exception handler, old handler: %p, new handler: %p", NSGetUncaughtExceptionHandler(), &uncaughtExceptionHandler);
+        NSSetUncaughtExceptionHandler(uncaughtExceptionHandler);
     }
     
 #if TARGET_OS_MACCATALYST
@@ -1631,6 +1639,8 @@ static id preprocess(id exception)
         handler.monitoring = kscrash_install(_crashBundleName, handler.basePath.UTF8String);
         if(handler.monitoring == KSCrashMonitorTypeNone)
             DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");
+        else
+            DDLogInfo(@"Crash monitoring active now: %d", handler.monitoring);
         
         //store data globally for later retrieval by our crash_callback() (_origLogfilePath and _logfilePath)
         strncpy(_origLogfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(_logfilePath)-1);

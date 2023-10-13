@@ -71,9 +71,9 @@ PODS:
     - MarqueeLabel (~> 4.3.0)
     - SnapKit (~> 5.6.0)
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.18.2):
-    - SDWebImage/Core (= 5.18.2)
-  - SDWebImage/Core (5.18.2)
+  - SDWebImage (5.18.3):
+    - SDWebImage/Core (= 5.18.3)
+  - SDWebImage/Core (5.18.3)
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
@@ -82,7 +82,7 @@ PODS:
   - sqlite3/perf-threadsafe (3.43.1):
     - sqlite3/common
   - TOCropViewController (2.6.1)
-  - WebRTC-lib (117.0.0)
+  - WebRTC-lib (118.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -145,13 +145,13 @@ SPEC CHECKSUMS:
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: c0de394d7cf7f9838aed1fd6bb6037654a4572e4
+  SDWebImage: 96e0c18ef14010b7485210e92fac888587ebb958
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   sqlite3: e0a0623a33a20a47cb5921552aebc6e9e437dc91
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
-  WebRTC-lib: 8e6d3ec41aea480ef844bb5d537cbefb83e7c2c2
+  WebRTC-lib: 6ac0d12bc164192a9cc6adb10a082d65c49ee0b8
 
 PODFILE CHECKSUM: 99af97fbdbc651c2f1c5558cb9ba7107ef30aa28
 

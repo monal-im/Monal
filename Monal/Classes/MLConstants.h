@@ -66,6 +66,10 @@ typedef enum NotificationPrivacySettingOption {
     DisplayOnlyPlaceholder
 } NotificationPrivacySettingOption;
 
+typedef NS_ENUM(NSUInteger, MLAudioState) {
+    MLAudioStateNormal,
+    MLAudioStateCall,
+};
 
 //some useful macros
 #define weakify(var)                        __weak __typeof__(var) AHKWeak_##var = var

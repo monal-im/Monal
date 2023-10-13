@@ -351,12 +351,16 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
             DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountNo);
             
             //add or update nickname
-            if(![item check:@"nick"])
-                [item addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
-            ((MLXMLNode*)[item findFirst:@"nick"]).data = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+            NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+            if(nick != nil)
+            {
+                if(![item check:@"{urn:xmpp:bookmarks:1}conference/nick"])
+                    [[item findFirst:@"{urn:xmpp:bookmarks:1}conference"] addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
+                ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference/nick"]).data = nick;
+            }
             
             //update autojoin value to true
-            item.attributes[@"autojoin"] = @"true";
+            ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference"]).attributes[@"autojoin"] = @"true";
             
             //publish this bookmark item again
             [account.pubsub publishItem:item onNode:@"urn:xmpp:bookmarks:1" withConfigOptions:@{
@@ -373,12 +377,13 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     for(NSString* room in toAdd)
     {
         DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
+        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
         [account.pubsub publishItem:
             [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": room} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"conference" andNamespace:@"urn:xmpp:bookmarks:1" withAttributes:@{
                     @"autojoin": @"true",
                 } andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:[[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo]],
+                    nilWrapper(nick != nil ? [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:nick] : nil),
                     [[MLXMLNode alloc] initWithElement:@"extensions" withAttributes:@{} andChildren:@[
                         [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:xmpp:monal.im:bookmarks:info" withAttributes:@{
                             @"name": @"Monal",
@@ -606,9 +611,13 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
                 DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountNo);
                 
                 //add or update nickname
-                if(![conference check:@"nick"])
-                    [conference addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
-                ((MLXMLNode*)[conference findFirst:@"nick"]).data = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+                NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+                if(nick != nil)
+                {
+                    if(![conference check:@"nick"])
+                        [conference addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
+                    ((MLXMLNode*)[conference findFirst:@"nick"]).data = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+                }
                 
                 //update autojoin value to true
                 conference.attributes[@"autojoin"] = @"true";
@@ -622,13 +631,12 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
         for(NSString* room in toAdd)
         {
             DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
+            NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
             [[data[itemId] findFirst:@"{storage:bookmarks}storage"] addChildNode:[[MLXMLNode alloc] initWithElement:@"conference" withAttributes:@{
                 @"jid": room,
                 @"name": [[MLContact createContactFromJid:room andAccountNo:account.accountNo] contactDisplayName],
                 @"autojoin": @"true",
-            } andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:[[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo]]
-            ] andData:nil]];
+            } andChildren:(nick != nil ? @[[[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:nick]] : @[]) andData:nil]];
             changed = YES;
         }
         
@@ -665,13 +673,12 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
     for(NSString* room in ownFavorites)
     {
         DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
+        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
         [conferences addObject:[[MLXMLNode alloc] initWithElement:@"conference" withAttributes:@{
             @"jid": room,
             @"name": [[MLContact createContactFromJid:room andAccountNo:account.accountNo] contactDisplayName],
             @"autojoin": @"true",
-        } andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:[[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo]]
-        ] andData:nil]];
+        } andChildren:(nick != nil ? @[[[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:nick]] : @[]) andData:nil]];
     }
     [account.pubsub publishItem:
         [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": @"current"} andChildren:@[

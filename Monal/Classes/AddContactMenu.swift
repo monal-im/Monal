@@ -15,7 +15,7 @@ struct AddContactMenu: View {
 
     @State private var connectedAccounts: [xmpp]
     @State private var selectedAccount: Int
-    @State private var scannedFingerprints: Dictionary<Int, String>? = nil
+    @State private var scannedFingerprints: [NSNumber:Data]? = nil
     @State private var importScannedFingerprints: Bool = false
     @State private var toAdd: String = ""
 
@@ -23,7 +23,7 @@ struct AddContactMenu: View {
     @State private var showAlert = false
     // note: dismissLabel is not accessed but defined at the .alert() section
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @State private var invitationResult: Dictionary<String, AnyObject>? = nil
+    @State private var invitationResult: [String:AnyObject]? = nil
 
     @ObservedObject private var overlay = LoadingOverlayState()
 
@@ -34,16 +34,27 @@ struct AddContactMenu: View {
     private let dismissWithNewContact: (MLContact) -> ()
     private let preauthToken: String?
 
-    init(delegate: SheetDismisserProtocol, dismissWithNewContact: @escaping (MLContact) -> (), prefillJid: String = "", preauthToken:String? = nil) {
+    init(delegate: SheetDismisserProtocol, dismissWithNewContact: @escaping (MLContact) -> (), prefillJid: String = "", preauthToken:String? = nil, prefillAccount:xmpp? = nil, omemoFingerprints: [NSNumber:Data]? = nil) {
         self.delegate = delegate
         self.dismissWithNewContact = dismissWithNewContact
         //self.toAdd = State(wrappedValue: prefillJid)
         self.toAdd = prefillJid
         self.preauthToken = preauthToken
+        //only display omemo ui part if there are any fingerprints (the checks below test for nil, not for 0)
+        if omemoFingerprints?.count ?? 0 > 0 {
+            self.scannedFingerprints = omemoFingerprints
+        }
         
         let connectedAccounts = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
         self.connectedAccounts = connectedAccounts
         self.selectedAccount = connectedAccounts.first != nil ? 0 : -1;
+        if let prefillAccount = prefillAccount {
+            for index in connectedAccounts.indices {
+                if connectedAccounts[index].accountNo.isEqual(to:prefillAccount.accountNo) {
+                    self.selectedAccount = index
+                }
+            }
+        }
     }
     
     // FIXME duplicate code from WelcomeLogIn.swift, maybe move to SwiftuiHelpers
@@ -84,11 +95,33 @@ struct AddContactMenu: View {
         return toAddEmpty || toAddInvalid ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
     }
 
+    func trustFingerprints(_ fingerprints:[NSNumber:Data]?, for jid:String, on account:xmpp) {
+        //we don't untrust other devices not included in here, because conversations only exports its own fingerprint
+        if let fingerprints = fingerprints {
+            for (deviceId, fingerprint) in fingerprints {
+                let address = SignalAddress.init(name:jid, deviceId:deviceId.int32Value)
+                let knownDevices = Array(account.omemo.knownDevices(forAddressName:jid))
+                if !knownDevices.contains(deviceId) {
+                    account.omemo.addIdentityManually(address, identityKey:fingerprint)
+                    assert(account.omemo.getIdentityFor(address) == fingerprint, "The stored and created fingerprint should match")
+                }
+                //trust device/fingerprint if fingerprints match
+                let knownFingerprintHex = HelperTools.signalHexKey(with:account.omemo.getIdentityFor(address))
+                let addedFingerprintHex = HelperTools.signalHexKey(with:fingerprint)
+                if knownFingerprintHex.uppercased() == addedFingerprintHex.uppercased() {
+                    account.omemo.updateTrust(true, for:address)
+                }
+            }
+        }
+    }
+    
     func addJid(jid: String) {
         let account = self.connectedAccounts[selectedAccount]
         let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
         if contact.isInRoster {
             self.newContact = contact
+            //import omemo fingerprints as manually trusted, if requested
+            trustFingerprints(self.importScannedFingerprints ? self.scannedFingerprints : [:], for:jid, on:account)
             if self.connectedAccounts.count > 1 {
                 successAlert(title: Text("Already present"), message: Text("This contact is already in the contact list of the selected account"))
             } else {
@@ -103,17 +136,19 @@ struct AddContactMenu: View {
                 let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
                 self.newContact = contact
                 MLXMPPManager.sharedInstance().add(contact, withPreauthToken:preauthToken)
+                //import omemo fingerprints as manually trusted, if requested
+                trustFingerprints(self.importScannedFingerprints ? self.scannedFingerprints : [:], for:jid, on:account)
                 successAlert(title: Text("Permission Requested"), message: Text("The new contact will be added to your contacts list when the person you've added has approved your request."))
             } else if(type == "muc") {
-                showLoadingOverlay(overlay, headline: NSLocalizedString("Adding MUC...", comment: ""))
+                showLoadingOverlay(overlay, headline: NSLocalizedString("Adding Group/Channel...", comment: ""))
                 account.mucProcessor.addUIHandler({data in
                     let success : Bool = (data as! NSDictionary)["success"] as! Bool;
                     hideLoadingOverlay(overlay)
                     if(success) {
                         self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
-                        successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined MUC %@!", jid)))
+                        successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined group/channel %@!", jid)))
                     } else {
-                        errorAlert(title: Text("Error entering MUC!"))
+                        errorAlert(title: Text("Error entering group/channel!"))
                     }
                 }, forMuc: jid)
                 account.joinMuc(jid)
@@ -182,7 +217,7 @@ struct AddContactMenu: View {
                                 return
                             }
                             // use the canonized jid from now on (lowercased, resource removed etc.)
-                            addJid(jid: jidComponents["user"]!) // check if user entry exists in components?
+                            addJid(jid: jidComponents["user"]!)
                         }
                     }, label: {
                         scannedFingerprints == nil ? Text("Add Group/Channel or Contact") : Text("Add scanned Group/Channel or Contact")
@@ -251,7 +286,7 @@ struct AddContactMenu: View {
                         DDLogVerbose("Trying to create invitation for: \(String(describing:splitJid["host"]!))")
                         showLoadingOverlay(overlay, headline: NSLocalizedString("Creating invitation...", comment: ""))
                         account.createInvitation(completion: {
-                            let result = $0 as! Dictionary<String, AnyObject>
+                            let result = $0 as! [String:AnyObject]
                             DispatchQueue.main.async {
                                 hideLoadingOverlay(overlay)
                                 DDLogVerbose("Got invitation result: \(String(describing:result))")
@@ -275,16 +310,9 @@ struct AddContactMenu: View {
         })
         .sheet(isPresented: $showQRCodeScanner) {
             NavigationView {
-                MLQRCodeScanner(
-                    handleContact: { jid, fingerprints in
-                        self.toAdd = jid
-                        self.scannedFingerprints = fingerprints
-                        self.importScannedFingerprints = true
-                        self.showQRCodeScanner = false
-                    }, handleClose: {
-                        self.showQRCodeScanner = false
-                    }
-                )
+                MLQRCodeScanner(handleClose: {
+                    self.showQRCodeScanner = false
+                })
                 .navigationTitle("QR-Code Scanner")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar(content: {

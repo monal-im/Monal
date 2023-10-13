@@ -532,13 +532,9 @@ a=max-message-size:262144\n" withInitiator:YES]);
     [self configureBackgroundTasks];
     
     // Play audio even if phone is in silent mode
-    NSError* audioSessionError;
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&audioSessionError];
-    if(audioSessionError != nil)
-    {
-        DDLogWarn(@"Couldn't set AVAudioSession to AVAudioSessionCategoryPlayback: %@", audioSessionError);
-    }
-
+    [HelperTools configureDefaultAudioSession];
+    self.audioState = MLAudioStateNormal;
+    
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
@@ -722,8 +718,9 @@ a=max-message-size:262144\n" withInitiator:YES]);
             BOOL isGroupJoin = NO;
             BOOL isIbr = NO;
             NSString* preauthToken = nil;
-            //someone had the really superior (NOT!) idea to split uri query parts by ';' instead of the standard '&' making all existing uri libs useless
-            //see: https://xmpp.org/extensions/xep-0147.html
+            NSMutableDictionary<NSNumber*, NSData*>* omemoFingerprints = [NSMutableDictionary new];
+            //someone had the really superior (NOT!) idea to split uri query parts by ';' instead of the standard '&'
+            //making all existing uri libs useless, see: https://xmpp.org/extensions/xep-0147.html
             //blame this author: Peter Saint-Andre
             NSArray* queryItems = [components.query componentsSeparatedByString:@";"];
             for(NSString* item in queryItems)
@@ -744,6 +741,12 @@ a=max-message-size:262144\n" withInitiator:YES]);
                     isIbr = YES;
                 if([name isEqualToString:@"preauth"])
                     preauthToken = [value copy];
+                if([name hasPrefix:@"omemo-sid-"])
+                {
+                    NSNumber* sid = [NSNumber numberWithUnsignedInteger:(NSUInteger)[[name substringFromIndex:10] longLongValue]];
+                    NSData* fingerprint = [HelperTools signalIdentityWithHexKey:value];
+                    omemoFingerprints[sid] = fingerprint;
+                }
             }
             
             if(!jidParts[@"host"])
@@ -752,14 +755,21 @@ a=max-message-size:262144\n" withInitiator:YES]);
                 return;
             }
             
-            if(isRegister || (isRoster && isIbr && registerNeeded))
+            if(isRegister || (isRoster && registerNeeded))
             {
                 NSString* username = nilDefault(jidParts[@"node"], @"");
                 NSString* host = jidParts[@"host"];
                 
                 if(isRoster)
-                    username = @"";         //roster does not specify a predefined username for the new account, register does (optional)
+                {
+                    //isRoster variant does not specify a predefined username for the new account, register does (but this is still optional)
+                    username = @"";
+                    //isRoster variant without ibr does not specify a host to register on, too
+                    if(!isIbr)
+                        host = @"";
+                }
                 
+                //show register view and, if isRoster, add contact as usual after register (e.g. call this method again)
                 weakify(self);
                 [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^(NSNumber* accountNo) {
                     strongify(self);
@@ -776,32 +786,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
                     
                     //add given jid to our roster if in roster mode (e.g. the jid is not the jid we just registered as like in register mode)
                     if(account != nil && isRoster)      //silence memory warning despite assertion above
-                    {
-                        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-                        DDLogInfo(@"Adding contact to roster: %@", contact);
-                        //will handle group joins and normal contacts transparently and even implement roster subscription pre-approval
-                        [[MLXMPPManager sharedInstance] addContact:contact withPreauthToken:preauthToken];
-                        [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
-                        [self openChatOfContact:contact];
-                    }
-                }];
-            }
-            else if(isRoster && registerNeeded)
-            {
-                //show register view and after register add contact as usual (e.g. call this method again)
-                weakify(self);
-                [self.activeChats showRegisterWithUsername:@"" onHost:@"" withToken:nil usingCompletion:^(NSNumber* accountNo) {
-                    strongify(self);
-                    DDLogVerbose(@"Got accountNo for newly registered account: %@", accountNo);
-                    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
-                    DDLogInfo(@"Got newly registered account: %@", account);
-                    
-                    //this should never happen
-                    MLAssert(account != nil, @"Can not use account after register!", (@{
-                        @"components": components,
-                    }));
-                    
-                    [self handleXMPPURL:url];
+                        [self handleXMPPURL:url];
                 }];
             }
             //I know this if is moot, but I wanted to preserve the different cases:
@@ -812,19 +797,13 @@ a=max-message-size:262144\n" withInitiator:YES]);
             {
                 if([MLXMPPManager sharedInstance].connectedXMPP.count == 1)
                 {
+                    //the add contacts ui will check if the contact is already present on the selected account
                     xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
-                    MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-                    if(contact.isInRoster)
-                    {
-                        [[DataLayer sharedInstance] addActiveBuddies:jid forAccount:account.accountNo];
-                        [self openChatOfContact:contact];
-                    }
-                    else
-                        [self.activeChats showAddContactWithJid:jid andPreauthToken:preauthToken];
+                    [self.activeChats showAddContactWithJid:jid preauthToken:preauthToken prefillAccount:account andOmemoFingerprints:omemoFingerprints];
                 }
                 else
                     //the add contacts ui will check if the contact is already present on the selected account
-                    [self.activeChats showAddContactWithJid:jid andPreauthToken:preauthToken];
+                    [self.activeChats showAddContactWithJid:jid preauthToken:preauthToken prefillAccount:nil andOmemoFingerprints:omemoFingerprints];
             }
             else
             {

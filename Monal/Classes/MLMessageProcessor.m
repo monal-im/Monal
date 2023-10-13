@@ -130,64 +130,70 @@ static NSMutableDictionary* _typingNotifications;
         MLContact* jmiContact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:account.accountNo];
         if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
             jmiContact = [MLContact createContactFromJid:messageNode.toUser andAccountNo:account.accountNo];
-        //only handle jmi stanzas exchanged with contacts in our roster
-        if(jmiContact.isInRoster)
+        
+        //only handle *incoming* call proposals
+        if([messageNode check:@"{urn:xmpp:jingle-message:0}propose"])
         {
-            //only handle *incoming* call proposals
-            if([messageNode check:@"{urn:xmpp:jingle-message:0}propose"])
+            if(![messageNode.toUser isEqualToString:account.connectionProperties.identity.jid])
             {
-                if(![messageNode.toUser isEqualToString:account.connectionProperties.identity.jid])
-                {
-                    //TODO: record this call in history db even if it was outgoing from another device on our account
-                    DDLogWarn(@"Ignoring incoming JMI propose coming from another device on our account");
-                    return message;
-                }
-                NSDate* delayStamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
-                if(delayStamp == nil)
-                    delayStamp = [NSDate date];
-                if([[NSDate date] timeIntervalSinceDate:delayStamp] > 60.0)
-                {
-                    DDLogWarn(@"Ignoring incoming JMI propose: too old");
-                    return message;
-                }
-                
-                //only allow audio calls for now
-                if([messageNode check:@"{urn:xmpp:jingle-message:0}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=audio>"])
-                {
-                    DDLogInfo(@"Got incoming JMI propose");
-                    NSDictionary* callData = @{
-                        @"messageNode": messageNode,
-                        @"accountNo": account.accountNo,
-                    };
-                    //this is needed because this file resides in the monalxmpp compilation unit while the MLVoipProcessor resides
-                    //in the monal compilation unit (the ui unit), the NSE resides in yet another compilation unit (the nse-appex unit)
-                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:account userInfo:callData];
-                }
-                else
-                    DDLogWarn(@"Ignoring incoming non-audio JMI call, not implemented yet");
+                //TODO: record this call in history db even if it was outgoing from another device on our account
+                DDLogWarn(@"Ignoring incoming JMI propose coming from another device on our account");
                 return message;
             }
-            //handle all other JMI events (TODO: add entry to local history, once the UI for this is implemented)
+            
+            //only handle jmi stanzas exchanged with contacts allowed to see us and ignore all others
+            //--> no presence leak and no unwanted spam calls
+            //but: outgoing calls are still allowed even without presence subscriptions in either direction
+            if(!jmiContact.isSubscribedFrom)
+            {
+                DDLogWarn(@"Ignoring incoming JMI propose coming from a contact we are not subscribed from");
+                return message;
+            }
+            
+            NSDate* delayStamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
+            if(delayStamp == nil)
+                delayStamp = [NSDate date];
+            if([[NSDate date] timeIntervalSinceDate:delayStamp] > 60.0)
+            {
+                DDLogWarn(@"Ignoring incoming JMI propose: too old");
+                return message;
+            }
+            
+            //only allow audio calls for now
+            if([messageNode check:@"{urn:xmpp:jingle-message:0}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=audio>"])
+            {
+                DDLogInfo(@"Got incoming JMI propose");
+                NSDictionary* callData = @{
+                    @"messageNode": messageNode,
+                    @"accountNo": account.accountNo,
+                };
+                //this is needed because this file resides in the monalxmpp compilation unit while the MLVoipProcessor resides
+                //in the monal compilation unit (the ui unit), the NSE resides in yet another compilation unit (the nse-appex unit)
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:account userInfo:callData];
+            }
+            else
+                DDLogWarn(@"Ignoring incoming non-audio JMI call, not implemented yet");
+            return message;
+        }
+        //handle all other JMI events (TODO: add entry to local history, once the UI for this is implemented)
+        //if the corresponding call is unknown these will just be ignored by MLVoipProcessor --> no presence leak
+        else
+        {
+            DDLogInfo(@"Got %@ for JMI call %@", [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*$"], [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id"]);
+            if([HelperTools isAppExtension])
+                DDLogWarn(@"Ignoring incoming JMI message: we are in the appex which means any outgoing or ongoing call was already terminated");
             else
             {
-                DDLogInfo(@"Got %@ for JMI call %@", [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*$"], [messageNode findFirst:@"{urn:xmpp:jingle-message:0}*@id"]);
-                if([HelperTools isAppExtension])
-                    DDLogWarn(@"Ignoring incoming JMI message: we are in the appex which means any outgoing or ongoing call was already terminated");
-                else
-                {
-                    NSDictionary* callData = @{
-                        @"messageNode": messageNode,
-                        @"accountNo": account.accountNo,
-                    };
-                    //this is needed because this file resides in the monalxmpp compilation unit while the MLVoipProcessor resides
-                    //in the monal compilation unit (the ui unit), the NSE resides in yet another compilation unit (the nse-appex unit)
-                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingJMIStanza object:account userInfo:callData];
-                }
-                return message;
+                NSDictionary* callData = @{
+                    @"messageNode": messageNode,
+                    @"accountNo": account.accountNo,
+                };
+                //this is needed because this file resides in the monalxmpp compilation unit while the MLVoipProcessor resides
+                //in the monal compilation unit (the ui unit), the NSE resides in yet another compilation unit (the nse-appex unit)
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingJMIStanza object:account userInfo:callData];
             }
-        }
-        else
             return message;
+        }
     }
     
     //ignore muc PMs (after discussion with holger we don't want to support that)

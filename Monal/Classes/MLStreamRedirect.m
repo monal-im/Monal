@@ -185,7 +185,7 @@
 {
     [self->_threadCondition lock];
     if(![self->_threadCondition waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:timeout]])
-        DDLogError(@"Timeout waiting for UUID EOF marker at outfd %d!", fileno(self->_stream));
+        DDLogWarn(@"Timeout waiting for UUID EOF marker at outfd %d!", fileno(self->_stream));
     [self->_threadCondition unlock];
 }
 

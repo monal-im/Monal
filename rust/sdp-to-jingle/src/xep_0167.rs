@@ -642,8 +642,12 @@ impl JingleRtpSessions {
                     SdpAttribute::Group(_) => {}
                     SdpAttribute::IceLite => {}
                     SdpAttribute::IceMismatch => {}
-                    SdpAttribute::IceOptions(_) => {
-                        // hardcoded by xep to "trickle", but what about "renomination"?
+                    SdpAttribute::IceOptions(options) => {
+                        // hardcoded by tribal knowledge to "trickle", but we want to negotiate other options, too
+                        // see https://codeberg.org/iNPUTmice/Conversations/commit/fd4b8ba1885a9f6e24a87e47c3a6a730f9ed15f8
+                        for option in options {
+                            media_transport.add_ice_option(option);
+                        }
                     }
                     SdpAttribute::IcePacing(_) => {}
                     SdpAttribute::IcePwd(s) => {
@@ -834,14 +838,7 @@ impl JingleRtpSessions {
                         ));
                     }
                     let media = sdp.media.last_mut().unwrap();
-
-                    // hardcoded by xep to "trickle", but what about "renomination"?
-                    media.add_attribute(SdpAttribute::IceOptions(
-                        ["trickle" /*, "renomination"*/]
-                            .iter()
-                            .map(|s| s.to_string())
-                            .collect(),
-                    ))?;
+                    let mut ice_options: Vec<String> = Vec::new();
 
                     // ...after that: fill media attributes
                     media.add_attribute(SdpAttribute::Mid(jingle_content.name.clone()))?;
@@ -876,6 +873,12 @@ impl JingleRtpSessions {
                                             media.add_attribute(SdpAttribute::Candidate(
                                                 candidate.to_sdp(transport.get_ufrag())?,
                                             ))?;
+                                        }
+                                        JingleTransportItems::Trickle(_) => {
+                                            ice_options.push("trickle".to_string());
+                                        }
+                                        JingleTransportItems::Renomination(_) => {
+                                            ice_options.push("renomination".to_string());
                                         }
                                         JingleTransportItems::Invalid => {}
                                     }
@@ -971,6 +974,17 @@ impl JingleRtpSessions {
                             }
                             JingleDes::Invalid => continue,
                         }
+                    }
+                    if ice_options.is_empty() {
+                        // hardcoded by tribal knowledge to "trickle"
+                        media.add_attribute(SdpAttribute::IceOptions(
+                            ["trickle"].iter().map(|s| s.to_string()).collect(),
+                        ))?;
+                    } else {
+                        // use xep-gultsch (see https://codeberg.org/iNPUTmice/Conversations/commit/fd4b8ba1885a9f6e24a87e47c3a6a730f9ed15f8)
+                        media.add_attribute(SdpAttribute::IceOptions(
+                            ice_options.iter().map(|s| s.to_string()).collect(),
+                        ))?;
                     }
                 }
                 RootEnum::Invalid => {}

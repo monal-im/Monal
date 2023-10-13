@@ -137,6 +137,7 @@
     if(_account == ((xmpp*)notification.object))
     {
         //fake incoming bookmarks push by pulling all bookmarks2 items (but only if we want to use bookmarks2 instead of old-style boommarks)
+        //don't use [self updateBookmarks] to not update anything (e.g. readd a bookmark removed by another client)
         if(!_hasFetchedBookmarks && _account.connectionProperties.supportsBookmarksCompat)
             [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler, $ID(type, @"publish"))];
     }
@@ -866,7 +867,10 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         DDLogInfo(@"Clearing muc participants and members tables for %@", iqNode.fromUser);
         [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser forAccountId:_account.accountNo];
     
-        //load members/admins/owners list
+        //now try to join this room if requested
+        [self sendJoinPresenceFor:iqNode.fromUser];
+        
+        //load members/admins/owners list (this has to be done *after* joining the muc to not get auth errors)
         DDLogInfo(@"Querying members/admin/owner lists for muc %@...", iqNode.fromUser);
         for(NSString* type in @[@"member", @"admin", @"owner"])
         {
@@ -874,9 +878,6 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
             [discoInfo setMucListQueryFor:type];
             [_account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
         }
-    
-        //now try to join this room if requested
-        [self sendJoinPresenceFor:iqNode.fromUser];
     }
 $$
 
@@ -1002,7 +1003,7 @@ $$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, accoun
         if([HelperTools isAppExtension] && imageData.length > 128 * 1024)
         {
             DDLogWarn(@"Not processing avatar image data of muc '%@' because it is too big to be handled in appex (%lu bytes), rescheduling it to be fetched in mainapp", iqNode.fromUser, (unsigned long)imageData.length);
-            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(iqNode.fromUser))];
+            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid, iqNode.fromUser))];
             return;
         }
         
@@ -1025,7 +1026,7 @@ $$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, accoun
         else
         {
             DDLogWarn(@"Not loading avatar image of muc '%@' because it is too big to be processed in appex (%lux%lu pixels), rescheduling it to be fetched in mainapp", iqNode.fromUser, (unsigned long)image.size.width, (unsigned long)image.size.height);
-            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(iqNode.fromUser))];
+            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid, iqNode.fromUser))];
         }
     }
 $$

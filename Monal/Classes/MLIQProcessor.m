@@ -77,21 +77,23 @@
 
 +(void) processSetIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
+    //these iqs will be ignored if not matching an outgoing or incoming call
+    //--> no presence leak if the call was not outgoing, because the jmi stanzas creating the call will
+    //not be processed without isSubscribedFrom in the first place
+    if(([iqNode check:@"{urn:xmpp:jingle:1}jingle"] && ![iqNode check:@"{urn:xmpp:jingle:1}jingle<action=transport-info>"]))
+    {
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingSDP object:account userInfo:@{@"iqNode": iqNode}];
+        return;
+    }
+    if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=transport-info>"])
+    {
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingICECandidate object:account userInfo:@{@"iqNode": iqNode}];
+        return;
+    }
+    
     MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
     if([account.connectionProperties.identity.jid isEqualToString:iqNode.fromUser] || (contact.isSubscribedFrom && !contact.isGroup))
     {
-        if(([iqNode check:@"{urn:xmpp:jingle:1}jingle"] && ![iqNode check:@"{urn:xmpp:jingle:1}jingle<action=transport-info>"]))
-        {
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingSDP object:account userInfo:@{@"iqNode": iqNode}];
-            return;
-        }
-        
-        if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=transport-info>"])
-        {
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingICECandidate object:account userInfo:@{@"iqNode": iqNode}];
-            return;
-        }
-        
         //its a roster push (sanity check will be done in processRosterWithAccount:andIqNode:)
         if([iqNode check:@"{jabber:iq:roster}query"])
         {

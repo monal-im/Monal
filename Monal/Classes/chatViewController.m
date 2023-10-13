@@ -35,7 +35,6 @@
 
 #import <Monal-Swift.h>
 #import <stdatomic.h>
-#import "IDMPhotoBrowser.h"
 
 #define UPLOAD_TYPE_IMAGE @"UploadTypeImage";
 #define UPLOAD_TYPE_URL @"UploadTypeURL";
@@ -48,7 +47,7 @@
 
 @class MLEmoji;
 
-@interface chatViewController()<IDMPhotoBrowserDelegate, ChatInputActionDelegage, UISearchControllerDelegate>
+@interface chatViewController()<ChatInputActionDelegage, UISearchControllerDelegate>
 {
     BOOL _isTyping;
     monal_void_block_t _cancelTypingNotification;
@@ -67,7 +66,6 @@
 @property (nonatomic, strong) UIBarButtonItem* callButton;
 
 @property (nonatomic, strong) NSMutableArray<MLMessage*>* messageList;
-@property (nonatomic, strong) NSMutableArray* photos;
 @property (nonatomic, strong) UIDocumentPickerViewController* filePicker;
 
 @property (nonatomic, assign) BOOL sendLocation; // used for first request
@@ -245,7 +243,7 @@ enum msgSentState {
         //this does not matter if we aren't already in the main thread, hence the async dispatch
         [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
             //these contact types can not be called
-            if(self.contact.isGroup || self.contact.isSelfChat || !self.contact.isSubscribedBoth)
+            if(self.contact.isGroup || self.contact.isSelfChat)
             {
                 self.callButton = nil;
                 
@@ -502,7 +500,7 @@ enum msgSentState {
 #if TARGET_OS_MACCATALYST
         style = UIAlertControllerStyleAlert;
 #endif
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact may to not support Monal-Style calls. Your call might never reach its destination.", @"") preferredStyle:style];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact may not support calls. Your call might never reach its destination.", @"") preferredStyle:style];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Try nevertheless", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
             
@@ -2330,37 +2328,17 @@ enum msgSentState {
                 DDLogVerbose(@"Trying to open link in chat cell");
                 [(MLChatCell *)cell openlink:self];
             } else  {
-                //TODO: fork swiftui image viewer (https://github.com/Jake-Short/swiftui-image-viewer),
-                //TODO: add support for FLAnimatedImage (https://github.com/Flipboard/FLAnimatedImage) using NSViewRepresentable
-                //TODO: or this so answer using quartz: https://stackoverflow.com/a/70369611/3528174
-                self.photos = [NSMutableArray new];
-                MLChatImageCell* imageCell = (MLChatImageCell *) cell;
-                IDMPhoto* photo = [IDMPhoto photoWithImage:[imageCell getDisplayedImage]];
-                // photo.caption=[row objectForKey:@"caption"];
-                [self.photos addObject:photo];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSDictionary* info = [MLFiletransfer getFileInfoForMessage:[self.messageList objectAtIndex:indexPath.row]];
+                    UIImage* image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
+                    NSData* animatedImageData = nil;
+                    if([info[@"mimeType"] hasPrefix:@"image/gif"])
+                        animatedImageData = [NSData dataWithContentsOfFile:info[@"cacheFile"]];
+                    UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewer:image withFilename:info[@"filename"] andAnimatedImageData:animatedImageData];
+                    imageViewer.modalPresentationStyle = UIModalPresentationFullScreen;
+                    [self presentViewController:imageViewer animated:YES completion:^{}];
+                });
             }
-
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(self.photos.count > 0) {
-                    IDMPhotoBrowser* browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
-                    browser.delegate=self;
-
-                    UIBarButtonItem* close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"") style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
-                    browser.navigationItem.leftBarButtonItem = close;
-
-                    //                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
-                    //                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
-                    //                browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
-                    //                browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
-                    //                browser.alwaysShowControls = NO; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
-                    //                browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
-                    //                browser.startOnGrid = NO; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
-                    //
-                    UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:browser];
-
-                    [self presentViewController:nav animated:YES completion:nil];
-                }
-            });
         }
     }
 }
@@ -3050,23 +3028,6 @@ enum msgSentState {
         resultHandler();
     }] resume];
 }
-
-#pragma mark - photo browser delegate
-
--(NSUInteger)numberOfPhotosInPhotoBrowser:(IDMPhotoBrowser*) photoBrowser
-{
-    return self.photos.count;
-}
-
--(id<IDMPhoto>) photoBrowser:(IDMPhotoBrowser*) photoBrowser photoAtIndex:(NSUInteger) index
-{
-    if (index < self.photos.count)
-    {
-        return [self.photos objectAtIndex:index];
-    }
-    return nil;
-}
-
 
 #pragma mark - Keyboard
 

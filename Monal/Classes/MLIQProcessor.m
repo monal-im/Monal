@@ -526,6 +526,9 @@ $$class_handler(handleServerDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
     if([features containsObject:@"urn:xmpp:ping"])
         account.connectionProperties.supportsPing = YES;
     
+    if([features containsObject:@"urn:xmpp:extdisco:2"])
+        account.connectionProperties.supportsExternalServiceDiscovery = YES;
+
     if([features containsObject:@"urn:xmpp:blocking"])
     {
         account.connectionProperties.supportsBlocking = YES;

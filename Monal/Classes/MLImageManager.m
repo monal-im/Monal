@@ -7,6 +7,7 @@
 //
 
 #import "MLImageManager.h"
+#import "MLXMPPManager.h"
 #import "HelperTools.h"
 #import "DataLayer.h"
 #import "AESGcm.h"
@@ -180,7 +181,16 @@
 
 -(UIImage*) generateDummyIconForContact:(MLContact*) contact
 {
-    NSString* contactLetter = [[[contact contactDisplayName] substringToIndex:1] uppercaseString];
+    NSString* contactLetter;
+
+    if(contact.isSelfChat)
+    {
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
+        contactLetter = [[[MLContact ownDisplayNameForAccount:account] substringToIndex:1] uppercaseString];
+    }
+    else
+        contactLetter = [[[contact contactDisplayName] substringToIndex:1] uppercaseString];
+
     UIColor* background = [HelperTools generateColorFromJid:contact.contactJid];
     UIColor* foreground = [UIColor blackColor];
     if(![background isLightColor])

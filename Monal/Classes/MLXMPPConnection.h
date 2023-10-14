@@ -54,6 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL supportsBlocking;
 @property (nonatomic, assign) BOOL supportsPing;
+@property (nonatomic, assign) BOOL supportsExternalServiceDiscovery;
 @property (nonatomic, assign) BOOL supportsPubSub;
 @property (nonatomic, assign) BOOL supportsPubSubMax;
 @property (nonatomic, assign) BOOL supportsModernPubSub;

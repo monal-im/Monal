@@ -3333,6 +3333,7 @@ NSString* const kStanza = @"stanza";
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsModernPubSub] forKey:@"supportsModernPubSub"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsExternalServiceDiscovery] forKey:@"supportsExternalServiceDiscovery"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
@@ -3531,6 +3532,12 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsPing = supportsPing.boolValue;
             }
             
+            if([dic objectForKey:@"supportsExternalServiceDiscovery"])
+            {
+                NSNumber* supportsExternalServiceDiscovery = [dic objectForKey:@"supportsExternalServiceDiscovery"];
+                self.connectionProperties.supportsExternalServiceDiscovery = supportsExternalServiceDiscovery.boolValue;
+            }
+
             if([dic objectForKey:@"lastInteractionDate"])
                 _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
             
@@ -3826,6 +3833,7 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.supportsModernPubSub = NO;
     self.connectionProperties.supportsHTTPUpload = NO;
     self.connectionProperties.supportsPing = NO;
+    self.connectionProperties.supportsExternalServiceDiscovery = NO;
     self.connectionProperties.supportsRosterPreApproval = NO;
     
     //clear list of running mam queries

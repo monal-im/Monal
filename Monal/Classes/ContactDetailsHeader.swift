@@ -22,7 +22,7 @@ struct ContactDetailsHeader: View {
                 Spacer()
                 Image(uiImage: contact.avatar)
                     .resizable()
-                    .frame(minWidth: 100, idealWidth: 150, maxWidth: 200, minHeight: 100, idealHeight: 150, maxHeight: 200, alignment: .center)
+                    .frame(width: 150, height: 150, alignment: .center)
                     .scaledToFit()
                     .shadow(radius: 7)
                 Spacer()

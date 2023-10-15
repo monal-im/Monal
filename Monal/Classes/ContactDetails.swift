@@ -49,18 +49,15 @@ struct ContactDetails: View {
                         if(contact.isMuted) {
                             Image(systemName: "bell.slash.fill")
                                 .foregroundColor(.red)
-                            Text("Contact is muted")
-                                .foregroundColor(.accentColor)
+                            contact.isGroup ? Text("Notifications disabled") : Text("Contact is muted")
                         } else if(contact.isGroup && contact.isMentionOnly) {
                             Image(systemName: "bell.badge")
                                 .foregroundColor(.accentColor)
-                            Text("Group/Channel is mention only")
-                                .foregroundColor(.accentColor)
+                            Text("Notify only when mentioned")
                         } else {
                             Image(systemName: "bell.fill")
                                 .foregroundColor(.green)
-                            Text("Contact is not muted")
-                                .foregroundColor(.accentColor)
+                            contact.isGroup ? Text("Notify on all messages") : Text("Contact is not muted")
                         }
                     }
                 }
@@ -115,7 +112,7 @@ struct ContactDetails: View {
 #endif
                 
                 if(!contact.isGroup && !contact.isSelfChat) {
-                    TextField("Change Nickname", text: $contact.nickNameView)
+                    TextField("Rename Contact", text: $contact.nickNameView)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .addClearButton(text:$contact.nickNameView)
                 }
@@ -157,7 +154,7 @@ struct ContactDetails: View {
                 }
                 
                 NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact, delegate:delegate))) {
-                    Text("Change Contact Background")
+                    Text("Change Chat Background")
                 }
             }
             .listStyle(.plain)

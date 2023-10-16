@@ -233,10 +233,17 @@ static NSMutableDictionary* _typingNotifications;
             DDLogVerbose(@"Not a carbon copy of a muc pm for contact: %@", carbonTestContact);
     }
 
+    NSString* possibleUnkownContact;
+    if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+        possibleUnkownContact = messageNode.toUser;
+    else
+        possibleUnkownContact = messageNode.fromUser;
+    
     if(([messageNode check:@"/<type=groupchat>"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
-        // Ignore all group chat msgs from unkown groups
-        if([[DataLayer sharedInstance] isContactInList:messageNode.fromUser forAccount:account.accountNo] == NO)
+        // Ignore all group chat msgs from unkown groups or 1:1 chats
+        MLContact* mucTestContact = [MLContact createContactFromJid:possibleUnkownContact andAccountNo:account.accountNo];
+        if([[DataLayer sharedInstance] isContactInList:messageNode.fromUser forAccount:account.accountNo] == NO || !mucTestContact.isGroup)
         {
             // ignore message
             DDLogWarn(@"Ignoring groupchat message from %@", messageNode.toUser);
@@ -245,12 +252,6 @@ static NSMutableDictionary* _typingNotifications;
     }
     else
     {
-        NSString* possibleUnkownContact;
-        if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
-            possibleUnkownContact = messageNode.toUser;
-        else
-            possibleUnkownContact = messageNode.fromUser;
-
         // handle KeyTransportMessages directly without adding a 1:1 buddy
         if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] == YES && [messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload#"] == NO)
         {

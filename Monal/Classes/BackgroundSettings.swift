@@ -125,7 +125,7 @@ struct BackgroundSettings: View {
                 }
             }
         }
-        .navigationBarTitle(contact != nil ? Text("Contact Background") : Text("Default Background"))
+        .navigationBarTitle(contact != nil ? Text("Chat Background") : Text("Default Background"))
         .onChange(of:inputImage) { _ in
             MLImageManager.sharedInstance().saveBackgroundImageData(inputImage?.pngData(), for:self.contact?.obj)
         }

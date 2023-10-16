@@ -526,6 +526,9 @@ $$class_handler(handleServerDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
     if([features containsObject:@"urn:xmpp:ping"])
         account.connectionProperties.supportsPing = YES;
     
+    if([features containsObject:@"urn:xmpp:extdisco:2"])
+        account.connectionProperties.supportsExternalServiceDiscovery = YES;
+
     if([features containsObject:@"urn:xmpp:blocking"])
     {
         account.connectionProperties.supportsBlocking = YES;
@@ -537,7 +540,7 @@ $$class_handler(handleServerDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
         DDLogInfo(@"supports http upload with server: %@", iqNode.from);
         account.connectionProperties.supportsHTTPUpload = YES;
         account.connectionProperties.uploadServer = iqNode.from;
-        account.connectionProperties.uploadSize = [[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{urn:xmpp:http:upload}result@max-file-size\\|int"] integerValue];
+        account.connectionProperties.uploadSize = [[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{urn:xmpp:http:upload:0}result@max-file-size\\|int"] integerValue];
         DDLogInfo(@"Upload max filesize: %lu", account.connectionProperties.uploadSize);
     }
 $$
@@ -550,7 +553,7 @@ $$class_handler(handleServiceDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         DDLogInfo(@"supports http upload with server: %@", iqNode.from);
         account.connectionProperties.supportsHTTPUpload = YES;
         account.connectionProperties.uploadServer = iqNode.from;
-        account.connectionProperties.uploadSize = [[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{urn:xmpp:http:upload}result@max-file-size\\|int"] integerValue];
+        account.connectionProperties.uploadSize = [[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{urn:xmpp:http:upload:0}result@max-file-size\\|int"] integerValue];
         DDLogInfo(@"Upload max filesize: %lu", account.connectionProperties.uploadSize);
     }
     

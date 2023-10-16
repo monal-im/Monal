@@ -2335,7 +2335,7 @@ enum msgSentState {
                     if([info[@"mimeType"] hasPrefix:@"image/gif"])
                         animatedImageData = [NSData dataWithContentsOfFile:info[@"cacheFile"]];
                     UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewer:image withFilename:info[@"filename"] andAnimatedImageData:animatedImageData];
-                    imageViewer.modalPresentationStyle = UIModalPresentationFullScreen;
+                    imageViewer.modalPresentationStyle = UIModalPresentationOverFullScreen;
                     [self presentViewController:imageViewer animated:YES completion:^{}];
                 });
             }

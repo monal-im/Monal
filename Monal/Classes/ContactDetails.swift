@@ -161,39 +161,37 @@ struct ContactDetails: View {
 
             Section { // the destructive section...
                 if !contact.isSelfChat {
-                    if !contact.isGroup {
-                        Button(action: {
-                            if(!contact.isBlocked) {
-                                showingBlockContactConfirmation = true
-                            } else {
-                                showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
-                            }
-                        }) {
-                            if(!contact.isBlocked) {
-                                Text("Block Contact")
-                                    .foregroundColor(.red)
-                            } else {
-                                Text("Unblock Contact")
-                            }
+                    Button(action: {
+                        if(!contact.isBlocked) {
+                            showingBlockContactConfirmation = true
+                        } else {
+                            showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
                         }
-                        .alert(isPresented: $showingCannotBlockAlert) {
-                            Alert(title: Text("Blocking/Unblocking Not Supported"), message: Text("The server does not support blocking (XEP-0191)."), dismissButton: .default(Text("Close")))
+                    }) {
+                        if(!contact.isBlocked) {
+                            Text("Block Contact")
+                                .foregroundColor(.red)
+                        } else {
+                            Text("Unblock Contact")
                         }
-                        .actionSheet(isPresented: $showingBlockContactConfirmation) {
-                            ActionSheet(
-                                title: Text("Block Contact"),
-                                message: Text("Do you really want to block this contact? You won't receive any messages from this contact."),
-                                buttons: [
-                                    .cancel(),
-                                    .destructive(
-                                        Text("Yes"),
-                                        action: {
-                                            showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
-                                        }
-                                    )
-                                ]
-                            )
-                        }
+                    }
+                    .alert(isPresented: $showingCannotBlockAlert) {
+                        Alert(title: Text("Blocking/Unblocking Not Supported"), message: Text("The server does not support blocking (XEP-0191)."), dismissButton: .default(Text("Close")))
+                    }
+                    .actionSheet(isPresented: $showingBlockContactConfirmation) {
+                        ActionSheet(
+                            title: Text("Block Contact"),
+                            message: Text("Do you really want to block this contact? You won't receive any messages from this contact."),
+                            buttons: [
+                                .cancel(),
+                                .destructive(
+                                    Text("Yes"),
+                                    action: {
+                                        showingCannotBlockAlert = !contact.obj.toggleBlocked(!contact.isBlocked)
+                                    }
+                                )
+                            ]
+                        )
                     }
 
                     Group {

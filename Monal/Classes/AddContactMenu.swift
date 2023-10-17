@@ -179,14 +179,16 @@ struct AddContactMenu: View {
                         .pickerStyle(.menu)
                     }
                     TextField("Contact or Group/Channel Jid", text: $toAdd)
-                        .autocorrectionDisabled()
+                        //ios15: .textInputAutocapitalization(.never)
                         .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                        .keyboardType(.emailAddress)
+                        .addClearButton(text:$toAdd)
                         .disabled(scannedFingerprints != nil)
                         .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
-                        .addClearButton(text:$toAdd)
-                        //ios15: .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
-                        .keyboardType(.emailAddress)
+                        .onChange(of: toAdd) { _ in
+                            toAdd = toAdd.replacingOccurrences(of: " ", with: "")
+                        }
                 }
                 if(scannedFingerprints != nil && scannedFingerprints!.count > 0) {
                     Section(header: Text("A contact was scanned through the QR code scanner")) {

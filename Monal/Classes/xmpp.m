@@ -5144,9 +5144,9 @@ NSString* const kStanza = @"stanza";
         [[MLXMLNode alloc] initWithElement:@"remove"]
     ] andData:nil]];
     [self sendIq:remove withResponseHandler:^(XMPPIQ* result) {
-        //disconnect account (without force) and throw away everything waiting to be processed
+        //disconnect account and throw away everything waiting to be processed
         //(for example the stream close coming from the server after removing the account on the server)
-        [self disconnect];      //this is needed to not show spurious errors on delete
+        [self disconnect:YES];  //this disconnect is needed to not show spurious errors on delete (technically the explicitLogout is not needed, but it doesn't hurt either)
         [[MLXMPPManager sharedInstance] removeAccountForAccountNo:self.accountNo];
         completion(nil);        //signal success to UI
     } andErrorHandler:^(XMPPIQ* error) {

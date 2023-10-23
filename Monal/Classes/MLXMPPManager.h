@@ -41,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  disconnects the specified account
  */
--(void) disconnectAccount:(NSNumber*) accountNo;
+-(void) disconnectAccount:(NSNumber*) accountNo withExplicitLogout:(BOOL) explicitLogout;
 
 /**
  connects the specified account

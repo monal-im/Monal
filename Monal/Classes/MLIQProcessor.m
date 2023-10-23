@@ -252,7 +252,7 @@ $$class_handler(handleBind, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
         if([iqNode check:@"error<type=cancel>"])
         {
             [HelperTools postError:NSLocalizedString(@"XMPP Bind Error", @"") withNode:iqNode andAccount:account andIsSevere:YES];
-            [account disconnect];
+            [account disconnect];       //don't try again until next process start/unfreeze
         }
         else if([iqNode check:@"error<type=modify>"])
             [account bindResource:[HelperTools encodeRandomResource]];      //try to bind a new resource

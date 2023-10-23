@@ -367,7 +367,7 @@ enum DummySettingsRows {
                     else
                     {
                         DDLogVerbose(@"Making sure newly created account is not connected and deleting all SiriKit interactions: %@", self.accountNo);
-                        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+                        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo withExplicitLogout:YES];
                         [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
                             if(error != nil)
                                 DDLogError(@"Could not delete all SiriKit interactions: %@", error);
@@ -391,7 +391,7 @@ enum DummySettingsRows {
         if(!self.enabled)
         {
             DDLogVerbose(@"Account is not enabled anymore, deleting all SiriKit interactions and making sure it's disconnected: %@", self.accountNo);
-            [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo];
+            [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo withExplicitLogout:YES];
             [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
                 if(error != nil)
                     DDLogError(@"Could not delete all SiriKit interactions: %@", error);

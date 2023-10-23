@@ -293,12 +293,14 @@ void swizzle(Class c, SEL orig, SEL new)
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount
 {
     [self postError:description withNode:node andAccount:account andIsSevere:isSevere];
-    [account disconnect];
     
     //make sure we don't try this again even when the mainapp/appex gets restarted
     NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:YES];
     accountDic[kEnabled] = @NO;
     [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
+    
+    //disconnect and reset state (including pipelined auth etc.)
+    [[MLXMPPManager sharedInstance] disconnectAccount:account.accountNo withExplicitLogout:YES];
 }
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere

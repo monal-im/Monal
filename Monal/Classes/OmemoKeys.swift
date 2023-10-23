@@ -364,13 +364,13 @@ struct OmemoKeys: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack{
-                    if(self.account != nil) {
+                    /*if(self.account != nil) {
                         Button(action: {
                             self.navigateToQRCodeScanner = true
                         }, label: {
                             Image(systemName: "camera.fill")
                         })
-                    }
+                    }*/
                     if(self.contacts.count == 1 && self.account != nil) {
                         Button(action: {
                             self.navigateToQRCodeView = true

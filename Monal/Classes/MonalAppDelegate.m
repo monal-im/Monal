@@ -1530,7 +1530,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
                     DDLogDebug(@"_bgTask == UIBackgroundTaskInvalid --> disconnecting and ending background task");
                     
                     //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-                    [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+                    [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:YES];
                     
                     //disconnect all accounts to prevent TCP buffer leaking
                     [[MLXMPPManager sharedInstance] disconnectAll];
@@ -1639,7 +1639,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
                     DDLogDebug(@"_bgTask == UIBackgroundTaskInvalid --> disconnecting and ending background task");
                     
                     //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-                    [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+                    [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:YES];
                     
                     //disconnect all accounts to prevent TCP buffer leaking
                     [[MLXMPPManager sharedInstance] disconnectAll];

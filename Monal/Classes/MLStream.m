@@ -491,12 +491,10 @@
 -(NSArray*) supportedChannelBindingTypes
 {
     //we made sure we only use PFS based ciphers for which tls-exporter can safely be used even with TLS1.2
-    /*
-    //tls-exporter channel binding is only supported with TLS >= 1.3 due to rfc requirement
-    if(!self.isTLS13)
-        return @[];
-    */
-    return @[@"tls-exporter", @"tls-server-end-point"];
+    //BUT: other implementations simply don't support tls-exporter on non-tls1.3 connections --> do the same for compatibility
+    if(self.isTLS13)
+        return @[@"tls-exporter", @"tls-server-end-point"];
+    return @[@"tls-server-end-point"];
 }
 
 -(NSData* _Nullable) channelBindingDataForType:(NSString* _Nullable) type

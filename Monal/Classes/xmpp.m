@@ -145,6 +145,7 @@ NSString* const kStanza = @"stanza";
 
 @property (nonatomic, assign) BOOL resuming;
 @property (atomic, strong) NSString* streamID;
+@property (nonatomic, assign) BOOL isDoingFullReconnect;
 
 /**
  h to go out in r stanza
@@ -242,6 +243,7 @@ NSString* const kStanza = @"stanza";
     
     _stateLockObject = [NSObject new];
     [self initSM3];
+    self.isDoingFullReconnect = YES;
     
     _accountState = kStateLoggedOut;
     _registration = NO;
@@ -1498,7 +1500,8 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
-#pragma mark message ACK
+#pragma mark smacks
+
 -(void) addSmacksHandler:(monal_void_block_t) handler
 {
     @synchronized(_stateLockObject) {
@@ -1560,6 +1563,26 @@ NSString* const kStanza = @"stanza";
             [self persistState];
         }
     }
+}
+
+-(BOOL) shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas
+{
+    @synchronized(_stateLockObject) {
+        DDLogInfo(@"Checking for important unacked stanzas...");
+        for(NSDictionary* dic in self.unAckedStanzas)
+        {
+            MLXMLNode* xmlNode = [dic objectForKey:kStanza];
+            //nonzas are not important here
+            if(![xmlNode isKindOfClass:[XMPPStanza class]])
+                continue;
+            XMPPStanza* stanza = (XMPPStanza*)xmlNode;
+            //important stanzas are message stanzas containing a body element
+            if([stanza.element isEqualToString:@"message"] && [stanza check:@"body"])
+                return YES;
+        }
+    }
+    //no important stanzas found
+    return NO;
 }
 
 -(BOOL) removeAckedStanzasFromQueue:(NSNumber*) hvalue
@@ -2220,6 +2243,7 @@ NSString* const kStanza = @"stanza";
             if(h==nil)
                 return [self invalidXMLError];
             self.resuming = NO;
+            self.isDoingFullReconnect = NO;
 
             //now we are bound again
             _accountState = kStateBound;
@@ -3294,6 +3318,7 @@ NSString* const kStanza = @"stanza";
             [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
             [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
             [values setValue:self.streamID forKey:@"streamID"];
+            [values setObject:[NSNumber numberWithBool:self.isDoingFullReconnect] forKey:@"isDoingFullReconnect"];
 
             NSMutableDictionary* persistentIqHandlers = [NSMutableDictionary new];
             NSMutableDictionary* persistentIqHandlerDescriptions = [NSMutableDictionary new];
@@ -3363,9 +3388,10 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
                 self.accountNo,
                 values[@"stateSavedAt"],
+                bool2str(self.isDoingFullReconnect),
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,
@@ -3418,6 +3444,11 @@ NSString* const kStanza = @"stanza";
             NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
             self.unAckedStanzas = [stanzas mutableCopy];
             self.streamID = [dic objectForKey:@"streamID"];
+            if([dic objectForKey:@"isDoingFullReconnect"])
+            {
+                NSNumber* isDoingFullReconnect = [dic objectForKey:@"isDoingFullReconnect"];
+                self.isDoingFullReconnect = isDoingFullReconnect.boolValue;
+            }
             
             @synchronized(_stateLockObject) {
                 //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
@@ -3583,9 +3614,10 @@ NSString* const kStanza = @"stanza";
                 self.omemo.state = [dic objectForKey:@"omemoState"];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
                 self.accountNo,
                 dic[@"stateSavedAt"],
+                bool2str(self.isDoingFullReconnect),
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,
@@ -3687,6 +3719,7 @@ NSString* const kStanza = @"stanza";
     if([parts count] < 2 || [[HelperTools dataWithHexString:parts[1]] length] < 1)
         return [self bindResource:[HelperTools encodeRandomResource]];
     
+    self.isDoingFullReconnect = YES;
     _accountState = kStateBinding;
     XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:resource];
@@ -3781,6 +3814,7 @@ NSString* const kStanza = @"stanza";
 -(void) initSession
 {
     DDLogInfo(@"Now bound, initializing new xmpp session");
+    self.isDoingFullReconnect = YES;
     
     //delete old resources because we get new presences once we're done initializing the session
     [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
@@ -5066,6 +5100,7 @@ NSString* const kStanza = @"stanza";
 -(void) handleFinishedCatchup
 {
     self->_catchupDone = YES;
+    self.isDoingFullReconnect = NO;
     
     //log catchup statistics
     [self logCatchupStats];

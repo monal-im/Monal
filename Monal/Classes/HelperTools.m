@@ -1305,6 +1305,20 @@ void swizzle(Class c, SEL orig, SEL new)
                         DDLogWarn(@"NOT posting syncError notification for %@ (already did so since last app foreground)...", account.connectionProperties.identity.jid);
                         continue;
                     }
+                    //we always want to post sync errors if we are in the appex (because an incoming push means the server has
+                    //*possibly* queued some messages for us)
+                    //if we are in the main app we only want to post sync errors if we are in one of these states:
+                    //1. we are NOT doing a full reconnect, are in state kStateBound and the smacks queue contains some unacked message
+                    //stanzas having a body --> opening the app while not having an internet connection or only briefly opening the app
+                    //does not generate sync errors
+                    //2. we are doing a full reconnect --> we always want to post sync erros because we have to rejoin mucs,
+                    //set up push etc. and we *really* want to be sure all of these get a chance to complete
+                    //NOTE: this conditions are all swapped and ANDed because we want to continue the loop here instead of posting a sync error
+                    if(![self isAppExtension] && !(!account.isDoingFullReconnect && account.accountState >= kStateBound && [account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas]) && !account.isDoingFullReconnect)
+                    {
+                        DDLogWarn(@"NOT posting syncError notification for %@ (we are not in the appex, no important stanzas are unacked and we are not doing a full reconnect)...", account.connectionProperties.identity.jid);
+                        continue;
+                    }
                     DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);
                     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
                     content.title = NSLocalizedString(@"Could not synchronize", @"");
@@ -1314,8 +1328,8 @@ void swizzle(Class c, SEL orig, SEL new)
                     content.categoryIdentifier = @"simple";
                     //we don't know if and when apple will start the background process or when the next push will come in
                     //--> we need a sync error notification to make the user aware of possible issues
-                    //BUT: we can delay it for some time and hope a background process/push is started in the meantime and removes the notification
-                    //     before it gets displayed at all (we use 60 seconds here)
+                    //BUT: we can delay it for some time and hope a background process/push that removes the notification before it
+                    //is displayed at all is started in the meantime (we use 60 seconds here)
                     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:syncErrorIdentifier content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:60 repeats: NO]];
                     NSError* error = [self postUserNotificationRequest:request];
                     if(error)

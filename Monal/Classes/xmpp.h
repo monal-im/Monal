@@ -84,6 +84,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 @property (nonatomic, readonly) xmppState accountState;
 @property (nonatomic, readonly) BOOL reconnectInProgress;
+@property (nonatomic, readonly) BOOL isDoingFullReconnect;
 
 // discovered properties
 @property (nonatomic, strong) NSArray* discoveredServersList;
@@ -220,6 +221,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 #pragma mark - internal stuff for processors
 
+-(BOOL) shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas;
 -(void) addMessageToMamPageArray:(NSDictionary*) messageDictionary;
 -(NSMutableArray*) getOrderedMamPageFor:(NSString*) mamQueryId;
 -(void) bindResource:(NSString*) resource;

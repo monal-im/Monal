@@ -122,10 +122,13 @@ struct AddContactMenu: View {
             self.newContact = contact
             //import omemo fingerprints as manually trusted, if requested
             trustFingerprints(self.importScannedFingerprints ? self.scannedFingerprints : [:], for:jid, on:account)
-            if self.connectedAccounts.count > 1 {
-                successAlert(title: Text("Already present"), message: Text("This contact is already in the contact list of the selected account"))
-            } else {
-                successAlert(title: Text("Already present"), message: Text("This contact is already in your contact list"))
+            //only alert of already known contact if we did not import the omemo fingerprints
+            if !self.importScannedFingerprints || self.scannedFingerprints?.count ?? 0 == 0 {
+                if self.connectedAccounts.count > 1 {
+                    successAlert(title: Text("Already present"), message: Text("This contact is already in the contact list of the selected account"))
+                } else {
+                    successAlert(title: Text("Already present"), message: Text("This contact is already in your contact list"))
+                }
             }
             return
         }

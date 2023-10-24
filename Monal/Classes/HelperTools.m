@@ -1323,7 +1323,7 @@ void swizzle(Class c, SEL orig, SEL new)
                     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
                     content.title = NSLocalizedString(@"Could not synchronize", @"");
                     content.subtitle = account.connectionProperties.identity.jid;
-                    content.body = NSLocalizedString(@"Please open the app to retry", @"");
+                    content.body = NSLocalizedString(@"Some messages might wait to be retrieved or sent. Please open the app to retry.", @"");
                     content.sound = [UNNotificationSound defaultSound];
                     content.categoryIdentifier = @"simple";
                     //we don't know if and when apple will start the background process or when the next push will come in

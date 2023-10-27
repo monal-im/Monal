@@ -357,8 +357,19 @@
 -(void) freezeAllParseQueues
 {
     DDLogInfo(@"Freezing all incoming streams until we know if we are either terminating or got another push");
+    dispatch_queue_t queue = dispatch_queue_create("im.monal.freezeAllParseQueues", DISPATCH_QUEUE_CONCURRENT);
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
-        [account freezeParseQueue];
+    {
+        //disconnect to prevent endless loops trying to connect
+        dispatch_async(queue, ^{
+            DDLogVerbose(@"freezeAllParseQueues: %@", account);
+            [account freezeParseQueue];
+            DDLogVerbose(@"freezeAllParseQueues: %@", account);
+        });
+    }
+    dispatch_barrier_sync(queue, ^{
+        DDLogVerbose(@"freezeAllParseQueues done (inside barrier)");
+    });
     DDLogInfo(@"All parse queues frozen now");
 }
 

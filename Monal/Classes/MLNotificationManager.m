@@ -790,17 +790,28 @@
 -(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(NSDictionary*) info havingTypeHint:(UTType*) typeHint
 {
     NSError* error;
-    //use ".tmp" extension to make sure this file will be garbage collected if the ios notification attachment should leave it behind
-    NSString* notificationImage = [[[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path] stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.tmp", info[@"cacheId"]]];
-    DDLogVerbose(@"Preparing for notification attachment: hardlinking downloaded file from '%@' to '%@'..", info[@"cacheFile"], notificationImage);
-    error = [HelperTools hardLinkOrCopyFile:info[@"cacheFile"] to:notificationImage];
+    NSString* notificationAttachment = [[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path];
+    //use "tmp." prefix to make sure this file will be garbage collected should the ios notification attachment implementation leave it behind
+    NSString* attachmentBasename = [NSString stringWithFormat:@"tmp.%@", info[@"cacheId"]];
+    //using stringByAppendingPathExtensionForType: does not produce playable audio notifications for audios sent by conversations,
+    //but seems to work for other types
+    //--> use info[@"fileExtension"] for audio files and stringByAppendingPathExtensionForType: for all other types
+    if([typeHint conformsToType:UTTypeAudio])
+        notificationAttachment = [notificationAttachment stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtension:info[@"fileExtension"]]];
+    else
+        notificationAttachment = [notificationAttachment stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtensionForType:typeHint]];
+    DDLogVerbose(@"Preparing for notification attachment(%@): hardlinking downloaded file from '%@' to '%@'..", typeHint, info[@"cacheFile"], notificationAttachment);
+    error = [HelperTools hardLinkOrCopyFile:info[@"cacheFile"] to:notificationAttachment];
     if(error)
     {
         DDLogError(@"Could not hardlink cache file to notification image temp file!");
         return nil;
     }
-    [HelperTools configureFileProtectionFor:notificationImage];
-    return [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:notificationImage] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+    [HelperTools configureFileProtectionFor:notificationAttachment];
+    UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:notificationAttachment] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+    if(error != nil)
+        DDLogError(@"Could not create UNNotificationAttachment: %@", error);
+    return attachment;
 }
 
 -(void) dealloc

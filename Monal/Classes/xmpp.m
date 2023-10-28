@@ -557,12 +557,12 @@ NSString* const kStanza = @"stanza";
     if(self.connectionProperties.server.isDirectTLS == YES)
     {
         DDLogInfo(@"creating directTLS streams");
-        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort inputStream:&localIStream outputStream:&localOStream];
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:YES inputStream:&localIStream outputStream:&localOStream];
     }
     else
     {
         DDLogInfo(@"creating plaintext streams");
-        [NSStream getStreamsToHostWithName:self.connectionProperties.server.connectServer port:self.connectionProperties.server.connectPort.integerValue inputStream:&localIStream outputStream:&localOStream];
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:NO inputStream:&localIStream outputStream:&localOStream];
     }
     
     if(localOStream)
@@ -654,7 +654,7 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"NO SRV records found, using standard xmpp config: %@:%@ (using starttls)", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
         }
     }
-
+    
     // Show warning when xmpp-client srv entry prohibits connections
     for(NSDictionary* row in _discoveredServersList)
     {
@@ -2347,11 +2347,8 @@ NSString* const kStanza = @"stanza";
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
             
-            //record TLS version (starttls is always TLS 1.2)
-            if(!self.connectionProperties.server.isDirectTLS)
-                self.connectionProperties.tlsVersion = @"1.2";
-            else
-                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            //record TLS version
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
             
             NSString* message = [parsedStanza findFirst:@"text#"];;
             if([parsedStanza check:@"not-authorized"])
@@ -2393,11 +2390,8 @@ NSString* const kStanza = @"stanza";
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
             
-            //record TLS version (starttls is always TLS 1.2)
-            if(!self.connectionProperties.server.isDirectTLS)
-                self.connectionProperties.tlsVersion = @"1.2";
-            else
-                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            //record TLS version
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
             
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
@@ -2459,7 +2453,7 @@ NSString* const kStanza = @"stanza";
                 return;
             }
             
-            NSData* channelBindingData = [self channelBindingDataForType:[self channelBindingToUse]];            
+            NSData* channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:[self channelBindingToUse]];
             MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFinalMessageWithChannelBindingData:channelBindingData]]];
             [self send:responseXML];
             
@@ -2542,11 +2536,8 @@ NSString* const kStanza = @"stanza";
                 //record SDDP support
                 self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
                 
-                //record TLS version (starttls is always TLS 1.2)
-                if(!self.connectionProperties.server.isDirectTLS)
-                    self.connectionProperties.tlsVersion = @"1.2";
-                else
-                    self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+                //record TLS version
+                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
                 [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
@@ -2586,11 +2577,8 @@ NSString* const kStanza = @"stanza";
             //record SDDP support
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
-            //record TLS version (starttls is always TLS 1.2)
-            if(!self.connectionProperties.server.isDirectTLS)
-                self.connectionProperties.tlsVersion = @"1.2";
-            else
-                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            //record TLS version
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
@@ -2745,17 +2733,7 @@ NSString* const kStanza = @"stanza";
             //this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
             DDLogInfo(@"configuring/starting tls handshake");
             self->_streamHasSpace = NO;         //make sure we do not try to send any data while the tls handshake is still performed
-            NSMutableDictionary* settings = [NSMutableDictionary new];
-            [settings setObject:(NSNumber*)kCFBooleanTrue forKey:(NSString*)kCFStreamSSLValidatesCertificateChain];
-            [settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
-            [settings setObject:@"kCFStreamSocketSecurityLevelTLSv1_2" forKey:(NSString*)kCFStreamSSLLevel];
-            if(CFWriteStreamSetProperty((__bridge CFWriteStreamRef)self->_oStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
-                DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-            else
-            {
-                DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
-                DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-            }
+            [((MLStream*)self->_oStream) startTLS];
             self->_startTLSComplete = YES;
             
             //stop everything coming after this (we don't want to process stanzas that came in *before* a secure TLS context was established!)
@@ -3051,7 +3029,7 @@ NSString* const kStanza = @"stanza";
 
 -(NSString* _Nullable) channelBindingToUse
 {
-    NSArray* typesList = [self supportedChannelBindingTypes];
+    NSArray* typesList = [((MLStream*)self->_oStream) supportedChannelBindingTypes];
     if(typesList == nil || typesList.count == 0)
         return nil;     //we don't support any channel-binding for this TLS connection
     for(NSString* type in typesList)
@@ -3060,24 +3038,6 @@ NSString* const kStanza = @"stanza";
     
     DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory!");
     return kServerDoesNotFollowXep0440Error;     //this will make sure the authentication fails
-}
-
-//proxy this to ostream if directTLS is used
--(NSArray* _Nullable) supportedChannelBindingTypes
-{
-    //channel binding is only supported for direct tls due to dependency on network framework
-    if(!self.connectionProperties.server.isDirectTLS)
-        return nil;
-    return [((MLStream*)self->_oStream) supportedChannelBindingTypes];
-}
-
-//proxy this to ostream if directTLS is used
--(NSData* _Nullable) channelBindingDataForType:(NSString*) type
-{
-    //channel binding is only supported for direct tls due to dependency on network framework
-    if(!self.connectionProperties.server.isDirectTLS)
-        return nil;
-    return [((MLStream*)self->_oStream) channelBindingDataForType:type];
 }
 
 #pragma mark stanza handling

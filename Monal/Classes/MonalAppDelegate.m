@@ -27,6 +27,7 @@
 #import "MLCrashReporter.h"
 
 @import NotificationBannerSwift;
+@import UserNotifications;
 
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"

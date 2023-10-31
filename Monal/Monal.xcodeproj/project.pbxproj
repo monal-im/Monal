@@ -183,6 +183,7 @@
 		C1613B5B2520723D0062C0C2 /* MLBasePaser.m in Sources */ = {isa = PBXBuildFile; fileRef = C1613B592520723C0062C0C2 /* MLBasePaser.m */; };
 		C16D18352792A4AF00F869A0 /* DataLayerMigrations.h in Headers */ = {isa = PBXBuildFile; fileRef = C16D18332792A4AF00F869A0 /* DataLayerMigrations.h */; };
 		C16D18362792A4AF00F869A0 /* DataLayerMigrations.m in Sources */ = {isa = PBXBuildFile; fileRef = C16D18342792A4AF00F869A0 /* DataLayerMigrations.m */; };
+		C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C176F1EB2AF11C31002034E5 /* UserNotifications.framework */; };
 		C1850EB825F38A2D003D506A /* MonalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1850EB725F38A2D003D506A /* MonalUITests.swift */; };
 		C1850EC625F3C5EB003D506A /* TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1850EC525F3C5EB003D506A /* TestHelper.swift */; };
 		C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */ = {isa = PBXBuildFile; fileRef = C18E7578245E8AE900AE8FB7 /* MLPipe.h */; };
@@ -641,6 +642,7 @@
 		C1613B592520723C0062C0C2 /* MLBasePaser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLBasePaser.m; sourceTree = "<group>"; };
 		C16D18332792A4AF00F869A0 /* DataLayerMigrations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataLayerMigrations.h; sourceTree = "<group>"; };
 		C16D18342792A4AF00F869A0 /* DataLayerMigrations.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DataLayerMigrations.m; sourceTree = "<group>"; };
+		C176F1EB2AF11C31002034E5 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/System/Library/Frameworks/UserNotifications.framework; sourceTree = DEVELOPER_DIR; };
 		C1850E6625F37EC0003D506A /* Monal Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Monal Tests-Bridging-Header.h"; sourceTree = "<group>"; };
 		C1850EB525F38A2D003D506A /* .xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = .xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1850EB725F38A2D003D506A /* MonalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonalUITests.swift; sourceTree = "<group>"; };
@@ -756,6 +758,7 @@
 			files = (
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
 				C1E1EC7B286A025F0097EC74 /* SwiftSoup in Frameworks */,
+				C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
 				841898AA2957712000FEC77D /* ViewExtractor in Frameworks */,
 				7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */,
@@ -1425,6 +1428,7 @@
 		D91581D0612C23AB5B3F867C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C176F1EB2AF11C31002034E5 /* UserNotifications.framework */,
 				8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */,
 				29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */,
 				2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */,

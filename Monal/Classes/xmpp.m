@@ -2436,8 +2436,18 @@ NSString* const kStanza = @"stanza";
             if(!self->_scramHandler)
                 return [self invalidXMLError];
             
+            NSString* message = nil;
+            BOOL deactivate_account = NO;
             NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"/{urn:xmpp:sasl:2}challenge#|base64"] encoding:NSUTF8StringEncoding];
-            if(![self->_scramHandler parseServerFirstMessage:innerSASLData])
+            switch([self->_scramHandler parseServerFirstMessage:innerSASLData]) {
+                case MLScramStatusSSDPTriggered: deactivate_account = YES; message = NSLocalizedString(@"Detected ongoing MITM attack via SSDP, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @""); break;
+                case MLScramStatusNonceError: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (nonce error), disconnecting!", @"parenthesis should be verbatim"); break;
+                case MLScramStatusUnsupportedMAttribute: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (m-attr error), disconnecting!", @"parenthesis should be verbatim"); break;
+                case MLScramStatusIterationCountInsecure: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (iteration count too low), disconnecting!", @"parenthesis should be verbatim"); break;
+                case MLScramStatusOK: deactivate_account = NO; message = nil; break;        //everything is okay
+                default: unreachable(@"wrong status for scram message!"); break;
+            }
+            if(message != nil)
             {
                 DDLogError(@"SCRAM says this server-first message was wrong!");
                 
@@ -2447,7 +2457,8 @@ NSString* const kStanza = @"stanza";
                 _cachedStreamFeaturesAfterAuth = nil;
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-                [HelperTools postError:NSLocalizedString(@"Error handling SASL challenge of server, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
+                //deactivate the account if requested, too
+                [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:deactivate_account];
                 [self disconnect];
                 
                 return;
@@ -2497,18 +2508,14 @@ NSString* const kStanza = @"stanza";
             }
             message = [NSString stringWithFormat:NSLocalizedString(@"Login error, account disabled: %@", @""), message];
             
-            //check if SSDP downgrade protection triggered
-            if([parsedStanza check:@"{urn:xmpp:ssdp:0}downgrade-detected"])
-                message = NSLocalizedString(@"SASL downgrade attack detected via SSDP, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @"");
-            
             //clear pipeline cache to make sure we have a fresh restart next time
             xmppPipeliningState oldPipeliningState = _pipeliningState;
             _pipeliningState = kPipelinedNothing;
             _cachedStreamFeaturesBeforeAuth = nil;
             _cachedStreamFeaturesAfterAuth = nil;
             
-            //don't report error but reconnect if we pipelined stuff that is not correct anymore and no downgrade was detected...
-            if(oldPipeliningState != kPipelinedNothing && ![parsedStanza check:@"{urn:xmpp:ssdp:0}downgrade-detected"])
+            //don't report error but reconnect if we pipelined stuff that is not correct anymore...
+            if(oldPipeliningState != kPipelinedNothing)
             {
                 DDLogInfo(@"Reconnecting to flush pipeline...");
                 [self reconnect];
@@ -3007,8 +3014,17 @@ NSString* const kStanza = @"stanza";
     //only parse and validate scram response, if we are in scram mode (should always be the case)
     MLAssert(self->_scramHandler != nil, @"self->_scramHandler should NEVER be nil when using SASL2!");
     
+    NSString* message = nil;
+    BOOL deactivate_account = NO;
     NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"additional-data#|base64"] encoding:NSUTF8StringEncoding];
-    if(![self->_scramHandler parseServerFinalMessage:innerSASLData])
+    switch([self->_scramHandler parseServerFinalMessage:innerSASLData]) {
+        case MLScramStatusWrongServerProof: deactivate_account = YES; message = NSLocalizedString(@"SCRAM server proof wrong, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @""); break;
+        case MLScramStatusServerError: deactivate_account = NO; message = NSLocalizedString(@"Unexpected error authenticating server using SASL2 (does your server have a bug?), disconnecting!", @""); break;
+        case MLScramStatusOK: deactivate_account = NO; message = nil; break;        //everything is okay
+        default: unreachable(@"wrong status for scram message!"); break;
+    }
+    
+    if(message != nil)
     {
         DDLogError(@"SCRAM says this server-final message was wrong!");
         
@@ -3018,7 +3034,8 @@ NSString* const kStanza = @"stanza";
         _cachedStreamFeaturesAfterAuth = nil;
         
         //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-        [HelperTools postError:NSLocalizedString(@"Error authenticating server using SASL2, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
+        //deactivate the account if requested, too
+        [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:deactivate_account];
         [self disconnect];
         
         return;

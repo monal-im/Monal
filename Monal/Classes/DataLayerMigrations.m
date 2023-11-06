@@ -1015,6 +1015,12 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:6.008 withBlock:^{
         }];
 
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.009 withBlock:^{
+            [db executeNonQuery:@"UPDATE account SET server=TRIM(server);"];
+            [db executeNonQuery:@"UPDATE account SET username=TRIM(username);"];
+            [db executeNonQuery:@"UPDATE account SET domain=TRIM(domain);"];
+        }];
+
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs
         if(![[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"])

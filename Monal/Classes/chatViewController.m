@@ -511,7 +511,6 @@ enum msgSentState {
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
-        alert.popoverPresentationController.sourceView = self.view;
         [self presentViewController:alert animated:YES completion:nil];
     }
     else
@@ -540,7 +539,7 @@ enum msgSentState {
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No, keep encryption activated", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
-        alert.popoverPresentationController.sourceView = sender;
+        //alert.popoverPresentationController.sourceView = sender;
         [self presentViewController:alert animated:YES completion:nil];
     }
     else

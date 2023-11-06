@@ -6,8 +6,6 @@
 //  Copyright © 2019 Monal.im. All rights reserved.
 //
 
-#import <BackgroundTasks/BackgroundTasks.h>
-
 #import "NotificationService.h"
 #import "MLConstants.h"
 #import "HelperTools.h"
@@ -307,7 +305,7 @@
             //don't post sync errors here, already did so above (see explanation there)
             
             //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
-            [self scheduleBackgroundTask:![[MLXMPPManager sharedInstance] allAccountsIdle]];
+            [HelperTools scheduleBackgroundTask:![[MLXMPPManager sharedInstance] allAccountsIdle]];
             
             //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
             //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
@@ -359,8 +357,19 @@
 -(void) freezeAllParseQueues
 {
     DDLogInfo(@"Freezing all incoming streams until we know if we are either terminating or got another push");
+    dispatch_queue_t queue = dispatch_queue_create("im.monal.freezeAllParseQueues", DISPATCH_QUEUE_CONCURRENT);
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
-        [account freezeParseQueue];
+    {
+        //disconnect to prevent endless loops trying to connect
+        dispatch_async(queue, ^{
+            DDLogVerbose(@"freezeAllParseQueues: %@", account);
+            [account freezeParseQueue];
+            DDLogVerbose(@"freezeAllParseQueues: %@", account);
+        });
+    }
+    dispatch_barrier_sync(queue, ^{
+        DDLogVerbose(@"freezeAllParseQueues done (inside barrier)");
+    });
     DDLogInfo(@"All parse queues frozen now");
 }
 
@@ -397,47 +406,6 @@
 {
     DDLogInfo(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
     [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:NO];
-}
-
--(void) scheduleBackgroundTask:(BOOL) force
-{
-    DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");
-    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
-        NSError* error;
-        if(force)
-        {
-            // cancel existing task (if any)
-            //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundProcessingTask];
-            // new task
-            BGProcessingTaskRequest* processingRequest = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundProcessingTask];
-            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-            processingRequest.earliestBeginDate = nil;
-            processingRequest.requiresNetworkConnectivity = YES;
-            processingRequest.requiresExternalPower = NO;
-            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:processingRequest error:&error])
-            {
-                // Errorcodes https://stackoverflow.com/a/58224050/872051
-                DDLogError(@"Failed to submit BGTask request %@: %@", processingRequest, error);
-            }
-            else
-                DDLogVerbose(@"Success submitting BGTask request %@", processingRequest);
-        }
-        else
-        {
-            // cancel existing task (if any)
-            //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
-            // new task
-            BGAppRefreshTaskRequest* refreshingRequest = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundRefreshingTask];
-            refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
-            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:refreshingRequest error:&error])
-            {
-                // Errorcodes https://stackoverflow.com/a/58224050/872051
-                DDLogError(@"Failed to submit BGTask request %@: %@", refreshingRequest, error);
-            }
-            else
-                DDLogVerbose(@"Success submitting BGTask request %@", refreshingRequest);
-        }
-    }];
 }
 
 @end

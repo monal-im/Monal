@@ -106,7 +106,7 @@ static NSMutableDictionary* currentTransactions;
     //some settings (e.g. truncate is faster than delete)
     //this uses the private api because we have no thread local instance added to the threadData dictionary yet and we don't use a transaction either (and public apis check both)
     //--> we must use the internal api because it does not call testThreadInstanceForQuery: testTransactionsForQuery:
-    sqlite3_busy_timeout(self->_database, 8000);        //set the busy time as early as possible to make sure the pragma states don't trigger a retry too often
+    sqlite3_busy_timeout(self->_database, 2000);        //set the busy time as early as possible to make sure the pragma states don't trigger a retry too often
     while([self executeNonQuery:@"PRAGMA synchronous=NORMAL;" andArguments:@[] withException:NO] != YES)
         DDLogError(@"Database locked, while calling 'PRAGMA synchronous=NORMAL;', retrying...");
     while([self executeNonQuery:@"PRAGMA truncate;" andArguments:@[] withException:NO] != YES)
@@ -244,10 +244,11 @@ static NSMutableDictionary* currentTransactions;
 
 -(void) throwErrorForQuery:(NSString*) query andArguments:(NSArray*) args
 {
+    int errcode = sqlite3_extended_errcode(self->_database);
     NSString* error = [NSString stringWithUTF8String:sqlite3_errmsg(self->_database)];
-    DDLogError(@"SQLite Exception: %@ for query '%@' having params %@", error, query ? query : @"", args ? args : @[]);
+    DDLogError(@"SQLite Exception: %d %@ for query '%@' having params %@", errcode, error, query ? query : @"", args ? args : @[]);
     DDLogError(@"currentTransactions: %@", currentTransactions);
-    @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{
+    @throw [NSException exceptionWithName:@"SQLite3Exception" reason:[NSString stringWithFormat:@"%d: %@", errcode, error] userInfo:@{
         @"query": query ? query : [NSNull null],
         @"args": args ? args : [NSNull null],
         @"currentTransactions": currentTransactions,
@@ -310,7 +311,13 @@ static NSMutableDictionary* currentTransactions;
             toReturn = YES;
         else
         {
-            DDLogVerbose(@"sqlite3_step(%@): %d --> %@", query, step, [[NSThread currentThread] threadDictionary]);
+            DDLogVerbose(@"sqlite3_step(%@): %d (%d) [%s] --> %@",
+                query,
+                step,
+                sqlite3_extended_errcode(self->_database),
+                sqlite3_errmsg(self->_database),
+                [[NSThread currentThread] threadDictionary]
+            );
             if(throwException)
                 [self throwErrorForQuery:query andArguments:args];
             toReturn = NO;

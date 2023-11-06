@@ -604,6 +604,15 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0401.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.0</xmpp:since>
+        <xmpp:version>0.5.0</xmpp:version>
+        <xmpp:note>XEP-0401: Ad-hoc Account Invitation Generation</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0402.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>5.4</xmpp:since>

@@ -11,6 +11,6 @@ crate-type = ["staticlib", "lib"]
 [dependencies]
 serde = {version = "1.0"}
 serde_derive = {version = "1.0"}
-quick-xml = { version = "0.30.0", features = ["serialize", "overlapped-lists"] }
+quick-xml = { version = "0.31.0", features = ["serialize", "overlapped-lists"] }
 
 webrtc-sdp = {version = "0.3.10", features = ["serialize"] }

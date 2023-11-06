@@ -64,6 +64,7 @@
 
 -(void) setSSDPMechanisms:(NSArray<NSString*>*) mechanisms andChannelBindingTypes:(NSArray<NSString*>* _Nullable) cbTypes
 {
+    MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     DDLogVerbose(@"Creating SDDP string: %@\n%@", mechanisms, cbTypes);
     NSMutableString* ssdpString = [NSMutableString new];
     [ssdpString appendString:[[mechanisms sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
@@ -78,6 +79,7 @@
 
 -(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType
 {
+    MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     if(channelBindingType == nil)
         _gssHeader = @"n,,";                                                                //not supported by us
     else if(!_usingChannelBinding)
@@ -88,29 +90,39 @@
     return [NSString stringWithFormat:@"%@%@", _gssHeader, _clientFirstMessageBare];
 }
 
--(BOOL) parseServerFirstMessage:(NSString*) str
+-(MLScramStatus) parseServerFirstMessage:(NSString*) str
 {
+    MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     NSDictionary* msg = [self parseScramString:str];
     //server nonce MUST start with our client nonce
     if(![msg[@"r"] hasPrefix:_nonce])
-        return NO;
+        return MLScramStatusNonceError;
     //check for attributes not allowed per RFC
     for(NSString* key in msg)
         if([@"m" isEqualToString:key])
-            return NO;
+            return MLScramStatusUnsupportedMAttribute;
     _serverFirstMessage = str;
     _nonce = msg[@"r"];     //from now on use the full nonce
     _salt = [HelperTools dataWithBase64EncodedString:msg[@"s"]];
     _iterationCount = (uint32_t)[msg[@"i"] integerValue];
-    _ssdpSupported = [@"ssdp" isEqualToString:msg[@"d"]];
+    //check if SSDP downgrade protection triggered, if provided
+    if(msg[@"d"] != nil && _ssdpString != nil)
+    {
+        _ssdpSupported = YES;
+        //calculate base64 encoded SSDP hash and compare it to server sent value
+        NSString* ssdpHash =[HelperTools encodeBase64WithData:[self hash:[_ssdpString dataUsingEncoding:NSUTF8StringEncoding]]];
+        if(![ssdpHash isEqualToString:msg[@"d"]])
+            return MLScramStatusSSDPTriggered;
+    }
     if(_iterationCount < 4096)
-        return NO;
-    return YES;
+        return MLScramStatusIterationCountInsecure;
+    return MLScramStatusOK;
 }
 
 //see https://stackoverflow.com/a/29299946/3528174
 -(NSString*) clientFinalMessageWithChannelBindingData:(NSData* _Nullable) channelBindingData
 {
+    MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     //calculate gss header with optional channel binding data
     NSMutableData* gssHeaderWithChannelBindingData = [NSMutableData new];
     [gssHeaderWithChannelBindingData appendData:[_gssHeader dataUsingEncoding:NSUTF8StringEncoding]];
@@ -125,13 +137,8 @@
     //calculate storedKey (e.g. H(ClientKey))
     NSData* storedKey = [self hash:clientKey];
     
-    //calculate base64 encoded SSDP hash, if provided
-    NSString* ssdpAttribute = @"";
-    if(_ssdpString != nil)
-        ssdpAttribute = [NSString stringWithFormat:@",d=%@", [HelperTools encodeBase64WithData:[self hash:[_ssdpString dataUsingEncoding:NSUTF8StringEncoding]]]];
-    
     //calculate authMessage (e.g. client-first-message-bare + "," + server-first-message + "," + client-final-message-without-proof)
-    NSString* clientFinalMessageWithoutProof = [NSString stringWithFormat:@"c=%@,r=%@%@", [HelperTools encodeBase64WithData:gssHeaderWithChannelBindingData], _nonce, ssdpAttribute];
+    NSString* clientFinalMessageWithoutProof = [NSString stringWithFormat:@"c=%@,r=%@", [HelperTools encodeBase64WithData:gssHeaderWithChannelBindingData], _nonce];
     NSString* authMessage = [NSString stringWithFormat:@"%@,%@,%@", _clientFirstMessageBare, _serverFirstMessage, clientFinalMessageWithoutProof];
     
     //calculate clientSignature (e.g. HMAC(StoredKey, AuthMessage))
@@ -150,21 +157,22 @@
     return [NSString stringWithFormat:@"%@,p=%@", clientFinalMessageWithoutProof, [HelperTools encodeBase64WithData:clientProof]];
 }
 
--(BOOL) parseServerFinalMessage:(NSString*) str
+-(MLScramStatus) parseServerFinalMessage:(NSString*) str
 {
+    MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     NSDictionary* msg = [self parseScramString:str];
     //wrong v-value
     if(![_expectedServerSignature isEqualToString:msg[@"v"]])
-        return NO;
+        return MLScramStatusWrongServerProof;
     //server sent a SCRAM error
     if(msg[@"e"] != nil)
     {
         DDLogError(@"SCRAM error: '%@'", msg[@"e"]);
-        return NO;
+        return MLScramStatusServerError;
     }
     //everything was successful
     _finishedSuccessfully = YES;
-    return YES;
+    return MLScramStatusOK;
 }
 
 -(NSData*) hashPasswordWithSalt:(NSData*) salt andIterationCount:(uint32_t) iterationCount

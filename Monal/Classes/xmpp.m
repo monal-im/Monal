@@ -145,6 +145,7 @@ NSString* const kStanza = @"stanza";
 
 @property (nonatomic, assign) BOOL resuming;
 @property (atomic, strong) NSString* streamID;
+@property (nonatomic, assign) BOOL isDoingFullReconnect;
 
 /**
  h to go out in r stanza
@@ -242,6 +243,7 @@ NSString* const kStanza = @"stanza";
     
     _stateLockObject = [NSObject new];
     [self initSM3];
+    self.isDoingFullReconnect = YES;
     
     _accountState = kStateLoggedOut;
     _registration = NO;
@@ -555,12 +557,12 @@ NSString* const kStanza = @"stanza";
     if(self.connectionProperties.server.isDirectTLS == YES)
     {
         DDLogInfo(@"creating directTLS streams");
-        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort inputStream:&localIStream outputStream:&localOStream];
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:YES inputStream:&localIStream outputStream:&localOStream];
     }
     else
     {
         DDLogInfo(@"creating plaintext streams");
-        [NSStream getStreamsToHostWithName:self.connectionProperties.server.connectServer port:self.connectionProperties.server.connectPort.integerValue inputStream:&localIStream outputStream:&localOStream];
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:NO inputStream:&localIStream outputStream:&localOStream];
     }
     
     if(localOStream)
@@ -652,7 +654,7 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"NO SRV records found, using standard xmpp config: %@:%@ (using starttls)", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
         }
     }
-
+    
     // Show warning when xmpp-client srv entry prohibits connections
     for(NSDictionary* row in _discoveredServersList)
     {
@@ -1498,7 +1500,8 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
-#pragma mark message ACK
+#pragma mark smacks
+
 -(void) addSmacksHandler:(monal_void_block_t) handler
 {
     @synchronized(_stateLockObject) {
@@ -1560,6 +1563,26 @@ NSString* const kStanza = @"stanza";
             [self persistState];
         }
     }
+}
+
+-(BOOL) shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas
+{
+    @synchronized(_stateLockObject) {
+        DDLogInfo(@"Checking for important unacked stanzas...");
+        for(NSDictionary* dic in self.unAckedStanzas)
+        {
+            MLXMLNode* xmlNode = [dic objectForKey:kStanza];
+            //nonzas are not important here
+            if(![xmlNode isKindOfClass:[XMPPStanza class]])
+                continue;
+            XMPPStanza* stanza = (XMPPStanza*)xmlNode;
+            //important stanzas are message stanzas containing a body element
+            if([stanza.element isEqualToString:@"message"] && [stanza check:@"body"])
+                return YES;
+        }
+    }
+    //no important stanzas found
+    return NO;
 }
 
 -(BOOL) removeAckedStanzasFromQueue:(NSNumber*) hvalue
@@ -2220,6 +2243,7 @@ NSString* const kStanza = @"stanza";
             if(h==nil)
                 return [self invalidXMLError];
             self.resuming = NO;
+            self.isDoingFullReconnect = NO;
 
             //now we are bound again
             _accountState = kStateBound;
@@ -2323,11 +2347,8 @@ NSString* const kStanza = @"stanza";
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
             
-            //record TLS version (starttls is always TLS 1.2)
-            if(!self.connectionProperties.server.isDirectTLS)
-                self.connectionProperties.tlsVersion = @"1.2";
-            else
-                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            //record TLS version
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
             
             NSString* message = [parsedStanza findFirst:@"text#"];;
             if([parsedStanza check:@"not-authorized"])
@@ -2369,11 +2390,8 @@ NSString* const kStanza = @"stanza";
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
             
-            //record TLS version (starttls is always TLS 1.2)
-            if(!self.connectionProperties.server.isDirectTLS)
-                self.connectionProperties.tlsVersion = @"1.2";
-            else
-                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            //record TLS version
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
             
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
@@ -2418,8 +2436,18 @@ NSString* const kStanza = @"stanza";
             if(!self->_scramHandler)
                 return [self invalidXMLError];
             
+            NSString* message = nil;
+            BOOL deactivate_account = NO;
             NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"/{urn:xmpp:sasl:2}challenge#|base64"] encoding:NSUTF8StringEncoding];
-            if(![self->_scramHandler parseServerFirstMessage:innerSASLData])
+            switch([self->_scramHandler parseServerFirstMessage:innerSASLData]) {
+                case MLScramStatusSSDPTriggered: deactivate_account = YES; message = NSLocalizedString(@"Detected ongoing MITM attack via SSDP, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @""); break;
+                case MLScramStatusNonceError: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (nonce error), disconnecting!", @"parenthesis should be verbatim"); break;
+                case MLScramStatusUnsupportedMAttribute: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (m-attr error), disconnecting!", @"parenthesis should be verbatim"); break;
+                case MLScramStatusIterationCountInsecure: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (iteration count too low), disconnecting!", @"parenthesis should be verbatim"); break;
+                case MLScramStatusOK: deactivate_account = NO; message = nil; break;        //everything is okay
+                default: unreachable(@"wrong status for scram message!"); break;
+            }
+            if(message != nil)
             {
                 DDLogError(@"SCRAM says this server-first message was wrong!");
                 
@@ -2429,13 +2457,14 @@ NSString* const kStanza = @"stanza";
                 _cachedStreamFeaturesAfterAuth = nil;
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-                [HelperTools postError:NSLocalizedString(@"Error handling SASL challenge of server, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
+                //deactivate the account if requested, too
+                [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:deactivate_account];
                 [self disconnect];
                 
                 return;
             }
             
-            NSData* channelBindingData = [self channelBindingDataForType:[self channelBindingToUse]];            
+            NSData* channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:[self channelBindingToUse]];
             MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFinalMessageWithChannelBindingData:channelBindingData]]];
             [self send:responseXML];
             
@@ -2479,18 +2508,14 @@ NSString* const kStanza = @"stanza";
             }
             message = [NSString stringWithFormat:NSLocalizedString(@"Login error, account disabled: %@", @""), message];
             
-            //check if SSDP downgrade protection triggered
-            if([parsedStanza check:@"{urn:xmpp:ssdp:0}downgrade-detected"])
-                message = NSLocalizedString(@"SASL downgrade attack detected via SSDP, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @"");
-            
             //clear pipeline cache to make sure we have a fresh restart next time
             xmppPipeliningState oldPipeliningState = _pipeliningState;
             _pipeliningState = kPipelinedNothing;
             _cachedStreamFeaturesBeforeAuth = nil;
             _cachedStreamFeaturesAfterAuth = nil;
             
-            //don't report error but reconnect if we pipelined stuff that is not correct anymore and no downgrade was detected...
-            if(oldPipeliningState != kPipelinedNothing && ![parsedStanza check:@"{urn:xmpp:ssdp:0}downgrade-detected"])
+            //don't report error but reconnect if we pipelined stuff that is not correct anymore...
+            if(oldPipeliningState != kPipelinedNothing)
             {
                 DDLogInfo(@"Reconnecting to flush pipeline...");
                 [self reconnect];
@@ -2518,11 +2543,8 @@ NSString* const kStanza = @"stanza";
                 //record SDDP support
                 self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
                 
-                //record TLS version (starttls is always TLS 1.2)
-                if(!self.connectionProperties.server.isDirectTLS)
-                    self.connectionProperties.tlsVersion = @"1.2";
-                else
-                    self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+                //record TLS version
+                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
                 [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
@@ -2562,11 +2584,8 @@ NSString* const kStanza = @"stanza";
             //record SDDP support
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
-            //record TLS version (starttls is always TLS 1.2)
-            if(!self.connectionProperties.server.isDirectTLS)
-                self.connectionProperties.tlsVersion = @"1.2";
-            else
-                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            //record TLS version
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
@@ -2721,17 +2740,7 @@ NSString* const kStanza = @"stanza";
             //this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
             DDLogInfo(@"configuring/starting tls handshake");
             self->_streamHasSpace = NO;         //make sure we do not try to send any data while the tls handshake is still performed
-            NSMutableDictionary* settings = [NSMutableDictionary new];
-            [settings setObject:(NSNumber*)kCFBooleanTrue forKey:(NSString*)kCFStreamSSLValidatesCertificateChain];
-            [settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
-            [settings setObject:@"kCFStreamSocketSecurityLevelTLSv1_2" forKey:(NSString*)kCFStreamSSLLevel];
-            if(CFWriteStreamSetProperty((__bridge CFWriteStreamRef)self->_oStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
-                DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-            else
-            {
-                DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
-                DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-            }
+            [((MLStream*)self->_oStream) startTLS];
             self->_startTLSComplete = YES;
             
             //stop everything coming after this (we don't want to process stanzas that came in *before* a secure TLS context was established!)
@@ -3005,8 +3014,17 @@ NSString* const kStanza = @"stanza";
     //only parse and validate scram response, if we are in scram mode (should always be the case)
     MLAssert(self->_scramHandler != nil, @"self->_scramHandler should NEVER be nil when using SASL2!");
     
+    NSString* message = nil;
+    BOOL deactivate_account = NO;
     NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"additional-data#|base64"] encoding:NSUTF8StringEncoding];
-    if(![self->_scramHandler parseServerFinalMessage:innerSASLData])
+    switch([self->_scramHandler parseServerFinalMessage:innerSASLData]) {
+        case MLScramStatusWrongServerProof: deactivate_account = YES; message = NSLocalizedString(@"SCRAM server proof wrong, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @""); break;
+        case MLScramStatusServerError: deactivate_account = NO; message = NSLocalizedString(@"Unexpected error authenticating server using SASL2 (does your server have a bug?), disconnecting!", @""); break;
+        case MLScramStatusOK: deactivate_account = NO; message = nil; break;        //everything is okay
+        default: unreachable(@"wrong status for scram message!"); break;
+    }
+    
+    if(message != nil)
     {
         DDLogError(@"SCRAM says this server-final message was wrong!");
         
@@ -3016,7 +3034,8 @@ NSString* const kStanza = @"stanza";
         _cachedStreamFeaturesAfterAuth = nil;
         
         //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-        [HelperTools postError:NSLocalizedString(@"Error authenticating server using SASL2, disconnecting!", @"") withNode:nil andAccount:self andIsSevere:YES];
+        //deactivate the account if requested, too
+        [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:deactivate_account];
         [self disconnect];
         
         return;
@@ -3027,7 +3046,7 @@ NSString* const kStanza = @"stanza";
 
 -(NSString* _Nullable) channelBindingToUse
 {
-    NSArray* typesList = [self supportedChannelBindingTypes];
+    NSArray* typesList = [((MLStream*)self->_oStream) supportedChannelBindingTypes];
     if(typesList == nil || typesList.count == 0)
         return nil;     //we don't support any channel-binding for this TLS connection
     for(NSString* type in typesList)
@@ -3036,24 +3055,6 @@ NSString* const kStanza = @"stanza";
     
     DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory!");
     return kServerDoesNotFollowXep0440Error;     //this will make sure the authentication fails
-}
-
-//proxy this to ostream if directTLS is used
--(NSArray* _Nullable) supportedChannelBindingTypes
-{
-    //channel binding is only supported for direct tls due to dependency on network framework
-    if(!self.connectionProperties.server.isDirectTLS)
-        return nil;
-    return [((MLStream*)self->_oStream) supportedChannelBindingTypes];
-}
-
-//proxy this to ostream if directTLS is used
--(NSData* _Nullable) channelBindingDataForType:(NSString*) type
-{
-    //channel binding is only supported for direct tls due to dependency on network framework
-    if(!self.connectionProperties.server.isDirectTLS)
-        return nil;
-    return [((MLStream*)self->_oStream) channelBindingDataForType:type];
 }
 
 #pragma mark stanza handling
@@ -3294,6 +3295,7 @@ NSString* const kStanza = @"stanza";
             [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
             [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
             [values setValue:self.streamID forKey:@"streamID"];
+            [values setObject:[NSNumber numberWithBool:self.isDoingFullReconnect] forKey:@"isDoingFullReconnect"];
 
             NSMutableDictionary* persistentIqHandlers = [NSMutableDictionary new];
             NSMutableDictionary* persistentIqHandlerDescriptions = [NSMutableDictionary new];
@@ -3363,9 +3365,10 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
                 self.accountNo,
                 values[@"stateSavedAt"],
+                bool2str(self.isDoingFullReconnect),
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,
@@ -3418,6 +3421,11 @@ NSString* const kStanza = @"stanza";
             NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
             self.unAckedStanzas = [stanzas mutableCopy];
             self.streamID = [dic objectForKey:@"streamID"];
+            if([dic objectForKey:@"isDoingFullReconnect"])
+            {
+                NSNumber* isDoingFullReconnect = [dic objectForKey:@"isDoingFullReconnect"];
+                self.isDoingFullReconnect = isDoingFullReconnect.boolValue;
+            }
             
             @synchronized(_stateLockObject) {
                 //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
@@ -3583,9 +3591,10 @@ NSString* const kStanza = @"stanza";
                 self.omemo.state = [dic objectForKey:@"omemoState"];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
                 self.accountNo,
                 dic[@"stateSavedAt"],
+                bool2str(self.isDoingFullReconnect),
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,
@@ -3687,6 +3696,7 @@ NSString* const kStanza = @"stanza";
     if([parts count] < 2 || [[HelperTools dataWithHexString:parts[1]] length] < 1)
         return [self bindResource:[HelperTools encodeRandomResource]];
     
+    self.isDoingFullReconnect = YES;
     _accountState = kStateBinding;
     XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:resource];
@@ -3781,6 +3791,7 @@ NSString* const kStanza = @"stanza";
 -(void) initSession
 {
     DDLogInfo(@"Now bound, initializing new xmpp session");
+    self.isDoingFullReconnect = YES;
     
     //delete old resources because we get new presences once we're done initializing the session
     [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
@@ -5066,6 +5077,7 @@ NSString* const kStanza = @"stanza";
 -(void) handleFinishedCatchup
 {
     self->_catchupDone = YES;
+    self.isDoingFullReconnect = NO;
     
     //log catchup statistics
     [self logCatchupStats];
@@ -5144,9 +5156,9 @@ NSString* const kStanza = @"stanza";
         [[MLXMLNode alloc] initWithElement:@"remove"]
     ] andData:nil]];
     [self sendIq:remove withResponseHandler:^(XMPPIQ* result) {
-        //disconnect account (without force) and throw away everything waiting to be processed
+        //disconnect account and throw away everything waiting to be processed
         //(for example the stream close coming from the server after removing the account on the server)
-        [self disconnect];      //this is needed to not show spurious errors on delete
+        [self disconnect:YES];  //this disconnect is needed to not show spurious errors on delete (technically the explicitLogout is not needed, but it doesn't hurt either)
         [[MLXMPPManager sharedInstance] removeAccountForAccountNo:self.accountNo];
         completion(nil);        //signal success to UI
     } andErrorHandler:^(XMPPIQ* error) {

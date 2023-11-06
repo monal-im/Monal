@@ -333,7 +333,7 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
         //this allows hardlinking later on because now the mainapp owns that file while it had only read/write access before
         if(!direct)
         {
-            NSString* cacheFileTMP = [NSString stringWithFormat:@"%@.tmp", cacheFile];
+            NSString* cacheFileTMP = [cacheFile.stringByDeletingLastPathComponent stringByAppendingPathComponent:[NSString stringWithFormat:@"tmp.%@", cacheFile.lastPathComponent]];
             DDLogInfo(@"Copying appex-created cache file '%@' to '%@' before deleting old file and renaming our copy...", cacheFile, cacheFileTMP);
             [_fileManager removeItemAtPath:cacheFileTMP error:nil];     //remove tmp file if already present
             [_fileManager copyItemAtPath:cacheFile toPath:cacheFileTMP error:&error];
@@ -485,7 +485,8 @@ $$
     MLAssert([msg.messageType isEqualToString:kMessageTypeFiletransfer], @"message not of type filetransfer!", (@{@"msg": msg}));
     
     NSURLComponents* urlComponents = [NSURLComponents componentsWithString:msg.messageText];
-    NSString* filename = [[NSUUID UUID] UUIDString];       //default is a dummy filename (used when the filename can not be extracted from url)
+    //default is a dummy filename (used when the filename can not be extracted from url)
+    NSString* filename = [NSString stringWithFormat:@"%@.bin", [[NSUUID UUID] UUIDString]];
     if(urlComponents != nil && urlComponents.path)
         filename = [urlComponents.path lastPathComponent];
     NSString* cacheFile = [self retrieveCacheFileForUrl:msg.messageText andMimeType:(msg.filetransferMimeType && ![msg.filetransferMimeType isEqualToString:@""] ? msg.filetransferMimeType : nil)];
@@ -501,12 +502,14 @@ $$
                 @"needsDownloading": @YES,
                 @"mimeType": msg.filetransferMimeType,
                 @"size": msg.filetransferSize,
+                @"fileExtension": [filename pathExtension],
             };
         else
             return @{
                 @"url": msg.messageText,
                 @"filename": filename,
                 @"needsDownloading": @YES,
+                @"fileExtension": [filename pathExtension],
             };
     }
     return @{
@@ -517,6 +520,7 @@ $$
         @"size": @([[_fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]),
         @"cacheId": [cacheFile lastPathComponent],
         @"cacheFile": cacheFile,
+        @"fileExtension": [filename pathExtension],
     };
 }
 
@@ -543,7 +547,7 @@ $$
     DDLogInfo(@"Preparing for upload of NSData object: %@", data);
     
     //save file data to our document cache (temporary filename because the upload url is unknown yet)
-    NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
+    NSString* tempname = [NSString stringWithFormat:@"tmp.%@", [[NSUUID UUID] UUIDString]];
     NSError* error;
     NSString* file = [_documentCacheDir stringByAppendingPathComponent:tempname];
     DDLogDebug(@"Tempstoring data at %@", file);
@@ -569,7 +573,7 @@ $$
     DDLogInfo(@"Preparing for upload of file stored at %@", [fileUrl path]);
     
     //copy file to our document cache (temporary filename because the upload url is unknown yet)
-    NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
+    NSString* tempname = [NSString stringWithFormat:@"tmp.%@", [[NSUUID UUID] UUIDString]];
     NSError* error;
     NSString* file = [_documentCacheDir stringByAppendingPathComponent:tempname];
     DDLogDebug(@"Tempstoring file at %@", file);
@@ -595,7 +599,7 @@ $$
     double imageQuality = [[HelperTools defaultsDB] doubleForKey:@"ImageUploadQuality"];
     
     //copy file to our document cache (temporary filename because the upload url is unknown yet)
-    NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
+    NSString* tempname = [NSString stringWithFormat:@"tmp.%@", [[NSUUID UUID] UUIDString]];
     NSError* error;
     NSString* file = [_documentCacheDir stringByAppendingPathComponent:tempname];
     DDLogDebug(@"Tempstoring jpeg encoded file having quality %f at %@", imageQuality, file);
@@ -640,7 +644,7 @@ $$
     //delete leftover tmp files older than 1 day
     NSDate* now = [NSDate date];
     NSArray* directoryContents = [_fileManager contentsOfDirectoryAtPath:_documentCacheDir error:nil];
-    NSPredicate* filter = [NSPredicate predicateWithFormat:@"self ENDSWITH '.tmp'"];
+    NSPredicate* filter = [NSPredicate predicateWithFormat:@"self BEGINSWITH 'tmp.'"];
     for(NSString* file in [directoryContents filteredArrayUsingPredicate:filter])
     {
         NSURL* fileUrl = [NSURL fileURLWithPath:file];

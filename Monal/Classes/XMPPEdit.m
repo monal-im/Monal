@@ -317,11 +317,11 @@ enum DummySettingsRows {
     }
 
     NSMutableDictionary* dic = [NSMutableDictionary new];
-    [dic setObject:domain.lowercaseString forKey:kDomain];
+    [dic setObject:[domain.lowercaseString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:kDomain];
     if(user)
-        [dic setObject:user.lowercaseString forKey:kUsername];
+        [dic setObject:[user.lowercaseString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:kUsername];
     if(self.server)
-        [dic setObject:self.server forKey:kServer];
+        [dic setObject:[self.server stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:kServer];
     if(self.port)
         [dic setObject:self.port forKey:kPort];
     [dic setObject:self.resource forKey:kResource];
@@ -329,9 +329,9 @@ enum DummySettingsRows {
     [dic setObject:[NSNumber numberWithBool:self.directTLS] forKey:kDirectTLS];
     [dic setObject:self.accountNo forKey:kAccountID];
     if(self.rosterName)
-        [dic setObject:self.rosterName forKey:kRosterName];
+        [dic setObject:[self.rosterName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:kRosterName];
     if(self.statusMessage)
-        [dic setObject:self.statusMessage forKey:@"statusMessage"];
+        [dic setObject:[self.statusMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:@"statusMessage"];
     [dic setObject:[NSNumber numberWithBool:self.sasl2Supported] forKey:kSupportsSasl2];
 
     if(!self.editMode)

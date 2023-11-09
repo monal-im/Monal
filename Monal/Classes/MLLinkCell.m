@@ -7,7 +7,7 @@
 //
 
 #import "MLLinkCell.h"
-#import "UIImageView+WebCache.h"
+#include <SDWebImage/UIImageView+WebCache.h>
 #import "MonalAppDelegate.h"
 @import SafariServices;
 

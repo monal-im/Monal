@@ -8,6 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		08CAF17FA202CF3CB760D93C /* Pods_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7A5555D807EE78C95217FD /* Pods_NotificationService.framework */; };
+		1164F9152AFC113F0082E8D7 /* LibMonalRustSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 1164F9142AFC113F0082E8D7 /* LibMonalRustSwiftBridge */; };
+		1164F9182AFC15FA0082E8D7 /* MBProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 1164F9172AFC15FA0082E8D7 /* MBProgressHUD */; };
+		1164F91B2AFC1A2C0082E8D7 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 1164F91A2AFC1A2C0082E8D7 /* SDWebImage */; };
+		1164F91E2AFC1A7C0082E8D7 /* DZNEmptyDataSet in Frameworks */ = {isa = PBXBuildFile; productRef = 1164F91D2AFC1A7C0082E8D7 /* DZNEmptyDataSet */; };
+		1164F9212AFC1AB70082E8D7 /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 1164F9202AFC1AB70082E8D7 /* TOCropViewController */; };
+		1164F9242AFC1AEC0082E8D7 /* NotificationBannerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1164F9232AFC1AEC0082E8D7 /* NotificationBannerSwift */; };
+		1164F9272AFC1B0B0082E8D7 /* FLAnimatedImage in Frameworks */ = {isa = PBXBuildFile; productRef = 1164F9262AFC1B0B0082E8D7 /* FLAnimatedImage */; };
+		1164F92A2AFC1B550082E8D7 /* ASN1Decoder in Frameworks */ = {isa = PBXBuildFile; productRef = 1164F9292AFC1B550082E8D7 /* ASN1Decoder */; };
+		1164F92D2AFC1B780082E8D7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 1164F92C2AFC1B780082E8D7 /* WebRTC */; };
+		1164F9302AFC1B9C0082E8D7 /* KSCrash in Frameworks */ = {isa = PBXBuildFile; productRef = 1164F92F2AFC1B9C0082E8D7 /* KSCrash */; };
 		1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* MonalAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
@@ -757,8 +767,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
+				1164F9242AFC1AEC0082E8D7 /* NotificationBannerSwift in Frameworks */,
 				C1E1EC7B286A025F0097EC74 /* SwiftSoup in Frameworks */,
+				1164F9272AFC1B0B0082E8D7 /* FLAnimatedImage in Frameworks */,
+				1164F91E2AFC1A7C0082E8D7 /* DZNEmptyDataSet in Frameworks */,
+				1164F91B2AFC1A2C0082E8D7 /* SDWebImage in Frameworks */,
 				C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */,
+				1164F9182AFC15FA0082E8D7 /* MBProgressHUD in Frameworks */,
+				1164F9212AFC1AB70082E8D7 /* TOCropViewController in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
 				841898AA2957712000FEC77D /* ViewExtractor in Frameworks */,
 				7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */,
@@ -788,9 +804,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				841B28282ACF75B300BCC42B /* CocoaLumberjack in Frameworks */,
+				1164F9152AFC113F0082E8D7 /* LibMonalRustSwiftBridge in Frameworks */,
 				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
+				1164F9302AFC1B9C0082E8D7 /* KSCrash in Frameworks */,
 				841B282A2ACF75B300BCC42B /* CocoaLumberjackSwift in Frameworks */,
 				841B282C2ACF75B300BCC42B /* CocoaLumberjackSwiftLogBackend in Frameworks */,
+				1164F92D2AFC1B780082E8D7 /* WebRTC in Frameworks */,
+				1164F92A2AFC1B550082E8D7 /* ASN1Decoder in Frameworks */,
 				8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1505,6 +1525,12 @@
 				C1F5C7AE2777638B0001F295 /* OrderedCollections */,
 				C1E1EC7A286A025F0097EC74 /* SwiftSoup */,
 				841898A92957712000FEC77D /* ViewExtractor */,
+				1164F9172AFC15FA0082E8D7 /* MBProgressHUD */,
+				1164F91A2AFC1A2C0082E8D7 /* SDWebImage */,
+				1164F91D2AFC1A7C0082E8D7 /* DZNEmptyDataSet */,
+				1164F9202AFC1AB70082E8D7 /* TOCropViewController */,
+				1164F9232AFC1AEC0082E8D7 /* NotificationBannerSwift */,
+				1164F9262AFC1B0B0082E8D7 /* FLAnimatedImage */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1568,6 +1594,10 @@
 				841B28272ACF75B300BCC42B /* CocoaLumberjack */,
 				841B28292ACF75B300BCC42B /* CocoaLumberjackSwift */,
 				841B282B2ACF75B300BCC42B /* CocoaLumberjackSwiftLogBackend */,
+				1164F9142AFC113F0082E8D7 /* LibMonalRustSwiftBridge */,
+				1164F9292AFC1B550082E8D7 /* ASN1Decoder */,
+				1164F92C2AFC1B780082E8D7 /* WebRTC */,
+				1164F92F2AFC1B9C0082E8D7 /* KSCrash */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1718,6 +1748,16 @@
 				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
 				841B28262ACF75B200BCC42B /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
+				1164F9132AFC113F0082E8D7 /* XCLocalSwiftPackageReference "../rust/LibMonalRustSwiftBridge" */,
+				1164F9162AFC15FA0082E8D7 /* XCRemoteSwiftPackageReference "MBProgressHUD" */,
+				1164F9192AFC1A2C0082E8D7 /* XCRemoteSwiftPackageReference "SDWebImage" */,
+				1164F91C2AFC1A7C0082E8D7 /* XCRemoteSwiftPackageReference "DZNEmptyDataSet" */,
+				1164F91F2AFC1AB70082E8D7 /* XCRemoteSwiftPackageReference "TOCropViewController" */,
+				1164F9222AFC1AEC0082E8D7 /* XCRemoteSwiftPackageReference "NotificationBanner" */,
+				1164F9252AFC1B0B0082E8D7 /* XCRemoteSwiftPackageReference "FLAnimatedImage" */,
+				1164F9282AFC1B550082E8D7 /* XCRemoteSwiftPackageReference "ASN1Decoder" */,
+				1164F92B2AFC1B780082E8D7 /* XCRemoteSwiftPackageReference "WebRTC" */,
+				1164F92E2AFC1B9C0082E8D7 /* XCRemoteSwiftPackageReference "KSCrash" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -3985,7 +4025,86 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		1164F9132AFC113F0082E8D7 /* XCLocalSwiftPackageReference "../rust/LibMonalRustSwiftBridge" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../rust/LibMonalRustSwiftBridge;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
+		1164F9162AFC15FA0082E8D7 /* XCRemoteSwiftPackageReference "MBProgressHUD" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jdg/MBProgressHUD.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+		1164F9192AFC1A2C0082E8D7 /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.18.4;
+			};
+		};
+		1164F91C2AFC1A7C0082E8D7 /* XCRemoteSwiftPackageReference "DZNEmptyDataSet" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dzenbot/DZNEmptyDataSet.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		1164F91F2AFC1AB70082E8D7 /* XCRemoteSwiftPackageReference "TOCropViewController" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TimOliver/TOCropViewController.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.1;
+			};
+		};
+		1164F9222AFC1AEC0082E8D7 /* XCRemoteSwiftPackageReference "NotificationBanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Daltron/NotificationBanner.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.2.1;
+			};
+		};
+		1164F9252AFC1B0B0082E8D7 /* XCRemoteSwiftPackageReference "FLAnimatedImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Flipboard/FLAnimatedImage.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.17;
+			};
+		};
+		1164F9282AFC1B550082E8D7 /* XCRemoteSwiftPackageReference "ASN1Decoder" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/filom/ASN1Decoder.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.9.0;
+			};
+		};
+		1164F92B2AFC1B780082E8D7 /* XCRemoteSwiftPackageReference "WebRTC" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stasel/WebRTC.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 119.0.0;
+			};
+		};
+		1164F92E2AFC1B9C0082E8D7 /* XCRemoteSwiftPackageReference "KSCrash" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/monal-im/KSCrash.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GeorgeElsham/ViewExtractor";
@@ -4021,6 +4140,55 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1164F9142AFC113F0082E8D7 /* LibMonalRustSwiftBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LibMonalRustSwiftBridge;
+		};
+		1164F9172AFC15FA0082E8D7 /* MBProgressHUD */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1164F9162AFC15FA0082E8D7 /* XCRemoteSwiftPackageReference "MBProgressHUD" */;
+			productName = MBProgressHUD;
+		};
+		1164F91A2AFC1A2C0082E8D7 /* SDWebImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1164F9192AFC1A2C0082E8D7 /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImage;
+		};
+		1164F91D2AFC1A7C0082E8D7 /* DZNEmptyDataSet */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1164F91C2AFC1A7C0082E8D7 /* XCRemoteSwiftPackageReference "DZNEmptyDataSet" */;
+			productName = DZNEmptyDataSet;
+		};
+		1164F9202AFC1AB70082E8D7 /* TOCropViewController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1164F91F2AFC1AB70082E8D7 /* XCRemoteSwiftPackageReference "TOCropViewController" */;
+			productName = TOCropViewController;
+		};
+		1164F9232AFC1AEC0082E8D7 /* NotificationBannerSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1164F9222AFC1AEC0082E8D7 /* XCRemoteSwiftPackageReference "NotificationBanner" */;
+			productName = NotificationBannerSwift;
+		};
+		1164F9262AFC1B0B0082E8D7 /* FLAnimatedImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1164F9252AFC1B0B0082E8D7 /* XCRemoteSwiftPackageReference "FLAnimatedImage" */;
+			productName = FLAnimatedImage;
+		};
+		1164F9292AFC1B550082E8D7 /* ASN1Decoder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1164F9282AFC1B550082E8D7 /* XCRemoteSwiftPackageReference "ASN1Decoder" */;
+			productName = ASN1Decoder;
+		};
+		1164F92C2AFC1B780082E8D7 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1164F92B2AFC1B780082E8D7 /* XCRemoteSwiftPackageReference "WebRTC" */;
+			productName = WebRTC;
+		};
+		1164F92F2AFC1B9C0082E8D7 /* KSCrash */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1164F92E2AFC1B9C0082E8D7 /* XCRemoteSwiftPackageReference "KSCrash" */;
+			productName = KSCrash;
+		};
 		8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LibMonalRustSwiftBridge;

@@ -18,7 +18,7 @@
 #import "AESGcm.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
-#import "MBProgressHUD.h"
+#import <MBProgressHUD/MBProgressHUD.h>
 #import "MLChatInputContainer.h"
 #import "MLChatViewHelper.h"
 #import "MLConstants.h"

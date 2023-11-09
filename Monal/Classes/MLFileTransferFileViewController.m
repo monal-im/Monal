@@ -7,7 +7,7 @@
 //
 
 #import "MLFileTransferFileViewController.h"
-#import "MBProgressHUD.h"
+#import <MBProgressHUD/MBProgressHUD.h>
 #import <WebKit/WebKit.h>
 
 @interface MLFilePreviewItem : NSObject <QLPreviewItem>

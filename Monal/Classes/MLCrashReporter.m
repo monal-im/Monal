@@ -7,14 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <KSCrash/KSCrash.h>
-#import <KSCrash/KSCrashReportFilterBasic.h>
-#import <KSCrash/KSCrashReportFilterJSON.h>
-#import <KSCrash/KSCrashReportFilterAppleFmt.h>
-#import <KSCrash/KSCrashReportFilterGZip.h>
-#import <KSCrash/KSCrashReportFields.h>
-#import <KSCrash/KSCrashReportFilterAlert.h>
-#import <KSCrash/NSError+SimpleConstructor.h>
+#import <KSCrash.h>
+#import <KSCrashReportFilterBasic.h>
+#import <KSCrashReportFilterJSON.h>
+#import <KSCrashReportFilterAppleFmt.h>
+#import <KSCrashReportFilterGZip.h>
+#import <KSCrashReportFields.h>
+#import <KSCrashReportFilterAlert.h>
+#import <NSError+SimpleConstructor.h>
 #import <MessageUI/MessageUI.h>
 #import "MLConstants.h"
 #import "HelperTools.h"

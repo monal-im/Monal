@@ -21,8 +21,8 @@
 #import <CommonCrypto/CommonHMAC.h>
 #import <MapKit/MapKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
-#import <KSCrash/KSCrash.h>
-#import <KSCrash/KSCrashC.h>
+#import <KSCrash.h>
+#import <KSCrashC.h>
 //can not be imported, use extern declaration instead
 //#import <KSCrash/Recording/KSCrashReportStore.h>
 extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);

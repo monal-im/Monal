@@ -15,12 +15,6 @@ end
 def monal
   use_frameworks!
   inhibit_all_warnings!
-  pod 'MBProgressHUD', '~> 1.2.0'
-  pod 'SDWebImage'
-  pod 'DZNEmptyDataSet'
-  pod 'TOCropViewController'
-  pod 'NotificationBannerSwift', '~> 3.2.0'
-  pod 'FLAnimatedImage', '~> 1.0'
 end
 
 def monalxmpp
@@ -29,10 +23,7 @@ def monalxmpp
   inhibit_all_warnings!
   pod 'SAMKeychain'
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
-  pod 'ASN1Decoder'
   #pod 'GoogleWebRTC'
-  pod 'WebRTC-lib'
-  pod 'KSCrash', git: 'https://github.com/monal-im/KSCrash', branch: 'master'
   signalDeps
 end
 

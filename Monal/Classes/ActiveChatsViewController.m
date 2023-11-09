@@ -133,7 +133,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) handleDeviceRotation
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self imageForEmptyDataSet:nil];
+        [self imageForEmptyDataSet];
         [self.chatListTable setNeedsDisplay];
     });
 }
@@ -765,8 +765,12 @@ static NSMutableSet* _smacksWarningDisplayed;
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 
-
 -(UIImage*) imageForEmptyDataSet:(UIScrollView*) scrollView
+{
+    return [self imageForEmptyDataSet];
+}
+
+-(UIImage*) imageForEmptyDataSet
 {
     int orientation;
     if(self.tableView.frame.size.height > self.tableView.frame.size.width)

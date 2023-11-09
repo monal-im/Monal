@@ -118,7 +118,7 @@
 -(void) handleDeviceRotation
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self imageForEmptyDataSet:nil];
+        [self imageForEmptyDataSet];
     });
 }
 
@@ -376,6 +376,11 @@
 #pragma mark - empty data set
 
 -(UIImage*) imageForEmptyDataSet:(UIScrollView*) scrollView
+{
+    return [self imageForEmptyDataSet];
+}
+
+-(UIImage*) imageForEmptyDataSet
 {
     DZNEmptyDataSetView* emptyDataSetView = self.tableView.emptyDataSetView;
     CGRect headerFrame = self.navigationController.navigationBar.frame;

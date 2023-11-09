@@ -8,7 +8,7 @@
 
 #import "MLBlockedUsersTableViewController.h"
 #import "DataLayer.h"
-#import "MBProgressHUD.h"
+#import <MBProgressHUD/MBProgressHUD.h>
 #import "MLXMPPManager.h"
 #import "HelperTools.h"
 

@@ -10,7 +10,7 @@
 #import "MonalAppDelegate.h"
 #import "HelperTools.h"
 #import "DataLayer.h"
-#import "MBProgressHUD.h"
+#import <MBProgressHUD/MBProgressHUD.h>
 #import "MLXMPPManager.h"
 #import "MLUDPLogger.h"
 

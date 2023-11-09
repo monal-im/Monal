@@ -7,7 +7,7 @@
 //
 
 #import "MLPasswordChangeTableViewController.h"
-#import "MBProgressHUD.h"
+#import <MBProgressHUD/MBProgressHUD.h>
 #import "MLXMPPManager.h"
 
 

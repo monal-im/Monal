@@ -21,7 +21,7 @@
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"
 #import "MLMucProcessor.h"
-#import "MBProgressHUD.h"
+#import <MBProgressHUD/MBProgressHUD.h>
 #import "MLVoIPProcessor.h"
 #import "MLUDPLogger.h"
 #import "MLCrashReporter.h"

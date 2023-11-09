@@ -8,7 +8,7 @@
 
 #import "XMPPEdit.h"
 #import "xmpp.h"
-#import "MBProgressHUD.h"
+#import <MBProgressHUD/MBProgressHUD.h>
 #import "MLBlockedUsersTableViewController.h"
 #import "MLButtonCell.h"
 #import "MLImageManager.h"

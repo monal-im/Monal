@@ -10,7 +10,7 @@
 #import "MLConstants.h"
 #import "MLImageManager.h"
 #import "MLContact.h"
-#import <DZNEmptyDataSet/UIScrollView+EmptyDataSet.h>
+#import <UIScrollView+EmptyDataSet.h>
 
 @interface ContactsViewController : UITableViewController  <UISearchResultsUpdating, UISearchControllerDelegate
 ,DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>

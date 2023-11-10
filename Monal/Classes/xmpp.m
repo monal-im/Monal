@@ -4411,7 +4411,7 @@ NSString* const kStanza = @"stanza";
     [self connect];
 }
 
--(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary*) hiddenFields withCompletion:(xmppCompletion) completion
+-(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary* _Nullable) hiddenFields withCompletion:(xmppCompletion) completion
 {
     //this is a registration submission
     _registration = NO;
@@ -4474,9 +4474,13 @@ NSString* const kStanza = @"stanza";
         //dispatch completion handler outside of the receiveQueue
         if(self->_regFormCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSMutableDictionary* hiddenFormFields = [NSMutableDictionary new];
-                for(MLXMLNode* field in [result find:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/field<type=hidden>"])
-                    hiddenFormFields[[field findFirst:@"/@var"]] = [field findFirst:@"value#"];
+                NSMutableDictionary* hiddenFormFields = nil;
+                if([result check:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/field"])
+                {
+                    hiddenFormFields = [NSMutableDictionary new];
+                    for(MLXMLNode* field in [result find:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/field<type=hidden>"])
+                        hiddenFormFields[[field findFirst:@"/@var"]] = [field findFirst:@"value#"];
+                }
                 self->_regFormCompletion([result findFirst:@"{jabber:iq:register}query/{urn:xmpp:bob}data#|base64"], hiddenFormFields);
             });
     } andErrorHandler:^(XMPPIQ* error) {

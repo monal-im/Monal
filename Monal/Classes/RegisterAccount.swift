@@ -51,7 +51,7 @@ struct RegisterAccount: View {
 
     @State private var xmppAccount: xmpp?
     @State private var captchaImg: Image?
-    @State private var hiddenFields: Dictionary<AnyHashable, Any> = [:]
+    @State private var hiddenFields: Dictionary<AnyHashable, Any>?
     @State private var captchaText: String = ""
 
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))

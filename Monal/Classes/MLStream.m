@@ -388,12 +388,43 @@
         shared_state.hasTLS = NO;
         
         //create simple framer and append it to our stack
+        __block int startupCounter = 0;     //workaround for some weird apple stuff, see below
         nw_protocol_definition_t starttls_framer_definition = nw_framer_create_definition("starttls_framer", NW_FRAMER_CREATE_FLAGS_DEFAULT, ^(nw_framer_t framer) {
             DDLogInfo(@"Framer %@ start called with wasOpenOnce=%@...", framer, bool2str(wasOpenOnce));
             nw_framer_set_stop_handler(framer, (nw_framer_stop_handler_t)^(nw_framer_t _Nullable framer) {
                 DDLogInfo(@"Framer stop called: %@", framer);
                 return YES;
             });
+            
+            //some weird apple stuff creates the framer twice: once directly when starting the tcp handshake
+            //and again later after the tcp connection was established successfully --> ignore the first one
+            //we don't need any locking for our counter because all framers will be started in the same internal network queue
+            startupCounter++;
+            if(startupCounter < 2)
+            {
+                nw_framer_set_input_handler(framer, ^size_t(nw_framer_t framer) {
+                    nw_framer_parse_input(framer, 1, BUFFER_SIZE, nil, ^size_t(uint8_t* buffer, size_t buffer_length, bool is_complete) {
+                        MLAssert(NO, @"Unexpected incoming bytes in first framer!", (@{
+                            @"framer": framer,
+                            @"buffer": [NSData dataWithBytes:buffer length:buffer_length],
+                            @"buffer_length": @(buffer_length),
+                            @"is_complete": bool2str(is_complete),
+                        }));
+                        return buffer_length;
+                    });
+                    return 0;       //why that?
+                });
+                nw_framer_set_output_handler(framer, ^(nw_framer_t framer, nw_framer_message_t message, size_t message_length, bool is_complete) {
+                    MLAssert(NO, @"Unexpected outgoing bytes in first framer!", (@{
+                        @"framer": framer,
+                        @"message": message,
+                        @"message_length": @(message_length),
+                        @"is_complete": bool2str(is_complete),
+                    }));
+                });
+                
+                return nw_framer_start_result_will_mark_ready;
+            }
             
             //we have to simulate nw_connection_state_ready because the connection state will not reflect that while our framer is active
             //--> use framer start as "connection active" signal

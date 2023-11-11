@@ -85,7 +85,7 @@ static NSMutableDictionary* currentTransactions;
         @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"sqlite3_open_v2() failed" userInfo:nil];
     }
     
-    //use this observer because dealloc will not be called in the same thread as the sqlite statements got prepared
+    //use this observer because dealloc will not be called in the same thread as the sqlite statements got prepared in
     [[NSNotificationCenter defaultCenter] addObserverForName:NSThreadWillExitNotification object:[NSThread currentThread] queue:nil usingBlock:^(NSNotification* notification __unused) {
         @synchronized(self) {
             NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
@@ -198,9 +198,7 @@ static NSMutableDictionary* currentTransactions;
         else
         {
             DDLogError(@"Binding unsupported parameter in: %@", statement);
-#ifdef IS_ALPHA
             [self throwErrorForQuery:query andArguments:args];
-#endif
         }
     }];
     

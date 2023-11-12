@@ -11,12 +11,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLPipe : NSObject <NSStreamDelegate>
+@interface MLPipe : NSObject<NSStreamDelegate>
 
--(id) initWithInputStream:(NSInputStream*)inputStream andOuterDelegate:(id <NSStreamDelegate>)outerDelegate;
--(void)close;
--(NSInputStream*) getNewEnd;
--(NSNumber*) drainInputStream;
+-(id) initWithInputStream:(NSInputStream*) inputStream andOuterDelegate:(id <NSStreamDelegate>) outerDelegate;
+-(void) close;
+-(NSInputStream*) getNewOutputStream;
+-(NSNumber*) drainInputStreamAndCloseOutputStream;
 
 @end
 

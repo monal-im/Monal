@@ -110,6 +110,7 @@ Sends a message to a specified contact in account. Calls completion handler on s
 
 @property (nonatomic, assign) BOOL hasAPNSToken;
 @property (nonatomic, strong) NSString* pushToken;
+@property (nonatomic, strong) NSError* _Nullable apnsError;
 
 @property (nonatomic, readonly) BOOL isBackgrounded;
 @property (nonatomic, readonly) BOOL isNotInFocus;

@@ -495,8 +495,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
                 //delete apns push token --> push will not be registered on our xmpp server anymore
                 DDLogWarn(@"Notifications disabled --> deleting APNS push token from user defaults!");
                 NSString* oldToken = [[HelperTools defaultsDB] objectForKey:@"pushToken"];
-                [[HelperTools defaultsDB] removeObjectForKey:@"pushToken"];
-                [[MLXMPPManager sharedInstance] setPushToken:nil];
+                [[MLXMPPManager sharedInstance] removeToken];
                 
                 if((oldToken != nil && oldToken.length != 0) || oldGranted)
                 {

@@ -358,7 +358,7 @@
     MLOutputStream* output = [[MLOutputStream alloc] initWithSharedState:shared_state];
     
     nw_parameters_configure_protocol_block_t tcp_options = ^(nw_protocol_options_t tcp_options) {
-        nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
+        //nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
         //nw_tcp_options_set_no_delay(tcp_options, YES);            //disable nagle's algorithm
     };
     nw_parameters_configure_protocol_block_t configure_tls_block = ^(nw_protocol_options_t tls_options) {

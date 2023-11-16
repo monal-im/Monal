@@ -1994,9 +1994,10 @@ enum msgSentState {
 {
     if(indexPath.section == messagesSection && indexPath.row == 0) {
         if(self.moreMessagesAvailable && !self.viewIsScrolling) {
+            self.viewIsScrolling = YES;     //don't load the next messages immediately
             [self loadOldMsgHistory];
             // Allow loading of more messages after a few seconds
-            createTimer(10, (^{
+            createTimer(8, (^{
                 self.viewIsScrolling = NO;
             }));
         }

@@ -358,7 +358,7 @@
     MLOutputStream* output = [[MLOutputStream alloc] initWithSharedState:shared_state];
     
     nw_parameters_configure_protocol_block_t tcp_options = ^(nw_protocol_options_t tcp_options) {
-        nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
+        //nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
         //nw_tcp_options_set_no_delay(tcp_options, YES);            //disable nagle's algorithm
     };
     nw_parameters_configure_protocol_block_t configure_tls_block = ^(nw_protocol_options_t tls_options) {
@@ -388,12 +388,45 @@
         shared_state.hasTLS = NO;
         
         //create simple framer and append it to our stack
+        __block int startupCounter = 0;     //workaround for some weird apple stuff, see below
         nw_protocol_definition_t starttls_framer_definition = nw_framer_create_definition("starttls_framer", NW_FRAMER_CREATE_FLAGS_DEFAULT, ^(nw_framer_t framer) {
-            DDLogInfo(@"Framer %@ start called with wasOpenOnce=%@...", framer, bool2str(wasOpenOnce));
+            //we don't need any locking for our counter because all framers will be started in the same internal network queue
+            int framerId = startupCounter;
+            startupCounter++;
+            DDLogInfo(@"Framer(%d) %@ start called with wasOpenOnce=%@...", framerId, framer, bool2str(wasOpenOnce));
             nw_framer_set_stop_handler(framer, (nw_framer_stop_handler_t)^(nw_framer_t _Nullable framer) {
-                DDLogInfo(@"Framer stop called: %@", framer);
+                DDLogInfo(@"Framer(%d) stop called: %@", framerId, framer);
                 return YES;
             });
+            
+            /*
+            //some weird apple stuff creates the framer twice: once directly when starting the tcp handshake
+            //and again later after the tcp connection was established successfully --> ignore the first one
+            if(framerId < 1)
+            {
+                nw_framer_set_input_handler(framer, ^size_t(nw_framer_t framer) {
+                    nw_framer_parse_input(framer, 1, BUFFER_SIZE, nil, ^size_t(uint8_t* buffer, size_t buffer_length, bool is_complete) {
+                        MLAssert(NO, @"Unexpected incoming bytes in first framer!", (@{
+                            @"framer": framer,
+                            @"buffer": [NSData dataWithBytes:buffer length:buffer_length],
+                            @"buffer_length": @(buffer_length),
+                            @"is_complete": bool2str(is_complete),
+                        }));
+                        return buffer_length;
+                    });
+                    return 0;       //why that?
+                });
+                nw_framer_set_output_handler(framer, ^(nw_framer_t framer, nw_framer_message_t message, size_t message_length, bool is_complete) {
+                    MLAssert(NO, @"Unexpected outgoing bytes in first framer!", (@{
+                        @"framer": framer,
+                        @"message": message,
+                        @"message_length": @(message_length),
+                        @"is_complete": bool2str(is_complete),
+                    }));
+                });
+                return nw_framer_start_result_will_mark_ready;
+            }
+            */
             
             //we have to simulate nw_connection_state_ready because the connection state will not reflect that while our framer is active
             //--> use framer start as "connection active" signal
@@ -466,7 +499,7 @@
         }
         else if(state == nw_connection_state_ready)
         {
-            DDLogInfo(@"Connection established: %@", bool2str(wasOpenOnce));
+            DDLogInfo(@"Connection established, wasOpenOnce: %@", bool2str(wasOpenOnce));
             if(!wasOpenOnce)
             {
                 wasOpenOnce = YES;
@@ -523,7 +556,8 @@
     [self.shared_state.tlsHandshakeCompleteCondition lock];
     @synchronized(self.shared_state) {
         MLAssert(!self.shared_state.hasTLS, @"We already have TLS on this connection!");
-        DDLogInfo(@"Activating TLS on framer: %@", self.shared_state.framer);
+        MLAssert(self.shared_state.framer != nil, @"Trying to start tls handshake without having a running framer!");
+        DDLogInfo(@"Starting TLS handshake on framer: %@", self.shared_state.framer);
         nw_framer_async(self.shared_state.framer, ^{
             @synchronized(self.shared_state) {
                 DDLogVerbose(@"Prepending tls to framer: %@", self.shared_state.framer);
@@ -541,7 +575,14 @@
     }
     [self.shared_state.tlsHandshakeCompleteCondition wait];
     [self.shared_state.tlsHandshakeCompleteCondition unlock];
-    DDLogInfo(@"TLS activated now: %@...", bool2str(self.shared_state.hasTLS));
+    DDLogInfo(@"TLS handshake completed: %@...", bool2str(self.shared_state.hasTLS));
+}
+
+-(BOOL) hasTLS
+{
+    @synchronized(self.shared_state) {
+        return self.shared_state.hasTLS;
+    }
 }
 
 -(instancetype) initWithSharedState:(MLSharedStreamState*) shared
@@ -603,8 +644,12 @@
 
 -(void) close
 {
+    nw_connection_t connection;
+    @synchronized(self.shared_state) {
+        connection = self.shared_state.connection;
+    }
     DDLogVerbose(@"Closing connection via nw_connection_send()...");
-    nw_connection_send(self.shared_state.connection, NULL, NW_CONNECTION_FINAL_MESSAGE_CONTEXT, YES, ^(nw_error_t  _Nullable error) {
+    nw_connection_send(connection, NULL, NW_CONNECTION_FINAL_MESSAGE_CONTEXT, YES, ^(nw_error_t  _Nullable error) {
         if(error)
         {
             NSError* st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(error));
@@ -617,6 +662,11 @@
     @synchronized(self.shared_state) {
         self.closed = YES;
         self.shared_state.open = NO;
+        
+        //unlock thread waiting on tls handshake
+        [self.shared_state.tlsHandshakeCompleteCondition lock];
+        [self.shared_state.tlsHandshakeCompleteCondition signal];
+        [self.shared_state.tlsHandshakeCompleteCondition unlock];
     }
 }
 
@@ -708,89 +758,95 @@
 
 -(BOOL) isTLS13
 {
-    MLAssert([self streamStatus] >= NSStreamStatusOpen && [self streamStatus] < NSStreamStatusClosed, @"Stream must be open to call this method!", (@{@"streamStatus": @([self streamStatus])}));
-    MLAssert(self.shared_state.hasTLS, @"Stream must have TLS negotiated to call this method!");
-    nw_protocol_metadata_t p_metadata = nw_connection_copy_protocol_metadata(self.shared_state.connection, nw_protocol_copy_tls_definition());
-    MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
-    sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
-    return sec_protocol_metadata_get_negotiated_tls_protocol_version(s_metadata) == tls_protocol_version_TLSv13;
+    @synchronized(self.shared_state) {
+        MLAssert([self streamStatus] >= NSStreamStatusOpen && [self streamStatus] < NSStreamStatusClosed, @"Stream must be open to call this method!", (@{@"streamStatus": @([self streamStatus])}));
+        MLAssert(self.shared_state.hasTLS, @"Stream must have TLS negotiated to call this method!");
+        nw_protocol_metadata_t p_metadata = nw_connection_copy_protocol_metadata(self.shared_state.connection, nw_protocol_copy_tls_definition());
+        MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
+        sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
+        return sec_protocol_metadata_get_negotiated_tls_protocol_version(s_metadata) == tls_protocol_version_TLSv13;
+    }
 }
 
 -(NSData*) channelBindingData_TLSExporter
 {
-    MLAssert([self streamStatus] >= NSStreamStatusOpen && [self streamStatus] < NSStreamStatusClosed, @"Stream must be open to call this method!", (@{@"streamStatus": @([self streamStatus])}));
-    MLAssert(self.shared_state.hasTLS, @"Stream must have TLS negotiated to call this method!");
-    nw_protocol_metadata_t p_metadata = nw_connection_copy_protocol_metadata(self.shared_state.connection, nw_protocol_copy_tls_definition());
-    MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
-    sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
-    //see https://www.rfc-editor.org/rfc/rfc9266.html
-    return (NSData*)sec_protocol_metadata_create_secret(s_metadata, 24, "EXPORTER-Channel-Binding", 32);
+    @synchronized(self.shared_state) {
+        MLAssert([self streamStatus] >= NSStreamStatusOpen && [self streamStatus] < NSStreamStatusClosed, @"Stream must be open to call this method!", (@{@"streamStatus": @([self streamStatus])}));
+        MLAssert(self.shared_state.hasTLS, @"Stream must have TLS negotiated to call this method!");
+        nw_protocol_metadata_t p_metadata = nw_connection_copy_protocol_metadata(self.shared_state.connection, nw_protocol_copy_tls_definition());
+        MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
+        sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
+        //see https://www.rfc-editor.org/rfc/rfc9266.html
+        return (NSData*)sec_protocol_metadata_create_secret(s_metadata, 24, "EXPORTER-Channel-Binding", 32);
+    }
 }
 
 -(NSData*) channelBindingData_TLSServerEndPoint
 {
-    MLAssert([self streamStatus] >= NSStreamStatusOpen && [self streamStatus] < NSStreamStatusClosed, @"Stream must be open to call this method!", (@{@"streamStatus": @([self streamStatus])}));
-    MLAssert(self.shared_state.hasTLS, @"Stream must have TLS negotiated to call this method!");
-    nw_protocol_metadata_t p_metadata = nw_connection_copy_protocol_metadata(self.shared_state.connection, nw_protocol_copy_tls_definition());
-    MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
-    sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
-    __block NSData* cert = nil;
-    sec_protocol_metadata_access_peer_certificate_chain(s_metadata, ^(sec_certificate_t certificate) {
-        if(cert == nil)
-            cert = (__bridge_transfer NSData*)SecCertificateCopyData(sec_certificate_copy_ref(certificate));
-    });
-    MLCrypto* crypto = [MLCrypto new];
-    NSString* signatureAlgo = [crypto getSignatureAlgoOfCert:cert];
-    DDLogDebug(@"Signature algo OID: %@", signatureAlgo);
-    //OIDs taken from https://www.rfc-editor.org/rfc/rfc3279#section-2.2.3 and "Updated by" RFCs
-    if([@"1.2.840.113549.2.5" isEqualToString:signatureAlgo])               //md5WithRSAEncryption
-        return [HelperTools sha256:cert];       //use sha256 as per RFC 5929
-    else if([@"1.3.14.3.2.26" isEqualToString:signatureAlgo])               //sha1WithRSAEncryption
-        return [HelperTools sha256:cert];       //use sha256 as per RFC 5929
-    else if([@"1.2.840.113549.1.1.11" isEqualToString:signatureAlgo])       //sha256WithRSAEncryption
-        return [HelperTools sha256:cert];
-    else if([@"1.2.840.113549.1.1.12" isEqualToString:signatureAlgo])       //sha384WithRSAEncryption (not supported, return sha256, will fail cb)
-    {
-        DDLogError(@"Using sha256 for unsupported OID %@ (sha384WithRSAEncryption)", signatureAlgo);
-        return [HelperTools sha256:cert];
-    }
-    else if([@"1.2.840.113549.1.1.13" isEqualToString:signatureAlgo])       //sha512WithRSAEncryption
-        return [HelperTools sha512:cert];
-    else if([@"1.2.840.113549.1.1.14" isEqualToString:signatureAlgo])       //sha224WithRSAEncryption (not supported, return sha256, will fail cb)
-    {
-        DDLogError(@"Using sha256 for unsupported OID %@ (sha224WithRSAEncryption)", signatureAlgo);
-        return [HelperTools sha256:cert];
-    }
-    else if([@"1.2.840.10045.4.1" isEqualToString:signatureAlgo])           //ecdsa-with-SHA1
-        return [HelperTools sha256:cert];
-    else if([@"1.2.840.10045.4.3.1" isEqualToString:signatureAlgo])         //ecdsa-with-SHA224  (not supported, return sha256, will fail cb)
-    {
-        DDLogError(@"Using sha256 for unsupported OID %@ (ecdsa-with-SHA224)", signatureAlgo);
-        return [HelperTools sha256:cert];
-    }
-    else if([@"1.2.840.10045.4.3.2" isEqualToString:signatureAlgo])         //ecdsa-with-SHA256
-        return [HelperTools sha256:cert];
-    else if([@"1.2.840.10045.4.3.3" isEqualToString:signatureAlgo])         //ecdsa-with-SHA384  (not supported, return sha256, will fail cb)
-    {
-        DDLogError(@"Using sha256 for unsupported OID %@ (ecdsa-with-SHA384)", signatureAlgo);
-        return [HelperTools sha256:cert];
-    }
-    else if([@"1.2.840.10045.4.3.4" isEqualToString:signatureAlgo])         //ecdsa-with-SHA512
-        return [HelperTools sha256:cert];
-    else if([@"1.3.6.1.5.5.7.6.32" isEqualToString:signatureAlgo])          //id-ecdsa-with-shake128  (not supported, return sha256, will fail cb)
-    {
-        DDLogError(@"Using sha256 for unsupported OID %@ (id-ecdsa-with-shake128)", signatureAlgo);
-        return [HelperTools sha256:cert];
-    }
-    else if([@"1.3.6.1.5.5.7.6.33" isEqualToString:signatureAlgo])          //id-ecdsa-with-shake256  (not supported, return sha256, will fail cb)
-    {
-        DDLogError(@"Using sha256 for unsupported OID %@ (id-ecdsa-with-shake256)", signatureAlgo);
-        return [HelperTools sha256:cert];
-    }
-    else        //all other algos use sha256 (that most probably will fail cb)
-    {
-        DDLogError(@"Using sha256 for unknown/unsupported OID: %@", signatureAlgo);
-        return [HelperTools sha256:cert];
+    @synchronized(self.shared_state) {
+        MLAssert([self streamStatus] >= NSStreamStatusOpen && [self streamStatus] < NSStreamStatusClosed, @"Stream must be open to call this method!", (@{@"streamStatus": @([self streamStatus])}));
+        MLAssert(self.shared_state.hasTLS, @"Stream must have TLS negotiated to call this method!");
+        nw_protocol_metadata_t p_metadata = nw_connection_copy_protocol_metadata(self.shared_state.connection, nw_protocol_copy_tls_definition());
+        MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
+        sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
+        __block NSData* cert = nil;
+        sec_protocol_metadata_access_peer_certificate_chain(s_metadata, ^(sec_certificate_t certificate) {
+            if(cert == nil)
+                cert = (__bridge_transfer NSData*)SecCertificateCopyData(sec_certificate_copy_ref(certificate));
+        });
+        MLCrypto* crypto = [MLCrypto new];
+        NSString* signatureAlgo = [crypto getSignatureAlgoOfCert:cert];
+        DDLogDebug(@"Signature algo OID: %@", signatureAlgo);
+        //OIDs taken from https://www.rfc-editor.org/rfc/rfc3279#section-2.2.3 and "Updated by" RFCs
+        if([@"1.2.840.113549.2.5" isEqualToString:signatureAlgo])               //md5WithRSAEncryption
+            return [HelperTools sha256:cert];       //use sha256 as per RFC 5929
+        else if([@"1.3.14.3.2.26" isEqualToString:signatureAlgo])               //sha1WithRSAEncryption
+            return [HelperTools sha256:cert];       //use sha256 as per RFC 5929
+        else if([@"1.2.840.113549.1.1.11" isEqualToString:signatureAlgo])       //sha256WithRSAEncryption
+            return [HelperTools sha256:cert];
+        else if([@"1.2.840.113549.1.1.12" isEqualToString:signatureAlgo])       //sha384WithRSAEncryption (not supported, return sha256, will fail cb)
+        {
+            DDLogError(@"Using sha256 for unsupported OID %@ (sha384WithRSAEncryption)", signatureAlgo);
+            return [HelperTools sha256:cert];
+        }
+        else if([@"1.2.840.113549.1.1.13" isEqualToString:signatureAlgo])       //sha512WithRSAEncryption
+            return [HelperTools sha512:cert];
+        else if([@"1.2.840.113549.1.1.14" isEqualToString:signatureAlgo])       //sha224WithRSAEncryption (not supported, return sha256, will fail cb)
+        {
+            DDLogError(@"Using sha256 for unsupported OID %@ (sha224WithRSAEncryption)", signatureAlgo);
+            return [HelperTools sha256:cert];
+        }
+        else if([@"1.2.840.10045.4.1" isEqualToString:signatureAlgo])           //ecdsa-with-SHA1
+            return [HelperTools sha256:cert];
+        else if([@"1.2.840.10045.4.3.1" isEqualToString:signatureAlgo])         //ecdsa-with-SHA224  (not supported, return sha256, will fail cb)
+        {
+            DDLogError(@"Using sha256 for unsupported OID %@ (ecdsa-with-SHA224)", signatureAlgo);
+            return [HelperTools sha256:cert];
+        }
+        else if([@"1.2.840.10045.4.3.2" isEqualToString:signatureAlgo])         //ecdsa-with-SHA256
+            return [HelperTools sha256:cert];
+        else if([@"1.2.840.10045.4.3.3" isEqualToString:signatureAlgo])         //ecdsa-with-SHA384  (not supported, return sha256, will fail cb)
+        {
+            DDLogError(@"Using sha256 for unsupported OID %@ (ecdsa-with-SHA384)", signatureAlgo);
+            return [HelperTools sha256:cert];
+        }
+        else if([@"1.2.840.10045.4.3.4" isEqualToString:signatureAlgo])         //ecdsa-with-SHA512
+            return [HelperTools sha256:cert];
+        else if([@"1.3.6.1.5.5.7.6.32" isEqualToString:signatureAlgo])          //id-ecdsa-with-shake128  (not supported, return sha256, will fail cb)
+        {
+            DDLogError(@"Using sha256 for unsupported OID %@ (id-ecdsa-with-shake128)", signatureAlgo);
+            return [HelperTools sha256:cert];
+        }
+        else if([@"1.3.6.1.5.5.7.6.33" isEqualToString:signatureAlgo])          //id-ecdsa-with-shake256  (not supported, return sha256, will fail cb)
+        {
+            DDLogError(@"Using sha256 for unsupported OID %@ (id-ecdsa-with-shake256)", signatureAlgo);
+            return [HelperTools sha256:cert];
+        }
+        else        //all other algos use sha256 (that most probably will fail cb)
+        {
+            DDLogError(@"Using sha256 for unknown/unsupported OID: %@", signatureAlgo);
+            return [HelperTools sha256:cert];
+        }
     }
 }
 

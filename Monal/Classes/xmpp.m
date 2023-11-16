@@ -593,7 +593,7 @@ NSString* const kStanza = @"stanza";
     if(self.connectionProperties.server.isDirectTLS == YES)
     {
         //prepare xmpp parser (this is the first time for this connection --> we don't need to clear the receive queue)
-        [self prepareXMPPParser:NO];
+        [self prepareXMPPParser];
         [self startXMPPStreamWithXMLOpening:YES];
         
         //pipeline auth request onto our stream header if we have cached stream features available
@@ -607,7 +607,7 @@ NSString* const kStanza = @"stanza";
     else
     {
         //prepare xmpp parser (this is the first time for this connection --> we don't need to clear the receive queue)
-        [self prepareXMPPParser:NO];
+        [self prepareXMPPParser];
         [self startXMPPStreamWithXMLOpening:YES];
         
         //ignore starttls stream feature presence and opportunistically try starttls even before receiving the stream features
@@ -1232,7 +1232,7 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark XMPP
 
--(void) prepareXMPPParser:(BOOL) clearReceiveQueue
+-(void) prepareXMPPParser
 {
     BOOL appex = [HelperTools isAppExtension];
     if(_xmlParser!=nil)
@@ -1351,7 +1351,6 @@ NSString* const kStanza = @"stanza";
                         DDLogVerbose(@"Ended transaction for: %@", parsedStanza);
                         [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
                     } onQueue:@"receiveQueue"];
-                    DDLogVerbose(@"Flushed all queued notifications...");
                     [self persistState];        //make sure to persist all state changes triggered by the events in the notification queue
                 }]] waitUntilFinished:YES];
             //we have to wait for the stanza/nonza to be handled before parsing the next one to not introduce race conditions
@@ -1366,21 +1365,12 @@ NSString* const kStanza = @"stanza";
     }
     
     // create (new) pipe and attach a (new) streaming parser
-    _xmlParser = [[NSXMLParser alloc] initWithStream:[_iPipe getNewEnd]];
+    _xmlParser = [[NSXMLParser alloc] initWithStream:[_iPipe getNewOutputStream]];
     [_xmlParser setShouldProcessNamespaces:YES];
     [_xmlParser setShouldReportNamespacePrefixes:NO];
     //[_xmlParser setShouldReportNamespacePrefixes:YES];        //for debugging only
     [_xmlParser setShouldResolveExternalEntities:NO];
     [_xmlParser setDelegate:_baseParserDelegate];
-    
-    if(clearReceiveQueue)
-    {
-        //stop everything coming after this (we don't want to process stanzas that came in *before* this xmpp stream got started!)
-        //if we do not do this we could be prone to attacks injecting xml elements into the new stream before it gets started
-        [_iPipe drainInputStream];
-        [_parseQueue cancelAllOperations];
-        [_receiveQueue cancelAllOperations];
-    }
     
     // do the stanza parsing in the low priority (=utility) global queue
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
@@ -2408,7 +2398,7 @@ NSString* const kStanza = @"stanza";
             self->_loggedInOnce = YES;
             
             //after sasl success a new stream will be started --> reset parser to accommodate this
-            [self prepareXMPPParser:NO];
+            [self prepareXMPPParser];
             
             //this could possibly be with or without XML opening (old behaviour was with opening, so keep that)
             DDLogDebug(@"Sending NOT-pipelined stream restart...");
@@ -2734,28 +2724,69 @@ NSString* const kStanza = @"stanza";
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-tls}proceed"])
         {
-            //remove all pending data before starting tls handshake
-            [_iPipe drainInputStream];
-            
-            //this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
-            DDLogInfo(@"configuring/starting tls handshake");
-            self->_streamHasSpace = NO;         //make sure we do not try to send any data while the tls handshake is still performed
-            [((MLStream*)self->_oStream) startTLS];
-            self->_startTLSComplete = YES;
-            
-            //stop everything coming after this (we don't want to process stanzas that came in *before* a secure TLS context was established!)
+            //stop the old xml parser and clear the parse queue
             //if we do not do this we could be prone to mitm attacks injecting xml elements into the stream before it gets encrypted
             //such xml elements would then get processed as received *after* the TLS initialization
-            [self prepareXMPPParser:YES];
-            [self startXMPPStreamWithXMLOpening:YES];
-            
-            //pipeline auth request onto our stream header if we have cached stream features available
-            if(_cachedStreamFeaturesBeforeAuth != nil)
+            if(_xmlParser!=nil)
             {
-                DDLogDebug(@"Pipelining auth using cached stream features: %@", _cachedStreamFeaturesBeforeAuth);
-                _pipeliningState = kPipelinedAuth;
-                [self handleFeaturesBeforeAuth:_cachedStreamFeaturesBeforeAuth];
+                DDLogInfo(@"stopping old xml parser");
+                [_xmlParser setDelegate:nil];
+                [_xmlParser abortParsing];
+                _xmlParser = nil;
+                //throw away all parsed but not processed stanzas (we aborted the parser right now)
+                //the xml parser will fill the parse queue synchronously while < kStateBound
+                //--> no stanzas/nonzas will leak into the parse queue after resetting the parser and clearing the parse queue
+                [_parseQueue cancelAllOperations];
             }
+            //prepare input/output streams
+            [_iPipe drainInputStreamAndCloseOutputStream];      //remove all pending data before starting tls handshake
+            self->_streamHasSpace = NO;     //make sure we do not try to send any data while the tls handshake is still performed
+            
+            //dispatch async to not block the db transaction of the proceed stanza inside the receive queue
+            //while waiting for the tls handshake to complete
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                DDLogInfo(@"configuring/starting tls handshake");
+                MLStream* oStream = (MLStream*)self->_oStream;
+                [oStream startTLS];
+                if(!oStream.hasTLS)
+                {
+                    DDLogError(@"Failed to complete TLS handshake, reconnecting!");
+                    showErrorOnAlpha(self, @"Failed to complete TLS handshake while using STARTTLS, retrying!");
+                    [self reconnect];
+                    return;
+                }
+                self->_startTLSComplete = YES;
+                
+                //we successfully completed the tls handshake, now proceed inside the receive queue again
+                [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                    if(self.accountState<kStateReconnecting)
+                    {
+                        DDLogWarn(@"Aborting second half of starttls handling, accountState < kStateReconnecting");
+                        return;
+                    }
+                    //create proper context for pipelining auth stuff (notification queue, db transaction etc.)
+                    [MLNotificationQueue queueNotificationsInBlock:^{
+                        [[DataLayer sharedInstance] createTransaction:^{
+                            //don't write data to our tcp stream while inside this db transaction (all effects to the outside world should be transactional, too)
+                            [self freezeSendQueue];
+                            
+                            //restart xml stream and parser
+                            [self prepareXMPPParser];
+                            [self startXMPPStreamWithXMLOpening:YES];
+                            
+                            //pipeline auth request onto our stream header if we have cached stream features available
+                            if(self->_cachedStreamFeaturesBeforeAuth != nil)
+                            {
+                                DDLogDebug(@"Pipelining auth using cached stream features: %@", self->_cachedStreamFeaturesBeforeAuth);
+                                self->_pipeliningState = kPipelinedAuth;
+                                [self handleFeaturesBeforeAuth:self->_cachedStreamFeaturesBeforeAuth];
+                            }
+                        }];
+                        [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
+                    } onQueue:@"receiveQueue"];
+                    [self persistState];        //make sure to persist all state changes triggered by the events in the notification queue
+                }]] waitUntilFinished:NO];
+            });
         }
         else
         {
@@ -2892,7 +2923,7 @@ NSString* const kStanza = @"stanza";
         
         //directly call our continuation block if SCRAM is not supported, because _blockToCallOnTCPOpen() will throw an error then
         //(we currently only support SCRAM for SASL2)
-        //pipelining can also be done immediately if we are sure we don't use channel binding (e.g. we're not in direct tls mode)
+        //pipelining can also be done immediately if we are sure the tls handshake is complete (e.g. we're not in direct tls mode)
         //and if we are not pipelining the auth, we can call the block immediately, too
         //(because the TLS connection was obviously already established and that made us receive the non-cached stream features used here)
         //if we don't call it here, the continuation block will be called automatically once the TLS connection got established
@@ -4411,7 +4442,7 @@ NSString* const kStanza = @"stanza";
     [self connect];
 }
 
--(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary*) hiddenFields withCompletion:(xmppCompletion) completion
+-(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary* _Nullable) hiddenFields withCompletion:(xmppCompletion) completion
 {
     //this is a registration submission
     _registration = NO;
@@ -4474,9 +4505,13 @@ NSString* const kStanza = @"stanza";
         //dispatch completion handler outside of the receiveQueue
         if(self->_regFormCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSMutableDictionary* hiddenFormFields = [NSMutableDictionary new];
-                for(MLXMLNode* field in [result find:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/field<type=hidden>"])
-                    hiddenFormFields[[field findFirst:@"/@var"]] = [field findFirst:@"value#"];
+                NSMutableDictionary* hiddenFormFields = nil;
+                if([result check:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/field"])
+                {
+                    hiddenFormFields = [NSMutableDictionary new];
+                    for(MLXMLNode* field in [result find:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/field<type=hidden>"])
+                        hiddenFormFields[[field findFirst:@"/@var"]] = [field findFirst:@"value#"];
+                }
                 self->_regFormCompletion([result findFirst:@"{jabber:iq:register}query/{urn:xmpp:bob}data#|base64"], hiddenFormFields);
             });
     } andErrorHandler:^(XMPPIQ* error) {

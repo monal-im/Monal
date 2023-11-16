@@ -384,18 +384,29 @@ NSString* const kiqErrorType = @"error";
 /*
  This is really hardcoded for yax.im might work for others
  */
--(void) registerUser:(NSString*) user withPassword:(NSString*) newPass captcha:(NSString*) captcha andHiddenFields:(NSDictionary*) hiddenFields
+-(void) registerUser:(NSString*) user withPassword:(NSString*) newPass captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary* _Nullable) hiddenFields
 {
-    NSMutableDictionary* fields = [NSMutableDictionary dictionaryWithDictionary:@{
-        @"username": user,
-        @"password": newPass,
-    }];
-    if(captcha)
-        fields[@"ocr"] = captcha;
-    [fields addEntriesFromDictionary:hiddenFields];
-    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
-        [[XMPPDataForm alloc] initWithType:@"submit" formType:kRegisterNameSpace andDictionary:fields]
-    ] andData:nil]];
+    //if no reg form was provided both of these are nil --> don't try to send a reg form in our response
+    if(captcha != nil && hiddenFields != nil)
+    {
+        NSMutableDictionary* fields = [NSMutableDictionary dictionaryWithDictionary:@{
+            @"username": user,
+            @"password": newPass,
+        }];
+        if(captcha)
+            fields[@"ocr"] = captcha;
+        [fields addEntriesFromDictionary:hiddenFields];
+        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
+            [[XMPPDataForm alloc] initWithType:@"submit" formType:kRegisterNameSpace andDictionary:fields]
+        ] andData:nil]];
+    }
+    else
+    {
+        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"username" andData:user],
+            [[MLXMLNode alloc] initWithElement:@"password" andData:newPass],
+        ] andData:nil]];
+    }
 }
 
 -(void) changePasswordForUser:(NSString*) user newPassword:(NSString*) newPass

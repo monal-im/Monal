@@ -11,15 +11,27 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSUInteger, MLScramStatus) {
+    MLScramStatusOK,
+    //server-first-message
+    MLScramStatusNonceError,
+    MLScramStatusUnsupportedMAttribute,
+    MLScramStatusSSDPTriggered,
+    MLScramStatusIterationCountInsecure,
+    //server-final-message
+    MLScramStatusWrongServerProof,
+    MLScramStatusServerError,
+};
+
 @interface SCRAM : NSObject
 +(NSArray*) supportedMechanismsIncludingChannelBinding:(BOOL) include;
 -(instancetype) initWithUsername:(NSString*) username password:(NSString*) password andMethod:(NSString*) method;
 -(void) setSSDPMechanisms:(NSArray<NSString*>*) mechanisms andChannelBindingTypes:(NSArray<NSString*>* _Nullable) cbTypes;
 
 -(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType;
--(BOOL) parseServerFirstMessage:(NSString*) str;
+-(MLScramStatus) parseServerFirstMessage:(NSString*) str;
 -(NSString*) clientFinalMessageWithChannelBindingData:(NSData* _Nullable) channelBindingData;
--(BOOL) parseServerFinalMessage:(NSString*) str;
+-(MLScramStatus) parseServerFinalMessage:(NSString*) str;
 -(NSData*) hashPasswordWithSalt:(NSData*) salt andIterationCount:(uint32_t) iterationCount;
 
 @property (nonatomic, readonly) NSString* method;

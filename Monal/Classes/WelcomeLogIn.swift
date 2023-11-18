@@ -131,10 +131,11 @@ struct WelcomeLogIn: View {
                     
                     TextField("user@domain.tld", text: Binding(
                         get: { self.jid },
-                        set: { string in self.jid = string.lowercased() })
+                        set: { string in self.jid = string.lowercased().replacingOccurrences(of: " ", with: "") })
                     )
                     //ios15: .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled()
                     .keyboardType(.emailAddress)
                     
                     SecureField("Password", text: $password)

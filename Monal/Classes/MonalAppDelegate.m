@@ -27,6 +27,7 @@
 #import "MLCrashReporter.h"
 
 @import NotificationBannerSwift;
+@import UserNotifications;
 
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
@@ -317,6 +318,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
 {
     DDLogError(@"APNS push reg error %@", error);
     [[MLXMPPManager sharedInstance] removeToken];
+    [MLXMPPManager sharedInstance].apnsError = error;
 }
 
 #pragma mark - notification actions
@@ -494,8 +496,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
                 //delete apns push token --> push will not be registered on our xmpp server anymore
                 DDLogWarn(@"Notifications disabled --> deleting APNS push token from user defaults!");
                 NSString* oldToken = [[HelperTools defaultsDB] objectForKey:@"pushToken"];
-                [[HelperTools defaultsDB] removeObjectForKey:@"pushToken"];
-                [[MLXMPPManager sharedInstance] setPushToken:nil];
+                [[MLXMPPManager sharedInstance] removeToken];
                 
                 if((oldToken != nil && oldToken.length != 0) || oldGranted)
                 {
@@ -1209,7 +1210,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
         DDLogVerbose(@"Setting _shutdownPending to YES...");
         _shutdownPending = YES;
         DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
-        [self scheduleBackgroundTask:YES];        //make sure delivery will be attempted, if needed (force as soon as possible)
+        [HelperTools scheduleBackgroundTask:YES];        //make sure delivery will be attempted, if needed (force as soon as possible)
         DDLogInfo(@"|~~| 20%% |~~|");
         [self updateUnread];
         DDLogInfo(@"|~~| 40%% |~~|");
@@ -1383,7 +1384,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
                 DDLogVerbose(@"Setting _shutdownPending to YES...");
                 _shutdownPending = YES;
                 [[MLXMPPManager sharedInstance] disconnectAll];     //disconnect all accounts to prevent TCP buffer leaking
-                [self scheduleBackgroundTask:NO];           //request bg fetch execution in BGFETCH_DEFAULT_INTERVAL seconds
+                [HelperTools scheduleBackgroundTask:NO];            //request bg fetch execution in BGFETCH_DEFAULT_INTERVAL seconds
                 [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
                     BOOL stopped = NO;
                     //make sure this will be done only once, even if we have an uikit bgtask and a bg fetch running simultaneously
@@ -1440,15 +1441,10 @@ a=max-message-size:262144\n" withInitiator:YES]);
 -(void) addBackgroundTask
 {
     [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
-        //log both cases if present
+        //don't start uikit bg task if it's already running
         if(self->_bgTask != UIBackgroundTaskInvalid)
             DDLogVerbose(@"Not starting UIKit background task, already running: %d", (int)self->_bgTask);
-        if(self->_bgProcessing != nil)
-            DDLogVerbose(@"Not starting UIKit background task, bg task already running: %@", self->_bgProcessing);
-        if(self->_bgRefreshing != nil)
-            DDLogVerbose(@"Not starting UIKit background task, bg task already running: %@", self->_bgRefreshing);
-        //don't start uikit bg task if it's already running or a bg fetch is running already
-        if(self->_bgTask == UIBackgroundTaskInvalid && self->_bgProcessing == nil && self->_bgRefreshing == nil)
+        else
         {
             DDLogInfo(@"Starting UIKit background task...");
             //indicate we want to do work even if the app is put into background
@@ -1474,7 +1470,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
                         
                         //schedule a BGProcessingTaskRequest to process this further as soon as possible
                         //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                        [self scheduleBackgroundTask:YES];      //force as soon as possible
+                        [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
                         
                         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                         DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1530,14 +1526,14 @@ a=max-message-size:262144\n" withInitiator:YES]);
                     DDLogDebug(@"_bgTask == UIBackgroundTaskInvalid --> disconnecting and ending background task");
                     
                     //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-                    [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+                    [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:YES];
                     
                     //disconnect all accounts to prevent TCP buffer leaking
                     [[MLXMPPManager sharedInstance] disconnectAll];
                     
                     //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                     //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                    [self scheduleBackgroundTask:YES];      //force as soon as possible
+                    [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
                     
                     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                     DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1575,14 +1571,15 @@ a=max-message-size:262144\n" withInitiator:YES]);
         }];
     }
     
-    if(self->_bgTask != UIBackgroundTaskInvalid)
-    {
-        DDLogDebug(@"stopping UIKit _bgTask, not needed when running a bg task");
-        [DDLog flushLog];
-        UIBackgroundTaskIdentifier task = self->_bgTask;
-        self->_bgTask = UIBackgroundTaskInvalid;
-        [[UIApplication sharedApplication] endBackgroundTask:task];
-    }
+    //we allow ui bgtasks alongside "modern" bgtasks to extend our runtime in case the "modern" background tasks only provde a few seconds of bgtime
+//     if(self->_bgTask != UIBackgroundTaskInvalid)
+//     {
+//         DDLogDebug(@"stopping UIKit _bgTask, not needed when running a bg task");
+//         [DDLog flushLog];
+//         UIBackgroundTaskIdentifier task = self->_bgTask;
+//         self->_bgTask = UIBackgroundTaskInvalid;
+//         [[UIApplication sharedApplication] endBackgroundTask:task];
+//     }
     
     if(self->_bgRefreshing != nil)
     {
@@ -1607,7 +1604,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
         DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
     
     //request another execution in BGFETCH_DEFAULT_INTERVAL seconds
-    [self scheduleBackgroundTask:NO];
+    [HelperTools scheduleBackgroundTask:NO];
     
     DDLogInfo(@"BGPROCESSING SETUP HANDLER COMPLETED SUCCESSFULLY...");
 }
@@ -1639,14 +1636,14 @@ a=max-message-size:262144\n" withInitiator:YES]);
                     DDLogDebug(@"_bgTask == UIBackgroundTaskInvalid --> disconnecting and ending background task");
                     
                     //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-                    [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
+                    [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:YES];
                     
                     //disconnect all accounts to prevent TCP buffer leaking
                     [[MLXMPPManager sharedInstance] disconnectAll];
                     
                     //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                     //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                    [self scheduleBackgroundTask:YES];      //force as soon as possible
+                    [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
                     
                     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                     DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1684,14 +1681,15 @@ a=max-message-size:262144\n" withInitiator:YES]);
         }];
     }
     
-    if(self->_bgTask != UIBackgroundTaskInvalid)
-    {
-        DDLogDebug(@"stopping UIKit _bgTask, not needed when running a bg task");
-        [DDLog flushLog];
-        UIBackgroundTaskIdentifier task = self->_bgTask;
-        self->_bgTask = UIBackgroundTaskInvalid;
-        [[UIApplication sharedApplication] endBackgroundTask:task];
-    }
+    //we allow ui bgtasks alongside "modern" bgtasks to extend our runtime in case the "modern" background tasks only provde a few seconds of bgtime
+//     if(self->_bgTask != UIBackgroundTaskInvalid)
+//     {
+//         DDLogDebug(@"stopping UIKit _bgTask, not needed when running a bg task");
+//         [DDLog flushLog];
+//         UIBackgroundTaskIdentifier task = self->_bgTask;
+//         self->_bgTask = UIBackgroundTaskInvalid;
+//         [[UIApplication sharedApplication] endBackgroundTask:task];
+//     }
     
     if([[MLXMPPManager sharedInstance] hasConnectivity])
     {
@@ -1707,7 +1705,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
         DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
     
     //request another execution in BGFETCH_DEFAULT_INTERVAL seconds
-    [self scheduleBackgroundTask:NO];
+    [HelperTools scheduleBackgroundTask:NO];
     
     DDLogInfo(@"BGREFRESHING SETUP HANDLER COMPLETED SUCCESSFULLY...");
 }
@@ -1768,50 +1766,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
     BOOL force = YES;
     if(notification.userInfo)
         force = [notification.userInfo[@"force"] boolValue];
-    [self scheduleBackgroundTask:force];
-}
-
--(void) scheduleBackgroundTask:(BOOL) force
-{
-    DDLogInfo(@"Scheduling new BackgroundTask with force=%@...", bool2str(force));
-    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
-        NSError* error;
-        if(force)
-        {
-            // cancel existing task (if any)
-            //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundProcessingTask];
-            // new task
-            BGProcessingTaskRequest* processingRequest = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundProcessingTask];
-            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-            processingRequest.earliestBeginDate = nil;
-            processingRequest.requiresNetworkConnectivity = YES;
-            processingRequest.requiresExternalPower = NO;
-            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:processingRequest error:&error])
-            {
-                // Errorcodes https://stackoverflow.com/a/58224050/872051
-                DDLogError(@"Failed to submit BGTask request %@: %@", processingRequest, error);
-            }
-            else
-                DDLogVerbose(@"Success submitting BGTask request %@", processingRequest);
-        }
-        else
-        {
-            // cancel existing task (if any)
-            //[BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
-            // new task
-            BGAppRefreshTaskRequest* refreshingRequest = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundRefreshingTask];
-            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-            refreshingRequest.earliestBeginDate = nil;
-            //refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
-            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:refreshingRequest error:&error])
-            {
-                // Errorcodes https://stackoverflow.com/a/58224050/872051
-                DDLogError(@"Failed to submit BGTask request %@: %@", refreshingRequest, error);
-            }
-            else
-                DDLogVerbose(@"Success submitting BGTask request %@", refreshingRequest);
-        }
-    }];
+    [HelperTools scheduleBackgroundTask:force];
 }
 
 -(void) connectIfNecessaryWithOptions:(NSDictionary*) options
@@ -1910,7 +1865,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
                             
                             //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
                             //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
-                            [self scheduleBackgroundTask:!wasIdle];
+                            [HelperTools scheduleBackgroundTask:!wasIdle];
                             
                             //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                             DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1927,18 +1882,18 @@ a=max-message-size:262144\n" withInitiator:YES]);
                         [self->_wakeupCompletions removeObjectForKey:completionId];
                         completionHandler(UIBackgroundFetchResultFailed);
                         
-                        //trigger disconnect if we are idle and no timer is blocking us now
-                        if(self->_bgTask != UIBackgroundTaskInvalid || self->_bgProcessing != nil || self->_bgRefreshing != nil)
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                                [self checkIfBackgroundTaskIsStillNeeded];
-                            });
-                        
                         if(stopped)
                         {
                             DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
                             [HelperTools flushLogsWithTimeout:0.100];
                         }
+                        
+                        //trigger disconnect if we are idle and no timer is blocking us now
+                        if(self->_bgTask != UIBackgroundTaskInvalid || self->_bgProcessing != nil || self->_bgRefreshing != nil)
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                [self checkIfBackgroundTaskIsStillNeeded];
+                            });
                     }
                 });
             }))

@@ -51,7 +51,7 @@ struct RegisterAccount: View {
 
     @State private var xmppAccount: xmpp?
     @State private var captchaImg: Image?
-    @State private var hiddenFields: Dictionary<AnyHashable, Any> = [:]
+    @State private var hiddenFields: Dictionary<AnyHashable, Any>?
     @State private var captchaText: String = ""
 
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
@@ -319,20 +319,30 @@ struct RegisterAccount: View {
                     }
                     .disabled(self.registerToken != nil)
 
-                    if(selectedServerIndex == 0) {
-                        TextField("Provide XMPP-Server", text: Binding(get: { self.providedServer }, set: { string in self.providedServer = string.lowercased() }))
+                    Group {
+                        if(selectedServerIndex == 0) {
+                            TextField("Provide XMPP-Server", text: Binding(
+                                get: { self.providedServer },
+                                set: { string in self.providedServer = string.lowercased().replacingOccurrences(of: " ", with: "") }
+                            ))
                             //ios15: .textInputAutocapitalization(.never)
-                            .disableAutocorrection(true)
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
                             .foregroundColor(self.registerToken != nil ? .secondary : .primary)
                             .disabled(self.registerToken != nil)
-                    }
+                        }
 
-                    TextField("Username", text: Binding(get: { self.username }, set: { string in self.username = string.lowercased() }))
+                        TextField("Username", text: Binding(
+                            get: { self.username },
+                            set: { string in self.username = string.lowercased().replacingOccurrences(of: " ", with: "") }
+                        ))
                         //ios15: .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
+                        .autocapitalization(.none)
+                        .autocorrectionDisabled()
                     
-                    SecureField("Password", text: $password)
-                    SecureField("Password (repeated)", text: $repeatedPassword)
+                        SecureField("Password", text: $password)
+                        SecureField("Password (repeated)", text: $repeatedPassword)
+                    }
                     
                     if(self.captchaImg != nil) {
                         HStack {
@@ -347,7 +357,8 @@ struct RegisterAccount: View {
                         }
                         TextField("Captcha", text: $captchaText)
                             //ios15: .textInputAutocapitalization(.never)
-                            .disableAutocorrection(true)
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
                     }
 
                     Button(action: {

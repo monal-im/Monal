@@ -476,7 +476,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         
         // Disable account because login will not be possible
         [[DataLayer sharedInstance] disableAccountForPasswordMigration:account[kAccountID]];
-        [self disconnectAccount:account[kAccountID]];
+        [self disconnectAccount:account[kAccountID] withExplicitLogout:YES];
         
         //show notifications for disabled accounts to warn user if in appex
         if([HelperTools isAppExtension])
@@ -523,8 +523,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         DDLogWarn(@"NOT connecting because no connectivity.");
 }
 
-
--(void) disconnectAccount:(NSNumber*) accountNo
+-(void) disconnectAccount:(NSNumber*) accountNo withExplicitLogout:(BOOL) explicitLogout
 {
     int index = 0;
     int pos = -1;
@@ -725,7 +724,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) removeAccountForAccountNo:(NSNumber*) accountNo
 {
-    [self disconnectAccount:accountNo];
+    [self disconnectAccount:accountNo withExplicitLogout:YES];
     [[DataLayer sharedInstance] removeAccount:accountNo];
     [SAMKeychain deletePasswordForService:kMonalKeychainName account:accountNo.stringValue];
     [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {

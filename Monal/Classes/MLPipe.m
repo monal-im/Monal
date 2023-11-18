@@ -43,95 +43,114 @@
 
 -(void) close
 {
-    //check if the streams are already closed
-    if(!_input && !_output)
-        return;
-    DDLogInfo(@"Closing pipe");
-    [self cleanupOutputBuffer];
-    @try
-    {
-        if(_input)
+    @synchronized(self) {
+        //check if the streams are already closed
+        if(!_input && !_output)
+            return;
+        DDLogInfo(@"Closing pipe");
+        [self cleanupOutputBuffer];
+        @try
         {
-            DDLogInfo(@"Closing pipe: input end");
-            [_input setDelegate:nil];
-            [_input removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-            [_input close];
-            _input = nil;
+            if(_input)
+            {
+                DDLogInfo(@"Closing pipe: input end");
+                [_input setDelegate:nil];
+                [_input removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+                [_input close];
+                _input = nil;
+            }
+            if(_output)
+            {
+                DDLogInfo(@"Closing pipe: output end");
+                [_output setDelegate:nil];
+                [_output removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+                [_output close];
+                _output = nil;
+            }
+            DDLogInfo(@"Pipe closed");
         }
+        @catch(id theException)
+        {
+            DDLogError(@"Exception while closing pipe: %@", theException);
+        }
+    }
+}
+
+-(NSInputStream*) getNewOutputStream
+{
+    @synchronized(self) {
+        //make current output stream orphan
         if(_output)
         {
-            DDLogInfo(@"Closing pipe: output end");
+            DDLogInfo(@"Pipe making output stream orphan");
             [_output setDelegate:nil];
             [_output removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
             [_output close];
             _output = nil;
         }
-        DDLogInfo(@"Pipe closed");
-    }
-    @catch(id theException)
-    {
-        DDLogError(@"Exception while closing pipe: %@", theException);
+        [self cleanupOutputBuffer];
+        
+        //create new stream pair and schedule it properly, see: https://stackoverflow.com/a/31961573/3528174
+        DDLogInfo(@"Pipe creating new stream pair");
+        CFReadStreamRef readStream = NULL;
+        CFWriteStreamRef writeStream = NULL;
+        CFStreamCreateBoundPair(NULL, &readStream, &writeStream, kPipeBufferSize);
+        NSInputStream* inputStream = (__bridge_transfer NSInputStream *)readStream;
+        _output = (__bridge_transfer NSOutputStream *)writeStream;
+        [_output setDelegate:self];
+        [_output scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+        [_output open];
+        [inputStream open];
+        return inputStream;
     }
 }
 
--(NSInputStream*) getNewEnd
+-(NSNumber*) drainInputStreamAndCloseOutputStream
 {
-    //make current output stream orphan
-    if(_output)
-    {
-        DDLogInfo(@"Pipe making output stream orphan");
-        [_output setDelegate:nil];
-        [_output removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-        [_output close];
-        _output = nil;
-    }
-    [self cleanupOutputBuffer];
-    
-    //create new stream pair and schedule it properly, see: https://stackoverflow.com/a/31961573/3528174
-    DDLogInfo(@"Pipe creating new stream pair");
-    CFReadStreamRef readStream = NULL;
-    CFWriteStreamRef writeStream = NULL;
-    CFStreamCreateBoundPair(NULL, &readStream, &writeStream, kPipeBufferSize);
-    NSInputStream* inputStream = (__bridge_transfer NSInputStream *)readStream;
-    _output = (__bridge_transfer NSOutputStream *)writeStream;
-    [_output setDelegate:self];
-    [_output scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-    [_output open];
-    [inputStream open];
-    return inputStream;
-}
-
--(NSNumber*) drainInputStream
-{
-    NSInteger drainedBytes = 0;
-    uint8_t* buf = malloc(kPipeBufferSize+1);
-    NSInteger len = 0;
-    do
-    {
-        if(![_input hasBytesAvailable])
-            break;
-        len = [_input read:buf maxLength:kPipeBufferSize];
-        DDLogVerbose(@"Pipe drained %ld bytes", (long)len);
-        if(len>0) {
-            drainedBytes += len;
-            buf[len] = '\0';      //null termination for log output of raw string
-            DDLogVerbose(@"Pipe got raw drained string '%s'", buf);
+    @synchronized(self) {
+        //make current output stream orphan
+        if(_output)
+        {
+            DDLogInfo(@"Pipe making output stream orphan");
+            [_output setDelegate:nil];
+            [_output removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+            [_output close];
+            _output = nil;
         }
-    } while(len>0 && [_input hasBytesAvailable]);
-    free(buf);
-    DDLogVerbose(@"Pipe done draining %ld bytes", (long)drainedBytes);
-    return @(drainedBytes);
+        [self cleanupOutputBuffer];
+        
+        NSInteger drainedBytes = 0;
+        uint8_t* buf = malloc(kPipeBufferSize+1);
+        NSInteger len = 0;
+        do
+        {
+            if(![_input hasBytesAvailable])
+                break;
+            len = [_input read:buf maxLength:kPipeBufferSize];
+            DDLogVerbose(@"Pipe drained %ld bytes", (long)len);
+            if(len>0) {
+                drainedBytes += len;
+                buf[len] = '\0';      //null termination for log output of raw string
+                DDLogVerbose(@"Pipe got raw drained string '%s'", buf);
+            }
+        } while(len>0 && [_input hasBytesAvailable]);
+        free(buf);
+        DDLogVerbose(@"Pipe done draining %ld bytes", (long)drainedBytes);
+        return @(drainedBytes);
+    }
 }
 
 -(void) cleanupOutputBuffer
 {
-    if(_outputBuffer)
-    {
-        DDLogVerbose(@"Pipe throwing away data in output buffer: %ld bytes", (long)_outputBufferByteCount);
-        free(_outputBuffer);
+    @synchronized(self) {
+        if(_outputBuffer)
+        {
+            DDLogVerbose(@"Pipe throwing away data in output buffer: %ld bytes", (long)_outputBufferByteCount);
+            free(_outputBuffer);
+        }
+        _outputBuffer = nil;
+        _outputBufferByteCount = 0;
     }
-    _outputBuffer = nil;
-    _outputBufferByteCount = 0;
 }
 
 -(void) process

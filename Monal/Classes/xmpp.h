@@ -84,6 +84,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 @property (nonatomic, readonly) xmppState accountState;
 @property (nonatomic, readonly) BOOL reconnectInProgress;
+@property (nonatomic, readonly) BOOL isDoingFullReconnect;
 
 // discovered properties
 @property (nonatomic, strong) NSArray* discoveredServersList;
@@ -214,12 +215,13 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) changePassword:(NSString*) newPass withCompletion:(xmppCompletion _Nullable) completion;
 
 -(void) requestRegFormWithToken:(NSString* _Nullable) token andCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
--(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary*) hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
+-(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary* _Nullable) hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
 
 -(void) publishRosterName:(NSString* _Nullable) rosterName;
 
 #pragma mark - internal stuff for processors
 
+-(BOOL) shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas;
 -(void) addMessageToMamPageArray:(NSDictionary*) messageDictionary;
 -(NSMutableArray*) getOrderedMamPageFor:(NSString*) mamQueryId;
 -(void) bindResource:(NSString*) resource;

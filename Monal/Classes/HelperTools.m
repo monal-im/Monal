@@ -16,6 +16,7 @@
 #include <objc/message.h>
 #include <objc/objc-exception.h>
 #import <sys/qos.h>
+#import <BackgroundTasks/BackgroundTasks.h>
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import <MapKit/MapKit.h>
@@ -293,12 +294,14 @@ void swizzle(Class c, SEL orig, SEL new)
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount
 {
     [self postError:description withNode:node andAccount:account andIsSevere:isSevere];
-    [account disconnect];
     
     //make sure we don't try this again even when the mainapp/appex gets restarted
     NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:YES];
     accountDic[kEnabled] = @NO;
     [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
+    
+    //disconnect and reset state (including pipelined auth etc.)
+    [[MLXMPPManager sharedInstance] disconnectAccount:account.accountNo withExplicitLogout:YES];
 }
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
@@ -1235,6 +1238,55 @@ void swizzle(Class c, SEL orig, SEL new)
     return [retval copy];
 }
 
++(void) scheduleBackgroundTask:(BOOL) force
+{
+    DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
+        NSError* error;
+        if(force)
+        {
+            //don't cancel existing task because that could delay our next execution
+//             //cancel existing task (if any)
+//             [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundProcessingTask];
+            //new task
+            BGProcessingTaskRequest* processingRequest = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundProcessingTask];
+            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+            processingRequest.earliestBeginDate = nil;
+            processingRequest.requiresNetworkConnectivity = YES;
+            processingRequest.requiresExternalPower = NO;
+            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:processingRequest error:&error])
+            {
+                // Errorcodes https://stackoverflow.com/a/58224050/872051
+                DDLogError(@"Failed to submit BGTask request %@: %@", processingRequest, error);
+            }
+            else
+                DDLogVerbose(@"Success submitting BGTask request %@", processingRequest);
+        }
+        else
+        {
+            if(@available(iOS 17.0, macCatalyst 17.0, *))
+            {
+                //cancel existing task (if any)
+                [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
+            }
+            //new task
+            BGAppRefreshTaskRequest* refreshingRequest = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundRefreshingTask];
+            //on ios<17 do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+            if(@available(iOS 17.0, macCatalyst 17.0, *))
+                refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
+            else
+                refreshingRequest.earliestBeginDate = nil;
+            if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:refreshingRequest error:&error])
+            {
+                // Errorcodes https://stackoverflow.com/a/58224050/872051
+                DDLogError(@"Failed to submit BGTask request %@: %@", refreshingRequest, error);
+            }
+            else
+                DDLogVerbose(@"Success submitting BGTask request %@", refreshingRequest);
+        }
+    }];
+}
+
 +(void) clearSyncErrorsOnAppForeground
 {
     NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
@@ -1303,17 +1355,31 @@ void swizzle(Class c, SEL orig, SEL new)
                         DDLogWarn(@"NOT posting syncError notification for %@ (already did so since last app foreground)...", account.connectionProperties.identity.jid);
                         continue;
                     }
+                    //we always want to post sync errors if we are in the appex (because an incoming push means the server has
+                    //*possibly* queued some messages for us)
+                    //if we are in the main app we only want to post sync errors if we are in one of these states:
+                    //1. we are NOT doing a full reconnect and the smacks queue contains some unacked message stanzas having a body
+                    //--> (briefly) opening the app while not having an internet connection does not generate sync errors (if no
+                    //outgoing message is pending)
+                    //2. we are doing a full reconnect --> we always want to post sync erros because we have to rejoin mucs,
+                    //set up push etc. and we *really* want to be sure all of these get a chance to complete
+                    //NOTE: this conditions are all swapped and ANDed because we want to continue the loop here instead of posting a sync error
+                    if(![self isAppExtension] && !account.isDoingFullReconnect && ![account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas])
+                    {
+                        DDLogWarn(@"NOT posting syncError notification for %@ (we are not in the appex, no important stanzas are unacked and we are not doing a full reconnect)...", account.connectionProperties.identity.jid);
+                        continue;
+                    }
                     DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);
                     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
                     content.title = NSLocalizedString(@"Could not synchronize", @"");
                     content.subtitle = account.connectionProperties.identity.jid;
-                    content.body = NSLocalizedString(@"Please open the app to retry", @"");
+                    content.body = NSLocalizedString(@"Some messages might wait to be retrieved or sent. Please open the app to retry.", @"");
                     content.sound = [UNNotificationSound defaultSound];
                     content.categoryIdentifier = @"simple";
                     //we don't know if and when apple will start the background process or when the next push will come in
                     //--> we need a sync error notification to make the user aware of possible issues
-                    //BUT: we can delay it for some time and hope a background process/push is started in the meantime and removes the notification
-                    //     before it gets displayed at all (we use 60 seconds here)
+                    //BUT: we can delay it for some time and hope a background process/push that removes the notification before it
+                    //is displayed at all is started in the meantime (we use 60 seconds here)
                     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:syncErrorIdentifier content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:60 repeats: NO]];
                     NSError* error = [self postUserNotificationRequest:request];
                     if(error)
@@ -1555,7 +1621,7 @@ void swizzle(Class c, SEL orig, SEL new)
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    DDLogInfo(@"Starting: Version %@ (%@ %@ UTC, %@)", version, buildDate, buildTime, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]);
+    DDLogInfo(@"Starting: Version %@ (%@ %@ UTC, %@) on %@", version, buildDate, buildTime, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion);
     [DDLog flushLog];
     
     DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_USER_INTERACTIVE", QOS_CLASS_USER_INTERACTIVE);

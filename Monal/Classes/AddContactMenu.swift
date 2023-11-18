@@ -122,10 +122,13 @@ struct AddContactMenu: View {
             self.newContact = contact
             //import omemo fingerprints as manually trusted, if requested
             trustFingerprints(self.importScannedFingerprints ? self.scannedFingerprints : [:], for:jid, on:account)
-            if self.connectedAccounts.count > 1 {
-                successAlert(title: Text("Already present"), message: Text("This contact is already in the contact list of the selected account"))
-            } else {
-                successAlert(title: Text("Already present"), message: Text("This contact is already in your contact list"))
+            //only alert of already known contact if we did not import the omemo fingerprints
+            if !self.importScannedFingerprints || self.scannedFingerprints?.count ?? 0 == 0 {
+                if self.connectedAccounts.count > 1 {
+                    successAlert(title: Text("Already present"), message: Text("This contact is already in the contact list of the selected account"))
+                } else {
+                    successAlert(title: Text("Already present"), message: Text("This contact is already in your contact list"))
+                }
             }
             return
         }
@@ -179,14 +182,16 @@ struct AddContactMenu: View {
                         .pickerStyle(.menu)
                     }
                     TextField("Contact or Group/Channel Jid", text: $toAdd)
-                        .autocorrectionDisabled()
+                        //ios15: .textInputAutocapitalization(.never)
                         .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                        .keyboardType(.emailAddress)
+                        .addClearButton(text:$toAdd)
                         .disabled(scannedFingerprints != nil)
                         .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
-                        .addClearButton(text:$toAdd)
-                        //ios15: .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
-                        .keyboardType(.emailAddress)
+                        .onChange(of: toAdd) { _ in
+                            toAdd = toAdd.replacingOccurrences(of: " ", with: "")
+                        }
                 }
                 if(scannedFingerprints != nil && scannedFingerprints!.count > 0) {
                     Section(header: Text("A contact was scanned through the QR code scanner")) {

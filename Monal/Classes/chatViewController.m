@@ -511,7 +511,6 @@ enum msgSentState {
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
-        alert.popoverPresentationController.sourceView = self.view;
         [self presentViewController:alert animated:YES completion:nil];
     }
     else
@@ -540,7 +539,7 @@ enum msgSentState {
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No, keep encryption activated", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
-        alert.popoverPresentationController.sourceView = sender;
+        //alert.popoverPresentationController.sourceView = sender;
         [self presentViewController:alert animated:YES completion:nil];
     }
     else
@@ -1995,9 +1994,10 @@ enum msgSentState {
 {
     if(indexPath.section == messagesSection && indexPath.row == 0) {
         if(self.moreMessagesAvailable && !self.viewIsScrolling) {
+            self.viewIsScrolling = YES;     //don't load the next messages immediately
             [self loadOldMsgHistory];
             // Allow loading of more messages after a few seconds
-            createTimer(10, (^{
+            createTimer(8, (^{
                 self.viewIsScrolling = NO;
             }));
         }

@@ -123,7 +123,7 @@ removes a contact from the roster
 
 -(void) submitRegToken:(NSString*) token;
 -(void) getRegistrationFields;
--(void) registerUser:(NSString*) user withPassword:(NSString*) newPass captcha:(NSString*) captcha andHiddenFields:(NSDictionary*) hiddenFields;
+-(void) registerUser:(NSString*) user withPassword:(NSString*) newPass captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary* _Nullable) hiddenFields;
 -(void) changePasswordForUser:(NSString*) user newPassword:(NSString*) newPass;
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString*) blockedJid;

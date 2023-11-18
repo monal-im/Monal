@@ -1,0 +1,14 @@
+diff a/Monal/Classes/ContactsViewController.m b/Monal/Classes/ContactsViewController.m	(rejected hunks)
+@@ -99,7 +105,11 @@ -(void) viewDidLoad
+     addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
+     [addContact setAction:@selector(openAddContacts:)];
+ 
+-    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], nil];
++    UIBarButtonItem* createGroup = [[UIBarButtonItem alloc] init];
++    createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
++    [createGroup setAction:@selector(openCreateGroup:)];
++
++    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], createGroup, nil];
+     [self configureContactRequestsImage];
+     
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactUpdate) name:kMonalContactRemoved object:nil];

@@ -106,7 +106,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
                         // byte -> mb
                         float mb = sliderValue / 1024 / 1024;
                         labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over WiFi upto: %.fMB", @""), mb];
-
+                        
                         return mb;
                     } withUpdateFunc:^(UILabel* labelToUpdate, float sliderValue) {
                         float newValue = roundf(sliderValue);

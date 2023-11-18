@@ -1264,17 +1264,14 @@ void swizzle(Class c, SEL orig, SEL new)
         }
         else
         {
-            if(@available(iOS 17.0, macCatalyst 17.0, *))
-            {
-                //cancel existing task (if any)
-                [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
-            }
+            //cancel existing task (if any)
+            [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
             //new task
             BGAppRefreshTaskRequest* refreshingRequest = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundRefreshingTask];
             //on ios<17 do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-            if(@available(iOS 17.0, macCatalyst 17.0, *))
-                refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
-            else
+//             if(@available(iOS 17.0, macCatalyst 17.0, *))
+//                 refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
+//             else
                 refreshingRequest.earliestBeginDate = nil;
             if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:refreshingRequest error:&error])
             {

@@ -344,10 +344,23 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) initSystem
 {
-    [self configureLogging];
+    BOOL enableDefaultLogAndCrashFramework = YES;
+#ifdef TARGET_IPHONE_SIMULATOR
+    // Automatically switch between the debug technique of TMolitor and FAltheide
+    enableDefaultLogAndCrashFramework = [[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"];
+#endif
+    if(enableDefaultLogAndCrashFramework)
+    {
+        [self configureLogging];
+        [self installCrashHandler];
+        [self installExceptionHandler];
+    }
+    else
+    {
+        [self configureXcodeLogging];
+    }
     [SwiftHelpers initSwiftHelpers];
-    [self installCrashHandler];
-    [self installExceptionHandler];
+
     [self activityLog];
 }
 
@@ -1568,6 +1581,11 @@ void swizzle(Class c, SEL orig, SEL new)
     [_stdoutRedirector flushWithTimeout:timeout];
     [DDLog flushLog];
     [MLUDPLogger flushWithTimeout:timeout];
+}
+
++(void) configureXcodeLogging
+{
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
 }
 
 +(void) configureLogging

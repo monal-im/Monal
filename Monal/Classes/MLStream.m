@@ -389,7 +389,7 @@
         
         //create simple framer and append it to our stack
         __block int startupCounter = 0;     //workaround for some weird apple stuff, see below
-        nw_protocol_definition_t starttls_framer_definition = nw_framer_create_definition("starttls_framer", NW_FRAMER_CREATE_FLAGS_DEFAULT, ^(nw_framer_t framer) {
+        nw_protocol_definition_t starttls_framer_definition = nw_framer_create_definition([[[NSUUID UUID] UUIDString] UTF8String], NW_FRAMER_CREATE_FLAGS_DEFAULT, ^(nw_framer_t framer) {
             //we don't need any locking for our counter because all framers will be started in the same internal network queue
             int framerId = startupCounter;
             startupCounter++;

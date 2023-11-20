@@ -2257,7 +2257,7 @@ NSString* const kStanza = @"stanza";
             }
             
             //enable push in case our token has changed
-            [account enablePush];
+            [self enablePush];
             
             //ping all mucs to check if we are still connected (XEP-0410)
             [self.mucProcessor pingAllMucs];

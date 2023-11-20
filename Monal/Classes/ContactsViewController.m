@@ -105,12 +105,15 @@
     addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
     [addContact setAction:@selector(openAddContacts:)];
 
-    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [UIBarButtonItem new], nil];
+#ifdef IS_ALPHA
     UIBarButtonItem* createGroup = [[UIBarButtonItem alloc] init];
         createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
         [createGroup setAction:@selector(openCreateGroup:)];
-
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], createGroup, nil];
+#else
+    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [UIBarButtonItem new], nil];
+#endif
+
     [self configureContactRequestsImage];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactUpdate) name:kMonalContactRemoved object:nil];

@@ -50,7 +50,7 @@
 @import WebRTC;
 
 #define STATE_VERSION 9
-#define CONNECT_TIMEOUT 12.0
+#define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";

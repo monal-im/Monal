@@ -370,7 +370,7 @@ void swizzle(Class c, SEL orig, SEL new)
     NSError* error;
     DDLogDebug(@"configuring default audio session...");
     AVAudioSessionCategoryOptions options = 0;
-    //options |= AVAudioSessionCategoryOptionMixWithOthers;
+    options |= AVAudioSessionCategoryOptionMixWithOthers;
     //options |= AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
     //options |= AVAudioSessionCategoryOptionAllowBluetooth;
     //options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;

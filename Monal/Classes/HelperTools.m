@@ -344,10 +344,23 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) initSystem
 {
-    [self configureLogging];
+    BOOL enableDefaultLogAndCrashFramework = YES;
+#ifdef TARGET_IPHONE_SIMULATOR
+    // Automatically switch between the debug technique of TMolitor and FAltheide
+    enableDefaultLogAndCrashFramework = [[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"];
+#endif
+    if(enableDefaultLogAndCrashFramework)
+    {
+        [self configureLogging];
+        [self installCrashHandler];
+        [self installExceptionHandler];
+    }
+    else
+    {
+        [self configureXcodeLogging];
+    }
     [SwiftHelpers initSwiftHelpers];
-    [self installCrashHandler];
-    [self installExceptionHandler];
+
     [self activityLog];
 }
 
@@ -357,7 +370,7 @@ void swizzle(Class c, SEL orig, SEL new)
     NSError* error;
     DDLogDebug(@"configuring default audio session...");
     AVAudioSessionCategoryOptions options = 0;
-    //options |= AVAudioSessionCategoryOptionMixWithOthers;
+    options |= AVAudioSessionCategoryOptionMixWithOthers;
     //options |= AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
     //options |= AVAudioSessionCategoryOptionAllowBluetooth;
     //options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
@@ -1264,17 +1277,14 @@ void swizzle(Class c, SEL orig, SEL new)
         }
         else
         {
-            if(@available(iOS 17.0, macCatalyst 17.0, *))
-            {
-                //cancel existing task (if any)
-                [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
-            }
+            //cancel existing task (if any)
+            [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
             //new task
             BGAppRefreshTaskRequest* refreshingRequest = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundRefreshingTask];
             //on ios<17 do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-            if(@available(iOS 17.0, macCatalyst 17.0, *))
-                refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
-            else
+//             if(@available(iOS 17.0, macCatalyst 17.0, *))
+//                 refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
+//             else
                 refreshingRequest.earliestBeginDate = nil;
             if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:refreshingRequest error:&error])
             {
@@ -1571,6 +1581,11 @@ void swizzle(Class c, SEL orig, SEL new)
     [_stdoutRedirector flushWithTimeout:timeout];
     [DDLog flushLog];
     [MLUDPLogger flushWithTimeout:timeout];
+}
+
++(void) configureXcodeLogging
+{
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
 }
 
 +(void) configureLogging

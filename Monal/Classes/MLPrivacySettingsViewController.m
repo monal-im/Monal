@@ -166,7 +166,7 @@ const long NotificationPrivacyOptionCnt = 3;
                 }
                 case 10:
                 {
-                    [cell initTapCell:NSLocalizedString(@"Auto-Download Media Settings", @"")];
+                    [cell initTapCell:NSLocalizedString(@"Media Upload & Download Settings", @"")];
                     break;
                 }
                 case 11:

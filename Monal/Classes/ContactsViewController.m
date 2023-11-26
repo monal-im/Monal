@@ -47,7 +47,13 @@
     [self presentViewController:addContactMenuView animated:YES completion:^{}];
 }
 
--(void) openContactRequests:(id)sender
+-(void) openCreateGroup:(id) sender
+{
+    UIViewController* createGroupView = [[SwiftuiInterface new] makeViewWithName:@"CreateGroup"];
+    [self presentViewController:createGroupView animated:YES completion:^{}];
+}
+
+-(void) openContactRequests:(id) sender
 {
     UIViewController* contactRequestsView = [[SwiftuiInterface new] makeViewWithName:@"ContactRequests"];
     [self presentViewController:contactRequestsView animated:YES completion:^{}];
@@ -99,7 +105,15 @@
     addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
     [addContact setAction:@selector(openAddContacts:)];
 
+#ifdef IS_ALPHA
+    UIBarButtonItem* createGroup = [[UIBarButtonItem alloc] init];
+        createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
+        [createGroup setAction:@selector(openCreateGroup:)];
+    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], createGroup, nil];
+#else
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [UIBarButtonItem new], nil];
+#endif
+
     [self configureContactRequestsImage];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactUpdate) name:kMonalContactRemoved object:nil];

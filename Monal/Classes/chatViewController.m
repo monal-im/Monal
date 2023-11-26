@@ -522,6 +522,8 @@ enum msgSentState {
 
 -(IBAction) toggleEncryption:(id)sender
 {
+    if([HelperTools isContactBlacklistedForEncryption:self.contact])
+        return;
 #ifndef DISABLE_OMEMO
     if(self.contact.isEncrypted)
     {
@@ -561,8 +563,11 @@ enum msgSentState {
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"]];
     else
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"]];
-    // disable encryption button on unsupported muc types
+    //disable encryption button on unsupported muc types
     if(self.contact.isGroup && [self.contact.mucType isEqualToString:@"group"] == NO)
+        [self.navBarEncryptToggleButton setEnabled:NO];
+    //disable encryption button for special jids
+    if([HelperTools isContactBlacklistedForEncryption:self.contact])
         [self.navBarEncryptToggleButton setEnabled:NO];
 }
 

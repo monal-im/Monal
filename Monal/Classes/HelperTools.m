@@ -1251,6 +1251,15 @@ void swizzle(Class c, SEL orig, SEL new)
     return [retval copy];
 }
 
++(BOOL) isContactBlacklistedForEncryption:(MLContact*) contact
+{
+    BOOL blacklisted = NO;
+    blacklisted = [@"cheogram.com" isEqualToString:[self splitJid:contact.contactJid][@"host"]];
+    if(blacklisted)
+        DDLogWarn(@"Jid blacklisted for encryption: %@", contact);
+    return blacklisted;
+}
+
 +(void) scheduleBackgroundTask:(BOOL) force
 {
     DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");

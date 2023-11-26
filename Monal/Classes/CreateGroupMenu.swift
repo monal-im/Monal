@@ -93,7 +93,9 @@ struct CreateGroupMenu: View {
                     Section(header: Text("Selected Group Members")) {
                         ForEach(self.selectedContacts, id: \.self) { contact in
                             ContactEntry(contact: contact)
-                        }
+                        }.onDelete(perform: { indexSet in
+                            self.selectedContacts.remove(atOffsets: indexSet)
+                        })
                     }
                     Section {
                         Button(action: {

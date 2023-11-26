@@ -93,11 +93,11 @@
     @synchronized(_stateLockObject) {
         NSDictionary* state = @{
             @"version": CURRENT_MUC_STATE_VERSION,
-            @"roomFeatures": _roomFeatures,
-            @"joining": _joining,
-            @"firstJoin": _firstJoin,
+            @"roomFeatures": [_roomFeatures copy],
+            @"joining": [_joining copy],
+            @"firstJoin": [_firstJoin copy],
             @"lastPing": _lastPing,
-            @"noUpdateBookmarks": _noUpdateBookmarks,
+            @"noUpdateBookmarks": [_noUpdateBookmarks copy],
             @"hasFetchedBookmarks": @(_hasFetchedBookmarks),
         };
         //DDLogVerbose(@"Returning MUC state: %@", state);

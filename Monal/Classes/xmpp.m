@@ -3344,7 +3344,7 @@ NSString* const kStanza = @"stanza";
             [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
             
             @synchronized(self->_reconnectionHandlers) {
-                [values setObject:self->_reconnectionHandlers forKey:@"reconnectionHandlers"];
+                [values setObject:[self->_reconnectionHandlers copy] forKey:@"reconnectionHandlers"];
             }
 
             [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
@@ -3355,8 +3355,8 @@ NSString* const kStanza = @"stanza";
             
             [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
             [values setObject:[self.mucProcessor getInternalState] forKey:@"mucState"];
-            [values setObject:self->_runningCapsQueries forKey:@"runningCapsQueries"];
-            [values setObject:self->_runningMamQueries forKey:@"runningMamQueries"];
+            [values setObject:[self->_runningCapsQueries copy] forKey:@"runningCapsQueries"];
+            [values setObject:[self->_runningMamQueries copy] forKey:@"runningMamQueries"];
             [values setObject:[NSNumber numberWithBool:self->_loggedInOnce] forKey:@"loggedInOnce"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBookmarksCompat] forKey:@"supportsBookmarksCompat"];

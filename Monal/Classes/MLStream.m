@@ -43,7 +43,7 @@
 
 @interface MLInputStream()
 {
-    NSData* _buf;
+    NSMutableData* _buf;
     BOOL _reading;
 }
 @property (atomic, readonly) void (^incoming_data_handler)(NSData* _Nullable, BOOL, NSError* _Nullable);
@@ -77,7 +77,7 @@
 -(instancetype) initWithSharedState:(MLSharedStreamState*) shared
 {
     self = [super initWithSharedState:shared];
-    _buf = [NSData new];
+    _buf = [NSMutableData new];
     _reading = NO;
     
     //this handler will be called by our framer or the schedule_read method
@@ -96,7 +96,9 @@
         {
             if([content length] > 0)
             {
-                self->_buf = content;
+                @synchronized(self->_buf) {
+                    [self->_buf appendData:content];
+                }
                 [self generateEvent:NSStreamEventHasBytesAvailable];
             }
         }
@@ -130,32 +132,46 @@
         if(self.closed || !self.open_called || !self.shared_state.open)
             return -1;
     }
-    if(len > [_buf length])
-        len = [_buf length];
-    [_buf getBytes:buffer length:len];
-    if(len < [_buf length])
-    {
-        _buf = [_buf subdataWithRange:NSMakeRange(len, [_buf length]-len)];
+    BOOL was_smaller = NO;
+    @synchronized(self->_buf) {
+        if(len > [_buf length])
+            len = [_buf length];
+        [_buf getBytes:buffer length:len];
+        if(len < [_buf length])
+        {
+            NSData* to_append = [_buf subdataWithRange:NSMakeRange(len, [_buf length]-len)];
+            [_buf setLength:0];
+            [_buf appendData:to_append];
+            was_smaller = YES;
+        }
+        else
+        {
+            [_buf setLength:0];
+            was_smaller = NO;
+        }
+    }
+    //this has to be done outside of our @synchronized block
+    if(was_smaller)
         [self generateEvent:NSStreamEventHasBytesAvailable];
-    }
     else
-    {
-        _buf = [NSData new];
         [self schedule_read];
-    }
     return len;
 }
 
 -(BOOL) getBuffer:(uint8_t* _Nullable *) buffer length:(NSUInteger*) len
 {
-    *len = [_buf length];
-    *buffer = (uint8_t* _Nullable)[_buf bytes];
-    return YES;
+    @synchronized(_buf) {
+        *len = [_buf length];
+        *buffer = (uint8_t* _Nullable)[_buf bytes];
+        return YES;
+    }
 }
 
 -(BOOL) hasBytesAvailable
 {
-    return _buf && [_buf length];
+    @synchronized(_buf) {
+        return _buf && [_buf length];
+    }
 }
 
 -(NSStreamStatus) streamStatus

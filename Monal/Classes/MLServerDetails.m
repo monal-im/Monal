@@ -339,7 +339,7 @@ enum MLServerDetailsSections {
         else if([entryColor isEqualToString:SERVER_DETAILS_COLOR_ERROR])
             [cell setBackgroundColor:[UIColor colorWithRed:1.0 green:0 blue:0 alpha:0.2]];
         else if([entryColor isEqualToString:SERVER_DETAILS_COLOR_NON_IDEAL])
-            [cell setBackgroundColor:[UIColor colorWithRed:0.99 green:0.95 blue:0 alpha:0.2]];
+            [cell setBackgroundColor:[UIColor colorWithRed:1.0 green:0.85 blue:0 alpha:0.2]];
         else
             [cell setBackgroundColor:nil];
     }

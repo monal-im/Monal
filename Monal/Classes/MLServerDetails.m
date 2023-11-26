@@ -335,11 +335,26 @@ enum MLServerDetailsSections {
         cell.detailTextLabel.backgroundColor = UIColor.clearColor;
 
         if([entryColor isEqualToString:SERVER_DETAILS_COLOR_OK])
-            [cell setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:0.9 alpha:0.2]];
+        {
+            if(self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark)
+                [cell setBackgroundColor:[UIColor colorWithRed:0.43 green:0.52 blue:0.93 alpha:1.0]];
+            else
+                [cell setBackgroundColor:[UIColor colorWithRed:0.76 green:0.76 blue:0.96 alpha:1.0]];
+        }
         else if([entryColor isEqualToString:SERVER_DETAILS_COLOR_ERROR])
-            [cell setBackgroundColor:[UIColor colorWithRed:1.0 green:0 blue:0 alpha:0.2]];
+        {
+            if(self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark)
+                [cell setBackgroundColor:[UIColor colorWithRed:0.93 green:0.47 blue:0.47 alpha:1.0]];
+            else
+                [cell setBackgroundColor:[UIColor colorWithRed:0.96 green:0.76 blue:0.78 alpha:1.0]];
+        }
         else if([entryColor isEqualToString:SERVER_DETAILS_COLOR_NON_IDEAL])
-            [cell setBackgroundColor:[UIColor colorWithRed:1.0 green:0.85 blue:0 alpha:0.2]];
+        {
+            if(self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark)
+                [cell setBackgroundColor:[UIColor colorWithRed:0.82 green:0.75 blue:0.37 alpha:1.0]];
+            else
+                [cell setBackgroundColor:[UIColor colorWithRed:0.96 green:0.93 blue:0.70 alpha:1.0]];
+        }
         else
             [cell setBackgroundColor:nil];
     }

@@ -76,6 +76,8 @@ static NSMutableSet* _smacksWarningDisplayed;
                                     buttonWithNotificationBadgeForImage:composeImage
                                     hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
                                     withTapHandler:composeTapRecoginzer];
+    [self.composeButton.customView setIsAccessibilityElement:YES];
+    [self.composeButton.customView setAccessibilityLabel:@"Open contacts list"];
 }
 
 -(void) viewDidLoad
@@ -119,6 +121,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     [self configureComposeButton];
 
     UIBarButtonItem* spinnerButton = [[UIBarButtonItem alloc] initWithCustomView:self.spinner];
+    [spinnerButton setIsAccessibilityElement:NO];
     [self.navigationItem setRightBarButtonItems:@[self.composeButton, spinnerButton] animated:NO];
     
     self.chatListTable.emptyDataSetSource = self;

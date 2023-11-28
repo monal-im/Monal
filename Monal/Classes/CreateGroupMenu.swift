@@ -10,6 +10,7 @@ import MobileCoreServices
 import UniformTypeIdentifiers
 import SwiftUI
 import monalxmpp
+import OrderedCollections
 
 struct CreateGroupMenu: View {
     var delegate: SheetDismisserProtocol
@@ -21,11 +22,10 @@ struct CreateGroupMenu: View {
     @State private var showAlert = false
     // note: dismissLabel is not accessed but defined at the .alert() section
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @State private var selectedContacts : [MLContact] = []
+    @State private var selectedContacts : OrderedSet<MLContact> = []
 
     @ObservedObject private var overlay = LoadingOverlayState()
 
-    @State private var showQRCodeScanner = false
     @State private var success = false
 
     private let dismissWithNewGroup: (MLContact) -> ()
@@ -83,18 +83,17 @@ struct CreateGroupMenu: View {
                         .autocapitalization(.none)
                         .addClearButton(text:$groupName)
 
-                    NavigationLink(destination: LazyClosureView(ContactPicker(excludedContacts: [], selectedContacts: self.selectedContacts, selectedContactsCallback: { selectedContacts in
-                        self.selectedContacts = selectedContacts
-                    })), label: {
+                    NavigationLink(destination: LazyClosureView(ContactPicker(selectedContacts: $selectedContacts)), label: {
                             Text("Group Members")
                         })
                 }
                 if(self.selectedContacts.count > 0) {
                     Section(header: Text("Selected Group Members")) {
-                        ForEach(self.selectedContacts, id: \.self) { contact in
+                        ForEach(self.selectedContacts, id: \.contactJid) { contact in
                             ContactEntry(contact: contact)
-                        }.onDelete(perform: { indexSet in
-                            self.selectedContacts.remove(atOffsets: indexSet)
+                        }
+                        .onDelete(perform: { indexSet in
+                            self.selectedContacts.remove(at: indexSet.first!)
                         })
                     }
                     Section {

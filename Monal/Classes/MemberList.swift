@@ -8,6 +8,7 @@
 
 import SwiftUI
 import monalxmpp
+import OrderedCollections
 
 struct MemberList: View {
     @Environment(\.editMode) private var editMode
@@ -15,9 +16,10 @@ struct MemberList: View {
     private let memberList: [ObservableKVOWrapper<MLContact>]
     private let groupName: String
     private let account: xmpp?
+    private let isAlpha: Bool
 
     @State private var openAccountSelection : Bool = false
-    @State private var contactsToAdd : [MLContact] = []
+    @State private var contactsToAdd : OrderedSet<MLContact> = []
 
     @State private var showAlert = false
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
@@ -29,10 +31,7 @@ struct MemberList: View {
 
     var body: some View {
         // This is the invisible NavigationLink hack again...
-        NavigationLink(destination:LazyClosureView(ContactPicker(excludedContacts: self.memberList, selectedContacts: [], selectedContactsCallback: { selectedContacts in
-            self.contactsToAdd = selectedContacts
-            setAndShowAlert(title: "Added contacts", description: "Selected " + String(selectedContacts.count) + " contact(s)")
-        })), isActive: $openAccountSelection){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
+        NavigationLink(destination:LazyClosureView(ContactPicker(selectedContacts: $contactsToAdd)), isActive: $openAccountSelection){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
         List {
             Section(header: Text(self.groupName)) {
                 ForEach(self.memberList, id: \.self.obj) {
@@ -62,12 +61,13 @@ struct MemberList: View {
                         self.setAndShowAlert(title: "Member deleted", description: self.memberList[memberIdx.first!].contactJid)
                     }
                 })
+                .deleteDisabled(self.isAlpha)
             }.alert(isPresented: $showAlert, content: {
                 Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
             })
         }
         .toolbar {
-            if(editMode?.wrappedValue.isEditing == true) {
+            if(isAlpha && editMode?.wrappedValue.isEditing == true) {
                 Button(action: {
                     openAccountSelection = true
                 }, label: {
@@ -90,6 +90,11 @@ struct MemberList: View {
             self.groupName = "Invalid Group"
             self.memberList = []
         }
+#if IS_ALPA
+        self.isAlpha = true
+#else
+        self.isAlpha = false
+#endif
     }
 }
 

@@ -3078,6 +3078,12 @@ NSString* const kStanza = @"stanza";
         DDLogDebug(@"SCRAM says this server-final message was correct");
 }
 
+//bridge needed fo MLServerDetails.m
+-(NSArray*) supportedChannelBindingTypes
+{
+    return [((MLStream*)self->_oStream) supportedChannelBindingTypes];
+}
+
 -(NSString* _Nullable) channelBindingToUse
 {
     NSArray* typesList = [((MLStream*)self->_oStream) supportedChannelBindingTypes];

@@ -59,6 +59,8 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
 
+#import "SCRAM.h"
+
 @interface KSCrash()
 @property(nonatomic,readwrite,retain) NSString* basePath;
 @end
@@ -356,11 +358,9 @@ void swizzle(Class c, SEL orig, SEL new)
         [self installExceptionHandler];
     }
     else
-    {
         [self configureXcodeLogging];
-    }
+    
     [SwiftHelpers initSwiftHelpers];
-
     [self activityLog];
 }
 
@@ -1645,7 +1645,8 @@ void swizzle(Class c, SEL orig, SEL new)
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    DDLogInfo(@"Starting: Version %@ (%@ %@ UTC, %@) on %@", version, buildDate, buildTime, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion);
+    DDLogInfo(@"Starting: Version %@ (%@ %@ UTC, %@) on iOS/macOS %@", version, buildDate, buildTime, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion);
+    //[SCRAM SSDPXepOutput];
     [DDLog flushLog];
     
     DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_USER_INTERACTIVE", QOS_CLASS_USER_INTERACTIVE);

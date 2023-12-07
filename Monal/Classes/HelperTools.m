@@ -1727,7 +1727,9 @@ void swizzle(Class c, SEL orig, SEL new)
         handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
         handler.monitoring = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
         handler.onCrash = crash_callback;
-        [handler enableSwapOfCxaThrow];
+        //this can trigger crashes on macos < 13 (e.g. mac catalyst < 16) (and possibly ios < 16)
+        if(@available(iOS 16.0, macCatalyst 16.0, *))
+            [handler enableSwapOfCxaThrow];
         handler.searchQueueNames = NO;      //this is not async safe and can crash :(
         handler.introspectMemory = YES;
         handler.addConsoleLogToReport = YES;

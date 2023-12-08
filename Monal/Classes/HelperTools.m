@@ -347,9 +347,9 @@ void swizzle(Class c, SEL orig, SEL new)
 +(void) initSystem
 {
     BOOL enableDefaultLogAndCrashFramework = YES;
-#ifdef TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
     // Automatically switch between the debug technique of TMolitor and FAltheide
-    enableDefaultLogAndCrashFramework = [[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"];
+    enableDefaultLogAndCrashFramework = [[HelperTools defaultsDB] boolForKey:@"udpLoggerEnabled"];
 #endif
     if(enableDefaultLogAndCrashFramework)
     {

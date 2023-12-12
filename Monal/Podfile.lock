@@ -2,34 +2,11 @@ PODS:
   - ASN1Decoder (1.9.0)
   - DZNEmptyDataSet (1.8.1)
   - FLAnimatedImage (1.0.17)
-  - KSCrash (1.16.2):
-    - KSCrash/Installations (= 1.16.2)
-  - KSCrash/Installations (1.16.2):
-    - KSCrash/Recording
-    - KSCrash/Reporting
+  - KSCrash/Core (1.16.2):
+    - KSCrash/Reporting/Filters/Basic
   - KSCrash/Recording (1.16.2):
     - KSCrash/Recording/Tools (= 1.16.2)
   - KSCrash/Recording/Tools (1.16.2)
-  - KSCrash/Reporting (1.16.2):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters (= 1.16.2)
-    - KSCrash/Reporting/MessageUI (= 1.16.2)
-    - KSCrash/Reporting/Sinks (= 1.16.2)
-    - KSCrash/Reporting/Tools (= 1.16.2)
-  - KSCrash/Reporting/Filters (1.16.2):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters/Alert (= 1.16.2)
-    - KSCrash/Reporting/Filters/AppleFmt (= 1.16.2)
-    - KSCrash/Reporting/Filters/Base (= 1.16.2)
-    - KSCrash/Reporting/Filters/Basic (= 1.16.2)
-    - KSCrash/Reporting/Filters/GZip (= 1.16.2)
-    - KSCrash/Reporting/Filters/JSON (= 1.16.2)
-    - KSCrash/Reporting/Filters/Sets (= 1.16.2)
-    - KSCrash/Reporting/Filters/Stringify (= 1.16.2)
-    - KSCrash/Reporting/Filters/Tools (= 1.16.2)
-  - KSCrash/Reporting/Filters/Alert (1.16.2):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters/Base
   - KSCrash/Reporting/Filters/AppleFmt (1.16.2):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/Base
@@ -57,12 +34,6 @@ PODS:
     - KSCrash/Reporting/Filters/Base
   - KSCrash/Reporting/Filters/Tools (1.16.2):
     - KSCrash/Recording
-  - KSCrash/Reporting/MessageUI (1.16.2):
-    - KSCrash/Recording
-  - KSCrash/Reporting/Sinks (1.16.2):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters
-    - KSCrash/Reporting/Tools
   - KSCrash/Reporting/Tools (1.16.2):
     - KSCrash/Recording
   - MarqueeLabel (4.3.2)
@@ -71,9 +42,9 @@ PODS:
     - MarqueeLabel (~> 4.3.0)
     - SnapKit (~> 5.6.0)
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.18.6):
-    - SDWebImage/Core (= 5.18.6)
-  - SDWebImage/Core (5.18.6)
+  - SDWebImage (5.18.7):
+    - SDWebImage/Core (= 5.18.7)
+  - SDWebImage/Core (5.18.7)
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
@@ -88,7 +59,11 @@ DEPENDENCIES:
   - ASN1Decoder
   - DZNEmptyDataSet
   - FLAnimatedImage (~> 1.0)
-  - KSCrash (from `https://github.com/monal-im/KSCrash`, branch `master`)
+  - KSCrash/Core
+  - KSCrash/Recording
+  - KSCrash/Reporting/Filters/Sets
+  - KSCrash/Reporting/Filters/Tools
+  - KSCrash/Reporting/Tools
   - MBProgressHUD (~> 1.2.0)
   - NotificationBannerSwift (~> 3.2.0)
   - SAMKeychain
@@ -104,6 +79,7 @@ SPEC REPOS:
     - ASN1Decoder
     - DZNEmptyDataSet
     - FLAnimatedImage
+    - KSCrash
     - MarqueeLabel
     - MBProgressHUD
     - NotificationBannerSwift
@@ -115,9 +91,6 @@ SPEC REPOS:
     - WebRTC-lib
 
 EXTERNAL SOURCES:
-  KSCrash:
-    :branch: master
-    :git: https://github.com/monal-im/KSCrash
   SignalProtocolC:
     :branch: master
     :git: https://github.com/monal-im/libsignal-protocol-c
@@ -126,9 +99,6 @@ EXTERNAL SOURCES:
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
 
 CHECKOUT OPTIONS:
-  KSCrash:
-    :commit: c7ba6e1cb2a548cb108d3536027e36a6e12670cb
-    :git: https://github.com/monal-im/KSCrash
   SignalProtocolC:
     :commit: 560504888d9c0ba4be860275d206dcef07e0761e
     :git: https://github.com/monal-im/libsignal-protocol-c
@@ -140,12 +110,12 @@ SPEC CHECKSUMS:
   ASN1Decoder: 4f4bbcaf1d1b8be56daa3280e82863a607f5bda9
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
-  KSCrash: 95066f51c72849faaa7d8d57f300416ee4e5df52
+  KSCrash: 469b9f982b97309acb719baaecbf9182f62ddf85
   MarqueeLabel: 15e524a6762552bb279cb17438b8a94990269fb9
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: 3d8caa2430f3d674dbb3e515df4a100a2105af5f
+  SDWebImage: f9258c58221ed854cfa0e2b80ee4033710b1c6d3
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
@@ -153,6 +123,6 @@ SPEC CHECKSUMS:
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   WebRTC-lib: bd0d4b76aab1492415216715bd02f4329a33cd10
 
-PODFILE CHECKSUM: 99af97fbdbc651c2f1c5558cb9ba7107ef30aa28
+PODFILE CHECKSUM: f415f317e34fd11a687374f84ee8dfb14ebb29a6
 
 COCOAPODS: 1.14.3

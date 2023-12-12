@@ -32,7 +32,7 @@ def monalxmpp
   pod 'ASN1Decoder'
   #pod 'GoogleWebRTC'
   pod 'WebRTC-lib'
-  pod 'KSCrash', git: 'https://github.com/monal-im/KSCrash', branch: 'master'
+  pod 'KSCrash', subspecs:['Recording', 'Reporting/Filters/Sets', 'Reporting/Filters/Tools', 'Reporting/Tools', 'Core']
   signalDeps
 end
 

@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class XMPPStanza;
 @class UNNotificationRequest;
 @class DDLogMessage;
-@class MLFileLogger;
+@class DDFileLogger;
 @class UIView;
 @class UITapGestureRecognizer;
 
@@ -37,7 +37,7 @@ void swizzle(Class c, SEL orig, SEL new);
 
 @interface HelperTools : NSObject
 
-@property (class, nonatomic, strong) MLFileLogger* fileLogger;
+@property (class, nonatomic, strong) DDFileLogger* fileLogger;
 
 +(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage counter:(uint64_t*) counter andError:(NSError** _Nullable) error;
 +(void) initSystem;

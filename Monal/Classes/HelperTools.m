@@ -48,7 +48,6 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "DataLayer.h"
 #import "OmemoState.h"
 #import "MLUDPLogger.h"
-#import "MLFileLogger.h"
 #import "MLStreamRedirect.h"
 
 @import UserNotifications;
@@ -1626,8 +1625,8 @@ void swizzle(Class c, SEL orig, SEL new)
     
     //file logger
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:containerUrl defaultFileProtectionLevel:NSFileProtectionCompleteUntilFirstUserAuthentication];
-    logFileManager.maximumNumberOfLogFiles = 5;
-    self.fileLogger = [[MLFileLogger alloc] initWithLogFileManager:logFileManager];
+    logFileManager.maximumNumberOfLogFiles = 4;
+    self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
     self.fileLogger.doNotReuseLogFiles = NO;
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
     self.fileLogger.maximumFileSize = 128 * 1024 * 1024;

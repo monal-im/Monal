@@ -997,6 +997,9 @@ NSString* const kStanza = @"stanza";
                 }
                 
                 [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
+                
+                //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             }
             return;
         }
@@ -1084,6 +1087,9 @@ NSString* const kStanza = @"stanza";
             }
             
             [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
+            
+            //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
         }
         else
         {
@@ -2365,7 +2371,7 @@ NSString* const kStanza = @"stanza";
             //don't report error but reconnect if we pipelined stuff that is not correct anymore...
             if(oldPipeliningState != kPipelinedNothing)
             {
-                DDLogInfo(@"Reconnecting to flush pipeline...");
+                DDLogWarn(@"Reconnecting to flush pipeline...");
                 [self reconnect];
             }
             //...but don't try again if it's really the password, that's wrong
@@ -2445,10 +2451,20 @@ NSString* const kStanza = @"stanza";
                 DDLogError(@"SCRAM says this server-first message was wrong!");
                 
                 //clear pipeline cache to make sure we have a fresh restart next time
+                xmppPipeliningState oldPipeliningState = _pipeliningState;
                 _pipeliningState = kPipelinedNothing;
                 _cachedStreamFeaturesBeforeAuth = nil;
                 _cachedStreamFeaturesAfterAuth = nil;
                 
+                //don't report error but reconnect if we pipelined stuff that is not correct anymore...
+                if(oldPipeliningState != kPipelinedNothing)
+                {
+                    DDLogWarn(@"Reconnecting to flush pipeline...");
+                    [self reconnect];
+                    return;
+                }
+                
+                //...but don't try again if it's really the server-first message, that's wrong
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
                 //deactivate the account if requested, too
                 [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:deactivate_account];
@@ -2510,7 +2526,7 @@ NSString* const kStanza = @"stanza";
             //don't report error but reconnect if we pipelined stuff that is not correct anymore...
             if(oldPipeliningState != kPipelinedNothing)
             {
-                DDLogInfo(@"Reconnecting to flush pipeline...");
+                DDLogWarn(@"Reconnecting to flush pipeline...");
                 [self reconnect];
             }
             //...but don't try again if it's really the password, that's wrong
@@ -2579,6 +2595,20 @@ NSString* const kStanza = @"stanza";
             
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            
+            //check for incomplete XEP-0440 support (not implementing mandatory tls-server-end-point channel-binding) not mitigated by SSDP
+            //(we allow either support for tls-server-end-point or SSDP signed non-support)
+            if([kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]])
+            {
+                MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
+                    [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:kServerDoesNotFollowXep0440Error],
+                ] andData:nil];
+                [self disconnectWithStreamError:streamError andExplicitLogout:YES];
+                
+                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+                [HelperTools postError:NSLocalizedString(@"Either this is a man-in-the-middle attack OR your server neither implements XEP-0474 nor does it fully implement XEP-0440 which mandates support for tls-server-end-point channel-binding. In either case you should inform your server admin! Account disabled now.", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+            }
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
@@ -3093,8 +3123,16 @@ NSString* const kStanza = @"stanza";
         if(_supportedChannelBindings != nil && [_supportedChannelBindings containsObject:type])
             return type;
     
-    DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory!");
-    return kServerDoesNotFollowXep0440Error;     //this will make sure the authentication fails
+    //if our scram handshake is not finished yet and no mutually supported channel-binding can be found --> ignore that for now (see below)
+    //if our scram handshake finished without negotiating a mutually supported channel-binding and this was not backed by SSDP --> report error
+    if(self->_scramHandler.finishedSuccessfully && !self->_scramHandler.ssdpSupported)
+    {
+        DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory via XEP-0440!");
+        return kServerDoesNotFollowXep0440Error;     //this will trigger a disconnect
+    }
+    if(!self->_scramHandler.finishedSuccessfully)
+        DDLogWarn(@"Could not find any supported channel-binding type, this COULD be a mitm attack (check via XEP-0474 pending)!");
+    return nil;
 }
 
 #pragma mark stanza handling

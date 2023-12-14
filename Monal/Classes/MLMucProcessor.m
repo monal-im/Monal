@@ -343,11 +343,11 @@
 {
     NSSet* presenceCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
     NSSet* messageCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}message/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
-    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:node.fromUser forAccount:_account.accountNo];
     
     //handle presence stanzas
     if(presenceCodes && [presenceCodes count])
     {
+        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:node.fromUser forAccount:_account.accountNo];
         for(NSNumber* code in presenceCodes)
             switch([code intValue])
             {
@@ -388,6 +388,7 @@
                         }
                         else
                             ;           //ignore other non-joining self-presences for now
+                        break;
                     }
                     break;
                 }
@@ -471,14 +472,15 @@
                 [_noUpdateBookmarks removeObject:node.fromUser];
             }
             
-            if([[[DataLayer sharedInstance] getMucTypeOfRoom:node.fromUser andAccount:_account.accountNo] isEqualToString:@"group"])
-                DDLogInfo(@"Recorded members and participants of group %@: %@", node.fromUser, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:node.fromUser forAccountId:_account.accountNo]);
-            else
+            [self logMembersOfMuc:node.fromUser];
+            
+            //load members/admins/owners list (this has to be done *after* joining the muc to not get auth errors)
+            DDLogInfo(@"Querying member/admin/owner lists for muc %@...", node.fromUser);
+            for(NSString* type in @[@"member", @"admin", @"owner"])
             {
-//these lists can potentially get really long for public channels --> restrict logging them to alpha builds
-#ifdef IS_ALPHA
-            DDLogInfo(@"Recorded members and participants of channel %@: %@", node.fromUser, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:node.fromUser forAccountId:_account.accountNo]);
-#endif
+                XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:node.fromUser];
+                [discoInfo setMucListQueryFor:type];
+                [_account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
             }
             
             monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
@@ -819,8 +821,13 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     if(![[DataLayer sharedInstance] isBuddyMuc:iqNode.fromUser forAccount:_account.accountNo])
     {
         //remove old non-muc contact from contactlist (we don't want mucs as normal contacts on our (server) roster and shadowed in monal by the real muc contact)
-        if([[DataLayer sharedInstance] contactDictionaryForUsername:iqNode.fromUser forAccount:_account.accountNo] != nil)
-            [_account removeFromRoster:[MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo]];
+        NSDictionary* existingContactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:iqNode.fromUser forAccount:_account.accountNo];
+        if(existingContactDict != nil)
+        {
+            MLContact* existingContact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo];
+            DDLogVerbose(@"Removing already existing contact (%@) having raw db dict: %@", existingContact, existingContactDict);
+            [_account removeFromRoster:existingContact];
+        }
         //add new muc buddy (potentially deleting a non-muc buddy having the same jid)
         NSString* nick = [self calculateNickForMuc:iqNode.fromUser];
         DDLogInfo(@"Adding new muc %@ using nick '%@' to buddylist...", iqNode.fromUser, nick);
@@ -869,15 +876,6 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     
         //now try to join this room if requested
         [self sendJoinPresenceFor:iqNode.fromUser];
-        
-        //load members/admins/owners list (this has to be done *after* joining the muc to not get auth errors)
-        DDLogInfo(@"Querying members/admin/owner lists for muc %@...", iqNode.fromUser);
-        for(NSString* type in @[@"member", @"admin", @"owner"])
-        {
-            XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:iqNode.fromUser];
-            [discoInfo setMucListQueryFor:type];
-            [_account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
-        }
     }
 $$
 
@@ -908,6 +906,7 @@ $$
 $$instance_handler(handleMembersList, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
     [self handleMembersListUpdate:iqNode];
+    [self logMembersOfMuc:iqNode.fromUser];
 $$
 
 $$instance_handler(handleMamResponseWithLatestId, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
@@ -1145,6 +1144,19 @@ $$
         DDLogVerbose(@"Removing from _joining[%@]: %@", room, _joining[room]);
         [[DataLayer sharedInstance] delIdleTimerWithId:_joining[room]];
         [_joining removeObjectForKey:room];
+    }
+}
+
+-(void) logMembersOfMuc:(NSString*) jid
+{
+    if([[[DataLayer sharedInstance] getMucTypeOfRoom:jid andAccount:_account.accountNo] isEqualToString:@"group"])
+        DDLogInfo(@"Currently recorded members and participants of group %@: %@", jid, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:jid forAccountId:_account.accountNo]);
+    else
+    {
+//these lists can potentially get really long for public channels --> restrict logging them to alpha builds
+#ifdef IS_ALPHA
+    DDLogInfo(@"Currently recorded members and participants of channel %@: %@", jid, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:jid forAccountId:_account.accountNo]);
+#endif
     }
 }
 

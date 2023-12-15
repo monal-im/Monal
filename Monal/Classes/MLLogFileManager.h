@@ -7,12 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLConstants.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLLogFileManager : DDLogFileManagerDefault
 
+-(instancetype) initWithLogsDirectory:(NSString* _Nullable) dir;
 -(NSString*) newLogFileName;
 -(BOOL) isLogFile:(NSString*) fileName;
 

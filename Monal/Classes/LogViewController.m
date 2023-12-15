@@ -56,7 +56,7 @@ DDLogFileInfo* _logInfo;
     NSArray* sortedLogFileInfos = [HelperTools.fileLogger.logFileManager sortedLogFileInfos];
     _logInfo = [sortedLogFileInfos objectAtIndex: 0];
 
-    self.logUDPSwitch.on = [[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"];
+    self.logUDPSwitch.on = [[HelperTools defaultsDB] boolForKey:@"udpLoggerEnabled"];
     self.logUDPPort.text = [[HelperTools defaultsDB] stringForKey: @"udpLoggerPort"];
     self.logUDPHostname.text = [[HelperTools defaultsDB] stringForKey: @"udpLoggerHostname"];
     self.logUDPAESKey.text = [[HelperTools defaultsDB] stringForKey:@"udpLoggerKey"];

@@ -37,6 +37,8 @@ typedef NS_ENUM(NSUInteger, MLScramStatus) {
 @property (nonatomic, readonly) NSString* method;
 @property (nonatomic, readonly) BOOL finishedSuccessfully;
 @property (nonatomic, readonly) BOOL ssdpSupported;
+
++(void) SSDPXepOutput;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -231,7 +231,7 @@
     {
         NSString* attribute = [component substringToIndex:1];
         NSString* value = [component substringFromIndex:2];
-        retval[attribute] = value;
+        retval[attribute] = [self unquote:value];
     }
     return retval;
 }
@@ -242,6 +242,34 @@
     str = [str stringByReplacingOccurrencesOfString:@"," withString:@"=2C"];
     str = [str stringByReplacingOccurrencesOfString:@"=" withString:@"=3D"];
     return str;
+}
+
+-(NSString*) unquote:(NSString*) str
+{
+    //TODO: use proper saslprep to allow for non-ascii chars
+    str = [str stringByReplacingOccurrencesOfString:@"=2C" withString:@","];
+    str = [str stringByReplacingOccurrencesOfString:@"=3D" withString:@"="];
+    return str;
+}
+
++(void) SSDPXepOutput
+{
+    SCRAM* s = [[self alloc] initWithUsername:@"user" password:@"pencil" andMethod:@"SCRAM-SHA-1-PLUS"];
+    
+    s->_clientFirstMessageBare = @"n=user,r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6";
+    s->_gssHeader = @"p=tls-exporter,,";
+    
+    s->_serverFirstMessage = @"r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6,s=QSXCR+Q6sek8bf92,i=4096,d=dRc3RenuSY9ypgPpERowoaySQZY=";
+    s->_nonce = @"12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6";
+    s->_salt = [HelperTools dataWithBase64EncodedString:@"QSXCR+Q6sek8bf92"];
+    s->_iterationCount = 4096;
+    
+    NSString* client_final_msg = [s clientFinalMessageWithChannelBindingData:[@"THIS IS FAKE CB DATA" dataUsingEncoding:NSUTF8StringEncoding]];
+    DDLogError(@"client_final_msg: %@", client_final_msg);
+    DDLogError(@"_expectedServerSignature: %@", s->_expectedServerSignature);
+    
+    [HelperTools flushLogsWithTimeout:0.250];
+    exit(0);
 }
 
 @end

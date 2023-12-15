@@ -67,6 +67,9 @@
         buttonWithNotificationBadgeForImage:requestsImage
         hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
         withTapHandler:requestsTapRecoginzer];
+    [self.navigationItem.rightBarButtonItems[1] setIsAccessibilityElement:YES];
+    [self.navigationItem.rightBarButtonItems[1] setAccessibilityLabel:@"Open contacts list"];
+
 }
 
 #pragma mark view life cycle

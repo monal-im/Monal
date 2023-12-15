@@ -13,30 +13,33 @@
 #import <KSCrash/KSCrashReportFilterAppleFmt.h>
 #import <KSCrash/KSCrashReportFilterGZip.h>
 #import <KSCrash/KSCrashReportFields.h>
-#import <KSCrash/KSCrashReportFilterAlert.h>
 #import <KSCrash/NSError+SimpleConstructor.h>
 #import <MessageUI/MessageUI.h>
 #import "MLConstants.h"
 #import "HelperTools.h"
+#import "MonalAppDelegate.h"
 #import "MLCrashReporter.h"
 
 #define PART_SEPARATOR_FORMAT "\n\n-------- d049d576-9bf0-47dd-839f-dee6b07c1df9 -------- %@ -------- d049d576-9bf0-47dd-839f-dee6b07c1df9 --------\n\n"
 
+@interface KSCrashReportFilterAlert: NSObject <KSCrashReportFilter>
++(instancetype) filter;
+@end
+
 @interface KSCrashReportFilterEmpty: NSObject <KSCrashReportFilter>
-+(KSCrashReportFilterEmpty*) filter;
++(instancetype) filter;
 @end
 
 @interface KSCrashReportFilterAddAuxInfo : NSObject <KSCrashReportFilter>
-+(KSCrashReportFilterAddAuxInfo*) filter;
++(instancetype) filter;
 @end
 
 @interface KSCrashReportFilterAddMLLogfile : NSObject <KSCrashReportFilter>
-+(KSCrashReportFilterAddMLLogfile*) filter;
++(instancetype) filter;
 @end
 
 
 @interface MLCrashReporter() <KSCrashReportFilter, MFMailComposeViewControllerDelegate>
-@property (atomic, strong) UIViewController* viewController;
 @property (atomic, strong) NSArray* _Nullable kscrashReports;
 @property (atomic, strong) KSCrashReportFilterCompletion _Nullable kscrashCompletion;
 @end
@@ -44,7 +47,7 @@
 
 @implementation MLCrashReporter
 
-+(void) reportPendingCrashesWithViewController:(UIViewController*) viewController
++(void) reportPendingCrashes
 {
     //send out pending KSCrash reports
     KSCrash* handler = [KSCrash sharedInstance];
@@ -60,12 +63,7 @@
     id<KSCrashReportFilter> logfileFilter = [KSCrashReportFilterAddMLLogfile filter];
     NSString* logfileName = @"Logfile (*.rawlog.gz)";
     handler.sink = [KSCrashReportFilterPipeline filterWithFilters:
-                        [KSCrashReportFilterAlert
-                            filterWithTitle:NSLocalizedString(@"Crash Detected", @"Crash reporting")
-                            message:NSLocalizedString(@"The app crashed last time it was launched. Send a crash report? This crash report will contain privacy related data. We will only use it to debug your crash and delete it afterwards!", @"Crash reporting")
-                            yesAnswer:NSLocalizedString(@"Sure, send it!", @"Crash reporting")
-                            noAnswer:NSLocalizedString(@"No, thanks", @"Crash reporting")
-                        ],
+                        [KSCrashReportFilterAlert filter],
                         [KSCrashReportFilterCombine filterWithFiltersAndKeys:
                             dummyFilter, dummyFilterName,       //this dummy is needed to make the filter framework print the title of our aux data
                             auxInfoFilter, auxInfoName,
@@ -84,7 +82,7 @@
                         ],
                         [KSCrashReportFilterStringToData filter],
                         [KSCrashReportFilterGZipCompress filterWithCompressionLevel:-1],
-                        [[self alloc] initWithViewController:viewController],           //this is the last filter sending out all stuff via mail
+                        [[self alloc] init],           //this is the last filter sending out all stuff via mail
                         nil
                    ];
     DDLogVerbose(@"Trying to send crash reports...");
@@ -94,13 +92,6 @@
         else
             DDLogError(@"Failed to send reports: %@", error);
     }];
-}
-
--(id) initWithViewController:(UIViewController*) viewController
-{
-    self = [super init];
-    self.viewController = viewController;
-    return self;
 }
 
 -(void) filterReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
@@ -133,7 +124,7 @@
                                                             style:UIAlertActionStyleDefault
                                                          handler:nil];
         [alertController addAction:okAction];
-        [self.viewController presentViewController:alertController animated:YES completion:NULL];
+        [[(MonalAppDelegate*)[[UIApplication sharedApplication] delegate] getTopViewController] presentViewController:alertController animated:YES completion:NULL];
 
         kscrash_callCompletion(onCompletion, reports, NO,
                                  [NSError errorWithDomain:[[self class] description]
@@ -164,14 +155,14 @@
     
     dispatch_async(dispatch_get_main_queue(), ^{
         DDLogVerbose(@"Presenting MFMailComposeViewController...");
-        [self.viewController presentViewController:mailController animated:YES completion:nil];
+        [[(MonalAppDelegate*)[[UIApplication sharedApplication] delegate] getTopViewController] presentViewController:mailController animated:YES completion:nil];
     });
 }
 
 -(void) mailComposeController:(__unused MFMailComposeViewController*) mailController didFinishWithResult:(MFMailComposeResult) result error:(NSError*) error
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.viewController dismissViewControllerAnimated:YES completion:nil];
+        [[(MonalAppDelegate*)[[UIApplication sharedApplication] delegate] getTopViewController] dismissViewControllerAnimated:YES completion:nil];
 
         if(self.kscrashCompletion == nil)
         {
@@ -217,9 +208,41 @@
 
 @end
 
+@implementation KSCrashReportFilterAlert
+
++(instancetype) filter
+{
+    return [[self alloc] init];
+}
+
+-(void) filterReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
+{
+    NSString* title = NSLocalizedString(@"Crash Detected", @"Crash reporting");
+    NSString* message = NSLocalizedString(@"The app crashed last time it was launched. Send a crash report? This crash report will contain privacy related data. We will only use it to debug your crash and delete it afterwards!", @"Crash reporting");
+    NSString* yesAnswer = NSLocalizedString(@"Sure, send it!", @"Crash reporting");
+    NSString* noAnswer = NSLocalizedString(@"No, thanks", @"Crash reporting");
+    
+    DDLogVerbose(@"KSCrashReportFilterAlert started...");
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIAlertController* alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction* yesAction = [UIAlertAction actionWithTitle:yesAnswer style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction* _Nonnull action) {
+            kscrash_callCompletion(onCompletion, reports, YES, nil);
+        }];
+        UIAlertAction* noAction = [UIAlertAction actionWithTitle:noAnswer style:UIAlertActionStyleCancel handler:^(__unused UIAlertAction* _Nonnull action) {
+            kscrash_callCompletion(onCompletion, reports, NO, nil);
+        }];
+        [alertController addAction:yesAction];
+        [alertController addAction:noAction];
+        [[(MonalAppDelegate*)[[UIApplication sharedApplication] delegate] getTopViewController] presentViewController:alertController animated:YES completion:NULL];
+    });
+    DDLogVerbose(@"KSCrashReportFilterAlert finished...");
+}
+
+@end
+
 @implementation KSCrashReportFilterEmpty
 
-+(KSCrashReportFilterEmpty*) filter
++(instancetype) filter
 {
     return [[self alloc] init];
 }
@@ -238,7 +261,7 @@
 
 @implementation KSCrashReportFilterAddAuxInfo
 
-+(KSCrashReportFilterAddAuxInfo*) filter
++(instancetype) filter
 {
     return [[self alloc] init];
 }
@@ -281,7 +304,7 @@
 
 @implementation KSCrashReportFilterAddMLLogfile
 
-+(KSCrashReportFilterAddMLLogfile*) filter
++(instancetype) filter
 {
     return [[self alloc] init];
 }

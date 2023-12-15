@@ -384,10 +384,13 @@
         sec_protocol_options_set_tls_ocsp_enabled(options, 1);
         sec_protocol_options_set_tls_false_start_enabled(options, 1);
         sec_protocol_options_set_min_tls_protocol_version(options, tls_protocol_version_TLSv12);
+        //sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_TLSv12);
         sec_protocol_options_set_tls_resumption_enabled(options, 1);
         sec_protocol_options_set_tls_tickets_enabled(options, 1);
         sec_protocol_options_set_tls_renegotiation_enabled(options, 0);
-        //tls-exporter channel-binding is only usable if DHE is used instead of RSA key exchange
+        //tls-exporter channel-binding is only usable for TLSv1.2 if ECDHE is used instead of RSA key exchange
+        //(see https://mitls.org/pages/attacks/3SHAKE)
+        //see also https://developer.apple.com/documentation/security/preventing_insecure_network_connections?language=objc
         sec_protocol_options_append_tls_ciphersuite_group(options, tls_ciphersuite_group_ats);
     };
     
@@ -750,10 +753,15 @@
 -(NSArray*) supportedChannelBindingTypes
 {
     //we made sure we only use PFS based ciphers for which tls-exporter can safely be used even with TLS1.2
+    //(see https://mitls.org/pages/attacks/3SHAKE)
+    return @[@"tls-exporter", @"tls-server-end-point"];
+    
+    /*
     //BUT: other implementations simply don't support tls-exporter on non-tls1.3 connections --> do the same for compatibility
     if(self.isTLS13)
         return @[@"tls-exporter", @"tls-server-end-point"];
     return @[@"tls-server-end-point"];
+    */
 }
 
 -(NSData* _Nullable) channelBindingDataForType:(NSString* _Nullable) type

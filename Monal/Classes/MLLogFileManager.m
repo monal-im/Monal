@@ -7,15 +7,58 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "HelperTools.h"
 #import "MLLogFileManager.h"
 
-@interface MLLogFileManager ()
+@interface DDFileLogMLVMessageSerializer : NSObject <DDFileLogMessageSerializer>
+@end
 
+@interface MLLogFileManager ()
 @end
 
 static NSString* appName = @"Monal";
 
+@implementation DDFileLogMLVMessageSerializer
+
+-(NSData*) dataForString:(NSString*) string originatingFromMessage:(DDLogMessage*) logMessage
+{
+    static uint64_t counter = 0;
+    
+    if(logMessage == nil)
+    {
+        NSLog(@"Error: logMessage should never be nil when calling dataForString:originatingFromMessage. Given log string: %@", string);
+        return [NSData new];        //return empty data, e.g. write nothing
+    }
+    
+    //encode log message
+    NSError* error;
+    NSData* rawData = [HelperTools convertLogmessageToJsonData:logMessage counter:&counter andError:&error];
+    if(error != nil || rawData == nil)
+    {
+        NSLog(@"Error jsonifying log message: %@, logMessage: %@", error, logMessage);
+        return [NSData new];        //return empty data, e.g. write nothing
+    }
+    
+    //add 32bit length prefix
+    NSAssert(rawData.length < (NSUInteger)1<<30, @"LogMessage is longer than 1<<30 bytes!");
+    uint32_t length = CFSwapInt32HostToBig((uint32_t)rawData.length);
+    NSMutableData* data = [[NSMutableData alloc] initWithBytes:&length length:sizeof(length)];
+    [data appendData:rawData];
+    
+    //return length_prefix + json_encoded_data
+    return data;
+}
+
+@end
+
 @implementation MLLogFileManager
+
+-(instancetype) initWithLogsDirectory:(NSString* _Nullable) dir
+{
+    self = [super initWithLogsDirectory:dir];
+    self.logMessageSerializer = [DDFileLogMLVMessageSerializer new];
+    return self;
+}
 
 -(NSString*) newLogFileName
 {

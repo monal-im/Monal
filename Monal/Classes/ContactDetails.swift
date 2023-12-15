@@ -64,7 +64,7 @@ struct ContactDetails: View {
                 //.buttonStyle(BorderlessButtonStyle())
                 
 #if !DISABLE_OMEMO
-                if(!contact.isGroup || (contact.isGroup && contact.mucType == "group")) {
+                if((!contact.isGroup || (contact.isGroup && contact.mucType == "group")) && !HelperTools.isContactBlacklisted(forEncryption:contact.obj)) {
                     Button(action: {
                         if(contact.isEncrypted) {
                             showingShouldDisableEncryptionAlert = true
@@ -127,13 +127,15 @@ struct ContactDetails: View {
                     }
                 }
 #if !DISABLE_OMEMO
-                if(!contact.isGroup) {
-                    NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
-                        contact.isSelfChat ? Text("Own Encryption Keys") : Text("Encryption Keys")
-                    }
-                } else if(contact.mucType == "group") {
-                    NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
-                        Text("Encryption Keys")
+                if(!HelperTools.isContactBlacklisted(forEncryption:contact.obj)) {
+                    if(!contact.isGroup) {
+                        NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
+                            contact.isSelfChat ? Text("Own Encryption Keys") : Text("Encryption Keys")
+                        }
+                    } else if(contact.mucType == "group") {
+                        NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
+                            Text("Encryption Keys")
+                        }
                     }
                 }
 #endif

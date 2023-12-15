@@ -676,7 +676,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
     }
     
     //report pending crashes
-    [MLCrashReporter reportPendingCrashesWithViewController:[self getTopViewController]];
+    [MLCrashReporter reportPendingCrashes];
 }
 
 -(void) setActiveChats:(UIViewController*) activeChats

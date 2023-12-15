@@ -134,13 +134,8 @@
 		8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */; };
 		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
 		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
-		841B28282ACF75B300BCC42B /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 841B28272ACF75B300BCC42B /* CocoaLumberjack */; };
-		841B282A2ACF75B300BCC42B /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 841B28292ACF75B300BCC42B /* CocoaLumberjackSwift */; };
-		841B282C2ACF75B300BCC42B /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 841B282B2ACF75B300BCC42B /* CocoaLumberjackSwiftLogBackend */; };
 		841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F19297B18720074F9B7 /* AccountPicker.swift */; };
 		841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */; };
-		841EE4292A3F46F700D3AF14 /* MLFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 841EE4282A3F46F700D3AF14 /* MLFileLogger.m */; };
-		841EE42B2A3F471100D3AF14 /* MLFileLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 841EE42A2A3F471100D3AF14 /* MLFileLogger.h */; };
 		841EE4302A426F2300D3AF14 /* MLCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */; };
 		8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */ = {isa = PBXBuildFile; fileRef = 8420EA9A2915E4FE0038FF40 /* OmemoState.h */; };
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
@@ -160,6 +155,9 @@
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
 		84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84C1CD532A8F6196007076ED /* MLStreamRedirect.h */; };
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
+		84DD7EF92B28512C005AC131 /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 84DD7EF82B28512C005AC131 /* CocoaLumberjack */; };
+		84DD7EFB2B28512C005AC131 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 84DD7EFA2B28512C005AC131 /* CocoaLumberjackSwift */; };
+		84DD7EFD2B28512C005AC131 /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 84DD7EFC2B28512C005AC131 /* CocoaLumberjackSwiftLogBackend */; };
 		84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		84E55E8029644279003E191A /* ActiveChatsViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E55E7F2964426D003E191A /* ActiveChatsViewController.h */; };
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
@@ -173,7 +171,7 @@
 		C104918B261301530054AC9E /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049198261301710054AC9E /* MLCryptoTest.swift */; };
 		C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D88BB76295BB6DC00FB30BA /* CreateGroupMenu.swift */; };
-		C117F7E22B0863B3001F2BC6 /* ContactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D631822294BAB1D00026BE7 /* ContactList.swift */; };
+		C117F7E22B0863B3001F2BC6 /* ContactPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D631822294BAB1D00026BE7 /* ContactPicker.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
 		C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */; };
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
@@ -502,7 +500,7 @@
 		3D27D955290B0BB60014748B /* AddContactMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddContactMenu.swift; sourceTree = "<group>"; };
 		3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactRequestsMenu.swift; sourceTree = "<group>"; };
 		3D5A91412842B4AE008CE57E /* MemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberList.swift; sourceTree = "<group>"; };
-		3D631822294BAB1D00026BE7 /* ContactList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactList.swift; sourceTree = "<group>"; };
+		3D631822294BAB1D00026BE7 /* ContactPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactPicker.swift; sourceTree = "<group>"; };
 		3D65B78C27234B74005A30F4 /* ContactDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
 		3D65B790272350F0005A30F4 /* SwiftuiHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftuiHelpers.swift; sourceTree = "<group>"; };
 		3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingOverlay.swift; sourceTree = "<group>"; };
@@ -566,8 +564,6 @@
 		841898AB2957DBAC00FEC77D /* RichAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichAlert.swift; sourceTree = "<group>"; };
 		841B6F19297B18720074F9B7 /* AccountPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountPicker.swift; sourceTree = "<group>"; };
 		841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVCallUI.swift; sourceTree = "<group>"; };
-		841EE4282A3F46F700D3AF14 /* MLFileLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLFileLogger.m; sourceTree = "<group>"; };
-		841EE42A2A3F471100D3AF14 /* MLFileLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLFileLogger.h; sourceTree = "<group>"; };
 		841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLCrashReporter.m; path = Classes/MLCrashReporter.m; sourceTree = "<group>"; };
 		841EE4312A426F3D00D3AF14 /* MLCrashReporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLCrashReporter.h; path = Classes/MLCrashReporter.h; sourceTree = "<group>"; };
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
@@ -791,10 +787,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				841B28282ACF75B300BCC42B /* CocoaLumberjack in Frameworks */,
+				84DD7EF92B28512C005AC131 /* CocoaLumberjack in Frameworks */,
 				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
-				841B282A2ACF75B300BCC42B /* CocoaLumberjackSwift in Frameworks */,
-				841B282C2ACF75B300BCC42B /* CocoaLumberjackSwiftLogBackend in Frameworks */,
+				84DD7EFB2B28512C005AC131 /* CocoaLumberjackSwift in Frameworks */,
+				84DD7EFD2B28512C005AC131 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
 				8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1053,7 +1049,7 @@
 				26A78ED623C2B59400C7CF40 /* MLPlaceholderViewController.h */,
 				26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */,
 				84FC375828981A5600634E3E /* PasswordMigration.swift */,
-				3D631822294BAB1D00026BE7 /* ContactList.swift */,
+				3D631822294BAB1D00026BE7 /* ContactPicker.swift */,
 				3D27D955290B0BB60014748B /* AddContactMenu.swift */,
 				3D88BB76295BB6DC00FB30BA /* CreateGroupMenu.swift */,
 				3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */,
@@ -1242,8 +1238,6 @@
 				541E4CBF254AA0E700FD7B28 /* MLHandler.m */,
 				C10490482612ED2F0054AC9E /* MLEmoji.swift */,
 				54A22D2426185C2900B56EAD /* MLNotificationQueue.m */,
-				841EE4282A3F46F700D3AF14 /* MLFileLogger.m */,
-				841EE42A2A3F471100D3AF14 /* MLFileLogger.h */,
 				84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */,
 				84C1CD512A8F617F007076ED /* MLStreamRedirect.m */,
 				84C1CD532A8F6196007076ED /* MLStreamRedirect.h */,
@@ -1468,7 +1462,6 @@
 				54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */,
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
 				C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */,
-				841EE42B2A3F471100D3AF14 /* MLFileLogger.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 				C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */,
 				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
@@ -1571,9 +1564,9 @@
 			name = monalxmpp;
 			packageProductDependencies = (
 				8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */,
-				841B28272ACF75B300BCC42B /* CocoaLumberjack */,
-				841B28292ACF75B300BCC42B /* CocoaLumberjackSwift */,
-				841B282B2ACF75B300BCC42B /* CocoaLumberjackSwiftLogBackend */,
+				84DD7EF82B28512C005AC131 /* CocoaLumberjack */,
+				84DD7EFA2B28512C005AC131 /* CocoaLumberjackSwift */,
+				84DD7EFC2B28512C005AC131 /* CocoaLumberjackSwiftLogBackend */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1723,7 +1716,7 @@
 				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */,
 				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
-				841B28262ACF75B200BCC42B /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
+				84DD7EF72B28512C005AC131 /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -2019,7 +2012,7 @@
 				841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */,
 				3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */,
 				C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */,
-				C117F7E22B0863B3001F2BC6 /* ContactList.swift in Sources */,
+				C117F7E22B0863B3001F2BC6 /* ContactPicker.swift in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
@@ -2141,7 +2134,6 @@
 				26CC57A223A086AA00ABB92A /* xmpp.m in Sources */,
 				26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */,
 				541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */,
-				841EE4292A3F46F700D3AF14 /* MLFileLogger.m in Sources */,
 				C158D41425A0AC630005AA40 /* MLMucProcessor.m in Sources */,
 				C16D18362792A4AF00F869A0 /* DataLayerMigrations.m in Sources */,
 				54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */,
@@ -4002,12 +3994,12 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-		841B28262ACF75B200BCC42B /* XCRemoteSwiftPackageReference "cocoalumberjack" */ = {
+		84DD7EF72B28512C005AC131 /* XCRemoteSwiftPackageReference "cocoalumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/cocoalumberjack/cocoalumberjack";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = revision;
+				revision = 5e6c2217d1ee7aa4795c411706e83adb3d414cb5;
 			};
 		};
 		C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
@@ -4038,19 +4030,19 @@
 			package = 841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */;
 			productName = ViewExtractor;
 		};
-		841B28272ACF75B300BCC42B /* CocoaLumberjack */ = {
+		84DD7EF82B28512C005AC131 /* CocoaLumberjack */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 841B28262ACF75B200BCC42B /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
+			package = 84DD7EF72B28512C005AC131 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
 			productName = CocoaLumberjack;
 		};
-		841B28292ACF75B300BCC42B /* CocoaLumberjackSwift */ = {
+		84DD7EFA2B28512C005AC131 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 841B28262ACF75B200BCC42B /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
+			package = 84DD7EF72B28512C005AC131 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
 			productName = CocoaLumberjackSwift;
 		};
-		841B282B2ACF75B300BCC42B /* CocoaLumberjackSwiftLogBackend */ = {
+		84DD7EFC2B28512C005AC131 /* CocoaLumberjackSwiftLogBackend */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 841B28262ACF75B200BCC42B /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
+			package = 84DD7EF72B28512C005AC131 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
 		};
 		C1E1EC7A286A025F0097EC74 /* SwiftSoup */ = {

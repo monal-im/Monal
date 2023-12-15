@@ -245,12 +245,14 @@ static NSMutableDictionary* currentTransactions;
     int errcode = sqlite3_extended_errcode(self->_database);
     NSString* error = [NSString stringWithUTF8String:sqlite3_errmsg(self->_database)];
     DDLogError(@"SQLite Exception: %d %@ for query '%@' having params %@", errcode, error, query ? query : @"", args ? args : @[]);
-    DDLogError(@"currentTransactions: %@", currentTransactions);
-    @throw [NSException exceptionWithName:@"SQLite3Exception" reason:[NSString stringWithFormat:@"%d: %@", errcode, error] userInfo:@{
-        @"query": query ? query : [NSNull null],
-        @"args": args ? args : [NSNull null],
-        @"currentTransactions": currentTransactions,
-    }];
+    @synchronized(currentTransactions) {
+        DDLogError(@"currentTransactions: %@", currentTransactions);
+        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:[NSString stringWithFormat:@"%d: %@", errcode, error] userInfo:@{
+            @"query": query ? query : [NSNull null],
+            @"args": args ? args : [NSNull null],
+            @"currentTransactions": currentTransactions,
+        }];
+    }
 }
 
 -(void) testThreadInstanceForQuery:(NSString*) query andArguments:(NSArray*) args
@@ -259,12 +261,14 @@ static NSMutableDictionary* currentTransactions;
     if(!threadData[@"_sqliteInstancesForThread"] || !threadData[@"_sqliteInstancesForThread"][_dbFile] || self != threadData[@"_sqliteInstancesForThread"][_dbFile])
     {
         DDLogError(@"Shared instance of MLSQLite used in wrong thread for query '%@' having params %@", query ? query : @"", args ? args : @[]);
-        DDLogError(@"currentTransactions: %@", currentTransactions);
-        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Shared instance of MLSQLite used in wrong thread!" userInfo:@{
-            @"currentTransactions": currentTransactions,
-            @"query": query ? query : [NSNull null],
-            @"args": args ? args : [NSNull null]
-        }];
+        @synchronized(currentTransactions) {
+            DDLogError(@"currentTransactions: %@", currentTransactions);
+            @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Shared instance of MLSQLite used in wrong thread!" userInfo:@{
+                @"currentTransactions": currentTransactions,
+                @"query": query ? query : [NSNull null],
+                @"args": args ? args : [NSNull null]
+            }];
+        }
     }
 }
 
@@ -277,12 +281,14 @@ static NSMutableDictionary* currentTransactions;
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
     {
         DDLogError(@"Tried to run query outside of transaction: '%@' having params %@", query ? query : @"", args ? args : @[]);
-        DDLogError(@"currentTransactions: %@", currentTransactions);
-        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to run query outside of transaction!" userInfo:@{
-            @"currentTransactions": currentTransactions,
-            @"query": query ? query : [NSNull null],
-            @"args": args ? args : [NSNull null]
-        }];
+        @synchronized(currentTransactions) {
+            DDLogError(@"currentTransactions: %@", currentTransactions);
+            @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to run query outside of transaction!" userInfo:@{
+                @"currentTransactions": currentTransactions,
+                @"query": query ? query : [NSNull null],
+                @"args": args ? args : [NSNull null]
+            }];
+        }
     }
 }
 
@@ -385,9 +391,11 @@ static NSMutableDictionary* currentTransactions;
     [self testThreadInstanceForQuery:@"beginWriteTransaction" andArguments:nil];
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     if([threadData[@"_sqliteStartedReadTransaction"][_dbFile] boolValue])
-        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to start write transaction inside running read transaction!" userInfo:@{
-            @"currentTransactions": currentTransactions,
-        }];
+        @synchronized(currentTransactions) {
+            @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to start write transaction inside running read transaction!" userInfo:@{
+                @"currentTransactions": currentTransactions,
+            }];
+        }
     threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] + 1)];
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
         return;			//begin only outermost transaction
@@ -397,10 +405,12 @@ static NSMutableDictionary* currentTransactions;
         if(!retval)
         {
             [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
-            DDLogWarn(@"Retrying write transaction start: %@", @{
-                @"newWriteTransactionVia": [NSThread callStackSymbols],
-                @"currentTransactions": currentTransactions,
-            });
+            @synchronized(currentTransactions) {
+                DDLogWarn(@"Retrying write transaction start: %@", @{
+                    @"newWriteTransactionVia": [NSThread callStackSymbols],
+                    @"currentTransactions": currentTransactions,
+                });
+            }
         }
     } while(!retval);
     NSString* ownThread = [self calcThreadName];
@@ -460,10 +470,12 @@ static NSMutableDictionary* currentTransactions;
         if(!retval)
         {
             [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
-            DDLogWarn(@"Retrying read transaction start: %@", @{
-                @"newReadTransactionVia": [NSThread callStackSymbols],
-                @"currentTransactions": currentTransactions,
-            });
+            @synchronized(currentTransactions) {
+                DDLogWarn(@"Retrying read transaction start: %@", @{
+                    @"newReadTransactionVia": [NSThread callStackSymbols],
+                    @"currentTransactions": currentTransactions,
+                });
+            }
         }
     } while(!retval);
     threadData[@"_sqliteStartedReadTransaction"][_dbFile] = @YES;

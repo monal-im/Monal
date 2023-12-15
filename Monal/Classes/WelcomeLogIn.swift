@@ -36,8 +36,8 @@ struct WelcomeLogIn: View {
 #endif
     
     private var credentialsEnteredAlert: Bool {
-        alertPrompt.title = Text("No Empty Values!")
-        alertPrompt.message = Text("Please make sure you have entered a username and password.")
+        alertPrompt.title = Text("Empty Values!")
+        alertPrompt.message = Text("Please make sure you have entered both a username and password.")
         return credentialsEntered
     }
 
@@ -49,7 +49,7 @@ struct WelcomeLogIn: View {
 
     private var credentialsExistAlert: Bool {
         alertPrompt.title = Text("Duplicate jid!")
-        alertPrompt.message = Text("This jid already exists on this instance.")
+        alertPrompt.message = Text("This account already exists in Monal.")
         return credentialsExist
     }
 

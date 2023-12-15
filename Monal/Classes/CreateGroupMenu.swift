@@ -10,6 +10,7 @@ import MobileCoreServices
 import UniformTypeIdentifiers
 import SwiftUI
 import monalxmpp
+import OrderedCollections
 
 struct CreateGroupMenu: View {
     var delegate: SheetDismisserProtocol
@@ -21,10 +22,10 @@ struct CreateGroupMenu: View {
     @State private var showAlert = false
     // note: dismissLabel is not accessed but defined at the .alert() section
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
+    @State private var selectedContacts : OrderedSet<MLContact> = []
 
     @ObservedObject private var overlay = LoadingOverlayState()
 
-    @State private var showQRCodeScanner = false
     @State private var success = false
 
     private let dismissWithNewGroup: (MLContact) -> ()
@@ -82,14 +83,26 @@ struct CreateGroupMenu: View {
                         .autocapitalization(.none)
                         .addClearButton(text:$groupName)
 
-                    NavigationLink(destination: LazyClosureView(ContactList(contacts: DataLayer.sharedInstance().contactList() as! [MLContact])), label: {
+                    NavigationLink(destination: LazyClosureView(ContactPicker(selectedContacts: $selectedContacts)), label: {
                             Text("Group Members")
                         })
                 }
-                Section {
-                    Button(action: {}, label: {
-                        Text("Create new group")
-                    })
+                if(self.selectedContacts.count > 0) {
+                    Section(header: Text("Selected Group Members")) {
+                        ForEach(self.selectedContacts, id: \.contactJid) { contact in
+                            ContactEntry(contact: contact)
+                        }
+                        .onDelete(perform: { indexSet in
+                            self.selectedContacts.remove(at: indexSet.first!)
+                        })
+                    }
+                    Section {
+                        Button(action: {
+                            
+                        }, label: {
+                            Text("Create new group")
+                        })
+                    }
                 }
             }
         }

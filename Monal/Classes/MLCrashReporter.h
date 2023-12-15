@@ -12,7 +12,7 @@
 @class UIViewController;
 
 @interface MLCrashReporter : NSObject
-+(void) reportPendingCrashesWithViewController:(UIViewController*) viewController;
++(void) reportPendingCrashes;
 @end
 
 #endif /* MLCrashReporter_h */

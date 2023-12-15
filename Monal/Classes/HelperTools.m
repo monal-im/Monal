@@ -1626,6 +1626,7 @@ void swizzle(Class c, SEL orig, SEL new)
     //file logger
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:containerUrl defaultFileProtectionLevel:NSFileProtectionCompleteUntilFirstUserAuthentication];
     logFileManager.maximumNumberOfLogFiles = 4;
+    logFileManager.logFilesDiskQuota = 512 * 1024 * 1024;
     self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
     self.fileLogger.doNotReuseLogFiles = NO;
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling

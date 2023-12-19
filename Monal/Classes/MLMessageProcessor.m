@@ -264,14 +264,6 @@ static NSMutableDictionary* _typingNotifications;
                 DDLogInfo(@"Ignoring MLhistory KeyTransportElement for buddy %@", possibleUnkownContact);
             return message;
         }
-        
-        //handle muc invites and return early, before creating a dummy 1:1 contact for this muc
-        if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] && [account.mucProcessor processMessage:messageNode])
-            return message;     //the muc processor said we have stop processing (e.g. it detected the invite, will alwaye due to the first part of the if statement above)
-        
-        //add contact if possible (ignore groupchats or already existing contacts, or KeyTransportElements)
-        DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
-        [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil];
     }
 
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
@@ -300,6 +292,10 @@ static NSMutableDictionary* _typingNotifications;
     //handle muc status changes or invites (this checks for the muc namespace itself)
     if([account.mucProcessor processMessage:messageNode])
         return message;     //the muc processor said we have stop processing
+    
+    //add contact if possible (ignore groupchats or already existing contacts, or KeyTransportElements)
+    DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
+    [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil];
     
     NSString* buddyName = [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
     NSString* ownNick;
@@ -774,7 +770,7 @@ static NSMutableDictionary* _typingNotifications;
             }
         }
     }
-    
+
     return message;
 }
 

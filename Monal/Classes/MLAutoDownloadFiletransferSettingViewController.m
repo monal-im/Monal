@@ -11,7 +11,8 @@
 
 enum MLAutoDownloadFiletransferSettingViewController {
     FiletransferSettingsGeneralSettings,
-    FiletransferSettingsAdvancedSettings,
+    FiletransferSettingsAdvancedDownloadSettings,
+    FiletransferSettingsAdvancedUploadSettings,
     FiletransferSettingSectionCnt
 };
 
@@ -33,7 +34,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
     self.navigationItem.title = NSLocalizedString(@"Auto-Download Media", @"");
 }
 
--(nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+-(nullable NSString*) tableView:(UITableView*) tableView titleForHeaderInSection:(NSInteger) section
 {
     NSString* sectionTitle = nil;
     switch(section)
@@ -41,8 +42,11 @@ enum MLAutoDownloadFiletransferSettingViewController {
         case FiletransferSettingsGeneralSettings:
             sectionTitle = NSLocalizedString(@"General File Transfer Settings", @"");
             break;
-        case FiletransferSettingsAdvancedSettings:
-            sectionTitle = NSLocalizedString(@"Maximum File Transfer Size", @"");
+        case FiletransferSettingsAdvancedDownloadSettings:
+            sectionTitle = NSLocalizedString(@"Download Settings", @"");
+            break;
+        case FiletransferSettingsAdvancedUploadSettings:
+            sectionTitle = NSLocalizedString(@"Upload Settings", @"");
             break;
         default:
             break;
@@ -62,8 +66,10 @@ enum MLAutoDownloadFiletransferSettingViewController {
     {
         case FiletransferSettingsGeneralSettings:
             return 1;
-        case FiletransferSettingsAdvancedSettings:
-            return 3;
+        case FiletransferSettingsAdvancedDownloadSettings:
+            return 2;
+        case FiletransferSettingsAdvancedUploadSettings:
+            return 1;
         default:
             unreachable();
             break;
@@ -91,8 +97,8 @@ enum MLAutoDownloadFiletransferSettingViewController {
                     unreachable();
             }
             break;
-        case FiletransferSettingsAdvancedSettings:
-            switch (indexPath.row)
+        case FiletransferSettingsAdvancedDownloadSettings:
+            switch(indexPath.row)
             {
                 case 0:
                 {
@@ -100,7 +106,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
                         // byte -> mb
                         float mb = sliderValue / 1024 / 1024;
                         labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over WiFi upto: %.fMB", @""), mb];
-
+                        
                         return mb;
                     } withUpdateFunc:^(UILabel* labelToUpdate, float sliderValue) {
                         float newValue = roundf(sliderValue);
@@ -115,7 +121,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
                         // byte -> mb
                         float mb = sliderValue / 1024 / 1024;
                         labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over cellular upto: %.fMB", @""), mb];
-
+                        
                         return mb;
                     } withUpdateFunc:^(UILabel* labelToUpdate, float sliderValue) {
                         float newValue = roundf(sliderValue);
@@ -125,15 +131,23 @@ enum MLAutoDownloadFiletransferSettingViewController {
                     }];
                     break;
                 }
-                case 2:
+                default:
+                    unreachable();
+                    break;
+            }
+            break;
+        case FiletransferSettingsAdvancedUploadSettings:
+            switch(indexPath.row)
+            {
+                case 0:
                 {
-                    [cell initCell:NSLocalizedString(@"Image Quality", @"") withSliderDefaultsKey:@"ImageUploadQuality" minValue:0.33f maxValue:1.0  withLoadFunc:^(UILabel* labelToUpdate, float sliderValue) {
+                    [cell initCell:NSLocalizedString(@"Image Upload Quality", @"") withSliderDefaultsKey:@"ImageUploadQuality" minValue:0.33f maxValue:1.0  withLoadFunc:^(UILabel* labelToUpdate, float sliderValue) {
                         float rate = roundf(sliderValue * 100) / 100;
-                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Image Quality: %.2f", @""), rate];
+                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Image Upload Quality: %.2f", @""), rate];
                         return rate;
                     } withUpdateFunc:^(UILabel* labelToUpdate, float sliderValue) {
                         float rate = roundf(sliderValue * 100) / 100;
-                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Image Quality: %.2f", @""), rate];
+                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Image Upload Quality: %.2f", @""), rate];
                         return rate;
                     }];
                     break;
@@ -149,7 +163,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
     return cell;
 }
 
--(void)sliderValueChanged:(UISlider*) slider
+-(void) sliderValueChanged:(UISlider*) slider
 {
     int maxFileSize = (int)slider.value;
     [sliderResultLabel setText:[NSString stringWithFormat:@"%d MB", maxFileSize]];
@@ -157,7 +171,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
     [[HelperTools defaultsDB] setInteger:(maxFileSize * 1024 * 1024) forKey:@"AutodownloadFiletransfersMaxSize"];
 }
 
--(void)updateUI
+-(void) updateUI
 {
     BOOL isAutodownloadFiletransfers = [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"];
     [slider setUserInteractionEnabled:isAutodownloadFiletransfers];

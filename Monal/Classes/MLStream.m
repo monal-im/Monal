@@ -43,7 +43,7 @@
 
 @interface MLInputStream()
 {
-    NSData* _buf;
+    NSMutableData* _buf;
     BOOL _reading;
 }
 @property (atomic, readonly) void (^incoming_data_handler)(NSData* _Nullable, BOOL, NSError* _Nullable);
@@ -77,7 +77,7 @@
 -(instancetype) initWithSharedState:(MLSharedStreamState*) shared
 {
     self = [super initWithSharedState:shared];
-    _buf = [NSData new];
+    _buf = [NSMutableData new];
     _reading = NO;
     
     //this handler will be called by our framer or the schedule_read method
@@ -96,7 +96,9 @@
         {
             if([content length] > 0)
             {
-                self->_buf = content;
+                @synchronized(self->_buf) {
+                    [self->_buf appendData:content];
+                }
                 [self generateEvent:NSStreamEventHasBytesAvailable];
             }
         }
@@ -130,32 +132,46 @@
         if(self.closed || !self.open_called || !self.shared_state.open)
             return -1;
     }
-    if(len > [_buf length])
-        len = [_buf length];
-    [_buf getBytes:buffer length:len];
-    if(len < [_buf length])
-    {
-        _buf = [_buf subdataWithRange:NSMakeRange(len, [_buf length]-len)];
+    BOOL was_smaller = NO;
+    @synchronized(self->_buf) {
+        if(len > [_buf length])
+            len = [_buf length];
+        [_buf getBytes:buffer length:len];
+        if(len < [_buf length])
+        {
+            NSData* to_append = [_buf subdataWithRange:NSMakeRange(len, [_buf length]-len)];
+            [_buf setLength:0];
+            [_buf appendData:to_append];
+            was_smaller = YES;
+        }
+        else
+        {
+            [_buf setLength:0];
+            was_smaller = NO;
+        }
+    }
+    //this has to be done outside of our @synchronized block
+    if(was_smaller)
         [self generateEvent:NSStreamEventHasBytesAvailable];
-    }
     else
-    {
-        _buf = [NSData new];
         [self schedule_read];
-    }
     return len;
 }
 
 -(BOOL) getBuffer:(uint8_t* _Nullable *) buffer length:(NSUInteger*) len
 {
-    *len = [_buf length];
-    *buffer = (uint8_t* _Nullable)[_buf bytes];
-    return YES;
+    @synchronized(_buf) {
+        *len = [_buf length];
+        *buffer = (uint8_t* _Nullable)[_buf bytes];
+        return YES;
+    }
 }
 
 -(BOOL) hasBytesAvailable
 {
-    return _buf && [_buf length];
+    @synchronized(_buf) {
+        return _buf && [_buf length];
+    }
 }
 
 -(NSStreamStatus) streamStatus
@@ -368,10 +384,13 @@
         sec_protocol_options_set_tls_ocsp_enabled(options, 1);
         sec_protocol_options_set_tls_false_start_enabled(options, 1);
         sec_protocol_options_set_min_tls_protocol_version(options, tls_protocol_version_TLSv12);
+        //sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_TLSv12);
         sec_protocol_options_set_tls_resumption_enabled(options, 1);
         sec_protocol_options_set_tls_tickets_enabled(options, 1);
         sec_protocol_options_set_tls_renegotiation_enabled(options, 0);
-        //tls-exporter channel-binding is only usable if DHE is used instead of RSA key exchange
+        //tls-exporter channel-binding is only usable for TLSv1.2 if ECDHE is used instead of RSA key exchange
+        //(see https://mitls.org/pages/attacks/3SHAKE)
+        //see also https://developer.apple.com/documentation/security/preventing_insecure_network_connections?language=objc
         sec_protocol_options_append_tls_ciphersuite_group(options, tls_ciphersuite_group_ats);
     };
     
@@ -389,7 +408,7 @@
         
         //create simple framer and append it to our stack
         __block int startupCounter = 0;     //workaround for some weird apple stuff, see below
-        nw_protocol_definition_t starttls_framer_definition = nw_framer_create_definition("starttls_framer", NW_FRAMER_CREATE_FLAGS_DEFAULT, ^(nw_framer_t framer) {
+        nw_protocol_definition_t starttls_framer_definition = nw_framer_create_definition([[[NSUUID UUID] UUIDString] UTF8String], NW_FRAMER_CREATE_FLAGS_DEFAULT, ^(nw_framer_t framer) {
             //we don't need any locking for our counter because all framers will be started in the same internal network queue
             int framerId = startupCounter;
             startupCounter++;
@@ -734,10 +753,15 @@
 -(NSArray*) supportedChannelBindingTypes
 {
     //we made sure we only use PFS based ciphers for which tls-exporter can safely be used even with TLS1.2
+    //(see https://mitls.org/pages/attacks/3SHAKE)
+    return @[@"tls-exporter", @"tls-server-end-point"];
+    
+    /*
     //BUT: other implementations simply don't support tls-exporter on non-tls1.3 connections --> do the same for compatibility
     if(self.isTLS13)
         return @[@"tls-exporter", @"tls-server-end-point"];
     return @[@"tls-server-end-point"];
+    */
 }
 
 -(NSData* _Nullable) channelBindingDataForType:(NSString* _Nullable) type

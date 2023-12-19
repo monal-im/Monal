@@ -48,7 +48,6 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "DataLayer.h"
 #import "OmemoState.h"
 #import "MLUDPLogger.h"
-#import "MLFileLogger.h"
 #import "MLStreamRedirect.h"
 
 @import UserNotifications;
@@ -58,6 +57,8 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 @import AVFoundation;
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
+
+#import "SCRAM.h"
 
 @interface KSCrash()
 @property(nonatomic,readwrite,retain) NSString* basePath;
@@ -344,10 +345,21 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) initSystem
 {
-    [self configureLogging];
+    BOOL enableDefaultLogAndCrashFramework = YES;
+#if TARGET_OS_SIMULATOR
+    // Automatically switch between the debug technique of TMolitor and FAltheide
+    enableDefaultLogAndCrashFramework = [[HelperTools defaultsDB] boolForKey:@"udpLoggerEnabled"];
+#endif
+    if(enableDefaultLogAndCrashFramework)
+    {
+        [self configureLogging];
+        [self installCrashHandler];
+        [self installExceptionHandler];
+    }
+    else
+        [self configureXcodeLogging];
+    
     [SwiftHelpers initSwiftHelpers];
-    [self installCrashHandler];
-    [self installExceptionHandler];
     [self activityLog];
 }
 
@@ -357,7 +369,7 @@ void swizzle(Class c, SEL orig, SEL new)
     NSError* error;
     DDLogDebug(@"configuring default audio session...");
     AVAudioSessionCategoryOptions options = 0;
-    //options |= AVAudioSessionCategoryOptionMixWithOthers;
+    options |= AVAudioSessionCategoryOptionMixWithOthers;
     //options |= AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
     //options |= AVAudioSessionCategoryOptionAllowBluetooth;
     //options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
@@ -475,10 +487,12 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(BOOL) shouldProvideVoip
 {
-    NSLocale* userLocale = [NSLocale currentLocale];
-    BOOL shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
+    BOOL shouldProvideVoip;
 #if TARGET_OS_MACCATALYST
     shouldProvideVoip = NO;
+#else
+    NSLocale* userLocale = [NSLocale currentLocale];
+    shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
 #endif
     return shouldProvideVoip;
 }
@@ -1238,6 +1252,15 @@ void swizzle(Class c, SEL orig, SEL new)
     return [retval copy];
 }
 
++(BOOL) isContactBlacklistedForEncryption:(MLContact*) contact
+{
+    BOOL blacklisted = NO;
+    blacklisted = [@"cheogram.com" isEqualToString:[self splitJid:contact.contactJid][@"host"]];
+    if(blacklisted)
+        DDLogWarn(@"Jid blacklisted for encryption: %@", contact);
+    return blacklisted;
+}
+
 +(void) scheduleBackgroundTask:(BOOL) force
 {
     DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");
@@ -1264,17 +1287,14 @@ void swizzle(Class c, SEL orig, SEL new)
         }
         else
         {
-            if(@available(iOS 17.0, macCatalyst 17.0, *))
-            {
-                //cancel existing task (if any)
-                [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
-            }
+            //cancel existing task (if any)
+            [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundRefreshingTask];
             //new task
             BGAppRefreshTaskRequest* refreshingRequest = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundRefreshingTask];
             //on ios<17 do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-            if(@available(iOS 17.0, macCatalyst 17.0, *))
-                refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
-            else
+//             if(@available(iOS 17.0, macCatalyst 17.0, *))
+//                 refreshingRequest.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:BGFETCH_DEFAULT_INTERVAL];
+//             else
                 refreshingRequest.earliestBeginDate = nil;
             if(![[BGTaskScheduler sharedScheduler] submitTaskRequest:refreshingRequest error:&error])
             {
@@ -1573,6 +1593,11 @@ void swizzle(Class c, SEL orig, SEL new)
     [MLUDPLogger flushWithTimeout:timeout];
 }
 
++(void) configureXcodeLogging
+{
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+}
+
 +(void) configureLogging
 {
     //don't log to the console (aka stderr) to not create loops with our redirected stderr
@@ -1600,8 +1625,9 @@ void swizzle(Class c, SEL orig, SEL new)
     
     //file logger
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:containerUrl defaultFileProtectionLevel:NSFileProtectionCompleteUntilFirstUserAuthentication];
-    logFileManager.maximumNumberOfLogFiles = 5;
-    self.fileLogger = [[MLFileLogger alloc] initWithLogFileManager:logFileManager];
+    logFileManager.maximumNumberOfLogFiles = 4;
+    logFileManager.logFilesDiskQuota = 512 * 1024 * 1024;
+    self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
     self.fileLogger.doNotReuseLogFiles = NO;
     self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
     self.fileLogger.maximumFileSize = 128 * 1024 * 1024;
@@ -1621,7 +1647,8 @@ void swizzle(Class c, SEL orig, SEL new)
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    DDLogInfo(@"Starting: Version %@ (%@ %@ UTC, %@) on %@", version, buildDate, buildTime, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion);
+    DDLogInfo(@"Starting: Version %@ (%@ %@ UTC, %@) on iOS/macOS %@", version, buildDate, buildTime, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion);
+    //[SCRAM SSDPXepOutput];
     [DDLog flushLog];
     
     DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_USER_INTERACTIVE", QOS_CLASS_USER_INTERACTIVE);
@@ -1688,66 +1715,58 @@ void swizzle(Class c, SEL orig, SEL new)
 +(void) installCrashHandler
 {
     
-    //only record crashes if either debuggin is turned on (alpha/beta releases) or the log export row was activated in settings by the user
-    BOOL record_crashes = NO;
-#ifdef DEBUG
-    record_crashes = YES;
-#else
-    record_crashes = [[HelperTools defaultsDB] boolForKey:@"showLogInSettings"];
-#endif
-    if(record_crashes)
-    {
-        DDLogVerbose(@"KSCrash installing handler with callback: %p", crash_callback);
-        KSCrash* handler = [KSCrash sharedInstance];
-        handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
-        handler.monitoring = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
-        handler.onCrash = crash_callback;
+    DDLogVerbose(@"KSCrash installing handler with callback: %p", crash_callback);
+    KSCrash* handler = [KSCrash sharedInstance];
+    handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
+    handler.monitoring = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
+    handler.onCrash = crash_callback;
+    //this can trigger crashes on macos < 13 (e.g. mac catalyst < 16) (and possibly ios < 16)
+    if(@available(iOS 16.0, macCatalyst 16.0, *))
         [handler enableSwapOfCxaThrow];
-        handler.searchQueueNames = NO;      //this is not async safe and can crash :(
-        handler.introspectMemory = YES;
-        handler.addConsoleLogToReport = YES;
-        handler.printPreviousLog = NO;     //debug kscrash itself?
-        handler.demangleLanguages = KSCrashDemangleLanguageAll;
-        handler.maxReportCount = 4;
-        handler.deadlockWatchdogInterval = 0;       // no main thread watchdog
-        NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-        NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
-        NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
-        NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-        handler.userInfo = @{
-            @"isAppex": @([self isAppExtension]),
-            @"processName": [[[NSBundle mainBundle] executablePath] lastPathComponent],
-            @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
-            @"appVersion": [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @""), version, buildDate, buildTime],
-        };
-        //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different
-        //in appex and mainapp use the lowlevel C api with dummy bundle name "UnifiedReport" instead
-        handler.monitoring = kscrash_install(_crashBundleName, handler.basePath.UTF8String);
-        if(handler.monitoring == KSCrashMonitorTypeNone)
-            DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");
-        else
-            DDLogInfo(@"Crash monitoring active now: %d", handler.monitoring);
-        
-        //store data globally for later retrieval by our crash_callback() (_origLogfilePath and _logfilePath)
-        strncpy(_origLogfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(_logfilePath)-1);
-        _origLogfilePath[sizeof(_origLogfilePath)-1] = '\0';
-        //use the same id for our logfile copy as for the main report (allows to delete all logfile copies for which no crash report exists)
-        //KSCrash increments the id by one every new crash --> the next id used by kscrash will be this one
-        uint64_t nextCrashId = kscrs_getNextCrashReport(NULL) + 1;
-        snprintf(_logfilePath, sizeof(_logfilePath)-1, "%s/Reports/%s-log-%016llx.rawlog", handler.basePath.UTF8String, _crashBundleName, nextCrashId);
-        _logfilePath[sizeof(_logfilePath)-1] = '\0';
-        DDLogVerbose(@"KSCrash: _origLogfilePath=%s, _logfilePath=%s", _origLogfilePath, _logfilePath);
-        
-        //clean up orphan rawlog copies
-        [self cleanupRawlogCrashcopies];
-        
-        NSArray* directoryContentsData = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Data"]] path] error:nil];
-        DDLogDebug(@"KSCrash data files: %@", directoryContentsData);
-        NSArray* directoryContentsReports = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Reports"]] path] error:nil];
-        DDLogDebug(@"KSCrash report files: %@", directoryContentsReports);
-        
-        //[[KSCrash sharedInstance] reportUserException:@"test" reason:@"dummy test" language:@"dylang" lineOfCode:nil stackTrace:nil logAllThreads:NO terminateProgram:YES];
-    }
+    handler.searchQueueNames = NO;      //this is not async safe and can crash :(
+    handler.introspectMemory = YES;
+    handler.addConsoleLogToReport = YES;
+    handler.printPreviousLog = NO;     //debug kscrash itself?
+    handler.demangleLanguages = KSCrashDemangleLanguageAll;
+    handler.maxReportCount = 4;
+    handler.deadlockWatchdogInterval = 0;       // no main thread watchdog
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
+    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
+    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
+    handler.userInfo = @{
+        @"isAppex": @([self isAppExtension]),
+        @"processName": [[[NSBundle mainBundle] executablePath] lastPathComponent],
+        @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
+        @"appVersion": [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @""), version, buildDate, buildTime],
+    };
+    //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different
+    //in appex and mainapp use the lowlevel C api with dummy bundle name "UnifiedReport" instead
+    handler.monitoring = kscrash_install(_crashBundleName, handler.basePath.UTF8String);
+    if(handler.monitoring == KSCrashMonitorTypeNone)
+        DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");
+    else
+        DDLogInfo(@"Crash monitoring active now: %d", handler.monitoring);
+    
+    //store data globally for later retrieval by our crash_callback() (_origLogfilePath and _logfilePath)
+    strncpy(_origLogfilePath, self.fileLogger.currentLogFileInfo.filePath.UTF8String, sizeof(_logfilePath)-1);
+    _origLogfilePath[sizeof(_origLogfilePath)-1] = '\0';
+    //use the same id for our logfile copy as for the main report (allows to delete all logfile copies for which no crash report exists)
+    //KSCrash increments the id by one every new crash --> the next id used by kscrash will be this one
+    uint64_t nextCrashId = kscrs_getNextCrashReport(NULL) + 1;
+    snprintf(_logfilePath, sizeof(_logfilePath)-1, "%s/Reports/%s-log-%016llx.rawlog", handler.basePath.UTF8String, _crashBundleName, nextCrashId);
+    _logfilePath[sizeof(_logfilePath)-1] = '\0';
+    DDLogVerbose(@"KSCrash: _origLogfilePath=%s, _logfilePath=%s", _origLogfilePath, _logfilePath);
+    
+    //clean up orphan rawlog copies
+    [self cleanupRawlogCrashcopies];
+    
+    NSArray* directoryContentsData = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Data"]] path] error:nil];
+    DDLogDebug(@"KSCrash data files: %@", directoryContentsData);
+    NSArray* directoryContentsReports = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Reports"]] path] error:nil];
+    DDLogDebug(@"KSCrash report files: %@", directoryContentsReports);
+    
+    //[[KSCrash sharedInstance] reportUserException:@"test" reason:@"dummy test" language:@"dylang" lineOfCode:nil stackTrace:nil logAllThreads:NO terminateProgram:YES];
 }
 
 +(BOOL) isAppExtension

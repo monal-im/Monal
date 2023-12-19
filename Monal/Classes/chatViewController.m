@@ -497,15 +497,14 @@ enum msgSentState {
     if(![[DataLayer sharedInstance] checkCap:@"urn:xmpp:jingle-message:0" forUser:self.contact.contactJid onAccountNo:self.contact.accountId])
     {
         NSInteger style = UIAlertControllerStyleActionSheet;
-#if TARGET_OS_MACCATALYST
-        style = UIAlertControllerStyleAlert;
-#endif
+        if([HelperTools deviceUsesSplitView])
+            style = UIAlertControllerStyleAlert;
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact may not support calls. Your call might never reach its destination.", @"") preferredStyle:style];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Try nevertheless", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
             
             //now initiate call
-            MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+            MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
             [appDelegate.activeChats callContact:self.contact];
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
@@ -515,13 +514,15 @@ enum msgSentState {
     }
     else
     {
-        MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+        MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
         [appDelegate.activeChats callContact:self.contact];
     }
 }
 
 -(IBAction) toggleEncryption:(id)sender
 {
+    if([HelperTools isContactBlacklistedForEncryption:self.contact])
+        return;
 #ifndef DISABLE_OMEMO
     if(self.contact.isEncrypted)
     {
@@ -561,8 +562,11 @@ enum msgSentState {
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"]];
     else
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"]];
-    // disable encryption button on unsupported muc types
+    //disable encryption button on unsupported muc types
     if(self.contact.isGroup && [self.contact.mucType isEqualToString:@"group"] == NO)
+        [self.navBarEncryptToggleButton setEnabled:NO];
+    //disable encryption button for special jids
+    if([HelperTools isContactBlacklistedForEncryption:self.contact])
         [self.navBarEncryptToggleButton setEnabled:NO];
 }
 

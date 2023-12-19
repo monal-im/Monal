@@ -442,6 +442,11 @@ NSString* const kAskSubscribe = @"subscribe";
     return self.isGroup == NO && [[DataLayer sharedInstance] hasContactRequestForContact:self];
 }
 
+-(BOOL) hasOutgoingContactRequest
+{
+    return self.isGroup == NO && [self.ask isEqualToString:kAskSubscribe];
+}
+
 // this will cache the unread count on first access
 -(NSInteger) unreadCount
 {
@@ -676,7 +681,7 @@ NSString* const kAskSubscribe = @"subscribe";
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@ (%@) %@%@", self.accountId, self.contactJid, self.isGroup ? self.mucType : @"1:1", self.isInRoster ? @"inRoster" : @"not(inRoster)", self.hasIncomingContactRequest ? @"[incomingContactRequest]" : @""];
+    return [NSString stringWithFormat:@"%@: %@ (%@) %@%@%@, kSub=%@", self.accountId, self.contactJid, self.isGroup ? self.mucType : @"1:1", self.isInRoster ? @"inRoster" : @"not(inRoster)", self.hasIncomingContactRequest ? @"[incomingContactRequest]" : @"", self.hasOutgoingContactRequest ? @"[outgoingContactRequest]" : @"", self.subscription];
 }
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic

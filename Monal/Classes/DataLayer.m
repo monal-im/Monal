@@ -255,8 +255,7 @@ static NSDateFormatter* dbFormatter;
             [dictionary objectForKey:kAccountID],
         ];
         BOOL retval = [self.db executeNonQuery:query andArguments:params];
-        //add self-chat
-        [self addContact:[NSString stringWithFormat:@"%@@%@", dictionary[kUsername], dictionary[kDomain]] forAccount:dictionary[kAccountID] nickname:nil];
+        [self addSelfChatForAccount:dictionary[kAccountID]];
         return retval;
     }];
 }
@@ -283,8 +282,7 @@ static NSDateFormatter* dbFormatter;
         if(result == YES) {
             NSNumber* accountID = [self.db lastInsertId];
             DDLogInfo(@"Added account %@ to account table with accountNo %@", [dictionary objectForKey:kUsername], accountID);
-            //add self-chat
-            [self addContact:[NSString stringWithFormat:@"%@@%@", dictionary[kUsername], dictionary[kDomain]] forAccount:accountID nickname:nil];
+            [self addSelfChatForAccount:accountID];
             return accountID;
         } else {
             return (NSNumber*)nil;
@@ -373,6 +371,16 @@ static NSDateFormatter* dbFormatter;
 }
 
 #pragma mark contact Commands
+
+-(BOOL) addSelfChatForAccount:(NSNumber*) accountNo
+{
+    BOOL encrypt = NO;
+#ifndef DISABLE_OMEMO
+        encrypt = [[HelperTools defaultsDB] boolForKey:@"OMEMODefaultOn"];
+#endif// DISABLE_OMEMO
+    NSDictionary* accountDetails = [self detailsForAccount:accountNo];
+    return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick', 'encrypt') VALUES(?, ?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET subscription='both';" andArguments:@[accountNo, [NSString stringWithFormat:@"%@@%@", accountDetails[kUsername], accountDetails[kDomain]], @"", @"", @0, @"", @(encrypt)]];
+}
 
 -(BOOL) addContact:(NSString*) contact forAccount:(NSNumber*) accountNo nickname:(NSString*) nickName
 {

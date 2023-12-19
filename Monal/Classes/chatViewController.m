@@ -494,7 +494,9 @@ enum msgSentState {
 
 -(void) openCallScreen:(id) sender
 {
-    if(![[DataLayer sharedInstance] checkCap:@"urn:xmpp:jingle-message:0" forUser:self.contact.contactJid onAccountNo:self.contact.accountId])
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
+    if(activeCall == nil && ![[DataLayer sharedInstance] checkCap:@"urn:xmpp:jingle-message:0" forUser:self.contact.contactJid onAccountNo:self.contact.accountId])
     {
         NSInteger style = UIAlertControllerStyleActionSheet;
         if([HelperTools deviceUsesSplitView])

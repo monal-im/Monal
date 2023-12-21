@@ -172,8 +172,10 @@ static void addFilePathWithSize(const KSCrashReportWriter* writer, char* name, c
 static void crash_callback(const KSCrashReportWriter* writer)
 {
     int copyRetval = asyncSafeCopyFile(_origLogfilePath, _logfilePath);
+    int errnoCopy = errno;
     writer->addStringElement(writer, "logfileCopied", "YES");
     writer->addIntegerElement(writer, "logfileCopyResult", copyRetval);
+    writer->addIntegerElement(writer, "logfileCopyErrno", errnoCopy);
     addFilePathWithSize(writer, "logfileCopy", _logfilePath);
     //this comes last to make sure we see size differences if the logfile got written during crash data collection (could be other processes)
     addFilePathWithSize(writer, "currentLogfile", _origLogfilePath);
@@ -280,7 +282,6 @@ void swizzle(Class c, SEL orig, SEL new)
     _crash_info.message = abort_msg.UTF8String;
     _crash_info.signature = abort_msg.UTF8String;       //use signature for apple crash reporter which does not handle message field
     _crash_info.backtrace = backtrace.UTF8String;
-    _crash_info.message2 = backtrace.UTF8String;        //use message2 for kscrash which does not handle backtrace field
     
     //log error and flush all logs
     [DDLog flushLog];

@@ -494,14 +494,15 @@ enum msgSentState {
 
 -(void) openCallScreen:(id) sender
 {
+    MLAssert(sender != nil || self.callButton != nil, @"We need at least one ui source (e.g. button) to base the popover controller upon!");
+    if(sender == nil)
+        sender = self.callButton;
+    
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
     MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
     if(activeCall == nil && ![[DataLayer sharedInstance] checkCap:@"urn:xmpp:jingle-message:0" forUser:self.contact.contactJid onAccountNo:self.contact.accountId])
     {
-        NSInteger style = UIAlertControllerStyleActionSheet;
-        if([HelperTools deviceUsesSplitView])
-            style = UIAlertControllerStyleAlert;
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact may not support calls. Your call might never reach its destination.", @"") preferredStyle:style];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact may not support calls. Your call might never reach its destination.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Try nevertheless", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
             
@@ -512,6 +513,11 @@ enum msgSentState {
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
+        UIPopoverPresentationController* popPresenter = [alert popoverPresentationController];
+        if(@available(iOS 16.0, macCatalyst 16.0, *))
+            popPresenter.sourceItem = sender;
+        else
+            popPresenter.barButtonItem = sender;
         [self presentViewController:alert animated:YES completion:nil];
     }
     else

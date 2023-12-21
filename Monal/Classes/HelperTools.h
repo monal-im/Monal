@@ -32,6 +32,11 @@ NS_ASSUME_NONNULL_BEGIN
 @class UIView;
 @class UITapGestureRecognizer;
 
+typedef NS_ENUM(NSUInteger, MLVersionType) {
+    MLVersionTypeIQ,
+    MLVersionTypeLog,
+};
+
 void logException(NSException* exception);
 void swizzle(Class c, SEL orig, SEL new);
 
@@ -139,7 +144,7 @@ void swizzle(Class c, SEL orig, SEL new);
 //don't use these four directly, but via createTimer() makro
 +(monal_void_block_t) startQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue;
 
-+(NSString*) appBuildVersionInfo;
++(NSString*) appBuildVersionInfoFor:(MLVersionType) type;
 
 +(BOOL) deviceUsesSplitView;
 

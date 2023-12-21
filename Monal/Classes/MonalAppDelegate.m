@@ -536,11 +536,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
     [HelperTools configureDefaultAudioSession];
     self.audioState = MLAudioStateNormal;
     
-    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
-    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
-    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @""), version, buildDate, buildTime]);
+    DDLogInfo(@"App started: %@", [HelperTools appBuildVersionInfoFor:MLVersionTypeLog]);
     
     //init background/foreground status
     //this has to be done here to make sure we have the correct state when he app got started through notification quick actions

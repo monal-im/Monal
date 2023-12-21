@@ -301,7 +301,7 @@ NSString* const kiqErrorType = @"error";
 #else
         [[MLXMLNode alloc] initWithElement:@"os" andData:[NSString stringWithFormat:@"iOS %lu", osVersion.majorVersion]],
 #endif
-        [[MLXMLNode alloc] initWithElement:@"version" andData:[HelperTools appBuildVersionInfo]]
+        [[MLXMLNode alloc] initWithElement:@"version" andData:[HelperTools appBuildVersionInfoFor:MLVersionTypeIQ]]
     ] andData:nil]];
 }
 

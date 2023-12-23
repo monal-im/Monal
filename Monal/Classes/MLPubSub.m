@@ -98,7 +98,7 @@ $$
     if(!account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedFetchNodeHandler, handleFetchInvalidation, $ID(node), $ID(jid), $ID(itemsList), $ID(handler))];
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedFetchNodeHandler, handleFetchInvalidation, $ID(node), $ID(jid), $ID(itemsList), $HANDLER(handler))];
         return;
     }
 
@@ -146,7 +146,7 @@ $$
     if(!account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedSubscribeToNodeHandler, handleSubscribeInvalidation, $ID(node), $ID(jid), $ID(handler))];
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedSubscribeToNodeHandler, handleSubscribeInvalidation, $ID(node), $ID(jid), $HANDLER(handler))];
         return;
     }
     
@@ -187,7 +187,7 @@ $$
     if(!_account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedUnsubscribeFromNodeHandler, handleUnsubscribeInvalidation, $ID(node), $ID(jid), $ID(handler))];
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedUnsubscribeFromNodeHandler, handleUnsubscribeInvalidation, $ID(node), $ID(jid), $HANDLER(handler))];
         return;
     }
     
@@ -229,7 +229,7 @@ $$
     if(!account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedConfigureNodeHandler, handleConfigFormResultInvalidation, $ID(node), $ID(configOptions), $ID(handler))];
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedConfigureNodeHandler, handleConfigFormResultInvalidation, $ID(node), $ID(configOptions), $HANDLER(handler))];
         return;
     }
     
@@ -273,7 +273,7 @@ $$
     if(!_account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedPublishItemHandler, handlePublishResultInvalidation, $ID(item), $ID(node), $ID(configOptions), $ID(handler))];
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedPublishItemHandler, handlePublishResultInvalidation, $ID(item), $ID(node), $ID(configOptions), $HANDLER(handler))];
         return;
     }
     
@@ -306,7 +306,7 @@ $$
     if(!account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedRetractItemWithIdHandler, handleRetractResultInvalidation, $ID(itemId), $ID(node), $ID(handler))];
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedRetractItemWithIdHandler, handleRetractResultInvalidation, $ID(itemId), $ID(node), $HANDLER(handler))];
         return;
     }
     
@@ -343,7 +343,7 @@ $$
     if(!account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedPurgeNodeNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $ID(handler))];
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedPurgeNodeNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $HANDLER(handler))];
         return;
     }
     
@@ -377,7 +377,7 @@ $$
     if(!account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedDeleteNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $ID(handler))];
+        [_queue addObject:$newHandlerWithInvalidation(self, queuedDeleteNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $HANDLER(handler))];
         return;
     }
     
@@ -772,8 +772,8 @@ $$instance_handler(handleFetch, account.pubsub, $$ID(xmpp*, account), $$ID(XMPPI
     }
 $$
 
-$$instance_handler(handleInternalFetch, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$BOOL(success), $$ID(NSString*, jid), $$ID(NSDictionary*, data))
-    if(success == NO)        //ignore errors (--> ignore invalidations, too)
+$$instance_handler(handleInternalFetch, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$BOOL(success), $$ID(NSString*, jid), $_ID(NSDictionary*, data))
+    if(success != NO && data != nil)        //ignore errors (--> ignore invalidations, too)
         [self callHandlersForNode:node andJid:jid withType:@"publish" andData:data];
 $$
 

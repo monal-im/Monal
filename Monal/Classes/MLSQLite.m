@@ -381,8 +381,12 @@ static NSMutableDictionary* currentTransactions;
 -(id) idWriteTransaction:(monal_sqlite_operations_t) operations
 {
     [self beginWriteTransaction];
+    NSDate* startTime = [NSDate date];
     id retval = operations();
+    NSDate* endTime = [NSDate date];
     [self endWriteTransaction];
+    if([endTime timeIntervalSinceDate:startTime] > 0.5)
+        showErrorOnAlpha(nil, @"Write transaction took %fs (longer than 0.5s): %@", (double)[endTime timeIntervalSinceDate:startTime], [NSThread callStackSymbols]);
     return retval;
 }
 

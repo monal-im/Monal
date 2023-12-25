@@ -318,7 +318,7 @@ void swizzle(Class c, SEL orig, SEL new)
     [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@(isSevere)}];
 }
 
-+(void) showErrorOnAlpha:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andFile:(char*) file andLine:(int) line andFunc:(char*) func
++(void) showErrorOnAlpha:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp* _Nullable) account andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
     NSString* fileStr = [NSString stringWithFormat:@"%s", file];
     NSArray* filePathComponents = [fileStr pathComponents];
@@ -326,10 +326,22 @@ void swizzle(Class c, SEL orig, SEL new)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
     NSString* message = description;
     if(node)
-        message = [HelperTools extractXMPPError:node withDescription:description];
+        message = [self extractXMPPError:node withDescription:description];
 #ifdef IS_ALPHA
     DDLogError(@"Notifying alpha user about error at %@:%d in %s: %@", fileStr, line, func, message);
-    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@YES}];
+    if(account != nil)
+        [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@YES}];
+    else
+    {
+        UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+        content.title = @"Global Error";
+        content.body = message;
+        content.sound = [UNNotificationSound defaultSound];
+        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
+        NSError* error = [self postUserNotificationRequest:request];
+        if(error)
+            DDLogError(@"Error posting global alpha xmppError notification: %@", error);
+    }
 #else
     DDLogWarn(@"Ignoring alpha-only error at %@:%d in %s: %@", fileStr, line, func, message);
 #endif

@@ -112,7 +112,7 @@ struct ContactDetails: View {
 #endif
                 
                 if(!contact.isGroup && !contact.isSelfChat) {
-                    TextField("Rename Contact", text: $contact.nickNameView)
+                    TextField(NSLocalizedString("Rename Contact", comment: "placeholder text in contact details"), text: $contact.nickNameView)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .addClearButton(text:$contact.nickNameView)
                 }

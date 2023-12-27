@@ -78,7 +78,7 @@ struct CreateGroupMenu: View {
                         }
                         .pickerStyle(.menu)
                     }
-                    TextField("Group Name (optional)", text: $groupName)
+                    TextField(NSLocalizedString("Group Name (optional)", comment: "placeholder when creating new group"), text: $groupName)
                         .autocorrectionDisabled()
                         .autocapitalization(.none)
                         .addClearButton(text:$groupName)

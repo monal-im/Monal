@@ -60,7 +60,7 @@ function runBartycrouch {
 
 git submodule deinit --all -f
 git submodule update --init --recursive --remote
-pullCurrentState
+pullCurrentState "$@"
 
 # update strings to remove everything that's now unused (that includes swiftui strings we'll readd below)
 cp .bartycrouch.toml .bartycrouch.toml.orig
@@ -71,7 +71,7 @@ mv .bartycrouch.toml.orig .bartycrouch.toml
 
 # now restore original state for all languages but our base one (otherwise every swiftui translation will be deleted)
 mv "localization/external/Base.lproj/Localizable.strings" "localization/external/Base.lproj/Localizable.strings.updated"
-pullCurrentState
+pullCurrentState "$@"
 mv "localization/external/Base.lproj/Localizable.strings.updated" "localization/external/Base.lproj/Localizable.strings"
 
 # extract xliff file (has to be run multiple times, even if no error occured, don't ask me why)

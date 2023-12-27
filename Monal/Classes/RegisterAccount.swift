@@ -321,7 +321,7 @@ struct RegisterAccount: View {
 
                     Group {
                         if(selectedServerIndex == 0) {
-                            TextField("Provide XMPP-Server", text: Binding(
+                            TextField(NSLocalizedString("Provide XMPP-Server", comment: "placeholder when creating account"), text: Binding(
                                 get: { self.providedServer },
                                 set: { string in self.providedServer = string.lowercased().replacingOccurrences(of: " ", with: "") }
                             ))
@@ -332,7 +332,7 @@ struct RegisterAccount: View {
                             .disabled(self.registerToken != nil)
                         }
 
-                        TextField("Username", text: Binding(
+                        TextField(NSLocalizedString("Username", comment: "placeholder when creating account"), text: Binding(
                             get: { self.username },
                             set: { string in self.username = string.lowercased().replacingOccurrences(of: " ", with: "") }
                         ))
@@ -340,8 +340,8 @@ struct RegisterAccount: View {
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
                     
-                        SecureField("Password", text: $password)
-                        SecureField("Password (repeated)", text: $repeatedPassword)
+                        SecureField(NSLocalizedString("Password", comment: "placeholder when creating account"), text: $password)
+                        SecureField(NSLocalizedString("Password (repeated)", comment: "placeholder when creating account"), text: $repeatedPassword)
                     }
                     
                     if(self.captchaImg != nil) {
@@ -355,7 +355,7 @@ struct RegisterAccount: View {
                             })
                             .buttonStyle(.borderless)
                         }
-                        TextField("Captcha", text: $captchaText)
+                        TextField(NSLocalizedString("Captcha", comment: "placeholder when creating account"), text: $captchaText)
                             //ios15: .textInputAutocapitalization(.never)
                             .autocapitalization(.none)
                             .autocorrectionDisabled()

@@ -49,6 +49,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "OmemoState.h"
 #import "MLUDPLogger.h"
 #import "MLStreamRedirect.h"
+#import "commithash.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -71,6 +72,7 @@ static DDFileLogger* _fileLogger = nil;
 static char _origLogfilePath[1024] = "";
 static char _logfilePath[1024] = "";
 static NSObject* _isAppExtensionLock = nil;
+static NSMutableDictionary* _versionInfoCache;
 static MLStreamRedirect* _stdoutRedirector = nil;
 static MLStreamRedirect* _stderrRedirector = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
@@ -172,8 +174,10 @@ static void addFilePathWithSize(const KSCrashReportWriter* writer, char* name, c
 static void crash_callback(const KSCrashReportWriter* writer)
 {
     int copyRetval = asyncSafeCopyFile(_origLogfilePath, _logfilePath);
+    int errnoCopy = errno;
     writer->addStringElement(writer, "logfileCopied", "YES");
     writer->addIntegerElement(writer, "logfileCopyResult", copyRetval);
+    writer->addIntegerElement(writer, "logfileCopyErrno", errnoCopy);
     addFilePathWithSize(writer, "logfileCopy", _logfilePath);
     //this comes last to make sure we see size differences if the logfile got written during crash data collection (could be other processes)
     addFilePathWithSize(writer, "currentLogfile", _origLogfilePath);
@@ -229,6 +233,7 @@ void swizzle(Class c, SEL orig, SEL new)
 +(void) initialize
 {
     _isAppExtensionLock = [NSObject new];
+    _versionInfoCache = [NSMutableDictionary new];
     
     u_int32_t i = arc4random();
     _processID = [self hexadecimalString:[NSData dataWithBytes:&i length:sizeof(i)]];
@@ -280,7 +285,6 @@ void swizzle(Class c, SEL orig, SEL new)
     _crash_info.message = abort_msg.UTF8String;
     _crash_info.signature = abort_msg.UTF8String;       //use signature for apple crash reporter which does not handle message field
     _crash_info.backtrace = backtrace.UTF8String;
-    _crash_info.message2 = backtrace.UTF8String;        //use message2 for kscrash which does not handle backtrace field
     
     //log error and flush all logs
     [DDLog flushLog];
@@ -314,7 +318,7 @@ void swizzle(Class c, SEL orig, SEL new)
     [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@(isSevere)}];
 }
 
-+(void) showErrorOnAlpha:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andFile:(char*) file andLine:(int) line andFunc:(char*) func
++(void) showErrorOnAlpha:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp* _Nullable) account andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
     NSString* fileStr = [NSString stringWithFormat:@"%s", file];
     NSArray* filePathComponents = [fileStr pathComponents];
@@ -322,10 +326,22 @@ void swizzle(Class c, SEL orig, SEL new)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
     NSString* message = description;
     if(node)
-        message = [HelperTools extractXMPPError:node withDescription:description];
+        message = [self extractXMPPError:node withDescription:description];
 #ifdef IS_ALPHA
     DDLogError(@"Notifying alpha user about error at %@:%d in %s: %@", fileStr, line, func, message);
-    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@YES}];
+    if(account != nil)
+        [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@YES}];
+    else
+    {
+        UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+        content.title = @"Global Error";
+        content.body = message;
+        content.sound = [UNNotificationSound defaultSound];
+        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
+        NSError* error = [self postUserNotificationRequest:request];
+        if(error)
+            DDLogError(@"Error posting global alpha xmppError notification: %@", error);
+    }
 #else
     DDLogWarn(@"Ignoring alpha-only error at %@:%d in %s: %@", fileStr, line, func, message);
 #endif
@@ -1643,11 +1659,7 @@ void swizzle(Class c, SEL orig, SEL new)
         DDLogDebug(@"File attributes: %@", attrs);
     
     //log version info as early as possible
-    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
-    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
-    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    DDLogInfo(@"Starting: Version %@ (%@ %@ UTC, %@) on iOS/macOS %@", version, buildDate, buildTime, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion);
+    DDLogInfo(@"Starting: %@", [self appBuildVersionInfoFor:MLVersionTypeLog]);
     //[SCRAM SSDPXepOutput];
     [DDLog flushLog];
     
@@ -1730,15 +1742,11 @@ void swizzle(Class c, SEL orig, SEL new)
     handler.demangleLanguages = KSCrashDemangleLanguageAll;
     handler.maxReportCount = 4;
     handler.deadlockWatchdogInterval = 0;       // no main thread watchdog
-    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
-    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
-    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     handler.userInfo = @{
         @"isAppex": @([self isAppExtension]),
         @"processName": [[[NSBundle mainBundle] executablePath] lastPathComponent],
         @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
-        @"appVersion": [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @""), version, buildDate, buildTime],
+        @"appVersion": [self appBuildVersionInfoFor:MLVersionTypeLog],
     };
     //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different
     //in appex and mainapp use the lowlevel C api with dummy bundle name "UnifiedReport" instead
@@ -2068,15 +2076,24 @@ void swizzle(Class c, SEL orig, SEL new)
     return resource;
 }
 
-+(NSString*) appBuildVersionInfo
++(NSString*) appBuildVersionInfoFor:(MLVersionType) type
 {
-    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    @synchronized(_versionInfoCache) {
+        if(_versionInfoCache[@(type)] != nil)
+            return _versionInfoCache[@(type)];
+        
 #ifdef IS_ALPHA
-        NSString* versionTxt = [NSString stringWithFormat:@"Alpha %@ (%s: %s UTC)", [infoDict objectForKey:@"CFBundleShortVersionString"], __DATE__, __TIME__];
+        NSString* rawVersionString = [NSString stringWithFormat:@"Alpha %s (%s %s UTC)", ALPHA_COMMIT_HASH, __DATE__, __TIME__];
 #else
-        NSString* versionTxt = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
+        NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+        NSString* rawVersionString = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
 #endif
-    return  versionTxt;
+        if(type == MLVersionTypeIQ)
+            return _versionInfoCache[@(type)] = rawVersionString;
+        else if(type == MLVersionTypeLog)
+            return _versionInfoCache[@(type)] = [NSString stringWithFormat:@"Version %@, %@ on iOS/macOS %@", rawVersionString, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion];
+        unreachable(@"unknown version type!");
+    }
 }
 
 +(NSNumber*) currentTimestampInSeconds

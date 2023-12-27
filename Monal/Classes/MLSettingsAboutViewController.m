@@ -20,8 +20,7 @@
 {
     [super viewDidLoad];
 
-    NSString* versionTxt = [HelperTools appBuildVersionInfo];
-    [self.aboutVersion setText:versionTxt];
+    [self.aboutVersion setText: [HelperTools appBuildVersionInfoFor:MLVersionTypeIQ]];
 
     UIBarButtonItem* leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(close:)];
     self.navigationItem.leftBarButtonItem = leftBarButtonItem;

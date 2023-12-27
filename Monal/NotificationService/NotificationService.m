@@ -427,10 +427,8 @@ static BOOL warnUnclean = NO;
     [MLProcessLock initializeForProcess:@"NotificationServiceExtension"];
     
     //log startup
-    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
-    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
-    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
+    DDLogInfo(@"Notification Service Extension started: %@", [HelperTools appBuildVersionInfoFor:MLVersionTypeLog]);
+    [DDLog flushLog];
     
     warnUnclean = ![NotificationService getAppexCleanShutdownStatus];
     if(warnUnclean)
@@ -438,9 +436,6 @@ static BOOL warnUnclean = NO;
     
     //mark this appex as unclean (will be cleared directly before calling exit(0))
     [NotificationService setAppexCleanShutdownStatus:NO];
-    
-    DDLogInfo(@"Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
-    [DDLog flushLog];
 }
 
 +(BOOL) getAppexCleanShutdownStatus

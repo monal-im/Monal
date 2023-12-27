@@ -37,6 +37,10 @@ jobs:
           if [[ -e "/Users/ci/secrets.monal_alpha" ]]; then
             echo "#import \"/Users/ci/secrets.monal_alpha\"" > Monal/Classes/secrets.h
           fi
+      - name: Write git hash include
+        run: |
+          echo "Current commit hash: $(git show-ref --hash --abbrev refs/heads/develop)"
+          echo "#define ALPHA_COMMIT_HASH \"$(git show-ref --hash --abbrev refs/heads/develop)\"" > Monal/Classes/commitHash.h
       - name: Make our build scripts executable
         run: chmod +x ./scripts/build.sh
       - name: Run build

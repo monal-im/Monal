@@ -253,7 +253,7 @@ enum DummySettingsRows {
                     break;
                 }
                 case VersionRow: {
-                    [cell initCell:NSLocalizedString(@"Version", @"") withLabel:[HelperTools appBuildVersionInfo]];
+                    [cell initCell:NSLocalizedString(@"Version", @"") withLabel:[HelperTools appBuildVersionInfoFor:MLVersionTypeIQ]];
                     break;
                 }
 #ifdef DEBUG
@@ -386,7 +386,7 @@ enum DummySettingsRows {
                         _tappedVersionInfo++;
 #endif
                     UIPasteboard* pastboard = UIPasteboard.generalPasteboard;
-                    pastboard.string = [HelperTools appBuildVersionInfo];
+                    pastboard.string = [HelperTools appBuildVersionInfoFor:MLVersionTypeIQ];
                     break;
                 }
                 default:

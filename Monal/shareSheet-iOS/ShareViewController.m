@@ -44,11 +44,7 @@
     [IPC initializeForProcess:@"ShareSheetExtension"];
     
     //log startup
-    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
-    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
-    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
-    DDLogInfo(@"Share Sheet Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    DDLogInfo(@"Share Sheet Extension started: %@", [HelperTools appBuildVersionInfoFor:MLVersionTypeLog]);
     [DDLog flushLog];
 }
 

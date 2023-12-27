@@ -5006,7 +5006,7 @@ NSString* const kStanza = @"stanza";
             //this makes sure a freeze/killed app doesn't immediately trigger timeouts once the app is restarted, as it would be with timestamp based timeouts
             //doing it this way makes sure the incoming iq result has a chance to be processed even in a freeze/kill scenario
             _iqHandlers[iqid][@"timeout"] = @([_iqHandlers[iqid][@"timeout"] doubleValue] - 1.0);
-            if([_iqHandlers[iqid][@"timeout"] doubleValue] < 0)
+            if([_iqHandlers[iqid][@"timeout"] doubleValue] < 0.0)
             {
                 DDLogWarn(@"Timeout of handler triggered: %@", _iqHandlers[iqid]);
                 //only force save state after calling a handler
@@ -5027,28 +5027,21 @@ NSString* const kStanza = @"stanza";
                 ] andData:nil]];
                 
                 //make sure our fake error iq is handled inside the receiveQueue
-                [self dispatchAsyncOnReceiveQueue:^{
-                    //extract this from _iqHandlers to make sure we only handle iqs that didn't get handled in the meantime
-                    NSMutableDictionary* iqHandler = nil;
-                    @synchronized(self->_iqHandlers) {
-                        iqHandler = self->_iqHandlers[iqid];
-                    }
-                    if(iqHandler)
-                    {
+                //extract this from _iqHandlers to make sure we only handle iqs that didn't get handled in the meantime
+                NSMutableDictionary* iqHandler = self->_iqHandlers[iqid];
+                [self->_iqHandlers removeObjectForKey:iqid];
+                if(iqHandler)
+                {
+                    [self dispatchAsyncOnReceiveQueue:^{
                         DDLogDebug(@"Calling iq handler with faked error iq: %@", errorIq);
                         if(iqHandler[@"handler"] != nil)
                             $call(iqHandler[@"handler"], $ID(account, self), $ID(iqNode, errorIq));
                         else if(iqHandler[@"errorHandler"] != nil)
                             ((monal_iq_handler_t) iqHandler[@"errorHandler"])(errorIq);
-                        
-                        //remove handler after calling it
-                        @synchronized(self->_iqHandlers) {
-                            [self->_iqHandlers removeObjectForKey:iqid];
-                        }
-                    }
-                    else
-                        DDLogWarn(@"iq handler for '%@' vanished while switching to receive queue", iqid);
-                }];
+                    }];
+                }
+                else
+                    DDLogWarn(@"iq handler for '%@' vanished while switching to receive queue", iqid);
             }
         }
     }

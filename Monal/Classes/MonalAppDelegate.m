@@ -287,6 +287,28 @@ a=sctp-port:5000\n\
 a=max-message-size:262144\n" withInitiator:YES]);
 }
 
+$$class_handler(handlerTest01, $$ID(NSObject*, dummyObj))
+    DDLogError(@"HandlerTest01 completed");
+$$
+
+$$class_handler(handlerTest02, $$ID(monal_void_block_t, dummyCallback))
+    DDLogError(@"HandlerTest02 completed");
+$$
+
+-(void) runHandlerTests
+{
+    DDLogError(@"NSClassFromString: '%@'", NSClassFromString(@"monal_void_block_t"));
+    
+    if([^{} isKindOfClass:[NSObject class]])
+        DDLogError(@"isKindOfClass");
+    
+    MLHandler* handler01 = $newHandler([self class], handlerTest01);
+    $call(handler01, $ID(dummyObj, [NSString new]));
+    
+    MLHandler* handler02 = $newHandler([self class], handlerTest02);
+    $call(handler02, $ID(dummyCallback, ^{}));
+}
+
 -(id) init
 {
     //someone (suspect: AppKit) resets our exception handler between the call to [MonalAppDelegate initialize] and [MonalAppDelegate init]
@@ -302,6 +324,7 @@ a=max-message-size:262144\n" withInitiator:YES]);
     //[self runParserTests];
     //[self runSDPTests];
     //[HelperTools flushLogsWithTimeout:0.250];
+    //[self runHandlerTests];
     return self;
 }
 

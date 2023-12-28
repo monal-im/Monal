@@ -5000,6 +5000,7 @@ NSString* const kStanza = @"stanza";
     BOOL stateUpdated = NO;
     @synchronized(_iqHandlers) {
         //we are NOT mutating on iteration here, because we use dispatchAsyncOnReceiveQueue to handle timeouts
+        NSMutableArray* idsToRemove = [NSMutableArray new];
         for(NSString* iqid in _iqHandlers)
         {
             //decrement handler timeout every second and check if it landed below zero --> trigger a fake iq error to handle timeout
@@ -5029,7 +5030,7 @@ NSString* const kStanza = @"stanza";
                 //make sure our fake error iq is handled inside the receiveQueue
                 //extract this from _iqHandlers to make sure we only handle iqs that didn't get handled in the meantime
                 NSMutableDictionary* iqHandler = self->_iqHandlers[iqid];
-                [self->_iqHandlers removeObjectForKey:iqid];
+                [idsToRemove addObject:iqid];
                 if(iqHandler)
                 {
                     [self dispatchAsyncOnReceiveQueue:^{
@@ -5044,6 +5045,9 @@ NSString* const kStanza = @"stanza";
                     DDLogWarn(@"iq handler for '%@' vanished while switching to receive queue", iqid);
             }
         }
+        //now delete iqs marked for deletion
+        for(NSString* iqid in idsToRemove)
+            [_iqHandlers removeObjectForKey:iqid];
     }
     
     //make sure all state is persisted as soon as possible (we could have called handlers and we don't want to execute them twice!)

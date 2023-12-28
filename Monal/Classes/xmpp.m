@@ -5033,13 +5033,19 @@ NSString* const kStanza = @"stanza";
                 [idsToRemove addObject:iqid];
                 if(iqHandler)
                 {
-                    [self dispatchAsyncOnReceiveQueue:^{
-                        DDLogDebug(@"Calling iq handler with faked error iq: %@", errorIq);
-                        if(iqHandler[@"handler"] != nil)
-                            $call(iqHandler[@"handler"], $ID(account, self), $ID(iqNode, errorIq));
-                        else if(iqHandler[@"errorHandler"] != nil)
-                            ((monal_iq_handler_t) iqHandler[@"errorHandler"])(errorIq);
-                    }];
+                    //do a real async dispatch, not an automatic sync one because we are in the same queue
+                    [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                        //make sure these handlers are called inside a db write transaction just like receiving a real error iq
+                        //--> don't create a deadlock with 2 threads waiting for db write transaction and synchronized iqhandlers
+                        //    in opposite order
+                        [[DataLayer sharedInstance] createTransaction:^{
+                            DDLogDebug(@"Calling iq handler with faked error iq: %@", errorIq);
+                            if(iqHandler[@"handler"] != nil)
+                                $call(iqHandler[@"handler"], $ID(account, self), $ID(iqNode, errorIq));
+                            else if(iqHandler[@"errorHandler"] != nil)
+                                ((monal_iq_handler_t) iqHandler[@"errorHandler"])(errorIq);
+                        }];
+                    }]] waitUntilFinished:NO];
                 }
                 else
                     DDLogWarn(@"iq handler for '%@' vanished while switching to receive queue", iqid);

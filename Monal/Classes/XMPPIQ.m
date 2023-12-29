@@ -345,10 +345,30 @@ NSString* const kiqErrorType = @"error";
 
 #pragma mark MUC
 
+-(void) setGetRoomConfig
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#owner"]];
+}
+
+-(void) setRoomConfig:(XMPPDataForm*) configForm
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#owner" withAttributes:@{} andChildren:@[configForm] andData:nil]];
+}
+
 -(void) setInstantRoom
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#owner" withAttributes:@{} andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"http://jabber.org/protocol/muc#roomconfig"]
+    ] andData:nil]];
+}
+
+-(void) setRemoveVcardAvatar
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"vCard" andNamespace:@"vcard-temp" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"PHOTO" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"PHOTO" andData:nil],
+            [[MLXMLNode alloc] initWithElement:@"BINVAL" andData:nil],
+        ] andData:nil]
     ] andData:nil]];
 }
 

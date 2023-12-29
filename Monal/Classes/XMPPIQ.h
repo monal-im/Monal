@@ -9,6 +9,8 @@
 #import "XMPPStanza.h"
 #import "MLContact.h"
 
+@class XMPPDataForm;
+
 NS_ASSUME_NONNULL_BEGIN
 
 FOUNDATION_EXPORT NSString* const kiqGetType;
@@ -117,6 +119,7 @@ removes a contact from the roster
 -(void) setInstantRoom;
 
 -(void) setVcardAvatarWithData:(NSData*) imageData andType:(NSString*) imageType;
+-(void) setRemoveVcardAvatar;
 -(void) setVcardQuery;
 
 #pragma mark - account
@@ -130,6 +133,8 @@ removes a contact from the roster
 -(void) requestBlockList;
 
 -(void) setMucAdminQueryWithAffiliation:(NSString*) affiliation forJid:(NSString*) jid;
+-(void) setGetRoomConfig;
+-(void) setRoomConfig:(XMPPDataForm*) configForm;
 
 @end
 

@@ -558,7 +558,7 @@ $$class_handler(handleServiceDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
     }
     
     if(!account.connectionProperties.conferenceServer && [features containsObject:@"http://jabber.org/protocol/muc"])
-        account.connectionProperties.conferenceServer = iqNode.from;
+        account.connectionProperties.conferenceServer = iqNode.fromUser;
 $$
 
 $$class_handler(handleServerDiscoItems, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))

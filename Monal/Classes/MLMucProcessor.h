@@ -25,8 +25,12 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) join:(NSString*) room;
 -(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks;
 
--(void) setAffiliation:(NSString*) affiliation ofUser:(NSString*) jid inRoom:(NSString*) roomJid;
--(void) publishAvatar:(UIImage*) image forMuc:(NSString*) room;
+//muc management methods
+-(NSString* _Nullable) createGroup:(NSString*) node;
+-(void) changeNameOfMuc:(NSString*) room to:(NSString*) name;
+-(void) changeSubjectOfMuc:(NSString*) room to:(NSString*) subject;
+-(void) publishAvatar:(UIImage* _Nullable) image forMuc:(NSString*) room;
+-(void) setAffiliation:(NSString*) affiliation ofUser:(NSString*) jid inMuc:(NSString*) roomJid;
 
 -(void) pingAllMucs;
 -(void) ping:(NSString*) roomJid;

@@ -80,6 +80,9 @@ allow subscription. Called in response to a remote request.
 -(void) unsubscribedContact:(MLContact*) contact;
 
 #pragma mark MUC
+
+-(void) createRoom:(NSString*) room withNick:(NSString*) nick;
+
 /**
  join specified room on server
  */

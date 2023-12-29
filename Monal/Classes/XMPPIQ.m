@@ -417,4 +417,14 @@ NSString* const kiqErrorType = @"error";
     ] andData:nil]];
 }
 
+-(void) setMucAdminQueryWithAffiliation:(NSString*) affiliation forJid:(NSString*) jid
+{
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#admin" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{
+            @"affiliation": affiliation,
+            @"jid": jid,
+        } andChildren:@[] andData:nil],
+    ] andData:nil]];
+}
+
 @end

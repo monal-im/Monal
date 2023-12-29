@@ -129,6 +129,8 @@ removes a contact from the roster
 -(void) setBlocked:(BOOL) blocked forJid:(NSString*) blockedJid;
 -(void) requestBlockList;
 
+-(void) setMucAdminQueryWithAffiliation:(NSString*) affiliation forJid:(NSString*) jid;
+
 @end
 
 NS_ASSUME_NONNULL_END

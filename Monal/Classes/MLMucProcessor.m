@@ -704,6 +704,24 @@
     }];
 }
 
+-(void) setAffiliation:(NSString*) affiliation ofUser:(NSString*) jid inRoom:(NSString*) roomJid
+{
+    DDLogInfo(@"Changing affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
+    XMPPIQ* updateIq = [[XMPPIQ alloc] initWithType:kiqSetType to:roomJid];
+    [updateIq setMucAdminQueryWithAffiliation:affiliation forJid:jid];
+    [_account sendIq:updateIq withHandler:$newHandler(self, handleAffiliationUpdateResult, $ID(roomJid), $ID(jid), $ID(affiliation))];
+}
+
+$$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Failed to change affiliation of '%@' in '%@' to '%@': %@", jid, roomJid, affiliation, [iqNode findFirst:@"error"]);
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@'", @""), jid, roomJid, affiliation] withNode:iqNode andAccount:_account andIsSevere:YES];
+        return;
+    }
+    DDLogError(@"Successfully changed affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
+$$
+
 -(void) publishAvatar:(UIImage*) image forMuc:(NSString*) room
 {
     //should work for ejabberd >= 19.02 and prosody >= 0.11
@@ -720,7 +738,7 @@ $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, 
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Publishing avatar for muc '%@' returned error: %@", iqNode.fromUser, [iqNode findFirst:@"error"]);
-        [HelperTools postError:NSLocalizedString(@"Failed to publish avatar image for group/channel %@", @"") withNode:iqNode andAccount:_account andIsSevere:YES];
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to publish avatar image for group/channel %@", @""), iqNode.fromUser] withNode:iqNode andAccount:_account andIsSevere:YES];
         return;
     }
     DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);

@@ -24,7 +24,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(void) join:(NSString*) room;
 -(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks;
+
+-(void) setAffiliation:(NSString*) affiliation ofUser:(NSString*) jid inRoom:(NSString*) roomJid;
 -(void) publishAvatar:(UIImage*) image forMuc:(NSString*) room;
+
 -(void) pingAllMucs;
 -(void) ping:(NSString*) roomJid;
 -(BOOL) checkIfStillBookmarked:(NSString*) room;

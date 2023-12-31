@@ -181,7 +181,7 @@ struct AddContactMenu: View {
                         }
                         .pickerStyle(.menu)
                     }
-                    TextField("Contact or Group/Channel Jid", text: $toAdd)
+                    TextField(NSLocalizedString("Contact or Group/Channel Jid", comment: "placeholder when adding jid"), text: $toAdd)
                         //ios15: .textInputAutocapitalization(.never)
                         .autocapitalization(.none)
                         .autocorrectionDisabled()

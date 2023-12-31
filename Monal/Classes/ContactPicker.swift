@@ -77,7 +77,7 @@ struct ContactPicker: View {
         } else {
             List {
                 Section {
-                    TextField("Search contacts", text: $searchFieldInput)
+                    TextField(NSLocalizedString("Search contacts", comment: "placeholder in contact picker"), text: $searchFieldInput)
                 }
                 ForEach(Array(contacts.enumerated()), id: \.element) { idx, contact in
                     if matchesSearch(contact: contact) {

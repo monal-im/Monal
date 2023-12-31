@@ -57,7 +57,7 @@ struct PasswordMigration: View {
                                 }
                             ))
                             
-                            SecureField("Password", text:Binding(
+                            SecureField(NSLocalizedString("Password", comment: "placeholder when migrating account"), text:Binding(
                                 get: { self.needingMigration[id]?["password"] as? String ?? "" },
                                 set: {
                                     self.needingMigration[id]?["password"] = $0 as NSString

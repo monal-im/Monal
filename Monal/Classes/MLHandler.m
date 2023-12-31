@@ -20,6 +20,11 @@
 }
 @end
 
+NSString* type_to_classname(NSString* type)
+{
+    return [type componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"*< "]][0];
+}
+
 @implementation MLHandler
 
 -(instancetype) init

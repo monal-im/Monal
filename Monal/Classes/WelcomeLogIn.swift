@@ -129,7 +129,7 @@ struct WelcomeLogIn: View {
                     //for ios >= 15.0
                     //.listRowSeparator(.hidden)
                     
-                    TextField("user@domain.tld", text: Binding(
+                    TextField(NSLocalizedString("user@domain.tld", comment: "placeholder when adding account"), text: Binding(
                         get: { self.jid },
                         set: { string in self.jid = string.lowercased().replacingOccurrences(of: " ", with: "") })
                     )
@@ -138,7 +138,7 @@ struct WelcomeLogIn: View {
                     .autocorrectionDisabled()
                     .keyboardType(.emailAddress)
                     
-                    SecureField("Password", text: $password)
+                    SecureField(NSLocalizedString("Password", comment: "placeholder when adding account"), text: $password)
                     
                     HStack() {
                         Button(action: {

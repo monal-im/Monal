@@ -37,6 +37,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, readonly) BOOL isSubscribedFrom;
 @property (nonatomic, readonly) BOOL isSubscribedBoth;
 @property (nonatomic, readonly) BOOL hasIncomingContactRequest;
+@property (nonatomic, readonly) BOOL hasOutgoingContactRequest;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
 -(BOOL) isEqualToMessage:(MLMessage*) message;

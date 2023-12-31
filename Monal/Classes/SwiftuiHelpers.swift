@@ -21,8 +21,6 @@ extension MLContact : Identifiable {}       //make MLContact be usable in swiftu
 let monalGreen = Color(UIColor(red:128.0/255, green:203.0/255, blue:182.0/255, alpha:1.0));
 let monalDarkGreen = Color(UIColor(red:20.0/255, green:138.0/255, blue:103.0/255, alpha:1.0));
 
-let swiftuiTranslationDummyString = Text("Dummy string to test SwiftUI translation support.")
-
 //see https://stackoverflow.com/a/62207329/3528174
 public extension Color {
 #if os(macOS)

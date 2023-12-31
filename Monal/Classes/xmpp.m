@@ -4889,6 +4889,10 @@ NSString* const kStanza = @"stanza";
 
 -(void) enablePush
 {
+#if TARGET_OS_SIMULATOR
+    DDLogError(@"Not registering push on the simulator!");
+    [self disablePush];
+#else
     NSString* pushToken = [MLXMPPManager sharedInstance].pushToken;
     NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
     if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateBound)
@@ -4929,6 +4933,7 @@ NSString* const kStanza = @"stanza";
             [self disablePush];
         }
     }
+#endif
 }
 
 -(void) disablePush
@@ -4995,13 +5000,14 @@ NSString* const kStanza = @"stanza";
     BOOL stateUpdated = NO;
     @synchronized(_iqHandlers) {
         //we are NOT mutating on iteration here, because we use dispatchAsyncOnReceiveQueue to handle timeouts
+        NSMutableArray* idsToRemove = [NSMutableArray new];
         for(NSString* iqid in _iqHandlers)
         {
             //decrement handler timeout every second and check if it landed below zero --> trigger a fake iq error to handle timeout
             //this makes sure a freeze/killed app doesn't immediately trigger timeouts once the app is restarted, as it would be with timestamp based timeouts
             //doing it this way makes sure the incoming iq result has a chance to be processed even in a freeze/kill scenario
             _iqHandlers[iqid][@"timeout"] = @([_iqHandlers[iqid][@"timeout"] doubleValue] - 1.0);
-            if([_iqHandlers[iqid][@"timeout"] doubleValue] < 0)
+            if([_iqHandlers[iqid][@"timeout"] doubleValue] < 0.0)
             {
                 DDLogWarn(@"Timeout of handler triggered: %@", _iqHandlers[iqid]);
                 //only force save state after calling a handler
@@ -5022,30 +5028,32 @@ NSString* const kStanza = @"stanza";
                 ] andData:nil]];
                 
                 //make sure our fake error iq is handled inside the receiveQueue
-                [self dispatchAsyncOnReceiveQueue:^{
-                    //extract this from _iqHandlers to make sure we only handle iqs that didn't get handled in the meantime
-                    NSMutableDictionary* iqHandler = nil;
-                    @synchronized(self->_iqHandlers) {
-                        iqHandler = self->_iqHandlers[iqid];
-                    }
-                    if(iqHandler)
-                    {
-                        DDLogDebug(@"Calling iq handler with faked error iq: %@", errorIq);
-                        if(iqHandler[@"handler"] != nil)
-                            $call(iqHandler[@"handler"], $ID(account, self), $ID(iqNode, errorIq));
-                        else if(iqHandler[@"errorHandler"] != nil)
-                            ((monal_iq_handler_t) iqHandler[@"errorHandler"])(errorIq);
-                        
-                        //remove handler after calling it
-                        @synchronized(self->_iqHandlers) {
-                            [self->_iqHandlers removeObjectForKey:iqid];
-                        }
-                    }
-                    else
-                        DDLogWarn(@"iq handler for '%@' vanished while switching to receive queue", iqid);
-                }];
+                //extract this from _iqHandlers to make sure we only handle iqs that didn't get handled in the meantime
+                NSMutableDictionary* iqHandler = self->_iqHandlers[iqid];
+                [idsToRemove addObject:iqid];
+                if(iqHandler)
+                {
+                    //do a real async dispatch, not an automatic sync one because we are in the same queue
+                    [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                        //make sure these handlers are called inside a db write transaction just like receiving a real error iq
+                        //--> don't create a deadlock with 2 threads waiting for db write transaction and synchronized iqhandlers
+                        //    in opposite order
+                        [[DataLayer sharedInstance] createTransaction:^{
+                            DDLogDebug(@"Calling iq handler with faked error iq: %@", errorIq);
+                            if(iqHandler[@"handler"] != nil)
+                                $call(iqHandler[@"handler"], $ID(account, self), $ID(iqNode, errorIq));
+                            else if(iqHandler[@"errorHandler"] != nil)
+                                ((monal_iq_handler_t) iqHandler[@"errorHandler"])(errorIq);
+                        }];
+                    }]] waitUntilFinished:NO];
+                }
+                else
+                    DDLogWarn(@"iq handler for '%@' vanished while switching to receive queue", iqid);
             }
         }
+        //now delete iqs marked for deletion
+        for(NSString* iqid in idsToRemove)
+            [_iqHandlers removeObjectForKey:iqid];
     }
     
     //make sure all state is persisted as soon as possible (we could have called handlers and we don't want to execute them twice!)

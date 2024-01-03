@@ -49,7 +49,7 @@
 @import AVFoundation;
 @import WebRTC;
 
-#define STATE_VERSION 9
+#define STATE_VERSION 10
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -3431,6 +3431,9 @@ NSString* const kStanza = @"stanza";
             
             if(self.connectionProperties.discoveredAdhocCommands)
                 [values setObject:[self.connectionProperties.discoveredAdhocCommands copy] forKey:@"discoveredAdhocCommands"];
+            
+            if(self.connectionProperties.serverVersion)
+                [values setObject:self.connectionProperties.serverVersion forKey:@"serverVersion"];
 
             [values setObject:self->_lastInteractionDate forKey:@"lastInteractionDate"];
             [values setValue:[NSDate date] forKey:@"stateSavedAt"];
@@ -3542,6 +3545,7 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.discoveredServices = [[dic objectForKey:@"discoveredServices"] mutableCopy];
             self.connectionProperties.discoveredStunTurnServers = [[dic objectForKey:@"discoveredStunTurnServers"] mutableCopy];
             self.connectionProperties.discoveredAdhocCommands = [[dic objectForKey:@"discoveredAdhocCommands"] mutableCopy];
+            self.connectionProperties.serverVersion = [dic objectForKey:@"serverVersion"];
             
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
             self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
@@ -3800,6 +3804,13 @@ NSString* const kStanza = @"stanza";
     [self sendIq:adhocCommands withHandler:$newHandler(MLIQProcessor, handleAdhocDisco)];
 }
 
+-(void) queryServerVersion
+{
+    XMPPIQ* serverVersion = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [serverVersion getEntitySoftWareVersionTo:self.connectionProperties.identity.domain];
+    [self send:serverVersion];
+}
+
 -(void) queryExternalServicesOn:(NSString*) jid
 {
     XMPPIQ* externalDisco = [[XMPPIQ alloc] initWithType:kiqGetType];
@@ -3951,6 +3962,7 @@ NSString* const kStanza = @"stanza";
     //if and what pubsub/pep features the server supports, before handling that
     //we can pipeline the disco requests and outgoing presence broadcast, though
     [self queryDisco];
+    [self queryServerVersion];
     [self purgeOfflineStorage];
     [self sendPresence];            //this will trigger a replay of offline stanzas on prosody (no XEP-0013 support anymore 😡)
     //the offline messages will come in *after* we initialized the mam query, because the disco result comes in first

@@ -708,35 +708,27 @@ $$
 +(void) iqVersionResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
     NSString* iqAppName = [iqNode findFirst:@"{jabber:iq:version}query/name#"];
-    if(!iqAppName)
-        iqAppName = @"";
     NSString* iqAppVersion = [iqNode findFirst:@"{jabber:iq:version}query/version#"];
-    if(!iqAppVersion)
-        iqAppVersion = @"";
     NSString* iqPlatformOS = [iqNode findFirst:@"{jabber:iq:version}query/os#"];
-    if(!iqPlatformOS)
-        iqPlatformOS = @"";
     
-    MLContactSoftwareVersionInfo* versionDBInfo = [[DataLayer sharedInstance] getSoftwareVersionInfoForContact:iqNode.fromUser resource:iqNode.fromResource andAccount:account.accountNo];
-    
-    if(versionDBInfo == nil || !(
-        [versionDBInfo.appName isEqualToString:iqAppName] &&
-        [versionDBInfo.appVersion isEqualToString:iqAppVersion] &&
-        [versionDBInfo.platformOs isEqualToString:iqPlatformOS]
-    )) {
-        DDLogVerbose(@"Updating software version info for %@", iqNode.from);
-        NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:iqNode.fromUser andResource:iqNode.fromResource forAccountNo:account.accountNo];
-        MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS andLastInteraction:lastInteraction];
-
-        [[DataLayer sharedInstance] setSoftwareVersionInfoForContact:iqNode.fromUser
-                                                            resource:iqNode.fromResource
-                                                            andAccount:account.accountNo
-                                                    withSoftwareInfo:newSoftwareVersionInfo];
-        
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh            
-                                                            object:account
-                                                            userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
+    if([iqNode.fromUser isEqualToString:account.connectionProperties.identity.domain])
+    {
+        account.connectionProperties.serverVersion = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS andLastInteraction:[NSDate date]];
+        return;
     }
+    
+    DDLogVerbose(@"Updating software version info for %@", iqNode.from);
+    NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:iqNode.fromUser andResource:iqNode.fromResource forAccountNo:account.accountNo];
+    MLContactSoftwareVersionInfo* newSoftwareVersionInfo = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS andLastInteraction:lastInteraction];
+
+    [[DataLayer sharedInstance] setSoftwareVersionInfoForContact:iqNode.fromUser
+                                                        resource:iqNode.fromResource
+                                                        andAccount:account.accountNo
+                                                withSoftwareInfo:newSoftwareVersionInfo];
+    
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh            
+                                                        object:account
+                                                        userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
 }
 
 +(void) respondWithErrorTo:(XMPPIQ*) iqNode onAccount:(xmpp*) account

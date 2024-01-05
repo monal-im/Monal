@@ -2831,10 +2831,8 @@ NSString* const kStanza = @"stanza";
 
 -(void) handleFeaturesBeforeAuth:(MLXMLNode*) parsedStanza
 {
-    //called below, if neither SASL1 nor SASL2 could be used to negotiate a valid SASL mechanism
-    monal_void_block_t noAuthSupported = ^{
-        //no supported auth mechanism
-        DDLogWarn(@"No supported auth mechanism!");
+    monal_id_block_t clearPipelineCacheOrReportSevereError = ^(NSString* msg) {
+        DDLogWarn(@"Clearing auth pipeline due to error...");
         
         //clear pipeline cache to make sure we have a fresh restart next time
         xmppPipeliningState oldPipeliningState = self->_pipeliningState;
@@ -2843,12 +2841,20 @@ NSString* const kStanza = @"stanza";
         self->_cachedStreamFeaturesAfterAuth = nil;
         
         if(oldPipeliningState != kPipelinedNothing)
+        {
+            DDLogWarn(@"Retrying auth without pipelining...");
             [self reconnect];
+        }
         else
         {
             //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-            [HelperTools postError:NSLocalizedString(@"No supported auth mechanism found, disabling account!", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+            [HelperTools postError:msg withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
         }
+    };
+    //called below, if neither SASL1 nor SASL2 could be used to negotiate a valid SASL mechanism
+    monal_void_block_t noAuthSupported = ^{
+        DDLogWarn(@"No supported auth mechanism!");
+        clearPipelineCacheOrReportSevereError(NSLocalizedString(@"No supported auth mechanism found, disabling account!", @""));
     };
     
     if([parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
@@ -3019,7 +3025,7 @@ NSString* const kStanza = @"stanza";
         }
         
         //if the above case didn't trigger, this is a downgrade attack downgrading from SASL2 to SASL1, report is as such
-        [HelperTools postError:NSLocalizedString(@"SASL2 to SASL1 downgrade attack detected, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+        clearPipelineCacheOrReportSevereError(NSLocalizedString(@"SASL2 to SASL1 downgrade attack detected, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @""));
     }
 }
 

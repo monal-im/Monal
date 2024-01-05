@@ -50,6 +50,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "MLUDPLogger.h"
 #import "MLStreamRedirect.h"
 #import "commithash.h"
+#import "MLContactSoftwareVersionInfo.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -643,6 +644,7 @@ void swizzle(Class c, SEL orig, SEL new)
         [MLMessage class],
         [NSURL class],
         [OmemoState class],
+        [MLContactSoftwareVersionInfo class],
     ]] fromData:data error:&error];
     if(error)
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];

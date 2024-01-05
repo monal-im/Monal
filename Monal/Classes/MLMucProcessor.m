@@ -23,7 +23,7 @@
 #import "MLOMEMO.h"
 #import "MLImageManager.h"
 
-#define CURRENT_MUC_STATE_VERSION @6
+#define CURRENT_MUC_STATE_VERSION @7
 
 @interface MLMucProcessor()
 {
@@ -31,6 +31,7 @@
     //persistent state
     NSObject* _stateLockObject;
     NSMutableDictionary* _roomFeatures;
+    NSMutableDictionary* _creating;
     NSMutableDictionary* _joining;
     NSMutableSet* _firstJoin;
     NSDate* _lastPing;
@@ -43,12 +44,35 @@
 
 @implementation MLMucProcessor
 
+static NSDictionary* _mandatoryGroupConfigOptions;
+static NSDictionary* _optionalGroupConfigOptions;
+
++(void) initialize
+{
+    _mandatoryGroupConfigOptions = @{
+        @"muc#roomconfig_persistentroom": @"1",
+        @"muc#roomconfig_membersonly": @"1",
+        @"muc#roomconfig_whois": @"anyone",
+    };
+    _optionalGroupConfigOptions = @{
+        @"muc#roomconfig_enablelogging": @"0",
+        @"muc#roomconfig_changesubject": @"0",
+        @"muc#roomconfig_allowinvites": @"0",
+        @"muc#roomconfig_getmemberlist": @"participant",
+        @"muc#roomconfig_publicroom": @"0",
+        @"muc#roomconfig_moderatedroom": @"0",
+        @"muc#maxhistoryfetch": @"0",               //should use mam
+    };
+    
+}
+
 -(id) initWithAccount:(xmpp*) account
 {
     self = [super init];
     _account = account;
     _stateLockObject = [NSObject new];
     _roomFeatures = [NSMutableDictionary new];
+    _creating = [NSMutableDictionary new];
     _joining = [NSMutableDictionary new];
     _firstJoin = [NSMutableSet new];
     _uiHandler = [NSMutableDictionary new];
@@ -80,6 +104,7 @@
     //extract state
     @synchronized(_stateLockObject) {
         _roomFeatures = [state[@"roomFeatures"] mutableCopy];
+        _creating = [state[@"creating"] mutableCopy];
         _joining = [state[@"joining"] mutableCopy];
         _firstJoin = [state[@"firstJoin"] mutableCopy];
         _lastPing = state[@"lastPing"];
@@ -94,6 +119,7 @@
         NSDictionary* state = @{
             @"version": CURRENT_MUC_STATE_VERSION,
             @"roomFeatures": [_roomFeatures copy],
+            @"creating": [_creating copy],
             @"joining": [_joining copy],
             @"firstJoin": [_firstJoin copy],
             @"lastPing": _lastPing,
@@ -118,6 +144,9 @@
             NSDictionary* joiningCopy = [_joining copy];
             for(NSString* room in joiningCopy)
                  [self removeRoomFromJoining:room];
+            NSDictionary* creatingCopy = [_creating copy];
+            for(NSString* room in creatingCopy)
+                 [self removeRoomFromCreating:room];
             
             //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
             
@@ -140,6 +169,13 @@
         //don't use [self updateBookmarks] to not update anything (e.g. readd a bookmark removed by another client)
         if(!_hasFetchedBookmarks && _account.connectionProperties.supportsBookmarksCompat)
             [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler, $ID(type, @"publish"))];
+    }
+}
+
+-(BOOL) isCreating:(NSString*) room
+{
+    @synchronized(_stateLockObject) {
+        return _creating[room] != nil;
     }
 }
 
@@ -339,6 +375,125 @@
         DDLogInfo(@"Ignoring handleMembersListUpdate for %@, MUC not in buddylist", node.fromUser);
 }
 
+-(void) configureMuc:(NSString*) roomJid withMandatoryOptions:(NSDictionary*) mandatoryOptions andOptionalOptions:(NSDictionary*) optionalOptions deletingMucOnError:(BOOL) deleteOnError
+{
+    DDLogInfo(@"Fetching room config form: %@", roomJid);
+    XMPPIQ* configFetchNode = [[XMPPIQ alloc] initWithType:kiqGetType to:roomJid];
+    [configFetchNode setGetRoomConfig];
+    [_account sendIq:configFetchNode withHandler:$newHandlerWithInvalidation(self, handleRoomConfigForm, handleRoomConfigFormInvalidation, $ID(roomJid), $ID(mandatoryOptions), $ID(optionalOptions), $BOOL(deleteOnError))];
+}
+
+$$instance_handler(handleRoomConfigFormInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    if(deleteOnError)
+    {
+        DDLogError(@"Config form fetch failed, removing muc '%@' from _creating...", roomJid);
+        [self removeRoomFromCreating:roomJid];
+        [self deleteMuc:roomJid withBookmarksUpdate:NO keepBuddylistEntry:NO];
+    }
+    else
+        DDLogError(@"Config form fetch failed for muc '%@'!", roomJid);
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could fetch room config form for '%@': timeout", @""), roomJid] forMuc:roomJid withNode:nil andIsSevere:YES];
+$$
+
+$$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Room config form response jid not matching query jid!", (@{
+        @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
+        @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
+    }));
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Failed to fetch room config form for '%@': %@", roomJid, [iqNode findFirst:@"error"]);
+        if(deleteOnError)
+        {
+            [self removeRoomFromCreating:roomJid];
+            [self deleteMuc:roomJid withBookmarksUpdate:NO keepBuddylistEntry:NO];
+        }
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to fetch room config form for '%@'", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:YES];
+        return;
+    }
+    
+    XMPPDataForm* dataForm = [[iqNode findFirst:@"{http://jabber.org/protocol/muc#owner}query/\\{http://jabber.org/protocol/muc#roomconfig}form\\"] copy];
+    if(dataForm == nil)
+    {
+        DDLogError(@"Got empty room config form for '%@'!", roomJid);
+        if(deleteOnError)
+        {
+            [self removeRoomFromCreating:roomJid];
+            [self deleteMuc:roomJid withBookmarksUpdate:NO keepBuddylistEntry:NO];
+        }
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Got empty room config form for '%@'", @""), roomJid] forMuc:roomJid withNode:nil andIsSevere:YES];
+        return;
+    }
+    
+    //these config options are mandatory and configure the room to be a group --> non anonymous, members only (and persistent)
+    for(NSString* option in mandatoryOptions)
+    {
+        if(!dataForm[option])
+        {
+            DDLogError(@"Could not configure room '%@' to be a groupchat: config option '%@' not available!", roomJid, option);
+            if(deleteOnError)
+            {
+                [self removeRoomFromCreating:roomJid];
+                [self deleteMuc:roomJid withBookmarksUpdate:NO keepBuddylistEntry:NO];
+            }
+            [self handleError:[NSString stringWithFormat:@"Could not configure new group '%@': config option '%@' not available!", roomJid, option] forMuc:roomJid withNode:nil andIsSevere:YES];
+            return;
+        }
+        else
+            dataForm[option] = mandatoryOptions[option];
+    }
+    
+    //these config options are optional but most of them should be supported by all modern servers
+    for(NSString* option in optionalOptions)
+    {
+        if(dataForm[option])
+            dataForm[option] = optionalOptions[option];
+        else
+            DDLogWarn(@"Ignoring optional config option for room '%@': %@", roomJid, option);
+    }
+    
+    //reconfigure the room
+    dataForm.type = @"submit";
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [query setRoomConfig:dataForm];
+    [_account sendIq:query withHandler:$newHandlerWithInvalidation(self, handleRoomConfigResult, handleRoomConfigResultInvalidation, $ID(roomJid), $ID(mandatoryOptions), $ID(optionalOptions), $BOOL(deleteOnError))];
+$$
+
+$$instance_handler(handleRoomConfigResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    if(deleteOnError)
+    {
+        DDLogError(@"Config form submit failed, removing muc '%@' from _creating...", roomJid);
+        [self removeRoomFromCreating:roomJid];
+        [self deleteMuc:roomJid withBookmarksUpdate:NO keepBuddylistEntry:NO];
+    }
+    else
+        DDLogError(@"Config form submit failed for muc '%@'!", roomJid);
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not configure group '%@': timeout", @""), roomJid] forMuc:roomJid withNode:nil andIsSevere:YES];
+$$
+
+$$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Room config form response jid not matching query jid!", (@{
+        @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
+        @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
+    }));
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Failed to submit room config form of '%@': %@", roomJid, [iqNode findFirst:@"error"]);
+        if(deleteOnError)
+        {
+            [self removeRoomFromCreating:roomJid];
+            [self deleteMuc:roomJid withBookmarksUpdate:NO keepBuddylistEntry:NO];
+        }
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not configure group '%@'", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:YES];
+        return;
+    }
+    
+    //group is now properly configured and we are joined, but all the code handling a proper join was not run
+    //--> join again to make sure everything is sane
+    [self removeRoomFromCreating:roomJid];
+    [self join:roomJid];
+$$
+
 -(void) handleStatusCodes:(XMPPStanza*) node
 {
     NSSet* presenceCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
@@ -354,11 +509,23 @@
                 //room created and needs configuration now
                 case 201:
                 {
-                    //make instant room
-                    DDLogInfo(@"Creating instant muc room using default config: %@", node.fromUser);
-                    XMPPIQ* configNode = [[XMPPIQ alloc] initWithType:kiqSetType to:node.fromUser];
-                    [configNode setInstantRoom];
-                    [_account send:configNode];
+                    if(![presenceCodes containsObject:@110])
+                    {
+                        DDLogError(@"Got 'muc needs configuration' status code (201) without self-presence, ignoring!");
+                        break;
+                    }
+                    if(![self isCreating:node.fromUser])
+                    {
+                        DDLogError(@"Got 'muc needs configuration' status code (201) without this muc currently being created, ignoring!");
+                        break;
+                    }
+                    
+                    //now configure newly created locked room
+                    [self configureMuc:node.fromUser withMandatoryOptions:_mandatoryGroupConfigOptions andOptionalOptions:_optionalGroupConfigOptions deletingMucOnError:YES];
+                    
+                    //stop processing here to not trigger the "successful join" code below
+                    //we will trigger this code by a "second" join presence once the room was created and is not locked anymore
+                    return;
                     break;
                 }
                 //muc service changed our nick
@@ -543,6 +710,16 @@
                 case 102:
                 case 103:
                 case 104:
+                /*
+                 * If room logging is now enabled, status code 170.
+                 * If room logging is now disabled, status code 171.
+                 * If the room is now non-anonymous, status code 172.
+                 * If the room is now semi-anonymous, status code 173.
+                 */
+                case 170:
+                case 171:
+                case 172:
+                case 173:
                 {
                     DDLogInfo(@"Muc config of %@ changed, sending new disco info query to reload muc config...", node.fromUser);
                     [self sendDiscoQueryFor:node.from withJoin:NO andBookmarksUpdate:NO];
@@ -552,6 +729,53 @@
                     DDLogWarn(@"Got unhandled muc status code in message from %@: %@", node.from, code);
             }
     }
+}
+
+$$instance_handler(handleCreateTimeout, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
+    [self removeRoomFromCreating:room];
+    [self deleteMuc:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could fetch room config form from '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not create group '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
+$$
+
+-(NSString*) createGroup:(NSString*) node
+{
+    NSString* room = [[NSString stringWithFormat:@"%@@%@", node, _account.connectionProperties.conferenceServer] lowercaseString];
+    if([[DataLayer sharedInstance] isBuddyMuc:room forAccount:_account.accountNo])
+    {
+        DDLogWarn(@"Cannot create muc already existing in our buddy list, checking if we are still joined and join if needed...");
+        [self ping:room];
+        return nil;
+    }
+    
+    //remove old non-muc contact from contactlist (we don't want mucs as normal contacts on our (server) roster and shadowed in monal by the real muc contact)
+    NSDictionary* existingContactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:room forAccount:_account.accountNo];
+    if(existingContactDict != nil)
+    {
+        MLContact* existingContact = [MLContact createContactFromJid:room andAccountNo:_account.accountNo];
+        DDLogVerbose(@"CreateMUC: Removing already existing contact (%@) having raw db dict: %@", existingContact, existingContactDict);
+        [_account removeFromRoster:existingContact];
+    }
+    //add new muc buddy (potentially deleting a non-muc buddy having the same jid)
+    NSString* nick = [self calculateNickForMuc:room];
+    DDLogInfo(@"CreateMUC: Adding new muc %@ using nick '%@' to buddylist...", room, nick);
+    [[DataLayer sharedInstance] initMuc:room forAccountId:_account.accountNo andMucNick:nick];
+    
+    DDLogInfo(@"Trying to create muc '%@' with nick '%@' on account %@...", room, nick, _account);
+    @synchronized(_stateLockObject) {
+        //add room to "currently creating" list (and remove any present idle timer for this room)
+        [[DataLayer sharedInstance] delIdleTimerWithId:_creating[room]];
+        //add idle timer to display error if we did not receive the reflected create presence after 30 idle seconds
+        //this will make sure the spinner ui will not spin indefinitely when adding a channel via ui
+        NSNumber* timerId = [[DataLayer sharedInstance] addIdleTimerWithTimeout:@30 andHandler:$newHandler(self, handleCreateTimeout, $ID(room)) onAccountNo:_account.accountNo];
+        _creating[room] = timerId;
+        //we don't need to force saving of our new state because once this outgoing create presence gets handled by smacks the whole state will be saved
+    }
+    XMPPPresence* presence = [XMPPPresence new];
+    [presence createRoom:room withNick:nick];
+    [_account send:presence];
+    
+    return room;
 }
 
 -(void) join:(NSString*) room
@@ -704,8 +928,53 @@
     }];
 }
 
--(void) publishAvatar:(UIImage*) image forMuc:(NSString*) room
+-(void) setAffiliation:(NSString*) affiliation ofUser:(NSString*) jid inMuc:(NSString*) roomJid
 {
+    DDLogInfo(@"Changing affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
+    XMPPIQ* updateIq = [[XMPPIQ alloc] initWithType:kiqSetType to:roomJid];
+    [updateIq setMucAdminQueryWithAffiliation:affiliation forJid:jid];
+    [_account sendIq:updateIq withHandler:$newHandlerWithInvalidation(self, handleAffiliationUpdateResult, handleAffiliationUpdateResultInvalidation, $ID(roomJid), $ID(jid), $ID(affiliation))];
+}
+
+$$instance_handler(handleAffiliationUpdateResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid))
+    DDLogError(@"Failed to change affiliation of '%@' in '%@' to '%@': timeout", jid, roomJid, affiliation);
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@': timeout", @""), jid, roomJid, affiliation] forMuc:roomJid withNode:nil andIsSevere:YES];
+$$
+
+$$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Failed to change affiliation of '%@' in '%@' to '%@': %@", jid, roomJid, affiliation, [iqNode findFirst:@"error"]);
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@'", @""), jid, roomJid, affiliation] forMuc:roomJid withNode:iqNode andIsSevere:YES];
+        return;
+    }
+    DDLogError(@"Successfully changed affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
+$$
+
+-(void) changeNameOfMuc:(NSString*) room to:(NSString*) name
+{
+    [self configureMuc:room withMandatoryOptions:@{
+        @"muc#roomconfig_roomname": name,
+    } andOptionalOptions:@{} deletingMucOnError:NO];
+}
+
+-(void) changeSubjectOfMuc:(NSString*) room to:(NSString*) subject
+{
+    XMPPMessage* msg = [[XMPPMessage alloc] initWithType:kMessageGroupChatType to:room];
+    [msg addChildNode:[[MLXMLNode alloc] initWithElement:@"subject" andData:subject]];
+    [_account send:msg];
+}
+
+-(void) publishAvatar:(UIImage* _Nullable) image forMuc:(NSString*) room
+{
+    if(image == nil)
+    {
+        DDLogInfo(@"Removing avatar image for muc '%@'...", room);
+        XMPPIQ* vcard = [[XMPPIQ alloc] initWithType:kiqSetType to:room];
+        [vcard setRemoveVcardAvatar];
+        [_account sendIq:vcard withHandler:$newHandlerWithInvalidation(self, handleAvatarPublishResult, handleAvatarPublishResultInvalidation, $ID(room))];
+        return;
+    }
     //should work for ejabberd >= 19.02 and prosody >= 0.11
     NSData* imageData = [HelperTools resizeAvatarImage:image withCircularMask:NO toMaxBase64Size:60000];
     NSString* imageHash = [HelperTools hexadecimalString:[HelperTools sha1:imageData]];
@@ -713,14 +982,19 @@
     DDLogInfo(@"Publishing avatar image for muc '%@' with hash %@", room, imageHash);
     XMPPIQ* vcard = [[XMPPIQ alloc] initWithType:kiqSetType to:room];
     [vcard setVcardAvatarWithData:imageData andType:@"image/jpeg"];
-    [_account sendIq:vcard withHandler:$newHandler(self, handleAvatarPublishResult)];
+    [_account sendIq:vcard withHandler:$newHandlerWithInvalidation(self, handleAvatarPublishResult, handleAvatarPublishResultInvalidation, $ID(room))];
 }
+
+$$instance_handler(handleAvatarPublishResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
+    DDLogError(@"Publishing avatar for muc '%@' returned timeout", room);
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to publish avatar image for group/channel %@", @""), room] forMuc:room withNode:nil andIsSevere:YES];
+$$
 
 $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Publishing avatar for muc '%@' returned error: %@", iqNode.fromUser, [iqNode findFirst:@"error"]);
-        [HelperTools postError:NSLocalizedString(@"Failed to publish avatar image for group/channel %@", @"") withNode:iqNode andAccount:_account andIsSevere:YES];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to publish avatar image for group/channel %@", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:iqNode andIsSevere:YES];
         return;
     }
     DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);
@@ -1136,6 +1410,15 @@ $$
         DDLogInfo(@"Using default nick '%@' for room %@ on account %@", nick, room, _account);
     }
     return nick;
+}
+
+-(void) removeRoomFromCreating:(NSString*) room
+{
+    @synchronized(_stateLockObject) {
+        DDLogVerbose(@"Removing from _creating[%@]: %@", room, _creating[room]);
+        [[DataLayer sharedInstance] delIdleTimerWithId:_creating[room]];
+        [_creating removeObjectForKey:room];
+    }
 }
 
 -(void) removeRoomFromJoining:(NSString*) room

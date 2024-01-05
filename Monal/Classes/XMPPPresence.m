@@ -68,6 +68,12 @@
 
 #pragma mark MUC 
 
+-(void) createRoom:(NSString*) room withNick:(NSString*) nick
+{
+    self.to = [NSString stringWithFormat:@"%@/%@", room, nick];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"http://jabber.org/protocol/muc" withAttributes:@{} andChildren:@[] andData:nil]];
+}
+
 -(void) joinRoom:(NSString*) room withNick:(NSString*) nick
 {
     [self.attributes setObject:[NSString stringWithFormat:@"%@/%@", room, nick] forKey:@"to"];

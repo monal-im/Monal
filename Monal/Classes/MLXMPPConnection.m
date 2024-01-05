@@ -26,6 +26,7 @@
     self.discoveredServices = [NSMutableArray new];
     self.discoveredStunTurnServers = [NSMutableArray new];
     self.discoveredAdhocCommands = [NSMutableDictionary new];
+    self.serverVersion = nil;
     return self;
 }
 

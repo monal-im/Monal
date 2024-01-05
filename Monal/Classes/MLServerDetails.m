@@ -9,9 +9,12 @@
 #import "MLServerDetails.h"
 #import "UIColor+Theme.h"
 #import "SCRAM.h"
+#import "MLContactSoftwareVersionInfo.h"
+#import "DataLayer.h"
 
 @interface MLServerDetails ()
 
+@property (nonatomic, strong) MLContactSoftwareVersionInfo* serverVersion;
 @property (nonatomic, strong) NSMutableArray* serverCaps;
 @property (nonatomic, strong) NSMutableArray* stunTurnServers;
 @property (nonatomic, strong) NSMutableArray* srvRecords;
@@ -23,7 +26,9 @@
 
 @implementation MLServerDetails
 
+//TODO: make all of these shareable as one long text (or json)
 enum MLServerDetailsSections {
+    SERVER_VERSION_SECTION,
     SUPPORTED_SERVER_XEPS_SECTION,
     VOIP_SECTION,
     SRV_RECORS_SECTION,
@@ -36,6 +41,7 @@ enum MLServerDetailsSections {
 #define SERVER_DETAILS_COLOR_OK @"Blue"
 #define SERVER_DETAILS_COLOR_NON_IDEAL @"Orange"
 #define SERVER_DETAILS_COLOR_ERROR @"Red"
+#define SERVER_DETAILS_COLOR_NONE @""
 
 - (void) viewDidLoad
 {
@@ -55,6 +61,7 @@ enum MLServerDetailsSections {
     self.navigationItem.title = self.xmppAccount.connectionProperties.identity.domain;
     self.tableView.allowsSelection = NO;
 
+    self.serverVersion = self.xmppAccount.connectionProperties.serverVersion;
     [self checkServerCaps:self.xmppAccount.connectionProperties];
     [self convertSRVRecordsToReadable];
     [self checkTLSVersions:self.xmppAccount.connectionProperties];
@@ -290,7 +297,9 @@ enum MLServerDetailsSections {
 
 -(NSInteger) tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
 {
-    if(section == SUPPORTED_SERVER_XEPS_SECTION)
+    if(section == SERVER_VERSION_SECTION)
+        return 1;
+    else if(section == SUPPORTED_SERVER_XEPS_SECTION)
         return (NSInteger)self.serverCaps.count;
     else if(section == VOIP_SECTION)
         return (NSInteger)self.stunTurnServers.count;
@@ -310,7 +319,21 @@ enum MLServerDetailsSections {
     UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"serverCell" forIndexPath:indexPath];
 
     NSDictionary* dic;
-    if(indexPath.section == SUPPORTED_SERVER_XEPS_SECTION)
+    if(indexPath.section == SERVER_VERSION_SECTION)
+    {
+        if(indexPath.row == 0)
+        {
+            NSString* serverName = nilDefault(self.serverVersion.appName, NSLocalizedString(@"<unknown server>", @"server details"));
+            NSString* serverVersion = nilDefault(self.serverVersion.appVersion, NSLocalizedString(@"<unknown version>", @"server details"));
+            NSString* serverPlatform = self.serverVersion.platformOs != nil ? [NSString stringWithFormat:NSLocalizedString(@" running on %@", @"server details"), self.serverVersion.platformOs] : @"";
+            dic = @{
+                @"Color": SERVER_DETAILS_COLOR_NONE, 
+                @"Title": serverName,
+                @"Description": [NSString stringWithFormat:NSLocalizedString(@"version %@%@", @"server details"), serverVersion, serverPlatform],
+            };
+        }
+    }
+    else if(indexPath.section == SUPPORTED_SERVER_XEPS_SECTION)
         dic = [self.serverCaps objectAtIndex:(NSUInteger)indexPath.row];
     if(indexPath.section == VOIP_SECTION)
         dic = [self.stunTurnServers objectAtIndex:(NSUInteger)indexPath.row];
@@ -323,8 +346,8 @@ enum MLServerDetailsSections {
     else if(indexPath.section == CB_SECTION)
         dic = [self.channelBindingTypes objectAtIndex:(NSUInteger)indexPath.row];
 
-    cell.textLabel.text = [dic objectForKey:@"Title"];
-    cell.detailTextLabel.text = [dic objectForKey:@"Description"];
+    cell.textLabel.text = nilExtractor([dic objectForKey:@"Title"]);
+    cell.detailTextLabel.text = nilExtractor([dic objectForKey:@"Description"]);
 
     // Add background color to selected cells
     if([dic objectForKey:@"Color"])
@@ -363,9 +386,11 @@ enum MLServerDetailsSections {
 
 -(NSString*) tableView:(UITableView*) tableView titleForHeaderInSection:(NSInteger) section
 {
-    if(section == SUPPORTED_SERVER_XEPS_SECTION)
+    if(section == SERVER_VERSION_SECTION)
+        return NSLocalizedString(@"This is the software running on your server.", @"");
+    else if(section == SUPPORTED_SERVER_XEPS_SECTION)
         return NSLocalizedString(@"These are the modern XMPP capabilities Monal detected on your server after you have logged in.", @"");
-    if(section == VOIP_SECTION)
+    else if(section == VOIP_SECTION)
         return NSLocalizedString(@"These are STUN and TURN services announced by your server. (blue entries are used by monal)", @"");
     else if(section == SRV_RECORS_SECTION)
         return NSLocalizedString(@"These are SRV resource records found for your domain.", @"");

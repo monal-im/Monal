@@ -94,7 +94,7 @@ struct ContactResources: View {
                 if softwareInfo.fromJid == contact.obj.contactJid && xmppAccount.accountNo == contact.obj.accountId {
                     DispatchQueue.main.async {
                         DDLogVerbose("Successfully matched software version info update to current contact: \(contact.obj)")
-                        self.contactVersionInfos[softwareInfo.resource] = ObservableKVOWrapper<MLContactSoftwareVersionInfo>(softwareInfo)
+                        self.contactVersionInfos[softwareInfo.resource ?? ""] = ObservableKVOWrapper<MLContactSoftwareVersionInfo>(softwareInfo)
                     }
                 }
             }

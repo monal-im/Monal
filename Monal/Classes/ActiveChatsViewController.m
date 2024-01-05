@@ -533,6 +533,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion
 {
+    DDLogVerbose(@"presenting chat with contact: %@, stacktrace: %@", contact, [NSThread callStackSymbols]);
     dispatch_async(dispatch_get_main_queue(), ^{
         DDLogVerbose(@"presenting chat with contact: %@", contact);
         [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{

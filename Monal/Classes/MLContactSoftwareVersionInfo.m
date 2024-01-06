@@ -14,7 +14,12 @@
 
 @implementation MLContactSoftwareVersionInfo
 
--(instancetype) initWithJid:(NSString*) jid andRessource:(NSString*) resource andAppName:(NSString* _Nullable) appName andAppVersion:(NSString* _Nullable) appVersion andPlatformOS:(NSString* _Nullable) platformOs andLastInteraction:(NSDate* _Nullable) lastInteraction
++(BOOL) supportsSecureCoding
+{
+    return YES;
+}
+
+-(instancetype) initWithJid:(NSString*) jid andRessource:(NSString* _Nullable) resource andAppName:(NSString* _Nullable) appName andAppVersion:(NSString* _Nullable) appVersion andPlatformOS:(NSString* _Nullable) platformOs andLastInteraction:(NSDate* _Nullable) lastInteraction
 {
     self = [super init];
     self.fromJid = jid;
@@ -23,6 +28,28 @@
     self.appVersion = appVersion;
     self.platformOs = platformOs;
     self.lastInteraction = lastInteraction;
+    return self;
+}
+
+-(void) encodeWithCoder:(NSCoder*) coder
+{
+    [coder encodeObject:self.fromJid forKey:@"fromJid"];
+    [coder encodeObject:self.resource forKey:@"resource"];
+    [coder encodeObject:self.appName forKey:@"appName"];
+    [coder encodeObject:self.appVersion forKey:@"appVersion"];
+    [coder encodeObject:self.platformOs forKey:@"platformOs"];
+    [coder encodeObject:self.lastInteraction forKey:@"lastInteraction"];
+}
+
+-(instancetype) initWithCoder:(NSCoder*) coder
+{
+    self = [self init];
+    self.fromJid = [coder decodeObjectForKey:@"fromJid"];
+    self.resource = [coder decodeObjectForKey:@"resource"];
+    self.appName = [coder decodeObjectForKey:@"appName"];
+    self.appVersion = [coder decodeObjectForKey:@"appVersion"];
+    self.platformOs = [coder decodeObjectForKey:@"platformOs"];
+    self.lastInteraction = [coder decodeObjectForKey:@"lastInteraction"];
     return self;
 }
 
@@ -43,6 +70,8 @@
 
 -(NSString*) id
 {
+    if(self.resource == nil)
+        return [NSString stringWithFormat:@"%@", self.fromJid];
     return [NSString stringWithFormat:@"%@/%@", self.fromJid, self.resource];
 }
 

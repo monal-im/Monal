@@ -12,6 +12,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class MLContactSoftwareVersionInfo;
+
 /**
  A class to hold the the  identity, host, state and discovered properties of an xmpp connection
  */
@@ -32,6 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSMutableArray* discoveredServices;
 @property (nonatomic, strong) NSMutableArray* discoveredStunTurnServers;
 @property (nonatomic, strong) NSMutableDictionary* discoveredAdhocCommands;
+@property (nonatomic, strong) MLContactSoftwareVersionInfo* _Nullable serverVersion;
 
 @property (nonatomic, strong) NSString* _Nullable conferenceServer;
 

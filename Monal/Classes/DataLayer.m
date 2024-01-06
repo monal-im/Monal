@@ -651,7 +651,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSNumber*)accountNo
+-(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*) contact resource:(NSString*) resource andAccount:(NSNumber*) accountNo
 {
     if(accountNo == nil)
         return nil;
@@ -668,14 +668,14 @@ static NSDateFormatter* dbFormatter;
     }
 }
 
--(void) setSoftwareVersionInfoForContact:(NSString*)contact
-                                resource:(NSString*)resource
-                              andAccount:(NSNumber*)account
+-(void) setSoftwareVersionInfoForContact:(NSString*) contact
+                                resource:(NSString*) resource
+                              andAccount:(NSNumber*) account
                         withSoftwareInfo:(MLContactSoftwareVersionInfo*) newSoftwareInfo
 {
     [self.db voidWriteTransaction:^{
         NSString* query = @"update buddy_resources set platform_App_Name=?, platform_App_Version=?, platform_OS=? where buddy_id in (select buddy_id from buddylist where account_id=? and buddy_name=?) and resource=?";
-        NSArray* params = @[newSoftwareInfo.appName, newSoftwareInfo.appVersion, newSoftwareInfo.platformOs, account, contact, resource];
+        NSArray* params = @[nilWrapper(newSoftwareInfo.appName), nilWrapper(newSoftwareInfo.appVersion), nilWrapper(newSoftwareInfo.platformOs), account, contact, resource];
         [self.db executeNonQuery:query andArguments:params];
     }];
 }

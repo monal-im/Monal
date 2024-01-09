@@ -1374,17 +1374,25 @@ void swizzle(Class c, SEL orig, SEL new)
             for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
             {
                 //ignore already disconnected accounts (they are always "idle" but this does not reflect the real sync state)
-                if(account.accountState < kStateReconnecting && !account.reconnectInProgress)
+                //but only do so if we have connectivity (we want to alert the user of pending outgoing stanzas even if we don't have connectivity)
+                if(account.accountState < kStateReconnecting && !account.reconnectInProgress && [[MLXMPPManager sharedInstance] hasConnectivity])
+                {
+                    DDLogDebug(@"Ignoring disconnected account: %@", account);
                     continue;
+                }
                 NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
                 //dispatching this to the receive queue isn't neccessary anymore, see comments in account.idle
                 if(account.idle)
                 {
-                    DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
-                    [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[syncErrorIdentifier]];
-                    [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
-                    syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
-                    [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+                    //but only do so, if we have connectivity, otherwise just ignore it (the old sync error should still be displayed)
+                    if([[MLXMPPManager sharedInstance] hasConnectivity])
+                    {
+                        DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
+                        [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[syncErrorIdentifier]];
+                        [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
+                        syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
+                        [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+                    }
                 }
                 else if(!removeOnly && [self isNotInFocus])
                 {
@@ -1405,6 +1413,7 @@ void swizzle(Class c, SEL orig, SEL new)
                     if(![self isAppExtension] && !account.isDoingFullReconnect && ![account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas])
                     {
                         DDLogWarn(@"NOT posting syncError notification for %@ (we are not in the appex, no important stanzas are unacked and we are not doing a full reconnect)...", account.connectionProperties.identity.jid);
+                        DDLogDebug(@"[self isAppExtension] == %@, account.isDoingFullReconnect == %@, [account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas] == %@", bool2str([self isAppExtension]), bool2str(account.isDoingFullReconnect), bool2str([account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas]));
                         continue;
                     }
                     DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);

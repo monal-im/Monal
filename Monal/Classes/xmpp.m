@@ -5180,7 +5180,7 @@ NSString* const kStanza = @"stanza";
 -(void) handleFinishedCatchup
 {
     self->_catchupDone = YES;
-    self.isDoingFullReconnect = NO;
+    self.isDoingFullReconnect = !self.connectionProperties.supportsSM3;
     
     //log catchup statistics
     [self logCatchupStats];

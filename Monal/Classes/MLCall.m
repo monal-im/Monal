@@ -598,7 +598,10 @@
                         [self sendJmiReject];
                 }
                 else if(self.finishReason == MLCallFinishReasonError)
+                {
+                    [self sendJmiFinishWithReason:@"application-error"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                }
                 else
                     unreachable(@"Unexpected finish reason!", (@{@"call": self}));
             }
@@ -621,7 +624,10 @@
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                 }
                 else if(self.finishReason == MLCallFinishReasonError)
+                {
+                    [self sendJmiFinishWithReason:@"application-error"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                }
                 else
                     unreachable(@"Unexpected finish reason!", (@{@"call": self}));
             }
@@ -644,7 +650,10 @@
                             [self sendJmiRetract];
                     }
                     else if(self.finishReason == MLCallFinishReasonError)
+                    {
+                        [self sendJmiFinishWithReason:@"application-error"];
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                    }
                     else
                         unreachable(@"Unexpected finish reason!", (@{@"call": self}));
                 }
@@ -667,7 +676,10 @@
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                     }
                     else if(self.finishReason == MLCallFinishReasonError)
+                    {
+                        [self sendJmiFinishWithReason:@"application-error"];
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                    }
                     else
                         unreachable(@"Unexpected finish reason!", (@{@"call": self}));
                 }
@@ -676,6 +688,7 @@
             {
                 //this case probably does never happen
                 //(the outgoing call transaction was started, but start call action not yet executed, and then the end call action arrives)
+                [self sendJmiFinishWithReason:@"connectivity-error"];
                 [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
                 self.finishReason = MLCallFinishReasonConnectivityError;
             }
@@ -807,6 +820,13 @@
         DDLogDebug(@"WebRTC reported local SDP '%@', sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
         NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:sdp.sdp withInitiator:YES];
+        if(children.count == 0)
+        {
+            DDLogError(@"Could not serialize local SDP to XML!");
+            [self handleEndCallActionWithReason:MLCallFinishReasonError];
+            return;
+        }
+        
         //we don't encrypt anything if encryption is not enabled for this contact or if the remote did not send us their deviceid
         if(self.contact.isEncrypted && self.remoteOmemoDeviceId != nil && [self encryptFingerprintsInChildren:children])
         {
@@ -815,6 +835,7 @@
         }
         else
             self.encryptionState = MLCallEncryptionStateClear;
+        
         XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
         [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
             @"action": @"session-initiate",

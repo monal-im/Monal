@@ -95,6 +95,8 @@ pub enum RtcpFbType {
     Ccm,
     Nack,
     TrrInt,
+    //the following two don't seem to be registered at IANA: https://www.iana.org/assignments/sdp-parameters/sdp-parameters.xhtml#sdp-parameters-14
+    #[serde(rename = "goog-remb")]      //this is defined in https://datatracker.ietf.org/doc/html/draft-alvestrand-rmcat-remb-03
     Remb,
     TransportCc,
 }

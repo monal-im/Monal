@@ -142,6 +142,11 @@
     [self.webRTCClient startCaptureLocalVideoWithRenderer:renderer];
 }
 
+-(void) stopCaptureLocalVideo
+{
+    [self.webRTCClient stopCaptureLocalVideo];
+}
+
 -(void) renderRemoteVideoWithRenderer:(id<RTCVideoRenderer>) renderer
 {
     [self.webRTCClient renderRemoteVideoTo:renderer];

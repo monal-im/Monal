@@ -82,6 +82,7 @@ typedef NS_ENUM(NSUInteger, MLCallEncryptionState) {
 //RTCVideoRenderer will not be visible to swift until we have swift 5.9 (feature flag ImportObjcForwardDeclarations) or swift 6.0 support
 //see https://github.com/apple/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md
 -(void) startCaptureLocalVideoWithRenderer:(id) renderer;
+-(void) stopCaptureLocalVideo;
 -(void) renderRemoteVideoWithRenderer:(id) renderer;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;

@@ -169,6 +169,15 @@ final class WebRTCClient: NSObject {
         guard let capturer = self.videoCapturer as? RTCCameraVideoCapturer else {
             return
         }
+        
+        //see https://bugs.chromium.org/p/webrtc/issues/detail?id=10006#c2
+        let aClass: AnyClass! = object_getClass(capturer)
+        let bClass: AnyClass! = object_getClass(self)
+        if capturer.responds(to: NSSelectorFromString("updateOrientation")) {
+            let swizzledMethod = class_getInstanceMethod(aClass, NSSelectorFromString("updateOrientation"))
+            let originalMethod = class_getInstanceMethod(bClass, NSSelectorFromString("myUpdateOrientation"))
+            method_exchangeImplementations(originalMethod!, swizzledMethod!)
+        }
 
         guard
             let frontCamera = (RTCCameraVideoCapturer.captureDevices().first { $0.position == .front }),
@@ -190,6 +199,19 @@ final class WebRTCClient: NSObject {
                               fps: Int(fps.maxFrameRate))
         
         self.localVideoTrack?.add(renderer)
+    }
+    
+    @objc
+    func myUpdateOrientation() {
+        DDLogDebug("Ignoring device orientation change in webrtc...")
+    }
+    
+    @objc
+    func stopCaptureLocalVideo() {
+        guard let capturer = self.videoCapturer as? RTCCameraVideoCapturer else {
+            return
+        }
+        capturer.stopCapture()
     }
     
     @objc

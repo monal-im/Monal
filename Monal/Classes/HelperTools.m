@@ -1236,12 +1236,13 @@ void swizzle(Class c, SEL orig, SEL new)
     }
     
     NSMutableDictionary<NSString*, NSString*>* retval = [NSMutableDictionary new];
-    NSArray* parts = [jid componentsSeparatedByString:@"/"];
+    NSArray* parts = [self splitString:jid withSeparator:@"/" andMaxSize:2];
     
     retval[@"user"] = [[parts objectAtIndex:0] lowercaseString];        //intended to not break code that expects lowercase
     if([parts count] > 1 && [[parts objectAtIndex:1] isEqualToString:@""] == NO)
         retval[@"resource"] = [parts objectAtIndex:1];                  //resources are case sensitive
-    parts = [retval[@"user"] componentsSeparatedByString:@"@"];
+    //there should never be more than one @ char, but just in case: split only at the first one
+    parts = [self splitString:retval[@"user"] withSeparator:@"@" andMaxSize:2];
     if([parts count] > 1)
     {
         retval[@"node"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
@@ -2476,6 +2477,36 @@ a=%@\r\n", mid, candidate];
             return NO;
     }
 #endif
+}
+
+//taken from: https://stackoverflow.com/a/30932216/3528174
++(NSArray*) splitString:(NSString*) string withSeparator:(NSString*) separator andMaxSize:(NSUInteger)size
+{
+    NSMutableArray* result = [[NSMutableArray alloc]initWithCapacity:size];
+    NSArray* components = [string componentsSeparatedByString:separator];
+
+    if(components.count < size)
+        return components;
+
+    NSUInteger i = 0;
+    while(i < size-1)
+    {
+        [result addObject:components[i]];
+        i++;
+    }
+
+    NSMutableString* lastItem = [[NSMutableString alloc] init];
+    while(i < components.count)
+    {
+        [lastItem appendString:components[i]];
+        [lastItem appendString:separator];
+        i++;
+    }
+    
+    //remove the last separator
+    [result addObject:[lastItem substringToIndex:lastItem.length - 1]];
+
+    return result;
 }
 
 @end

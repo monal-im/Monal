@@ -4413,13 +4413,13 @@ NSString* const kStanza = @"stanza";
     //delete contact request if it exists
     [[DataLayer sharedInstance] deleteContactRequest:contact];
     
-    XMPPPresence* presence = [XMPPPresence new];
-    [presence subscribeContact:contact withPreauthToken:preauthToken];
-    [self send:presence];
+    XMPPPresence* acceptPresence = [XMPPPresence new];
+    [acceptPresence subscribedContact:contact];
+    [self send:acceptPresence];
     
-    XMPPPresence* presence2 = [XMPPPresence new];
-    [presence2 subscribedContact:contact];
-    [self send:presence2];
+    XMPPPresence* subscribePresence = [XMPPPresence new];
+    [subscribePresence subscribeContact:contact withPreauthToken:preauthToken];
+    [self send:subscribePresence];
 }
 
 -(void) updateRosterItem:(MLContact*) contact withName:(NSString*) name

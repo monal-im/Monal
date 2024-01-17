@@ -318,8 +318,15 @@ $$
     NSArray* rosterList = [iqNode find:@"{jabber:iq:roster}query/item@@"];
     for(NSMutableDictionary* contact in rosterList)
     {
-        if(!contact[@"jid"])
+        //ignore roster entries without jid (is this even possible?)
+        if(contact[@"jid"] == nil)
             continue;
+        
+        //ignore roster entries providing a full jid instead of bare jids (is that even legitimate?)
+        NSDictionary* splitJid = [HelperTools splitJid:contact[@"jid"]];
+        if(splitJid[@"resource"] != nil)
+            continue;
+        
         contact[@"jid"] = [[NSString stringWithFormat:@"%@", contact[@"jid"]] lowercaseString];
         MLContact* contactObj = [MLContact createContactFromJid:contact[@"jid"] andAccountNo:account.accountNo];
         BOOL isKnownUser = [[DataLayer sharedInstance] contactDictionaryForUsername:contact[@"jid"] forAccount:account.accountNo] != nil;

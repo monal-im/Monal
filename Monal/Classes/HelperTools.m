@@ -2096,10 +2096,19 @@ void swizzle(Class c, SEL orig, SEL new)
         
 #ifdef IS_ALPHA
         NSString* rawVersionString = [NSString stringWithFormat:@"Alpha %s (%s %s UTC)", ALPHA_COMMIT_HASH, __DATE__, __TIME__];
-#else
+#else// IS_ALPHA
         NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-        NSString* rawVersionString = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
-#endif
+        NSString* rawVersionString = [NSString stringWithFormat:@"%@ %@ (%@)",
+#ifdef DEBUG
+            @"Beta",
+#else// DEBUG
+            @"Stable",
+#endif// DEBUG
+            [infoDict objectForKey:@"CFBundleShortVersionString"],
+            [infoDict objectForKey:@"CFBundleVersion"]
+        ];
+#endif// IS_ALPHA
+        
         if(type == MLVersionTypeIQ)
             return _versionInfoCache[@(type)] = rawVersionString;
         else if(type == MLVersionTypeLog)

@@ -281,6 +281,10 @@ static NSMutableDictionary* _pendingCalls;
     MLCall* call = [self createCallWithJmiPropose:messageNode onAccountNo:accountNo];
     if(call == nil)
     {
+        //ios will stop delivering voip notifications if an incoming pushkit notification doesn't trigger a visible ringing
+        //indication within 5 seconds (one single time is permitted, the second time we get punished indefinitely)
+        MLAssert(completion == nil, @"Got nil call but wakeup was via pushkit, this is dangerous!!", userInfo);
+        
         //call pushkit completion if given
         if(completion != nil)
             completion();

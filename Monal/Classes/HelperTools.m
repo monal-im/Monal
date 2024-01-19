@@ -1861,14 +1861,13 @@ void swizzle(Class c, SEL orig, SEL new)
             [featuresArray addObject:@"urn:xmpp:jingle:1"];
             [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:1"];
             [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:audio"];
-            //[featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:video"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:video"];
             [featuresArray addObject:@"urn:xmpp:jingle:transports:ice-udp:1"];
             [featuresArray addObject:@"urn:ietf:rfc:5888"];
             [featuresArray addObject:@"urn:xmpp:jingle:apps:dtls:0"];
             [featuresArray addObject:@"urn:ietf:rfc:5576"];
             [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:rtp-hdrext:0"];
             [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:rtcp-fb:0"];
-            [featuresArray addObject:@"urn:tmp:monal:webrtc"];  //TODO: write xep for this
         }
         
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];

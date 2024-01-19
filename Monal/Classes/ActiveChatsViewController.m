@@ -506,7 +506,23 @@ static NSMutableSet* _smacksWarningDisplayed;
     if(activeCall != nil)
         [self presentCall:activeCall];
     else
-        [self presentCall:[appDelegate.voipProcessor initiateCallWithType:MLCallTypeAudio toContact:contact]];
+    {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Call Type", @"") message:NSLocalizedString(@"What call do you want to place?", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"🎵 Audio", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+            [self presentCall:[appDelegate.voipProcessor initiateCallWithType:MLCallTypeAudio toContact:contact]];
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"🎥 Video", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+            [self presentCall:[appDelegate.voipProcessor initiateCallWithType:MLCallTypeVideo toContact:contact]];
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        UIPopoverPresentationController* popPresenter = [alert popoverPresentationController];
+        popPresenter.sourceView = self.view;
+        [self presentViewController:alert animated:YES completion:nil];
+    }
 }
 
 -(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts

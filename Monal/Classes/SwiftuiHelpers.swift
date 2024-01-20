@@ -359,12 +359,12 @@ func iOS16() -> Bool {
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {
-    @objc(makeAccountPickerForContacts:)
-    func makeAccountPicker(for contacts: [MLContact]) -> UIViewController {
+    @objc(makeAccountPickerForContacts:andCallType:)
+    func makeAccountPicker(for contacts: [MLContact], and callType: MLCallType) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(delegate:delegate, contacts:contacts)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(delegate:delegate, contacts:contacts, callType:callType)))
         return host
     }
     

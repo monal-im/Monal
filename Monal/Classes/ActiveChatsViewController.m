@@ -499,6 +499,16 @@ static NSMutableSet* _smacksWarningDisplayed;
     [self presentViewController:messageAlert animated:YES completion:nil];
 }
 
+-(void) callContact:(MLContact*) contact withCallType:(MLCallType) callType
+{
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:contact];
+    if(activeCall != nil)
+        [self presentCall:activeCall];
+    else
+        [self presentCall:[appDelegate.voipProcessor initiateCallWithType:callType toContact:contact]];
+}
+
 -(void) callContact:(MLContact*) contact
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
@@ -525,10 +535,10 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
 }
 
--(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts
+-(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts andCallType:(MLCallType) callType
 {
     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
-        UIViewController* accountPickerController = [[SwiftuiInterface new] makeAccountPickerForContacts:contacts];;
+        UIViewController* accountPickerController = [[SwiftuiInterface new] makeAccountPickerForContacts:contacts andCallType:callType];
         [self presentViewController:accountPickerController animated:YES completion:^{}];
     }];
 }

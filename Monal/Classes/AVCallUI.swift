@@ -38,6 +38,8 @@ struct AVCallUI: View {
         x: UIScreen.main.bounds.size.width - (UIScreen.main.bounds.size.width/5.0/2.0 + 24.0),
         y: UIScreen.main.bounds.size.height/5.0/2.0 + 16.0
     )
+    @State private var cameraPosition: AVCaptureDevice.Position = .front
+    @State private var cameraPositionButtonVisible = false
     private var ringingPlayer: AVAudioPlayer!
     private var busyPlayer: AVAudioPlayer!
     private var errorPlayer: AVAudioPlayer!
@@ -72,7 +74,7 @@ struct AVCallUI: View {
     func maybeStartRenderer() {
         if MLCallType(rawValue:call.callType) == .video && MLCallState(rawValue:call.state) == .connected {
             DDLogError("Starting renderer...")
-            call.obj.startCaptureLocalVideo(withRenderer: self.localRenderer)
+            call.obj.startCaptureLocalVideo(withRenderer: self.localRenderer, andCameraPosition:cameraPosition)
             call.obj.renderRemoteVideo(withRenderer: self.remoteRenderer)
         }
     }
@@ -175,13 +177,36 @@ struct AVCallUI: View {
             if MLCallType(rawValue:call.callType) == .video && MLCallState(rawValue:call.state) == .connected {
                 VideoView(renderer:self.remoteRenderer)
                 
-                VideoView(renderer:self.localRenderer)
-                    //this will sometimes only honor the width and ignore the height
-                    .frame(width: UIScreen.main.bounds.size.width/5.0, height: UIScreen.main.bounds.size.height/5.0)
-                    .position(localRendererLocation)
-                    .gesture(DragGesture().onChanged { value in
-                        self.localRendererLocation = value.location
-                    })
+                ZStack {
+                    VideoView(renderer:self.localRenderer)
+                        //this will sometimes only honor the width and ignore the height
+                        .frame(width: UIScreen.main.bounds.size.width/5.0, height: UIScreen.main.bounds.size.height/5.0)
+                    
+                    if cameraPositionButtonVisible {
+                        Button(action: {
+                            if cameraPosition == .front {
+                                cameraPosition = .back
+                            } else {
+                                cameraPosition = .front
+                            }
+                            call.obj.stopCaptureLocalVideo()
+                            maybeStartRenderer()
+                            cameraPositionButtonVisible = false
+                        }, label: {
+                            Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
+                                .resizable()
+                                .frame(width: 32.0, height: 32.0)
+                                .foregroundColor(.primary)
+                        })
+                    }
+                }
+                .position(localRendererLocation)
+                .gesture(DragGesture().onChanged { value in
+                    self.localRendererLocation = value.location
+                })
+                .onTapGesture(count: 1) {
+                    cameraPositionButtonVisible = !cameraPositionButtonVisible
+                }
             }
             
             if MLCallType(rawValue:call.callType) == .audio ||
@@ -535,6 +560,7 @@ struct AVCallUI: View {
         }
         .onTapGesture(count: 1) {
             controlsVisible = !controlsVisible
+            cameraPositionButtonVisible = false
         }
         .alert(isPresented: $showMicAlert) {
             Alert(

@@ -137,9 +137,9 @@
 
 #pragma mark - public interface
 
--(void) startCaptureLocalVideoWithRenderer:(id<RTCVideoRenderer>) renderer
+-(void) startCaptureLocalVideoWithRenderer:(id<RTCVideoRenderer>) renderer andCameraPosition:(AVCaptureDevicePosition) position
 {
-    [self.webRTCClient startCaptureLocalVideoWithRenderer:renderer];
+    [self.webRTCClient startCaptureLocalVideoWithRenderer:renderer andCameraPosition:position];
 }
 
 -(void) stopCaptureLocalVideo

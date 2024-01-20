@@ -7,8 +7,6 @@
 //
 
 import UniformTypeIdentifiers
-import CocoaLumberjackSwift
-import CocoaLumberjack
 
 @available(iOS 16, *)
 struct GifRepresentation: Transferable {

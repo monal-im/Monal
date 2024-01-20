@@ -38,7 +38,3 @@ module MLCallPrivate {
     header "../Classes/MLCall.h"
     export *
 }
-module HelperToolsPrivate {
-    header "../Classes/HelperTools.h"
-    export *
-}

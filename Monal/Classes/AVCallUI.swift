@@ -34,6 +34,10 @@ struct AVCallUI: View {
     @State private var showMicAlert = false
     @State private var showSecurityHelpAlert: MLCallEncryptionState? = nil
     @State private var controlsVisible = true
+    @State private var localRendererLocation: CGPoint = CGPoint(
+        x: UIScreen.main.bounds.size.width - (UIScreen.main.bounds.size.width/5.0/2.0 + 24.0),
+        y: UIScreen.main.bounds.size.height/5.0/2.0 + 16.0
+    )
     private var ringingPlayer: AVAudioPlayer!
     private var busyPlayer: AVAudioPlayer!
     private var errorPlayer: AVAudioPlayer!
@@ -103,9 +107,6 @@ struct AVCallUI: View {
             case .connected:
                 DDLogDebug("state: connected")
                 maybeStartRenderer()
-                //we want our controls to disappear when we first connected, but want them to be visible when returning to a call
-                //--> don't set controlsVisible to false in maybeStartRenderer(), but only here
-                controlsVisible = false
             case .finished:
                 DDLogDebug("state: finished: \(String(describing:call.finishReason as NSNumber))")
                 //check audio state before trying to play anything (if we are still in state .call,
@@ -172,27 +173,15 @@ struct AVCallUI: View {
                 .edgesIgnoringSafeArea(.all)
             
             if MLCallType(rawValue:call.callType) == .video && MLCallState(rawValue:call.state) == .connected {
-                if MLCallState(rawValue:call.state) == .connected {
-                    VideoView(renderer:self.remoteRenderer)
-                }
+                VideoView(renderer:self.remoteRenderer)
                 
-                VStack {
-                    Spacer().frame(height: 16)
-                    
-                    HStack {
-                        Spacer()
-                        
-                        if MLCallState(rawValue:call.state) == .connected {
-                            VideoView(renderer:self.localRenderer)
-                                //this will sometimes only honor the width and ignore the height
-                                .frame(width: UIScreen.main.bounds.size.width/5.0, height: UIScreen.main.bounds.size.height/5.0)
-                        }
-                        
-                        Spacer().frame(width: 24)
-                    }
-                    
-                    Spacer()
-                }
+                VideoView(renderer:self.localRenderer)
+                    //this will sometimes only honor the width and ignore the height
+                    .frame(width: UIScreen.main.bounds.size.width/5.0, height: UIScreen.main.bounds.size.height/5.0)
+                    .position(localRendererLocation)
+                    .gesture(DragGesture().onChanged { value in
+                        self.localRendererLocation = value.location
+                    })
             }
             
             if MLCallType(rawValue:call.callType) == .audio ||

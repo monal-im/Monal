@@ -74,7 +74,9 @@ impl JingleSsrcGroup {
         };
         let mut sources_vec: Vec<JingleSsrcGroupSourceEnum> = Vec::new();
         for ssrc in sources {
-            sources_vec.push(JingleSsrcGroupSourceEnum::Source(JingleSsrcGroupSource::new_from_sdp(ssrc)));
+            sources_vec.push(JingleSsrcGroupSourceEnum::Source(
+                JingleSsrcGroupSource::new_from_sdp(ssrc),
+            ));
         }
         Self {
             xmlns: "urn:xmpp:jingle:apps:rtp:ssma:0".to_string(),
@@ -132,11 +134,9 @@ pub struct JingleSsrcGroupSource {
 
 impl JingleSsrcGroupSource {
     pub fn new_from_sdp(ssrc: &SdpAttributeSsrc) -> Self {
-        Self {
-            id: ssrc.id,
-        }
+        Self { id: ssrc.id }
     }
-    
+
     pub fn to_sdp(&self) -> SdpAttributeSsrc {
         SdpAttributeSsrc {
             id: self.id,
@@ -145,4 +145,3 @@ impl JingleSsrcGroupSource {
         }
     }
 }
-

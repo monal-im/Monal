@@ -1461,6 +1461,21 @@
         else
             self.encryptionState = MLCallEncryptionStateClear;
         
+        //check if the jingle offer/response contains only the media that got advertised in jmi and throw a security error otherwise
+        if(self.callType == MLCallTypeAudio && [iqNode check:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:apps:rtp:1}description<media=video>"])
+        {
+            DDLogError(@"Security: jingle advertises video while jmi only contained audio, aborting call!");
+            XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+            [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+                [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" andData:@"Sent video in jingle, but only advertised audio in jmi!"],
+            ] andData:nil]];
+            [self.account send:errorIq];
+            
+            [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
+            return;
+        }
+        
         //now handle the jingle offer/response nodes and convert jingle xml to sdp
         if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
         {

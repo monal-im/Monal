@@ -170,15 +170,6 @@ final class WebRTCClient: NSObject {
             return
         }
         
-        //see https://bugs.chromium.org/p/webrtc/issues/detail?id=10006#c2
-        let aClass: AnyClass! = object_getClass(capturer)
-        let bClass: AnyClass! = object_getClass(self)
-        if capturer.responds(to: NSSelectorFromString("updateOrientation")) {
-            let swizzledMethod = class_getInstanceMethod(aClass, NSSelectorFromString("updateOrientation"))
-            let originalMethod = class_getInstanceMethod(bClass, NSSelectorFromString("myUpdateOrientation"))
-            method_exchangeImplementations(originalMethod!, swizzledMethod!)
-        }
-
         guard
             let frontCamera = (RTCCameraVideoCapturer.captureDevices().first { $0.position == .front }),
         
@@ -276,6 +267,17 @@ final class WebRTCClient: NSObject {
         #else
         self.videoCapturer = RTCCameraVideoCapturer(delegate: videoSource)
         #endif
+        
+        //see https://bugs.chromium.org/p/webrtc/issues/detail?id=10006#c2
+        //this sometimes doesn't swizzle the method (observable because a device orientation change does not call our myUpdateOrientation method)
+        //but: why??
+        let aClass: AnyClass! = object_getClass(self.videoCapturer!)
+        let bClass: AnyClass! = object_getClass(self)
+        if self.videoCapturer!.responds(to: NSSelectorFromString("updateOrientation")) {
+            let swizzledMethod = class_getInstanceMethod(aClass, NSSelectorFromString("updateOrientation"))
+            let originalMethod = class_getInstanceMethod(bClass, NSSelectorFromString("myUpdateOrientation"))
+            method_exchangeImplementations(originalMethod!, swizzledMethod!)
+        }
         
         let videoTrack = WebRTCClient.factory.videoTrack(with: videoSource, trackId: "video0")
         return videoTrack

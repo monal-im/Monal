@@ -390,7 +390,7 @@ struct AVCallUI: View {
                             Button(action: {
                                 self.delegate.dismissWithoutAnimation()
                                 if let activeChats = self.appDelegate.obj.activeChats {
-                                    activeChats.call(contact.obj)
+                                    activeChats.call(contact.obj, with:MLCallType(rawValue:call.callType)!)
                                 }                            
                             }) {
                                 if #available(iOS 15, *) {
@@ -455,7 +455,7 @@ struct AVCallUI: View {
                                     call.muted = !call.muted
                                 }) {
                                     if #available(iOS 15, *) {
-                                        Image(systemName: call.muted ? "mic.circle.fill" : "mic.slash.circle.fill")
+                                        Image(systemName: "mic.slash.circle.fill")
                                             .resizable()
                                             .frame(width: 64.0, height: 64.0)
                                             .symbolRenderingMode(.palette)
@@ -467,7 +467,7 @@ struct AVCallUI: View {
                                                 .resizable()
                                                 .frame(width: 64.0, height: 64.0)
                                                 .accentColor(call.muted ? .black : .white)
-                                            Image(systemName: call.muted ? "mic.circle.fill" : "mic.circle.fill")
+                                            Image(systemName: "mic.circle.fill")
                                                 .resizable()
                                                 .frame(width: 64.0, height: 64.0)
                                                 .accentColor(call.muted ? .white : .black)

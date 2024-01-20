@@ -2732,7 +2732,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -2750,7 +2749,6 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LLVM_LTO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -2768,7 +2766,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -2785,7 +2782,6 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LLVM_LTO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -2803,7 +2799,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -2820,7 +2815,6 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LLVM_LTO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -2941,7 +2935,7 @@
 					"$(inherited)",
 					"$(SRCROOT)",
 				);
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = MonalSourceCodePrefix.pch;
 				GCC_THREADSAFE_STATICS = NO;
@@ -3434,7 +3428,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -3451,7 +3444,6 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LLVM_LTO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -3739,7 +3731,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -3756,7 +3747,6 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LLVM_LTO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -4097,9 +4087,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
-				CLANG_STATIC_ANALYZER_MODE = deep;
-				CLANG_STATIC_ANALYZER_MODE_ON_ANALYZE_ACTION = deep;
 				CURRENT_PROJECT_VERSION = 0;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";

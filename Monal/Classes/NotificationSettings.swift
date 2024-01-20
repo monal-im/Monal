@@ -7,6 +7,7 @@
 //
 
 import OrderedCollections
+import monalxmpp
 
 struct NotificationSettings: View {
     @ViewBuilder

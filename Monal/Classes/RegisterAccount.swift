@@ -8,6 +8,7 @@
 
 import SafariServices
 import WebKit
+import monalxmpp
 
 struct WebView: UIViewRepresentable {
     var url: URL

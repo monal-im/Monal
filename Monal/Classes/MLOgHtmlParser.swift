@@ -7,6 +7,7 @@
 //
 
 import SwiftSoup;
+import CocoaLumberjackSwift
 
 @objc class MLOgHtmlParser: NSObject {
     var og_title: String?

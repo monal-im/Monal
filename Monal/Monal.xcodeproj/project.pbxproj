@@ -170,6 +170,9 @@
 		C1049189261301530054AC9E /* MonalXMPPUnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */; };
 		C104918B261301530054AC9E /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049198261301710054AC9E /* MLCryptoTest.swift */; };
+		C10A397F2B5BB29B0048C40E /* MLCall.h in Headers */ = {isa = PBXBuildFile; fileRef = 848717F2295ED64500B8D288 /* MLCall.h */; };
+		C10A39802B5BEDD50048C40E /* HelperTools.h in Headers */ = {isa = PBXBuildFile; fileRef = C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */; };
+		C10A39812B5BF1820048C40E /* MLVoIPProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 849A53E5287135D7007E941A /* MLVoIPProcessor.h */; };
 		C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D88BB76295BB6DC00FB30BA /* CreateGroupMenu.swift */; };
 		C117F7E22B0863B3001F2BC6 /* ContactPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D631822294BAB1D00026BE7 /* ContactPicker.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
@@ -1447,6 +1450,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C16D18352792A4AF00F869A0 /* DataLayerMigrations.h in Headers */,
+				C10A39812B5BF1820048C40E /* MLVoIPProcessor.h in Headers */,
+				C10A39802B5BEDD50048C40E /* HelperTools.h in Headers */,
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 				5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
@@ -1461,6 +1466,7 @@
 				542CF4002763314F002C3710 /* hsluv.h in Headers */,
 				54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */,
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
+				C10A397F2B5BB29B0048C40E /* MLCall.h in Headers */,
 				C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 				C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */,
@@ -2754,7 +2760,6 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -2787,7 +2792,6 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -2820,7 +2824,6 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -3449,7 +3452,6 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -3752,7 +3754,6 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -4108,7 +4109,6 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = monalxmpp/;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
 				VERSION_INFO_PREFIX = "";
 			};

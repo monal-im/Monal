@@ -9,6 +9,7 @@ import WebRTC
 import AVFoundation
 import CallKit
 import AVKit
+import monalxmpp
 
 struct VideoView: UIViewRepresentable {
     var renderer: RTCMTLVideoView

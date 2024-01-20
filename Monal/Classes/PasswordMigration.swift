@@ -5,6 +5,7 @@
 //  Created by Thilo Molitor on 01.08.22.
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
+import monalxmpp
 
 struct PasswordMigration: View {
     let delegate: SheetDismisserProtocol

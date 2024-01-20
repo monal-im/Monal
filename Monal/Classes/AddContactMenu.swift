@@ -8,6 +8,8 @@
 
 import MobileCoreServices
 import UniformTypeIdentifiers
+import monalxmpp
+import SignalProtocolObjC
 
 struct AddContactMenu: View {
     var delegate: SheetDismisserProtocol

@@ -11,7 +11,7 @@
 @_exported import CocoaLumberjack
 @_exported import Logging
 @_exported import SwiftUI
-@_exported import monalxmpp
+import monalxmpp
 import PhotosUI
 import Combine
 import FLAnimatedImage
@@ -360,10 +360,12 @@ func iOS16() -> Bool {
 @objc
 class SwiftuiInterface : NSObject {
     @objc(makeAccountPickerForContacts:andCallType:)
-    func makeAccountPicker(for contacts: [MLContact], and callType: MLCallType) -> UIViewController {
+    func makeAccountPicker(for contacts: [MLContact], and callType: UInt) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
+        let callType: MLCallType = MLCallType(rawValue: callType)!
+        
         host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(delegate:delegate, contacts:contacts, callType:callType)))
         return host
     }

@@ -8,6 +8,7 @@
 //
 
 import WebRTC
+import monalxmpp
 
 @objc
 protocol WebRTCClientDelegate: AnyObject {

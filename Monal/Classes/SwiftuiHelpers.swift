@@ -9,6 +9,7 @@
 //see https://davedelong.com/blog/2018/01/19/simplifying-swift-framework-development/ for explanation of @_exported
 @_exported import Foundation
 @_exported import CocoaLumberjack
+//@_exported import CocoaLumberjackSwift
 @_exported import Logging
 @_exported import SwiftUI
 @_exported import monalxmpp
@@ -360,11 +361,11 @@ func iOS16() -> Bool {
 @objc
 class SwiftuiInterface : NSObject {
     @objc(makeAccountPickerForContacts:andCallType:)
-    func makeAccountPicker(for contacts: [MLContact], and callType: MLCallType) -> UIViewController {
+    func makeAccountPicker(for contacts: [MLContact], and callType: UInt) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(delegate:delegate, contacts:contacts, callType:callType)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(delegate:delegate, contacts:contacts, callType:MLCallType(rawValue: callType)!)))
         return host
     }
     

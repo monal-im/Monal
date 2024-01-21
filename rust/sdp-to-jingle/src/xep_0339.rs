@@ -59,8 +59,8 @@ pub struct JingleSsrcGroup {
     xmlns: String,
     #[serde(rename = "@semantics")]
     semantics: SsrcGroupSemantics,
-    #[serde(rename = "source", skip_serializing_if = "Vec::is_empty")]
-    sources: Vec<u32>,
+    #[serde(rename = "$value", skip_serializing_if = "Vec::is_empty")]
+    sources: Vec<JingleSsrcGroupSourceEnum>,
 }
 
 impl JingleSsrcGroup {
@@ -72,9 +72,11 @@ impl JingleSsrcGroup {
             SdpSsrcGroupSemantic::ForwardErrorCorrectionFr => SsrcGroupSemantics::FecFr,
             SdpSsrcGroupSemantic::Sim => SsrcGroupSemantics::Sim,
         };
-        let mut sources_vec: Vec<u32> = Vec::new();
+        let mut sources_vec: Vec<JingleSsrcGroupSourceEnum> = Vec::new();
         for ssrc in sources {
-            sources_vec.push(ssrc.id);
+            sources_vec.push(JingleSsrcGroupSourceEnum::Source(
+                JingleSsrcGroupSource::new_from_sdp(ssrc),
+            ));
         }
         Self {
             xmlns: "urn:xmpp:jingle:apps:rtp:ssma:0".to_string(),
@@ -92,11 +94,10 @@ impl JingleSsrcGroup {
             SsrcGroupSemantics::Sim => SdpSsrcGroupSemantic::Sim,
         };
         let mut sources_vec: Vec<SdpAttributeSsrc> = Vec::new();
-        for id in &self.sources {
-            sources_vec.push(SdpAttributeSsrc {
-                id: *id,
-                attribute: None,
-                value: None,
+        for ssrc in &self.sources {
+            sources_vec.push(match ssrc {
+                JingleSsrcGroupSourceEnum::Source(src) => src.to_sdp(),
+                JingleSsrcGroupSourceEnum::Invalid => continue,
             });
         }
         (semantics, sources_vec)
@@ -113,4 +114,34 @@ pub enum SsrcGroupSemantics {
     #[serde(rename = "FEC-FR")]
     FecFr,
     Sim, //not defined in the IANA registry?? see https://www.iana.org/assignments/sdp-parameters/sdp-parameters.xhtml#sdp-parameters-17
+}
+
+// *** xep-0339
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum JingleSsrcGroupSourceEnum {
+    Source(JingleSsrcGroupSource),
+    #[serde(other)]
+    Invalid,
+}
+
+// *** xep-0339
+#[derive(Serialize, Deserialize, Clone)]
+pub struct JingleSsrcGroupSource {
+    #[serde(rename = "@ssrc")]
+    id: u32,
+}
+
+impl JingleSsrcGroupSource {
+    pub fn new_from_sdp(ssrc: &SdpAttributeSsrc) -> Self {
+        Self { id: ssrc.id }
+    }
+
+    pub fn to_sdp(&self) -> SdpAttributeSsrc {
+        SdpAttributeSsrc {
+            id: self.id,
+            attribute: None,
+            value: None,
+        }
+    }
 }

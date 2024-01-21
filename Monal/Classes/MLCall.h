@@ -9,6 +9,8 @@
 #ifndef MLCall_h
 #define MLCall_h
 
+#import <AVFoundation/AVFoundation.h>
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class WebRTCClient;
@@ -81,7 +83,8 @@ typedef NS_ENUM(NSUInteger, MLCallEncryptionState) {
 //these will not use the correct RTCVideoRenderer protocol like in the implementation because the forward declaration of
 //RTCVideoRenderer will not be visible to swift until we have swift 5.9 (feature flag ImportObjcForwardDeclarations) or swift 6.0 support
 //see https://github.com/apple/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md
--(void) startCaptureLocalVideoWithRenderer:(id) renderer;
+-(void) startCaptureLocalVideoWithRenderer:(id) renderer andCameraPosition:(AVCaptureDevicePosition) position;
+-(void) stopCaptureLocalVideo;
 -(void) renderRemoteVideoWithRenderer:(id) renderer;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;

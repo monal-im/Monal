@@ -9,6 +9,7 @@
 //see https://davedelong.com/blog/2018/01/19/simplifying-swift-framework-development/ for explanation of @_exported
 @_exported import Foundation
 @_exported import CocoaLumberjack
+//@_exported import CocoaLumberjackSwift
 @_exported import Logging
 @_exported import SwiftUI
 @_exported import monalxmpp
@@ -359,12 +360,12 @@ func iOS16() -> Bool {
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {
-    @objc(makeAccountPickerForContacts:)
-    func makeAccountPicker(for contacts: [MLContact]) -> UIViewController {
+    @objc(makeAccountPickerForContacts:andCallType:)
+    func makeAccountPicker(for contacts: [MLContact], and callType: UInt) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(delegate:delegate, contacts:contacts)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(delegate:delegate, contacts:contacts, callType:MLCallType(rawValue: callType)!)))
         return host
     }
     
@@ -386,12 +387,12 @@ class SwiftuiInterface : NSObject {
         return host
     }
     
-    @objc
-    func makeImageViewer(_ image: UIImage, withFilename filename:String = "", andAnimatedImageData animatedImageData:Data?) -> UIViewController {
+    @objc(makeImageViewerForInfo:)
+    func makeImageViewerFor(info:[String:AnyObject]) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(ImageViewer(delegate:delegate, image:image, filename:filename, animatedImageData:animatedImageData))
+        host.rootView = AnyView(try! ImageViewer(delegate:delegate, info:info))
         return host
     }
     

@@ -616,10 +616,18 @@ $$
                 [self.activeChats showCallContactNotFoundAlert:contactHandle.value];
                 return NO;
             }
+            //don't display account picker or open call ui if we have an already active call with any of the possible contacts
+            //the call ui will be brought into foreground by applicationWillEnterForeground: independently of this
+            for(MLContact* contact in contacts)
+                if([self.voipProcessor getActiveCallWithContact:contact] != nil)
+                    return YES;
+            MLCallType callType = MLCallTypeAudio;      //default is audio call
+            if(intent.callCapability == INCallCapabilityVideoCall)
+                callType = MLCallTypeVideo;
             if([contacts count] > 1)
-                [self.activeChats presentAccountPickerForContacts:contacts];
+                [self.activeChats presentAccountPickerForContacts:contacts andCallType:callType];
             else
-                [self.activeChats callContact:contacts.firstObject];
+                [self.activeChats callContact:contacts.firstObject withCallType:callType];
             return YES;
         }
     }

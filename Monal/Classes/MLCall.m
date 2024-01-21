@@ -137,9 +137,14 @@
 
 #pragma mark - public interface
 
--(void) startCaptureLocalVideoWithRenderer:(id<RTCVideoRenderer>) renderer
+-(void) startCaptureLocalVideoWithRenderer:(id<RTCVideoRenderer>) renderer andCameraPosition:(AVCaptureDevicePosition) position
 {
-    [self.webRTCClient startCaptureLocalVideoWithRenderer:renderer];
+    [self.webRTCClient startCaptureLocalVideoWithRenderer:renderer andCameraPosition:position];
+}
+
+-(void) stopCaptureLocalVideo
+{
+    [self.webRTCClient stopCaptureLocalVideo];
 }
 
 -(void) renderRemoteVideoWithRenderer:(id<RTCVideoRenderer>) renderer
@@ -598,7 +603,10 @@
                         [self sendJmiReject];
                 }
                 else if(self.finishReason == MLCallFinishReasonError)
+                {
+                    [self sendJmiFinishWithReason:@"application-error"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                }
                 else
                     unreachable(@"Unexpected finish reason!", (@{@"call": self}));
             }
@@ -621,7 +629,10 @@
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                 }
                 else if(self.finishReason == MLCallFinishReasonError)
+                {
+                    [self sendJmiFinishWithReason:@"application-error"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                }
                 else
                     unreachable(@"Unexpected finish reason!", (@{@"call": self}));
             }
@@ -644,7 +655,10 @@
                             [self sendJmiRetract];
                     }
                     else if(self.finishReason == MLCallFinishReasonError)
+                    {
+                        [self sendJmiFinishWithReason:@"application-error"];
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                    }
                     else
                         unreachable(@"Unexpected finish reason!", (@{@"call": self}));
                 }
@@ -667,7 +681,10 @@
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                     }
                     else if(self.finishReason == MLCallFinishReasonError)
+                    {
+                        [self sendJmiFinishWithReason:@"application-error"];
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                    }
                     else
                         unreachable(@"Unexpected finish reason!", (@{@"call": self}));
                 }
@@ -676,6 +693,7 @@
             {
                 //this case probably does never happen
                 //(the outgoing call transaction was started, but start call action not yet executed, and then the end call action arrives)
+                [self sendJmiFinishWithReason:@"connectivity-error"];
                 [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonUnanswered];
                 self.finishReason = MLCallFinishReasonConnectivityError;
             }
@@ -807,6 +825,13 @@
         DDLogDebug(@"WebRTC reported local SDP '%@', sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
         NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:sdp.sdp withInitiator:YES];
+        if(children.count == 0)
+        {
+            DDLogError(@"Could not serialize local SDP to XML!");
+            [self handleEndCallActionWithReason:MLCallFinishReasonError];
+            return;
+        }
+        
         //we don't encrypt anything if encryption is not enabled for this contact or if the remote did not send us their deviceid
         if(self.contact.isEncrypted && self.remoteOmemoDeviceId != nil && [self encryptFingerprintsInChildren:children])
         {
@@ -815,6 +840,7 @@
         }
         else
             self.encryptionState = MLCallEncryptionStateClear;
+        
         XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
         [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
             @"action": @"session-initiate",
@@ -1434,6 +1460,21 @@
         }
         else
             self.encryptionState = MLCallEncryptionStateClear;
+        
+        //check if the jingle offer/response contains only the media that got advertised in jmi and throw a security error otherwise
+        if(self.callType == MLCallTypeAudio && [iqNode check:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:apps:rtp:1}description<media=video>"])
+        {
+            DDLogError(@"Security: jingle advertises video while jmi only contained audio, aborting call!");
+            XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+            [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"modify"} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+                [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" andData:@"Sent video in jingle, but only advertised audio in jmi!"],
+            ] andData:nil]];
+            [self.account send:errorIq];
+            
+            [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
+            return;
+        }
         
         //now handle the jingle offer/response nodes and convert jingle xml to sdp
         if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])

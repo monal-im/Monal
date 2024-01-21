@@ -499,6 +499,16 @@ static NSMutableSet* _smacksWarningDisplayed;
     [self presentViewController:messageAlert animated:YES completion:nil];
 }
 
+-(void) callContact:(MLContact*) contact withCallType:(MLCallType) callType
+{
+    MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:contact];
+    if(activeCall != nil)
+        [self presentCall:activeCall];
+    else
+        [self presentCall:[appDelegate.voipProcessor initiateCallWithType:callType toContact:contact]];
+}
+
 -(void) callContact:(MLContact*) contact
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
@@ -506,13 +516,29 @@ static NSMutableSet* _smacksWarningDisplayed;
     if(activeCall != nil)
         [self presentCall:activeCall];
     else
-        [self presentCall:[appDelegate.voipProcessor initiateCallWithType:MLCallTypeAudio toContact:contact]];
+    {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Call Type", @"") message:NSLocalizedString(@"What call do you want to place?", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"🎵 Audio", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+            [self presentCall:[appDelegate.voipProcessor initiateCallWithType:MLCallTypeAudio toContact:contact]];
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"🎥 Video", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+            [self presentCall:[appDelegate.voipProcessor initiateCallWithType:MLCallTypeVideo toContact:contact]];
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        UIPopoverPresentationController* popPresenter = [alert popoverPresentationController];
+        popPresenter.sourceView = self.view;
+        [self presentViewController:alert animated:YES completion:nil];
+    }
 }
 
--(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts
+-(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts andCallType:(MLCallType) callType
 {
     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
-        UIViewController* accountPickerController = [[SwiftuiInterface new] makeAccountPickerForContacts:contacts];;
+        UIViewController* accountPickerController = [[SwiftuiInterface new] makeAccountPickerForContacts:contacts andCallType:callType];
         [self presentViewController:accountPickerController animated:YES completion:^{}];
     }];
 }

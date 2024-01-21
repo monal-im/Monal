@@ -1764,7 +1764,7 @@ NSString* const kStanza = @"stanza";
             XMPPPresence* presenceNode = (XMPPPresence*)parsedStanza;
             
             //sanity: check if presence from and to attributes are valid and throw it away if not
-            if([@"" isEqualToString:presenceNode.from] || [@"" isEqualToString:presenceNode.to])
+            if([@"" isEqualToString:presenceNode.from] || [@"" isEqualToString:presenceNode.to] || [presenceNode.fromHost containsString:@"@"] || [presenceNode.toHost containsString:@"@"])
             {
                 DDLogError(@"sanity check failed for presence node, ignoring presence: %@", presenceNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
@@ -1975,7 +1975,7 @@ NSString* const kStanza = @"stanza";
             XMPPMessage* messageNode = outerMessageNode;
             
             //sanity: check if outer message from and to attributes are valid and throw it away if not
-            if([@"" isEqualToString:outerMessageNode.from] || [@"" isEqualToString:outerMessageNode.to])
+            if([@"" isEqualToString:outerMessageNode.from] || [@"" isEqualToString:outerMessageNode.to] || [outerMessageNode.fromHost containsString:@"@"] || [outerMessageNode.toHost containsString:@"@"])
             {
                 DDLogError(@"sanity check failed for outer message node, ignoring message: %@", outerMessageNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
@@ -2055,7 +2055,7 @@ NSString* const kStanza = @"stanza";
             }
             
             //sanity: check if inner message from and to attributes are valid and throw it away if not
-            if([@"" isEqualToString:messageNode.from] || [@"" isEqualToString:messageNode.to])
+            if([@"" isEqualToString:messageNode.from] || [@"" isEqualToString:messageNode.to] || [messageNode.fromHost containsString:@"@"] || [messageNode.toHost containsString:@"@"])
             {
                 DDLogError(@"sanity check failed for inner message node, ignoring message: %@", messageNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
@@ -2149,7 +2149,7 @@ NSString* const kStanza = @"stanza";
                 iqNode.to = nil;
             
             //sanity: check if iq from and to attributes are valid and throw it away if not
-            if([@"" isEqualToString:iqNode.from] || [@"" isEqualToString:iqNode.to])
+            if([@"" isEqualToString:iqNode.from] || [@"" isEqualToString:iqNode.to] || [iqNode.fromHost containsString:@"@"] || [iqNode.toHost containsString:@"@"])
             {
                 DDLogError(@"sanity check failed for iq node, ignoring iq: %@", iqNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
@@ -4413,13 +4413,13 @@ NSString* const kStanza = @"stanza";
     //delete contact request if it exists
     [[DataLayer sharedInstance] deleteContactRequest:contact];
     
-    XMPPPresence* presence = [XMPPPresence new];
-    [presence subscribeContact:contact withPreauthToken:preauthToken];
-    [self send:presence];
+    XMPPPresence* acceptPresence = [XMPPPresence new];
+    [acceptPresence subscribedContact:contact];
+    [self send:acceptPresence];
     
-    XMPPPresence* presence2 = [XMPPPresence new];
-    [presence2 subscribedContact:contact];
-    [self send:presence2];
+    XMPPPresence* subscribePresence = [XMPPPresence new];
+    [subscribePresence subscribeContact:contact withPreauthToken:preauthToken];
+    [self send:subscribePresence];
 }
 
 -(void) updateRosterItem:(MLContact*) contact withName:(NSString*) name
@@ -5180,7 +5180,7 @@ NSString* const kStanza = @"stanza";
 -(void) handleFinishedCatchup
 {
     self->_catchupDone = YES;
-    self.isDoingFullReconnect = NO;
+    self.isDoingFullReconnect = !self.connectionProperties.supportsSM3;
     
     //log catchup statistics
     [self logCatchupStats];

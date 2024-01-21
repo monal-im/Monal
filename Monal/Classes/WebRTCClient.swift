@@ -165,13 +165,13 @@ final class WebRTCClient: NSObject {
     
     // MARK: Media
     @objc
-    func startCaptureLocalVideo(renderer: RTCVideoRenderer) {
+    func startCaptureLocalVideo(renderer: RTCVideoRenderer, andCameraPosition position: AVCaptureDevice.Position) {
         guard let capturer = self.videoCapturer as? RTCCameraVideoCapturer else {
             return
         }
-
+        
         guard
-            let frontCamera = (RTCCameraVideoCapturer.captureDevices().first { $0.position == .front }),
+            let frontCamera = (RTCCameraVideoCapturer.captureDevices().first { $0.position == position }),
         
             // choose highest res
             let format = (RTCCameraVideoCapturer.supportedFormats(for: frontCamera).sorted { (f1, f2) -> Bool in
@@ -190,6 +190,19 @@ final class WebRTCClient: NSObject {
                               fps: Int(fps.maxFrameRate))
         
         self.localVideoTrack?.add(renderer)
+    }
+    
+    @objc
+    func myUpdateOrientation() {
+        DDLogDebug("Ignoring device orientation change in webrtc...")
+    }
+    
+    @objc
+    func stopCaptureLocalVideo() {
+        guard let capturer = self.videoCapturer as? RTCCameraVideoCapturer else {
+            return
+        }
+        capturer.stopCapture()
     }
     
     @objc
@@ -254,6 +267,17 @@ final class WebRTCClient: NSObject {
         #else
         self.videoCapturer = RTCCameraVideoCapturer(delegate: videoSource)
         #endif
+        
+        //see https://bugs.chromium.org/p/webrtc/issues/detail?id=10006#c2
+        //this sometimes doesn't swizzle the method (observable because a device orientation change does not call our myUpdateOrientation method)
+        //but: why??
+        let aClass: AnyClass! = object_getClass(self.videoCapturer!)
+        let bClass: AnyClass! = object_getClass(self)
+        if self.videoCapturer!.responds(to: NSSelectorFromString("updateOrientation")) {
+            let swizzledMethod = class_getInstanceMethod(aClass, NSSelectorFromString("updateOrientation"))
+            let originalMethod = class_getInstanceMethod(bClass, NSSelectorFromString("myUpdateOrientation"))
+            method_exchangeImplementations(originalMethod!, swizzledMethod!)
+        }
         
         let videoTrack = WebRTCClient.factory.videoTrack(with: videoSource, trackId: "video0")
         return videoTrack

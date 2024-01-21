@@ -2342,11 +2342,7 @@ enum msgSentState {
             } else  {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     NSDictionary* info = [MLFiletransfer getFileInfoForMessage:[self.messageList objectAtIndex:indexPath.row]];
-                    UIImage* image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
-                    NSData* animatedImageData = nil;
-                    if([info[@"mimeType"] hasPrefix:@"image/gif"])
-                        animatedImageData = [NSData dataWithContentsOfFile:info[@"cacheFile"]];
-                    UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewer:image withFilename:info[@"filename"] andAnimatedImageData:animatedImageData];
+                    UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewerForInfo:info];
                     imageViewer.modalPresentationStyle = UIModalPresentationOverFullScreen;
                     [self presentViewController:imageViewer animated:YES completion:^{}];
                 });

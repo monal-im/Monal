@@ -75,13 +75,17 @@ struct ContactResources: View {
                     .frame(height: 20)
                 Section {
                     let capsVer = DataLayer.sharedInstance().getVerForUser(self.contact.contactJid, andResource:resource, onAccountNo:self.contact.accountId)
-                    let caps = Array(DataLayer.sharedInstance().getCapsforVer(capsVer) as! Set<String>)
-                    VStack(alignment: .leading) {
-                        ForEach(caps, id: \.self) { cap in
-                            Text(cap)
-                                .font(.system(.footnote, design:.monospaced))
-                            if cap != caps.last {
-                                Divider()
+                    Text("Caps hash: \(String(describing:capsVer))")
+                    Divider()
+                    if let capsSet = DataLayer.sharedInstance().getCapsforVer(capsVer) as? Set<String> {
+                        let caps = Array(capsSet)
+                        VStack(alignment: .leading) {
+                            ForEach(caps, id: \.self) { cap in
+                                Text(cap)
+                                    .font(.system(.footnote, design:.monospaced))
+                                if cap != caps.last {
+                                    Divider()
+                                }
                             }
                         }
                     }

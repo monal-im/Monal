@@ -39,6 +39,7 @@ struct AVCallUI: View {
         y: UIScreen.main.bounds.size.height/5.0/2.0 + 16.0
     )
     @State private var cameraPosition: AVCaptureDevice.Position = .front
+    @State private var sendingVideo = true
     private var ringingPlayer: AVAudioPlayer!
     private var busyPlayer: AVAudioPlayer!
     private var errorPlayer: AVAudioPlayer!
@@ -202,6 +203,14 @@ struct AVCallUI: View {
                 .gesture(DragGesture().onChanged { value in
                     self.localRendererLocation = value.location
                 })
+                .onTapGesture(count: 2) {
+                    if sendingVideo {
+                        call.obj.hideVideo()
+                    } else {
+                        call.obj.showVideo()
+                    }
+                    sendingVideo = !sendingVideo
+                }
             }
             
             if MLCallType(rawValue:call.callType) == .audio ||
@@ -627,7 +636,9 @@ struct AVCallUI: View {
             busyPlayer.stop()
             errorPlayer.stop()
             
-            call.obj.stopCaptureLocalVideo()
+            if MLCallType(rawValue:call.callType) == .video {
+                call.obj.stopCaptureLocalVideo()
+            }
         }
         .onChange(of: MLCallState(rawValue:call.state)) { state in
             DDLogVerbose("call state changed: \(String(describing:call.state as NSNumber))")

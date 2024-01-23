@@ -39,7 +39,6 @@ struct AVCallUI: View {
         y: UIScreen.main.bounds.size.height/5.0/2.0 + 16.0
     )
     @State private var cameraPosition: AVCaptureDevice.Position = .front
-    @State private var cameraPositionButtonVisible = false
     private var ringingPlayer: AVAudioPlayer!
     private var busyPlayer: AVAudioPlayer!
     private var errorPlayer: AVAudioPlayer!
@@ -182,7 +181,7 @@ struct AVCallUI: View {
                         //this will sometimes only honor the width and ignore the height
                         .frame(width: UIScreen.main.bounds.size.width/5.0, height: UIScreen.main.bounds.size.height/5.0)
                     
-                    if cameraPositionButtonVisible {
+                    if controlsVisible {
                         Button(action: {
                             if cameraPosition == .front {
                                 cameraPosition = .back
@@ -191,7 +190,6 @@ struct AVCallUI: View {
                             }
                             call.obj.stopCaptureLocalVideo()
                             maybeStartRenderer()
-                            cameraPositionButtonVisible = false
                         }, label: {
                             Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
                                 .resizable()
@@ -204,9 +202,6 @@ struct AVCallUI: View {
                 .gesture(DragGesture().onChanged { value in
                     self.localRendererLocation = value.location
                 })
-                .onTapGesture(count: 1) {
-                    cameraPositionButtonVisible = !cameraPositionButtonVisible
-                }
             }
             
             if MLCallType(rawValue:call.callType) == .audio ||
@@ -560,7 +555,6 @@ struct AVCallUI: View {
         }
         .onTapGesture(count: 1) {
             controlsVisible = !controlsVisible
-            cameraPositionButtonVisible = false
         }
         .alert(isPresented: $showMicAlert) {
             Alert(

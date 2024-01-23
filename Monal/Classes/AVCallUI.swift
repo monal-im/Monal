@@ -73,7 +73,7 @@ struct AVCallUI: View {
     
     func maybeStartRenderer() {
         if MLCallType(rawValue:call.callType) == .video && MLCallState(rawValue:call.state) == .connected {
-            DDLogError("Starting renderer...")
+            DDLogInfo("Starting local and remote video renderers...")
             call.obj.startCaptureLocalVideo(withRenderer: self.localRenderer, andCameraPosition:cameraPosition)
             call.obj.renderRemoteVideo(withRenderer: self.remoteRenderer)
         }

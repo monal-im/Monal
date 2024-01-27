@@ -581,7 +581,7 @@ NSString* const kStanza = @"stanza";
     //open sockets and start connecting (including TLS handshake if isDirectTLS==YES)
     DDLogInfo(@"opening TCP streams");
     [_oStream setDelegate:self];
-    [_oStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    [_oStream scheduleInRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
     _iPipe = [[MLPipe alloc] initWithInputStream:localIStream andOuterDelegate:self];
     [localIStream open];
     [_oStream open];
@@ -1160,7 +1160,7 @@ NSString* const kStanza = @"stanza";
         [self cleanupSendQueue];
         
         //remove from runloop *after* cleaning up sendQueue (maybe this fixes a rare crash)
-        [self->_oStream removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+        [self->_oStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
 
         DDLogInfo(@"resetting internal stream state to disconnected");
         self->_startTLSComplete = NO;

@@ -453,6 +453,47 @@ void swizzle(Class c, SEL orig, SEL new)
     ];
 }
 
++(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier
+{
+    static NSMutableDictionary* runloops = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        runloops = [NSMutableDictionary new];
+    });
+    
+    //every identifier has its own thread priority/qos class
+    __block dispatch_queue_priority_t priority;
+    switch(identifier)
+    {
+        case MLRunLoopIdentifierNetwork: priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND; break;
+        default: unreachable(@"unknown runloop identifier!");
+    }
+    
+    @synchronized(runloops) {
+        if(runloops[@(identifier)] == nil)
+        {
+            NSCondition* condition = [NSCondition new];
+            [condition lock];
+            dispatch_async(dispatch_get_global_queue(priority, 0), ^{
+                //we don't need an @synchronized block around this because the @synchronized block of the outer thread
+                //waits until we signal our condition (e.g. no other thread can race with us)
+                NSRunLoop* localLoop = runloops[@(identifier)] = [NSRunLoop currentRunLoop];
+                [condition lock];
+                [condition signal];
+                [condition unlock];
+                while(YES)
+                {
+                    [localLoop run];
+                    usleep(10000);          //sleep 10ms if we ever return from our runloop to not consume too much cpu
+                }
+            });
+            [condition wait];
+            [condition unlock];
+        }
+        return runloops[@(identifier)];
+    }
+}
+
 +(NSError* _Nullable) hardLinkOrCopyFile:(NSString*) from to:(NSString*) to
 {
     NSError* error = nil;

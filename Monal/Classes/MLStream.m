@@ -44,14 +44,14 @@
 @interface MLInputStream()
 {
     NSMutableData* _buf;
-    BOOL _reading;
+    volatile __block BOOL _reading;
 }
 @property (atomic, readonly) void (^incoming_data_handler)(NSData* _Nullable, BOOL, NSError* _Nullable);
 @end
 
 @interface MLOutputStream()
 {
-    unsigned long _writing;
+    volatile __block unsigned long _writing;
 }
 @end
 
@@ -80,7 +80,7 @@
     _buf = [NSMutableData new];
     _reading = NO;
     
-    //this handler will be called by our framer or the schedule_read method
+    //this handler will be called by the schedule_read method
     //since the framer swallows all data, nw_connection_receive() and the framer cannot race against each other and deliver reordered data
     weakify(self);
     _incoming_data_handler = ^(NSData* _Nullable content, BOOL is_complete, NSError* _Nullable st_error) {
@@ -89,7 +89,10 @@
             return;
         
         DDLogVerbose(@"Incoming data handler called with is_complete=%@, st_error=%@, content=%@", bool2str(is_complete), st_error, content);
-        self->_reading = NO;
+        @synchronized(self.shared_state) {
+            DDLogVerbose(@"Setting _reading to no...");
+            self->_reading = NO;
+        }
         
         //handle content received
         if(content != NULL)
@@ -190,13 +193,14 @@
             return;
         }
         
-        //don't call nw_connection_receive() twice: this will introduce race conditions
+        //don't call nw_connection_receive() or nw_framer_parse_input() twice: this will introduce race conditions
         if(_reading)
         {
             DDLogWarn(@"Not calling nw_connection_receive: already reading!");
             //TODO: does this ever happen??
             unreachable(@"Not calling nw_connection_receive: already reading!");
         }
+        DDLogVerbose(@"Setting _reading to yes...");
         _reading = YES;
         
         if(self.shared_state.framer != nil)

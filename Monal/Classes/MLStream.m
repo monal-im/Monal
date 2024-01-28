@@ -45,8 +45,12 @@
 {
     NSMutableData* _buf;
     volatile __block BOOL _reading;
+    //this semaphore will make sure that at most only one call to nw_connection_receive() or nw_framer_parse_input() is in flight
+    //we use it as mutex: be careful to never increase it beyond 1!!
+    //(mutexes can not be unlocked in a thread different from the one it got locked in and NSLock internally uses mutext --> both can not be used)
+    dispatch_semaphore_t _read_sem;
 }
-@property (atomic, readonly) void (^incoming_data_handler)(NSData* _Nullable, BOOL, NSError* _Nullable);
+@property (atomic, readonly) void (^incoming_data_handler)(NSData* _Nullable, BOOL, NSError* _Nullable, BOOL allow_next_read);
 @end
 
 @interface MLOutputStream()
@@ -79,20 +83,23 @@
     self = [super initWithSharedState:shared];
     _buf = [NSMutableData new];
     _reading = NO;
+    //(see the comments added to the declaration of this member var)
+    _read_sem = dispatch_semaphore_create(1);       //the first schedule_read call is always allowed
     
     //this handler will be called by the schedule_read method
     //since the framer swallows all data, nw_connection_receive() and the framer cannot race against each other and deliver reordered data
     weakify(self);
-    _incoming_data_handler = ^(NSData* _Nullable content, BOOL is_complete, NSError* _Nullable st_error) {
+    _incoming_data_handler = ^(NSData* _Nullable content, BOOL is_complete, NSError* _Nullable st_error, BOOL allow_next_read) {
         strongify(self);
         if(self == nil)
             return;
         
         DDLogVerbose(@"Incoming data handler called with is_complete=%@, st_error=%@, content=%@", bool2str(is_complete), st_error, content);
         @synchronized(self.shared_state) {
-            DDLogVerbose(@"Setting _reading to no...");
             self->_reading = NO;
         }
+        BOOL generate_bytes_available_event = NO;
+        BOOL generate_error_event = NO;
         
         //handle content received
         if(content != NULL)
@@ -102,7 +109,7 @@
                 @synchronized(self->_buf) {
                     [self->_buf appendData:content];
                 }
-                [self generateEvent:NSStreamEventHasBytesAvailable];
+                generate_bytes_available_event = YES;
             }
         }
         
@@ -117,14 +124,26 @@
                 @synchronized(self.shared_state) {
                     self.shared_state.error = st_error;
                 }
-                [self generateEvent:NSStreamEventErrorOccurred];
+                generate_error_event = YES;
             }
         }
         
-        //check if we're read-closed and stop our loop if true
-        //this has to be done *after* processing content
+        //allow new call to schedule_read
+        //(see the comments added to the declaration of this member var)
+        dispatch_semaphore_signal(self->_read_sem);
+        
+        //emit events
+        if(generate_bytes_available_event)
+            [self generateEvent:NSStreamEventHasBytesAvailable];
+        if(generate_error_event)
+            [self generateEvent:NSStreamEventErrorOccurred];
+        //check if we're read-closed and stop our loop if true (this has to be done *after* processing content)
         if(is_complete)
             [self generateEvent:NSStreamEventEndEncountered];
+        
+        //try to read again
+        if(!is_complete && !generate_bytes_available_event && allow_next_read)
+            [self schedule_read];
     };
     return self;
 }
@@ -156,18 +175,23 @@
     //this has to be done outside of our @synchronized block
     if(was_smaller)
         [self generateEvent:NSStreamEventHasBytesAvailable];
-    else
+    else if(len > 0)        //only do this if we really provided some data to the reader
+    {
+        //buffered data got retrieved completely --> schedule new read
         [self schedule_read];
+    }
     return len;
 }
 
 -(BOOL) getBuffer:(uint8_t* _Nullable *) buffer length:(NSUInteger*) len
 {
+    return NO;      //this method is not available in this implementation
+    /*
     @synchronized(_buf) {
         *len = [_buf length];
         *buffer = (uint8_t* _Nullable)[_buf bytes];
         return YES;
-    }
+    }*/
 }
 
 -(BOOL) hasBytesAvailable
@@ -179,8 +203,10 @@
 
 -(NSStreamStatus) streamStatus
 {
-    if(self.open_called && self.shared_state.open && _reading)
-        return NSStreamStatusReading;
+    @synchronized(self.shared_state) {
+        if(self.open_called && self.shared_state.open && _reading)
+            return NSStreamStatusReading;
+    }
     return [super streamStatus];
 }
 
@@ -193,24 +219,24 @@
             return;
         }
         
-        //don't call nw_connection_receive() or nw_framer_parse_input() twice: this will introduce race conditions
-        if(_reading)
+        //don't call nw_connection_receive() or nw_framer_parse_input() multiple times in parallel: this will introduce race conditions
+        //(see the comments added to the declaration of this member var)
+        if(dispatch_semaphore_wait(_read_sem, DISPATCH_TIME_NOW) != 0)
         {
-            DDLogWarn(@"Not calling nw_connection_receive: already reading!");
-            //TODO: does this ever happen??
-            unreachable(@"Not calling nw_connection_receive: already reading!");
+            DDLogWarn(@"Ignoring call to schedule_read, reading already in progress...");
+            return;
         }
-        DDLogVerbose(@"Setting _reading to yes...");
         _reading = YES;
         
         if(self.shared_state.framer != nil)
         {
-            DDLogVerbose(@"dispatching async call to nw_framer_parse_input into framer queue");
+            DDLogDebug(@"dispatching async call to nw_framer_parse_input into framer queue");
             nw_framer_async(self.shared_state.framer, ^{
-                DDLogVerbose(@"now calling nw_framer_parse_input inside framer queue");
+                DDLogDebug(@"now calling nw_framer_parse_input inside framer queue");
                 nw_framer_parse_input(self.shared_state.framer, 1, BUFFER_SIZE, nil, ^size_t(uint8_t* buffer, size_t buffer_length, bool is_complete) {
-                    DDLogVerbose(@"nw_framer_parse_input got callback with is_complete:%@, length=%zu", bool2str(is_complete), (unsigned long)buffer_length);
-                    self.incoming_data_handler([NSData dataWithBytes:buffer length:buffer_length], is_complete, nil);
+                    DDLogDebug(@"nw_framer_parse_input got callback with is_complete:%@, length=%zu", bool2str(is_complete), (unsigned long)buffer_length);
+                    //we only want to allow new calls to schedule_read if we received some data --> set last arg accordingly
+                    self.incoming_data_handler([NSData dataWithBytes:buffer length:buffer_length], is_complete, nil, buffer_length > 0);
                     return buffer_length;
                 });
             });
@@ -223,7 +249,8 @@
                 NSError* st_error = nil;
                 if(receive_error)
                     st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(receive_error));
-                self.incoming_data_handler((NSData*)content, is_complete, st_error);
+                //we always want to allow new calls to schedule_read --> set last arg to YES
+                self.incoming_data_handler((NSData*)content, is_complete, st_error, YES);
             });
         }
     }
@@ -233,9 +260,13 @@
 {
     @synchronized(self.shared_state) {
         [super generateEvent:event];
-        //don't call schedule_read if a framer is active: the framer will call it itself
+        //in contrast to the normal nw_receive, the framer receive will not block until we receive any data
+        //--> don't call schedule_read if a framer is active, the framer will call it itself once it gets signalled that data is available
         if(event == NSStreamEventOpenCompleted && self.open_called && self.shared_state.open && self.shared_state.framer == nil)
+        {
+            //we are open now --> allow reading (this will block until we receive any data)
             [self schedule_read];
+        }
     }
 }
 
@@ -386,7 +417,7 @@
 +(void) connectWithSNIDomain:(NSString*) SNIDomain connectHost:(NSString*) host connectPort:(NSNumber*) port tls:(BOOL) tls inputStream:(NSInputStream* _Nullable * _Nonnull) inputStream  outputStream:(NSOutputStream* _Nullable * _Nonnull) outputStream
 {
     //create state
-    __block BOOL wasOpenOnce = NO;
+    volatile __block BOOL wasOpenOnce = NO;
     MLSharedStreamState* shared_state = [[MLSharedStreamState alloc] init];
     
     //create and configure public stream instances returned later
@@ -427,11 +458,10 @@
         shared_state.hasTLS = NO;
         
         //create simple framer and append it to our stack
-        __block int startupCounter = 0;     //workaround for some weird apple stuff, see below
+        volatile __block int startupCounter = 0;     //workaround for some weird apple stuff, see below
         nw_protocol_definition_t starttls_framer_definition = nw_framer_create_definition([[[NSUUID UUID] UUIDString] UTF8String], NW_FRAMER_CREATE_FLAGS_DEFAULT, ^(nw_framer_t framer) {
             //we don't need any locking for our counter because all framers will be started in the same internal network queue
-            int framerId = startupCounter;
-            startupCounter++;
+            int framerId = startupCounter++;
             DDLogInfo(@"Framer(%d) %@ start called with wasOpenOnce=%@...", framerId, framer, bool2str(wasOpenOnce));
             nw_framer_set_stop_handler(framer, (nw_framer_stop_handler_t)^(nw_framer_t _Nullable framer) {
                 DDLogInfo(@"Framer(%d) stop called: %@", framerId, framer);
@@ -551,13 +581,15 @@
                 //this informs the upper layer that the connection is in ready state now, but we already treat the framer start
                 //as connection ready event
                 
-                //tls handshake completed now
-                shared_state.hasTLS = YES;
-                
-                //unlock thread waiting on tls handshake completion (starttls)
-                [shared_state.tlsHandshakeCompleteCondition lock];
-                [shared_state.tlsHandshakeCompleteCondition signal];
-                [shared_state.tlsHandshakeCompleteCondition unlock];
+                @synchronized(shared_state) {
+                    //tls handshake completed now
+                    shared_state.hasTLS = YES;
+                    
+                    //unlock thread waiting on tls handshake completion (starttls)
+                    [shared_state.tlsHandshakeCompleteCondition lock];
+                    [shared_state.tlsHandshakeCompleteCondition signal];
+                    [shared_state.tlsHandshakeCompleteCondition unlock];
+                }
                 
                 //we still want to inform our stream users that they can write data now and schedule a read operation
                 [output generateEvent:NSStreamEventHasSpaceAvailable];

@@ -202,7 +202,7 @@ static uint8_t _staticOutputBuffer[kPipeBufferSize+1];      //+1 for '\0' needed
         //return here if we have nothing to read
         if(![_input hasBytesAvailable])
         {
-            DDLogDebug(@"stopped pipe processing: nothing to read");
+            DDLogVerbose(@"stopped pipe processing: nothing to read");
             return;
         }
         

@@ -193,11 +193,6 @@ final class WebRTCClient: NSObject {
     }
     
     @objc
-    func myUpdateOrientation() {
-        DDLogDebug("Ignoring device orientation change in webrtc...")
-    }
-    
-    @objc
     func stopCaptureLocalVideo() {
         guard let capturer = self.videoCapturer as? RTCCameraVideoCapturer else {
             return
@@ -269,18 +264,23 @@ final class WebRTCClient: NSObject {
         #endif
         
         //see https://bugs.chromium.org/p/webrtc/issues/detail?id=10006#c2
-        //this sometimes doesn't swizzle the method (observable because a device orientation change does not call our myUpdateOrientation method)
-        //but: why??
         let aClass: AnyClass! = object_getClass(self.videoCapturer!)
         let bClass: AnyClass! = object_getClass(self)
         if self.videoCapturer!.responds(to: NSSelectorFromString("updateOrientation")) {
+            DDLogWarn("Swizzling method 'updateOrientation' of video capturer...")
             let swizzledMethod = class_getInstanceMethod(aClass, NSSelectorFromString("updateOrientation"))
-            let originalMethod = class_getInstanceMethod(bClass, NSSelectorFromString("myUpdateOrientation"))
-            method_exchangeImplementations(originalMethod!, swizzledMethod!)
+            let replacementMethod = class_getInstanceMethod(bClass, NSSelectorFromString("dummyUpdateOrientation"))
+            let replacementImplementation = method_getImplementation(replacementMethod!)
+            method_setImplementation(swizzledMethod!, replacementImplementation)
         }
         
         let videoTrack = WebRTCClient.factory.videoTrack(with: videoSource, trackId: "video0")
         return videoTrack
+    }
+    
+    @objc
+    func dummyUpdateOrientation() {
+        DDLogDebug("Ignoring device orientation change in webrtc...")
     }
     
     // MARK: Data Channels

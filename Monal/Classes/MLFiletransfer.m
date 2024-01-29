@@ -221,6 +221,13 @@ static NSObject* _hardlinkingSyncObject;
                 if(encryptedData && encryptedData.length > 0 && key && key.length == 32 && iv && iv.length == 12)
                 {
                     NSData* decryptedData = [AESGcm decrypt:encryptedData withKey:key andIv:iv withAuth:nil];
+                    if(decryptedData == nil)
+                    {
+                        DDLogError(@"File download decryption failed");
+                        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt download", @"") forMessageId:msg.messageId];
+                        [self markAsComplete:historyId];
+                        return;
+                    }
                     [decryptedData writeToFile:cacheFile options:NSDataWritingAtomic error:&error];
                     if(error)
                     {

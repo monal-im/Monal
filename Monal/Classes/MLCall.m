@@ -139,17 +139,32 @@
 
 -(void) startCaptureLocalVideoWithRenderer:(id<RTCVideoRenderer>) renderer andCameraPosition:(AVCaptureDevicePosition) position
 {
+    MLAssert(self.callType == MLCallTypeVideo, @"startCaptureLocalVideoWithRenderer:andCameraPosition: can only be called for video calls!");
     [self.webRTCClient startCaptureLocalVideoWithRenderer:renderer andCameraPosition:position];
 }
 
 -(void) stopCaptureLocalVideo
 {
+    MLAssert(self.callType == MLCallTypeVideo, @"stopCaptureLocalVideo: can only be called for video calls!");
     [self.webRTCClient stopCaptureLocalVideo];
 }
 
 -(void) renderRemoteVideoWithRenderer:(id<RTCVideoRenderer>) renderer
 {
+    MLAssert(self.callType == MLCallTypeVideo, @"renderRemoteVideoWithRenderer: can only be called for video calls!");
     [self.webRTCClient renderRemoteVideoTo:renderer];
+}
+
+-(void) hideVideo
+{
+    MLAssert(self.callType == MLCallTypeVideo, @"hideVideo: can only be called for video calls!");
+    [self.webRTCClient hideVideo];
+}
+
+-(void) showVideo
+{
+    MLAssert(self.callType == MLCallTypeVideo, @"showVideo: can only be called for video calls!");
+    [self.webRTCClient showVideo];
 }
 
 -(void) end

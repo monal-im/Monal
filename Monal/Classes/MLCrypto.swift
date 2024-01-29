@@ -57,7 +57,7 @@ public class MLCrypto: NSObject {
             let decryptedData = try AES.GCM.open(sealedBoxToOpen, using: gcmKey)
             return decryptedData
         } catch {
-            DDLogWarn("Could not decryptGCM. Returning nil instead")
+            DDLogWarn("Could not decrypt GCM. Returning nil instead: \(String(describing:error))")
             return nil;
         }
     }

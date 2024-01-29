@@ -39,7 +39,7 @@ struct AVCallUI: View {
         y: UIScreen.main.bounds.size.height/5.0/2.0 + 16.0
     )
     @State private var cameraPosition: AVCaptureDevice.Position = .front
-    @State private var cameraPositionButtonVisible = false
+    @State private var sendingVideo = true
     private var ringingPlayer: AVAudioPlayer!
     private var busyPlayer: AVAudioPlayer!
     private var errorPlayer: AVAudioPlayer!
@@ -73,7 +73,7 @@ struct AVCallUI: View {
     
     func maybeStartRenderer() {
         if MLCallType(rawValue:call.callType) == .video && MLCallState(rawValue:call.state) == .connected {
-            DDLogError("Starting renderer...")
+            DDLogInfo("Starting local and remote video renderers...")
             call.obj.startCaptureLocalVideo(withRenderer: self.localRenderer, andCameraPosition:cameraPosition)
             call.obj.renderRemoteVideo(withRenderer: self.remoteRenderer)
         }
@@ -182,7 +182,7 @@ struct AVCallUI: View {
                         //this will sometimes only honor the width and ignore the height
                         .frame(width: UIScreen.main.bounds.size.width/5.0, height: UIScreen.main.bounds.size.height/5.0)
                     
-                    if cameraPositionButtonVisible {
+                    if controlsVisible {
                         Button(action: {
                             if cameraPosition == .front {
                                 cameraPosition = .back
@@ -191,7 +191,6 @@ struct AVCallUI: View {
                             }
                             call.obj.stopCaptureLocalVideo()
                             maybeStartRenderer()
-                            cameraPositionButtonVisible = false
                         }, label: {
                             Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
                                 .resizable()
@@ -204,8 +203,13 @@ struct AVCallUI: View {
                 .gesture(DragGesture().onChanged { value in
                     self.localRendererLocation = value.location
                 })
-                .onTapGesture(count: 1) {
-                    cameraPositionButtonVisible = !cameraPositionButtonVisible
+                .onTapGesture(count: 2) {
+                    if sendingVideo {
+                        call.obj.hideVideo()
+                    } else {
+                        call.obj.showVideo()
+                    }
+                    sendingVideo = !sendingVideo
                 }
             }
             
@@ -560,7 +564,6 @@ struct AVCallUI: View {
         }
         .onTapGesture(count: 1) {
             controlsVisible = !controlsVisible
-            cameraPositionButtonVisible = false
         }
         .alert(isPresented: $showMicAlert) {
             Alert(
@@ -633,7 +636,9 @@ struct AVCallUI: View {
             busyPlayer.stop()
             errorPlayer.stop()
             
-            call.obj.stopCaptureLocalVideo()
+            if MLCallType(rawValue:call.callType) == .video {
+                call.obj.stopCaptureLocalVideo()
+            }
         }
         .onChange(of: MLCallState(rawValue:call.state)) { state in
             DDLogVerbose("call state changed: \(String(describing:call.state as NSNumber))")

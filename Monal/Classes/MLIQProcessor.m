@@ -6,6 +6,7 @@
 //  Copyright © 2019 Monal.im. All rights reserved.
 //
 
+#import <stdatomic.h>
 #import "MLIQProcessor.h"
 #import "MLConstants.h"
 #import "MLHandler.h"
@@ -502,6 +503,7 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         [account mamFinishedFor:account.connectionProperties.identity.jid];
     }
     
+    atomic_thread_fence(memory_order_seq_cst);  //make sure our connection properties are "visible" to other threads before marking them as such
     account.connectionProperties.accountDiscoDone = YES;
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalAccountDiscoDone object:account];
 $$

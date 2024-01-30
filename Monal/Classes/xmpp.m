@@ -578,8 +578,9 @@ NSString* const kStanza = @"stanza";
     else
         DDLogInfo(@"streams created ok");
     
-    //open sockets and start connecting (including TLS handshake if isDirectTLS==YES)
+    //open sockets, init pipe and start connecting (including TLS handshake if isDirectTLS==YES)
     DDLogInfo(@"opening TCP streams");
+    _pipeliningState = kPipelinedNothing;
     [_oStream setDelegate:self];
     [_oStream scheduleInRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
     _iPipe = [[MLPipe alloc] initWithInputStream:localIStream andOuterDelegate:self];
@@ -587,13 +588,12 @@ NSString* const kStanza = @"stanza";
     [_oStream open];
     DDLogInfo(@"TCP streams opened");
     
-    _pipeliningState = kPipelinedNothing;
+    //prepare xmpp parser (this is the first time for this connection --> we don't need to clear the receive queue)
+    [self prepareXMPPParser];
     
-    //tcp fast open is only supperted when connecting through network framework which is only supported when using direct tls
+    //MLStream will automatically use tcp fast open for direct tls connections
     if(self.connectionProperties.server.isDirectTLS == YES)
     {
-        //prepare xmpp parser (this is the first time for this connection --> we don't need to clear the receive queue)
-        [self prepareXMPPParser];
         [self startXMPPStreamWithXMLOpening:YES];
         
         //pipeline auth request onto our stream header if we have cached stream features available
@@ -606,14 +606,10 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
-        //prepare xmpp parser (this is the first time for this connection --> we don't need to clear the receive queue)
-        [self prepareXMPPParser];
-        [self startXMPPStreamWithXMLOpening:YES];
-        
-        //ignore starttls stream feature presence and opportunistically try starttls even before receiving the stream features
-        //(this is in accordance to RFC 7590: https://tools.ietf.org/html/rfc7590#section-3.1 )
-        MLXMLNode* startTLS = [[MLXMLNode alloc] initWithElement:@"starttls" andNamespace:@"urn:ietf:params:xml:ns:xmpp-tls"];
-        [self send:startTLS];
+        //send stream start and starttls nonza as tcp fastopen idempotent data if not in direct tls mode
+        //(this will concatenate everything to one single NSString queue entry)
+        //(not doing this will cause the network framework to only send the first queue entry (the xml opening) but not the stream start itself)
+        [self startXMPPStreamWithXMLOpening:YES withStartTLS:YES andDirectWrite:YES];
     }
 }
 
@@ -1041,9 +1037,9 @@ NSString* const kStanza = @"stanza";
             [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                 //close stream (either with error or normally)
                 if(streamError != nil)
-                    [self writeToStream:[streamError XMLString]];    // dont even bother queueing
+                    [self writeToStream:streamError.XMLString];    // dont even bother queueing
                 MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"/stream:stream"];  //hack to close stream
-                [self writeToStream:[stream XMLString]];    // dont even bother queueing
+                [self writeToStream:stream.XMLString];    // dont even bother queueing
             }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
 
             @synchronized(self->_stateLockObject) {
@@ -1098,9 +1094,9 @@ NSString* const kStanza = @"stanza";
             {
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //close stream with error
-                    [self writeToStream:[streamError XMLString]];    // dont even bother queueing
+                    [self writeToStream:streamError.XMLString];    // dont even bother queueing
                     MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"/stream:stream"];  //hack to close stream
-                    [self writeToStream:[stream XMLString]];    // dont even bother queueing
+                    [self writeToStream:stream.XMLString];    // dont even bother queueing
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
             }
             else
@@ -1388,11 +1384,12 @@ NSString* const kStanza = @"stanza";
 
 -(void) startXMPPStreamWithXMLOpening:(BOOL) withXMLOpening
 {
-    if(withXMLOpening)
-    {
-        MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"__xml"];
-        [self send:xmlOpening];
-    }
+    return [self startXMPPStreamWithXMLOpening:withXMLOpening withStartTLS:NO andDirectWrite:NO];
+}
+
+-(void) startXMPPStreamWithXMLOpening:(BOOL) withXMLOpening withStartTLS:(BOOL) withStartTLS andDirectWrite:(BOOL) directWrite
+{
+    MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"__xml"];
     MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"stream:stream" andNamespace:@"jabber:client" withAttributes:@{
         @"xmlns:stream": @"http://etherx.jabber.org/streams",
         @"version": @"1.0",
@@ -1401,7 +1398,38 @@ NSString* const kStanza = @"stanza";
     //only set from-attribute if TLS is already established
     if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
         stream.attributes[@"from"] = self.connectionProperties.identity.jid;
-    [self send:stream];
+    //ignore starttls stream feature presence and opportunistically try starttls even before receiving the stream features
+    //(this is in accordance to RFC 7590: https://tools.ietf.org/html/rfc7590#section-3.1 )
+    MLXMLNode* startTLS = [[MLXMLNode alloc] initWithElement:@"starttls" andNamespace:@"urn:ietf:params:xml:ns:xmpp-tls"];
+    
+    if(directWrite)
+    {
+        //log stanzas being sent as idempotent data
+        if(withXMLOpening)
+            [self logStanza:xmlOpening withPrefix:@"IDEMPOTENT_SEND"];
+        [self logStanza:stream withPrefix:@"IDEMPOTENT_SEND"];
+        if(withStartTLS)
+            [self logStanza:startTLS withPrefix:@"IDEMPOTENT_SEND"];
+        
+        //concatenate everything and directly write it as one single string, wait until this is finished to make sure
+        //the direct write is complete when returning from here (not strictly needed, but done for good measure)
+        [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
+            [self->_outputQueue addObject:[NSString stringWithFormat:@"%@%@%@",
+                (withXMLOpening ? xmlOpening.XMLString : @""),
+                stream.XMLString,
+                (withStartTLS ? startTLS.XMLString : @"")
+            ]];
+            [self writeFromQueue];      // try to send if there is space
+        }]] waitUntilFinished:YES];
+    }
+    else
+    {
+        if(withXMLOpening)
+            [self send:xmlOpening];
+        [self send:stream];
+        if(withStartTLS)
+            [self send:startTLS];
+    }
 }
 
 -(void) sendPing:(double) timeout
@@ -1719,7 +1747,7 @@ NSString* const kStanza = @"stanza";
     if(queuedSend)
         [self send:aNode];
     else      //this should only be done from sendQueue (e.g. by sendLastAck())
-        [self writeToStream:[aNode XMLString]];		// dont even bother queueing
+        [self writeToStream:aNode.XMLString];		// dont even bother queueing
 }
 
 #pragma mark - stanza handling
@@ -4767,22 +4795,37 @@ NSString* const kStanza = @"stanza";
         return;
     }
     BOOL requestAck=NO;
-    NSMutableArray *queueCopy = [[NSMutableArray alloc] initWithArray:_outputQueue];
+    NSMutableArray* queueCopy = [[NSMutableArray alloc] initWithArray:_outputQueue];
     DDLogVerbose(@"iterating _outputQueue");
-    for(MLXMLNode* node in queueCopy)
+    for(id entry in queueCopy)
     {
-        BOOL success = [self writeToStream:node.XMLString];
+        BOOL success = NO;
+        NSString* entryType = @"unknown";
+        if([entry isKindOfClass:[MLXMLNode class]])
+        {
+            entryType = @"MLXMLNode";
+            MLXMLNode* node = (MLXMLNode*)entry;
+            success = [self writeToStream:node.XMLString];
+            if(success)
+            {
+                //only react to stanzas, not nonzas
+                if([node.element isEqualToString:@"iq"]
+                    || [node.element isEqualToString:@"message"]
+                    || [node.element isEqualToString:@"presence"]) {
+                    requestAck=YES;
+                }
+            }
+        }
+        else
+        {
+            entryType = @"NSString";
+            success = [self writeToStream:entry];
+        }
+
         if(success)
         {
-            //only react to stanzas, not nonzas
-            if([node.element isEqualToString:@"iq"]
-                || [node.element isEqualToString:@"message"]
-                || [node.element isEqualToString:@"presence"]) {
-                requestAck=YES;
-            }
-
-            DDLogVerbose(@"removing sent MLXMLNode from _outputQueue");
-            [_outputQueue removeObject:node];
+            DDLogVerbose(@"removing sent %@ entry from _outputQueue", entryType);
+            [_outputQueue removeObject:entry];
         }
         else        //stop sending the remainder of the queue if the send failed (tcp output buffer full etc.)
         {

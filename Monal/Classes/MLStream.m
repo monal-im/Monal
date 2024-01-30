@@ -320,7 +320,7 @@
     //the call to dispatch_get_main_queue() is a dummy because we are using DISPATCH_DATA_DESTRUCTOR_DEFAULT which is performed inline
     dispatch_data_t data = dispatch_data_create(buffer, len, dispatch_get_main_queue(), DISPATCH_DATA_DESTRUCTOR_DEFAULT);
     
-    //support tcp fast open for all data sent before the connection got opened
+    //support tcp fast open for all data sent before the connection got opened, but only usable for connections NOT using a framer
     /*if(!self.open_called)
     {
         DDLogInfo(@"Sending TCP fast open early data: %@", data);
@@ -458,6 +458,7 @@
         shared_state.hasTLS = NO;
         
         //create simple framer and append it to our stack
+        //first framer initialization is allowed to send tcp early data
         volatile __block int startupCounter = 0;     //workaround for some weird apple stuff, see below
         nw_protocol_definition_t starttls_framer_definition = nw_framer_create_definition([[[NSUUID UUID] UUIDString] UTF8String], NW_FRAMER_CREATE_FLAGS_DEFAULT, ^(nw_framer_t framer) {
             //we don't need any locking for our counter because all framers will be started in the same internal network queue
@@ -499,6 +500,7 @@
             
             //we have to simulate nw_connection_state_ready because the connection state will not reflect that while our framer is active
             //--> use framer start as "connection active" signal
+            //first framer start is allowed to directly send data which will be used as tcp early data
             if(!wasOpenOnce)
             {
                 wasOpenOnce = YES;
@@ -523,8 +525,8 @@
         DDLogInfo(@"Not doing direct TLS: appending framer to protocol stack...");
         nw_protocol_stack_prepend_application_protocol(nw_parameters_copy_default_protocol_stack(parameters), nw_framer_create_options(starttls_framer_definition));
     }
-    //not needed, will be done by apple's tls implementation automatically (only needed for plain tcp and manual sending of idempotent data)
-    //nw_parameters_set_fast_open_enabled(parameters, YES);
+    //needed to activate tcp fast open with apple's internal tls framer
+    nw_parameters_set_fast_open_enabled(parameters, YES);
     
     //create and configure connection object
     nw_endpoint_t endpoint = nw_endpoint_create_host([host cStringUsingEncoding:NSUTF8StringEncoding], [[port stringValue] cStringUsingEncoding:NSUTF8StringEncoding]);

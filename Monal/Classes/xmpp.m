@@ -830,12 +830,6 @@ NSString* const kStanza = @"stanza";
     if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
         [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
     
-    if(![[MLXMPPManager sharedInstance] hasConnectivity])
-    {
-        DDLogInfo(@"no connectivity, ignoring connect call.");
-        return;
-    }
-    
     [self dispatchAsyncOnReceiveQueue: ^{
         [self->_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas from old connections
         [self unfreezeParseQueue];                        //make sure the parse queue is operational again

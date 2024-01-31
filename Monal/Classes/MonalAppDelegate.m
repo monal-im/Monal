@@ -1617,18 +1617,15 @@ $$
         [refreshingTask setTaskCompletedWithSuccess:YES];
     }
     
-    if([[MLXMPPManager sharedInstance] hasConnectivity])
-    {
-        [self startBackgroundTimer:BGPROCESS_GRACEFUL_TIMEOUT];
-        @synchronized(self) {
-            DDLogVerbose(@"Setting _shutdownPending to NO...");
-            _shutdownPending = NO;
-        }
-        //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg task
-        [[MLXMPPManager sharedInstance] connectIfNecessary];
+    MLAssert([[MLXMPPManager sharedInstance] hasConnectivity], @"BGTASK has *no* connectivity? That's strange!");
+    
+    [self startBackgroundTimer:BGPROCESS_GRACEFUL_TIMEOUT];
+    @synchronized(self) {
+        DDLogVerbose(@"Setting _shutdownPending to NO...");
+        _shutdownPending = NO;
     }
-    else
-        DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
+    //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg task
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     //request another execution in BGFETCH_DEFAULT_INTERVAL seconds
     [HelperTools scheduleBackgroundTask:NO];
@@ -1718,18 +1715,15 @@ $$
 //         [[UIApplication sharedApplication] endBackgroundTask:task];
 //     }
     
-    if([[MLXMPPManager sharedInstance] hasConnectivity])
-    {
-        [self startBackgroundTimer:GRACEFUL_TIMEOUT];
-        @synchronized(self) {
-            DDLogVerbose(@"Setting _shutdownPending to NO...");
-            _shutdownPending = NO;
-        }
-        //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg task
-        [[MLXMPPManager sharedInstance] connectIfNecessary];
+    MLAssert([[MLXMPPManager sharedInstance] hasConnectivity], @"BGTASK has *no* connectivity? That's strange!");
+    
+    [self startBackgroundTimer:GRACEFUL_TIMEOUT];
+    @synchronized(self) {
+        DDLogVerbose(@"Setting _shutdownPending to NO...");
+        _shutdownPending = NO;
     }
-    else
-        DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
+    //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg task
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     //request another execution in BGFETCH_DEFAULT_INTERVAL seconds
     [HelperTools scheduleBackgroundTask:NO];

@@ -1415,13 +1415,6 @@ void swizzle(Class c, SEL orig, SEL new)
             DDLogInfo(@"Updating syncError notifications: %@", syncErrorsDisplayed);
             for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
             {
-                //ignore already disconnected accounts (they are always "idle" but this does not reflect the real sync state)
-                //but only do so if we have connectivity (we want to alert the user of pending outgoing stanzas even if we don't have connectivity)
-                if(account.accountState < kStateReconnecting && !account.reconnectInProgress && [[MLXMPPManager sharedInstance] hasConnectivity])
-                {
-                    DDLogDebug(@"Ignoring disconnected account: %@", account);
-                    continue;
-                }
                 NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
                 //dispatching this to the receive queue isn't neccessary anymore, see comments in account.idle
                 if(account.idle)

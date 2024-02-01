@@ -110,13 +110,22 @@ static NSDateFormatter* dbFormatter;
     //checkpoint db before copying db file
     [self.db checkpointWal];
     
-    //copy db file to temp file
-    NSError* error;
-    [fileManager copyItemAtPath:dbPath toPath:temporaryFilePath error:&error];
-    if(error)
-        return nil;
+    //this transaction creates a new wal log and makes sure the file copy is atomic/consistent
+    BOOL success = [self.db boolWriteTransaction:^{
+        //copy db file to temp file
+        NSError* error;
+        [fileManager copyItemAtPath:dbPath toPath:temporaryFilePath error:&error];
+        if(error)
+        {
+            DDLogError(@"Could not copy logfile to export location!");
+            return NO;
+        }
+        return YES;
+    }];
     
-    return temporaryFilePath;
+    if(success)
+        return temporaryFilePath;
+    return nil;
 }
 
 -(void) createTransaction:(monal_void_block_t) block

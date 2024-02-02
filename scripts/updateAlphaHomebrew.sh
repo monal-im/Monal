@@ -4,7 +4,7 @@
 set -e
 
 EPOCH=$(date +%s)
-SHASUM=$(shasum -a 256 ./Monal/build/app/Monal.tar | awk '{print $1}')
+SHASUM=$(shasum -a 256 ./Monal/build/app/Monal.alpha.tar | awk '{print $1}')
 
 echo ""
 echo "*********************************************"

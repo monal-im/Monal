@@ -15,6 +15,8 @@ struct AccountPicker: View {
     let callType: MLCallType
 #if IS_ALPHA
     let appLogoId = "AlphaAppLogo"
+#elseif IS_QUICKSY
+    let appLogoId = "QuicksyAppLogo"
 #else
     let appLogoId = "AppLogo"
 #endif

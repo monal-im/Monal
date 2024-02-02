@@ -53,7 +53,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>monalOpen</string>
+				<string>quicksyOpen</string>
 			</array>
 		</dict>
 	</array>
@@ -77,17 +77,17 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Monal allows users to take photos and upload to a conversation</string>
+	<string>Quicksy allows users to take photos and upload to a conversation</string>
 	<key>NSLocationUsageDescription</key>
-	<string>Monal uses your location when you send a location message in a conversation.</string>
+	<string>Quicksy uses your location when you send a location message in a conversation.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Monal uses your location when you send a location message in a conversation.</string>
+	<string>Quicksy uses your location when you send a location message in a conversation.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Monal uses the microphone to transmit your voice in audio messages or calls.</string>
+	<string>Quicksy uses the microphone to transmit your voice in audio messages or calls.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Monal allows users to save photos received in conversations.</string>
+	<string>Quicksy allows users to save photos received in conversations.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Monal allows users to upload photos to recipients in a conversation</string>
+	<string>Quicksy allows users to upload photos to recipients in a conversation</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>INSendMessageIntent</string>

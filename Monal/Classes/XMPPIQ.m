@@ -69,12 +69,16 @@ NSString* const kiqErrorType = @"error";
 #ifdef IS_ALPHA
     [pushModule appendString:@"monalAlpha"];
 #else //IS_ALPHA
-#if TARGET_OS_MACCATALYST
+#if TARGET_OS_MACCATALYST && defined(IS_QUICKSY)
+    [pushModule appendString:@"quicksyProdCatalyst"];
+#elif TARGET_OS_MACCATALYST
     [pushModule appendString:@"monalProdCatalyst"];
-#else //TARGET_OS_MACCATALYST
+#elif defined(IS_QUICKSY)
+    [pushModule appendString:@"quicksyProdiOS"];
+#else
     [pushModule appendString:@"monalProdiOS"];
-#endif //NOT TARGET_OS_MACCATALYST
-#endif //NOT IS_ALPHA
+#endif
+#endif
 
     if([[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"])
     {

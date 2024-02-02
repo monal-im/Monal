@@ -89,8 +89,31 @@ static NSDateFormatter* dbFormatter;
 
 -(id) init
 {
-    //check db version on first db open only
-    [self version];
+    self = [super init];
+    
+    //checking db version and upgrading if necessary
+    DDLogInfo(@"Database version check");
+
+    //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
+    //this is a special case because it can not be done while in a transaction!!!
+    [self.db enableWAL];
+
+    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
+    [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+    [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
+
+    //do db upgrades and vacuum db afterwards
+    if([DataLayerMigrations migrateDB:self.db withDataLayer:self])
+        [self.db vacuum];
+
+    //turn foreign keys on again
+    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
+    [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+    
+    DDLogInfo(@"Database version check completed");
+    
     return self;
 }
 
@@ -131,36 +154,6 @@ static NSDateFormatter* dbFormatter;
 -(void) createTransaction:(monal_void_block_t) block
 {
     [self.db voidWriteTransaction:block];
-}
-
--(void) version
-{
-    // checking db version and upgrading if necessary
-    DDLogInfo(@"Database version check");
-
-    //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
-    //this is a special case because it can not be done while in a transaction!!!
-    [self.db enableWAL];
-
-    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
-    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
-    [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
-    [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
-
-    // Vacuum after db updates
-    if([DataLayerMigrations migrateDB:self.db withDataLayer:self])
-    {
-        [self.db vacuum];
-        DDLogInfo(@"Database Vacuum complete");
-    }
-
-    //turn foreign keys on again
-    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
-    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
-    [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
-    
-    DDLogInfo(@"Database version check completed");
-    return;
 }
 
 #pragma mark account commands

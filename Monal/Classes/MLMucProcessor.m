@@ -225,17 +225,33 @@ static NSDictionary* _optionalGroupConfigOptions;
         return;
     }
     
-    //check for all other errors
-    if([presenceNode findFirst:@"/<type=error>"])
+    //check for all other errors (these can happen if the muc is discoverable but joining somehow fails nonetheless like with biboumi)
+    if([presenceNode check:@"/<type=error>/error<type=wait>"])
     {
-        DDLogError(@"got muc error presence of %@!", presenceNode.fromUser);
+        DDLogError(@"Got transient muc error presence of %@: %@", presenceNode.fromUser, [presenceNode findFirst:@"error"]);
         [self removeRoomFromJoining:presenceNode.fromUser];
         
-        //delete muc from favorites table and update bookmarks
-        if([self checkIfStillBookmarked:presenceNode.fromUser])
-            [self deleteMuc:presenceNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+        //do nothing: the error is only temporary (a s2s problem etc.), a muc ping will retry the join
+        //this will keep the entry in local bookmarks table and remote bookmars
+        //--> retry the join on mucPing or full login without smacks resume
+        //this will also keep the buddy list entry
+        //--> allow users to read the last messages before the muc got broken
         
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel error in %@", @""), presenceNode.fromUser] forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:YES];
+        //only display an error banner, no notification (this is only temporary)
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Temporary failure to enter Group/Channel: %@", @""), presenceNode.fromUser] forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:NO];
+        return;
+    }
+    else if([presenceNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Got permanent muc error presence of %@: %@", presenceNode.fromUser, [presenceNode findFirst:@"error"]);
+        [self removeRoomFromJoining:presenceNode.fromUser];
+        
+        //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
+        //make sure to update remote bookmarks, even if updateBookmarks == NO
+        //keep buddy list entry to allow users to read the last messages before the muc got deleted/broken
+        [self deleteMuc:presenceNode.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+        
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter Group/Channel %@", @""), presenceNode.fromUser] forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:YES];
         return;
     }
     

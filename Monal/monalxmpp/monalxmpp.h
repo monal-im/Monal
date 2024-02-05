@@ -24,3 +24,4 @@ FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 #import "MLMucProcessor.h"
 #import "MLVoIPProcessor.h"
 #import "MLCall.h"
+#import "HelperTools.h"

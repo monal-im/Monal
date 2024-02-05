@@ -616,10 +616,18 @@ $$
                 [self.activeChats showCallContactNotFoundAlert:contactHandle.value];
                 return NO;
             }
+            //don't display account picker or open call ui if we have an already active call with any of the possible contacts
+            //the call ui will be brought into foreground by applicationWillEnterForeground: independently of this
+            for(MLContact* contact in contacts)
+                if([self.voipProcessor getActiveCallWithContact:contact] != nil)
+                    return YES;
+            MLCallType callType = MLCallTypeAudio;      //default is audio call
+            if(intent.callCapability == INCallCapabilityVideoCall)
+                callType = MLCallTypeVideo;
             if([contacts count] > 1)
-                [self.activeChats presentAccountPickerForContacts:contacts];
+                [self.activeChats presentAccountPickerForContacts:contacts andCallType:callType];
             else
-                [self.activeChats callContact:contacts.firstObject];
+                [self.activeChats callContact:contacts.firstObject withCallType:callType];
             return YES;
         }
     }
@@ -1609,18 +1617,15 @@ $$
         [refreshingTask setTaskCompletedWithSuccess:YES];
     }
     
-    if([[MLXMPPManager sharedInstance] hasConnectivity])
-    {
-        [self startBackgroundTimer:BGPROCESS_GRACEFUL_TIMEOUT];
-        @synchronized(self) {
-            DDLogVerbose(@"Setting _shutdownPending to NO...");
-            _shutdownPending = NO;
-        }
-        //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg task
-        [[MLXMPPManager sharedInstance] connectIfNecessary];
+    MLAssert([[MLXMPPManager sharedInstance] hasConnectivity], @"BGTASK has *no* connectivity? That's strange!");
+    
+    [self startBackgroundTimer:BGPROCESS_GRACEFUL_TIMEOUT];
+    @synchronized(self) {
+        DDLogVerbose(@"Setting _shutdownPending to NO...");
+        _shutdownPending = NO;
     }
-    else
-        DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
+    //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg task
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     //request another execution in BGFETCH_DEFAULT_INTERVAL seconds
     [HelperTools scheduleBackgroundTask:NO];
@@ -1710,18 +1715,15 @@ $$
 //         [[UIApplication sharedApplication] endBackgroundTask:task];
 //     }
     
-    if([[MLXMPPManager sharedInstance] hasConnectivity])
-    {
-        [self startBackgroundTimer:GRACEFUL_TIMEOUT];
-        @synchronized(self) {
-            DDLogVerbose(@"Setting _shutdownPending to NO...");
-            _shutdownPending = NO;
-        }
-        //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg task
-        [[MLXMPPManager sharedInstance] connectIfNecessary];
+    MLAssert([[MLXMPPManager sharedInstance] hasConnectivity], @"BGTASK has *no* connectivity? That's strange!");
+    
+    [self startBackgroundTimer:GRACEFUL_TIMEOUT];
+    @synchronized(self) {
+        DDLogVerbose(@"Setting _shutdownPending to NO...");
+        _shutdownPending = NO;
     }
-    else
-        DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
+    //don't use *self* connectIfNecessary, because we don't need an additional UIKit bg task, this one is already a bg task
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     //request another execution in BGFETCH_DEFAULT_INTERVAL seconds
     [HelperTools scheduleBackgroundTask:NO];

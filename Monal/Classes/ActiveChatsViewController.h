@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "MLConstants.h"
 #import "MLContact.h"
+#import "MLCall.h"
 #import <DZNEmptyDataSet/UIScrollView+EmptyDataSet.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -26,7 +27,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(void) showCallContactNotFoundAlert:(NSString*) jid;
 -(void) callContact:(MLContact*) contact;
--(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts;
+-(void) callContact:(MLContact*) contact withCallType:(MLCallType) callType;
+-(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts andCallType:(MLCallType) callType;
 -(void) presentCall:(MLCall*) call;
 -(void) presentChatWithContact:(MLContact* _Nullable) contact;
 -(void) presentChatWithContact:(MLContact* _Nullable) contact andCompletion:(monal_id_block_t _Nullable) completion;

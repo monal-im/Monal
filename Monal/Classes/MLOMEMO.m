@@ -5,8 +5,9 @@
 //  Created by Friedrich Altheide on 21.06.20.
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
+#import <UserNotifications/UserNotifications.h>
+#import <stdlib.h>
 
-#include <stdlib.h>
 #import "MLOMEMO.h"
 #import "MLXMPPConnection.h"
 #import "MLHandler.h"
@@ -435,6 +436,27 @@ $$
 
 -(void) handleOwnDevicelistUpdate:(NSSet<NSNumber*>*) receivedDevices
 {
+    //check for new deviceids not previously known, but only if the devicelist is not empty
+    if([self.ownDeviceList count] > 0)
+    {
+        NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
+        [newDevices minusSet:self.ownDeviceList];
+        for(NSNumber* device in newDevices)
+        {
+            DDLogWarn(@"Got new deviceid %@ for own account %@", device, self.account.connectionProperties.identity.jid);
+            UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+            content.title = NSLocalizedString(@"New omemo device", @"");;
+            content.subtitle = self.account.connectionProperties.identity.jid;
+            content.body = [NSString stringWithFormat:NSLocalizedString(@"Detected a new omemo device on your account: %@", @""), device];
+            content.sound = [UNNotificationSound defaultSound];
+            content.categoryIdentifier = @"simple";
+            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"newOwnOmemoDevice::%@::%@", self.account.connectionProperties.identity.jid, device] content:content trigger:nil];
+            NSError* error = [HelperTools postUserNotificationRequest:request];
+            if(error)
+                DDLogError(@"Error posting new deviceid notification: %@", error);
+        }
+    }
+    
     //update own devicelist (this can be an empty list, if the list on our server is empty)
     self.ownDeviceList = [receivedDevices mutableCopy];
     DDLogVerbose(@"Own devicelist for account %@ is now: %@", self.account, self.ownDeviceList);

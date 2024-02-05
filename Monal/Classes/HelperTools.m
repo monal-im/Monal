@@ -225,7 +225,7 @@ void swizzle(Class c, SEL orig, SEL new)
     if(class_addMethod(c, orig, method_getImplementation(newMethod), method_getTypeEncoding(newMethod)))
         class_replaceMethod(c, new, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
     else
-    method_exchangeImplementations(origMethod, newMethod);
+        method_exchangeImplementations(origMethod, newMethod);
 }
 
 
@@ -451,6 +451,47 @@ void swizzle(Class c, SEL orig, SEL new)
         @"stuns:eu.prod.turn.monal-im.org:3478",
 #endif
     ];
+}
+
++(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier
+{
+    static NSMutableDictionary* runloops = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        runloops = [NSMutableDictionary new];
+    });
+    
+    //every identifier has its own thread priority/qos class
+    __block dispatch_queue_priority_t priority;
+    switch(identifier)
+    {
+        case MLRunLoopIdentifierNetwork: priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND; break;
+        default: unreachable(@"unknown runloop identifier!");
+    }
+    
+    @synchronized(runloops) {
+        if(runloops[@(identifier)] == nil)
+        {
+            NSCondition* condition = [NSCondition new];
+            [condition lock];
+            dispatch_async(dispatch_get_global_queue(priority, 0), ^{
+                //we don't need an @synchronized block around this because the @synchronized block of the outer thread
+                //waits until we signal our condition (e.g. no other thread can race with us)
+                NSRunLoop* localLoop = runloops[@(identifier)] = [NSRunLoop currentRunLoop];
+                [condition lock];
+                [condition signal];
+                [condition unlock];
+                while(YES)
+                {
+                    [localLoop run];
+                    usleep(10000);          //sleep 10ms if we ever return from our runloop to not consume too much cpu
+                }
+            });
+            [condition wait];
+            [condition unlock];
+        }
+        return runloops[@(identifier)];
+    }
 }
 
 +(NSError* _Nullable) hardLinkOrCopyFile:(NSString*) from to:(NSString*) to
@@ -1236,12 +1277,13 @@ void swizzle(Class c, SEL orig, SEL new)
     }
     
     NSMutableDictionary<NSString*, NSString*>* retval = [NSMutableDictionary new];
-    NSArray* parts = [jid componentsSeparatedByString:@"/"];
+    NSArray* parts = [self splitString:jid withSeparator:@"/" andMaxSize:2];
     
     retval[@"user"] = [[parts objectAtIndex:0] lowercaseString];        //intended to not break code that expects lowercase
     if([parts count] > 1 && [[parts objectAtIndex:1] isEqualToString:@""] == NO)
         retval[@"resource"] = [parts objectAtIndex:1];                  //resources are case sensitive
-    parts = [retval[@"user"] componentsSeparatedByString:@"@"];
+    //there should never be more than one @ char, but just in case: split only at the first one
+    parts = [self splitString:retval[@"user"] withSeparator:@"@" andMaxSize:2];
     if([parts count] > 1)
     {
         retval[@"node"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
@@ -1373,18 +1415,19 @@ void swizzle(Class c, SEL orig, SEL new)
             DDLogInfo(@"Updating syncError notifications: %@", syncErrorsDisplayed);
             for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
             {
-                //ignore already disconnected accounts (they are always "idle" but this does not reflect the real sync state)
-                if(account.accountState < kStateReconnecting && !account.reconnectInProgress)
-                    continue;
                 NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
                 //dispatching this to the receive queue isn't neccessary anymore, see comments in account.idle
                 if(account.idle)
                 {
-                    DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
-                    [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[syncErrorIdentifier]];
-                    [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
-                    syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
-                    [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+                    //but only do so, if we have connectivity, otherwise just ignore it (the old sync error should still be displayed)
+                    if([[MLXMPPManager sharedInstance] hasConnectivity])
+                    {
+                        DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
+                        [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[syncErrorIdentifier]];
+                        [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
+                        syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
+                        [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+                    }
                 }
                 else if(!removeOnly && [self isNotInFocus])
                 {
@@ -1405,6 +1448,7 @@ void swizzle(Class c, SEL orig, SEL new)
                     if(![self isAppExtension] && !account.isDoingFullReconnect && ![account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas])
                     {
                         DDLogWarn(@"NOT posting syncError notification for %@ (we are not in the appex, no important stanzas are unacked and we are not doing a full reconnect)...", account.connectionProperties.identity.jid);
+                        DDLogDebug(@"[self isAppExtension] == %@, account.isDoingFullReconnect == %@, [account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas] == %@", bool2str([self isAppExtension]), bool2str(account.isDoingFullReconnect), bool2str([account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas]));
                         continue;
                     }
                     DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);
@@ -1851,14 +1895,13 @@ void swizzle(Class c, SEL orig, SEL new)
             [featuresArray addObject:@"urn:xmpp:jingle:1"];
             [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:1"];
             [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:audio"];
-            //[featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:video"];
+            [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:video"];
             [featuresArray addObject:@"urn:xmpp:jingle:transports:ice-udp:1"];
             [featuresArray addObject:@"urn:ietf:rfc:5888"];
             [featuresArray addObject:@"urn:xmpp:jingle:apps:dtls:0"];
             [featuresArray addObject:@"urn:ietf:rfc:5576"];
             [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:rtp-hdrext:0"];
             [featuresArray addObject:@"urn:xmpp:jingle:apps:rtp:rtcp-fb:0"];
-            [featuresArray addObject:@"urn:tmp:monal:webrtc"];  //TODO: write xep for this
         }
         
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
@@ -2086,10 +2129,19 @@ void swizzle(Class c, SEL orig, SEL new)
         
 #ifdef IS_ALPHA
         NSString* rawVersionString = [NSString stringWithFormat:@"Alpha %s (%s %s UTC)", ALPHA_COMMIT_HASH, __DATE__, __TIME__];
-#else
+#else// IS_ALPHA
         NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-        NSString* rawVersionString = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
-#endif
+        NSString* rawVersionString = [NSString stringWithFormat:@"%@ %@ (%@)",
+#ifdef DEBUG
+            @"Beta",
+#else// DEBUG
+            @"Stable",
+#endif// DEBUG
+            [infoDict objectForKey:@"CFBundleShortVersionString"],
+            [infoDict objectForKey:@"CFBundleVersion"]
+        ];
+#endif// IS_ALPHA
+        
         if(type == MLVersionTypeIQ)
             return _versionInfoCache[@(type)] = rawVersionString;
         else if(type == MLVersionTypeLog)
@@ -2467,6 +2519,36 @@ a=%@\r\n", mid, candidate];
             return NO;
     }
 #endif
+}
+
+//taken from: https://stackoverflow.com/a/30932216/3528174
++(NSArray*) splitString:(NSString*) string withSeparator:(NSString*) separator andMaxSize:(NSUInteger)size
+{
+    NSMutableArray* result = [[NSMutableArray alloc]initWithCapacity:size];
+    NSArray* components = [string componentsSeparatedByString:separator];
+
+    if(components.count < size)
+        return components;
+
+    NSUInteger i = 0;
+    while(i < size-1)
+    {
+        [result addObject:components[i]];
+        i++;
+    }
+
+    NSMutableString* lastItem = [[NSMutableString alloc] init];
+    while(i < components.count)
+    {
+        [lastItem appendString:components[i]];
+        [lastItem appendString:separator];
+        i++;
+    }
+    
+    //remove the last separator
+    [result addObject:[lastItem substringToIndex:lastItem.length - 1]];
+
+    return result;
 }
 
 @end

@@ -226,15 +226,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                               60ull * NSEC_PER_SEC);        //allow for better battery optimizations
 
     dispatch_source_set_event_handler(_pinger, ^{
-        //only ping when having connectivity
-        if(self->_hasConnectivity)
+        for(xmpp* xmppAccount in [self connectedXMPP])
         {
-            for(xmpp* xmppAccount in [self connectedXMPP])
-            {
-                if(xmppAccount.accountState>=kStateBound) {
-                    DDLogInfo(@"began a idle ping");
-                    [xmppAccount sendPing:LONG_PING];        //long ping timeout because this is a background/interval ping
-                }
+            if(xmppAccount.accountState>=kStateBound) {
+                DDLogInfo(@"began a idle ping");
+                [xmppAccount sendPing:LONG_PING];        //long ping timeout because this is a background/interval ping
             }
         }
     });
@@ -286,18 +282,12 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         {
             DDLogVerbose(@"NOT reachable");
             self->_hasConnectivity = NO;
-            //we only want to react on connectivity changes if not in NSE because disconnecting would terminate the NSE
-            //we want do do "polling" reconnects in NSE instead to make sure we try as long as possible until the NSE times out
-            if(![HelperTools isAppExtension])
-            {
-                //BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
-                [self disconnectAll];
-                DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
-                //this will automatically start the app if connectivity gets restored
-                //always force as soon as possible to make sure any missed pushes get compensated for
-                //don't queue this notification because it should be handled immediately
-                [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @YES}];
-            }
+            
+            DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
+            //this will automatically start the app if connectivity gets restored
+            //always force as soon as possible to make sure any missed pushes get compensated for
+            //don't queue this notification because it should be handled immediately
+            [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @YES}];
             
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalConnectivityChange object:self userInfo:@{@"reachable": @NO}];
         }
@@ -393,8 +383,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
         [xmppAccount unfreeze];
-        if(_hasConnectivity)
-            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         [xmppAccount setClientActive];
     }
     
@@ -459,10 +448,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         DDLogInfo(@"existing account, calling unfreeze");
         [existing unfreeze];
         DDLogInfo(@"existing account, just pinging.");
-        if(_hasConnectivity)
-            [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-        else
-            DDLogWarn(@"NOT pinging because no connectivity.");
+        [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         return;
     }
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
@@ -504,23 +490,18 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [_connectedXMPP addObject:xmppAccount];
     }
 
-    if(_hasConnectivity)
+    if(![account[@"enabled"] boolValue])
     {
-        if(![account[@"enabled"] boolValue])
-        {
-            DDLogInfo(@"existing but disabled account, not connecting");
-            return;
-        }
-        if(!self.isConnectBlocked)
-        {
-            DDLogInfo(@"starting connect");
-            [xmppAccount connect];
-        }
-        else
-            DDLogWarn(@"connect blocked, not connecting newly created xmpp* instance");
+        DDLogInfo(@"existing but disabled account, not connecting");
+        return;
+    }
+    if(!self.isConnectBlocked)
+    {
+        DDLogInfo(@"starting connect");
+        [xmppAccount connect];
     }
     else
-        DDLogWarn(@"NOT connecting because no connectivity.");
+        DDLogWarn(@"connect blocked, not connecting newly created xmpp* instance");
 }
 
 -(void) disconnectAccount:(NSNumber*) accountNo withExplicitLogout:(BOOL) explicitLogout

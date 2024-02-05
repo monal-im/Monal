@@ -239,9 +239,6 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setMAMQueryAfterTimestamp:(NSDate* _Nullable) timestamp
 {
-#ifdef IS_ALPHA
-    MLAssert(timestamp!=nil, @"setMAMQueryAfterTimestamp: called with nil timestamp!", @{@"self": self});
-#endif
     //set iq id to mam query id
     self.id = [NSString stringWithFormat:@"MLcatchup:%@", [[NSUUID UUID] UUIDString]];
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
@@ -261,6 +258,11 @@ NSString* const kiqErrorType = @"error";
         ] andData:nil]
     ] andData:nil];
     [self addChildNode:queryNode];
+    
+#ifdef IS_ALPHA
+    if(timestamp == nil)
+        showXMLErrorOnAlpha(nil, self, @"setMAMQueryAfterTimestamp: called with nil timestamp!");
+#endif
 }
 
 -(void) setRemoveFromRoster:(MLContact*) contact

@@ -14,5 +14,7 @@ EOF
 
 cd Monal
 
-sftp_upload downloads.monal-im.org@s1.eu.prod.push.monal-im.org
+sftp_upload downloads.monal-im.org@s1.eu.prod.push.monal-im.org &
+pid=$!
 sftp_upload downloads.monal-im.org@s2.eu.prod.push.monal-im.org
+wait $pid

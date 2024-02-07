@@ -22,6 +22,7 @@ typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut = -1,
     kStateDisconnected,		// has connected once
     kStateReconnecting,
+    kStateConnected,
     kStateHasStream,
     kStateLoggedIn,
     kStateBinding,

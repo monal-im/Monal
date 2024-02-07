@@ -362,9 +362,9 @@
     {
         //disconnect to prevent endless loops trying to connect
         dispatch_async(queue, ^{
-            DDLogVerbose(@"freezeAllParseQueues: %@", account);
+            DDLogVerbose(@"freezing: %@", account);
             [account freezeParseQueue];
-            DDLogVerbose(@"freezeAllParseQueues: %@", account);
+            DDLogVerbose(@"done freezing: %@", account);
         });
     }
     dispatch_barrier_sync(queue, ^{

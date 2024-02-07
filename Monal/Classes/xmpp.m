@@ -718,10 +718,11 @@ NSString* const kStanza = @"stanza";
     //this has to be synchronous because we want to be sure no further stanzas are leaking from the parse queue
     //into the receive queue once we leave this method
     _parseQueue.suspended = YES;
-    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
     [self dispatchOnReceiveQueue: ^{
+        MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES (in receive queue)!");
         DDLogWarn(@"Parse queue is frozen now!");
     }];
+    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
 }
 
 -(void) unfreezeParseQueue
@@ -829,6 +830,12 @@ NSString* const kStanza = @"stanza";
     //autodelete messages old enough (second invocation)
     if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
         [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
+    
+    if(_parseQueue.suspended)
+    {
+        DDLogWarn(@"Not trying to connect: parse queue frozen!");
+        return;
+    }
     
     [self dispatchAsyncOnReceiveQueue: ^{
         [self->_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas from old connections
@@ -1158,7 +1165,6 @@ NSString* const kStanza = @"stanza";
         self->_accountState = kStateDisconnected;
         
         [self->_parseQueue cancelAllOperations];    //throw away all parsed but not processed stanzas (we should have closed sockets then!)
-        [self unfreezeParseQueue];                  //make sure the cancelled operations get handled and our next connect can use the parse queue again
         //we don't throw away operations in the receive queue because they could be more than just stanzas
         //(for example outgoing messages that should be written to the smacks queue instead of just vanishing in a void)
         //all incoming stanzas in the receive queue will honor the _accountState being lower than kStateReconnecting and be dropped
@@ -1219,8 +1225,11 @@ NSString* const kStanza = @"stanza";
                 self->_reconnectInProgress = NO;
             }];
         }), (^{
-            DDLogInfo(@"Reconnect got aborted...");
-            self->_reconnectInProgress = NO;
+            DDLogInfo(@"Reconnect got aborted: %@", self);
+            self->_cancelReconnectTimer = nil;
+            [self dispatchAsyncOnReceiveQueue: ^{
+                self->_reconnectInProgress = NO;
+            }];
         }));
         DDLogInfo(@"reconnect exits");
     }];
@@ -1244,47 +1253,30 @@ NSString* const kStanza = @"stanza";
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
             DDLogVerbose(@"Parse finished for new <%@> stanza...", parsedStanza.element);
             
-            if(!appex)
+            //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
+            //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
+            //should create a backpressure ino the tcp stream, too
+            //the calculated sleep time gives every stanza in the queue ~10ms to be handled (based on statistics)
+            BOOL wasSleeping = NO;
+            while(self.accountState >= kStateConnected)
             {
-                //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
-                //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
-                //should create a backpressure ino the tcp stream, too
-                //the calculated sleep time gives every stanza in the queue ~10ms to be handled
-                BOOL wasSleeping = NO;
-                while([self->_parseQueue operationCount] > 50 && self.accountState >= kStateReconnecting)
-                {
-                    double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries (used/available memory: %.3fMiB / %.3fMiB)...", waittime, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-                    [NSThread sleepForTimeInterval:waittime];
-                    wasSleeping = YES;
-                }
-                if(wasSleeping)
-                    DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+                //use a much smaller limit while in appex because memory there is limited to ~32MiB
+                unsigned long operationCount = [self->_parseQueue operationCount];
+                double usedMemory = [HelperTools report_memory];
+                if(!(operationCount > 50 || (appex && usedMemory > 16 && operationCount > MAX(2, 24 - usedMemory))))
+                    break;
+                
+                double waittime = (double)[self->_parseQueue operationCount] / 100.0;
+                DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
+                [NSThread sleepForTimeInterval:waittime];
+                wasSleeping = YES;
             }
-            else
-            {
-                BOOL wasSleeping = NO;
-                while(self.accountState >= kStateReconnecting)
-                {
-                    //use a much smaller limit while in appex because memory there is limited to ~32MiB
-                    //like in the mainapp the calculated sleep time gives every stanza in the queue ~10ms to be handled
-                    unsigned long operationCount = [self->_parseQueue operationCount];
-                    double usedMemory = [HelperTools report_memory];
-                    if(!(operationCount > 50 || (appex && usedMemory > 16 && operationCount > MAX(2, 24 - usedMemory))))
-                        break;
-                    
-                    double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
-                    [NSThread sleepForTimeInterval:waittime];
-                    wasSleeping = YES;
-                }
-                if(wasSleeping)
-                    DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-            }
+            if(wasSleeping)
+                DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
             
-            if(self.accountState < kStateReconnecting)
+            if(self.accountState < kStateConnected)
             {
-                DDLogWarn(@"Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateReconnecting");
+                DDLogWarn(@"Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateConnected");
                 return;
             }
             
@@ -1328,9 +1320,9 @@ NSString* const kStanza = @"stanza";
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
                 DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue, %.3fMiB / %.3fMiB memory used / available)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                    if(self.accountState<kStateReconnecting)
+                    if(self.accountState < kStateConnected)
                     {
-                        DDLogWarn(@"Throwing away incoming stanza queued in parse queue, accountState < kStateReconnecting");
+                        DDLogWarn(@"Throwing away incoming stanza queued in parse queue, accountState < kStateConnected");
                         return;
                     }
                     [MLNotificationQueue queueNotificationsInBlock:^{
@@ -4024,6 +4016,10 @@ NSString* const kStanza = @"stanza";
 
 -(void) addReconnectionHandler:(MLHandler*) handler
 {
+    //don't check if we are bound and execute the handler directly if so
+    //--> reconnect handlers are frequently used while being bound to schedule a task on *next* (re)connect
+    //--> in cases where the reconnect handler is only needed if we are not bound, the caller can do this check itself
+    //    (this might introduce small race conditions, though, but these should be negligible in most cases)
     @synchronized(_reconnectionHandlers) {
         [_reconnectionHandlers addObject:handler];
     }
@@ -4649,13 +4645,15 @@ NSString* const kStanza = @"stanza";
                 if(_cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
                     [self reinitLoginTimer];
                 
-                if(_blockToCallOnTCPOpen != nil)
-                {
-                    [self dispatchAsyncOnReceiveQueue:^{
+                //we want this to be sync instead of async to make sure we are in kStateConnected before sending anything
+                [self dispatchOnReceiveQueue:^{
+                    self->_accountState = kStateConnected;
+                    if(self->_blockToCallOnTCPOpen != nil)
+                    {
                         self->_blockToCallOnTCPOpen();
                         self->_blockToCallOnTCPOpen = nil;     //don't call this twice
-                    }];
-                }
+                    }
+                }];
             }
             break;
         }

@@ -621,6 +621,10 @@ static NSMutableDictionary* currentTransactions;
 
 -(void) enableWAL
 {
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    MLAssert([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0, @"Could not enable wal, inside transaction!", (@{
+        @"threadDictionary": threadData
+    }));
     NSString* mode = [self internalExecuteScalar:@"PRAGMA journal_mode;" andArguments:@[]];
     if([mode isEqualToString:@"wal"])
         return;
@@ -636,16 +640,30 @@ static NSMutableDictionary* currentTransactions;
 
 -(void) checkpointWal
 {
-    NSArray* result = [self executeReader:@"PRAGMA wal_checkpoint(TRUNCATE);"];
-    DDLogInfo(@"Chekpointing returned: %@", result);
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    //being inside a transaction is non-fatal, the db file will just not be up to date then
+    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
+    {
+        NSArray* result = [self executeReader:@"PRAGMA wal_checkpoint(TRUNCATE);"];
+        DDLogInfo(@"Chekpointing returned: %@", result);
+    }
+    else
+        DDLogError(@"Could not checkpoint wal, inside transaction: %@", threadData);
 }
 
 // optimize db
 -(void) vacuum
 {
+    //trying to vaccum the db inside a transaction is non-fatal, the db file will just not be shrinked then
     DDLogDebug(@"Vacuum DB");
-    [self executeNonQuery:@"VACUUM;" andArguments:@[] withException:YES];
-    DDLogDebug(@"Vacuum DB success");
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
+    {
+        [self executeNonQuery:@"VACUUM;" andArguments:@[] withException:YES];
+        DDLogDebug(@"Vacuum DB success");
+    }
+    else
+        DDLogError(@"Could not vaccum db, inside transaction: %@", threadData);
 }
 
 @end

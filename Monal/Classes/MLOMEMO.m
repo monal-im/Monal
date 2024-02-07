@@ -437,11 +437,10 @@ $$
 -(void) handleOwnDevicelistUpdate:(NSSet<NSNumber*>*) receivedDevices
 {
     //check for new deviceids not previously known, but only if the devicelist is not empty
-    if([self.ownDeviceList count] > 0)
-    {
-        NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
-        [newDevices minusSet:self.ownDeviceList];
-        for(NSNumber* device in newDevices)
+    NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
+    [newDevices minusSet:self.ownDeviceList];
+    for(NSNumber* device in newDevices)
+        if([device unsignedIntValue] != self.monalSignalStore.deviceid)
         {
             DDLogWarn(@"Got new deviceid %@ for own account %@", device, self.account.connectionProperties.identity.jid);
             UNMutableNotificationContent* content = [UNMutableNotificationContent new];
@@ -455,7 +454,6 @@ $$
             if(error)
                 DDLogError(@"Error posting new deviceid notification: %@", error);
         }
-    }
     
     //update own devicelist (this can be an empty list, if the list on our server is empty)
     self.ownDeviceList = [receivedDevices mutableCopy];

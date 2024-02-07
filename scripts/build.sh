@@ -52,7 +52,7 @@ xcrun xcodebuild \
     -sdk macosx \
     -configuration $BUILD_TYPE \
     -destination 'generic/platform=macOS,variant=Mac Catalyst,name=Any Mac' \
-    -archivePath "build/macos_Monal.xcarchive" \
+    -archivePath "build/macos_$APP_NAME.xcarchive" \
     -allowProvisioningUpdates \
     archive \
     BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \

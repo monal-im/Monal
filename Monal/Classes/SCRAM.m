@@ -86,7 +86,8 @@
         _gssHeader = @"y,,";                                                                //supported by us BUT NOT advertised by the server
     else
         _gssHeader = [NSString stringWithFormat:@"p=%@,,", channelBindingType];             //supported by us AND advertised by the server
-    _clientFirstMessageBare = [NSString stringWithFormat:@"n=%@,r=%@", [self quote:_username], _nonce];
+    //the g attribute is a random grease to check if servers are rfc compliant (e.g. accept optional attributes)
+    _clientFirstMessageBare = [NSString stringWithFormat:@"n=%@,r=%@,g=%@", [self quote:_username], _nonce, [NSUUID UUID].UUIDString];
     return [NSString stringWithFormat:@"%@%@", _gssHeader, _clientFirstMessageBare];
 }
 
@@ -138,7 +139,8 @@
     NSData* storedKey = [self hash:clientKey];
     
     //calculate authMessage (e.g. client-first-message-bare + "," + server-first-message + "," + client-final-message-without-proof)
-    NSString* clientFinalMessageWithoutProof = [NSString stringWithFormat:@"c=%@,r=%@", [HelperTools encodeBase64WithData:gssHeaderWithChannelBindingData], _nonce];
+    //the x attribute is a random grease to check if servers are rfc compliant (e.g. accept optional attributes)
+    NSString* clientFinalMessageWithoutProof = [NSString stringWithFormat:@"c=%@,r=%@,x=%@", [HelperTools encodeBase64WithData:gssHeaderWithChannelBindingData], _nonce, [NSUUID UUID].UUIDString];
     NSString* authMessage = [NSString stringWithFormat:@"%@,%@,%@", _clientFirstMessageBare, _serverFirstMessage, clientFinalMessageWithoutProof];
     
     //calculate clientSignature (e.g. HMAC(StoredKey, AuthMessage))

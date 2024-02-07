@@ -1,2 +1,2 @@
-pycryptodomex==3.11.0
+pycryptodomex==3.19.1
 xtermcolor==1.3

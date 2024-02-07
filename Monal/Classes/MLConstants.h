@@ -28,6 +28,11 @@ static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
     #define kMonalOpenURL [NSURL URLWithString:@"monalAlphaOpen://"]
     #define kBackgroundProcessingTask @"im.monal.alpha.process"
     #define kBackgroundRefreshingTask @"im.monal.alpha.refresh"
+#elif defined(IS_QUICKSY)
+    #define kAppGroup @"group.quicksy"
+    #define kMonalOpenURL [NSURL URLWithString:@"quicksyOpen://"]
+    #define kBackgroundProcessingTask @"im.monal.process"
+    #define kBackgroundRefreshingTask @"im.monal.refresh"
 #else
     #define kAppGroup @"group.monal"
     #define kMonalOpenURL [NSURL URLWithString:@"monalOpen://"]

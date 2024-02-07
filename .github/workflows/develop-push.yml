@@ -16,7 +16,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ['ARM64', 'self-hosted']
     env:
-      APP_NAME: "Monal"
+      APP_NAME: "Monal.alpha"
       APP_DIR: "Monal.alpha.app"
       BUILD_TYPE: "Alpha"
       ALPHA_UPLOAD_SECRET: ${{ secrets.ALPHA_UPLOAD_SECRET }}
@@ -61,26 +61,26 @@ jobs:
       - name: Uploading to alpha site
         run: ./scripts/uploadAlpha.sh
       - name: Notarize catalyst
-        run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
+        run: xcrun notarytool submit ./Monal/build/app/Monal.alpha.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
       - name: Update monal homebrew alpha repo
         run: scripts/updateAlphaHomebrew.sh
-      - uses: actions/upload-artifact@v3
-        with:
-          name: monal-catalyst
-          path: Monal/build/app/Monal.tar
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v3
-        with:
-          name: monal-ios
-          path: Monal/build/ipa/Monal.ipa
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v3
-        with:
-          name: monal-catalyst-dsym
-          path: Monal/build/macos_Monal.xcarchive/dSYMs
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v3
-        with:
-          name: monal-ios-dsym
-          path: Monal/build/ios_Monal.xcarchive/dSYMs
-          if-no-files-found: error
+      #- uses: actions/upload-artifact@v3
+      #  with:
+      #    name: monal-catalyst
+      #    path: "Monal/build/app/Monal.alpha.tar"
+      #    if-no-files-found: error
+      #- uses: actions/upload-artifact@v3
+      #  with:
+      #    name: monal-ios
+      #    path: "Monal/build/ipa/Monal.alpha.ipa"
+      #    if-no-files-found: error
+      #- uses: actions/upload-artifact@v3
+      #  with:
+      #    name: monal-catalyst-dsym
+      #    path: Monal/build/macos_Monal.xcarchive/dSYMs
+      #    if-no-files-found: error
+      #- uses: actions/upload-artifact@v3
+      #  with:
+      #    name: monal-ios-dsym
+      #    path: Monal/build/ios_Monal.xcarchive/dSYMs
+      #    if-no-files-found: error

@@ -1449,9 +1449,9 @@ static NSDateFormatter* dbFormatter;
         //delete all chats with empty history from active chats list
         [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
         [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
-        //vacuum db after delete
-        [self.db vacuum];
     }];
+    //vacuum db after delete (must be done outside of transactions)
+    [self.db vacuum];
 }
 
 -(void) deleteMessageHistory:(NSNumber*) messageNo

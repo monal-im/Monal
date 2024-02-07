@@ -319,7 +319,7 @@ $$
     MLXMLNode* item = [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": itemId} andChildren:@[] andData:nil];
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query addChildNode:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"retract" withAttributes:@{@"node": node} andChildren:@[item] andData:nil]
+        [[MLXMLNode alloc] initWithElement:@"retract" withAttributes:@{@"node": node, @"notify": @"true"} andChildren:@[item] andData:nil]
     ] andData:nil]];
     [account sendIq:query withHandler:$newHandlerWithInvalidation(self, handleRetractResult, handleRetractResultInvalidation,
         $ID(node),

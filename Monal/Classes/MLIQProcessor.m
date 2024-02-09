@@ -725,6 +725,11 @@ $$
         account.connectionProperties.serverVersion = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS andLastInteraction:[NSDate date]];
         return;
     }
+    // TODO Thilo
+    if(iqNode.fromResource == Nil)
+    {
+        return;
+    }
     
     DDLogVerbose(@"Updating software version info for %@", iqNode.from);
     NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:iqNode.fromUser andResource:iqNode.fromResource forAccountNo:account.accountNo];

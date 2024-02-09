@@ -1617,7 +1617,10 @@ $$
         [refreshingTask setTaskCompletedWithSuccess:YES];
     }
     
-    MLAssert([[MLXMPPManager sharedInstance] hasConnectivity], @"BGTASK has *no* connectivity? That's strange!");
+    if(![[MLXMPPManager sharedInstance] hasConnectivity])
+    {
+        DDLogError(@"BGTASK has *no* connectivity? That's strange!");
+    }
     
     [self startBackgroundTimer:BGPROCESS_GRACEFUL_TIMEOUT];
     @synchronized(self) {
@@ -1715,7 +1718,10 @@ $$
 //         [[UIApplication sharedApplication] endBackgroundTask:task];
 //     }
     
-    MLAssert([[MLXMPPManager sharedInstance] hasConnectivity], @"BGTASK has *no* connectivity? That's strange!");
+    if(![[MLXMPPManager sharedInstance] hasConnectivity])
+    {
+        DDLogError(@"BGTASK has *no* connectivity? That's strange!");
+    }
     
     [self startBackgroundTimer:GRACEFUL_TIMEOUT];
     @synchronized(self) {

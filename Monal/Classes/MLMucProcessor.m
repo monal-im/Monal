@@ -440,11 +440,10 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Got empty room config form for '%@'", @""), roomJid] forMuc:roomJid withNode:nil andIsSevere:YES];
         return;
     }
-    
     //these config options are mandatory and configure the room to be a group --> non anonymous, members only (and persistent)
     for(NSString* option in mandatoryOptions)
     {
-        if(!dataForm[option])
+        if([dataForm getField:option] == nil)
         {
             DDLogError(@"Could not configure room '%@' to be a groupchat: config option '%@' not available!", roomJid, option);
             if(deleteOnError)
@@ -470,7 +469,7 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
     
     //reconfigure the room
     dataForm.type = @"submit";
-    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType to:roomJid];
     [query setRoomConfig:dataForm];
     [_account sendIq:query withHandler:$newHandlerWithInvalidation(self, handleRoomConfigResult, handleRoomConfigResultInvalidation, $ID(roomJid), $ID(mandatoryOptions), $ID(optionalOptions), $BOOL(deleteOnError))];
 $$
@@ -488,10 +487,6 @@ $$instance_handler(handleRoomConfigResultInvalidation, account.mucProcessor, $$I
 $$
 
 $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
-    MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Room config form response jid not matching query jid!", (@{
-        @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
-        @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
-    }));
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Failed to submit room config form of '%@': %@", roomJid, [iqNode findFirst:@"error"]);
@@ -503,7 +498,10 @@ $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, acc
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not configure group '%@'", @""), roomJid] forMuc:roomJid withNode:iqNode andIsSevere:YES];
         return;
     }
-    
+    MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Room config form response jid not matching query jid!", (@{
+        @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
+        @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
+    }));
     //group is now properly configured and we are joined, but all the code handling a proper join was not run
     //--> join again to make sure everything is sane
     [self removeRoomFromCreating:roomJid];

@@ -527,18 +527,14 @@ enum msgSentState {
     }
 }
 
--(IBAction) toggleEncryption:(id)sender
+-(IBAction) toggleEncryption:(id) sender
 {
     if([HelperTools isContactBlacklistedForEncryption:self.contact])
         return;
 #ifndef DISABLE_OMEMO
     if(self.contact.isEncrypted)
     {
-        NSInteger style = UIAlertControllerStyleActionSheet;
-#if TARGET_OS_MACCATALYST
-        style = UIAlertControllerStyleAlert;
-#endif
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Disable encryption?", @"") message:NSLocalizedString(@"Do you really want to disable encryption for this contact?", @"") preferredStyle:style];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Disable encryption?", @"") message:NSLocalizedString(@"Do you really want to disable encryption for this contact?", @"") preferredStyle:UIAlertControllerStyleActionSheet];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes, deactivate encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withSelf:self afterToggle:^() {
                 [self displayEncryptionStateInUI];
@@ -548,7 +544,11 @@ enum msgSentState {
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No, keep encryption activated", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
-        //alert.popoverPresentationController.sourceView = sender;
+        UIPopoverPresentationController* popPresenter = [alert popoverPresentationController];
+        if(@available(iOS 16.0, macCatalyst 16.0, *))
+            popPresenter.sourceItem = sender;
+        else
+            popPresenter.barButtonItem = sender;
         [self presentViewController:alert animated:YES completion:nil];
     }
     else

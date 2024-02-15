@@ -509,7 +509,7 @@ static NSMutableSet* _smacksWarningDisplayed;
         [self presentCall:[appDelegate.voipProcessor initiateCallWithType:callType toContact:contact]];
 }
 
--(void) callContact:(MLContact*) contact
+-(void) callContact:(MLContact*) contact withUIKitSender:(_Nullable id) sender
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
     MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:contact];
@@ -530,7 +530,15 @@ static NSMutableSet* _smacksWarningDisplayed;
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
         UIPopoverPresentationController* popPresenter = [alert popoverPresentationController];
-        popPresenter.sourceView = self.view;
+        if(sender != nil)
+        {
+            if(@available(iOS 16.0, macCatalyst 16.0, *))
+                popPresenter.sourceItem = sender;
+            else
+                popPresenter.barButtonItem = sender;
+        }
+        else
+            popPresenter.sourceView = self.view;
         [self presentViewController:alert animated:YES completion:nil];
     }
 }

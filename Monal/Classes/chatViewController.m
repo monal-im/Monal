@@ -508,7 +508,7 @@ enum msgSentState {
             
             //now initiate call
             MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
-            [appDelegate.activeChats callContact:self.contact];
+            [appDelegate.activeChats callContact:self.contact withUIKitSender:sender];
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
@@ -523,7 +523,7 @@ enum msgSentState {
     else
     {
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
-        [appDelegate.activeChats callContact:self.contact];
+        [appDelegate.activeChats callContact:self.contact withUIKitSender:sender];
     }
 }
 

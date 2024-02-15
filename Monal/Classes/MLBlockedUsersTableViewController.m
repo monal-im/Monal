@@ -120,7 +120,7 @@
         passwordField.placeholder = NSLocalizedString(@"user@example.org/resource", @"BlockUserTable - blockJidForm");
     }];
 
-    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Block", @"") style:UIAlertActionStyleDefault
+    [blockJidForm addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Block", @"") style:UIAlertActionStyleDefault
        handler:^(UIAlertAction* action __unused) {
         NSString* jidToBlock = [blockJidForm textFields][0].text;
         // try to split the jid
@@ -143,9 +143,10 @@
             [invalidJid addAction:defaultAction];
             [self presentViewController:invalidJid animated:YES completion:nil];
         }
-    }];
-
-    [blockJidForm addAction:defaultAction];
+    }]];
+    [blockJidForm addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        [blockJidForm dismissViewControllerAnimated:YES completion:nil];
+    }]];
     [self presentViewController:blockJidForm animated:YES completion:nil];
 }
 @end

@@ -242,8 +242,7 @@ static NSMutableDictionary* _typingNotifications;
     if(([messageNode check:@"/<type=groupchat>"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
         // Ignore all group chat msgs from unkown groups or 1:1 chats
-        MLContact* mucTestContact = [MLContact createContactFromJid:possibleUnkownContact andAccountNo:account.accountNo];
-        if([[DataLayer sharedInstance] isContactInList:messageNode.fromUser forAccount:account.accountNo] == NO || !mucTestContact.isGroup)
+        if(![[[DataLayer sharedInstance] listMucsForAccount:account.accountNo] containsObject:messageNode.fromUser])
         {
             // ignore message
             DDLogWarn(@"Ignoring groupchat message from %@", messageNode.toUser);

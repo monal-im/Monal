@@ -335,7 +335,14 @@ static NSDictionary* _optionalGroupConfigOptions;
     //handle mediated invites
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
-        DDLogInfo(@"Got mediated muc invite from %@ for %@ --> joining...", [messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"], messageNode.fromUser);
+        MLContact* inviteFrom = [MLContact createContactFromJid:[messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"] andAccountNo:_account.accountNo];
+        DDLogInfo(@"Got mediated muc invite from %@ for %@...", inviteFrom, messageNode.fromUser);
+        if(!inviteFrom.isSubscribedFrom)
+        {
+            DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
+            return YES;     //don't process this further
+        }
+        DDLogInfo(@"--> joinging %@...", messageNode.fromUser);
         [self sendDiscoQueryFor:messageNode.fromUser withJoin:YES andBookmarksUpdate:YES];
         return YES;     //stop processing in MLMessageProcessor
     }
@@ -343,7 +350,14 @@ static NSDictionary* _optionalGroupConfigOptions;
     //handle direct invites
     if([messageNode check:@"{jabber:x:conference}x@jid"] && [[messageNode findFirst:@"{jabber:x:conference}x@jid"] length] > 0)
     {
-        DDLogInfo(@"Got direct muc invite from %@ for %@ --> joining...", messageNode.fromUser, [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
+        MLContact* inviteFrom = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:_account.accountNo];
+        DDLogInfo(@"Got direct muc invite from %@ for %@ --> joining...", inviteFrom, [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
+        if(!inviteFrom.isSubscribedFrom)
+        {
+            DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
+            return YES;     //don't process this further
+        }
+        DDLogInfo(@"--> joinging %@...", [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
         [self sendDiscoQueryFor:[messageNode findFirst:@"{jabber:x:conference}x@jid"] withJoin:YES andBookmarksUpdate:YES];
         return YES;     //stop processing in MLMessageProcessor
     }

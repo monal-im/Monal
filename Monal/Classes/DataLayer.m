@@ -510,7 +510,7 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         //list all contacts and group chats
-        NSString* query = @"SELECT buddy_name, account_id, IFNULL(IFNULL(NULLIF(nick_name, ''), NULLIF(full_name, '')), buddy_name) FROM buddylist WHERE account_id=? AND muc=0";
+        NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) FROM buddylist as B INNER JOIN account AS A ON A.account_id=B.account_id WHERE B.account_id=? AND B.muc=0 AND B.buddy_name != (A.username || '@' || A.domain)";
         NSMutableArray* toReturn = [NSMutableArray new];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:@[accountNo]])
             [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];

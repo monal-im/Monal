@@ -66,7 +66,7 @@ struct MemberList: View {
             })
         }
         .toolbar {
-#if IS_ALPA
+#if IS_ALPHA
             if(editMode?.wrappedValue.isEditing == true) {
                 Button(action: {
                     openAccountSelection = true

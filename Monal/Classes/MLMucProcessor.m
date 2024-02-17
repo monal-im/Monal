@@ -400,6 +400,11 @@ static NSDictionary* _optionalGroupConfigOptions;
 }
 
 $$instance_handler(handleRoomConfigFormInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    if(![self isCreating:roomJid])
+    {
+        DDLogError(@"Got room config form invalidation but not creating group, ignoring: %@", roomJid);
+        return;
+    }
     if(deleteOnError)
     {
         DDLogError(@"Config form fetch failed, removing muc '%@' from _creating...", roomJid);
@@ -412,6 +417,11 @@ $$instance_handler(handleRoomConfigFormInvalidation, account.mucProcessor, $$ID(
 $$
 
 $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    if(![self isCreating:iqNode.fromUser])
+    {
+        DDLogError(@"Got room form result but not creating group, ignoring: %@", iqNode);
+        return;
+    }
     MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Room config form response jid not matching query jid!", (@{
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
@@ -475,6 +485,11 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
 $$
 
 $$instance_handler(handleRoomConfigResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    if(![self isCreating:roomJid])
+    {
+        DDLogError(@"Got room config invalidation but not creating group, ignoring: %@", roomJid);
+        return;
+    }
     if(deleteOnError)
     {
         DDLogError(@"Config form submit failed, removing muc '%@' from _creating...", roomJid);
@@ -487,6 +502,11 @@ $$instance_handler(handleRoomConfigResultInvalidation, account.mucProcessor, $$I
 $$
 
 $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    if(![self isCreating:iqNode.fromUser])
+    {
+        DDLogError(@"Got room config result but not creating group, ignoring: %@", iqNode);
+        return;
+    }
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Failed to submit room config form of '%@': %@", roomJid, [iqNode findFirst:@"error"]);
@@ -530,7 +550,7 @@ $$
                     }
                     if(![self isCreating:node.fromUser])
                     {
-                        DDLogError(@"Got 'muc needs configuration' status code (201) without this muc currently being created, ignoring!");
+                        DDLogError(@"Got 'muc needs configuration' status code (201) without this muc currently being created, ignoring: %@", node.fromUser);
                         break;
                     }
                     
@@ -746,9 +766,13 @@ $$
 }
 
 $$instance_handler(handleCreateTimeout, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
+    if(![self isCreating:room])
+    {
+        DDLogError(@"Got room create idle timeout but not creating group, ignoring: %@", room);
+        return;
+    }
     [self removeRoomFromCreating:room];
     [self deleteMuc:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
-    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could fetch room config form from '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not create group '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
 $$
 

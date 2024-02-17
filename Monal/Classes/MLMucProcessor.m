@@ -603,6 +603,7 @@ $$
                         [self removeRoomFromJoining:node.fromUser];
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
+                    break;
                 }
                 //kicked from room
                 case 307:
@@ -614,17 +615,23 @@ $$
                         [self removeRoomFromJoining:node.fromUser];
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
+                    break;
                 }
                 //removed because of affiliation change --> reenter room
                 case 321:
                 {
-                    DDLogDebug(@"user '%@' got affiliation changed for room %@", node.fromResource, node.fromUser);
-                    if([nick isEqualToString:node.fromResource])
+                    //only handle this and rejoin, if we did not get removed from a members-only room
+                    if(![presenceCodes containsObject:@322])
                     {
-                        DDLogDebug(@"got affiliation change for room %@", node.fromUser);
-                        [self removeRoomFromJoining:node.fromUser];
-                        [self sendDiscoQueryFor:node.fromUser withJoin:YES andBookmarksUpdate:YES];
+                        DDLogDebug(@"user '%@' got affiliation changed for room %@", node.fromResource, node.fromUser);
+                        if([nick isEqualToString:node.fromResource])
+                        {
+                            DDLogDebug(@"got affiliation change for room %@", node.fromUser);
+                            [self removeRoomFromJoining:node.fromUser];
+                            [self sendDiscoQueryFor:node.fromUser withJoin:YES andBookmarksUpdate:YES];
+                        }
                     }
+                    break;
                 }
                 //removed because room is now members only (an we are not a member)
                 case 322:
@@ -637,6 +644,7 @@ $$
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                         [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                     }
+                    break;
                 }
                 //removed because of system shutdown
                 case 332:
@@ -648,6 +656,7 @@ $$
                         [self removeRoomFromJoining:node.fromUser];
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
+                    break;
                 }
                 default:
                     DDLogWarn(@"Got unhandled muc status code in presence from %@: %@", node.from, code);

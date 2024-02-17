@@ -358,11 +358,13 @@ void swizzle(Class c, SEL orig, SEL new)
 {
     if(description == nil || [description isEqualToString:@""])
         description = @"XMPP Error";
+    NSMutableString* message = [description mutableCopy];
     NSString* errorReason = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
+    if(errorReason && ![errorReason isEqualToString:@""])
+        [message appendString:[NSString stringWithFormat:@": %@", errorReason]];
     NSString* errorText = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
-    NSString* message = [NSString stringWithFormat:@"%@: %@", description, errorReason];
     if(errorText && ![errorText isEqualToString:@""])
-        message = [NSString stringWithFormat:@"%@: %@ (%@)", description, errorReason, errorText];
+        [message appendString:[NSString stringWithFormat:@" (%@)", errorText]];
     return message;
 }
 

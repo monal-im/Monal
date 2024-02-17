@@ -574,25 +574,6 @@ $$
                     }
                     break;
                 }
-                //this is a self-presence (marking the end of the presence flood if we are in joining state)
-                case 110:
-                {
-                    //check if we have joined already (we handle only non-joining self-presences here)
-                    //joining self-presences are handled below
-                    if(![self isJoining:node.fromUser])
-                    {
-                        //muc got destroyed
-                        if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
-                        {
-                            [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
-                            [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
-                        }
-                        else
-                            ;           //ignore other non-joining self-presences for now
-                        break;
-                    }
-                    break;
-                }
                 //banned from room
                 case 301:
                 {
@@ -662,88 +643,106 @@ $$
                     DDLogWarn(@"Got unhandled muc status code in presence from %@: %@", node.from, code);
             }
         
-        //this is a self-presence marking the end of the presence flood, handle this code last because it resets _joining
-        if([presenceCodes containsObject:@110] && [self isJoining:node.fromUser])
+        //this is a self-presence (marking the end of the presence flood if we are in joining state)
+        //handle this code last because it may reset _joining
+        if([presenceCodes containsObject:@110])
         {
-            DDLogInfo(@"Successfully joined muc %@...", node.fromUser);
-            
-            //we are joined now, remove from joining list
-            [self removeRoomFromJoining:node.fromUser];
-            
-            //we joined successfully --> add muc to our favorites (this will use the already up to date nick from buddylist db table)
-            //and update bookmarks if this was the first time we joined this muc
-            [[DataLayer sharedInstance] addMucFavorite:node.fromUser forAccountId:_account.accountNo andMucNick:nil];
-            @synchronized(_stateLockObject) {
-                DDLogVerbose(@"_firstJoin set: %@\n_noUpdateBookmarks set: %@", _firstJoin, _noUpdateBookmarks);
-                //only update bookmarks on first join AND if not requested otherwise (batch join etc.)
-                if([_firstJoin containsObject:node.fromUser] && ![_noUpdateBookmarks containsObject:node.fromUser])
-                    [self updateBookmarks];
-                [_firstJoin removeObject:node.fromUser];
-                [_noUpdateBookmarks removeObject:node.fromUser];
-            }
-            
-            [self logMembersOfMuc:node.fromUser];
-            
-            //load members/admins/owners list (this has to be done *after* joining the muc to not get auth errors)
-            DDLogInfo(@"Querying member/admin/owner lists for muc %@...", node.fromUser);
-            for(NSString* type in @[@"member", @"admin", @"owner"])
+            //check if we have joined already (we handle only non-joining self-presences here)
+            //joining self-presences are handled below
+            if(![self isJoining:node.fromUser])
             {
-                XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:node.fromUser];
-                [discoInfo setMucListQueryFor:type];
-                [_account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
-            }
-            
-            monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
-            if(uiHandler)
-            {
-                //remove handler (it will only be called once)
-                [self removeUIHandlerForMuc:node.fromUser];
+                DDLogInfo(@"Got non-joining muc presence for %@...", node.fromUser);
                 
-                DDLogInfo(@"Calling UI handler for muc %@...", node.fromUser);
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    uiHandler(@{
-                        @"success": @YES,
-                        @"muc": node.fromUser,
-                        @"account": self->_account
+                //handle muc destroys, but ignore other non-joining self-presences for now
+                //(normally these have an additional status code that was already handled in the switch statement above
+                if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
+                {
+                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                    [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                }
+            }
+            else
+            {
+                DDLogInfo(@"Successfully joined muc %@...", node.fromUser);
+                
+                //we are joined now, remove from joining list
+                [self removeRoomFromJoining:node.fromUser];
+                
+                //we joined successfully --> add muc to our favorites (this will use the already up to date nick from buddylist db table)
+                //and update bookmarks if this was the first time we joined this muc
+                [[DataLayer sharedInstance] addMucFavorite:node.fromUser forAccountId:_account.accountNo andMucNick:nil];
+                @synchronized(_stateLockObject) {
+                    DDLogVerbose(@"_firstJoin set: %@\n_noUpdateBookmarks set: %@", _firstJoin, _noUpdateBookmarks);
+                    //only update bookmarks on first join AND if not requested otherwise (batch join etc.)
+                    if([_firstJoin containsObject:node.fromUser] && ![_noUpdateBookmarks containsObject:node.fromUser])
+                        [self updateBookmarks];
+                    [_firstJoin removeObject:node.fromUser];
+                    [_noUpdateBookmarks removeObject:node.fromUser];
+                }
+                
+                [self logMembersOfMuc:node.fromUser];
+                
+                //load members/admins/owners list (this has to be done *after* joining the muc to not get auth errors)
+                DDLogInfo(@"Querying member/admin/owner lists for muc %@...", node.fromUser);
+                for(NSString* type in @[@"member", @"admin", @"owner"])
+                {
+                    XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:node.fromUser];
+                    [discoInfo setMucListQueryFor:type];
+                    [_account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
+                }
+                
+                monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
+                if(uiHandler)
+                {
+                    //remove handler (it will only be called once)
+                    [self removeUIHandlerForMuc:node.fromUser];
+                    
+                    DDLogInfo(@"Calling UI handler for muc %@...", node.fromUser);
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        uiHandler(@{
+                            @"success": @YES,
+                            @"muc": node.fromUser,
+                            @"account": self->_account
+                        });
                     });
-                });
-            }
-            
-            //MAYBE TODO: send out notification indicating we joined that room
-            
-            //query muc-mam for new messages
-            BOOL supportsMam = NO;
-            @synchronized(_stateLockObject) {
-                if(_roomFeatures[node.fromUser] && [_roomFeatures[node.fromUser] containsObject:@"urn:xmpp:mam:2"])
-                    supportsMam = YES;
-            }
-            if(supportsMam)
-            {
-                DDLogInfo(@"Muc %@ supports mam:2...", node.fromUser);
+                }
                 
-                //query mam since last received stanza ID because we could not resume the smacks session
-                //(we would not have landed here if we were able to resume the smacks session)
-                //this will do a catchup of everything we might have missed since our last connection
-                //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
-                //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
-                NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:node.fromUser andAccount:_account.accountNo];
-                [_account delayIncomingMessageStanzasForArchiveJid:node.fromUser];
-                XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType to:node.fromUser];
-                if(lastStanzaId)
-                {
-                    DDLogInfo(@"Querying muc mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
-                    [mamQuery setMAMQueryAfter:lastStanzaId];
-                    [_account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
+                //MAYBE TODO: send out notification indicating we joined that room
+                
+                //query muc-mam for new messages
+                BOOL supportsMam = NO;
+                @synchronized(_stateLockObject) {
+                    if(_roomFeatures[node.fromUser] && [_roomFeatures[node.fromUser] containsObject:@"urn:xmpp:mam:2"])
+                        supportsMam = YES;
                 }
-                else
+                if(supportsMam)
                 {
-                    DDLogInfo(@"Querying muc mam:2 archive for latest stanzaid to prime database");
-                    [mamQuery setMAMQueryForLatestId];
-                    [_account sendIq:mamQuery withHandler:$newHandler(self, handleMamResponseWithLatestId)];
+                    DDLogInfo(@"Muc %@ supports mam:2...", node.fromUser);
+                    
+                    //query mam since last received stanza ID because we could not resume the smacks session
+                    //(we would not have landed here if we were able to resume the smacks session)
+                    //this will do a catchup of everything we might have missed since our last connection
+                    //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
+                    //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
+                    NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:node.fromUser andAccount:_account.accountNo];
+                    [_account delayIncomingMessageStanzasForArchiveJid:node.fromUser];
+                    XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType to:node.fromUser];
+                    if(lastStanzaId)
+                    {
+                        DDLogInfo(@"Querying muc mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
+                        [mamQuery setMAMQueryAfter:lastStanzaId];
+                        [_account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
+                    }
+                    else
+                    {
+                        DDLogInfo(@"Querying muc mam:2 archive for latest stanzaid to prime database");
+                        [mamQuery setMAMQueryForLatestId];
+                        [_account sendIq:mamQuery withHandler:$newHandler(self, handleMamResponseWithLatestId)];
+                    }
                 }
+                
+                //we don't need to force saving of our new state because once this incoming presence gets counted by smacks the whole state will be saved
             }
-            
-            //we don't need to force saving of our new state because once this incoming presence gets counted by smacks the whole state will be saved
         }
     }
     //handle message stanzas

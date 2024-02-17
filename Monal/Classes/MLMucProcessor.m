@@ -687,6 +687,9 @@ $$
             monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
             if(uiHandler)
             {
+                //remove handler (it will only be called once)
+                [self removeUIHandlerForMuc:node.fromUser];
+                
                 DDLogInfo(@"Calling UI handler for muc %@...", node.fromUser);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     uiHandler(@{
@@ -776,8 +779,11 @@ $$instance_handler(handleCreateTimeout, account.mucProcessor, $$ID(xmpp*, accoun
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not create group '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
 $$
 
--(NSString*) createGroup:(NSString*) node
+-(NSString* _Nullable) createGroup:(NSString* _Nullable) node
 {
+    if(node == nil)
+        node = [self generateSpeakableGroupNode];
+    node = [node stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet].lowercaseString;
     NSString* room = [[NSString stringWithFormat:@"%@@%@", node, _account.connectionProperties.conferenceServer] lowercaseString];
     if([[DataLayer sharedInstance] isBuddyMuc:room forAccount:_account.accountNo])
     {
@@ -1479,6 +1485,22 @@ $$
     DDLogInfo(@"Currently recorded members and participants of channel %@: %@", jid, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:jid forAccountId:_account.accountNo]);
 #endif
     }
+}
+
+-(NSString*) generateSpeakableGroupNode
+{
+    NSArray* charLists = @[
+        @"bcdfghjklmnpqrstvwxyz",
+        @"aeiou",
+    ];
+    NSMutableString* retval = [NSMutableString new];
+    int charTypeBegin = arc4random() % charLists.count;
+    for(int i=0; i<10; i++)
+    {
+        NSString* selectedCharList = charLists[(i + charTypeBegin) % charLists.count];
+        [retval appendString:[selectedCharList substringWithRange:NSMakeRange(arc4random() % selectedCharList.length, 1)]];
+    }
+    return retval;
 }
 
 @end

@@ -32,7 +32,7 @@ final class WebRTCClient: NSObject {
     @objc public let peerConnection: RTCPeerConnection
     private let rtcAudioSession =  RTCAudioSession.sharedInstance()
     private let audioQueue = DispatchQueue(label: "audio")
-    private let streamId = "stream"
+    private let streamId = "-"
     private var mediaConstrains: [String:String] = [:]
     private var videoCapturer: RTCVideoCapturer?
     private var localVideoTrack: RTCVideoTrack?
@@ -250,7 +250,7 @@ final class WebRTCClient: NSObject {
     private func createAudioTrack() -> RTCAudioTrack {
         let audioConstrains = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
         let audioSource = WebRTCClient.factory.audioSource(with: audioConstrains)
-        let audioTrack = WebRTCClient.factory.audioTrack(with: audioSource, trackId: "audio0")
+        let audioTrack = WebRTCClient.factory.audioTrack(with: audioSource, trackId: "audio-"+UUID().uuidString)
         return audioTrack
     }
     
@@ -274,7 +274,7 @@ final class WebRTCClient: NSObject {
             method_setImplementation(swizzledMethod!, replacementImplementation)
         }
         
-        let videoTrack = WebRTCClient.factory.videoTrack(with: videoSource, trackId: "video0")
+        let videoTrack = WebRTCClient.factory.videoTrack(with: videoSource, trackId: "video-"+UUID().uuidString)
         return videoTrack
     }
     
@@ -362,6 +362,7 @@ extension WebRTCClient {
         setTrackEnabled(RTCVideoTrack.self, isEnabled: isEnabled)
     }
 }
+
 // MARK:- Audio control
 extension WebRTCClient {
     @objc

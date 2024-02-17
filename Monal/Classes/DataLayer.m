@@ -1105,10 +1105,13 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSMutableArray*) listMucsForAccount:(NSNumber*) accountNo
+-(NSSet*) listMucsForAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
-        return [self.db executeReader:@"SELECT * FROM muc_favorites WHERE account_id=?;" andArguments:@[accountNo]];
+        NSMutableSet* retval = [NSMutableSet new];
+        for(NSDictionary* entry in [self.db executeReader:@"SELECT * FROM muc_favorites WHERE account_id=?;" andArguments:@[accountNo]])
+            [retval addObject:[entry[@"room"] lowercaseString]];
+        return retval;
     }];
 }
 

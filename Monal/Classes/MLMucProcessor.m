@@ -155,8 +155,8 @@ static NSDictionary* _optionalGroupConfigOptions;
         }
             
         //join MUCs from (current) muc_favorites db, the pending bookmarks fetch will join the remaining currently unknown mucs
-        for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
-            [self join:entry[@"room"]];
+        for(NSString* room in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
+            [self join:room];
     }
 }
 
@@ -887,8 +887,8 @@ $$
         DDLogInfo(@"Not pinging all mucs, last ping was less than %d seconds ago: %@", MUC_PING, _lastPing);
         return;
     }
-    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
-        [self ping:entry[@"room"] withLastPing:_lastPing];
+    for(NSString* room in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
+        [self ping:room withLastPing:_lastPing];
     _lastPing = [NSDate date];
 }
 
@@ -1407,8 +1407,8 @@ $$
 -(BOOL) checkIfStillBookmarked:(NSString*) room
 {
     room = [room lowercaseString];
-    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
-        if([room isEqualToString:[entry[@"room"] lowercaseString]])
+    for(NSString* entry in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
+        if([room isEqualToString:entry])
             return YES;
     return NO;
 }

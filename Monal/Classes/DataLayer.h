@@ -125,7 +125,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) updateMucSubject:(NSString*) subject forAccount:(NSNumber*) accountNo andRoom:(NSString*) room;
 -(NSString*) mucSubjectforAccount:(NSNumber*) accountNo andRoom:(NSString*) room;
 
--(NSMutableArray*) listMucsForAccount:(NSNumber*) accountNo;
+-(NSSet*) listMucsForAccount:(NSNumber*) accountNo;
 -(BOOL) deleteMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 
 -(void) updateMucTypeTo:(NSString*) type forRoom:(NSString*) room andAccount:(NSNumber*) accountNo;

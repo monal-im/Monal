@@ -3826,9 +3826,9 @@ NSString* const kStanza = @"stanza";
 
 -(void) queryServerVersion
 {
-    XMPPIQ* serverVersion = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [serverVersion getEntitySoftWareVersionTo:self.connectionProperties.identity.domain];
-    [self send:serverVersion];
+    XMPPIQ* serverVersion = [[XMPPIQ alloc] initWithType:kiqGetType to:self.connectionProperties.identity.domain];
+    [serverVersion getEntitySoftwareVersionInfo];
+    [self sendIq:serverVersion withHandler:$newHandler(MLIQProcessor, handleVersionResponse)];
 }
 
 -(void) queryExternalServicesOn:(NSString*) jid
@@ -4055,15 +4055,15 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark vcard
 
--(void) getEntitySoftWareVersion:(NSString*) user
+-(void) getEntitySoftWareVersion:(NSString*) jid
 {
-    NSDictionary* jid = [HelperTools splitJid:user];
-    MLAssert(jid[@"resource"] != nil, @"getEntitySoftWareVersion needs a full jid!");
-    if([[DataLayer sharedInstance] checkCap:@"jabber:iq:version" forUser:jid[@"user"] andResource:jid[@"resource"] onAccountNo:self.accountNo])
+    NSDictionary* split = [HelperTools splitJid:jid];
+    MLAssert(split[@"resource"] != nil, @"getEntitySoftWareVersion needs a full jid!");
+    if([[DataLayer sharedInstance] checkCap:@"jabber:iq:version" forUser:split[@"user"] andResource:split[@"resource"] onAccountNo:self.accountNo])
     {
-        XMPPIQ* iqEntitySoftWareVersion = [[XMPPIQ alloc] initWithType:kiqGetType];
-        [iqEntitySoftWareVersion getEntitySoftWareVersionTo:user];
-        [self send:iqEntitySoftWareVersion];
+        XMPPIQ* iqEntitySoftWareVersion = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
+        [iqEntitySoftWareVersion getEntitySoftwareVersionInfo];
+        [self sendIq:iqEntitySoftWareVersion withHandler:$newHandler(MLIQProcessor, handleVersionResponse)];
     }
 }
 

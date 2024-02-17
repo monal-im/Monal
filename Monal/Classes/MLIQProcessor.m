@@ -161,13 +161,7 @@
 
 +(void) processResultIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    //this is the only iq result that does not need any state
-    //WARNING: be careful adding other stateless result handlers (those can impose security risks!)
-    if([iqNode check:@"{jabber:iq:version}query"])
-    {
-        [self iqVersionResult:iqNode forAccount:account];
-        return;
-    }
+    //WARNING: be careful adding stateless result handlers here (those can impose security risks!)
     
     DDLogWarn(@"Got unhandled result IQ: %@", iqNode);
     [self respondWithErrorTo:iqNode onAccount:account];
@@ -714,20 +708,15 @@ $$class_handler(handleBlocked, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID
     }
 $$
 
-+(void) iqVersionResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account
-{
+$$class_handler(handleVersionResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     NSString* iqAppName = [iqNode findFirst:@"{jabber:iq:version}query/name#"];
     NSString* iqAppVersion = [iqNode findFirst:@"{jabber:iq:version}query/version#"];
     NSString* iqPlatformOS = [iqNode findFirst:@"{jabber:iq:version}query/os#"];
     
+    //server version info is the only case where there will be no resource --> return here
     if([iqNode.fromUser isEqualToString:account.connectionProperties.identity.domain])
     {
         account.connectionProperties.serverVersion = [[MLContactSoftwareVersionInfo alloc] initWithJid:iqNode.fromUser andRessource:iqNode.fromResource andAppName:iqAppName andAppVersion:iqAppVersion andPlatformOS:iqPlatformOS andLastInteraction:[NSDate date]];
-        return;
-    }
-    // TODO Thilo
-    if(iqNode.fromResource == Nil)
-    {
         return;
     }
     
@@ -743,7 +732,7 @@ $$
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh            
                                                         object:account
                                                         userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
-}
+$$
 
 +(void) respondWithErrorTo:(XMPPIQ*) iqNode onAccount:(xmpp*) account
 {

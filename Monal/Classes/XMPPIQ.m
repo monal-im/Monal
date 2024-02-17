@@ -340,13 +340,9 @@ NSString* const kiqErrorType = @"error";
 
 #pragma mark iq get
 
--(void) getEntitySoftWareVersionTo:(NSString*) to
+-(void) getEntitySoftwareVersionInfo
 {
-    [self setiqTo:to];
-    
-    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version"];
-    
-    [self addChildNode:queryNode];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version"]];
 }
 
 #pragma mark MUC

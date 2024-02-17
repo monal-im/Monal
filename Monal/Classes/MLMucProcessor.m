@@ -391,20 +391,15 @@ static NSDictionary* _optionalGroupConfigOptions;
         DDLogInfo(@"Ignoring handleMembersListUpdate for %@, MUC not in buddylist", node.fromUser);
 }
 
--(void) configureMuc:(NSString*) roomJid withMandatoryOptions:(NSDictionary*) mandatoryOptions andOptionalOptions:(NSDictionary*) optionalOptions deletingMucOnError:(BOOL) deleteOnError
+-(void) configureMuc:(NSString*) roomJid withMandatoryOptions:(NSDictionary*) mandatoryOptions andOptionalOptions:(NSDictionary*) optionalOptions deletingMucOnError:(BOOL) deleteOnError andJoiningMucOnSuccess:(BOOL) joinOnSuccess
 {
     DDLogInfo(@"Fetching room config form: %@", roomJid);
     XMPPIQ* configFetchNode = [[XMPPIQ alloc] initWithType:kiqGetType to:roomJid];
     [configFetchNode setGetRoomConfig];
-    [_account sendIq:configFetchNode withHandler:$newHandlerWithInvalidation(self, handleRoomConfigForm, handleRoomConfigFormInvalidation, $ID(roomJid), $ID(mandatoryOptions), $ID(optionalOptions), $BOOL(deleteOnError))];
+    [_account sendIq:configFetchNode withHandler:$newHandlerWithInvalidation(self, handleRoomConfigForm, handleRoomConfigFormInvalidation, $ID(roomJid), $ID(mandatoryOptions), $ID(optionalOptions), $BOOL(deleteOnError), $BOOL(joinOnSuccess))];
 }
 
 $$instance_handler(handleRoomConfigFormInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
-    if(![self isCreating:roomJid])
-    {
-        DDLogError(@"Got room config form invalidation but not creating group, ignoring: %@", roomJid);
-        return;
-    }
     if(deleteOnError)
     {
         DDLogError(@"Config form fetch failed, removing muc '%@' from _creating...", roomJid);
@@ -416,12 +411,7 @@ $$instance_handler(handleRoomConfigFormInvalidation, account.mucProcessor, $$ID(
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could fetch room config form for '%@': timeout", @""), roomJid] forMuc:roomJid withNode:nil andIsSevere:YES];
 $$
 
-$$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
-    if(![self isCreating:iqNode.fromUser])
-    {
-        DDLogError(@"Got room form result but not creating group, ignoring: %@", iqNode);
-        return;
-    }
+$$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError), $$BOOL(joinOnSuccess))
     MLAssert([iqNode.fromUser isEqualToString:roomJid], @"Room config form response jid not matching query jid!", (@{
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
@@ -481,15 +471,10 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
     dataForm.type = @"submit";
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType to:roomJid];
     [query setRoomConfig:dataForm];
-    [_account sendIq:query withHandler:$newHandlerWithInvalidation(self, handleRoomConfigResult, handleRoomConfigResultInvalidation, $ID(roomJid), $ID(mandatoryOptions), $ID(optionalOptions), $BOOL(deleteOnError))];
+    [_account sendIq:query withHandler:$newHandlerWithInvalidation(self, handleRoomConfigResult, handleRoomConfigResultInvalidation, $ID(roomJid), $ID(mandatoryOptions), $ID(optionalOptions), $BOOL(deleteOnError), $BOOL(joinOnSuccess))];
 $$
 
 $$instance_handler(handleRoomConfigResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
-    if(![self isCreating:roomJid])
-    {
-        DDLogError(@"Got room config invalidation but not creating group, ignoring: %@", roomJid);
-        return;
-    }
     if(deleteOnError)
     {
         DDLogError(@"Config form submit failed, removing muc '%@' from _creating...", roomJid);
@@ -501,12 +486,7 @@ $$instance_handler(handleRoomConfigResultInvalidation, account.mucProcessor, $$I
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not configure group '%@': timeout", @""), roomJid] forMuc:roomJid withNode:nil andIsSevere:YES];
 $$
 
-$$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
-    if(![self isCreating:iqNode.fromUser])
-    {
-        DDLogError(@"Got room config result but not creating group, ignoring: %@", iqNode);
-        return;
-    }
+$$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError), $$BOOL(joinOnSuccess))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Failed to submit room config form of '%@': %@", roomJid, [iqNode findFirst:@"error"]);
@@ -522,10 +502,14 @@ $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, acc
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
     }));
-    //group is now properly configured and we are joined, but all the code handling a proper join was not run
-    //--> join again to make sure everything is sane
-    [self removeRoomFromCreating:roomJid];
-    [self join:roomJid];
+    
+    if(joinOnSuccess)
+    {
+        //group is now properly configured and we are joined, but all the code handling a proper join was not run
+        //--> join again to make sure everything is sane
+        [self removeRoomFromCreating:roomJid];
+        [self join:roomJid];
+    }
 $$
 
 -(void) handleStatusCodes:(XMPPStanza*) node
@@ -555,7 +539,7 @@ $$
                     }
                     
                     //now configure newly created locked room
-                    [self configureMuc:node.fromUser withMandatoryOptions:_mandatoryGroupConfigOptions andOptionalOptions:_optionalGroupConfigOptions deletingMucOnError:YES];
+                    [self configureMuc:node.fromUser withMandatoryOptions:_mandatoryGroupConfigOptions andOptionalOptions:_optionalGroupConfigOptions deletingMucOnError:YES andJoiningMucOnSuccess:YES];
                     
                     //stop processing here to not trigger the "successful join" code below
                     //we will trigger this code by a "second" join presence once the room was created and is not locked anymore
@@ -1027,7 +1011,7 @@ $$
 {
     [self configureMuc:room withMandatoryOptions:@{
         @"muc#roomconfig_roomname": name,
-    } andOptionalOptions:@{} deletingMucOnError:NO];
+    } andOptionalOptions:@{} deletingMucOnError:NO andJoiningMucOnSuccess:NO];
 }
 
 -(void) changeSubjectOfMuc:(NSString*) room to:(NSString*) subject

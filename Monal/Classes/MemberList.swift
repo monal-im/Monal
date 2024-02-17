@@ -13,10 +13,9 @@ import OrderedCollections
 struct MemberList: View {
     @Environment(\.editMode) private var editMode
 
-    private let memberList: [ObservableKVOWrapper<MLContact>]
-    private let groupName: String
+    @State private var memberList: [ObservableKVOWrapper<MLContact>]
+    @ObservedObject var group: ObservableKVOWrapper<MLContact>
     private let account: xmpp?
-    private let isAlpha: Bool
 
     @State private var openAccountSelection : Bool = false
     @State private var contactsToAdd : OrderedSet<MLContact> = []
@@ -31,9 +30,9 @@ struct MemberList: View {
 
     var body: some View {
         // This is the invisible NavigationLink hack again...
-        NavigationLink(destination:LazyClosureView(ContactPicker(selectedContacts: $contactsToAdd)), isActive: $openAccountSelection){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
+        NavigationLink(destination:LazyClosureView(ContactPicker(account: self.account!, selectedContacts: $contactsToAdd)), isActive: $openAccountSelection){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
         List {
-            Section(header: Text(self.groupName)) {
+            Section(header: Text(self.group.obj.contactDisplayName)) {
                 ForEach(self.memberList, id: \.self.obj) {
                     contact in
                     if contact.obj.contactJid != self.account?.connectionProperties.identity.jid {
@@ -56,18 +55,19 @@ struct MemberList: View {
                     }
                 }
                 .onDelete(perform: { memberIdx in
-                    // TODO maybe alert before deletion
-                    if(memberIdx.count == 1) {
-                        self.setAndShowAlert(title: "Member deleted", description: self.memberList[memberIdx.first!].contactJid)
-                    }
+                    let member = self.memberList[memberIdx.first!]
+                    self.account!.mucProcessor.setAffiliation("none", ofUser: member.contactJid, inMuc: self.group.obj.contactJid)
+
+                    self.setAndShowAlert(title: "Member deleted", description: self.memberList[memberIdx.first!].contactJid)
+                    self.memberList.remove(at: memberIdx.first!)
                 })
-                .deleteDisabled(self.isAlpha)
             }.alert(isPresented: $showAlert, content: {
                 Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
             })
         }
         .toolbar {
-            if(isAlpha && editMode?.wrappedValue.isEditing == true) {
+#if IS_ALPA
+            if(editMode?.wrappedValue.isEditing == true) {
                 Button(action: {
                     openAccountSelection = true
                 }, label: {
@@ -75,26 +75,16 @@ struct MemberList: View {
                         .foregroundColor(.blue)
                 })
             }
+#endif
             EditButton()
         }
         .navigationBarTitle("Group Members", displayMode: .inline)
     }
 
     init(mucContact: ObservableKVOWrapper<MLContact>?) {
-        if let mucContact = mucContact {
-            self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact.obj.accountId)! as xmpp
-            self.groupName = mucContact.contactDisplayName
-            self.memberList = getContactList(viewContact: mucContact)
-        } else {
-            self.account = nil
-            self.groupName = "Invalid Group"
-            self.memberList = []
-        }
-#if IS_ALPA
-        self.isAlpha = true
-#else
-        self.isAlpha = false
-#endif
+        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact!.obj.accountId)! as xmpp
+        self.group = mucContact!;
+        _memberList = State(wrappedValue: getContactList(viewContact: mucContact))
     }
 }
 

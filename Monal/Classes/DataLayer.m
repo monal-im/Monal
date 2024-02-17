@@ -501,12 +501,24 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSMutableArray<MLContact*>*) contactList
+-(NSArray<MLContact*>*) contactList
 {
     return [self contactListWithJid:@""];
 }
 
--(NSMutableArray<MLContact*>*) contactListWithJid:(NSString*) jid
+-(NSArray<MLContact*>*) possibleGroupMembersForAccount:(NSNumber*) accountNo
+{
+    return [self.db idReadTransaction:^{
+        //list all contacts and group chats
+        NSString* query = @"SELECT buddy_name, account_id, IFNULL(IFNULL(NULLIF(nick_name, ''), NULLIF(full_name, '')), buddy_name) FROM buddylist WHERE account_id=? AND muc=0";
+        NSMutableArray* toReturn = [NSMutableArray new];
+        for(NSDictionary* dic in [self.db executeReader:query andArguments:@[accountNo]])
+            [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
+        return toReturn;
+    }];
+}
+
+-(NSArray<MLContact*>*) contactListWithJid:(NSString*) jid
 {
     return [self.db idReadTransaction:^{
         //list all contacts and group chats

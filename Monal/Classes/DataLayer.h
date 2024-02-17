@@ -60,8 +60,9 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(NSMutableArray<MLContact*>*) searchContactsWithString:(NSString*) search;
 
--(NSMutableArray<MLContact*>*) contactList;
--(NSMutableArray<MLContact*>*) contactListWithJid:(NSString*) jid;
+-(NSArray<MLContact*>*) contactList;
+-(NSArray<MLContact*>*) contactListWithJid:(NSString*) jid;
+-(NSArray<MLContact*>*) possibleGroupMembersForAccount:(NSNumber*) accountNo;
 -(NSArray<NSString*>*) resourcesForContact:(MLContact* _Nonnull)contact ;
 -(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSNumber*)account;
 -(void) setSoftwareVersionInfoForContact:(NSString*)contact

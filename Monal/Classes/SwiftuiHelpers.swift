@@ -473,9 +473,7 @@ class SwiftuiInterface : NSObject {
             case "ContactRequests":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactRequestsMenu(delegate: delegate)))
             case "CreateGroup":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate, dismissWithNewGroup: { contact in
-                    // FIXME
-                })))
+                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate)))
             case "ChatPlaceholder":
                 host.rootView = AnyView(ChatPlaceholder())
             default:

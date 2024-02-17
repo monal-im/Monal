@@ -68,9 +68,7 @@
     // list all contacts, not only active chats
     // that will clutter the list of selectable contacts, but you can always use sirikit interactions
     // to get the recently used contacts listed
-    NSMutableArray<MLContact*>* recipients = [[DataLayer sharedInstance] contactList];
-    
-    self.recipients = recipients;
+    self.recipients = [[DataLayer sharedInstance] contactList];
     self.accounts = [[DataLayer sharedInstance] enabledAccountList];
 
     if(self.intentContact != nil)

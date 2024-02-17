@@ -981,20 +981,19 @@ $$
 -(void) inviteUser:(NSString*) jid inMuc:(NSString*) roomJid
 {
     DDLogInfo(@"Inviting user '%@' to '%@' directly & indirectly", jid, roomJid);
+    
     XMPPMessage* indirectInviteMsg = [[XMPPMessage alloc] initWithType:kMessageNormalType to:roomJid];
     [indirectInviteMsg addChildNode:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"http://jabber.org/protocol/muc#user" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"invite" withAttributes:@{
             @"to": jid
         } andChildren:@[] andData:nil]
     ] andData:nil]];
-
     [_account send:indirectInviteMsg];
     
     XMPPMessage* directInviteMsg = [[XMPPMessage alloc] initWithType:kMessageNormalType to:jid];
     [directInviteMsg addChildNode:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:conference" withAttributes:@{
         @"jid": roomJid
     } andChildren:@[] andData:nil]];
-
     [_account send:directInviteMsg];
 }
 

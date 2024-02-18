@@ -67,7 +67,7 @@ static NSMutableDictionary* _typingNotifications;
         if(![messageNode check:@"/@id"])
         {
             DDLogError(@"Ignoring error messages having an empty ID");
-            return message;
+            return nil;
         }
         
         NSString* errorType = [messageNode findFirst:@"error@type"];
@@ -94,7 +94,7 @@ static NSMutableDictionary* _typingNotifications;
             @"errorReason": errorText
         }];
 
-        return message;
+        return nil;
     }
     
     //ignore prosody mod_muc_notifications muc push stanzas (they are only needed to trigger an apns push)
@@ -104,13 +104,13 @@ static NSMutableDictionary* _typingNotifications;
         NSString* roomJid = [messageNode findFirst:@"{http://quobis.com/xmpp/muc#push}notification@jid"];
         if([[[DataLayer sharedInstance] listMucsForAccount:account.accountNo] containsObject:roomJid])
             [account.mucProcessor ping:roomJid];
-        return message;
+        return nil;
     }
     
     if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"])
     {
         [account.pubsub handleHeadlineMessage:messageNode];
-        return message;
+        return nil;
     }
     
     if(![messageNode check:@"/<type=groupchat>"] && [[messageNode from] isEqualToString:account.connectionProperties.identity.fullJid] && [[messageNode toUser] isEqualToString:account.connectionProperties.identity.jid]) {
@@ -123,7 +123,7 @@ static NSMutableDictionary* _typingNotifications;
     if([messageNode check:@"{urn:xmpp:jingle-message:0}*"] && ![HelperTools shouldProvideVoip])
     {
         DDLogWarn(@"China locale detected, ignoring incoming JMI message!");
-        return message;
+        return nil;
     }
     else if([messageNode check:@"{urn:xmpp:jingle-message:0}*"])
     {
@@ -138,7 +138,7 @@ static NSMutableDictionary* _typingNotifications;
             {
                 //TODO: record this call in history db even if it was outgoing from another device on our account
                 DDLogWarn(@"Ignoring incoming JMI propose coming from another device on our account");
-                return message;
+                return nil;
             }
             
             //only handle jmi stanzas exchanged with contacts allowed to see us and ignore all others
@@ -147,7 +147,7 @@ static NSMutableDictionary* _typingNotifications;
             if(!jmiContact.isSubscribedFrom)
             {
                 DDLogWarn(@"Ignoring incoming JMI propose coming from a contact we are not subscribed from");
-                return message;
+                return nil;
             }
             
             NSDate* delayStamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
@@ -156,7 +156,7 @@ static NSMutableDictionary* _typingNotifications;
             if([[NSDate date] timeIntervalSinceDate:delayStamp] > 60.0)
             {
                 DDLogWarn(@"Ignoring incoming JMI propose: too old");
-                return message;
+                return nil;
             }
             
             //only allow audio calls for now
@@ -173,7 +173,7 @@ static NSMutableDictionary* _typingNotifications;
             }
             else
                 DDLogWarn(@"Ignoring incoming non-audio JMI call, not implemented yet");
-            return message;
+            return nil;
         }
         //handle all other JMI events (TODO: add entry to local history, once the UI for this is implemented)
         //if the corresponding call is unknown these will just be ignored by MLVoipProcessor --> no presence leak
@@ -192,7 +192,7 @@ static NSMutableDictionary* _typingNotifications;
                 //in the monal compilation unit (the ui unit), the NSE resides in yet another compilation unit (the nse-appex unit)
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingJMIStanza object:account userInfo:callData];
             }
-            return message;
+            return nil;
         }
     }
     
@@ -205,7 +205,7 @@ static NSMutableDictionary* _typingNotifications;
         DDLogWarn(@"Ignoring muc pm marked as such...");
         //ignore muc pms without id attribute (we can't send out errors pointing to this message without an id)
         if([messageNode findFirst:@"/@id"] == nil)
-            return message;
+            return nil;
         XMPPMessage* errorReply = [XMPPMessage new];
         [errorReply.attributes setObject:@"error" forKey:@"type"];
         [errorReply.attributes setObject:messageNode.from forKey:@"to"];                       //this has to be the full jid here
@@ -216,7 +216,7 @@ static NSMutableDictionary* _typingNotifications;
         ] andData:nil]];
         [errorReply setStoreHint];
         [account send:errorReply];
-        return message;
+        return nil;
     }
     //ignore carbon copied muc pms not marked as such
     NSString* carbonType = [outerMessageNode findFirst:@"{urn:xmpp:carbons:2}*$"];
@@ -227,7 +227,7 @@ static NSMutableDictionary* _typingNotifications;
         if(carbonTestContact.isGroup)
         {
             DDLogWarn(@"Ignoring carbon copied muc pm...");
-            return message;
+            return nil;
         }
         else
             DDLogVerbose(@"Not a carbon copy of a muc pm for contact: %@", carbonTestContact);
@@ -246,7 +246,7 @@ static NSMutableDictionary* _typingNotifications;
         {
             // ignore message
             DDLogWarn(@"Ignoring groupchat message from %@", messageNode.toUser);
-            return message;
+            return nil;
         }
     }
     else
@@ -261,7 +261,7 @@ static NSMutableDictionary* _typingNotifications;
             }
             else
                 DDLogInfo(@"Ignoring MLhistory KeyTransportElement for buddy %@", possibleUnkownContact);
-            return message;
+            return nil;
         }
     }
 
@@ -290,7 +290,7 @@ static NSMutableDictionary* _typingNotifications;
     
     //handle muc status changes or invites (this checks for the muc namespace itself)
     if([account.mucProcessor processMessage:messageNode])
-        return message;     //the muc processor said we have stop processing
+        return nil;     //the muc processor said we have stop processing
     
     //add contact if possible (ignore groupchats or already existing contacts, or KeyTransportElements)
     DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
@@ -343,7 +343,7 @@ static NSMutableDictionary* _typingNotifications;
             DDLogInfo(@"Got MUC subject for %@: %@", messageNode.fromUser, subject);
             
             if(subject == nil || [subject isEqualToString:currentSubject])
-                return message;
+                return nil;
             
             DDLogVerbose(@"Updating subject in database: %@", subject);
             [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
@@ -353,12 +353,12 @@ static NSMutableDictionary* _typingNotifications;
                 @"subject": subject,
             }];
         }
-        return message;
+        return nil;
     }
     
     //ignore all other groupchat messages coming from bare jid (e.g. not being a "normal" muc message nor a subject update handled above)
     if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
-        return message;
+        return nil;
     
     NSString* decrypted;
     if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])

@@ -485,11 +485,13 @@ enum msgSentState {
 
 -(void) handleForeGround
 {
-    @synchronized(_localMLContactCache) {
-        [_localMLContactCache removeAllObjects];
-    }
-    [self refreshData];
-    [self reloadTable];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        @synchronized(self->_localMLContactCache) {
+            [self->_localMLContactCache removeAllObjects];
+        }
+        [self refreshData];
+        [self reloadTable];
+    });
 }
 
 -(void) openCallScreen:(id) sender
@@ -903,13 +905,15 @@ enum msgSentState {
 
 -(void) handleBackgroundChanged
 {
-    DDLogVerbose(@"Loading background image for %@", self.contact);
-    self.backgroundImage.image = [[MLImageManager sharedInstance] getBackgroundFor:self.contact];
-    //use default background if this contact does not have its own
-    if(self.backgroundImage.image == nil)
-        self.backgroundImage.image = [[MLImageManager sharedInstance] getBackgroundFor:nil];
-    self.backgroundImage.hidden = self.backgroundImage.image == nil;
-    DDLogVerbose(@"Background is now: %@", self.backgroundImage.image);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogVerbose(@"Loading background image for %@", self.contact);
+        self.backgroundImage.image = [[MLImageManager sharedInstance] getBackgroundFor:self.contact];
+        //use default background if this contact does not have its own
+        if(self.backgroundImage.image == nil)
+            self.backgroundImage.image = [[MLImageManager sharedInstance] getBackgroundFor:nil];
+        self.backgroundImage.hidden = self.backgroundImage.image == nil;
+        DDLogVerbose(@"Background is now: %@", self.backgroundImage.image);
+    });
 }
 
 #pragma mark rotation

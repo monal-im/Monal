@@ -335,6 +335,10 @@ static NSDictionary* _optionalGroupConfigOptions;
     //handle mediated invites
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
+        //ignore outgoing carbon copies or mam results
+        if(![messageNode.toUser isEqualToString:_account.connectionProperties.identity.jid])
+            return YES;     //stop processing in MLMessageProcessor and ignore this invite
+        
         MLContact* inviteFrom = [MLContact createContactFromJid:[messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"] andAccountNo:_account.accountNo];
         DDLogInfo(@"Got mediated muc invite from %@ for %@...", inviteFrom, messageNode.fromUser);
         if(!inviteFrom.isSubscribedFrom)
@@ -346,10 +350,14 @@ static NSDictionary* _optionalGroupConfigOptions;
         [self sendDiscoQueryFor:messageNode.fromUser withJoin:YES andBookmarksUpdate:YES];
         return YES;     //stop processing in MLMessageProcessor
     }
-    
+        
     //handle direct invites
     if([messageNode check:@"{jabber:x:conference}x@jid"] && [[messageNode findFirst:@"{jabber:x:conference}x@jid"] length] > 0)
     {
+        //ignore outgoing carbon copies or mam results
+        if(![messageNode.toUser isEqualToString:_account.connectionProperties.identity.jid])
+            return YES;     //stop processing in MLMessageProcessor and ignore this invite
+        
         MLContact* inviteFrom = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:_account.accountNo];
         DDLogInfo(@"Got direct muc invite from %@ for %@ --> joining...", inviteFrom, [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
         if(!inviteFrom.isSubscribedFrom)

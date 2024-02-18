@@ -59,31 +59,32 @@ const long NotificationPrivacyOptionCnt = 3;
 #pragma mark tableview datasource delegate
 
 
--(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+-(NSInteger) numberOfSectionsInTableView:(UITableView*) tableView
 {
     return [self.sectionArray count];
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+-(NSString*) tableView:(UITableView*) tableView titleForHeaderInSection:(NSInteger) section
 {
     return [self.sectionArray objectAtIndex:section];
 }
 
--(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+-(UIView*) tableView:(UITableView*) tableView viewForHeaderInSection:(NSInteger) section
 {
     NSString* sectionTitle = [self tableView:tableView titleForHeaderInSection:section];
     return [HelperTools MLCustomViewHeaderWithTitle:sectionTitle];
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+-(NSInteger) tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
 {
-    switch (section) {
+    switch (section)
+    {
         case 0:
         {
 #ifdef DISABLE_OMEMO
-            return 12 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
-#else// DISABLE_OMEMO
             return 13 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
+#else// DISABLE_OMEMO
+            return 14 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
 #endif// DISABLE_OMEMO
         }
         default:
@@ -94,13 +95,14 @@ const long NotificationPrivacyOptionCnt = 3;
     }
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     
-    MLSwitchCell* cell = (MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+    MLSwitchCell* cell = (MLSwitchCell*)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
     [cell clear];
 
-    switch (indexPath.section) {
+    switch(indexPath.section)
+    {
         case 0:
         {
             long row = indexPath.row;
@@ -197,6 +199,11 @@ const long NotificationPrivacyOptionCnt = 3;
                     break;
 #endif// DISABLE_OMEMO
                 }
+                case 16:
+                {
+                    [cell initCell:NSLocalizedString(@"Allow contacts not in my Contact list to contact me", @"") withToggleDefaultsKey:@"allowNonRosterContacts"];
+                    break;
+                }
                 default:
                     unreachable();
                     break;
@@ -210,9 +217,10 @@ const long NotificationPrivacyOptionCnt = 3;
     return cell;
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+-(void) tableView:(UITableView*) tableView didSelectRowAtIndexPath:(NSIndexPath*) indexPath
 {
-    switch (indexPath.section) {
+    switch (indexPath.section)
+    {
         case 0:
         {
             long row = indexPath.row;
@@ -252,6 +260,7 @@ const long NotificationPrivacyOptionCnt = 3;
                 case 13:
                 case 14:
                 case 15:
+                case 16:
                     break;
             }
             break;
@@ -268,25 +277,18 @@ const long NotificationPrivacyOptionCnt = 3;
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
--(void)openNotificationPrivacyFolder
+-(void) openNotificationPrivacyFolder
 {
-    if (self.isNotificationPrivacyOpened)
-    {
-        self.isNotificationPrivacyOpened = NO;
-    }
-    else
-    {
-        self.isNotificationPrivacyOpened = YES;
-    }
+    self.isNotificationPrivacyOpened = !self.isNotificationPrivacyOpened;
     [self refershTable];
 }
 
--(void)refershTable
+-(void) refershTable
 {
     [_settingsTable reloadData];
 }
 
--(void)checkStatusForCell:(MLSwitchCell*) cell atIndexPath:(NSIndexPath*) idxPath
+-(void) checkStatusForCell:(MLSwitchCell*) cell atIndexPath:(NSIndexPath*) idxPath
 {
     NotificationPrivacySettingOption privacySettionOption = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
     // default: remove checkmark
@@ -318,8 +320,9 @@ const long NotificationPrivacyOptionCnt = 3;
 
 -(NSString*)getNsNotificationPrivacyOption:(NotificationPrivacySettingOption) option
 {
-    NSString *optionStr = @"";
-    switch (option) {
+    NSString* optionStr = @"";
+    switch (option)
+    {
         case DisplayNameAndMessage:
             optionStr = NSLocalizedString(@"Display Name And Message", @"");
             break;
@@ -336,7 +339,7 @@ const long NotificationPrivacyOptionCnt = 3;
     return optionStr;
 }
 
--(void)setNotificationPrivacyOption:(NSIndexPath*) idxPath
+-(void) setNotificationPrivacyOption:(NSIndexPath*) idxPath
 {
     switch (idxPath.row) {
         case DisplayNameAndMessageRow:

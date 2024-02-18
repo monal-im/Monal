@@ -26,6 +26,11 @@
 
 +(void) processUnboundIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
+    //only handle these iqs if the remote user is on our roster
+    MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
+    if(![account.connectionProperties.identity.jid isEqualToString:iqNode.fromUser] && !(contact.isSubscribedFrom && !contact.isGroup))
+        DDLogWarn(@"Invalid sender for iq (!subscribedFrom || isGroup), ignoring: %@", iqNode);
+    
     if([iqNode check:@"/<type=get>"])
         [self processGetIq:iqNode forAccount:account];
     else if([iqNode check:@"/<type=set>"])
@@ -40,40 +45,33 @@
 
 +(void) processGetIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    //only handle these iqs if the remote user is on our roster
-    MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
-    if([account.connectionProperties.identity.jid isEqualToString:iqNode.fromUser] || (contact.isSubscribedFrom && !contact.isGroup))
+    if([iqNode check:@"{urn:xmpp:ping}ping"])
     {
-        if([iqNode check:@"{urn:xmpp:ping}ping"])
-        {
-            XMPPIQ* pong = [[XMPPIQ alloc] initAsResponseTo:iqNode];
-            [pong setiqTo:iqNode.from];
-            [account send:pong];
-            return;
-        }
-        
-        if([iqNode check:@"{jabber:iq:version}query"] && [[HelperTools defaultsDB] boolForKey: @"allowVersionIQ"])
-        {
-            XMPPIQ* versioniq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
-            [versioniq setiqTo:iqNode.from];
-            [versioniq setVersion];
-            [account send:versioniq];
-            return;
-        }
-        
-        if([iqNode check:@"{http://jabber.org/protocol/disco#info}query"])
-        {
-            XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initAsResponseTo:iqNode];
-            [discoInfoResponse setDiscoInfoWithFeatures:account.capsFeatures identity:account.capsIdentity andNode:[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query@node"]];
-            [account send:discoInfoResponse];
-            return;
-        }
-        
-        DDLogWarn(@"Got unhandled get IQ: %@", iqNode);
-        [self respondWithErrorTo:iqNode onAccount:account];
+        XMPPIQ* pong = [[XMPPIQ alloc] initAsResponseTo:iqNode];
+        [pong setiqTo:iqNode.from];
+        [account send:pong];
+        return;
     }
-    else
-        DDLogWarn(@"Invalid sender for get iq (!subscribedFrom || isGroup), ignoring iq: %@", iqNode);
+    
+    if([iqNode check:@"{jabber:iq:version}query"] && [[HelperTools defaultsDB] boolForKey: @"allowVersionIQ"])
+    {
+        XMPPIQ* versioniq = [[XMPPIQ alloc] initAsResponseTo:iqNode];
+        [versioniq setiqTo:iqNode.from];
+        [versioniq setVersion];
+        [account send:versioniq];
+        return;
+    }
+    
+    if([iqNode check:@"{http://jabber.org/protocol/disco#info}query"])
+    {
+        XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initAsResponseTo:iqNode];
+        [discoInfoResponse setDiscoInfoWithFeatures:account.capsFeatures identity:account.capsIdentity andNode:[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query@node"]];
+        [account send:discoInfoResponse];
+        return;
+    }
+    
+    DDLogWarn(@"Got unhandled get IQ: %@", iqNode);
+    [self respondWithErrorTo:iqNode onAccount:account];
 }
 
 +(void) processSetIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
@@ -92,71 +90,65 @@
         return;
     }
     
-    MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
-    if([account.connectionProperties.identity.jid isEqualToString:iqNode.fromUser] || (contact.isSubscribedFrom && !contact.isGroup))
+    //its a roster push (sanity check will be done in processRosterWithAccount:andIqNode:)
+    if([iqNode check:@"{jabber:iq:roster}query"])
     {
-        //its a roster push (sanity check will be done in processRosterWithAccount:andIqNode:)
-        if([iqNode check:@"{jabber:iq:roster}query"])
+        //this will only return YES, if the roster push was allowed and processed successfully
+        if([self processRosterWithAccount:account andIqNode:iqNode])
         {
-            //this will only return YES, if the roster push was allowed and processed successfully
-            if([self processRosterWithAccount:account andIqNode:iqNode])
-            {
-                //send empty result iq as per RFC 6121 requirements
-                XMPPIQ* reply = [[XMPPIQ alloc] initAsResponseTo:iqNode];
-                [reply setiqTo:iqNode.from];
-                [account send:reply];
-            }
-            return;
+            //send empty result iq as per RFC 6121 requirements
+            XMPPIQ* reply = [[XMPPIQ alloc] initAsResponseTo:iqNode];
+            [reply setiqTo:iqNode.from];
+            [account send:reply];
         }
-
-        if([iqNode check:@"{urn:xmpp:blocking}block"] || [iqNode check:@"{urn:xmpp:blocking}unblock"])
-        {
-            //make sure we don't process blocking updates not coming from our own account
-            if(account.connectionProperties.supportsBlocking && (iqNode.from == nil || [iqNode.fromUser isEqualToString:account.connectionProperties.identity.jid]))
-            {
-                BOOL blockingUpdated = NO;
-                // mark jid as unblocked
-                if([iqNode check:@"{urn:xmpp:blocking}unblock"])
-                {
-                    NSArray* unBlockItems = [iqNode find:@"{urn:xmpp:blocking}unblock/item@@"];
-                    for(NSDictionary* item in unBlockItems)
-                    {
-                        if(item && item[@"jid"])
-                            [[DataLayer sharedInstance] unBlockJid:item[@"jid"] withAccountNo:account.accountNo];
-                    }
-                    if(unBlockItems && unBlockItems.count == 0)
-                    {
-                        // remove all blocks
-                        [account updateLocalBlocklistCache:[[NSSet<NSString*> alloc] init]];
-                    }
-                    blockingUpdated = YES;
-                }
-                // mark jid as blocked
-                if([iqNode check:@"{urn:xmpp:blocking}block"])
-                {
-                    for(NSDictionary* item in [iqNode find:@"{urn:xmpp:blocking}block/item@@"])
-                    {
-                        if(item && item[@"jid"])
-                            [[DataLayer sharedInstance] blockJid:item[@"jid"] withAccountNo:account.accountNo];
-                    }
-                    blockingUpdated = YES;
-                }
-                if(blockingUpdated)
-                {
-                    // notify the views
-                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
-                }
-            }
-            else
-                DDLogWarn(@"Invalid sender for blocklist, ignoring iq: %@", iqNode);
-            return;
-        }
-        
-        DDLogWarn(@"Got unhandled set IQ: %@", iqNode);
-        [self respondWithErrorTo:iqNode onAccount:account];
+        return;
     }
-    else
-        DDLogWarn(@"Invalid sender for set iq (!subscribedFrom || isGroup), ignoring iq: %@", iqNode);
+
+    if([iqNode check:@"{urn:xmpp:blocking}block"] || [iqNode check:@"{urn:xmpp:blocking}unblock"])
+    {
+        //make sure we don't process blocking updates not coming from our own account
+        if(account.connectionProperties.supportsBlocking && (iqNode.from == nil || [iqNode.fromUser isEqualToString:account.connectionProperties.identity.jid]))
+        {
+            BOOL blockingUpdated = NO;
+            // mark jid as unblocked
+            if([iqNode check:@"{urn:xmpp:blocking}unblock"])
+            {
+                NSArray* unBlockItems = [iqNode find:@"{urn:xmpp:blocking}unblock/item@@"];
+                for(NSDictionary* item in unBlockItems)
+                {
+                    if(item && item[@"jid"])
+                        [[DataLayer sharedInstance] unBlockJid:item[@"jid"] withAccountNo:account.accountNo];
+                }
+                if(unBlockItems && unBlockItems.count == 0)
+                {
+                    // remove all blocks
+                    [account updateLocalBlocklistCache:[[NSSet<NSString*> alloc] init]];
+                }
+                blockingUpdated = YES;
+            }
+            // mark jid as blocked
+            if([iqNode check:@"{urn:xmpp:blocking}block"])
+            {
+                for(NSDictionary* item in [iqNode find:@"{urn:xmpp:blocking}block/item@@"])
+                {
+                    if(item && item[@"jid"])
+                        [[DataLayer sharedInstance] blockJid:item[@"jid"] withAccountNo:account.accountNo];
+                }
+                blockingUpdated = YES;
+            }
+            if(blockingUpdated)
+            {
+                // notify the views
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
+            }
+        }
+        else
+            DDLogWarn(@"Invalid sender for blocklist, ignoring iq: %@", iqNode);
+        return;
+    }
+    
+    DDLogWarn(@"Got unhandled set IQ: %@", iqNode);
+    [self respondWithErrorTo:iqNode onAccount:account];
 }
 
 +(void) processResultIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account

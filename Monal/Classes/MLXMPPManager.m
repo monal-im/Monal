@@ -139,6 +139,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     //default value for sanbox is no (e.g. production)
     [self upgradeBoolUserSettingsIfUnset:@"isSandboxAPNS" toDefault:NO];
+    
+    //anti spam/privacy setting, but default to yes (current behavior, conversations behavior etc.)
+    [self upgradeBoolUserSettingsIfUnset:@"allowNonRosterContacts" toDefault:YES];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

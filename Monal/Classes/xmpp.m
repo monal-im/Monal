@@ -1861,6 +1861,13 @@ NSString* const kStanza = @"stanza";
                     [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                     return;
                 }
+                
+                if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !contact.isSubscribedFrom)
+                {
+                    //mark this stanza as handled
+                    [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
+                    return;
+                }
 
                 if(![presenceNode check:@"/@type"])
                 {

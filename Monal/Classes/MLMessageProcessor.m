@@ -97,6 +97,16 @@ static NSMutableDictionary* _typingNotifications;
         return nil;
     }
     
+    NSString* buddyName = [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
+    MLContact* possiblyUnknownContact = [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo];
+    
+    //ignore unknown contacts if configured to do so
+    if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !possiblyUnknownContact.isSubscribedFrom)
+    {
+        DDLogWarn(@"Ignoring incoming message stanza from unknown contact: %@", possiblyUnknownContact);
+        return nil;
+    }
+    
     //ignore prosody mod_muc_notifications muc push stanzas (they are only needed to trigger an apns push)
     //but trigger a muc ping for these mucs nonetheless (if this muc is known, we don't want to arbitrarily join mucs just because of this stanza)
     if([messageNode check:@"{http://quobis.com/xmpp/muc#push}notification"])
@@ -232,12 +242,6 @@ static NSMutableDictionary* _typingNotifications;
         else
             DDLogVerbose(@"Not a carbon copy of a muc pm for contact: %@", carbonTestContact);
     }
-
-    NSString* possibleUnkownContact;
-    if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
-        possibleUnkownContact = messageNode.toUser;
-    else
-        possibleUnkownContact = messageNode.fromUser;
     
     if(([messageNode check:@"/<type=groupchat>"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
@@ -256,11 +260,11 @@ static NSMutableDictionary* _typingNotifications;
         {
             if(!isMLhistory)
             {
-                DDLogInfo(@"Handling KeyTransportElement without trying to add a 1:1 buddy %@", possibleUnkownContact);
+                DDLogInfo(@"Handling KeyTransportElement without trying to add a 1:1 buddy %@", possiblyUnknownContact);
                 [account.omemo decryptMessage:messageNode withMucParticipantJid:nil];
             }
             else
-                DDLogInfo(@"Ignoring MLhistory KeyTransportElement for buddy %@", possibleUnkownContact);
+                DDLogInfo(@"Ignoring MLhistory KeyTransportElement for buddy %@", possiblyUnknownContact);
             return nil;
         }
     }
@@ -293,10 +297,9 @@ static NSMutableDictionary* _typingNotifications;
         return nil;     //the muc processor said we have stop processing
     
     //add contact if possible (ignore groupchats or already existing contacts, or KeyTransportElements)
-    DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
-    [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil];
+    DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possiblyUnknownContact);
+    [[DataLayer sharedInstance] addContact:possiblyUnknownContact.contactJid forAccount:account.accountNo nickname:nil];
     
-    NSString* buddyName = [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
     NSString* ownNick;
     NSString* actualFrom = messageNode.fromUser;
     NSString* participantJid = nil;

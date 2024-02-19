@@ -271,8 +271,12 @@ struct AddContactMenu: View {
                 UIPasteboard.general.setValue(data["landing"] as! String, forPasteboardType:UTType.utf8PlainText.identifier as String)
                 invitationResult = nil
             }) {
-                Text("Copy link to clipboard")
-                    .frame(maxWidth: .infinity)
+                if #available(iOS 16, *) {
+                    ShareLink("Share invitation link", item: URL(string: data["landing"] as! String)!)
+                } else {
+                    Text("Copy invitation link to clipboard")
+                        .frame(maxWidth: .infinity)
+                }
             }
             Button(action: {
                 invitationResult = nil

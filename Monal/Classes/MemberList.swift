@@ -11,11 +11,11 @@ import monalxmpp
 import OrderedCollections
 
 struct MemberList: View {
-    @Environment(\.editMode) private var editMode
-
     @State private var memberList: [ObservableKVOWrapper<MLContact>]
+    @State private var affiliation: Dictionary<String, String>
     @ObservedObject var group: ObservableKVOWrapper<MLContact>
     private let account: xmpp?
+    private var ownAffiliation: String = "none";
 
     @State private var openAccountSelection : Bool = false
     @State private var contactsToAdd : OrderedSet<MLContact> = []
@@ -28,6 +28,20 @@ struct MemberList: View {
         self.showAlert = true
     }
 
+    func ownUserHasPermissionToRemove(contact: ObservableKVOWrapper<MLContact>) -> Bool {
+        if contact.obj.contactJid == self.account?.connectionProperties.identity.jid {
+            return false
+        }
+        if let contactAffiliation = self.affiliation[contact.obj.contactJid] {
+            if self.ownAffiliation == "owner" {
+                return true
+            } else if self.ownAffiliation == "admin" && contactAffiliation == "member" {
+                return true
+            }
+        }
+        return false
+    }
+
     var body: some View {
         // This is the invisible NavigationLink hack again...
         NavigationLink(destination:LazyClosureView(ContactPicker(account: self.account!, selectedContacts: $contactsToAdd)), isActive: $openAccountSelection){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
@@ -35,24 +49,29 @@ struct MemberList: View {
             Section(header: Text(self.group.obj.contactDisplayName)) {
                 ForEach(self.memberList, id: \.self.obj) {
                     contact in
-                    if contact.obj.contactJid != self.account?.connectionProperties.identity.jid {
-                        NavigationLink(destination: LazyClosureView(ContactDetails(delegate: SheetDismisserProtocol(), contact: contact)), label: {
-                            ZStack(alignment: .topLeading) {
-                                HStack(alignment: .center) {
-                                    Image(uiImage: contact.obj.avatar)
-                                        .resizable()
-                                        .frame(width: 40, height: 40, alignment: .center)
-                                    Text(contact.contactDisplayName as String)
-                                    if(editMode?.wrappedValue.isEditing == true) {
-                                        Spacer()
-                                        Button(action: {}, label: {
-                                            Image(systemName: "slider.horizontal.3")
-                                        })
+                    NavigationLink(destination: LazyClosureView(ContactDetails(delegate: SheetDismisserProtocol(), contact: contact)), label: {
+                        ZStack(alignment: .topLeading) {
+                            HStack(alignment: .center) {
+                                Image(uiImage: contact.obj.avatar)
+                                    .resizable()
+                                    .frame(width: 40, height: 40, alignment: .center)
+                                Text(contact.contactDisplayName as String)
+                                Spacer()
+                                if let contactAffiliation = self.affiliation[contact.obj.contactJid] {
+                                    if contactAffiliation == "owner" {
+                                        Text(NSLocalizedString("Owner", comment: ""))
+                                    } else if contactAffiliation == "admin" {
+                                        Text(NSLocalizedString("Admin", comment: ""))
+                                    } else {
+                                        Text(NSLocalizedString("Member", comment: ""))
                                     }
                                 }
                             }
-                        })
-                    }
+                        }
+                    })
+                    .deleteDisabled(
+                        !ownUserHasPermissionToRemove(contact: contact)
+                    )
                 }
                 .onDelete(perform: { memberIdx in
                     let member = self.memberList[memberIdx.first!]
@@ -65,19 +84,6 @@ struct MemberList: View {
                 Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
             })
         }
-        .toolbar {
-#if IS_ALPHA
-            if(editMode?.wrappedValue.isEditing == true) {
-                Button(action: {
-                    openAccountSelection = true
-                }, label: {
-                    Image(systemName: "plus")
-                        .foregroundColor(.blue)
-                })
-            }
-#endif
-            EditButton()
-        }
         .navigationBarTitle("Group Members", displayMode: .inline)
     }
 
@@ -85,6 +91,21 @@ struct MemberList: View {
         self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact!.obj.accountId)! as xmpp
         self.group = mucContact!;
         _memberList = State(wrappedValue: getContactList(viewContact: mucContact))
+        var affiliationTmp = Dictionary<String, String>()
+        for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: mucContact!.contactJid, forAccountId: self.account!.accountNo)) {
+            var jid : String? = memberInfo["participant_jid"] as? String
+            if(jid == nil) {
+                jid = memberInfo["member_jid"] as? String
+            }
+            if(jid == nil) {
+                continue
+            }
+            if(jid == self.account?.connectionProperties.identity.jid) {
+                self.ownAffiliation = memberInfo["affiliation"]! as! String
+            }
+            affiliationTmp.updateValue(memberInfo["affiliation"]! as! String, forKey: jid!)
+        }
+        _affiliation = State(wrappedValue: affiliationTmp)
     }
 }
 

@@ -125,6 +125,10 @@ struct ContactDetails: View {
                     NavigationLink(destination: LazyClosureView(MemberList(mucContact: contact))) {
                         Text("Group Members")
                     }
+                } else if(contact.obj.isGroup && contact.obj.mucType == "channel") {
+                    NavigationLink(destination: LazyClosureView(ChannelMemberList(channelContact: contact))) {
+                        Text("Channel Members")
+                    }
                 }
 #if !DISABLE_OMEMO
                 if(!HelperTools.isContactBlacklisted(forEncryption:contact.obj)) {

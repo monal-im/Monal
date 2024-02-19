@@ -245,14 +245,12 @@ struct AddContactMenu: View {
         }
         .richAlert(isPresented: $invitationResult, title:Text("Invitation for \(splitJid["host"]!) created")) { data in
             VStack {
-                Text("Direct your buddy to this webpage for instructions on how to setup an xmpp client. You will then automatically be added to their contact list.")
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Link(data["landing"] as! String, destination:URL(string:data["landing"] as! String)!)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 10)
-                    .padding(.bottom, 10)
+                Image(uiImage: createQrCode(value: data["landing"] as! String))
+                    .interpolation(.none)
+                    .resizable()
+                    .scaledToFit()
+                    .aspectRatio(1, contentMode: .fit)
+
                 if let expires = data["expires"] as? Date {
                     HStack {
                         if #available(iOS 15, *) {

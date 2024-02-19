@@ -1109,7 +1109,9 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     //no matter what the disco response is: we are not creating this muc anymore
     //either because we successfully created it and called join afterwards,
     //or because the user tried to simultaneously create and join this muc (the join has precendence in this case)
+    BOOL wasCreating = [self isCreating:roomJid];
     [self removeRoomFromCreating:roomJid];
+    
     
     if([iqNode check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}gone"])
     {
@@ -1192,15 +1194,19 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         mucType = @"group";
     
     //update db with new infos
-    if(![[DataLayer sharedInstance] isBuddyMuc:iqNode.fromUser forAccount:_account.accountNo])
+    BOOL isBuddyMuc = [[DataLayer sharedInstance] isBuddyMuc:iqNode.fromUser forAccount:_account.accountNo];
+    if(!isBuddyMuc || wasCreating)
     {
-        //remove old non-muc contact from contactlist (we don't want mucs as normal contacts on our (server) roster and shadowed in monal by the real muc contact)
-        NSDictionary* existingContactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:iqNode.fromUser forAccount:_account.accountNo];
-        if(existingContactDict != nil)
+        if(!isBuddyMuc)
         {
-            MLContact* existingContact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo];
-            DDLogVerbose(@"Removing already existing contact (%@) having raw db dict: %@", existingContact, existingContactDict);
-            [_account removeFromRoster:existingContact];
+            //remove old non-muc contact from contactlist (we don't want mucs as normal contacts on our (server) roster and shadowed in monal by the real muc contact)
+            NSDictionary* existingContactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:iqNode.fromUser forAccount:_account.accountNo];
+            if(existingContactDict != nil)
+            {
+                MLContact* existingContact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo];
+                DDLogVerbose(@"Removing already existing contact (%@) having raw db dict: %@", existingContact, existingContactDict);
+                [_account removeFromRoster:existingContact];
+            }
         }
         //add new muc buddy (potentially deleting a non-muc buddy having the same jid)
         NSString* nick = [self calculateNickForMuc:iqNode.fromUser];

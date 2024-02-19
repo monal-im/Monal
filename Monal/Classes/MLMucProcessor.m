@@ -541,8 +541,9 @@ $$
     
     //handle status codes allowed in presences AND messages
     NSMutableSet* unhandledStatusCodes = [NSMutableSet new];
-    NSMutableSet* jointCodes = [[presenceCodes mutableCopy] unionSet:messageCodes];
-    for(NSNumber* code in )
+    NSMutableSet* jointCodes = [presenceCodes mutableCopy];
+    [jointCodes unionSet:messageCodes];
+    for(NSNumber* code in jointCodes)
             switch([code intValue])
             {
                 //muc service changed our nick

@@ -1014,6 +1014,7 @@ static NSDateFormatter* dbFormatter;
     if(!member || !member[@"jid"] || !room || accountNo == nil)
         return;
     
+    DDLogDebug(@"Removing member '%@' from muc '%@'...", member[@"jid"], room);
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=? AND member_jid=?;" andArguments:@[accountNo, room, member[@"jid"]]];
     }];

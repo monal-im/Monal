@@ -537,36 +537,14 @@ $$
 {
     NSSet* presenceCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
     NSSet* messageCodes = [[NSSet alloc] initWithArray:[node find:@"/{jabber:client}message/{http://jabber.org/protocol/muc#user}x/status@code|int"]];
+    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:node.fromUser forAccount:_account.accountNo];
     
-    //handle presence stanzas
-    if(presenceCodes && [presenceCodes count])
-    {
-        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:node.fromUser forAccount:_account.accountNo];
-        for(NSNumber* code in presenceCodes)
+    //handle status codes allowed in presences AND messages
+    NSMutableSet* unhandledStatusCodes = [NSMutableSet new];
+    NSMutableSet* jointCodes = [[presenceCodes mutableCopy] unionSet:messageCodes];
+    for(NSNumber* code in )
             switch([code intValue])
             {
-                //room created and needs configuration now
-                case 201:
-                {
-                    if(![presenceCodes containsObject:@110])
-                    {
-                        DDLogError(@"Got 'muc needs configuration' status code (201) without self-presence, ignoring!");
-                        break;
-                    }
-                    if(![self isCreating:node.fromUser])
-                    {
-                        DDLogError(@"Got 'muc needs configuration' status code (201) without this muc currently being created, ignoring: %@", node.fromUser);
-                        break;
-                    }
-                    
-                    //now configure newly created locked room
-                    [self configureMuc:node.fromUser withMandatoryOptions:_mandatoryGroupConfigOptions andOptionalOptions:_optionalGroupConfigOptions deletingMucOnError:YES andJoiningMucOnSuccess:YES];
-                    
-                    //stop processing here to not trigger the "successful join" code below
-                    //we will trigger this code by a "second" join presence once the room was created and is not locked anymore
-                    return;
-                    break;
-                }
                 //muc service changed our nick
                 case 210:
                 {
@@ -607,7 +585,7 @@ $$
                 case 321:
                 {
                     //only handle this and rejoin, if we did not get removed from a members-only room
-                    if(![presenceCodes containsObject:@322])
+                    if(![jointCodes containsObject:@322])
                     {
                         DDLogDebug(@"user '%@' got affiliation changed for room %@", node.fromResource, node.fromUser);
                         if([nick isEqualToString:node.fromResource])
@@ -644,10 +622,45 @@ $$
                     }
                     break;
                 }
+                default:
+                    [unhandledStatusCodes addObject:code];
+            }
+    
+    //handle presence stanzas
+    if(presenceCodes && [presenceCodes count])
+    {
+        for(NSNumber* code in presenceCodes)
+            switch([code intValue])
+            {
+                //room created and needs configuration now
+                case 201:
+                {
+                    if(![presenceCodes containsObject:@110])
+                    {
+                        DDLogError(@"Got 'muc needs configuration' status code (201) without self-presence, ignoring!");
+                        break;
+                    }
+                    if(![self isCreating:node.fromUser])
+                    {
+                        DDLogError(@"Got 'muc needs configuration' status code (201) without this muc currently being created, ignoring: %@", node.fromUser);
+                        break;
+                    }
+                    
+                    //now configure newly created locked room
+                    [self configureMuc:node.fromUser withMandatoryOptions:_mandatoryGroupConfigOptions andOptionalOptions:_optionalGroupConfigOptions deletingMucOnError:YES andJoiningMucOnSuccess:YES];
+                    
+                    //stop processing here to not trigger the "successful join" code below
+                    //we will trigger this code by a "second" join presence once the room was created and is not locked anymore
+                    return;
+                    break;
+                }
                 case 110:
                     break;      //ignore self-presence status handled below
                 default:
-                    DDLogWarn(@"Got unhandled muc status code in presence from %@: %@", node.from, code);
+                    //only log errors for status codes not already handled by our joint handling above
+                    if([unhandledStatusCodes containsObject:code])
+                        DDLogWarn(@"Got unhandled muc status code in presence from %@: %@", node.from, code);
+                    break;
             }
         
         //this is a self-presence (marking the end of the presence flood if we are in joining state)
@@ -753,7 +766,7 @@ $$
         }
     }
     //handle message stanzas
-    else if([[node findFirst:@"/@type"] isEqualToString:@"groupchat"] && messageCodes && [messageCodes count])
+    else if(messageCodes && [messageCodes count])
     {
         for(NSNumber* code in messageCodes)
             switch([code intValue])
@@ -778,7 +791,10 @@ $$
                     break;
                 }
                 default:
-                    DDLogWarn(@"Got unhandled muc status code in message from %@: %@", node.from, code);
+                    //only log errors for status codes not already handled by our joint handling above
+                    if([unhandledStatusCodes containsObject:code])
+                        DDLogWarn(@"Got unhandled muc status code in message from %@: %@", node.from, code);
+                    break;
             }
     }
 }

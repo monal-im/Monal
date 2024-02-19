@@ -529,7 +529,6 @@ $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, acc
     {
         //group is now properly configured and we are joined, but all the code handling a proper join was not run
         //--> join again to make sure everything is sane
-        [self removeRoomFromCreating:roomJid];
         [self join:roomJid];
     }
 $$
@@ -645,6 +644,8 @@ $$
                     }
                     break;
                 }
+                case 110:
+                    break;      //ignore self-presence status handled below
                 default:
                     DDLogWarn(@"Got unhandled muc status code in presence from %@: %@", node.from, code);
             }
@@ -1087,6 +1088,11 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
     }));
+    
+    //no matter what the disco response is: we are not creating this muc anymore
+    //either because we successfully created it and called join afterwards,
+    //or because the user tried to simultaneously create and join this muc (the join has precendence in this case)
+    [self removeRoomFromCreating:roomJid];
     
     if([iqNode check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}gone"])
     {

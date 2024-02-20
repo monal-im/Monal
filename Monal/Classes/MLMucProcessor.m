@@ -53,6 +53,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         @"muc#roomconfig_persistentroom": @"1",
         @"muc#roomconfig_membersonly": @"1",
         @"muc#roomconfig_whois": @"anyone",
+        //TODO: mark mam as mandatory
     };
     _optionalGroupConfigOptions = @{
         @"muc#roomconfig_enablelogging": @"0",
@@ -259,33 +260,29 @@ static NSDictionary* _optionalGroupConfigOptions;
     if(presenceNode.fromResource == nil)
     {
         DDLogVerbose(@"Got muc presence from bare jid: %@", presenceNode.from);
-        if([[DataLayer sharedInstance] isContactInList:presenceNode.fromUser forAccount:_account.accountNo])
+        //check vcard hash
+        NSString* avatarHash = [presenceNode findFirst:@"{vcard-temp:x:update}x/photo#"];
+        NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:presenceNode.fromUser andAccount:_account.accountNo];
+        DDLogVerbose(@"Checking if avatar hash in presence '%@' equals stored hash '%@'...", avatarHash, currentHash);
+        if(avatarHash != nil && !(currentHash && [avatarHash isEqualToString:currentHash]))
         {
-            //check vcard hash
-            NSString* avatarHash = [presenceNode findFirst:@"{vcard-temp:x:update}x/photo#"];
-            NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:presenceNode.fromUser andAccount:_account.accountNo];
-            DDLogVerbose(@"Checking if avatar hash in presence '%@' equals stored hash '%@'...", avatarHash, currentHash);
-            if(avatarHash != nil && !(currentHash && [avatarHash isEqualToString:currentHash]))
-            {
-                DDLogInfo(@"Got new muc avatar hash '%@' for muc %@, fetching new image via vcard-temp...", avatarHash, presenceNode.fromUser);
-                [self fetchAvatarForRoom:presenceNode.fromUser];
-            }
-            else if(avatarHash == nil && currentHash != nil && ![currentHash isEqualToString:@""])
-            {
-                [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo] WithData:nil];
-                [[DataLayer sharedInstance] setAvatarHash:@"" forContact:presenceNode.fromUser andAccount:_account.accountNo];
-                //delete cache to make sure the image will be regenerated
-                [[MLImageManager sharedInstance] purgeCacheForContact:presenceNode.fromUser andAccount:_account.accountNo];
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
-                    @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo]
-                }];
-                DDLogInfo(@"Avatar of muc '%@' deleted successfully", presenceNode.fromUser);
-            }
-            else
-                DDLogInfo(@"Avatar hash '%@' of muc %@ did not change, not updating avatar...", avatarHash, presenceNode.fromUser);
+            DDLogInfo(@"Got new muc avatar hash '%@' for muc %@, fetching new image via vcard-temp...", avatarHash, presenceNode.fromUser);
+            [self fetchAvatarForRoom:presenceNode.fromUser];
+        }
+        else if(avatarHash == nil && currentHash != nil && ![currentHash isEqualToString:@""])
+        {
+            [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo] WithData:nil];
+            [[DataLayer sharedInstance] setAvatarHash:@"" forContact:presenceNode.fromUser andAccount:_account.accountNo];
+            //delete cache to make sure the image will be regenerated
+            [[MLImageManager sharedInstance] purgeCacheForContact:presenceNode.fromUser andAccount:_account.accountNo];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo]
+            }];
+            DDLogInfo(@"Avatar of muc '%@' deleted successfully", presenceNode.fromUser);
         }
         else
-            DDLogInfo(@"Ignoring presence updates from %@, MUC not in buddylist", presenceNode.fromUser);
+            DDLogInfo(@"Avatar hash '%@' of muc %@ did not change, not updating avatar...", avatarHash, presenceNode.fromUser);
+        }
     }
     //handle reflected presences
     else
@@ -307,14 +304,9 @@ static NSDictionary* _optionalGroupConfigOptions;
             [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
         else
         {
-            if([[DataLayer sharedInstance] isContactInList:presenceNode.fromUser forAccount:_account.accountNo])
-            {
-                if(item[@"jid"] != nil)
-                    [self handleMembersListUpdate:presenceNode];
-                [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
-            }
-            else
-                DDLogInfo(@"Ignoring presence updates from %@, MUC not in buddylist", presenceNode.fromUser);
+            if(item[@"jid"] != nil)
+                [self handleMembersListUpdate:presenceNode];
+            [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
         }
         
         //handle muc status codes in self-presences (after the above code, to make sure we are registered as participant in our db, too)
@@ -376,7 +368,8 @@ static NSDictionary* _optionalGroupConfigOptions;
 
 -(void) handleMembersListUpdate:(XMPPStanza*) node
 {
-    if([[DataLayer sharedInstance] isContactInList:node.fromUser forAccount:_account.accountNo])
+    //check if this is still a muc and ignore the members list update, if not
+    if([[DataLayer sharedInstance] isBuddyMuc:node.fromUser forAccount:_account.accountNo])
     {
         for(NSDictionary* entry in [node find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
         {

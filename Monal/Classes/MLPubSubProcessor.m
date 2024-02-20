@@ -381,7 +381,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
                 } andChildren:@[
                     nilWrapper(nick != nil ? [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:nick] : nil),
                     [[MLXMLNode alloc] initWithElement:@"extensions" withAttributes:@{} andChildren:@[
-                        [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:xmpp:monal.im:bookmarks:info" withAttributes:@{
+                        [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:monal.im:bookmarks:info" withAttributes:@{
                             @"name": @"Monal",
                             @"version": infoDict[@"CFBundleShortVersionString"],
                             @"build": infoDict[@"CFBundleVersion"],

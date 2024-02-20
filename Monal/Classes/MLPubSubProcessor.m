@@ -268,10 +268,15 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         for(NSString* itemId in data)
         {
             NSString* room = [itemId lowercaseString];
-            DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
-            //delete local favorites entry and leave room afterwards
-            [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-            [account.mucProcessor leave:room withBookmarksUpdate:NO];
+            if([ownFavorites containsObject:room])
+            {
+                DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
+                //delete local favorites entry and leave room afterwards
+                [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+                [account.mucProcessor leave:room withBookmarksUpdate:NO];
+            }
+            else
+                DDLogVerbose(@"Ignoring retracted bookmark because not listed in muc_favorites already...");
         }
     }
     else

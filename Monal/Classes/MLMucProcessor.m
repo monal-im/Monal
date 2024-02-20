@@ -882,7 +882,7 @@ $$
     [self sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:YES];
 }
 
--(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks
+-(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry
 {
     room = [room lowercaseString];
     NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:_account.accountNo];
@@ -905,7 +905,7 @@ $$
     [_account send:presence];
     
     //delete muc from favorites table and update bookmarks if requested
-    [self deleteMuc:room withBookmarksUpdate:updateBookmarks keepBuddylistEntry:NO];
+    [self deleteMuc:room withBookmarksUpdate:updateBookmarks keepBuddylistEntry:keepBuddylistEntry];
 }
 
 -(void) sendDiscoQueryFor:(NSString*) roomJid withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks

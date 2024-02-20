@@ -239,9 +239,8 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
             else if([ownFavorites containsObject:room] && ![autojoin boolValue])
             {
                 DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
-                //delete local favorites entry and leave room afterwards
-                [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                [account.mucProcessor leave:room withBookmarksUpdate:NO];
+                //delete local favorites entry and leave room afterwards, but keep buddylist entry because only the autojoin flag changed
+                [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:YES];
             }
             //check for nickname changes
             else if([ownFavorites containsObject:room] && nick != nil)
@@ -272,8 +271,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
             {
                 DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
                 //delete local favorites entry and leave room afterwards
-                [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                [account.mucProcessor leave:room withBookmarksUpdate:NO];
+                [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
             }
             else
                 DDLogVerbose(@"Ignoring retracted bookmark because not listed in muc_favorites already...");
@@ -287,8 +285,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         {
             DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
             //delete local favorites entry and leave room afterwards
-            [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-            [account.mucProcessor leave:room withBookmarksUpdate:NO];
+            [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
         }
     }
 $$
@@ -503,9 +500,8 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
                 else if([ownFavorites containsObject:room] && ![autojoin boolValue])
                 {
                     DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
-                    //delete local favorites entry and leave room afterwards
-                    [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                    [account.mucProcessor leave:room withBookmarksUpdate:NO];
+                    //delete local favorites entry and leave room afterwards, but keep buddylist entry because only the autojoin flag changed
+                    [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:YES];
                 }
                 //check for nickname changes
                 else if([ownFavorites containsObject:room] && nick != nil)
@@ -534,8 +530,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
             {
                 DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
                 //delete local favorites entry and leave room afterwards
-                [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                [account.mucProcessor leave:room withBookmarksUpdate:NO];
+                [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
             }
             
             return;      //we only need the first pep item (there should be only one item in the first place)
@@ -548,8 +543,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
     {
         DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
         //delete local favorites entry and leave room afterwards
-        [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-        [account.mucProcessor leave:room withBookmarksUpdate:NO];
+        [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
     }
 $$
 

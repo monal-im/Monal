@@ -4381,7 +4381,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) leaveMuc:(NSString* _Nonnull) room
 {
-    [self.mucProcessor leave:room withBookmarksUpdate:YES];
+    [self.mucProcessor leave:room withBookmarksUpdate:YES keepBuddylistEntry:NO];
 }
 
 -(void) checkJidType:(NSString*) jid withCompletion:(void (^)(NSString* type, NSString* _Nullable errorMessage)) completion

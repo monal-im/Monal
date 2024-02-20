@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(BOOL) processMessage:(XMPPMessage*) messageNode;
 
 -(void) join:(NSString*) room;
--(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks;
+-(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry;
 
 //muc management methods
 -(NSString* _Nullable) createGroup:(NSString* _Nullable) node;

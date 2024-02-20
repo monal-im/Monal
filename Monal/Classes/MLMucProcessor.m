@@ -281,6 +281,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             DDLogInfo(@"Avatar of muc '%@' deleted successfully", presenceNode.fromUser);
         }
         else
+        {
             DDLogInfo(@"Avatar hash '%@' of muc %@ did not change, not updating avatar...", avatarHash, presenceNode.fromUser);
         }
     }

@@ -310,7 +310,8 @@ static NSDictionary* _optionalGroupConfigOptions;
         if(item[@"jid"] != nil)
             [self handleMembersListUpdate:[presenceNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:presenceNode.fromUser];
         
-        //handle muc status codes in reflected presences (after the above code, to make sure we are registered as participant in our db, too)
+        //handle muc status codes in reflected presences
+        //this MUST be done after the above code to make sure the db correctly reflects our membership/participant status
         if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
             [self handleStatusCodes:presenceNode];        
     }
@@ -543,6 +544,7 @@ $$
     NSMutableSet* unhandledStatusCodes = [NSMutableSet new];
     NSMutableSet* jointCodes = [presenceCodes mutableCopy];
     [jointCodes unionSet:messageCodes];
+    BOOL selfPrecenceHandled = NO;
     for(NSNumber* code in jointCodes)
             switch([code intValue])
             {
@@ -555,6 +557,7 @@ $$
                         //update nick in database
                         DDLogInfo(@"Updating muc %@ nick in database to nick provided by server: '%@'...", node.fromUser, node.fromResource);
                         [[DataLayer sharedInstance] updateOwnNickName:node.fromResource forMuc:node.fromUser forAccount:_account.accountNo];
+                        selfPrecenceHandled = YES;
                     }
                     break;
                 }
@@ -567,22 +570,33 @@ $$
                         DDLogDebug(@"got banned from room %@", node.fromUser);
                         [self removeRoomFromJoining:node.fromUser];
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        selfPrecenceHandled = YES;
                     }
                     break;
                 }
                 //kicked from room
                 case 307:
                 {
-                    DDLogDebug(@"user '%@' got kicked from room %@", node.fromResource, node.fromUser);
-                    if([nick isEqualToString:node.fromResource])
+                    /*
+                     * To quote XEP-0045:
+                     * Note: Some server implementations additionally include a 307 status code (signifying a 'kick', i.e. a forced ejection from the room). This is generally not advisable, as these types of disconnects may be frequent in the presence of poor network conditions and they are not linked to any user (e.g. moderator) action that the 307 code usually indicates. It is therefore recommended for the client to ignore the 307 code if a 333 status code is present.
+                     */
+                    if(![jointCodes containsObject:@333])
                     {
-                        DDLogDebug(@"got kicked from room %@", node.fromUser);
-                        [self removeRoomFromJoining:node.fromUser];
-                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        DDLogDebug(@"user '%@' got kicked from room %@", node.fromResource, node.fromUser);
+                        if([nick isEqualToString:node.fromResource])
+                        {
+                            DDLogDebug(@"got kicked from room %@", node.fromUser);
+                            [self removeRoomFromJoining:node.fromUser];
+                            [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                            selfPrecenceHandled = YES;
+                        }
                     }
+                    else
+                        DDLogWarn(@"Ignoring 307 status code because code 333 is present, too...");
                     break;
                 }
-                //removed because of affiliation change --> reenter room
+                //removed because of affiliation change
                 case 321:
                 {
                     //only handle this and rejoin, if we did not get removed from a members-only room
@@ -591,9 +605,16 @@ $$
                         DDLogDebug(@"user '%@' got affiliation changed for room %@", node.fromResource, node.fromUser);
                         if([nick isEqualToString:node.fromResource])
                         {
-                            DDLogDebug(@"got affiliation change for room %@", node.fromUser);
-                            [self removeRoomFromJoining:node.fromUser];
-                            [self sendDiscoQueryFor:node.fromUser withJoin:YES andBookmarksUpdate:YES];
+                            DDLogDebug(@"got own affiliation change for room %@", node.fromUser);
+                            //check if we are still in the room (e.g. loss of membership status in public channel or admin to member degradation)
+                            if([[DataLayer sharedInstance] getParticipantForNick:node.fromResource inRoom:node.fromUser forAccountId:_account.accountNo] == nil)
+                            {
+                                DDLogInfo(@"Lost membership...");
+                                [self removeRoomFromJoining:node.fromUser];
+                                [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                                [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                                selfPrecenceHandled = YES;
+                            }
                         }
                     }
                     break;
@@ -608,6 +629,7 @@ $$
                         [self removeRoomFromJoining:node.fromUser];
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                         [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                        selfPrecenceHandled = YES;
                     }
                     break;
                 }
@@ -620,6 +642,7 @@ $$
                         DDLogDebug(@"got removed from room %@ because of system shutdown", node.fromUser);
                         [self removeRoomFromJoining:node.fromUser];
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        selfPrecenceHandled = YES;
                     }
                     break;
                 }
@@ -666,7 +689,7 @@ $$
         
         //this is a self-presence (marking the end of the presence flood if we are in joining state)
         //handle this code last because it may reset _joining
-        if([presenceCodes containsObject:@110])
+        if([presenceCodes containsObject:@110] && !selfPrecenceHandled)
         {
             //check if we have joined already (we handle only non-joining self-presences here)
             //joining self-presences are handled below

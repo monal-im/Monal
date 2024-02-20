@@ -214,7 +214,7 @@ NSString* const kAskSubscribe = @"subscribe";
             @"state": @"offline",
             @"count": @0,
             @"isActiveChat": @NO,
-            @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],
+            @"lastInteraction": nilWrapper(nil),
         }];
     }
     else

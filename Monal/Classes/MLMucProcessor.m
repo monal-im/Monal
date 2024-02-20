@@ -300,17 +300,17 @@ static NSDictionary* _optionalGroupConfigOptions;
             item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
         item[@"nick"] = presenceNode.fromResource;
         
-        //handle presences
+        //handle participant updates
         if([presenceNode check:@"/<type=unavailable>"])
             [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
         else
-        {
-            if(item[@"jid"] != nil)
-                [self handleMembersListUpdate:presenceNode];
             [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
-        }
         
-        //handle muc status codes in self-presences (after the above code, to make sure we are registered as participant in our db, too)
+        //handle members updates
+        if(item[@"jid"] != nil)
+            [self handleMembersListUpdate:[presenceNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:presenceNode.fromUser];
+        
+        //handle muc status codes in reflected presences (after the above code, to make sure we are registered as participant in our db, too)
         if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
             [self handleStatusCodes:presenceNode];        
     }
@@ -320,7 +320,7 @@ static NSDictionary* _optionalGroupConfigOptions;
 {
     //handle member list updates of offline members (useful for members-only mucs)
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/item"])
-        [self handleMembersListUpdate:messageNode];
+        [self handleMembersListUpdate:[messageNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:messageNode.fromUser];
     
     //handle muc status codes
     [self handleStatusCodes:messageNode];
@@ -367,27 +367,32 @@ static NSDictionary* _optionalGroupConfigOptions;
     return NO;
 }
 
--(void) handleMembersListUpdate:(XMPPStanza*) node
+-(void) handleMembersListUpdate:(NSArray<NSDictionary*>*) items forMuc:(NSString*) mucJid;
 {
     //check if this is still a muc and ignore the members list update, if not
-    if([[DataLayer sharedInstance] isBuddyMuc:node.fromUser forAccount:_account.accountNo])
+    if([[DataLayer sharedInstance] isBuddyMuc:mucJid forAccount:_account.accountNo])
     {
-        for(NSDictionary* entry in [node find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
+        DDLogInfo(@"Handling members list update for %@: %@", mucJid, items);
+        for(NSDictionary* entry in items)
         {
             NSMutableDictionary* item = [entry mutableCopy];
             if(!item || item[@"jid"] == nil)
+            {
+                DDLogDebug(@"Ignoring empty item/jid: %@", item);
                 continue;       //ignore empty items or items without a jid
+            }
 
             //update jid to be a bare jid
             item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
             
 #ifndef DISABLE_OMEMO
-            BOOL isTypeGroup = [[[DataLayer sharedInstance] getMucTypeOfRoom:node.fromUser andAccount:_account.accountNo] isEqualToString:@"group"];
+            BOOL isTypeGroup = [[[DataLayer sharedInstance] getMucTypeOfRoom:mucJid andAccount:_account.accountNo] isEqualToString:@"group"];
 #endif
             
             if([@"none" isEqualToString:item[@"affiliation"]])
             {
-                [[DataLayer sharedInstance] removeMember:item fromMuc:node.fromUser forAccountId:_account.accountNo];
+                DDLogVerbose(@"Removing member '%@' from muc '%@'...", item[@"jid"], mucJid);
+                [[DataLayer sharedInstance] removeMember:item fromMuc:mucJid forAccountId:_account.accountNo];
 #ifndef DISABLE_OMEMO
                 if(isTypeGroup == YES)
                     [_account.omemo checkIfSessionIsStillNeeded:item[@"jid"] isMuc:NO];
@@ -395,7 +400,8 @@ static NSDictionary* _optionalGroupConfigOptions;
             }
             else
             {
-                [[DataLayer sharedInstance] addMember:item toMuc:node.fromUser forAccountId:_account.accountNo];
+                DDLogVerbose(@"Adding member '%@' to muc '%@'...", item[@"jid"], mucJid);
+                [[DataLayer sharedInstance] addMember:item toMuc:mucJid forAccountId:_account.accountNo];
 #ifndef DISABLE_OMEMO
                 if(isTypeGroup == YES)
                     [_account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:item[@"jid"]];
@@ -404,7 +410,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         }
     }
     else
-        DDLogInfo(@"Ignoring handleMembersListUpdate for %@, MUC not in buddylist", node.fromUser);
+        DDLogWarn(@"Ignoring handleMembersListUpdate for %@, MUC not in buddylist", mucJid);
 }
 
 -(void) configureMuc:(NSString*) roomJid withMandatoryOptions:(NSDictionary*) mandatoryOptions andOptionalOptions:(NSDictionary*) optionalOptions deletingMucOnError:(BOOL) deleteOnError andJoiningMucOnSuccess:(BOOL) joinOnSuccess
@@ -1037,7 +1043,7 @@ $$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmp
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@'", @""), jid, roomJid, affiliation] forMuc:roomJid withNode:iqNode andIsSevere:YES];
         return;
     }
-    DDLogError(@"Successfully changed affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
+    DDLogInfo(@"Successfully changed affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
 $$
 
 -(void) changeNameOfMuc:(NSString*) room to:(NSString*) name
@@ -1279,7 +1285,7 @@ $$
 
 $$instance_handler(handleMembersList, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
-    [self handleMembersListUpdate:iqNode];
+    [self handleMembersListUpdate:[iqNode find:@"{http://jabber.org/protocol/muc#admin}query/item@@"] forMuc:iqNode.fromUser];
     [self logMembersOfMuc:iqNode.fromUser];
 $$
 

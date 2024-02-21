@@ -569,8 +569,9 @@ $$
                     {
                         DDLogDebug(@"got banned from room %@", node.fromUser);
                         [self removeRoomFromJoining:node.fromUser];
-                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:NO];
                         selfPrecenceHandled = YES;
+                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from group/channel: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
                     break;
                 }
@@ -588,8 +589,9 @@ $$
                         {
                             DDLogDebug(@"got kicked from room %@", node.fromUser);
                             [self removeRoomFromJoining:node.fromUser];
-                            [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                            [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:NO];
                             selfPrecenceHandled = YES;
+                            [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from group/channel: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                         }
                     }
                     else
@@ -609,11 +611,11 @@ $$
                             //check if we are still in the room (e.g. loss of membership status in public channel or admin to member degradation)
                             if([[DataLayer sharedInstance] getParticipantForNick:node.fromResource inRoom:node.fromUser forAccountId:_account.accountNo] == nil)
                             {
-                                DDLogInfo(@"Lost membership...");
+                                DDLogInfo(@"Got removed from room...");
                                 [self removeRoomFromJoining:node.fromUser];
-                                [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                                 [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                                 selfPrecenceHandled = YES;
+                                [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got removed from group/channel: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                             }
                         }
                     }
@@ -627,7 +629,7 @@ $$
                     {
                         DDLogDebug(@"got removed from members-only room %@", node.fromUser);
                         [self removeRoomFromJoining:node.fromUser];
-                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because group/channel is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                         [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                         selfPrecenceHandled = YES;
                     }
@@ -641,8 +643,8 @@ $$
                     {
                         DDLogDebug(@"got removed from room %@ because of system shutdown", node.fromUser);
                         [self removeRoomFromJoining:node.fromUser];
-                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                         selfPrecenceHandled = YES;
+                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked from group/channel, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                     }
                     break;
                 }
@@ -657,6 +659,11 @@ $$
             switch([code intValue])
             {
                 //room created and needs configuration now
+                case 100:
+                    DDLogVerbose(@"This room is non-anonymous: everybody can see all jids...");
+                    break;
+                case 110:
+                    break;      //ignore self-presence status handled below
                 case 201:
                 {
                     if(![presenceCodes containsObject:@110])
@@ -678,8 +685,6 @@ $$
                     return;
                     break;
                 }
-                case 110:
-                    break;      //ignore self-presence status handled below
                 default:
                     //only log errors for status codes not already handled by our joint handling above
                     if([unhandledStatusCodes containsObject:code])
@@ -723,6 +728,11 @@ $$
                     [_firstJoin removeObject:node.fromUser];
                     [_noUpdateBookmarks removeObject:node.fromUser];
                 }
+                
+                DDLogDebug(@"Updating muc contact...");
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                    @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                }];
                 
                 [self logMembersOfMuc:node.fromUser];
                 
@@ -1507,22 +1517,23 @@ $$
 {
     DDLogInfo(@"Deleting muc %@ on account %@...", room, _account);
     
-    //create contact object before deleting it to retain the muc specific settings
-    //(after deleting it from our db, the contact for this jid will look like an ordinary 1:1 contact)
-    MLContact* contact = [MLContact createContactFromJid:room andAccountNo:_account.accountNo];
-    
     //delete muc from favorites table and update bookmarks if requested
     [[DataLayer sharedInstance] deleteMuc:room forAccountId:_account.accountNo];
     if(updateBookmarks)
         [self updateBookmarks];
     
     //update buddylist (e.g. contact list) if requested
+    MLContact* contact = [MLContact createContactFromJid:room andAccountNo:_account.accountNo];
+    [contact removeShareInteractions];
     if(keepBuddylistEntry)
-        ;       //TODO: mark entry as destroyed to be displayed in the ui
+    {
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+            @"contact": contact
+        }];
+    }
     else
     {
         [[DataLayer sharedInstance] removeBuddy:room forAccount:_account.accountNo];
-        [contact removeShareInteractions];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:_account userInfo:@{
             @"contact": contact
         }];

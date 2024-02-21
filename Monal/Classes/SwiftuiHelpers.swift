@@ -319,42 +319,16 @@ struct AlertPrompt {
     var dismissLabel: Text = Text("Close")
 }
 
-//see https://www.avanderlee.com/swiftui/conditional-view-modifier/
 extension View {
-    /// Applies the given transform if the given condition evaluates to `true`.
+    /// Applies the given transform.
+    ///
+    /// Useful for availability branching on view modifiers. Do not branch with any properties that may change during runtime as this will cause errors.
     /// - Parameters:
-    ///   - condition: The condition to evaluate.
     ///   - transform: The transform to apply to the source `View`.
-    /// - Returns: Either the original `View` or the modified `View` if the condition is `true`.
-    @ViewBuilder func `if`<Content: View>(_ condition: @autoclosure () -> Bool, transform: (Self) -> Content) -> some View {
-        if condition() {
-            transform(self)
-        } else {
-            self
-        }
+    /// - Returns: The view transformed by the transform.
+    func ifAvailable<Content: View>(@ViewBuilder _ transform: (Self) -> Content) -> some View {
+        transform(self)
     }
-    
-    @ViewBuilder func `if`<Content: View>(closure condition: () -> Bool, transform: (Self) -> Content) -> some View {
-        if condition() {
-            transform(self)
-        } else {
-            self
-        }
-    }
-}
-
-func iOS15() -> Bool {
-    guard #available(iOS 15, *) else {
-        return true
-    }
-    return false
-}
-
-func iOS16() -> Bool {
-    guard #available(iOS 16, *) else {
-        return true
-    }
-    return false
 }
 
 // Interfaces between ObjectiveC/Storyboards and SwiftUI

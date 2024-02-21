@@ -392,6 +392,8 @@ static NSMutableDictionary* _typingNotifications;
         }
         else
             decrypted = [account.omemo decryptMessage:messageNode withMucParticipantJid:participantJid];
+        
+        DDLogVerbose(@"Decrypted: %@", decrypted);
     }
     
 #ifdef IS_ALPHA
@@ -425,7 +427,7 @@ static NSMutableDictionary* _typingNotifications;
     {
         NSString* originIdToRetract = [messageNode findFirst:@"{urn:xmpp:fasten:0}apply-to@id"];
         //this checks if this message is from the same jid as the message it tries to retract for (e.g. inbound can only retract inbound and outbound only outbound)
-        NSNumber* historyIdToRetract = [[DataLayer sharedInstance] getHistoryIDForMessageId:originIdToRetract from:messageNode.fromUser andAccount:account.accountNo];
+        NSNumber* historyIdToRetract = [[DataLayer sharedInstance] getHistoryIDForMessageId:originIdToRetract from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
         
         if(historyIdToRetract != nil)
         {
@@ -529,8 +531,10 @@ static NSMutableDictionary* _typingNotifications;
             if([messageNode check:@"{urn:xmpp:message-correct:0}replace"])
             {
                 NSString* messageIdToReplace = [messageNode findFirst:@"{urn:xmpp:message-correct:0}replace@id"];
+                DDLogVerbose(@"Message id to LMC-replace: %@", messageIdToReplace);
                 //this checks if this message is from the same jid as the message it tries to do the LMC for (e.g. inbound can only correct inbound and outbound only outbound)
-                historyId = [[DataLayer sharedInstance] getHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser andAccount:account.accountNo];
+                historyId = [[DataLayer sharedInstance] getHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
+                DDLogVerbose(@"History id to LMC-replace: %@", historyId);
                 //now check if the LMC is allowed (we use historyIdToUse for MLhistory mam queries to only check LMC for the 3 messages coming before this ID in this converastion)
                 //historyIdToUse will be nil, for messages going forward in time which means (check for the newest 3 messages in this conversation)
                 if(historyId != nil && [[DataLayer sharedInstance] checkLMCEligible:historyId encrypted:encrypted historyBaseID:historyIdToUse])

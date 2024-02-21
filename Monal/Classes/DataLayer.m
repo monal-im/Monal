@@ -1281,7 +1281,7 @@ static NSDateFormatter* dbFormatter;
         }
         else
         {
-            DDLogError(@"Message(%@) %@ with stanzaid %@ already existing, ignoring history update", accountNo, messageid, stanzaid);
+            DDLogWarn(@"Message(%@) %@ with stanzaid %@ already existing, ignoring history update: %@", accountNo, messageid, stanzaid, message);
             return (NSNumber*)nil;
         }
     }];
@@ -1501,12 +1501,29 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSNumber*) accountNo
+-(NSNumber*) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
-        return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE messageid=? AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0)) AND M.account_id=?;" andArguments:@[messageid, from, from, accountNo]];
+        return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id WHERE messageid=? AND M.account_id=? AND (\
+            (B.Muc=0 AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0))) OR \
+            (\
+                B.Muc=1 AND M.buddy_name=? AND M.actual_from=? AND (\
+                    M.participant_jid=? OR M.participant_jid IS NULL \
+                ) AND ( \
+                    (M.actual_from=B.muc_nick AND M.inbound=0) OR \
+                    (M.actual_from!=B.muc_nick AND M.inbound=1) \
+                ) \
+            ) \
+        );" andArguments:@[messageid, accountNo, from, from, from, nilWrapper(actualFrom), nilWrapper(participantJid)]];
     }];
 }
+
+/*
+CF6DE818-6036-4B2E-A228-717303D1E9FF
+bififufuva@conference.xmpp.eightysoft.de
+bififufuva@conference.xmpp.eightysoft.de
+43
+*/
 
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID
 {

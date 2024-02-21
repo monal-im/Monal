@@ -2710,7 +2710,7 @@ enum msgSentState {
                 {
                     NSString* errorText = error;
                     if(!error)
-                        errorText = NSLocalizedString(@"All messages already present in local history!", @"");
+                        errorText = NSLocalizedString(@"Unknown error!", @"");
                     DDLogError(@"Got backscrolling mam error: %@", errorText);
                     UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not fetch messages", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Could not fetch (all) old messages for this chat from your server archive. Please try again later. %@", @""), errorText] preferredStyle:UIAlertControllerStyleAlert];
                     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -2720,11 +2720,19 @@ enum msgSentState {
                 }
                 else
                 {
-                    if([messages count] == 0) {
-                        self.moreMessagesAvailable = NO;
-                    }
                     DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
-                    [self insertOldMessages:[[messages reverseObjectEnumerator] allObjects]];
+                    if([messages count] == 0)
+                    {
+                        self.moreMessagesAvailable = NO;
+                        
+                        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Finished fetching messages", @"") message:NSLocalizedString(@"All messages fetched successfully, there are no more left on the server!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                            [alert dismissViewControllerAnimated:YES completion:nil];
+                        }]];
+                        [self presentViewController:alert animated:YES completion:nil];
+                    }
+                    else
+                        [self insertOldMessages:[[messages reverseObjectEnumerator] allObjects]];
                 }
                 //allow next mam fetch
                 self.isLoadingMam = NO;

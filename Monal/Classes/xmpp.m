@@ -4258,6 +4258,7 @@ NSString* const kStanza = @"stanza";
                     [[DataLayer sharedInstance] createTransaction:^{
                         DDLogVerbose(@"Handling mam page entry[%u(%@).%u(%@)]): %@", pageNo, @([pageList count]), entryNo, @([page count]), data);
                         MLMessage* msg = [MLMessageProcessor processMessage:data[@"messageNode"] andOuterMessage:data[@"outerMessageNode"] forAccount:self withHistoryId:historyId];
+                        DDLogVerbose(@"Got message processor result: %@", msg);
                         //add successfully added messages to our display list
                         //stanzas not transporting a body will be processed, too, but the message processor will return nil for these
                         if(msg != nil)
@@ -4283,16 +4284,8 @@ NSString* const kStanza = @"stanza";
         }));
         if([historyIdList count] < retrievedBodies)
             DDLogWarn(@"Got %lu mam history messages already contained in history db, possibly ougoing messages that did not have a stanzaid yet!", (unsigned long)(retrievedBodies - [historyIdList count]));
-        if(![historyIdList count])
-        {
-            //call completion with nil to signal an error, if we could not get any messages not yet in history db
-            completion(nil, nil);
-        }
-        else
-        {
-            //query db (again) for the real MLMessage to account for changes in history table by non-body metadata messages received after the body-message
-            completion([[DataLayer sharedInstance] messagesForHistoryIDs:historyIdList], nil);
-        }
+        //query db (again) for the real MLMessage to account for changes in history table by non-body metadata messages received after the body-message
+        completion([[DataLayer sharedInstance] messagesForHistoryIDs:historyIdList], nil);
     };
     responseHandler = ^(XMPPIQ* response) {
         NSMutableArray* mamPage = [self getOrderedMamPageFor:[response findFirst:@"/@id"]];

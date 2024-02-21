@@ -123,9 +123,10 @@ static NSMutableDictionary* _typingNotifications;
         return nil;
     }
     
-    if(![messageNode check:@"/<type=groupchat>"] && [[messageNode from] isEqualToString:account.connectionProperties.identity.fullJid] && [[messageNode toUser] isEqualToString:account.connectionProperties.identity.jid]) {
-        return nil;
-    }
+    //TODO firedrich: thy that??
+//     if(![messageNode check:@"/<type=groupchat>"] && [[messageNode from] isEqualToString:account.connectionProperties.identity.fullJid] && [[messageNode toUser] isEqualToString:account.connectionProperties.identity.jid]) {
+//         return nil;
+//     }
 
     //handle incoming jmi calls (TODO: add entry to local history, once the UI for this is implemented)
     //only handle incoming propose messages if not older than 60 seconds
@@ -294,7 +295,10 @@ static NSMutableDictionary* _typingNotifications;
     
     //handle muc status changes or invites (this checks for the muc namespace itself)
     if([account.mucProcessor processMessage:messageNode])
+    {
+        DDLogVerbose(@"Muc processor said we have to stop message processing here...");
         return nil;     //the muc processor said we have stop processing
+    }
     
     //add contact if possible (ignore groupchats or already existing contacts, or KeyTransportElements)
     DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possiblyUnknownContact);
@@ -346,7 +350,10 @@ static NSMutableDictionary* _typingNotifications;
             DDLogInfo(@"Got MUC subject for %@: %@", messageNode.fromUser, subject);
             
             if(subject == nil || [subject isEqualToString:currentSubject])
+            {
+                DDLogVerbose(@"Ignoring subject, nothing changed...");
                 return nil;
+            }
             
             DDLogVerbose(@"Updating subject in database: %@", subject);
             [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
@@ -356,12 +363,17 @@ static NSMutableDictionary* _typingNotifications;
                 @"subject": subject,
             }];
         }
+        else
+            DDLogVerbose(@"Ignoring muc subject: isMLhistory=YES...");
         return nil;
     }
     
     //ignore all other groupchat messages coming from bare jid (e.g. not being a "normal" muc message nor a subject update handled above)
     if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
+    {
+        DDLogVerbose(@"Ignoring groupchat message without resource (should be already handled above)...");
         return nil;
+    }
     
     NSString* decrypted;
     if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
@@ -384,7 +396,7 @@ static NSMutableDictionary* _typingNotifications;
     }
     
 #ifdef IS_ALPHA
-    //thats the negation of our case from line 193
+    //thats the negation of our case from line 375
     //--> opportunistic omemo in alpha builds should use the fallback body instead of the EME error because the fallback body could be the cleartext message
     //    (it could be a real omemo fallback, too, but there is no harm in using that instead of the EME message)
     if(!([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] && isMLhistory && [messageNode check:@"body#"]))

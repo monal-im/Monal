@@ -31,6 +31,8 @@ struct AddContactMenu: View {
     @State private var success = false
     @State private var newContact : MLContact?
     
+    @State private var isEditingJid = false
+    
     private let dismissWithNewContact: (MLContact) -> ()
     private let preauthToken: String?
 
@@ -181,12 +183,13 @@ struct AddContactMenu: View {
                         }
                         .pickerStyle(.menu)
                     }
-                    TextField(NSLocalizedString("Contact or Group/Channel Jid", comment: "placeholder when adding jid"), text: $toAdd)
+                    
+                    TextField(NSLocalizedString("Contact or Group/Channel Jid", comment: "placeholder when adding jid"), text: $toAdd, onEditingChanged: { isEditingJid = $0 })
                         //ios15: .textInputAutocapitalization(.never)
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
                         .keyboardType(.emailAddress)
-                        .addClearButton(text:$toAdd)
+                        .addClearButton(isEditing: isEditingJid, text:$toAdd)
                         .disabled(scannedFingerprints != nil)
                         .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
                         .onChange(of: toAdd) { _ in

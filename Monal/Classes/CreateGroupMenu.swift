@@ -23,6 +23,8 @@ struct CreateGroupMenu: View {
     // note: dismissLabel is not accessed but defined at the .alert() section
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
     @State private var selectedContacts : OrderedSet<MLContact> = []
+    
+    @State private var isEditingGroupName = false
 
     @ObservedObject private var overlay = LoadingOverlayState()
     
@@ -52,16 +54,17 @@ struct CreateGroupMenu: View {
             else
             {
                 Section() {
-                        Picker("Use account", selection: $selectedAccount) {
-                            ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
-                                Text(account.connectionProperties.identity.jid).tag(account as xmpp?)
-                            }
+                    Picker("Use account", selection: $selectedAccount) {
+                        ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
+                            Text(account.connectionProperties.identity.jid).tag(account as xmpp?)
                         }
-                        .pickerStyle(.menu)
-                    TextField(NSLocalizedString("Group Name (optional)", comment: "placeholder when creating new group"), text: $groupName)
+                    }
+                    .pickerStyle(.menu)
+                    
+                    TextField(NSLocalizedString("Group Name (optional)", comment: "placeholder when creating new group"), text: $groupName, onEditingChanged: { isEditingGroupName = $0 })
                         .autocorrectionDisabled()
                         .autocapitalization(.none)
-                        .addClearButton(text:$groupName)
+                        .addClearButton(isEditing: isEditingGroupName, text:$groupName)
 
                     NavigationLink(destination: LazyClosureView(ContactPicker(account: self.selectedAccount!, selectedContacts: $selectedContacts)), label: {
                             Text("Change Group Members")

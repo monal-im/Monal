@@ -30,7 +30,7 @@ struct ContactDetails: View {
                 
             // info/nondestructive buttons
             Section {
-                Button(action: {
+                Button {
                     if(contact.isGroup) {
                         if(!contact.isMuted && !contact.isMentionOnly) {
                             contact.obj.toggleMentionOnly(true)
@@ -44,45 +44,52 @@ struct ContactDetails: View {
                     } else {
                         contact.obj.toggleMute(!contact.isMuted)
                     }
-                }) {
-                    HStack {
-                        if(contact.isMuted) {
+                } label: {
+                    if(contact.isMuted) {
+                        Label {
+                            contact.isGroup ? Text("Notifications disabled") : Text("Contact is muted")
+                        } icon: {
                             Image(systemName: "bell.slash.fill")
                                 .foregroundColor(.red)
-                            contact.isGroup ? Text("Notifications disabled") : Text("Contact is muted")
-                        } else if(contact.isGroup && contact.isMentionOnly) {
-                            Image(systemName: "bell.badge")
-                                .foregroundColor(.accentColor)
+                        }
+                    } else if(contact.isGroup && contact.isMentionOnly) {
+                        Label {
                             Text("Notify only when mentioned")
-                        } else {
+                        } icon: {
+                            Image(systemName: "bell.badge")
+                        }
+                    } else {
+                        Label {
+                            contact.isGroup ? Text("Notify on all messages") : Text("Contact is not muted")
+                        } icon: {
                             Image(systemName: "bell.fill")
                                 .foregroundColor(.green)
-                            contact.isGroup ? Text("Notify on all messages") : Text("Contact is not muted")
                         }
                     }
                 }
-                //.buttonStyle(BorderlessButtonStyle())
                 
 #if !DISABLE_OMEMO
                 if((!contact.isGroup || (contact.isGroup && contact.mucType == "group")) && !HelperTools.isContactBlacklisted(forEncryption:contact.obj)) {
-                    Button(action: {
+                    Button {
                         if(contact.isEncrypted) {
                             showingShouldDisableEncryptionAlert = true
                         } else {
                             showingCannotEncryptAlert = !contact.obj.toggleEncryption(!contact.isEncrypted)
                         }
-                    }) {
-                        HStack {
-                            if contact.isEncrypted {
+                    } label: {
+                        if contact.isEncrypted {
+                            Label {
+                                Text("Messages are encrypted")
+                            } icon: {
                                 Image(systemName: "lock.fill")
                                     .foregroundColor(.green)
-                                Text("Messages are encrypted")
-                                    .foregroundColor(.accentColor)
-                            } else {
+                            }
+                        } else {
+                            Label {
+                                Text("Messages are NOT encrypted")
+                            } icon: {
                                 Image(systemName: "lock.open.fill")
                                     .foregroundColor(.red)
-                                Text("Messages are NOT encrypted")
-                                    .foregroundColor(.accentColor)
                             }
                         }
                     }
@@ -117,9 +124,14 @@ struct ContactDetails: View {
                         .addClearButton(text:$contact.nickNameView)
                 }
                 
-                Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {
-                    contact.obj.togglePinnedChat(!contact.isPinned);
-                }
+                Toggle("Pin Chat", isOn: Binding(get: {
+                    contact.isPinned
+                }, set: {
+                    contact.obj.togglePinnedChat($0)
+                }))
+//                Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {
+//                    contact.obj.togglePinnedChat(!contact.isPinned);
+//                }
 
                 if(contact.obj.isGroup && contact.obj.mucType == "group") {
                     NavigationLink(destination: LazyClosureView(MemberList(mucContact: contact))) {

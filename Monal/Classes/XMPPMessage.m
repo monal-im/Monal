@@ -35,18 +35,14 @@ NSString* const kMessageHeadlineType = @"headline";
 
 -(XMPPMessage*) initWithType:(NSString*) type to:(NSString*) to
 {
-    self = [self init];
-    self.attributes[@"type"] = type;
+    self = [self initWithType:type];
     self.attributes[@"to"] = to;
-
     return self;
 }
 
 -(XMPPMessage*) initToContact:(MLContact*) toContact
 {
-    self = [self init];
-    self.attributes[@"to"] = toContact.contactJid;
-
+    self = [self initWithType:(toContact.isGroup ? kMessageGroupChatType : kMessageChatType) to:toContact.contactJid];
     return self;
 }
 
@@ -54,7 +50,6 @@ NSString* const kMessageHeadlineType = @"headline";
 {
     self = [self init];
     self.attributes[@"type"] = type;
-
     return self;
 }
 

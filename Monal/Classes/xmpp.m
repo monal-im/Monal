@@ -3364,8 +3364,7 @@ NSString* const kStanza = @"stanza";
     if(self.accountState < kStateBound)
         return;
 
-    XMPPMessage* messageNode = [XMPPMessage new];
-    messageNode.attributes[@"to"] = contact.contactJid;
+    XMPPMessage* messageNode = [[XMPPMessage alloc] initToContact:contact];
     [messageNode setNoStoreHint];
     if(isTyping)
         [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"composing" andNamespace:@"http://jabber.org/protocol/chatstates"]];
@@ -5284,10 +5283,7 @@ NSString* const kStanza = @"stanza";
         return;
     }
     
-    XMPPMessage* displayedNode = [XMPPMessage new];
-    //the message type is needed so that the store hint is accepted by the server
-    displayedNode.attributes[@"type"] = msg.isMuc ? @"groupchat" : @"chat";
-    displayedNode.attributes[@"to"] = msg.inbound ? msg.buddyName : self.connectionProperties.identity.jid;
+    XMPPMessage* displayedNode = [[XMPPMessage alloc] initToContact:contact];
     [displayedNode setDisplayed:msg.isMuc && msg.stanzaId != nil ? msg.stanzaId : msg.messageId];
     [displayedNode setStoreHint];
     DDLogVerbose(@"Sending display marker: %@", displayedNode);

@@ -84,8 +84,12 @@ struct MemberList: View {
                                         Text(NSLocalizedString("Owner", comment: ""))
                                     } else if contactAffiliation == "admin" {
                                         Text(NSLocalizedString("Admin", comment: ""))
-                                    } else {
+                                    } else if contactAffiliation == "member" {
                                         Text(NSLocalizedString("Member", comment: ""))
+                                    } else if contactAffiliation == "outcast" {
+                                        Text(NSLocalizedString("Outcast", comment: ""))
+                                    } else {
+                                        Text(NSLocalizedString("<unknown>", comment: ""))
                                     }
                                 }
                             }

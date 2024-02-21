@@ -123,10 +123,9 @@ static NSMutableDictionary* _typingNotifications;
         return nil;
     }
     
-    //TODO firedrich: thy that??
-//     if(![messageNode check:@"/<type=groupchat>"] && [[messageNode from] isEqualToString:account.connectionProperties.identity.fullJid] && [[messageNode toUser] isEqualToString:account.connectionProperties.identity.jid]) {
-//         return nil;
-//     }
+    //ignore messages from our own device, see this github issue: https://github.com/monal-im/Monal/issues/941
+    if(![messageNode check:@"/<type=groupchat>"] && !isMLhistory && [messageNode.from isEqualToString:account.connectionProperties.identity.fullJid] && [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid])
+        return nil;
 
     //handle incoming jmi calls (TODO: add entry to local history, once the UI for this is implemented)
     //only handle incoming propose messages if not older than 60 seconds

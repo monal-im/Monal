@@ -158,26 +158,33 @@ extension DocumentPickerViewController: UIDocumentPickerDelegate {
 
 // clear button for text fields, see https://stackoverflow.com/a/58896723/3528174
 struct ClearButton: ViewModifier {
+    let isEditing: Bool
     @Binding var text: String
+    
     public func body(content: Content) -> some View {
-        ZStack(alignment: .trailing) {
+        HStack {
             content
-            if(!text.isEmpty) {
-                Button(action: {
+                .accessibilitySortPriority(2)
+            
+            if isEditing, !text.isEmpty {
+                Button {
                     self.text = ""
-                }) {
-                    Image(systemName: "delete.left")
-                    .foregroundColor(Color(UIColor.opaqueSeparator))
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(Color(UIColor.tertiaryLabel))
+                        .accessibilityLabel("Clear text")
                 }
                 .padding(.trailing, 8)
+                .accessibilitySortPriority(1)
             }
         }
     }
 }
 //this extension contains the easy-access view modifier
 extension View {
-    func addClearButton(text: Binding<String>) -> some View {
-        modifier(ClearButton(text:text))
+    /// Puts the view in an HStack and adds a clear button to the right when the text is not empty.
+    func addClearButton(isEditing: Bool, text: Binding<String>) -> some View {
+        modifier(ClearButton(isEditing: isEditing, text:text))
     }
 }
 

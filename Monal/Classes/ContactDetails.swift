@@ -21,6 +21,7 @@ struct ContactDetails: View {
     @State private var showingResetOmemoSessionConfirmation = false
     @State private var showingCannotEncryptAlert = false
     @State private var showingShouldDisableEncryptionAlert = false
+    @State private var isEditingNickname = false
 
     var body: some View {
         Form {
@@ -119,9 +120,11 @@ struct ContactDetails: View {
 #endif
                 
                 if(!contact.isGroup && !contact.isSelfChat) {
-                    TextField(NSLocalizedString("Rename Contact", comment: "placeholder text in contact details"), text: $contact.nickNameView)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .addClearButton(text:$contact.nickNameView)
+                    TextField(NSLocalizedString("Rename Contact", comment: "placeholder text in contact details"), text: $contact.nickNameView, onEditingChanged: {
+                        isEditingNickname = $0
+                    })
+                    .accessibilityLabel("Nickname")
+                    .addClearButton(isEditing: isEditingNickname, text: $contact.nickNameView)
                 }
                 
                 Toggle("Pin Chat", isOn: Binding(get: {

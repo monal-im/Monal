@@ -293,15 +293,27 @@ enum msgSentState {
     self.navBarContactJid = [[UILabel alloc] initWithFrame:CGRectMake(38, 7, 200, 18)];
     self.navBarLastInteraction = [[UILabel alloc] initWithFrame:CGRectMake(38, 26, 200, 12)];
 
-    [self.navBarContactJid setFont:[UIFont systemFontOfSize:15.0]];
-    [self.navBarLastInteraction setFont:[UIFont systemFontOfSize:10.0]];
+    self.navBarContactJid.font = [UIFont systemFontOfSize:15.0];
+    self.navBarLastInteraction.font = [UIFont systemFontOfSize:10.0];
 
     [cusView addSubview:self.navBarIcon];
     [cusView addSubview:self.navBarContactJid];
     [cusView addSubview:self.navBarLastInteraction];
-    UITapGestureRecognizer* customViewTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(commandIPressed:)];
-    [cusView addGestureRecognizer:customViewTapRecognizer];
-    self.navigationItem.leftBarButtonItems = @[[[UIBarButtonItem alloc] initWithCustomView:cusView]];
+
+    UITapGestureRecognizer* openContactDetailsTapAction = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(commandIPressed:)];
+    [cusView addGestureRecognizer:openContactDetailsTapAction];
+
+    UIBarButtonItem* customViewButtonWithMultipleItems = [[UIBarButtonItem alloc] initWithCustomView:cusView];
+    [customViewButtonWithMultipleItems setAction:@selector(commandIPressed:)];
+
+    // allow opening of contact details via voice over
+    [customViewButtonWithMultipleItems setIsAccessibilityElement:YES];
+    [customViewButtonWithMultipleItems setAccessibilityTraits:UIAccessibilityTraitAllowsDirectInteraction];
+    [customViewButtonWithMultipleItems setAccessibilityLabel:self.navBarContactJid.text];
+
+    self.customHeader = customViewButtonWithMultipleItems;
+
+    self.navigationItem.leftBarButtonItems = @[customViewButtonWithMultipleItems];
     self.navigationItem.leftItemsSupplementBackButton = YES;
 }
 
@@ -630,9 +642,10 @@ enum msgSentState {
     // change text values
     dispatch_async(dispatch_get_main_queue(), ^{
         self.navBarContactJid.text = jidLabelText;
+        [self.customHeader setAccessibilityLabel:jidLabelText];
         self.sendButton.enabled = sendButtonEnabled;
         [[MLImageManager sharedInstance] getIconForContact:self.contact withCompletion:^(UIImage *image) {
-            self.navBarIcon.image=image;
+            self.navBarIcon.image = image;
         }];
         
         [self updateCallButtonImage];

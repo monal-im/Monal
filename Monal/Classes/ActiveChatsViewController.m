@@ -70,14 +70,17 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) configureComposeButton
 {
-    UIImage* composeImage = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];
-    UITapGestureRecognizer* composeTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
-    self.composeButton.customView = [HelperTools
-                                    buttonWithNotificationBadgeForImage:composeImage
-                                    hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
-                                    withTapHandler:composeTapRecoginzer];
-    [self.composeButton.customView setIsAccessibilityElement:YES];
-    [self.composeButton.customView setAccessibilityLabel:@"Open contacts list"];
+    UIImage* composeImage = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];    
+    if([[DataLayer sharedInstance] allContactRequests].count > 0)
+    {
+        self.composeButton.image = [HelperTools imageWithNotificationBadgeForImage:composeImage];
+    }
+    else
+    {
+        self.composeButton.image = composeImage;
+    }
+    [self.composeButton setAccessibilityLabel:@"Open contacts list"];
+    [self.composeButton setAccessibilityHint:NSLocalizedString(@"Open contact list", @"")];
 }
 
 -(void) viewDidLoad
@@ -120,9 +123,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     self.settingsButton.image = [UIImage systemImageNamed:@"gearshape.fill"];
     [self configureComposeButton];
 
-    UIBarButtonItem* spinnerButton = [[UIBarButtonItem alloc] initWithCustomView:self.spinner];
-    [spinnerButton setIsAccessibilityElement:NO];
-    [self.navigationItem setRightBarButtonItems:@[self.composeButton, spinnerButton] animated:NO];
+    self.spinnerButton.customView = self.spinner;
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;

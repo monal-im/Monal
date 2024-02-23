@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) UITableView* chatListTable;
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* settingsButton;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem* spinnerButton;
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* composeButton;
 @property (nonatomic, strong) chatViewController* currentChatViewController;
 @property (nonatomic, strong) UIActivityIndicatorView* spinner;

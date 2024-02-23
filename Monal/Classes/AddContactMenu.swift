@@ -30,9 +30,9 @@ struct AddContactMenu: View {
     @State private var showQRCodeScanner = false
     @State private var success = false
     @State private var newContact : MLContact?
-    
+
     @State private var isEditingJid = false
-    
+
     private let dismissWithNewContact: (MLContact) -> ()
     private let preauthToken: String?
 
@@ -183,7 +183,7 @@ struct AddContactMenu: View {
                         }
                         .pickerStyle(.menu)
                     }
-                    
+
                     TextField(NSLocalizedString("Contact or Group/Channel Jid", comment: "placeholder when adding jid"), text: $toAdd, onEditingChanged: { isEditingJid = $0 })
                         //ios15: .textInputAutocapitalization(.never)
                         .autocapitalization(.none)

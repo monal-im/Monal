@@ -42,6 +42,8 @@ struct ContactPicker: View {
     let account : xmpp
     @Binding var selectedContacts : OrderedSet<MLContact> // already selected when going into the view
     @State var searchFieldInput = ""
+    
+    @State var isEditingSearchInput: Bool = false
 
     func matchesSearch(contact : MLContact) -> Bool {
         // TODO better lookup
@@ -60,7 +62,8 @@ struct ContactPicker: View {
         } else {
             List {
                 Section {
-                    TextField(NSLocalizedString("Search contacts", comment: "placeholder in contact picker"), text: $searchFieldInput)
+                    TextField(NSLocalizedString("Search contacts", comment: "placeholder in contact picker"), text: $searchFieldInput, onEditingChanged: { isEditingSearchInput = $0 })
+                        .addClearButton(isEditing: isEditingSearchInput, text:$searchFieldInput)
                 }
                 ForEach(Array(contacts.enumerated()), id: \.element) { idx, contact in
                     if matchesSearch(contact: contact) {

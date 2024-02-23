@@ -158,26 +158,33 @@ extension DocumentPickerViewController: UIDocumentPickerDelegate {
 
 // clear button for text fields, see https://stackoverflow.com/a/58896723/3528174
 struct ClearButton: ViewModifier {
+    let isEditing: Bool
     @Binding var text: String
+    
     public func body(content: Content) -> some View {
-        ZStack(alignment: .trailing) {
+        HStack {
             content
-            if(!text.isEmpty) {
-                Button(action: {
+                .accessibilitySortPriority(2)
+            
+            if isEditing, !text.isEmpty {
+                Button {
                     self.text = ""
-                }) {
-                    Image(systemName: "delete.left")
-                    .foregroundColor(Color(UIColor.opaqueSeparator))
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(Color(UIColor.tertiaryLabel))
+                        .accessibilityLabel("Clear text")
                 }
                 .padding(.trailing, 8)
+                .accessibilitySortPriority(1)
             }
         }
     }
 }
 //this extension contains the easy-access view modifier
 extension View {
-    func addClearButton(text: Binding<String>) -> some View {
-        modifier(ClearButton(text:text))
+    /// Puts the view in an HStack and adds a clear button to the right when the text is not empty.
+    func addClearButton(isEditing: Bool, text: Binding<String>) -> some View {
+        modifier(ClearButton(isEditing: isEditing, text:text))
     }
 }
 
@@ -319,42 +326,16 @@ struct AlertPrompt {
     var dismissLabel: Text = Text("Close")
 }
 
-//see https://www.avanderlee.com/swiftui/conditional-view-modifier/
 extension View {
-    /// Applies the given transform if the given condition evaluates to `true`.
+    /// Applies the given transform.
+    ///
+    /// Useful for availability branching on view modifiers. Do not branch with any properties that may change during runtime as this will cause errors.
     /// - Parameters:
-    ///   - condition: The condition to evaluate.
     ///   - transform: The transform to apply to the source `View`.
-    /// - Returns: Either the original `View` or the modified `View` if the condition is `true`.
-    @ViewBuilder func `if`<Content: View>(_ condition: @autoclosure () -> Bool, transform: (Self) -> Content) -> some View {
-        if condition() {
-            transform(self)
-        } else {
-            self
-        }
+    /// - Returns: The view transformed by the transform.
+    func ifAvailable<Content: View>(@ViewBuilder _ transform: (Self) -> Content) -> some View {
+        transform(self)
     }
-    
-    @ViewBuilder func `if`<Content: View>(closure condition: () -> Bool, transform: (Self) -> Content) -> some View {
-        if condition() {
-            transform(self)
-        } else {
-            self
-        }
-    }
-}
-
-func iOS15() -> Bool {
-    guard #available(iOS 15, *) else {
-        return true
-    }
-    return false
-}
-
-func iOS16() -> Bool {
-    guard #available(iOS 16, *) else {
-        return true
-    }
-    return false
 }
 
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
@@ -473,9 +454,7 @@ class SwiftuiInterface : NSObject {
             case "ContactRequests":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactRequestsMenu(delegate: delegate)))
             case "CreateGroup":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate, dismissWithNewGroup: { contact in
-                    // FIXME
-                })))
+                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate)))
             case "ChatPlaceholder":
                 host.rootView = AnyView(ChatPlaceholder())
             default:

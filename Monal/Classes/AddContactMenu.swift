@@ -30,7 +30,9 @@ struct AddContactMenu: View {
     @State private var showQRCodeScanner = false
     @State private var success = false
     @State private var newContact : MLContact?
-    
+
+    @State private var isEditingJid = false
+
     private let dismissWithNewContact: (MLContact) -> ()
     private let preauthToken: String?
 
@@ -181,12 +183,13 @@ struct AddContactMenu: View {
                         }
                         .pickerStyle(.menu)
                     }
-                    TextField(NSLocalizedString("Contact or Group/Channel Jid", comment: "placeholder when adding jid"), text: $toAdd)
+
+                    TextField(NSLocalizedString("Contact or Group/Channel Jid", comment: "placeholder when adding jid"), text: $toAdd, onEditingChanged: { isEditingJid = $0 })
                         //ios15: .textInputAutocapitalization(.never)
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
                         .keyboardType(.emailAddress)
-                        .addClearButton(text:$toAdd)
+                        .addClearButton(isEditing: isEditingJid, text:$toAdd)
                         .disabled(scannedFingerprints != nil)
                         .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
                         .onChange(of: toAdd) { _ in
@@ -245,14 +248,12 @@ struct AddContactMenu: View {
         }
         .richAlert(isPresented: $invitationResult, title:Text("Invitation for \(splitJid["host"]!) created")) { data in
             VStack {
-                Text("Direct your buddy to this webpage for instructions on how to setup an xmpp client. You will then automatically be added to their contact list.")
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Link(data["landing"] as! String, destination:URL(string:data["landing"] as! String)!)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 10)
-                    .padding(.bottom, 10)
+                Image(uiImage: createQrCode(value: data["landing"] as! String))
+                    .interpolation(.none)
+                    .resizable()
+                    .scaledToFit()
+                    .aspectRatio(1, contentMode: .fit)
+
                 if let expires = data["expires"] as? Date {
                     HStack {
                         if #available(iOS 15, *) {
@@ -271,8 +272,12 @@ struct AddContactMenu: View {
                 UIPasteboard.general.setValue(data["landing"] as! String, forPasteboardType:UTType.utf8PlainText.identifier as String)
                 invitationResult = nil
             }) {
-                Text("Copy link to clipboard")
-                    .frame(maxWidth: .infinity)
+                if #available(iOS 16, *) {
+                    ShareLink("Share invitation link", item: URL(string: data["landing"] as! String)!)
+                } else {
+                    Text("Copy invitation link to clipboard")
+                        .frame(maxWidth: .infinity)
+                }
             }
             Button(action: {
                 invitationResult = nil

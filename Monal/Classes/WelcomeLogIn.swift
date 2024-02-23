@@ -14,7 +14,9 @@ struct WelcomeLogIn: View {
     
     var delegate: SheetDismisserProtocol
     
+    @State private var isEditingJid: Bool = false
     @State private var jid: String = ""
+    @State private var isEditingPassword: Bool = false
     @State private var password: String = ""
 
     @State private var showAlert = false
@@ -133,14 +135,17 @@ struct WelcomeLogIn: View {
                     
                     TextField(NSLocalizedString("user@domain.tld", comment: "placeholder when adding account"), text: Binding(
                         get: { self.jid },
-                        set: { string in self.jid = string.lowercased().replacingOccurrences(of: " ", with: "") })
+                        set: { string in self.jid = string.lowercased().replacingOccurrences(of: " ", with: "") }), onEditingChanged: { isEditingJid = $0 }
                     )
                     //ios15: .textInputAutocapitalization(.never)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
                     .keyboardType(.emailAddress)
+                    .addClearButton(isEditing: isEditingJid, text: $jid)
                     
                     SecureField(NSLocalizedString("Password", comment: "placeholder when adding account"), text: $password)
+                        .addClearButton(isEditing:  password.count > 0
+                                        , text: $password)
                     
                     HStack() {
                         Button(action: {

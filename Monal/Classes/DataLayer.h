@@ -60,8 +60,9 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(NSMutableArray<MLContact*>*) searchContactsWithString:(NSString*) search;
 
--(NSMutableArray<MLContact*>*) contactList;
--(NSMutableArray<MLContact*>*) contactListWithJid:(NSString*) jid;
+-(NSArray<MLContact*>*) contactList;
+-(NSArray<MLContact*>*) contactListWithJid:(NSString*) jid;
+-(NSArray<MLContact*>*) possibleGroupMembersForAccount:(NSNumber*) accountNo;
 -(NSArray<NSString*>*) resourcesForContact:(MLContact* _Nonnull)contact ;
 -(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSNumber*)account;
 -(void) setSoftwareVersionInfoForContact:(NSString*)contact
@@ -125,7 +126,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) updateMucSubject:(NSString*) subject forAccount:(NSNumber*) accountNo andRoom:(NSString*) room;
 -(NSString*) mucSubjectforAccount:(NSNumber*) accountNo andRoom:(NSString*) room;
 
--(NSMutableArray*) listMucsForAccount:(NSNumber*) accountNo;
+-(NSSet*) listMucsForAccount:(NSNumber*) accountNo;
 -(BOOL) deleteMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 
 -(void) updateMucTypeTo:(NSString*) type forRoom:(NSString*) room andAccount:(NSNumber*) accountNo;
@@ -208,7 +209,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
 -(void) deleteMessageHistoryLocally:(NSNumber*) messageNo;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
--(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSNumber*) accountNo;
+-(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo;
 
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID;
 -(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted historyBaseID:(NSNumber* _Nullable) historyBaseID;

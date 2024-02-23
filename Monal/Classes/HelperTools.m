@@ -102,7 +102,7 @@ static struct {
 int asyncSafeCopyFile(const char* from, const char* to)
 {
     int fd_to, fd_from;
-    char buf[4096];
+    char buf[1024];
     ssize_t nread;
     int saved_errno;
 
@@ -201,9 +201,15 @@ void logException(NSException* exception)
 void uncaughtExceptionHandler(NSException* exception)
 {
     logException(exception);
+//don't let kscrash handle the exception if we are in the simulator
+//(this makes sure xcode will catch the exception and show proper backtraces etc.)
+#if TARGET_OS_SIMULATOR
+    return;
+#else
     //make sure this crash will be recorded by kscrash using the NSException rather than the c++ exception thrown by the objc runtime
     //this will make sure that the stacktrace matches the objc exception rather than being a top level c++ stacktrace
     KSCrash.sharedInstance.uncaughtExceptionHandler(exception);
+#endif
 }
 
 //this function will only be in use under macos alpha builds to log every exception (even when catched with @try-@catch constructs)
@@ -352,11 +358,13 @@ void swizzle(Class c, SEL orig, SEL new)
 {
     if(description == nil || [description isEqualToString:@""])
         description = @"XMPP Error";
+    NSMutableString* message = [description mutableCopy];
     NSString* errorReason = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
+    if(errorReason && ![errorReason isEqualToString:@""])
+        [message appendString:[NSString stringWithFormat:@": %@", errorReason]];
     NSString* errorText = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
-    NSString* message = [NSString stringWithFormat:@"%@: %@", description, errorReason];
     if(errorText && ![errorText isEqualToString:@""])
-        message = [NSString stringWithFormat:@"%@: %@ (%@)", description, errorReason, errorText];
+        [message appendString:[NSString stringWithFormat:@" (%@)", errorText]];
     return message;
 }
 

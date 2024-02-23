@@ -482,7 +482,12 @@ enum DummySettingsRows {
     }];
     [questionAlert addAction:noAction];
     [questionAlert addAction:yesAction];
-    questionAlert.popoverPresentationController.sourceView = sender;
+    
+    UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
+    if(@available(iOS 16.0, macCatalyst 16.0, *))
+        popPresenter.sourceItem = sender;
+    else
+        popPresenter.barButtonItem = sender;
 
     [self presentViewController:questionAlert animated:YES completion:nil];
 }
@@ -538,7 +543,12 @@ enum DummySettingsRows {
     }];
     [questionAlert addAction:noAction];
     [questionAlert addAction:yesAction];
-    questionAlert.popoverPresentationController.sourceView = sender;
+    
+    UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
+    if(@available(iOS 16.0, macCatalyst 16.0, *))
+        popPresenter.sourceItem = sender;
+    else
+        popPresenter.barButtonItem = sender;
 
     [self presentViewController:questionAlert animated:YES completion:nil];
 }
@@ -568,7 +578,12 @@ enum DummySettingsRows {
 
     [questionAlert addAction:noAction];
     [questionAlert addAction:yesAction];
-    questionAlert.popoverPresentationController.sourceView = sender;
+    
+    UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
+    if(@available(iOS 16.0, macCatalyst 16.0, *))
+        popPresenter.sourceItem = sender;
+    else
+        popPresenter.barButtonItem = sender;
 
     [self presentViewController:questionAlert animated:YES completion:nil];
 

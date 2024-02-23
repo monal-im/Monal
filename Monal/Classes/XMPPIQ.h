@@ -87,7 +87,7 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 /**
 gets Entity SoftWare Version
  */
--(void) getEntitySoftWareVersionTo:(NSString*) to;
+-(void) getEntitySoftwareVersionInfo;
 
 /**
 removes a contact from the roster

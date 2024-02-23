@@ -21,12 +21,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) UITableView* chatListTable;
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* settingsButton;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem* spinnerButton;
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* composeButton;
 @property (nonatomic, strong) chatViewController* currentChatViewController;
 @property (nonatomic, strong) UIActivityIndicatorView* spinner;
 
 -(void) showCallContactNotFoundAlert:(NSString*) jid;
--(void) callContact:(MLContact*) contact;
+-(void) callContact:(MLContact*) contact withUIKitSender:(_Nullable id) sender;
 -(void) callContact:(MLContact*) contact withCallType:(MLCallType) callType;
 -(void) presentAccountPickerForContacts:(NSArray<MLContact*>*) contacts andCallType:(MLCallType) callType;
 -(void) presentCall:(MLCall*) call;

@@ -131,8 +131,8 @@ $invalidate(h, $BOOL(done, YES))
 #define $$                                                                }
 
 //call handler/invalidation
-#define $call(handler, ...)                                               [handler callWithArguments:@{ __VA_ARGS__ }]
-#define $invalidate(handler, ...)                                         [handler invalidateWithArguments:@{ __VA_ARGS__ }]
+#define $call(handler, ...)                                               do { if(handler != nil) { [handler callWithArguments:@{ __VA_ARGS__ }]; } } while(0)
+#define $invalidate(handler, ...)                                         do { if(handler != nil) { [handler invalidateWithArguments:@{ __VA_ARGS__ }]; } } while(0)
 
 //internal stuff
 //$_*() and $$*() will add parentheses around its result to make sure all inner commas like those probably exposed by an inner STRIP_PARENTHESES() call get not

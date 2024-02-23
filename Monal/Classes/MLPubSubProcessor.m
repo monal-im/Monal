@@ -204,9 +204,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         return;
     }
     
-    NSMutableDictionary* ownFavorites = [NSMutableDictionary new];
-    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
-        ownFavorites[entry[@"room"]] = entry;
+    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountNo];
     
     //new/updated bookmarks
     if([type isEqualToString:@"publish"])
@@ -226,7 +224,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
                 autojoin = @NO;     //default value specified in xep
             
             //check if this is a new entry with autojoin=true
-            if(ownFavorites[room] == nil && [autojoin boolValue])
+            if(![ownFavorites containsObject:room] && [autojoin boolValue])
             {
                 DDLogInfo(@"Entering muc '%@' on account %@ because it got added to bookmarks...", room, account.accountNo);
                 //make sure we update our favorites table right away, to counter any race conditions when joining multiple mucs with one bookmarks update
@@ -238,15 +236,14 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
                 [account.mucProcessor sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:NO];
             }
             //check if it is a known entry that changed autojoin to false
-            else if(ownFavorites[room] != nil && ![autojoin boolValue])
+            else if([ownFavorites containsObject:room] && ![autojoin boolValue])
             {
                 DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
-                //delete local favorites entry and leave room afterwards
-                [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                [account.mucProcessor leave:room withBookmarksUpdate:NO];
+                //delete local favorites entry and leave room afterwards, but keep buddylist entry because only the autojoin flag changed
+                [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:YES];
             }
             //check for nickname changes
-            else if(ownFavorites[room] != nil && nick != nil)
+            else if([ownFavorites containsObject:room] && nick != nil)
             {
                 NSString* oldNick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
                 if(![nick isEqualToString:oldNick])
@@ -270,10 +267,14 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         for(NSString* itemId in data)
         {
             NSString* room = [itemId lowercaseString];
-            DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
-            //delete local favorites entry and leave room afterwards
-            [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-            [account.mucProcessor leave:room withBookmarksUpdate:NO];
+            if([ownFavorites containsObject:room])
+            {
+                DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
+                //delete local favorites entry and leave room afterwards
+                [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
+            }
+            else
+                DDLogVerbose(@"Ignoring retracted bookmark because not listed in muc_favorites already...");
         }
     }
     else
@@ -284,8 +285,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         {
             DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
             //delete local favorites entry and leave room afterwards
-            [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-            [account.mucProcessor leave:room withBookmarksUpdate:NO];
+            [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
         }
     }
 $$
@@ -315,10 +315,8 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
         max_items = @"max";
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     
-    NSMutableDictionary* ownFavorites = [NSMutableDictionary new];
-    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
-        ownFavorites[entry[@"room"]] = entry;
-    DDLogVerbose(@"Own favorites: %@", [ownFavorites allKeys]);
+    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountNo];
+    DDLogVerbose(@"Own favorites: %@", ownFavorites);
     
     //filter passwort protected mucs and make sure jids (the item ids) are always lowercase
     NSMutableDictionary* _data = [NSMutableDictionary new];
@@ -346,7 +344,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
             autojoin = @NO;     //default value specified in xep
         
         //check if the bookmark exists with autojoin==false and only update the autojoin and nick values, if true
-        if(ownFavorites[room] && ![autojoin boolValue])
+        if([ownFavorites containsObject:room] && ![autojoin boolValue])
         {
             DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountNo);
             
@@ -372,7 +370,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     }
         
     //add all mucs not yet listed in bookmarks
-    NSMutableSet* toAdd = [NSMutableSet setWithArray:[ownFavorites allKeys]];
+    NSMutableSet* toAdd = [ownFavorites mutableCopy];
     [toAdd  minusSet:[NSSet setWithArray:[_data allKeys]]];
     for(NSString* room in toAdd)
     {
@@ -385,7 +383,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
                 } andChildren:@[
                     nilWrapper(nick != nil ? [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:nick] : nil),
                     [[MLXMLNode alloc] initWithElement:@"extensions" withAttributes:@{} andChildren:@[
-                        [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:xmpp:monal.im:bookmarks:info" withAttributes:@{
+                        [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:monal.im:bookmarks:info" withAttributes:@{
                             @"name": @"Monal",
                             @"version": infoDict[@"CFBundleShortVersionString"],
                             @"build": infoDict[@"CFBundleVersion"],
@@ -402,7 +400,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     
     //remove all mucs not listed in local favorites table
     NSMutableSet* toRemove = [NSMutableSet setWithArray:[_data allKeys]];
-    [toRemove  minusSet:[NSSet setWithArray:[ownFavorites allKeys]]];
+    [toRemove  minusSet:ownFavorites];
     for(NSString* room in toRemove)
     {
         DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountNo);
@@ -455,9 +453,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
         return;
     }
     
-    NSMutableDictionary* ownFavorites = [NSMutableDictionary new];
-    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
-        ownFavorites[entry[@"room"]] = entry;
+    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountNo];
     
     //new/updated bookmarks
     if([type isEqualToString:@"publish"])
@@ -489,7 +485,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
                     autojoin = @NO;     //default value specified in xep
                 
                 //check if this is a new entry with autojoin=true
-                if(ownFavorites[room] == nil && [autojoin boolValue])
+                if(![ownFavorites containsObject:room] && [autojoin boolValue])
                 {
                     DDLogInfo(@"Entering muc '%@' on account %@ because it got added to bookmarks...", room, account.accountNo);
                     //make sure we update our favorites table right away, to counter any race conditions when joining multiple mucs with one bookmarks update
@@ -501,15 +497,14 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
                     [account.mucProcessor sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:NO];
                 }
                 //check if it is a known entry that changed autojoin to false
-                else if(ownFavorites[room] != nil && ![autojoin boolValue])
+                else if([ownFavorites containsObject:room] && ![autojoin boolValue])
                 {
                     DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
-                    //delete local favorites entry and leave room afterwards
-                    [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                    [account.mucProcessor leave:room withBookmarksUpdate:NO];
+                    //delete local favorites entry and leave room afterwards, but keep buddylist entry because only the autojoin flag changed
+                    [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:YES];
                 }
                 //check for nickname changes
-                else if(ownFavorites[room] != nil && nick != nil)
+                else if([ownFavorites containsObject:room] && nick != nil)
                 {
                     NSString* oldNick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
                     if(![nick isEqualToString:oldNick])
@@ -529,14 +524,13 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
             }
             
             //remove and leave all mucs removed from bookmarks
-            NSMutableSet* toLeave = [NSMutableSet setWithArray:[ownFavorites allKeys]];
+            NSMutableSet* toLeave = [ownFavorites mutableCopy];
             [toLeave  minusSet:bookmarkedMucs];
             for(NSString* room in toLeave)
             {
                 DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
                 //delete local favorites entry and leave room afterwards
-                [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                [account.mucProcessor leave:room withBookmarksUpdate:NO];
+                [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
             }
             
             return;      //we only need the first pep item (there should be only one item in the first place)
@@ -549,8 +543,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
     {
         DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
         //delete local favorites entry and leave room afterwards
-        [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-        [account.mucProcessor leave:room withBookmarksUpdate:NO];
+        [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
     }
 $$
 
@@ -575,9 +568,7 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
     }
     
     BOOL changed = NO;
-    NSMutableDictionary* ownFavorites = [NSMutableDictionary new];
-    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
-        ownFavorites[entry[@"room"]] = entry;
+    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountNo];
     
     for(NSString* itemId in data)
     {
@@ -606,7 +597,7 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
                 autojoin = @NO;     //default value specified in xep
             
             //check if the bookmark exists with autojoin==false and only update the autojoin and nick values, if true
-            if(ownFavorites[room] && ![autojoin boolValue])
+            if([ownFavorites containsObject:room] && ![autojoin boolValue])
             {
                 DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountNo);
                 
@@ -626,7 +617,7 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
         }
         
         //add all mucs not yet listed in bookmarks
-        NSMutableSet* toAdd = [NSMutableSet setWithArray:[ownFavorites allKeys]];
+        NSMutableSet* toAdd = [ownFavorites mutableCopy];
         [toAdd  minusSet:bookmarkedMucs];
         for(NSString* room in toAdd)
         {
@@ -642,7 +633,7 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
         
         //remove all mucs not listed in local favorites table
         NSMutableSet* toRemove = [bookmarkedMucs mutableCopy];
-        [toRemove  minusSet:[NSMutableSet setWithArray:[ownFavorites allKeys]]];
+        [toRemove  minusSet:ownFavorites];
         for(NSString* room in toRemove)
         {
             DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountNo);

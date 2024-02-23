@@ -293,15 +293,27 @@ enum msgSentState {
     self.navBarContactJid = [[UILabel alloc] initWithFrame:CGRectMake(38, 7, 200, 18)];
     self.navBarLastInteraction = [[UILabel alloc] initWithFrame:CGRectMake(38, 26, 200, 12)];
 
-    [self.navBarContactJid setFont:[UIFont systemFontOfSize:15.0]];
-    [self.navBarLastInteraction setFont:[UIFont systemFontOfSize:10.0]];
+    self.navBarContactJid.font = [UIFont systemFontOfSize:15.0];
+    self.navBarLastInteraction.font = [UIFont systemFontOfSize:10.0];
 
     [cusView addSubview:self.navBarIcon];
     [cusView addSubview:self.navBarContactJid];
     [cusView addSubview:self.navBarLastInteraction];
-    UITapGestureRecognizer* customViewTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(commandIPressed:)];
-    [cusView addGestureRecognizer:customViewTapRecognizer];
-    self.navigationItem.leftBarButtonItems = @[[[UIBarButtonItem alloc] initWithCustomView:cusView]];
+
+    UITapGestureRecognizer* openContactDetailsTapAction = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(commandIPressed:)];
+    [cusView addGestureRecognizer:openContactDetailsTapAction];
+
+    UIBarButtonItem* customViewButtonWithMultipleItems = [[UIBarButtonItem alloc] initWithCustomView:cusView];
+    [customViewButtonWithMultipleItems setAction:@selector(commandIPressed:)];
+
+    // allow opening of contact details via voice over
+    [customViewButtonWithMultipleItems setIsAccessibilityElement:YES];
+    [customViewButtonWithMultipleItems setAccessibilityTraits:UIAccessibilityTraitAllowsDirectInteraction];
+    [customViewButtonWithMultipleItems setAccessibilityLabel:self.navBarContactJid.text];
+
+    self.customHeader = customViewButtonWithMultipleItems;
+
+    self.navigationItem.leftBarButtonItems = @[customViewButtonWithMultipleItems];
     self.navigationItem.leftItemsSupplementBackButton = YES;
 }
 
@@ -485,11 +497,13 @@ enum msgSentState {
 
 -(void) handleForeGround
 {
-    @synchronized(_localMLContactCache) {
-        [_localMLContactCache removeAllObjects];
-    }
-    [self refreshData];
-    [self reloadTable];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        @synchronized(self->_localMLContactCache) {
+            [self->_localMLContactCache removeAllObjects];
+        }
+        [self refreshData];
+        [self reloadTable];
+    });
 }
 
 -(void) openCallScreen:(id) sender
@@ -508,7 +522,7 @@ enum msgSentState {
             
             //now initiate call
             MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
-            [appDelegate.activeChats callContact:self.contact];
+            [appDelegate.activeChats callContact:self.contact withUIKitSender:sender];
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
@@ -523,22 +537,18 @@ enum msgSentState {
     else
     {
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
-        [appDelegate.activeChats callContact:self.contact];
+        [appDelegate.activeChats callContact:self.contact withUIKitSender:sender];
     }
 }
 
--(IBAction) toggleEncryption:(id)sender
+-(IBAction) toggleEncryption:(id) sender
 {
     if([HelperTools isContactBlacklistedForEncryption:self.contact])
         return;
 #ifndef DISABLE_OMEMO
     if(self.contact.isEncrypted)
     {
-        NSInteger style = UIAlertControllerStyleActionSheet;
-#if TARGET_OS_MACCATALYST
-        style = UIAlertControllerStyleAlert;
-#endif
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Disable encryption?", @"") message:NSLocalizedString(@"Do you really want to disable encryption for this contact?", @"") preferredStyle:style];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Disable encryption?", @"") message:NSLocalizedString(@"Do you really want to disable encryption for this contact?", @"") preferredStyle:UIAlertControllerStyleActionSheet];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes, deactivate encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withSelf:self afterToggle:^() {
                 [self displayEncryptionStateInUI];
@@ -548,7 +558,11 @@ enum msgSentState {
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No, keep encryption activated", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
-        //alert.popoverPresentationController.sourceView = sender;
+        UIPopoverPresentationController* popPresenter = [alert popoverPresentationController];
+        if(@available(iOS 16.0, macCatalyst 16.0, *))
+            popPresenter.sourceItem = sender;
+        else
+            popPresenter.barButtonItem = sender;
         [self presentViewController:alert animated:YES completion:nil];
     }
     else
@@ -628,9 +642,10 @@ enum msgSentState {
     // change text values
     dispatch_async(dispatch_get_main_queue(), ^{
         self.navBarContactJid.text = jidLabelText;
+        [self.customHeader setAccessibilityLabel:jidLabelText];
         self.sendButton.enabled = sendButtonEnabled;
         [[MLImageManager sharedInstance] getIconForContact:self.contact withCompletion:^(UIImage *image) {
-            self.navBarIcon.image=image;
+            self.navBarIcon.image = image;
         }];
         
         [self updateCallButtonImage];
@@ -903,13 +918,15 @@ enum msgSentState {
 
 -(void) handleBackgroundChanged
 {
-    DDLogVerbose(@"Loading background image for %@", self.contact);
-    self.backgroundImage.image = [[MLImageManager sharedInstance] getBackgroundFor:self.contact];
-    //use default background if this contact does not have its own
-    if(self.backgroundImage.image == nil)
-        self.backgroundImage.image = [[MLImageManager sharedInstance] getBackgroundFor:nil];
-    self.backgroundImage.hidden = self.backgroundImage.image == nil;
-    DDLogVerbose(@"Background is now: %@", self.backgroundImage.image);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogVerbose(@"Loading background image for %@", self.contact);
+        self.backgroundImage.image = [[MLImageManager sharedInstance] getBackgroundFor:self.contact];
+        //use default background if this contact does not have its own
+        if(self.backgroundImage.image == nil)
+            self.backgroundImage.image = [[MLImageManager sharedInstance] getBackgroundFor:nil];
+        self.backgroundImage.hidden = self.backgroundImage.image == nil;
+        DDLogVerbose(@"Background is now: %@", self.backgroundImage.image);
+    });
 }
 
 #pragma mark rotation
@@ -2706,7 +2723,7 @@ enum msgSentState {
                 {
                     NSString* errorText = error;
                     if(!error)
-                        errorText = NSLocalizedString(@"All messages already present in local history!", @"");
+                        errorText = NSLocalizedString(@"Unknown error!", @"");
                     DDLogError(@"Got backscrolling mam error: %@", errorText);
                     UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not fetch messages", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Could not fetch (all) old messages for this chat from your server archive. Please try again later. %@", @""), errorText] preferredStyle:UIAlertControllerStyleAlert];
                     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -2716,11 +2733,19 @@ enum msgSentState {
                 }
                 else
                 {
-                    if([messages count] == 0) {
-                        self.moreMessagesAvailable = NO;
-                    }
                     DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
-                    [self insertOldMessages:[[messages reverseObjectEnumerator] allObjects]];
+                    if([messages count] == 0)
+                    {
+                        self.moreMessagesAvailable = NO;
+                        
+                        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Finished fetching messages", @"") message:NSLocalizedString(@"All messages fetched successfully, there are no more left on the server!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                            [alert dismissViewControllerAnimated:YES completion:nil];
+                        }]];
+                        [self presentViewController:alert animated:YES completion:nil];
+                    }
+                    else
+                        [self insertOldMessages:[[messages reverseObjectEnumerator] allObjects]];
                 }
                 //allow next mam fetch
                 self.isLoadingMam = NO;

@@ -501,12 +501,24 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSMutableArray<MLContact*>*) contactList
+-(NSArray<MLContact*>*) contactList
 {
     return [self contactListWithJid:@""];
 }
 
--(NSMutableArray<MLContact*>*) contactListWithJid:(NSString*) jid
+-(NSArray<MLContact*>*) possibleGroupMembersForAccount:(NSNumber*) accountNo
+{
+    return [self.db idReadTransaction:^{
+        //list all contacts and group chats
+        NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) FROM buddylist as B INNER JOIN account AS A ON A.account_id=B.account_id WHERE B.account_id=? AND B.muc=0 AND B.buddy_name != (A.username || '@' || A.domain)";
+        NSMutableArray* toReturn = [NSMutableArray new];
+        for(NSDictionary* dic in [self.db executeReader:query andArguments:@[accountNo]])
+            [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
+        return toReturn;
+    }];
+}
+
+-(NSArray<MLContact*>*) contactListWithJid:(NSString*) jid
 {
     return [self.db idReadTransaction:^{
         //list all contacts and group chats
@@ -1002,6 +1014,7 @@ static NSDateFormatter* dbFormatter;
     if(!member || !member[@"jid"] || !room || accountNo == nil)
         return;
     
+    DDLogDebug(@"Removing member '%@' from muc '%@'...", member[@"jid"], room);
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=? AND member_jid=?;" andArguments:@[accountNo, room, member[@"jid"]]];
     }];
@@ -1105,10 +1118,13 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSMutableArray*) listMucsForAccount:(NSNumber*) accountNo
+-(NSSet*) listMucsForAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
-        return [self.db executeReader:@"SELECT * FROM muc_favorites WHERE account_id=?;" andArguments:@[accountNo]];
+        NSMutableSet* retval = [NSMutableSet new];
+        for(NSDictionary* entry in [self.db executeReader:@"SELECT * FROM muc_favorites WHERE account_id=?;" andArguments:@[accountNo]])
+            [retval addObject:[entry[@"room"] lowercaseString]];
+        return retval;
     }];
 }
 
@@ -1265,7 +1281,7 @@ static NSDateFormatter* dbFormatter;
         }
         else
         {
-            DDLogError(@"Message(%@) %@ with stanzaid %@ already existing, ignoring history update", accountNo, messageid, stanzaid);
+            DDLogWarn(@"Message(%@) %@ with stanzaid %@ already existing, ignoring history update: %@", accountNo, messageid, stanzaid, message);
             return (NSNumber*)nil;
         }
     }];
@@ -1485,12 +1501,29 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSNumber*) accountNo
+-(NSNumber*) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
-        return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE messageid=? AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0)) AND M.account_id=?;" andArguments:@[messageid, from, from, accountNo]];
+        return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id WHERE messageid=? AND M.account_id=? AND (\
+            (B.Muc=0 AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0))) OR \
+            (\
+                B.Muc=1 AND M.buddy_name=? AND M.actual_from=? AND (\
+                    M.participant_jid=? OR M.participant_jid IS NULL \
+                ) AND ( \
+                    (M.actual_from=B.muc_nick AND M.inbound=0) OR \
+                    (M.actual_from!=B.muc_nick AND M.inbound=1) \
+                ) \
+            ) \
+        );" andArguments:@[messageid, accountNo, from, from, from, nilWrapper(actualFrom), nilWrapper(participantJid)]];
     }];
 }
+
+/*
+CF6DE818-6036-4B2E-A228-717303D1E9FF
+bififufuva@conference.xmpp.eightysoft.de
+bififufuva@conference.xmpp.eightysoft.de
+43
+*/
 
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID
 {

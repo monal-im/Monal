@@ -87,6 +87,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(void) addUploadItemPreviewForItem:(NSURL* _Nullable) url provider:(NSItemProvider* _Nullable) provider andPayload:(NSMutableDictionary*) payload withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion;
 +(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void (^)(NSMutableDictionary* _Nullable)) completion;
 +(UIView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler;
++(UIImage*) imageWithNotificationBadgeForImage:(UIImage*) image;
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length;
 +(double) report_memory;
 +(UIColor*) generateColorFromJid:(NSString*) jid;

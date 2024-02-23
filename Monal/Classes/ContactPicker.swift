@@ -10,24 +10,6 @@ import SwiftUI
 import monalxmpp
 import OrderedCollections
 
-struct ContactEntry: View { // TODO move
-    let contact : MLContact
-
-    var body:some View {
-        ZStack(alignment: .topLeading) {
-            HStack(alignment: .center) {
-                Image(uiImage: contact.avatar)
-                    .resizable()
-                    .frame(width: 40, height: 40, alignment: .center)
-                VStack(alignment: .leading) {
-                    Text(contact.contactDisplayName as String)
-                    Text(contact.contactJid as String).font(.footnote).opacity(0.6)
-                }
-            }
-        }
-    }
-}
-
 struct ContactPickerEntry: View {
     let contact : MLContact
     let isPicked: Bool
@@ -57,8 +39,11 @@ struct ContactPicker: View {
     @Environment(\.presentationMode) private var presentationMode
 
     let contacts : [MLContact]
+    let account : xmpp
     @Binding var selectedContacts : OrderedSet<MLContact> // already selected when going into the view
     @State var searchFieldInput = ""
+    
+    @State var isEditingSearchInput: Bool = false
 
     func matchesSearch(contact : MLContact) -> Bool {
         // TODO better lookup
@@ -77,7 +62,8 @@ struct ContactPicker: View {
         } else {
             List {
                 Section {
-                    TextField(NSLocalizedString("Search contacts", comment: "placeholder in contact picker"), text: $searchFieldInput)
+                    TextField(NSLocalizedString("Search contacts", comment: "placeholder in contact picker"), text: $searchFieldInput, onEditingChanged: { isEditingSearchInput = $0 })
+                        .addClearButton(isEditing: isEditingSearchInput, text:$searchFieldInput)
                 }
                 ForEach(Array(contacts.enumerated()), id: \.element) { idx, contact in
                     if matchesSearch(contact: contact) {
@@ -106,8 +92,9 @@ struct ContactPicker: View {
         }
     }
 
-    init(selectedContacts: Binding<OrderedSet<MLContact>>) {
+    init(account: xmpp, selectedContacts: Binding<OrderedSet<MLContact>>) {
+        self.account = account
         self._selectedContacts = selectedContacts
-        self.contacts = DataLayer.sharedInstance().contactList() as! [MLContact]
+        self.contacts = DataLayer.sharedInstance().possibleGroupMembers(forAccount: account.accountNo)
     }
 }

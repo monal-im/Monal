@@ -108,14 +108,10 @@
     addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
     [addContact setAction:@selector(openAddContacts:)];
 
-#ifdef IS_ALPHA
     UIBarButtonItem* createGroup = [[UIBarButtonItem alloc] init];
         createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
         [createGroup setAction:@selector(openCreateGroup:)];
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], createGroup, nil];
-#else
-    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [UIBarButtonItem new], nil];
-#endif
 
     [self configureContactRequestsImage];
     
@@ -231,7 +227,7 @@
 
 -(void) loadContactsWithFilter:(NSString*) filter
 {
-    NSMutableArray* contacts;
+    NSArray<MLContact*>* contacts;
     if(filter && [filter length] > 0)
         self.contacts = [[DataLayer sharedInstance] searchContactsWithString:filter];
     else

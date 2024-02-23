@@ -41,11 +41,12 @@
 @property (weak, nonatomic) IBOutlet UICollectionView* uploadMenuView;
 
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
-@property (nonatomic, strong) IBOutlet UIView* navBarContainerView;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* tableviewBottom;
-@property (nonatomic, strong) IBOutlet UILabel* navBarContactJid;
-@property (nonatomic, strong) IBOutlet UILabel* navBarLastInteraction;
+@property (nonatomic, strong) UILabel* navBarContactJid;
+@property (nonatomic, strong) UILabel* navBarLastInteraction;
 @property (nonatomic, strong) IBOutlet UIImageView* navBarIcon;
+@property (nonatomic, strong) UIBarButtonItem* customHeader;
+
 @property (weak, nonatomic) IBOutlet UIBarButtonItem* navBarEncryptToggleButton;
 
 @property (nonatomic, weak) IBOutlet UIImageView* backgroundImage;

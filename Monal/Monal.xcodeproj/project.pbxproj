@@ -170,6 +170,7 @@
 		C1049189261301530054AC9E /* MonalXMPPUnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */; };
 		C104918B261301530054AC9E /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049198261301710054AC9E /* MLCryptoTest.swift */; };
+		C114D13D2B15B903000FB99F /* ContactEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C114D13C2B15B903000FB99F /* ContactEntry.swift */; };
 		C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D88BB76295BB6DC00FB30BA /* CreateGroupMenu.swift */; };
 		C117F7E22B0863B3001F2BC6 /* ContactPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D631822294BAB1D00026BE7 /* ContactPicker.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
@@ -186,6 +187,7 @@
 		C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C176F1EB2AF11C31002034E5 /* UserNotifications.framework */; };
 		C1850EB825F38A2D003D506A /* MonalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1850EB725F38A2D003D506A /* MonalUITests.swift */; };
 		C1850EC625F3C5EB003D506A /* TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1850EC525F3C5EB003D506A /* TestHelper.swift */; };
+		C18967C72B81F61B0073C7C5 /* ChannelMemberList.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18967C62B81F61B0073C7C5 /* ChannelMemberList.swift */; };
 		C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */ = {isa = PBXBuildFile; fileRef = C18E7578245E8AE900AE8FB7 /* MLPipe.h */; };
 		C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = C18E7579245E8AE900AE8FB7 /* MLPipe.m */; };
 		C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1943A4B25309A9D0036172F /* MLReloadCell.m */; };
@@ -614,6 +616,7 @@
 		C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonalXMPPUnitTests.swift; sourceTree = "<group>"; };
 		C104918A261301530054AC9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C1049198261301710054AC9E /* MLCryptoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCryptoTest.swift; sourceTree = "<group>"; };
+		C114D13C2B15B903000FB99F /* ContactEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactEntry.swift; sourceTree = "<group>"; };
 		C12436122434AB5D00B8F074 /* MLAttributedLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAttributedLabel.h; sourceTree = "<group>"; };
 		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
 		C132EA9426C92DD900BB9A67 /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = external/pa.lproj/Main.strings; sourceTree = "<group>"; };
@@ -654,6 +657,7 @@
 		C1850EB725F38A2D003D506A /* MonalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonalUITests.swift; sourceTree = "<group>"; };
 		C1850EB925F38A2D003D506A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C1850EC525F3C5EB003D506A /* TestHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHelper.swift; sourceTree = "<group>"; };
+		C18967C62B81F61B0073C7C5 /* ChannelMemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelMemberList.swift; sourceTree = "<group>"; };
 		C18E7578245E8AE900AE8FB7 /* MLPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPipe.h; sourceTree = "<group>"; };
 		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
 		C1943A4A25309A9D0036172F /* MLReloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReloadCell.h; sourceTree = "<group>"; };
@@ -1061,6 +1065,7 @@
 				3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */,
 				846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */,
 				841898AB2957DBAC00FEC77D /* RichAlert.swift */,
+				C114D13C2B15B903000FB99F /* ContactEntry.swift */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -1095,6 +1100,7 @@
 				3D65B78C27234B74005A30F4 /* ContactDetails.swift */,
 				C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */,
 				3D5A91412842B4AE008CE57E /* MemberList.swift */,
+				C18967C62B81F61B0073C7C5 /* ChannelMemberList.swift */,
 			);
 			name = "Contact Details";
 			sourceTree = "<group>";
@@ -2021,6 +2027,8 @@
 				848717F3295ED64600B8D288 /* MLCall.m in Sources */,
 				26D89F061A890672009B147C /* MLSwitchCell.m in Sources */,
 				C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */,
+				C18967C72B81F61B0073C7C5 /* ChannelMemberList.swift in Sources */,
+				C114D13D2B15B903000FB99F /* ContactEntry.swift in Sources */,
 				841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */,
 				3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */,
 				C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */,
@@ -2622,7 +2630,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.1.1;
+				MARKETING_VERSION = 6.2.0;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
@@ -2955,7 +2963,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.1.1;
+				MARKETING_VERSION = 6.2.0;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
@@ -3106,7 +3114,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.1.1;
+				MARKETING_VERSION = 6.2.0;
 				ONLY_ACTIVE_ARCH = YES;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -3366,7 +3374,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.1.1;
+				MARKETING_VERSION = 6.2.0;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
@@ -3690,7 +3698,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.1.1;
+				MARKETING_VERSION = 6.2.0;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = IS_QUICKSY;
@@ -4066,7 +4074,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = NO;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.1.1;
+				MARKETING_VERSION = 6.2.0;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;

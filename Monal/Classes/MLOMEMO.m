@@ -5,6 +5,7 @@
 //  Created by Friedrich Altheide on 21.06.20.
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
+#import <UserNotifications/UserNotifications.h>
 #import <stdlib.h>
 
 #import "MLOMEMO.h"
@@ -366,9 +367,7 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
         
         if(publishedDevices)
         {
-            NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"{eu.siacs.conversations.axolotl}list/device@id|uint"];
-            NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
-
+            NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:[publishedDevices find:@"{eu.siacs.conversations.axolotl}list/device@id|uint"]];
             [self processOMEMODevices:deviceSet from:jid];
         }
         
@@ -382,7 +381,7 @@ $$
 {
     DDLogVerbose(@"Processing omemo devices from %@: %@", source, receivedDevices);
 
-    NSMutableSet<NSNumber*>* existingDevices = [NSMutableSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:source]];
+    NSMutableSet<NSNumber*>* existingDevices = [[self knownDevicesForAddressName:source] mutableCopy];
     // ensure that we refetch bundles of devices with broken bundles again after some time
     NSSet<NSNumber*>* existingDevicesReqPendingFetch = [NSSet setWithArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:source]];
     [existingDevices minusSet:existingDevicesReqPendingFetch];
@@ -436,23 +435,30 @@ $$
 -(void) handleOwnDevicelistUpdate:(NSSet<NSNumber*>*) receivedDevices
 {
     //check for new deviceids not previously known, but only if the devicelist is not empty
-    NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
-    [newDevices minusSet:self.ownDeviceList];
-    for(NSNumber* device in newDevices)
-        if([device unsignedIntValue] != self.monalSignalStore.deviceid)
-        {
-            DDLogWarn(@"Got new deviceid %@ for own account %@", device, self.account.connectionProperties.identity.jid);
-            UNMutableNotificationContent* content = [UNMutableNotificationContent new];
-            content.title = NSLocalizedString(@"New omemo device", @"");;
-            content.subtitle = self.account.connectionProperties.identity.jid;
-            content.body = [NSString stringWithFormat:NSLocalizedString(@"Detected a new omemo device on your account: %@", @""), device];
-            content.sound = [UNNotificationSound defaultSound];
-            content.categoryIdentifier = @"simple";
-            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"newOwnOmemoDevice::%@::%@", self.account.connectionProperties.identity.jid, device] content:content trigger:nil];
-            NSError* error = [HelperTools postUserNotificationRequest:request];
-            if(error)
-                DDLogError(@"Error posting new deviceid notification: %@", error);
-        }
+    if([self.ownDeviceList count] > 0)
+    {
+        NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
+        [newDevices minusSet:self.ownDeviceList];
+        //don't alert for devices with broken bundles
+        NSSet<NSNumber*>* existingDevicesReqPendingFetch = [NSSet setWithArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:self.account.connectionProperties.identity.jid]];
+        [newDevices minusSet:existingDevicesReqPendingFetch];
+        //alert for all devices now still listed in newDevices
+        for(NSNumber* device in newDevices)
+            if([device unsignedIntValue] != self.monalSignalStore.deviceid)
+            {
+                DDLogWarn(@"Got new deviceid %@ for own account %@", device, self.account.connectionProperties.identity.jid);
+                UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+                content.title = NSLocalizedString(@"New omemo device", @"");;
+                content.subtitle = self.account.connectionProperties.identity.jid;
+                content.body = [NSString stringWithFormat:NSLocalizedString(@"Detected a new omemo device on your account: %@", @""), device];
+                content.sound = [UNNotificationSound defaultSound];
+                content.categoryIdentifier = @"simple";
+                UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"newOwnOmemoDevice::%@::%@", self.account.connectionProperties.identity.jid, device] content:content trigger:nil];
+                NSError* error = [HelperTools postUserNotificationRequest:request];
+                if(error)
+                    DDLogError(@"Error posting new deviceid notification: %@", error);
+            }
+    }
     
     //update own devicelist (this can be an empty list, if the list on our server is empty)
     self.ownDeviceList = [receivedDevices mutableCopy];
@@ -954,7 +960,7 @@ $$
     }
 
     //check if we found omemo keys of at least one of the recipients or more than 1 own device, otherwise don't encrypt anything
-    NSSet<NSNumber*>* myDevices = [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:self.account.connectionProperties.identity.jid]];
+    NSSet<NSNumber*>* myDevices = [self knownDevicesForAddressName:self.account.connectionProperties.identity.jid];
     if(contactDeviceMap.count > 0 || myDevices.count > 1)
     {
         //add encryption for all of our own devices to contactDeviceMap

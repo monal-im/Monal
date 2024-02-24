@@ -5,7 +5,6 @@
 //  Created by Friedrich Altheide on 21.06.20.
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
-#import <UserNotifications/UserNotifications.h>
 #import <stdlib.h>
 
 #import "MLOMEMO.h"
@@ -499,18 +498,6 @@ $$
         return;
     }
     
-    NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
-        @"accountNo": self.account.accountNo,
-        @"completed": @(self.closedBundleFetchCnt),
-        @"all": @(self.openBundleFetchCnt + self.closedBundleFetchCnt)
-    }];
-    [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleBundleFetchResult, handleBundleFetchInvalidation, $ID(jid), $ID(rid, deviceid))];
-    
-    if(self.state.openBundleFetches[jid] == nil)
-        self.state.openBundleFetches[jid] = [NSMutableSet new];
-    [self.state.openBundleFetches[jid] addObject:deviceid];
-    
     //update bundle fetch status
     self.openBundleFetchCnt++;
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
@@ -518,6 +505,14 @@ $$
         @"completed": @(self.closedBundleFetchCnt),
         @"all": @(self.openBundleFetchCnt + self.closedBundleFetchCnt)
     }];
+    
+    NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
+    [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleBundleFetchResult, handleBundleFetchInvalidation, $ID(jid), $ID(rid, deviceid))];
+    
+    if(self.state.openBundleFetches[jid] == nil)
+        self.state.openBundleFetches[jid] = [NSMutableSet new];
+    [self.state.openBundleFetches[jid] addObject:deviceid];
+    
 }
 
 //don't mark any devices as deleted in this invalidation handler (like we do for an error in the normal handler below),
@@ -607,7 +602,16 @@ $$
 -(void) decrementBundleFetchCount
 {
     //use catchupDone for better UX on first login
-    if(self.openBundleFetchCnt > 1 || !self.state.catchupDone)
+    if(self.openBundleFetchCnt == 0 && self.state.catchupDone)
+    {
+        //update bundle fetch status (e.g. complete)
+        self.openBundleFetchCnt = 0;
+        self.closedBundleFetchCnt = 0;
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{
+            @"accountNo": self.account.accountNo,
+        }];
+    }
+    else
     {
         //update bundle fetch status (e.g. pending)
         self.openBundleFetchCnt--;
@@ -616,15 +620,6 @@ $$
             @"accountNo": self.account.accountNo,
             @"completed": @(self.closedBundleFetchCnt),
             @"all": @(self.openBundleFetchCnt + self.closedBundleFetchCnt),
-        }];
-    }
-    else
-    {
-        //update bundle fetch status (e.g. complete)
-        self.openBundleFetchCnt = 0;
-        self.closedBundleFetchCnt = 0;
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{
-            @"accountNo": self.account.accountNo,
         }];
     }
 }

@@ -42,10 +42,6 @@ struct ImageViewer: View {
     init(delegate: SheetDismisserProtocol, info:[String:AnyObject]) throws {
         self.delegate = delegate
         self.info = info
-        if #available(iOS 16, *) {
-            let mimeType = UTType(exportedAs:info["mimeType"] as! String, conformingTo:.data)
-            DDLogError("mimeType = \(String(describing:mimeType))")
-        }
     }
     
 //     var body: some View {
@@ -56,11 +52,11 @@ struct ImageViewer: View {
 //     }
     
     var body: some View {
-        let image = UIImage(contentsOfFile:info["cacheFile"] as! String)!
-        
         ZStack(alignment: .top) {
             Color.background
                 .edgesIgnoringSafeArea(.all)
+            
+            let image = UIImage(contentsOfFile:info["cacheFile"] as! String)!
             
             VStack {
                 ZoomableContainer(maxScale:8.0, doubleTapScale:4.0) {

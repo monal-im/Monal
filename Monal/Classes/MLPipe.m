@@ -10,10 +10,11 @@
 #import "HelperTools.h"
 
 #define kPipeBufferSize 4096
-static uint8_t _staticOutputBuffer[kPipeBufferSize+1];      //+1 for '\0' needed for logging the received raw bytes
 
 @interface MLPipe()
 {
+    uint8_t _staticOutputBuffer[kPipeBufferSize+1];      //+1 for '\0' needed for logging the received raw bytes
+    
     //buffer for writes to the output stream that can not be completed
     uint8_t* _outputBuffer;
     size_t _outputBufferByteCount;
@@ -172,7 +173,8 @@ static uint8_t _staticOutputBuffer[kPipeBufferSize+1];      //+1 for '\0' needed
         //try to send remaining buffered data first
         if(_outputBufferByteCount > 0)
         {
-            DDLogDebug(@"trying to send buffered data: %lu bytes", (unsigned long)_outputBufferByteCount);
+            _outputBuffer[_outputBufferByteCount] = '\0';      //null termination for log output of raw string
+            DDLogDebug(@"trying to send buffered data(%lu): %s", (unsigned long)_outputBufferByteCount, _outputBuffer);
             NSInteger writtenLen = [_output write:_outputBuffer maxLength:_outputBufferByteCount];
             if(writtenLen > 0)
             {
@@ -233,7 +235,7 @@ static uint8_t _staticOutputBuffer[kPipeBufferSize+1];      //+1 for '\0' needed
             else
                 DDLogDebug(@"pipe read %ld <= 0 bytes", (long)readLen);
         } while(readLen > 0 && [_input hasBytesAvailable] && [_output hasSpaceAvailable]);
-        //DDLogVerbose(@"pipe processing done");
+        DDLogVerbose(@"pipe processing done");
     }
 }
 

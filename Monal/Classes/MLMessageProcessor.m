@@ -422,6 +422,13 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
+    //ignore encrypted messages coming from our own device id (most probably a muc reflection)
+    BOOL sentByOwnOmemoDevice = NO;
+#ifndef DISABLE_OMEMO
+    if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"])
+        sentByOwnOmemoDevice = ((NSNumber*)[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"]).unsignedIntValue == [account.omemo getDeviceId].unsignedIntValue;
+#endif
+    
     //handle message retraction (XEP-0424)
     if([messageNode check:@"{urn:xmpp:fasten:0}apply-to/{urn:xmpp:message-retract:0}retract"])
     {
@@ -479,7 +486,8 @@ static NSMutableDictionary* _typingNotifications;
             @"contact": [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo],
         }];
     }
-    else if([messageNode check:@"body#"] || decrypted)
+    //ignore encrypted body messages coming from our own device id (most probably a muc reflection)
+    else if(([messageNode check:@"body#"] || decrypted) && !sentByOwnOmemoDevice)
     {
         BOOL unread = YES;
         BOOL showAlert = YES;

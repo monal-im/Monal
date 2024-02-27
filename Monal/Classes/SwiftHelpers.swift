@@ -126,6 +126,11 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable 
     public static func == (lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
         return lhs.obj.isEqual(rhs.obj)
     }
+    
+    // see https://stackoverflow.com/a/33320737
+    public static func === (lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
+        return lhs.obj === rhs.obj
+    }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.obj.hashValue)

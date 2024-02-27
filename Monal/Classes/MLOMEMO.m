@@ -439,9 +439,6 @@ $$
     {
         NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
         [newDevices minusSet:self.ownDeviceList];
-        //don't alert for devices with broken bundles
-        NSSet<NSNumber*>* existingDevicesReqPendingFetch = [NSSet setWithArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:self.account.connectionProperties.identity.jid]];
-        [newDevices minusSet:existingDevicesReqPendingFetch];
         //alert for all devices now still listed in newDevices
         for(NSNumber* device in newDevices)
             if([device unsignedIntValue] != self.monalSignalStore.deviceid)

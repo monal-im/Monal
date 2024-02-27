@@ -478,7 +478,7 @@ static NSDateFormatter* dbFormatter;
         {
             NSMutableDictionary* contact = [results[0] mutableCopy];
             //correctly extract NSDate object or 1970, if last interaction is zero
-            contact[@"lastInteraction"] = [self lastInteractionOfJid:username forAccountNo:accountNo];
+            contact[@"lastInteraction"] = nilWrapper([self lastInteractionOfJid:username forAccountNo:accountNo]);
             //if we have this muc in our favorites table, this muc is "subscribed"
             if([self.db executeScalar:@"SELECT room FROM muc_favorites WHERE room=? AND account_id=?;" andArguments:@[username, accountNo]] != nil)
                 contact[@"subscription"] = @"both";

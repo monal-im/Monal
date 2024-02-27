@@ -745,7 +745,7 @@ NSString* const kAskSubscribe = @"subscribe";
     contact.isEncrypted = [[dic objectForKey:@"encrypt"] boolValue];
     contact.isMuted = [[dic objectForKey:@"muted"] boolValue];
     // initial value comes from db, all other values get updated by our kMonalLastInteractionUpdatedNotice handler
-    contact.lastInteractionTime = [dic objectForKey:@"lastInteraction"];        //no default needed, already done in DataLayer
+    contact.lastInteractionTime = nilExtractor([dic objectForKey:@"lastInteraction"]);        //no default needed, already done in DataLayer
     contact->_avatar = nil;
     return contact;
 }

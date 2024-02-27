@@ -1,5 +1,5 @@
 //
-//  EditGroupDescription.swift
+//  EditGroupSubject.swift
 //  Monal
 //
 //  Created by Friedrich Altheide on 27.02.24.
@@ -19,7 +19,7 @@ extension View {
 }
 
 @available(iOS 15.0, *)
-struct EditGroupDescription: View {
+struct EditGroupSubject: View {
     @ObservedObject var contact: ObservableKVOWrapper<MLContact>
     private let account: xmpp?
 

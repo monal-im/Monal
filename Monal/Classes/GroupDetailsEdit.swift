@@ -59,7 +59,7 @@ struct GroupDetailsEdit: View {
                         }
                     }
                     .sheet(isPresented: $showingSheet) {
-                        LazyClosureView(EditGroupDescription(contact: contact))
+                        LazyClosureView(EditGroupSubject(contact: contact))
                     }
                 }
             }

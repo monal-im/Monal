@@ -202,7 +202,7 @@
 		C1D7D7B0283FB4E700401389 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		C1E1EC7B286A025F0097EC74 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = C1E1EC7A286A025F0097EC74 /* SwiftSoup */; };
 		C1E4654824EE517000CA5AAF /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
-		C1E8A7F72B8E47C300760220 /* EditGroupDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E8A7F62B8E47C300760220 /* EditGroupDescription.swift */; };
+		C1E8A7F72B8E47C300760220 /* EditGroupSubject.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E8A7F62B8E47C300760220 /* EditGroupSubject.swift */; };
 		C1F5C7A92775DA000001F295 /* MLContactSoftwareVersionInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */; };
 		C1F5C7AA2775DA000001F295 /* MLContactSoftwareVersionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */; };
 		C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7AB2777621B0001F295 /* ContactResources.swift */; };
@@ -741,7 +741,7 @@
 		C1E856A728DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/Settings.strings; sourceTree = "<group>"; };
 		C1E856A828DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/iosShare.strings; sourceTree = "<group>"; };
 		C1E856A928DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/Localizable.strings; sourceTree = "<group>"; };
-		C1E8A7F62B8E47C300760220 /* EditGroupDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditGroupDescription.swift; sourceTree = "<group>"; };
+		C1E8A7F62B8E47C300760220 /* EditGroupSubject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditGroupSubject.swift; sourceTree = "<group>"; };
 		C1F0AD15288BCE6F00BB0182 /* Alpha.Monal.ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Alpha.Monal.ios.entitlements; sourceTree = "<group>"; };
 		C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactSoftwareVersionInfo.h; sourceTree = "<group>"; };
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
@@ -1109,7 +1109,7 @@
 				C18967C62B81F61B0073C7C5 /* ChannelMemberList.swift */,
 				C153825E2B89BBE600EA83EC /* GroupDetailsEdit.swift */,
 				C15382612B89C38300EA83EC /* EditGroupName.swift */,
-				C1E8A7F62B8E47C300760220 /* EditGroupDescription.swift */,
+				C1E8A7F62B8E47C300760220 /* EditGroupSubject.swift */,
 			);
 			name = "Contact Details";
 			sourceTree = "<group>";
@@ -2050,7 +2050,7 @@
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */,
 				C15382622B89C38300EA83EC /* EditGroupName.swift in Sources */,
-				C1E8A7F72B8E47C300760220 /* EditGroupDescription.swift in Sources */,
+				C1E8A7F72B8E47C300760220 /* EditGroupSubject.swift in Sources */,
 				263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */,
 				3D65B78D27234B74005A30F4 /* ContactDetails.swift in Sources */,
 				E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */,

@@ -270,24 +270,23 @@ static NSMutableSet* _smacksWarningDisplayed;
 {
     MLContact* removedContact = [notification.userInfo objectForKey:@"contact"];
     if(removedContact == nil)
-    {
         unreachable();
-    }
     
-    //update red dot
     dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogInfo(@"Contact removed, refreshing active chats...");
+        
+        //update red dot
         [self configureComposeButton];
-    });
-    
-    // ignore all removals that aren't in foreground
-    if([removedContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact] == NO)
-        return;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        DDLogInfo(@"Contact removed, closing chat view...");
+        
         // remove contact from activechats table
         [self refreshDisplay];
-        // open placeholder
-        [self presentChatWithContact:nil];
+        
+        // open placeholder if the removed contact was "in foreground"
+        if([removedContact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
+        {
+            DDLogInfo(@"Contact removed, closing chat view...");
+            [self presentChatWithContact:nil];
+        }
     });
 }
 

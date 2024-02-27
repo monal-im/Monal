@@ -348,6 +348,22 @@ struct ContactDetails: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationBarTitle(contact.contactDisplayName as String, displayMode: .inline)
+        .navigationBarGroupEditButton(contact: contact)
+    }
+}
+
+extension View {
+    func navigationBarGroupEditButton(contact: ObservableKVOWrapper<MLContact>) -> some View {
+        if contact.isGroup {
+            return AnyView(self.toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: LazyClosureView(GroupDetailsEdit(contact: contact))) {
+                        Text("Edit")
+                    }
+                }
+            })
+        }
+        return AnyView(self)
     }
 }
 

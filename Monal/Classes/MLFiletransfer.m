@@ -845,7 +845,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
     {
         DDLogInfo(@"Encrypting file data before upload");
         encryptedPayload = [AESGcm encrypt:fileData keySize:32];
-        if(encryptedPayload)
+        if(encryptedPayload && encryptedPayload.body != nil)
         {
             NSMutableData* encryptedData = [encryptedPayload.body mutableCopy];
             [encryptedData appendData:encryptedPayload.authTag];

@@ -7,18 +7,22 @@
 //
 
 import SwiftUI
+import _PhotosUI_SwiftUI
 
 struct GroupDetailsEdit: View {
     @ObservedObject var contact: ObservableKVOWrapper<MLContact>
     private let account: xmpp?
 
     @State private var showingSheet = false
+    @State private var inputImage: UIImage?
+    @State private var showingImagePicker = false
 
     init(contact: ObservableKVOWrapper<MLContact>) {
         MLAssert(contact.isGroup)
 
         self.contact = contact
         self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)! as xmpp
+        _inputImage = State(initialValue: contact.avatar)
     }
 
     var body: some View {
@@ -32,7 +36,13 @@ struct GroupDetailsEdit: View {
                         .accessibilityLabel((contact.obj.mucType == "group") ? "Group Avatar" : "Channel Avatar")
                         .frame(width: 150, height: 150, alignment: .center)
                         .shadow(radius: 7)
+                        .onTapGesture {
+                            showingImagePicker = true
+                        }
                     Spacer()
+                }
+                .sheet(isPresented:$showingImagePicker) {
+                    ImagePicker(image:$inputImage)
                 }
             }
             Section {
@@ -65,6 +75,9 @@ struct GroupDetailsEdit: View {
             }
         }
         .navigationTitle("Edit group")
+        .onChange(of:inputImage) { _ in
+            self.account!.mucProcessor.publishAvatar(inputImage, forMuc: contact.contactJid)
+        }
     }
 }
 

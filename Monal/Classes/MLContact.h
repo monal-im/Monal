@@ -111,6 +111,8 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(void) clearHistory;
 -(void) removeShareInteractions;
 
+-(NSUInteger) hash;
+
 @end
 
 NS_ASSUME_NONNULL_END

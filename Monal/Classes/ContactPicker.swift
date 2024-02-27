@@ -11,7 +11,7 @@ import monalxmpp
 import OrderedCollections
 
 struct ContactPickerEntry: View {
-    let contact : MLContact
+    let contact : ObservableKVOWrapper<MLContact>
     let isPicked: Bool
 
     var body:some View {
@@ -38,20 +38,31 @@ struct ContactPickerEntry: View {
 struct ContactPicker: View {
     @Environment(\.presentationMode) private var presentationMode
 
-    let contacts : [MLContact]
-    let account : xmpp
-    @Binding var selectedContacts : OrderedSet<MLContact> // already selected when going into the view
+    @State var contacts: [ObservableKVOWrapper<MLContact>]
+    let account: xmpp
+    @Binding var selectedContacts : OrderedSet<ObservableKVOWrapper<MLContact>> // already selected when going into the view
     @State var searchFieldInput = ""
-    
+
     @State var isEditingSearchInput: Bool = false
 
-    func matchesSearch(contact : MLContact) -> Bool {
+    init(account: xmpp, selectedContacts: Binding<OrderedSet<ObservableKVOWrapper<MLContact>>>) {
+        self.account = account
+        self._selectedContacts = selectedContacts
+
+        var contactsTmp: [ObservableKVOWrapper<MLContact>] = Array()
+        for contact in DataLayer.sharedInstance().possibleGroupMembers(forAccount: account.accountNo) {
+            contactsTmp.append(ObservableKVOWrapper(contact))
+        }
+        _contacts = State(wrappedValue: contactsTmp)
+    }
+
+    func matchesSearch(contact: ObservableKVOWrapper<MLContact>) -> Bool {
         // TODO better lookup
         if searchFieldInput.isEmpty == true {
             return true
         } else {
-            return contact.contactDisplayName.lowercased().contains(searchFieldInput.lowercased()) ||
-                contact.contactJid.contains(searchFieldInput.lowercased())
+            return (contact.contactDisplayName as String).lowercased().contains(searchFieldInput.lowercased()) ||
+                (contact.contactJid as String).contains(searchFieldInput.lowercased())
         }
     }
 
@@ -65,7 +76,7 @@ struct ContactPicker: View {
                     TextField(NSLocalizedString("Search contacts", comment: "placeholder in contact picker"), text: $searchFieldInput, onEditingChanged: { isEditingSearchInput = $0 })
                         .addClearButton(isEditing: isEditingSearchInput, text:$searchFieldInput)
                 }
-                ForEach(Array(contacts.enumerated()), id: \.element) { idx, contact in
+                ForEach(Array(contacts.enumerated()), id: \.element.obj.contactJid) { idx, contact in
                     if matchesSearch(contact: contact) {
                         let contactIsSelected = self.selectedContacts.contains(contact);
                         ContactPickerEntry(contact: contact, isPicked: contactIsSelected)
@@ -90,11 +101,5 @@ struct ContactPicker: View {
                 }
             }
         }
-    }
-
-    init(account: xmpp, selectedContacts: Binding<OrderedSet<MLContact>>) {
-        self.account = account
-        self._selectedContacts = selectedContacts
-        self.contacts = DataLayer.sharedInstance().possibleGroupMembers(forAccount: account.accountNo)
     }
 }

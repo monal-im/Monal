@@ -69,7 +69,7 @@ class KVOObserver: NSObject {
 }
 
 @dynamicMemberLookup
-public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
+public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable {
     public var obj: ObjType
     private var observedMembers: NSMutableSet = NSMutableSet()
     private var observers: [KVOObserver] = Array()
@@ -113,7 +113,7 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
             self.setWrapper(for:member, value:newValue as AnyObject?)
         }
     }
-    
+
     public subscript<T>(dynamicMember member: String) -> T {
         get {
             return self.getWrapper(for:member) as! T
@@ -121,6 +121,14 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject {
         set {
             self.setWrapper(for:member, value:newValue as AnyObject?)
         }
+    }
+
+    public static func == (lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
+        return lhs.obj.isEqual(rhs.obj)
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.obj.hashValue)
     }
 }
 

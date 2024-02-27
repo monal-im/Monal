@@ -18,7 +18,7 @@ struct MemberList: View {
     private var ownAffiliation: String = "none";
 
     @State private var openAccountSelection : Bool = false
-    @State private var contactsToAdd : OrderedSet<MLContact> = []
+    @State private var contactsToAdd : OrderedSet<ObservableKVOWrapper<MLContact>> = []
 
     @State private var showAlert = false
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))

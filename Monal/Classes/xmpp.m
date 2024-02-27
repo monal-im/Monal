@@ -114,6 +114,7 @@ NSString* const kStanza = @"stanza";
     BOOL _lastIdleState;
     NSMutableDictionary* _mamPageArrays;
     NSString* _internalID;
+    NSString* _logtag;
     NSMutableDictionary* _inCatchup;
     
     //registration related stuff
@@ -180,7 +181,8 @@ NSString* const kStanza = @"stanza";
     self = [super init];
     u_int32_t i = arc4random();
     _internalID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
-    DDLogVerbose(@"Created account %@ with id %@", accountNo, _internalID);
+    _logtag = [NSString stringWithFormat:@"[%@:%@]", accountNo, _internalID];
+    DDLogVerbose(@"Creating account %@ with id %@", accountNo, _internalID);
     self.accountNo = accountNo;
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     
@@ -557,12 +559,12 @@ NSString* const kStanza = @"stanza";
     if(self.connectionProperties.server.isDirectTLS == YES)
     {
         DDLogInfo(@"creating directTLS streams");
-        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:YES inputStream:&localIStream outputStream:&localOStream];
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:YES inputStream:&localIStream outputStream:&localOStream logtag:self->_logtag];
     }
     else
     {
         DDLogInfo(@"creating plaintext streams");
-        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:NO inputStream:&localIStream outputStream:&localOStream];
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:NO inputStream:&localIStream outputStream:&localOStream logtag:self->_logtag];
     }
     
     if(localOStream)
@@ -1242,16 +1244,16 @@ NSString* const kStanza = @"stanza";
     BOOL appex = [HelperTools isAppExtension];
     if(_xmlParser!=nil)
     {
-        DDLogInfo(@"resetting old xml parser");
+        DDLogInfo(@"%@: resetting old xml parser", self->_logtag);
         [_xmlParser setDelegate:nil];
         [_xmlParser abortParsing];
         [_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we aborted the parser right now)
     }
     if(!_baseParserDelegate)
     {
-        DDLogInfo(@"creating parser delegate");
+        DDLogInfo(@"%@: creating parser delegate", self->_logtag);
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
-            DDLogVerbose(@"Parse finished for new <%@> stanza...", parsedStanza.element);
+            DDLogVerbose(@"%@: Parse finished for new <%@> stanza...", self->_logtag, parsedStanza.element);
             
             //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
             //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
@@ -1267,16 +1269,16 @@ NSString* const kStanza = @"stanza";
                     break;
                 
                 double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
+                DDLogInfo(@"%@: Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
                 [NSThread sleepForTimeInterval:waittime];
                 wasSleeping = YES;
             }
             if(wasSleeping)
-                DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+                DDLogInfo(@"%@: Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
             
             if(self.accountState < kStateConnected)
             {
-                DDLogWarn(@"Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateConnected");
+                DDLogWarn(@"%@: Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateConnected", self->_logtag);
                 return;
             }
             
@@ -1348,7 +1350,7 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
-        DDLogInfo(@"resetting parser delegate");
+        DDLogInfo(@"%@: resetting parser delegate", self->_logtag);
         [_baseParserDelegate reset];
     }
     
@@ -1361,10 +1363,10 @@ NSString* const kStanza = @"stanza";
     [_xmlParser setDelegate:_baseParserDelegate];
     
     // do the stanza parsing in the low priority (=utility) global queue
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-        DDLogInfo(@"calling parse");
+    dispatch_async(dispatch_queue_create_with_target([NSString stringWithFormat:@"im.monal.xmlparser%@", self->_logtag].UTF8String, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)), ^{
+        DDLogInfo(@"%@: calling parse", self->_logtag);
         [self->_xmlParser parse];     //blocking operation
-        DDLogInfo(@"parse ended");
+        DDLogInfo(@"%@: parse ended", self->_logtag);
     });
 }
 

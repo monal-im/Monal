@@ -414,7 +414,7 @@
 
 @implementation MLStream
 
-+(void) connectWithSNIDomain:(NSString*) SNIDomain connectHost:(NSString*) host connectPort:(NSNumber*) port tls:(BOOL) tls inputStream:(NSInputStream* _Nullable * _Nonnull) inputStream  outputStream:(NSOutputStream* _Nullable * _Nonnull) outputStream
++(void) connectWithSNIDomain:(NSString*) SNIDomain connectHost:(NSString*) host connectPort:(NSNumber*) port tls:(BOOL) tls inputStream:(NSInputStream* _Nullable * _Nonnull) inputStream  outputStream:(NSOutputStream* _Nullable * _Nonnull) outputStream logtag:(id _Nullable) logtag
 {
     //create state
     volatile __block BOOL wasOpenOnce = NO;
@@ -463,9 +463,9 @@
         nw_protocol_definition_t starttls_framer_definition = nw_framer_create_definition([[[NSUUID UUID] UUIDString] UTF8String], NW_FRAMER_CREATE_FLAGS_DEFAULT, ^(nw_framer_t framer) {
             //we don't need any locking for our counter because all framers will be started in the same internal network queue
             int framerId = startupCounter++;
-            DDLogInfo(@"Framer(%d) %@ start called with wasOpenOnce=%@...", framerId, framer, bool2str(wasOpenOnce));
+            DDLogInfo(@"%@: Framer(%d) %@ start called with wasOpenOnce=%@...", logtag, framerId, framer, bool2str(wasOpenOnce));
             nw_framer_set_stop_handler(framer, (nw_framer_stop_handler_t)^(nw_framer_t _Nullable framer) {
-                DDLogInfo(@"Framer(%d) stop called: %@", framerId, framer);
+                DDLogInfo(@"%@, Framer(%d) stop called: %@", logtag, framerId, framer);
                 return YES;
             });
             
@@ -477,6 +477,7 @@
                 nw_framer_set_input_handler(framer, ^size_t(nw_framer_t framer) {
                     nw_framer_parse_input(framer, 1, BUFFER_SIZE, nil, ^size_t(uint8_t* buffer, size_t buffer_length, bool is_complete) {
                         MLAssert(NO, @"Unexpected incoming bytes in first framer!", (@{
+                            @"logtag": nilWrapper(logtag),
                             @"framer": framer,
                             @"buffer": [NSData dataWithBytes:buffer length:buffer_length],
                             @"buffer_length": @(buffer_length),
@@ -488,6 +489,7 @@
                 });
                 nw_framer_set_output_handler(framer, ^(nw_framer_t framer, nw_framer_message_t message, size_t message_length, bool is_complete) {
                     MLAssert(NO, @"Unexpected outgoing bytes in first framer!", (@{
+                        @"logtag": nilWrapper(logtag),
                         @"framer": framer,
                         @"message": message,
                         @"message_length": @(message_length),
@@ -522,7 +524,7 @@
             shared_state.framer = framer;
             return nw_framer_start_result_will_mark_ready;
         });
-        DDLogInfo(@"Not doing direct TLS: appending framer to protocol stack...");
+        DDLogInfo(@"%@: Not doing direct TLS: appending framer to protocol stack...", logtag);
         nw_protocol_stack_prepend_application_protocol(nw_parameters_copy_default_protocol_stack(parameters), nw_framer_create_options(starttls_framer_definition));
     }
     //needed to activate tcp fast open with apple's internal tls framer
@@ -531,7 +533,7 @@
     //create and configure connection object
     nw_endpoint_t endpoint = nw_endpoint_create_host([host cStringUsingEncoding:NSUTF8StringEncoding], [[port stringValue] cStringUsingEncoding:NSUTF8StringEncoding]);
     nw_connection_t connection = nw_connection_create(endpoint, parameters);
-    nw_connection_set_queue(connection, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0));
+    nw_connection_set_queue(connection, dispatch_queue_create_with_target([NSString stringWithFormat:@"im.monal.networking:%@", logtag].UTF8String, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)));
     
     //configure shared state
     shared_state.connection = connection;
@@ -543,7 +545,7 @@
             //connection was opened once (e.g. opening=YES) and closed later on (e.g. open=NO)
             if(wasOpenOnce && !shared_state.open)
             {
-                DDLogVerbose(@"ignoring call to nw_connection state_changed_handler, connection already closed: %@ --> %du, %@", self, state, error);
+                DDLogVerbose(@"%@: ignoring call to nw_connection state_changed_handler, connection already closed: %@ --> %du, %@", logtag, self, state, error);
                 return;
             }
         }
@@ -553,11 +555,11 @@
             //which seems to mean: if the network path changed (for example connectivity regained)
             //if this happens inside the connection timeout all is ok
             //if not, the connection will be cancelled already and everything will be ok, too
-            DDLogVerbose(@"got nw_connection_state_waiting and ignoring it, see comments in code...");
+            DDLogVerbose(@"%@: got nw_connection_state_waiting and ignoring it, see comments in code...", logtag);
         }
         else if(state == nw_connection_state_failed)
         {
-            DDLogError(@"Connection failed");
+            DDLogError(@"%@: Connection failed", logtag);
             NSError* st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(error));
             @synchronized(shared_state) {
                 shared_state.error = st_error;
@@ -567,7 +569,7 @@
         }
         else if(state == nw_connection_state_ready)
         {
-            DDLogInfo(@"Connection established, wasOpenOnce: %@", bool2str(wasOpenOnce));
+            DDLogInfo(@"%@: Connection established, wasOpenOnce: %@", bool2str(wasOpenOnce), logtag);
             if(!wasOpenOnce)
             {
                 wasOpenOnce = YES;
@@ -601,17 +603,17 @@
         else if(state == nw_connection_state_cancelled)
         {
             //ignore this (we use reference counting)
-            DDLogVerbose(@"ignoring call to nw_connection state_changed_handler with state nw_connection_state_cancelled: %@ (%@)", self, error);
+            DDLogVerbose(@"%@: ignoring call to nw_connection state_changed_handler with state nw_connection_state_cancelled: %@ (%@)", logtag, self, error);
         }
         else if(state == nw_connection_state_invalid)
         {
             //ignore all other states (preparing, invalid)
-            DDLogVerbose(@"ignoring call to nw_connection state_changed_handler with state nw_connection_state_invalid: %@ (%@)", self, error);
+            DDLogVerbose(@"%@: ignoring call to nw_connection state_changed_handler with state nw_connection_state_invalid: %@ (%@)", logtag, self, error);
         }
         else if(state == nw_connection_state_preparing)
         {
             //ignore all other states (preparing, invalid)
-            DDLogVerbose(@"ignoring call to nw_connection state_changed_handler with state nw_connection_state_preparing: %@ (%@)", self, error);
+            DDLogVerbose(@"%@: ignoring call to nw_connection state_changed_handler with state nw_connection_state_preparing: %@ (%@)", logtag, self, error);
         }
         else
             unreachable();

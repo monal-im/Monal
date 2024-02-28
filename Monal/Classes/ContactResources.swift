@@ -77,7 +77,7 @@ struct ContactResources: View {
                     let capsVer = DataLayer.sharedInstance().getVerForUser(self.contact.contactJid, andResource:resource, onAccountNo:self.contact.accountId)
                     Text("Caps hash: \(String(describing:capsVer))")
                     Divider()
-                    if let capsSet = DataLayer.sharedInstance().getCapsforVer(capsVer) as? Set<String> {
+                    if let capsSet = DataLayer.sharedInstance().getCapsforVer(capsVer, onAccountNo:contact.obj.accountId) as? Set<String> {
                         let caps = Array(capsSet)
                         VStack(alignment: .leading) {
                             ForEach(caps, id: \.self) { cap in

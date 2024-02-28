@@ -244,8 +244,6 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 -(void) createInvitationWithCompletion:(monal_id_block_t) completion;
 
--(void) markCapsQueryCompleteFor:(NSString*) ver;
-
 @end
 
 NS_ASSUME_NONNULL_END

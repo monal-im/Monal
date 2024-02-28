@@ -67,7 +67,7 @@ struct ContactResources: View {
                 }
             }
         }
-        .richAlert(isPresented:$showCaps, title:Text("XMPP Capabilities").foregroundColor(.black)) { resource in
+        .richAlert(isPresented:$showCaps, title:Text("XMPP Capabilities")) { resource in
             VStack(alignment: .leading) {
                 Text("The resource '\(resource)' has the following capabilities:")
                     .font(Font.body.weight(.semibold))
@@ -90,7 +90,7 @@ struct ContactResources: View {
                         }
                     }
                 }
-            }.foregroundColor(.black)
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalXmppUserSoftWareVersionRefresh")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let softwareInfo = notification.userInfo?["versionInfo"] as? MLContactSoftwareVersionInfo {

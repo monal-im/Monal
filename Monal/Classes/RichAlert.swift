@@ -65,6 +65,7 @@ struct RichAlertView<T, TitleContent, BodyContent, ButtonContent>: ViewModifier 
                     }
                     .frame(maxHeight: scrollViewContentSize.height)
                 }
+                .foregroundColor(.primary)
                 .padding([.top, .bottom], 13)
                 .frame(width: 320)
                 .background(Color.background)

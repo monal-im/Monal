@@ -254,6 +254,10 @@ static const int KEY_SIZE = 16;
                 [self queryOMEMOBundleFrom:jid andDevice:rid];
     }
     
+    //check bundle fetch status and inform ui if we are now catchupDone *and* all bundles are fetched
+    //(this method is only called by the catchupDone handler above or by the devicelist fetch triggered by the catchupDone handler)
+    [self checkBundleFetchCount];
+    
     DDLogVerbose(@"New state: %@", self.state);
 }
 
@@ -627,9 +631,8 @@ $$
     }
 }
 
--(void) decrementBundleFetchCount
+-(BOOL) checkBundleFetchCount
 {
-    //use catchupDone for better UX on first login
     if(self.openBundleFetchCnt == 0 && self.state.catchupDone)
     {
         //update bundle fetch status (e.g. complete)
@@ -638,8 +641,14 @@ $$
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{
             @"accountNo": self.account.accountNo,
         }];
+        return YES;
     }
-    else
+    return NO;
+}
+
+-(void) decrementBundleFetchCount
+{
+    if(![self checkBundleFetchCount])
     {
         //update bundle fetch status (e.g. pending)
         self.openBundleFetchCnt--;

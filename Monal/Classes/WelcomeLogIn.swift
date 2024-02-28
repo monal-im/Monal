@@ -27,6 +27,7 @@ struct WelcomeLogIn: View {
     @State private var errorObserverEnabled = false
     @State private var newAccountNo: NSNumber? = nil
     @State private var loginComplete = false
+    @State private var isLoadingOmemoBundles = false
     
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
     @ObservedObject private var overlay = LoadingOverlayState()
@@ -262,6 +263,7 @@ struct WelcomeLogIn: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalUpdateBundleFetchStatus")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if(notificationAccountNo.intValue == newAccountNo.intValue) {
+                    isLoadingOmemoBundles = true
                     DispatchQueue.main.async {
                         showLoadingOverlay(
                             overlay, 
@@ -272,10 +274,9 @@ struct WelcomeLogIn: View {
                 }
             }
         }
-        /*
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedOmemoBundleFetch")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
-                if(notificationAccountNo.intValue == newAccountNo.intValue) {
+                if(notificationAccountNo.intValue == newAccountNo.intValue && isLoadingOmemoBundles) {
                     DispatchQueue.main.async {
                         self.loginComplete = true
                         showSuccessAlert()
@@ -283,10 +284,9 @@ struct WelcomeLogIn: View {
                 }
             }
         }
-        */
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedCatchup")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
-                if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
+                if(xmppAccount.accountNo.intValue == newAccountNo.intValue && !isLoadingOmemoBundles) {
                     DispatchQueue.main.async {
                         self.loginComplete = true
                         showSuccessAlert()

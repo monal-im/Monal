@@ -866,6 +866,10 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
     if(encrypted)
         sendMimeType = @"application/octet-stream";
     
+    MLAssert(fileData != nil, @"fileData should never be nil!");
+    MLAssert(userFacingFilename != nil, @"userFacingFilename should never be nil!");
+    MLAssert(sendMimeType != nil, @"sendMimeType should never be nil!");
+    
     DDLogDebug(@"Requesting file upload slot for mimeType %@", sendMimeType);
     [account requestHTTPSlotWithParams:@{
         @"data":fileData,

@@ -471,9 +471,10 @@ void swizzle(Class c, SEL orig, SEL new)
     
     //every identifier has its own thread priority/qos class
     __block dispatch_queue_priority_t priority;
+    __block char* name;
     switch(identifier)
     {
-        case MLRunLoopIdentifierNetwork: priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND; break;
+        case MLRunLoopIdentifierNetwork: priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND; name = "im.monal.runloop.networking"; break;
         default: unreachable(@"unknown runloop identifier!");
     }
     
@@ -482,7 +483,7 @@ void swizzle(Class c, SEL orig, SEL new)
         {
             NSCondition* condition = [NSCondition new];
             [condition lock];
-            dispatch_async(dispatch_get_global_queue(priority, 0), ^{
+            dispatch_async(dispatch_queue_create_with_target(name, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(priority, 0)), ^{
                 //we don't need an @synchronized block around this because the @synchronized block of the outer thread
                 //waits until we signal our condition (e.g. no other thread can race with us)
                 NSRunLoop* localLoop = runloops[@(identifier)] = [NSRunLoop currentRunLoop];
@@ -1558,7 +1559,7 @@ void swizzle(Class c, SEL orig, SEL new)
 #endif
     if(log_activity)
     {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        dispatch_async(dispatch_queue_create_with_target("im.monal.activityLog", DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)), ^{
             unsigned long counter = 1;
             while(counter++)
             {

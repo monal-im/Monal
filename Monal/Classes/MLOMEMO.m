@@ -195,49 +195,66 @@ static const int KEY_SIZE = 16;
         self.state.catchupDone = YES;
         
         //if we did not see our own devicelist until now that means the server does not have any devicelist stored
-        //(e.g. we are the first omemo capable client)
-        //--> publish devicelist by faking an empty server-sent devicelist
-        //self.state.hasSeenDeviceList will be set to YES once the published devicelist gets returned to us by a pubsub headline echo
-        //(e.g. once the devicelist was safely stored on our server)
+        //OR: our own devicelist could have been delayed by the server having to do a disco query to us to discover our +notify
+        //for the devicelist (e.g. either we are the first omemo capable client, or the devicelist has just been delayed)
+        //--> forcefully fetch devicelist to be sure (but don't subscribe, we are +notify and have a presence subscription to our own account)
+        //If our device is not listed in this devicelist node, that fetch and the headline push eventually coming in
+        //may both trigger a devicelist publish, but that should not do any harm
         if(self.state.hasSeenDeviceList == NO)
         {
-            DDLogInfo(@"We did not see any devicelist during catchup since last non-smacks-resume reconnect, adding our device to an otherwise empty devicelist and publishing this list...");
-            [self processOMEMODevices:[NSSet<NSNumber*> new] from:self.account.connectionProperties.identity.jid];
+            DDLogInfo(@"We did not see any devicelist during catchup since last non-smacks-resume reconnect, forcefully fetching own devicelist...");
+            [self queryOMEMODevices:self.account.connectionProperties.identity.jid withSubscribe:NO];
         }
         else
         {
-            //generate new prekeys if needed and publish them
-            [self generateNewKeysIfNeeded];
+            [self generateNewKeysIfNeeded];     //generate new prekeys if needed and publish them
+            [self repairQueuedSessions];
         }
-        
-        //send all needed key transport elements now (added by incoming catchup messages or bundle fetches)
-        //the queue is needed to make sure we won't send multiple key transport messages to a single contact/device
-        //only because we received multiple messages from this user in the catchup or fetched multiple bundles
-        //queuedKeyTransportElements will survive any smacks or non-smacks resumptions and eventually trigger key transport elements
-        //once the catchup could be finished (could take several smacks resumptions to finish the whole (mam) catchup)
-        //has to be synchronized because [xmpp sendMessage:] could be called from main thread
-        @synchronized(self.state.queuedKeyTransportElements) {
-            DDLogDebug(@"Replaying queuedKeyTransportElements for all jids: %@", self.state.queuedKeyTransportElements);
-            for(NSString* jid in [self.state.queuedKeyTransportElements allKeys])
-                [self retriggerKeyTransportElementsForJid:jid];
-        }
-        
-        //handle all broken sessions now (e.g. reestablish them by fetching their bundles and sending key transport elements afterwards)
-        //the code handling the fetched bundle will check for an entry in queuedSessionRepairs and send
-        //a key transport element if such an entry can be found
-        //it removes the entry in queuedSessionRepairs afterwards, so no need to remove it here
-        //queuedSessionRepairs will survive a non-smacks relogin and trigger these dropped bundle fetches again to complete them
-        //has to be synchronized because [xmpp sendMessage:] could be called from main thread
-        @synchronized(self.state.queuedSessionRepairs) {
-            DDLogDebug(@"Replaying queuedSessionRepairs: %@", self.state.queuedSessionRepairs);
-            for(NSString* jid in self.state.queuedSessionRepairs)
-                for(NSNumber* rid in self.state.queuedSessionRepairs[jid])
-                    [self queryOMEMOBundleFrom:jid andDevice:rid];
-        }
-        
-        DDLogVerbose(@"New state: %@", self.state);
     }
 #endif
+}
+
+-(void) handleOwnDevicelistFetchError
+{
+    //devicelist could neither be fetched explicitly nor by using +notify --> publish own devicelist by faking an empty server-sent devicelist
+    //self.state.hasSeenDeviceList will be set to YES once the published devicelist gets returned to us by a pubsub headline echo
+    //(e.g. once the devicelist was safely stored on our server)
+    DDLogInfo(@"Could not fetch own devicelist, faking empty devicelist to publish our own deviceid...");
+    [self processOMEMODevices:[NSSet<NSNumber*> new] from:self.account.connectionProperties.identity.jid];
+    
+    [self repairQueuedSessions];
+}
+
+-(void) repairQueuedSessions
+{
+    DDLogInfo(@"Own devicelist was handled, now trying to repair queued sessions...");
+    
+    //send all needed key transport elements now (added by incoming catchup messages or bundle fetches)
+    //the queue is needed to make sure we won't send multiple key transport messages to a single contact/device
+    //only because we received multiple messages from this user in the catchup or fetched multiple bundles
+    //queuedKeyTransportElements will survive any smacks or non-smacks resumptions and eventually trigger key transport elements
+    //once the catchup could be finished (could take several smacks resumptions to finish the whole (mam) catchup)
+    //has to be synchronized because [xmpp sendMessage:] could be called from main thread
+    @synchronized(self.state.queuedKeyTransportElements) {
+        DDLogDebug(@"Replaying queuedKeyTransportElements for all jids: %@", self.state.queuedKeyTransportElements);
+        for(NSString* jid in [self.state.queuedKeyTransportElements allKeys])
+            [self retriggerKeyTransportElementsForJid:jid];
+    }
+    
+    //handle all broken sessions now (e.g. reestablish them by fetching their bundles and sending key transport elements afterwards)
+    //the code handling the fetched bundle will check for an entry in queuedSessionRepairs and send
+    //a key transport element if such an entry can be found
+    //it removes the entry in queuedSessionRepairs afterwards, so no need to remove it here
+    //queuedSessionRepairs will survive a non-smacks relogin and trigger these dropped bundle fetches again to complete them
+    //has to be synchronized because [xmpp sendMessage:] could be called from main thread
+    @synchronized(self.state.queuedSessionRepairs) {
+        DDLogDebug(@"Replaying queuedSessionRepairs: %@", self.state.queuedSessionRepairs);
+        for(NSString* jid in self.state.queuedSessionRepairs)
+            for(NSNumber* rid in self.state.queuedSessionRepairs[jid])
+                [self queryOMEMOBundleFrom:jid andDevice:rid];
+    }
+    
+    DDLogVerbose(@"New state: %@", self.state);
 }
 
 -(void) retriggerKeyTransportElementsForJid:(NSString*) jid
@@ -294,7 +311,7 @@ $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(
     }
 $$
 
--(void) queryOMEMODevices:(NSString*) jid
+-(void) queryOMEMODevices:(NSString*) jid withSubscribe:(BOOL) subscribe
 {
     //don't fetch devicelist twice (could be triggered by multiple useractions in a row)
     if([self.state.openDevicelistFetches containsObject:jid])
@@ -302,7 +319,7 @@ $$
     else
     {
         //fetch newest devicelist (this is needed even after a subscribe on at least prosody)
-        [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, YES))];
+        [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe))];
     }
 }
 
@@ -328,11 +345,14 @@ $$instance_handler(handleDevicelistFetchInvalidation, account.omemo, $$ID(xmpp*,
     //mark devicelist fetch as done
     [self.state.openDevicelistFetches removeObject:jid];
     
+    [self handleOwnDevicelistFetchError];
+    
     //retrigger queued key transport elements for this jid (if any)
     [self retriggerKeyTransportElementsForJid:jid];
 $$
 
 $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $$BOOL(subscribe), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    //mark devicelist fetch as done
     [self.state.openDevicelistFetches removeObject:jid];
     
     if(success == NO)
@@ -341,11 +361,16 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
             DDLogError(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorIq);
         else
             DDLogError(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorReason);
-        // TODO: improve error handling
+        if([self.account.connectionProperties.identity.jid isEqualToString:jid])
+            [self handleOwnDevicelistFetchError];
+        else
+        {
+            // TODO: improve error handling
+        }
     }
     else
     {
-        if(subscribe)
+        if(subscribe && ![self.account.connectionProperties.identity.jid isEqualToString:jid])
         {
             DDLogInfo(@"Successfully fetched devicelist, now subscribing to this node for updates...");
             //don't subscribe devicelist twice (could be triggered by multiple useractions in a row)
@@ -1242,7 +1267,7 @@ $$
         MLContact* contact = [MLContact createContactFromJid:buddyJid andAccountNo:self.account.accountNo];
         //only do so if we don't receive automatic headline pushes of the devicelist
         if(!contact.isSubscribedTo)
-            [self queryOMEMODevices:buddyJid];
+            [self queryOMEMODevices:buddyJid withSubscribe:YES];
     }
 }
 

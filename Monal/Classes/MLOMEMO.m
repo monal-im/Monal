@@ -402,8 +402,10 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
         
     }
     
-    //retrigger queued key transport elements for this jid (if any)
-    [self retriggerKeyTransportElementsForJid:jid];
+    if([self.account.connectionProperties.identity.jid isEqualToString:jid])
+        [self repairQueuedSessions];                        //now try to repair all broken sessions (our catchup is now really done)
+    else
+        [self retriggerKeyTransportElementsForJid:jid];     //retrigger queued key transport elements for this jid (if any)
 $$
 
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString*) source
@@ -648,11 +650,13 @@ $$
 
 -(void) decrementBundleFetchCount
 {
+    //update bundle fetch status (e.g. pending)
+    self.openBundleFetchCnt--;
+    self.closedBundleFetchCnt++;
+    
+    //check if we should send a bundle fetch status update or if checkBundleFetchCount already sent the final finished notification for us
     if(![self checkBundleFetchCount])
     {
-        //update bundle fetch status (e.g. pending)
-        self.openBundleFetchCnt--;
-        self.closedBundleFetchCnt++;
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
             @"accountNo": self.account.accountNo,
             @"completed": @(self.closedBundleFetchCnt),

@@ -208,7 +208,7 @@ static NSMutableDictionary* _typingNotifications;
     
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(
-        ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
+        ![messageNode check:@"/<type=groupchat>"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
         ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] && [messageNode check:@"body#"]
     )
     {
@@ -293,7 +293,14 @@ static NSMutableDictionary* _typingNotifications;
     }
     
     //handle muc status changes or invites (this checks for the muc namespace itself)
-    if([account.mucProcessor processMessage:messageNode])
+    if(isMLhistory)
+    {
+        if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] || ([messageNode check:@"{jabber:x:conference}x@jid"] && [[messageNode findFirst:@"{jabber:x:conference}x@jid"] length] > 0))
+            return nil;     //stop processing because this is a (mediated) muc invite received through backscrolling history
+        else
+            ;   //continue processing for backscrolling history but don't call mucProcessor.processMessage to not process ancient status/memberlist updates
+    }
+    else if([account.mucProcessor processMessage:messageNode])
     {
         DDLogVerbose(@"Muc processor said we have to stop message processing here...");
         return nil;     //the muc processor said we have stop processing

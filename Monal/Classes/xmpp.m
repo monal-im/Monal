@@ -5045,7 +5045,7 @@ NSString* const kStanza = @"stanza";
             _iqHandlers[iqid][@"timeout"] = @([_iqHandlers[iqid][@"timeout"] doubleValue] - 1.0);
             if([_iqHandlers[iqid][@"timeout"] doubleValue] < 0.0)
             {
-                DDLogWarn(@"Timeout of handler triggered: %@", _iqHandlers[iqid]);
+                DDLogWarn(@"%@: Timeout of handler triggered: %@", _logtag, _iqHandlers[iqid]);
                 //only force save state after calling a handler
                 //(timeout changes that don't make it to disk only extend the timeout by a few seconds but don't have any negative sideeffect)
                 stateUpdated = YES;
@@ -5084,7 +5084,7 @@ NSString* const kStanza = @"stanza";
                     }]] waitUntilFinished:NO];
                 }
                 else
-                    DDLogWarn(@"iq handler for '%@' vanished while switching to receive queue", iqid);
+                    DDLogError(@"%@: iq handler for '%@' vanished while switching to receive queue", _logtag, iqid);
             }
         }
         //now delete iqs marked for deletion

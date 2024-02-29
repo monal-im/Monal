@@ -13,7 +13,8 @@ struct GroupDetailsEdit: View {
     @ObservedObject var contact: ObservableKVOWrapper<MLContact>
     private let account: xmpp?
 
-    @State private var showingSheet = false
+    @State private var showingSheetEditName = false
+    @State private var showingSheetEditSubject = false
     @State private var inputImage: UIImage?
     @State private var showingImagePicker = false
 
@@ -48,7 +49,7 @@ struct GroupDetailsEdit: View {
             Section {
                 if #available(iOS 15.0, *) {
                     Button(action: {
-                        showingSheet.toggle()
+                        showingSheetEditName.toggle()
                     }) {
                         HStack {
                             Image(systemName: "person.2")
@@ -56,11 +57,11 @@ struct GroupDetailsEdit: View {
                             Spacer()
                         }
                     }
-                    .sheet(isPresented: $showingSheet) {
+                    .sheet(isPresented: $showingSheetEditName) {
                         LazyClosureView(EditGroupName(contact: contact))
                     }
                     Button(action: {
-                        showingSheet.toggle()
+                        showingSheetEditSubject.toggle()
                     }) {
                         HStack {
                             Image(systemName: "pencil")
@@ -68,13 +69,13 @@ struct GroupDetailsEdit: View {
                             Spacer()
                         }
                     }
-                    .sheet(isPresented: $showingSheet) {
+                    .sheet(isPresented: $showingSheetEditSubject) {
                         LazyClosureView(EditGroupSubject(contact: contact))
                     }
                 }
             }
         }
-        .navigationTitle("Edit group")
+        .navigationTitle((contact.obj.mucType == "group") ? "Edit group" : "Edit channel")
         .onChange(of:inputImage) { _ in
             self.account!.mucProcessor.publishAvatar(inputImage, forMuc: contact.contactJid)
         }

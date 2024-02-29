@@ -13,7 +13,7 @@ import monalxmpp
 
 struct ContactDetailsHeader: View {
     var delegate: SheetDismisserProtocol
-    @StateObject var contact: ObservableKVOWrapper<MLContact>
+    @ObservedObject var contact: ObservableKVOWrapper<MLContact>
     @State private var navigationAction: String?
 
     var body: some View {

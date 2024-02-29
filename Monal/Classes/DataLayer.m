@@ -1011,6 +1011,16 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(NSString*) getOwnRoleInGroupOrChannel:(MLContact*) contact
+{
+    if(contact == nil)
+        return nil;
+    MLAssert(contact.isGroup, @"Function should only be called on a group contact");
+    return [self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT M.role FROM muc_participants AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE M.room=? AND A.account_id=? AND (A.username || '@' || A.domain) == M.participant_jid" andArguments:@[contact.contactJid, contact.accountId]];
+    }];
+}
+
 -(void) addMucFavorite:(NSString*) room forAccountId:(NSNumber*) accountNo andMucNick:(NSString* _Nullable) mucNick
 {
     [self.db voidWriteTransaction:^{

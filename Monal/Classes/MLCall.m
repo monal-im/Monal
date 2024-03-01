@@ -419,6 +419,20 @@
         AVAudioSession* oldSession = _audioSession;
         _audioSession = audioSession;
         
+        NSError* error;
+        NSUInteger options = 0;
+        options |= AVAudioSessionCategoryOptionAllowBluetooth;
+        options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+        options |= AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
+        options |= AVAudioSessionCategoryOptionAllowAirPlay;
+        [_audioSession setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:options error:&error];
+        if(error != nil)
+            DDLogError(@"Failed to configure AVAudioSession category: %@", error);
+        [_audioSession setMode:AVAudioSessionModeVoiceChat error:&error];
+        if(error != nil)
+            DDLogError(@"Failed to configure AVAudioSession mode: %@", error);
+        
+        
         //do nothing if not yet connected
         if(self.isConnected == YES && oldSession == nil && self.audioSession != nil)
             [self didActivateAudioSession:self.audioSession];
@@ -457,6 +471,16 @@
     [[RTCAudioSession sharedInstance] audioSessionDidActivate:audioSession];
     [[RTCAudioSession sharedInstance] setIsAudioEnabled:YES];
     [[RTCAudioSession sharedInstance] unlockForConfiguration];
+    
+    //reset mode to default to make speaker button in default ui work
+    createTimer(2.0, (^{
+        NSError* error = nil;
+        [[RTCAudioSession sharedInstance] lockForConfiguration];
+        [[RTCAudioSession sharedInstance] setMode:AVAudioSessionModeDefault error:&error];
+        if(error != nil)
+            DDLogError(@"Failed to configure AVAudioSession mode: %@", error);
+        [[RTCAudioSession sharedInstance] unlockForConfiguration];
+    }));
 }
 
 -(void) didDeactivateAudioSession:(AVAudioSession*) audioSession

@@ -24,29 +24,26 @@ struct EditGroupName: View {
         _groupName = State(wrappedValue: contact.obj.contactDisplayName)
         self.contact = contact
         self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)! as xmpp
-
     }
 
     var body: some View {
+
         NavigationView {
-            VStack {
                 Form {
-                    Section {
+                    Section(header: Text("Group name")) {
                         TextField(NSLocalizedString("Group Name (optional)", comment: "placeholder when editing a group name"), text: $groupName, onEditingChanged: { isEditingGroupName = $0 })
                             .autocorrectionDisabled()
                             .autocapitalization(.none)
                             .addClearButton(isEditing: isEditingGroupName, text:$groupName)
                     }
                 }
-            }
-            .navigationTitle("Groupname")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Abort") {
                         dismiss()
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
+                    ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         self.account!.mucProcessor.changeName(ofMuc: contact.contactJid, to: self.groupName)
                         dismiss()

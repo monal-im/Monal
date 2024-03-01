@@ -40,7 +40,7 @@ struct EditGroupSubject: View {
         NavigationView {
             VStack {
                 Form {
-                    Section {
+                    Section(header: Text("Group Description")) {
                         TextField(NSLocalizedString("Group Description (optional)", comment: "placeholder when editing a group description"), text: $subject, onEditingChanged: { isEditingSubject = $0 })
                             .multilineTextAlignment(.leading)
                             .versionConditionalLineLimit(10...50)
@@ -50,12 +50,12 @@ struct EditGroupSubject: View {
             }
             .navigationTitle("Group description")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Abort") {
                         dismiss()
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         self.account!.mucProcessor.changeSubject(ofMuc: contact.contactJid, to: self.subject)
                         dismiss()

@@ -17,6 +17,7 @@ struct GroupDetailsEdit: View {
     @State private var showingSheetEditSubject = false
     @State private var inputImage: UIImage?
     @State private var showingImagePicker = false
+    @ObservedObject private var overlay = LoadingOverlayState()
 
     init(contact: ObservableKVOWrapper<MLContact>) {
         MLAssert(contact.isGroup)
@@ -75,9 +76,14 @@ struct GroupDetailsEdit: View {
                 }
             }
         }
+        .addLoadingOverlay(overlay)
         .navigationTitle((contact.obj.mucType == "group") ? "Edit group" : "Edit channel")
         .onChange(of:inputImage) { _ in
+            showLoadingOverlay(overlay, headline: NSLocalizedString("Uploading image...", comment: ""))
             self.account!.mucProcessor.publishAvatar(inputImage, forMuc: contact.contactJid)
+        }
+        .onChange(of:contact.avatar as UIImage) { _ in
+            hideLoadingOverlay(overlay)
         }
     }
 }

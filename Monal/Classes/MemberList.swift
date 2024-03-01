@@ -208,12 +208,11 @@ struct MemberList: View {
 
     func block(_ selectedMember: ObservableKVOWrapper<MLContact>) -> AnyView {
         if self.group.mucType != "group" {
-            return AnyView(Button(action: {
-                self.account!.mucProcessor.setAffiliation("outcast", ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
-                self.affiliation[selectedMember.contactJid] = "outcast"
-            }) {
-                Text("Block from group")
-            })
+            return AnyView(
+                permissionsButton(selectedMember, permission: "outcast", label: {
+                    Text("Block grom group")
+                })
+            )
         } else {
             return AnyView(EmptyView())
         }

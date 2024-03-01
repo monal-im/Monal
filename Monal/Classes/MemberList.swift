@@ -23,6 +23,8 @@ struct MemberList: View {
     @State private var showAlert = false
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
 
+    @State private var selectedMember: MLContact?
+
     init(mucContact: ObservableKVOWrapper<MLContact>?) {
         self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact!.accountId)! as xmpp
         self.group = mucContact!;
@@ -65,34 +67,33 @@ struct MemberList: View {
     }
 
     var body: some View {
-        // This is the invisible NavigationLink hack again...
-        NavigationLink(destination:LazyClosureView(ContactPicker(account: self.account!, selectedContacts: $contactsToAdd)), isActive: $openAccountSelection){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
         List {
             Section(header: Text(self.group.obj.contactDisplayName)) {
                 ForEach(self.memberList, id: \.self.obj) {
                     contact in
-                    NavigationLink(destination: LazyClosureView(ContactDetails(delegate: SheetDismisserProtocol(), contact: contact)), label: {
-                        ZStack(alignment: .topLeading) {
-                            HStack(alignment: .center) {
-                                Image(uiImage: contact.avatar)
-                                    .resizable()
-                                    .frame(width: 40, height: 40, alignment: .center)
-                                Text(contact.contactDisplayName as String)
-                                Spacer()
-                                if let contactAffiliation = self.affiliation[contact.contactJid] {
-                                    if contactAffiliation == "owner" {
-                                        Text(NSLocalizedString("Owner", comment: ""))
-                                    } else if contactAffiliation == "admin" {
-                                        Text(NSLocalizedString("Admin", comment: ""))
-                                    } else if contactAffiliation == "member" {
-                                        Text(NSLocalizedString("Member", comment: ""))
-                                    } else if contactAffiliation == "outcast" {
-                                        Text(NSLocalizedString("Outcast", comment: ""))
-                                    } else {
-                                        Text(NSLocalizedString("<unknown>", comment: ""))
-                                    }
-                                }
+                    HStack(alignment: .center) {
+                        Image(uiImage: contact.avatar)
+                            .resizable()
+                            .frame(width: 40, height: 40, alignment: .center)
+                        Text(contact.contactDisplayName as String)
+                        Spacer()
+                        if let contactAffiliation = self.affiliation[contact.contactJid] {
+                            if contactAffiliation == "owner" {
+                                Text(NSLocalizedString("Owner", comment: ""))
+                            } else if contactAffiliation == "admin" {
+                                Text(NSLocalizedString("Admin", comment: ""))
+                            } else if contactAffiliation == "member" {
+                                Text(NSLocalizedString("Member", comment: ""))
+                            } else if contactAffiliation == "outcast" {
+                                Text(NSLocalizedString("Outcast", comment: ""))
+                            } else {
+                                Text(NSLocalizedString("<unknown>", comment: ""))
                             }
+                        }
+                    }
+                    .onTapGesture(perform: {
+                        if(contact.obj.contactJid != self.account?.connectionProperties.identity.jid) {
+                            self.selectedMember = contact.obj
                         }
                     })
                     .deleteDisabled(
@@ -109,8 +110,113 @@ struct MemberList: View {
             }.alert(isPresented: $showAlert, content: {
                 Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
             })
+            .sheet(item: self.$selectedMember, content: { selectedMemberUnobserved in
+                let selectedMember = ObservableKVOWrapper(selectedMemberUnobserved)
+                VStack {
+                    Form {
+                        Section {
+                            HStack {
+                                Spacer()
+                                Image(uiImage: selectedMember.avatar)
+                                    .resizable()
+                                    .frame(width: 150, height: 150, alignment: .center)
+                                Spacer()
+                            }
+                            HStack {
+                                Spacer()
+                                Text(selectedMember.contactDisplayName as String)
+                                Spacer()
+                            }
+                        }
+                        Section(header: Text("Configure Membership")) {
+                            if self.ownAffiliation == "owner" && self.affiliation[selectedMember.contactJid] == "owner" {
+                                makeAdmin(selectedMember)
+                                makeMember(selectedMember)
+                                removeUserButton(selectedMember)
+                                block(selectedMember)
+                            }
+                            if self.ownAffiliation == "owner" && self.affiliation[selectedMember.contactJid] == "admin" {
+                                makeOwner(selectedMember)
+                                makeMember(selectedMember)
+                                removeUserButton(selectedMember)
+                                block(selectedMember)
+                            }
+                            if self.ownAffiliation == "owner" && self.affiliation[selectedMember.contactJid] == "member" {
+                                makeOwner(selectedMember)
+                                makeAdmin(selectedMember)
+                                removeUserButton(selectedMember)
+                                block(selectedMember)
+                            }
+                            if self.ownAffiliation == "admin" && self.affiliation[selectedMember.contactJid] == "member" {
+                                removeUserButton(selectedMember)
+                                block(selectedMember)
+                            }
+                            if (self.ownAffiliation == "admin" || self.ownAffiliation == "owner") && self.affiliation[selectedMember.contactJid] == "outcast" {
+                                makeMember(selectedMember)
+                            }
+                        }
+                    }
+                }
+            })
         }
         .navigationBarTitle("Group Members", displayMode: .inline)
+    }
+
+    func removeUserButton(_ selectedMember: ObservableKVOWrapper<MLContact>) -> some View {
+        if #available(iOS 15, *) {
+            return Button(role: .destructive, action: {
+                self.account!.mucProcessor.setAffiliation("none", ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
+                self.setAndShowAlert(title: "Member deleted", description: selectedMember.contactJid)
+                if let index = self.memberList.firstIndex(of: selectedMember) {
+                    self.memberList.remove(at: index)
+                }
+                self.selectedMember = nil
+            }) {
+                Text("Remove from group")
+            }
+        } else {
+            return AnyView(EmptyView())
+        }
+    }
+
+    func permissionsButton<Label: View>(_ selectedMember: ObservableKVOWrapper<MLContact>, permission: String, @ViewBuilder label: () -> Label) -> some View {
+        return Button(action: {
+            self.account!.mucProcessor.setAffiliation(permission, ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
+            self.affiliation[selectedMember.contactJid] = permission
+        }) {
+            label()
+        }
+    }
+
+    func makeOwner(_ selectedMember: ObservableKVOWrapper<MLContact>) -> some View {
+        return permissionsButton(selectedMember, permission: "owner", label: {
+            Text("Make owner")
+        })
+    }
+
+    func makeAdmin(_ selectedMember: ObservableKVOWrapper<MLContact>) -> some View {
+        return permissionsButton(selectedMember, permission: "admin", label: {
+            Text("Make admin")
+        })
+    }
+
+    func makeMember(_ selectedMember: ObservableKVOWrapper<MLContact>) -> some View {
+        return permissionsButton(selectedMember, permission: "member", label: {
+            Text("Make member")
+        })
+    }
+
+    func block(_ selectedMember: ObservableKVOWrapper<MLContact>) -> AnyView {
+        if self.group.mucType != "group" {
+            return AnyView(Button(action: {
+                self.account!.mucProcessor.setAffiliation("outcast", ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
+                self.affiliation[selectedMember.contactJid] = "outcast"
+            }) {
+                Text("Block from group")
+            })
+        } else {
+            return AnyView(EmptyView())
+        }
     }
 }
 

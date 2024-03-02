@@ -67,9 +67,17 @@ struct ContactPicker: View {
     }
 
     private var searchResults : OrderedSet<ObservableKVOWrapper<MLContact>> {
-        searchText.isEmpty ? self.contacts : self.contacts.filter {
-            ($0.contactDisplayName as String).lowercased().contains(searchText.lowercased()) ||
-                ($0.contactJid as String).contains(searchText.lowercased())
+        if searchText.isEmpty {
+            return self.contacts
+        } else {
+            var filteredContacts: OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
+            for contact in self.contacts {
+                if (contact.contactDisplayName as String).lowercased().contains(searchText.lowercased()) ||
+                    (contact.contactJid as String).contains(searchText.lowercased()) {
+                    filteredContacts.append(contact)
+                }
+            }
+            return filteredContacts
         }
     }
 

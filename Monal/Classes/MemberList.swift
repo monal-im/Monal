@@ -11,14 +11,13 @@ import monalxmpp
 import OrderedCollections
 
 struct MemberList: View {
-    @State private var memberList: [ObservableKVOWrapper<MLContact>]
+    @State private var memberList: OrderedSet<ObservableKVOWrapper<MLContact>>
     @State private var affiliation: Dictionary<String, String>
     @ObservedObject var group: ObservableKVOWrapper<MLContact>
     private let account: xmpp?
     private var ownAffiliation: String = "none";
 
     @State private var openAccountSelection : Bool = false
-    @State private var contactsToAdd : OrderedSet<ObservableKVOWrapper<MLContact>> = []
 
     @State private var showAlert = false
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
@@ -69,6 +68,11 @@ struct MemberList: View {
     var body: some View {
         List {
             Section(header: Text(self.group.obj.contactDisplayName)) {
+                if self.ownAffiliation == "owner" || self.ownAffiliation == "admin" {
+                    NavigationLink(destination: LazyClosureView(ContactPicker(account: self.account!, selectedContacts: $memberList, existingMembers: self.memberList)), label: {
+                            Text("Add Group Members")
+                    })
+                }
                 ForEach(self.memberList, id: \.self.obj) {
                     contact in
                     HStack(alignment: .center) {
@@ -107,7 +111,17 @@ struct MemberList: View {
                     self.setAndShowAlert(title: "Member deleted", description: self.memberList[memberIdx.first!].contactJid)
                     self.memberList.remove(at: memberIdx.first!)
                 })
-            }.alert(isPresented: $showAlert, content: {
+            }
+            .onChange(of: self.memberList) { [previousMemberList = self.memberList] newMemberList in
+                // only handle new members (added via the contact picker
+                for member in newMemberList {
+                    if !previousMemberList.contains(member) {
+                        // add selected group member with role member
+                        permissionChangeAction(member, permission: "member")
+                    }
+                }
+            }
+            .alert(isPresented: $showAlert, content: {
                 Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
             })
             .sheet(item: self.$selectedMember, content: { selectedMemberUnobserved in
@@ -179,10 +193,16 @@ struct MemberList: View {
         }
     }
 
+    func permissionChangeAction(_ selectedMember: ObservableKVOWrapper<MLContact>, permission: String) {
+        self.account!.mucProcessor.setAffiliation(permission, ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
+        self.affiliation[selectedMember.contactJid] = permission
+    }
+
     func permissionsButton<Label: View>(_ selectedMember: ObservableKVOWrapper<MLContact>, permission: String, @ViewBuilder label: () -> Label) -> some View {
         return Button(action: {
-            self.account!.mucProcessor.setAffiliation(permission, ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
-            self.affiliation[selectedMember.contactJid] = permission
+            permissionChangeAction(selectedMember, permission: permission)
+            // dismiss sheet
+            self.selectedMember = nil
         }) {
             label()
         }

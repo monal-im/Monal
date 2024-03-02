@@ -16,6 +16,7 @@
 import PhotosUI
 import Combine
 import FLAnimatedImage
+import OrderedCollections
 
 extension MLContact : Identifiable {}       //make MLContact be usable in swiftui ForEach clauses
 
@@ -464,12 +465,12 @@ class SwiftuiInterface : NSObject {
     }
 }
 
-func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> [ObservableKVOWrapper<MLContact>] {
+func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedSet<ObservableKVOWrapper<MLContact>> {
     if let contact = viewContact {
         if(contact.isGroup && contact.mucType == "group") {
             //this uses the account the muc belongs to and treats every other account to be remote, even when multiple accounts of the same monal instance are in the same group
             let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: contact.accountId))
-            var contactList : [ObservableKVOWrapper<MLContact>] = []
+            var contactList : OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
             for jidDict in jidList {
                 //jid can be participant_jid (if currently joined to muc) or member_jid (if not joined but member of muc)
                 var jid : String? = jidDict["participant_jid"] as? String

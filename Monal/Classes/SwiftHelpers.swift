@@ -69,7 +69,7 @@ class KVOObserver: NSObject {
 }
 
 @dynamicMemberLookup
-public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable {
+public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable {
     public var obj: ObjType
     private var observedMembers: NSMutableSet = NSMutableSet()
     private var observers: [KVOObserver] = Array()
@@ -123,15 +123,18 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable 
         }
     }
 
-    public static func == (lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
+    @inlinable
+    public static func ==(lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
         return lhs.obj.isEqual(rhs.obj)
     }
     
     // see https://stackoverflow.com/a/33320737
-    public static func === (lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
+    @inlinable
+    public static func ===(lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
         return lhs.obj === rhs.obj
     }
 
+    @inlinable
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.obj.hashValue)
     }

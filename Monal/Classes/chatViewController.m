@@ -2555,7 +2555,9 @@ enum msgSentState {
 
 -(MLBaseCell*) fileTransferCellCheckerWithInfo:(NSDictionary*)info direction:(BOOL)inDirection tableView:(UITableView*)tableView andMsg:(MLMessage*)row{
     MLBaseCell *cell = nil;
-    if([info[@"mimeType"] hasPrefix:@"image/"])
+    //don't crash on svg images not supported by UIImage
+    //TODO: use webview to display SVG
+    if([info[@"mimeType"] hasPrefix:@"image/"] && ![info[@"mimeType"] hasPrefix:@"image/svg"])
     {
         MLChatImageCell* imageCell = (MLChatImageCell *)[self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
         [imageCell initCellWithMLMessage:row];

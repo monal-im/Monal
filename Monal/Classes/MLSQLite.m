@@ -385,12 +385,12 @@ static NSMutableDictionary* currentTransactions;
     NSDate* startTime = [NSDate date];
 #endif
     id retval = operations();
-    [self endWriteTransaction];
 #if !TARGET_OS_SIMULATOR
     NSDate* endTime = [NSDate date];
-    if([endTime timeIntervalSinceDate:startTime] > 0.5)
-        showErrorOnAlpha(nil, @"Write transaction took %fs (longer than 0.5s): %@", (double)[endTime timeIntervalSinceDate:startTime], [NSThread callStackSymbols]);
+    if([endTime timeIntervalSinceDate:startTime] > 2.0)
+        showErrorOnAlpha(nil, @"Write transaction blocking took %fs (longer than 2.0s): %@", (double)[endTime timeIntervalSinceDate:startTime], [NSThread callStackSymbols]);
 #endif
+    [self endWriteTransaction];
     return retval;
 }
 

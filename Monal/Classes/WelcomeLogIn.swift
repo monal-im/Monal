@@ -59,9 +59,10 @@ struct WelcomeLogIn: View {
     }
 
     private func showTimeoutAlert() {
+        DDLogVerbose("Showing timeout alert...")
         hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Timeout Error")
-        alertPrompt.message = Text("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.")
+        alertPrompt.message = Text("We were not able to connect your account. Please check your username and password and make sure you are connected to the internet.")
         showAlert = true
     }
 
@@ -75,7 +76,7 @@ struct WelcomeLogIn: View {
     private func showLoginErrorAlert(errorMessage: String) {
         hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Error")
-        alertPrompt.message = Text(String(format: NSLocalizedString("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.\n\nTechnical error message: %@", comment: ""), errorMessage))
+        alertPrompt.message = Text(String(format: NSLocalizedString("We were not able to connect your account. Please check your username and password and make sure you are connected to the internet.\n\nTechnical error message: %@", comment: ""), errorMessage))
         showAlert = true
     }
 
@@ -101,7 +102,9 @@ struct WelcomeLogIn: View {
         self.currentTimeout = newTimeout
         DispatchQueue.main.asyncAfter(deadline: newTimeout) {
             if(newTimeout == self.currentTimeout) {
+                DDLogWarn("First login timeout triggered...")
                 if(self.newAccountNo != nil) {
+                    DDLogVerbose("Removing account...")
                     MLXMPPManager.sharedInstance().removeAccount(forAccountNo: self.newAccountNo!)
                     self.newAccountNo = nil
                 }

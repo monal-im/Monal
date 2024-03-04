@@ -496,6 +496,7 @@
         DDLogDebug(@"%@: Preparing this call for new webrtc connection...", [self short]);
         self.jmiid = otherCall.jmiid;
         self.fullRemoteJid = otherCall.fullRemoteJid;
+        self.callType = otherCall.callType;
         self.isConnected = NO;
         self.isReconnecting = YES;
         self.finishReason = MLCallFinishReasonUnknown;

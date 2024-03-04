@@ -49,7 +49,7 @@
 @import AVFoundation;
 @import WebRTC;
 
-#define STATE_VERSION 10
+#define STATE_VERSION 11
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -102,7 +102,6 @@ NSString* const kStanza = @"stanza";
     NSMutableArray* _smacksAckHandler;
     NSMutableDictionary* _iqHandlers;
     NSMutableArray* _reconnectionHandlers;
-    NSMutableSet* _runningCapsQueries;
     NSMutableDictionary* _runningMamQueries;
     BOOL _SRVDiscoveryDone;
     BOOL _startTLSComplete;
@@ -114,6 +113,7 @@ NSString* const kStanza = @"stanza";
     BOOL _lastIdleState;
     NSMutableDictionary* _mamPageArrays;
     NSString* _internalID;
+    NSString* _logtag;
     NSMutableDictionary* _inCatchup;
     
     //registration related stuff
@@ -180,7 +180,8 @@ NSString* const kStanza = @"stanza";
     self = [super init];
     u_int32_t i = arc4random();
     _internalID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
-    DDLogVerbose(@"Created account %@ with id %@", accountNo, _internalID);
+    _logtag = [NSString stringWithFormat:@"[%@:%@]", accountNo, _internalID];
+    DDLogVerbose(@"Creating account %@ with id %@", accountNo, _internalID);
     self.accountNo = accountNo;
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     
@@ -257,7 +258,6 @@ NSString* const kStanza = @"stanza";
     _iqHandlers = [NSMutableDictionary new];
     _reconnectionHandlers = [NSMutableArray new];
     _mamPageArrays = [NSMutableDictionary new];
-    _runningCapsQueries = [NSMutableSet new];
     _runningMamQueries = [NSMutableDictionary new];
     _inCatchup = [NSMutableDictionary new];
     _pipeliningState = kPipelinedNothing;
@@ -557,12 +557,12 @@ NSString* const kStanza = @"stanza";
     if(self.connectionProperties.server.isDirectTLS == YES)
     {
         DDLogInfo(@"creating directTLS streams");
-        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:YES inputStream:&localIStream outputStream:&localOStream];
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:YES inputStream:&localIStream outputStream:&localOStream logtag:self->_logtag];
     }
     else
     {
         DDLogInfo(@"creating plaintext streams");
-        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:NO inputStream:&localIStream outputStream:&localOStream];
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:NO inputStream:&localIStream outputStream:&localOStream logtag:self->_logtag];
     }
     
     if(localOStream)
@@ -1242,16 +1242,16 @@ NSString* const kStanza = @"stanza";
     BOOL appex = [HelperTools isAppExtension];
     if(_xmlParser!=nil)
     {
-        DDLogInfo(@"resetting old xml parser");
+        DDLogInfo(@"%@: resetting old xml parser", self->_logtag);
         [_xmlParser setDelegate:nil];
         [_xmlParser abortParsing];
         [_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we aborted the parser right now)
     }
     if(!_baseParserDelegate)
     {
-        DDLogInfo(@"creating parser delegate");
+        DDLogInfo(@"%@: creating parser delegate", self->_logtag);
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
-            DDLogVerbose(@"Parse finished for new <%@> stanza...", parsedStanza.element);
+            DDLogVerbose(@"%@: Parse finished for new <%@> stanza...", self->_logtag, parsedStanza.element);
             
             //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
             //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
@@ -1267,16 +1267,16 @@ NSString* const kStanza = @"stanza";
                     break;
                 
                 double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
+                DDLogInfo(@"%@: Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
                 [NSThread sleepForTimeInterval:waittime];
                 wasSleeping = YES;
             }
             if(wasSleeping)
-                DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+                DDLogInfo(@"%@: Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
             
             if(self.accountState < kStateConnected)
             {
-                DDLogWarn(@"Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateConnected");
+                DDLogWarn(@"%@: Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateConnected", self->_logtag);
                 return;
             }
             
@@ -1348,7 +1348,7 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
-        DDLogInfo(@"resetting parser delegate");
+        DDLogInfo(@"%@: resetting parser delegate", self->_logtag);
         [_baseParserDelegate reset];
     }
     
@@ -1361,10 +1361,10 @@ NSString* const kStanza = @"stanza";
     [_xmlParser setDelegate:_baseParserDelegate];
     
     // do the stanza parsing in the low priority (=utility) global queue
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-        DDLogInfo(@"calling parse");
+    dispatch_async(dispatch_queue_create_with_target([NSString stringWithFormat:@"im.monal.xmlparser%@", self->_logtag].UTF8String, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)), ^{
+        DDLogInfo(@"%@: calling parse", self->_logtag);
         [self->_xmlParser parse];     //blocking operation
-        DDLogInfo(@"parse ended");
+        DDLogInfo(@"%@: parse ended", self->_logtag);
     });
 }
 
@@ -1941,18 +1941,10 @@ NSString* const kStanza = @"stanza";
                         if(!ver || ![ver isEqualToString:newVer])     //caps hash of resource changed
                             [[DataLayer sharedInstance] setVer:newVer forUser:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo];
 
-                        if(![[DataLayer sharedInstance] getCapsforVer:newVer])
+                        if(![[DataLayer sharedInstance] getCapsforVer:newVer onAccountNo:self.accountNo])
                         {
-                            if([_runningCapsQueries containsObject:newVer])
-                            {
-                                DDLogDebug(@"Presence included unknown caps hash %@, but disco query already running", newVer);
-                                shouldQueryCaps = NO;
-                            }
-                            else
-                            {
-                                DDLogInfo(@"Presence included unknown caps hash %@, querying disco", newVer);
-                                shouldQueryCaps = YES;
-                            }
+                            DDLogInfo(@"Presence included unknown caps hash %@, querying disco", newVer);
+                            shouldQueryCaps = YES;
                         }
                     }
                     
@@ -1962,7 +1954,6 @@ NSString* const kStanza = @"stanza";
                         [discoInfo setiqTo:presenceNode.from];
                         [discoInfo setDiscoInfoNode];
                         [self sendIq:discoInfo withHandler:$newHandler(MLIQProcessor, handleEntityCapsDisco)];
-                        [_runningCapsQueries addObject:newVer];
                     }
                 }
                 
@@ -3425,7 +3416,6 @@ NSString* const kStanza = @"stanza";
             
             [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
             [values setObject:[self.mucProcessor getInternalState] forKey:@"mucState"];
-            [values setObject:[self->_runningCapsQueries copy] forKey:@"runningCapsQueries"];
             [values setObject:[self->_runningMamQueries copy] forKey:@"runningMamQueries"];
             [values setObject:[NSNumber numberWithBool:self->_loggedInOnce] forKey:@"loggedInOnce"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
@@ -3680,9 +3670,6 @@ NSString* const kStanza = @"stanza";
             
             if([dic objectForKey:@"mucState"])
                 [self.mucProcessor setInternalState:[dic objectForKey:@"mucState"]];
-            
-            if([dic objectForKey:@"runningCapsQueries"])
-                _runningCapsQueries = [[dic objectForKey:@"runningCapsQueries"] mutableCopy];
             
             if([dic objectForKey:@"runningMamQueries"])
                 _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
@@ -3964,9 +3951,6 @@ NSString* const kStanza = @"stanza";
     
     //clear list of running mam queries
     _runningMamQueries = [NSMutableDictionary new];
-    
-    //clear list of running caps queries
-    _runningCapsQueries = [NSMutableSet new];
     
     //clear old catchup state (technically all stanzas still in delayedMessageStanzas could have also been
     //in the parseQueue in the last run and deleted there)
@@ -5061,7 +5045,7 @@ NSString* const kStanza = @"stanza";
             _iqHandlers[iqid][@"timeout"] = @([_iqHandlers[iqid][@"timeout"] doubleValue] - 1.0);
             if([_iqHandlers[iqid][@"timeout"] doubleValue] < 0.0)
             {
-                DDLogWarn(@"Timeout of handler triggered: %@", _iqHandlers[iqid]);
+                DDLogWarn(@"%@: Timeout of handler triggered: %@", _logtag, _iqHandlers[iqid]);
                 //only force save state after calling a handler
                 //(timeout changes that don't make it to disk only extend the timeout by a few seconds but don't have any negative sideeffect)
                 stateUpdated = YES;
@@ -5100,7 +5084,7 @@ NSString* const kStanza = @"stanza";
                     }]] waitUntilFinished:NO];
                 }
                 else
-                    DDLogWarn(@"iq handler for '%@' vanished while switching to receive queue", iqid);
+                    DDLogError(@"%@: iq handler for '%@' vanished while switching to receive queue", _logtag, iqid);
             }
         }
         //now delete iqs marked for deletion
@@ -5302,11 +5286,6 @@ NSString* const kStanza = @"stanza";
             completion(errorStr);   //signal error to UI
         }
     }];
-}
-
--(void) markCapsQueryCompleteFor:(NSString*) ver
-{
-    [_runningCapsQueries removeObject:ver];
 }
 
 -(void) publishRosterName:(NSString* _Nullable) rosterName

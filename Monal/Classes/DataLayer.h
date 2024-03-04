@@ -76,8 +76,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo;
 -(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo;
 -(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo;
--(NSSet* _Nullable) getCapsforVer:(NSString*) ver;
--(void) setCaps:(NSSet*) caps forVer:(NSString*) ver;
+-(NSSet* _Nullable) getCapsforVer:(NSString*) ver onAccountNo:(NSNumber*) accountNo;
+-(void) setCaps:(NSSet*) caps forVer:(NSString*) ver onAccountNo:(NSNumber*) accountNo;
 
 #pragma mark  presence functions
 -(void) setResourceOnline:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
@@ -115,6 +115,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) removeParticipant:(NSDictionary*) participant fromMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(NSDictionary* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(NSArray<NSDictionary<NSString*, id>*>*) getMembersAndParticipantsOfMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(NSString*) getOwnRoleInGroupOrChannel:(MLContact*) contact;
 -(void) addMucFavorite:(NSString*) room forAccountId:(NSNumber*) accountNo andMucNick:(NSString* _Nullable) mucNick;
 -(NSString*) lastStanzaIdForMuc:(NSString* _Nonnull) room andAccount:(NSNumber* _Nonnull) accountNo;
 -(void) setLastStanzaId:(NSString*) lastStanzaId forMuc:(NSString* _Nonnull) room andAccount:(NSNumber* _Nonnull) accountNo;

@@ -208,7 +208,7 @@ static NSMutableDictionary* _typingNotifications;
     
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(
-        ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
+        ![messageNode check:@"/<type=groupchat>"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
         ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] && [messageNode check:@"body#"]
     )
     {
@@ -293,7 +293,14 @@ static NSMutableDictionary* _typingNotifications;
     }
     
     //handle muc status changes or invites (this checks for the muc namespace itself)
-    if([account.mucProcessor processMessage:messageNode])
+    if(isMLhistory)
+    {
+        if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] || ([messageNode check:@"{jabber:x:conference}x@jid"] && [[messageNode findFirst:@"{jabber:x:conference}x@jid"] length] > 0))
+            return nil;     //stop processing because this is a (mediated) muc invite received through backscrolling history
+        else
+            ;   //continue processing for backscrolling history but don't call mucProcessor.processMessage to not process ancient status/memberlist updates
+    }
+    else if([account.mucProcessor processMessage:messageNode])
     {
         DDLogVerbose(@"Muc processor said we have to stop message processing here...");
         return nil;     //the muc processor said we have stop processing
@@ -422,6 +429,13 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
+    //ignore encrypted messages coming from our own device id (most probably a muc reflection)
+    BOOL sentByOwnOmemoDevice = NO;
+#ifndef DISABLE_OMEMO
+    if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"])
+        sentByOwnOmemoDevice = ((NSNumber*)[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"]).unsignedIntValue == [account.omemo getDeviceId].unsignedIntValue;
+#endif
+    
     //handle message retraction (XEP-0424)
     if([messageNode check:@"{urn:xmpp:fasten:0}apply-to/{urn:xmpp:message-retract:0}retract"])
     {
@@ -479,7 +493,8 @@ static NSMutableDictionary* _typingNotifications;
             @"contact": [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo],
         }];
     }
-    else if([messageNode check:@"body#"] || decrypted)
+    //ignore encrypted body messages coming from our own device id (most probably a muc reflection)
+    else if(([messageNode check:@"body#"] || decrypted) && !sentByOwnOmemoDevice)
     {
         BOOL unread = YES;
         BOOL showAlert = YES;

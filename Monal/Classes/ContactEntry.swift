@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct ContactEntry: View {
-    let contact : MLContact
+    let contact : ObservableKVOWrapper<MLContact>
 
     var body:some View {
         ZStack(alignment: .topLeading) {
@@ -27,17 +27,17 @@ struct ContactEntry: View {
 }
 
 #Preview {
-    ContactEntry(contact:MLContact.makeDummyContact(0))
+    ContactEntry(contact:ObservableKVOWrapper(MLContact.makeDummyContact(0)))
 }
 
 #Preview {
-    ContactEntry(contact:MLContact.makeDummyContact(1))
+    ContactEntry(contact:ObservableKVOWrapper(MLContact.makeDummyContact(1)))
 }
 
 #Preview {
-    ContactEntry(contact:MLContact.makeDummyContact(2))
+    ContactEntry(contact:ObservableKVOWrapper(MLContact.makeDummyContact(2)))
 }
 
 #Preview {
-    ContactEntry(contact:MLContact.makeDummyContact(3))
+    ContactEntry(contact:ObservableKVOWrapper(MLContact.makeDummyContact(3)))
 }

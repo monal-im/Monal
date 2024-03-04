@@ -267,7 +267,7 @@ struct OmemoKeys: View {
     @State private var scannedJid : String = ""
     @State private var scannedFingerprints : Dictionary<NSInteger, String> = [:]
 
-    @State private var contacts: [ObservableKVOWrapper<MLContact>] // contact list may change/be reloaded -> state
+    @State private var contacts: OrderedSet<ObservableKVOWrapper<MLContact>> // contact list may change/be reloaded -> state
 
     @State var selectedContact : ObservableKVOWrapper<MLContact>? // for reason why see start of body
     @State private var navigateToQRCodeView = false

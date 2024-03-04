@@ -845,7 +845,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
     {
         DDLogInfo(@"Encrypting file data before upload");
         encryptedPayload = [AESGcm encrypt:fileData keySize:32];
-        if(encryptedPayload)
+        if(encryptedPayload && encryptedPayload.body != nil)
         {
             NSMutableData* encryptedData = [encryptedPayload.body mutableCopy];
             [encryptedData appendData:encryptedPayload.authTag];
@@ -865,6 +865,10 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
     NSString* sendMimeType = mimeType;
     if(encrypted)
         sendMimeType = @"application/octet-stream";
+    
+    MLAssert(fileData != nil, @"fileData should never be nil!");
+    MLAssert(userFacingFilename != nil, @"userFacingFilename should never be nil!");
+    MLAssert(sendMimeType != nil, @"sendMimeType should never be nil!");
     
     DDLogDebug(@"Requesting file upload slot for mimeType %@", sendMimeType);
     [account requestHTTPSlotWithParams:@{

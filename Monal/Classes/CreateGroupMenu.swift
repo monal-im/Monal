@@ -22,7 +22,7 @@ struct CreateGroupMenu: View {
     @State private var showAlert = false
     // note: dismissLabel is not accessed but defined at the .alert() section
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @State private var selectedContacts : OrderedSet<MLContact> = []
+    @State private var selectedContacts : OrderedSet<ObservableKVOWrapper<MLContact>> = []
     
     @State private var isEditingGroupName = false
 
@@ -106,7 +106,7 @@ struct CreateGroupMenu: View {
                 }
                 if(self.selectedContacts.count > 0) {
                     Section(header: Text("Selected Group Members")) {
-                        ForEach(self.selectedContacts, id: \.contactJid) { contact in
+                        ForEach(self.selectedContacts, id: \.obj.contactJid) { contact in
                             ContactEntry(contact: contact)
                         }
                         .onDelete(perform: { indexSet in

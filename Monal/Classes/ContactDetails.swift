@@ -12,16 +12,31 @@ import monalxmpp
 
 struct ContactDetails: View {
     var delegate: SheetDismisserProtocol
-    @StateObject var contact: ObservableKVOWrapper<MLContact>
-    @State private var showingBlockContactConfirmation = false
-    @State private var showingCannotBlockAlert = false
-    @State private var showingRemoveContactConfirmation = false
-    @State private var showingAddContactConfirmation = false
-    @State private var showingClearHistoryConfirmation = false
-    @State private var showingResetOmemoSessionConfirmation = false
-    @State private var showingCannotEncryptAlert = false
-    @State private var showingShouldDisableEncryptionAlert = false
-    @State private var isEditingNickname = false
+    @ObservedObject var contact: ObservableKVOWrapper<MLContact>
+    private var account: xmpp?
+    @State private var showingBlockContactConfirmation: Bool = false
+    @State private var showingCannotBlockAlert: Bool = false
+    @State private var showingRemoveContactConfirmation: Bool = false
+    @State private var showingAddContactConfirmation: Bool = false
+    @State private var showingClearHistoryConfirmation: Bool = false
+    @State private var showingResetOmemoSessionConfirmation: Bool = false
+    @State private var showingCannotEncryptAlert: Bool = false
+    @State private var showingShouldDisableEncryptionAlert: Bool = false
+    @State private var isEditingNickname: Bool = false
+    private let isGroupModerator: Bool
+
+    init(delegate: SheetDismisserProtocol, contact: ObservableKVOWrapper<MLContact>) {
+        self.delegate = delegate
+        self.contact = contact
+        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId) as xmpp?
+
+        if contact.isGroup {
+            let ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj)
+            self.isGroupModerator = (ownRole == "moderator")
+        } else {
+            self.isGroupModerator = false
+        }
+    }
 
     var body: some View {
         Form {
@@ -348,6 +363,22 @@ struct ContactDetails: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationBarTitle(contact.contactDisplayName as String, displayMode: .inline)
+        .navigationBarGroupEditButton(contact: contact, isGroupModerator: self.isGroupModerator, account: self.account)
+    }
+}
+
+extension View {
+    func navigationBarGroupEditButton(contact: ObservableKVOWrapper<MLContact>, isGroupModerator: Bool, account: xmpp?) -> some View {
+        if contact.isGroup && isGroupModerator && (account != nil && account!.accountState.rawValue >= xmppState.stateBound.rawValue) {
+            return AnyView(self.toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: LazyClosureView(GroupDetailsEdit(contact: contact))) {
+                        Text("Edit")
+                    }
+                }
+            })
+        }
+        return AnyView(self)
     }
 }
 

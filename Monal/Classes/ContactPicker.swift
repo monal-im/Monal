@@ -103,7 +103,11 @@ struct ContactPicker: View {
                     })
                 }
             }
-            .searchableWithiOSCheck(text: $searchText)
+            .ifAvailable { view in
+                if #available(iOS 15.0, *) {
+                    view.searchable(text: $searchText, placement: .automatic, prompt: nil)
+                }
+            }
             .listStyle(.inset)
             .navigationBarTitle("Contact Selection", displayMode: .inline)
             .navigationBarBackButtonHidden(true)
@@ -114,16 +118,6 @@ struct ContactPicker: View {
                     })
                 }
             }
-        }
-    }
-}
-
-extension View {
-    func searchableWithiOSCheck(text: Binding<String>, prompt: Text? = nil) -> some View {
-        if #available(iOS 15.0, *) {
-            return self.searchable(text: text, placement: .automatic, prompt: prompt)
-        } else {
-            return self
         }
     }
 }

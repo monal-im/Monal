@@ -369,7 +369,7 @@ struct ContactDetails: View {
 
 extension View {
     func navigationBarGroupEditButton(contact: ObservableKVOWrapper<MLContact>, isGroupModerator: Bool, account: xmpp?) -> some View {
-        if contact.isGroup && isGroupModerator && (account != nil && account!.accountState == xmppState.stateBound) {
+        if contact.isGroup && isGroupModerator && (account != nil && account!.accountState.rawValue >= xmppState.stateBound.rawValue) {
             return AnyView(self.toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: LazyClosureView(GroupDetailsEdit(contact: contact))) {

@@ -45,13 +45,13 @@ struct MemberList: View {
         _affiliation = State(wrappedValue: affiliationTmp)
     }
 
-    func setAndShowAlert(title: String, description: String) {
+    func showAlert(title: String, description: String) {
         self.alertPrompt.title = Text(title)
         self.alertPrompt.message = Text(description)
         self.showAlert = true
     }
 
-    func ownUserHasPermissionToRemove(contact: ObservableKVOWrapper<MLContact>) -> Bool {
+    func ownUserHasAffiliationToRemove(contact: ObservableKVOWrapper<MLContact>) -> Bool {
         if contact.obj.contactJid == self.account?.connectionProperties.identity.jid {
             return false
         }
@@ -83,15 +83,15 @@ struct MemberList: View {
                         Spacer()
                         if let contactAffiliation = self.affiliation[contact.contactJid] {
                             if contactAffiliation == "owner" {
-                                Text(NSLocalizedString("Owner", comment: ""))
+                                Text(NSLocalizedString("Owner", comment: "muc affiliation"))
                             } else if contactAffiliation == "admin" {
-                                Text(NSLocalizedString("Admin", comment: ""))
+                                Text(NSLocalizedString("Admin", comment: "muc affiliation"))
                             } else if contactAffiliation == "member" {
-                                Text(NSLocalizedString("Member", comment: ""))
+                                Text(NSLocalizedString("Member", comment: "muc affiliation"))
                             } else if contactAffiliation == "outcast" {
-                                Text(NSLocalizedString("Outcast", comment: ""))
+                                Text(NSLocalizedString("Outcast", comment: "muc affiliation"))
                             } else {
-                                Text(NSLocalizedString("<unknown>", comment: ""))
+                                Text(NSLocalizedString("<unknown>", comment: "muc affiliation"))
                             }
                         }
                     }
@@ -101,23 +101,23 @@ struct MemberList: View {
                         }
                     })
                     .deleteDisabled(
-                        !ownUserHasPermissionToRemove(contact: contact)
+                        !ownUserHasAffiliationToRemove(contact: contact)
                     )
                 }
                 .onDelete(perform: { memberIdx in
                     let member = self.memberList[memberIdx.first!]
                     self.account!.mucProcessor.setAffiliation("none", ofUser: member.contactJid, inMuc: self.group.contactJid)
 
-                    self.setAndShowAlert(title: "Member deleted", description: self.memberList[memberIdx.first!].contactJid)
+                    self.showAlert(title: "Member deleted", description: self.memberList[memberIdx.first!].contactJid)
                     self.memberList.remove(at: memberIdx.first!)
                 })
             }
             .onChange(of: self.memberList) { [previousMemberList = self.memberList] newMemberList in
-                // only handle new members (added via the contact picker
+                // only handle new members (added via the contact picker)
                 for member in newMemberList {
                     if !previousMemberList.contains(member) {
-                        // add selected group member with role member
-                        permissionChangeAction(member, permission: "member")
+                        // add selected group member with affiliation member
+                        affiliationChangeAction(member, affiliation: "member")
                     }
                 }
             }
@@ -180,7 +180,7 @@ struct MemberList: View {
         if #available(iOS 15, *) {
             return Button(role: .destructive, action: {
                 self.account!.mucProcessor.setAffiliation("none", ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
-                self.setAndShowAlert(title: "Member deleted", description: selectedMember.contactJid)
+                self.showAlert(title: "Member deleted", description: selectedMember.contactJid)
                 if let index = self.memberList.firstIndex(of: selectedMember) {
                     self.memberList.remove(at: index)
                 }
@@ -193,14 +193,14 @@ struct MemberList: View {
         }
     }
 
-    func permissionChangeAction(_ selectedMember: ObservableKVOWrapper<MLContact>, permission: String) {
-        self.account!.mucProcessor.setAffiliation(permission, ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
-        self.affiliation[selectedMember.contactJid] = permission
+    func affiliationChangeAction(_ selectedMember: ObservableKVOWrapper<MLContact>, affiliation: String) {
+        self.account!.mucProcessor.setAffiliation(affiliation, ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
+        self.affiliation[selectedMember.contactJid] = affiliation
     }
 
-    func permissionsButton<Label: View>(_ selectedMember: ObservableKVOWrapper<MLContact>, permission: String, @ViewBuilder label: () -> Label) -> some View {
+    func affiliationButton<Label: View>(_ selectedMember: ObservableKVOWrapper<MLContact>, affiliation: String, @ViewBuilder label: () -> Label) -> some View {
         return Button(action: {
-            permissionChangeAction(selectedMember, permission: permission)
+            affiliationChangeAction(selectedMember, affiliation: affiliation)
             // dismiss sheet
             self.selectedMember = nil
         }) {
@@ -209,19 +209,19 @@ struct MemberList: View {
     }
 
     func makeOwner(_ selectedMember: ObservableKVOWrapper<MLContact>) -> some View {
-        return permissionsButton(selectedMember, permission: "owner", label: {
+        return affiliationButton(selectedMember, affiliation: "owner", label: {
             Text("Make owner")
         })
     }
 
     func makeAdmin(_ selectedMember: ObservableKVOWrapper<MLContact>) -> some View {
-        return permissionsButton(selectedMember, permission: "admin", label: {
+        return affiliationButton(selectedMember, affiliation: "admin", label: {
             Text("Make admin")
         })
     }
 
     func makeMember(_ selectedMember: ObservableKVOWrapper<MLContact>) -> some View {
-        return permissionsButton(selectedMember, permission: "member", label: {
+        return affiliationButton(selectedMember, affiliation: "member", label: {
             Text("Make member")
         })
     }
@@ -229,7 +229,7 @@ struct MemberList: View {
     func block(_ selectedMember: ObservableKVOWrapper<MLContact>) -> AnyView {
         if self.group.mucType != "group" {
             return AnyView(
-                permissionsButton(selectedMember, permission: "outcast", label: {
+                affiliationButton(selectedMember, affiliation: "outcast", label: {
                     Text("Block grom group")
                 })
             )

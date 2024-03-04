@@ -8,16 +8,6 @@
 
 import SwiftUI
 
-extension View {
-    func versionConditionalLineLimit(_ limit: ClosedRange<Int>) -> some View {
-        if #available(iOS 16.0, *) {
-            return self.lineLimit(10...50)
-        } else {
-            return self
-        }
-    }
-}
-
 @available(iOS 15.0, *)
 struct EditGroupSubject: View {
     @ObservedObject var contact: ObservableKVOWrapper<MLContact>
@@ -43,7 +33,11 @@ struct EditGroupSubject: View {
                     Section(header: Text("Group Description")) {
                         TextField(NSLocalizedString("Group Description (optional)", comment: "placeholder when editing a group description"), text: $subject, onEditingChanged: { isEditingSubject = $0 })
                             .multilineTextAlignment(.leading)
-                            .versionConditionalLineLimit(10...50)
+                            .ifAvailable { view in
+                                if #available(iOS 16.0, *) {
+                                    view.lineLimit(10...50)
+                                }
+                            }
                             .addClearButton(isEditing: isEditingSubject, text:$subject)
                     }
                 }

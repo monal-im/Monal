@@ -13,7 +13,7 @@ import monalxmpp
 import OrderedCollections
 
 struct CreateGroupMenu: View {
-    @StateObject private var appDelegate: ObservableKVOWrapper<MonalAppDelegate>
+    private var appDelegate: MonalAppDelegate
 
     @State private var connectedAccounts: [xmpp]
     @State private var selectedAccount: xmpp?
@@ -26,12 +26,12 @@ struct CreateGroupMenu: View {
     
     @State private var isEditingGroupName = false
 
-    @ObservedObject private var overlay = LoadingOverlayState()
+    @StateObject private var overlay = LoadingOverlayState()
     
     private var delegate: SheetDismisserProtocol
 
     init(delegate: SheetDismisserProtocol) {
-        _appDelegate = StateObject(wrappedValue: ObservableKVOWrapper(UIApplication.shared.delegate as! MonalAppDelegate))
+        self.appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
         self.delegate = delegate
 
         let connectedAccounts = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
@@ -76,7 +76,7 @@ struct CreateGroupMenu: View {
                             let groupContact = MLContact.createContact(fromJid: roomJid!, andAccountNo: self.selectedAccount!.accountNo)
                             hideLoadingOverlay(overlay)
                             self.delegate.dismissWithoutAnimation()
-                            if let activeChats = self.appDelegate.obj.activeChats {
+                            if let activeChats = self.appDelegate.activeChats {
                                 activeChats.presentChat(with:groupContact)
                             }
                         } else {
@@ -91,7 +91,7 @@ struct CreateGroupMenu: View {
                                     let groupContact = MLContact.createContact(fromJid: roomJid!, andAccountNo: self.selectedAccount!.accountNo)
                                     hideLoadingOverlay(overlay)
                                     self.delegate.dismissWithoutAnimation()
-                                    if let activeChats = self.appDelegate.obj.activeChats {
+                                    if let activeChats = self.appDelegate.activeChats {
                                         activeChats.presentChat(with:groupContact)
                                     }
                                 } else {

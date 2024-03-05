@@ -11,36 +11,27 @@ import monalxmpp
 import OrderedCollections
 
 struct MemberList: View {
+    private let account: xmpp
+    private let ownAffiliation: String;
+    @StateObject var group: ObservableKVOWrapper<MLContact>
     @State private var memberList: OrderedSet<ObservableKVOWrapper<MLContact>>
     @State private var affiliation: Dictionary<String, String>
-    @ObservedObject var group: ObservableKVOWrapper<MLContact>
-    private let account: xmpp?
-    private var ownAffiliation: String = "none";
-
     @State private var openAccountSelection : Bool = false
-
     @State private var showAlert = false
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-
     @State private var selectedMember: MLContact?
 
-    init(mucContact: ObservableKVOWrapper<MLContact>?) {
-        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact!.accountId)! as xmpp
-        self.group = mucContact!;
+    init(mucContact: ObservableKVOWrapper<MLContact>) {
+        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact.accountId)! as xmpp
+        _group = StateObject(wrappedValue: mucContact)
         _memberList = State(wrappedValue: getContactList(viewContact: mucContact))
+        self.ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:mucContact.obj) ?? "none"
         var affiliationTmp = Dictionary<String, String>()
-        for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: mucContact!.contactJid, forAccountId: self.account!.accountNo)) {
-            var jid : String? = memberInfo["participant_jid"] as? String
-            if(jid == nil) {
-                jid = memberInfo["member_jid"] as? String
-            }
-            if(jid == nil) {
+        for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: mucContact.contactJid, forAccountId: self.account.accountNo)) {
+            guard let jid = memberInfo["participant_jid"] as? String ?? memberInfo["member_jid"] as? String else {
                 continue
             }
-            if(jid == self.account?.connectionProperties.identity.jid) {
-                self.ownAffiliation = memberInfo["affiliation"]! as! String
-            }
-            affiliationTmp.updateValue(memberInfo["affiliation"]! as! String, forKey: jid!)
+            affiliationTmp.updateValue((memberInfo["affiliation"] as? String) ?? "none", forKey: jid)
         }
         _affiliation = State(wrappedValue: affiliationTmp)
     }
@@ -52,7 +43,7 @@ struct MemberList: View {
     }
 
     func ownUserHasAffiliationToRemove(contact: ObservableKVOWrapper<MLContact>) -> Bool {
-        if contact.obj.contactJid == self.account?.connectionProperties.identity.jid {
+        if contact.obj.contactJid == self.account.connectionProperties.identity.jid {
             return false
         }
         if let contactAffiliation = self.affiliation[contact.contactJid] {
@@ -69,7 +60,7 @@ struct MemberList: View {
         List {
             Section(header: Text(self.group.obj.contactDisplayName)) {
                 if self.ownAffiliation == "owner" || self.ownAffiliation == "admin" {
-                    NavigationLink(destination: LazyClosureView(ContactPicker(account: self.account!, selectedContacts: $memberList, existingMembers: self.memberList)), label: {
+                    NavigationLink(destination: LazyClosureView(ContactPicker(account: self.account, selectedContacts: $memberList, existingMembers: self.memberList)), label: {
                             Text("Add Group Members")
                     })
                 }
@@ -96,7 +87,7 @@ struct MemberList: View {
                         }
                     }
                     .onTapGesture(perform: {
-                        if(contact.obj.contactJid != self.account?.connectionProperties.identity.jid) {
+                        if contact.obj.contactJid != self.account.connectionProperties.identity.jid {
                             self.selectedMember = contact.obj
                         }
                     })
@@ -106,7 +97,7 @@ struct MemberList: View {
                 }
                 .onDelete(perform: { memberIdx in
                     let member = self.memberList[memberIdx.first!]
-                    self.account!.mucProcessor.setAffiliation("none", ofUser: member.contactJid, inMuc: self.group.contactJid)
+                    self.account.mucProcessor.setAffiliation("none", ofUser: member.contactJid, inMuc: self.group.contactJid)
 
                     self.showAlert(title: "Member deleted", description: self.memberList[memberIdx.first!].contactJid)
                     self.memberList.remove(at: memberIdx.first!)
@@ -179,7 +170,7 @@ struct MemberList: View {
     func removeUserButton(_ selectedMember: ObservableKVOWrapper<MLContact>) -> some View {
         if #available(iOS 15, *) {
             return Button(role: .destructive, action: {
-                self.account!.mucProcessor.setAffiliation("none", ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
+                self.account.mucProcessor.setAffiliation("none", ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
                 self.showAlert(title: "Member deleted", description: selectedMember.contactJid)
                 if let index = self.memberList.firstIndex(of: selectedMember) {
                     self.memberList.remove(at: index)
@@ -194,7 +185,7 @@ struct MemberList: View {
     }
 
     func affiliationChangeAction(_ selectedMember: ObservableKVOWrapper<MLContact>, affiliation: String) {
-        self.account!.mucProcessor.setAffiliation(affiliation, ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
+        self.account.mucProcessor.setAffiliation(affiliation, ofUser: selectedMember.contactJid, inMuc: self.group.contactJid)
         self.affiliation[selectedMember.contactJid] = affiliation
     }
 
@@ -241,7 +232,6 @@ struct MemberList: View {
 
 struct MemberList_Previews: PreviewProvider {
     static var previews: some View {
-        // TODO some dummy views, requires a dummy xmpp obj
-        MemberList(mucContact: nil);
+        MemberList(mucContact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(2)));
     }
 }

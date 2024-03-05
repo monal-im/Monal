@@ -55,7 +55,7 @@ struct RegisterAccount: View {
     @State private var captchaText: String = ""
 
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @ObservedObject private var overlay = LoadingOverlayState()
+    @StateObject private var overlay = LoadingOverlayState()
     @State private var currentTimeout : DispatchTime? = nil
 
     @State private var showWebView = false

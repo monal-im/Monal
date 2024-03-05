@@ -12,29 +12,27 @@ import monalxmpp
 
 struct ContactDetails: View {
     var delegate: SheetDismisserProtocol
-    @ObservedObject var contact: ObservableKVOWrapper<MLContact>
-    private var account: xmpp?
-    @State private var showingBlockContactConfirmation: Bool = false
-    @State private var showingCannotBlockAlert: Bool = false
-    @State private var showingRemoveContactConfirmation: Bool = false
-    @State private var showingAddContactConfirmation: Bool = false
-    @State private var showingClearHistoryConfirmation: Bool = false
-    @State private var showingResetOmemoSessionConfirmation: Bool = false
-    @State private var showingCannotEncryptAlert: Bool = false
-    @State private var showingShouldDisableEncryptionAlert: Bool = false
-    @State private var isEditingNickname: Bool = false
-    private let isGroupModerator: Bool
+    private var account: xmpp
+    private var isGroupModerator = false
+    @StateObject var contact: ObservableKVOWrapper<MLContact>
+    @State private var showingBlockContactConfirmation = false
+    @State private var showingCannotBlockAlert = false
+    @State private var showingRemoveContactConfirmation = false
+    @State private var showingAddContactConfirmation = false
+    @State private var showingClearHistoryConfirmation = false
+    @State private var showingResetOmemoSessionConfirmation = false
+    @State private var showingCannotEncryptAlert = false
+    @State private var showingShouldDisableEncryptionAlert = false
+    @State private var isEditingNickname = false
 
     init(delegate: SheetDismisserProtocol, contact: ObservableKVOWrapper<MLContact>) {
         self.delegate = delegate
-        self.contact = contact
-        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId) as xmpp?
+        _contact = StateObject(wrappedValue: contact)
+        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)!
 
         if contact.isGroup {
-            let ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj)
+            let ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj) ?? "none"
             self.isGroupModerator = (ownRole == "moderator")
-        } else {
-            self.isGroupModerator = false
         }
     }
 
@@ -152,11 +150,11 @@ struct ContactDetails: View {
 //                }
 
                 if(contact.obj.isGroup && contact.obj.mucType == "group") {
-                    NavigationLink(destination: LazyClosureView(MemberList(mucContact: contact))) {
+                    NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
                         Text("Group Members")
                     }
                 } else if(contact.obj.isGroup && contact.obj.mucType == "channel") {
-                    NavigationLink(destination: LazyClosureView(ChannelMemberList(channelContact: contact))) {
+                    NavigationLink(destination: LazyClosureView(ChannelMemberList(mucContact:contact))) {
                         Text("Channel Members")
                     }
                 }
@@ -349,9 +347,7 @@ struct ContactDetails: View {
                                 .destructive(
                                     Text("Yes"),
                                     action: {
-                                        if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId) {
-                                            account.omemo.clearAllSessions(forJid:contact.contactJid);
-                                        }
+                                        self.account.omemo.clearAllSessions(forJid:contact.contactJid);
                                     }
                                 )
                             ]
@@ -362,23 +358,19 @@ struct ContactDetails: View {
 #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationBarTitle(contact.contactDisplayName as String, displayMode: .inline)
-        .navigationBarGroupEditButton(contact: contact, isGroupModerator: self.isGroupModerator, account: self.account)
-    }
-}
-
-extension View {
-    func navigationBarGroupEditButton(contact: ObservableKVOWrapper<MLContact>, isGroupModerator: Bool, account: xmpp?) -> some View {
-        if contact.isGroup && isGroupModerator && (account != nil && account!.accountState.rawValue >= xmppState.stateBound.rawValue) {
-            return AnyView(self.toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: LazyClosureView(GroupDetailsEdit(contact: contact))) {
-                        Text("Edit")
+        .navigationBarTitle(contact.contactDisplayName as String, displayMode:.inline)
+        .applyClosure { view in
+            if contact.isGroup && isGroupModerator && self.account.accountState.rawValue >= xmppState.stateBound.rawValue {
+                view.toolbar {
+                    ToolbarItem(placement:.navigationBarTrailing) {
+                        let ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:contact.obj) ?? "none"
+                        NavigationLink(destination:LazyClosureView(GroupDetailsEdit(contact:contact, ownAffiliation:ownAffiliation))) {
+                            Text("Edit")
+                        }
                     }
                 }
-            })
+            }
         }
-        return AnyView(self)
     }
 }
 

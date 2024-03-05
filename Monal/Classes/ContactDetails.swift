@@ -369,6 +369,8 @@ struct ContactDetails: View {
                         }
                     }
                 }
+            } else {
+                view
             }
         }
     }

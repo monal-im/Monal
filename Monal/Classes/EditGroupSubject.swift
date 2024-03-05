@@ -34,6 +34,8 @@ struct EditGroupSubject: View {
                             .applyClosure { view in
                                 if #available(iOS 16.0, *) {
                                     view.lineLimit(10...50)
+                                } else {
+                                    view
                                 }
                             }
                             .addClearButton(isEditing: isEditingSubject, text:$subject)

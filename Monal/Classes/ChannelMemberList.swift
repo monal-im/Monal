@@ -12,18 +12,18 @@ import OrderedCollections
 
 struct ChannelMemberList: View {
     @State private var channelMembers: OrderedDictionary<String, String>
-    @ObservedObject var channel: ObservableKVOWrapper<MLContact>
-    private let account: xmpp?
+    @StateObject var channel: ObservableKVOWrapper<MLContact>
+    private let account: xmpp
 
-    init(channelContact: ObservableKVOWrapper<MLContact>) {
-        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: channelContact.accountId)! as xmpp
-        self.channel = channelContact;
-
-        let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: channelContact.contactJid, forAccountId: channelContact.accountId))
+    init(mucContact: ObservableKVOWrapper<MLContact>) {
+        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact.accountId)! as xmpp
+        _channel = StateObject(wrappedValue: mucContact)
+        
+        let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: mucContact.contactJid, forAccountId: mucContact.accountId))
         var nickSet : OrderedDictionary<String, String> = OrderedDictionary()
         for jidDict in jidList {
             if let nick = jidDict["room_nick"] as? String {
-                nickSet.updateValue(jidDict["affiliation"]! as! String, forKey: nick)
+                nickSet.updateValue((jidDict["affiliation"] as? String) ?? "none", forKey:nick)
             }
         }
         _channelMembers = State(wrappedValue: nickSet)
@@ -54,9 +54,8 @@ struct ChannelMemberList: View {
     }
 }
 
-/*struct ChannelMemberList_Previews: PreviewProvider {
+struct ChannelMemberList_Previews: PreviewProvider {
     static var previews: some View {
-        // TODO some dummy views, requires a dummy xmpp obj
-        // ChannelMemberList(channelContact: nil);
+        ChannelMemberList(mucContact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(3)));
     }
-}*/
+}

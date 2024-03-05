@@ -103,9 +103,11 @@ struct ContactPicker: View {
                     })
                 }
             }
-            .ifAvailable { view in
+            .applyClosure { view in
                 if #available(iOS 15.0, *) {
                     view.searchable(text: $searchText, placement: .automatic, prompt: nil)
+                } else {
+                    view
                 }
             }
             .listStyle(.inset)

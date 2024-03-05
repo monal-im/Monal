@@ -334,7 +334,7 @@ extension View {
     /// - Parameters:
     ///   - transform: The transform to apply to the source `View`.
     /// - Returns: The view transformed by the transform.
-    func ifAvailable<Content: View>(@ViewBuilder _ transform: (Self) -> Content) -> some View {
+    func applyClosure<Content: View>(@ViewBuilder _ transform: (Self) -> Content) -> some View {
         transform(self)
     }
 }

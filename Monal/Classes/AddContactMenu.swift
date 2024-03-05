@@ -25,7 +25,7 @@ struct AddContactMenu: View {
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
     @State private var invitationResult: [String:AnyObject]? = nil
 
-    @ObservedObject private var overlay = LoadingOverlayState()
+    @StateObject private var overlay = LoadingOverlayState()
 
     @State private var showQRCodeScanner = false
     @State private var success = false

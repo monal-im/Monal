@@ -49,7 +49,7 @@
 @import AVFoundation;
 @import WebRTC;
 
-#define STATE_VERSION 11
+#define STATE_VERSION 12
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -102,6 +102,7 @@ NSString* const kStanza = @"stanza";
     NSMutableArray* _smacksAckHandler;
     NSMutableDictionary* _iqHandlers;
     NSMutableArray* _reconnectionHandlers;
+    NSMutableSet* _runningCapsQueries;
     NSMutableDictionary* _runningMamQueries;
     BOOL _SRVDiscoveryDone;
     BOOL _startTLSComplete;
@@ -258,6 +259,7 @@ NSString* const kStanza = @"stanza";
     _iqHandlers = [NSMutableDictionary new];
     _reconnectionHandlers = [NSMutableArray new];
     _mamPageArrays = [NSMutableDictionary new];
+    _runningCapsQueries = [NSMutableSet new];
     _runningMamQueries = [NSMutableDictionary new];
     _inCatchup = [NSMutableDictionary new];
     _pipeliningState = kPipelinedNothing;
@@ -1932,7 +1934,7 @@ NSString* const kStanza = @"stanza";
                     BOOL shouldQueryCaps = NO;
                     if(![@"sha-1" isEqualToString:[presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@hash"]])
                     {
-                        DDLogWarn(@"Unknown caps hash algo '%@', querying disco without checking hash!", [presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@hash"]);
+                        DDLogWarn(@"Unknown caps hash algo '%@', requesting disco query without checking hash!", [presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@hash"]);
                         shouldQueryCaps = YES;
                     }
                     else
@@ -1943,17 +1945,24 @@ NSString* const kStanza = @"stanza";
 
                         if(![[DataLayer sharedInstance] getCapsforVer:newVer onAccountNo:self.accountNo])
                         {
-                            DDLogInfo(@"Presence included unknown caps hash %@, querying disco", newVer);
+                            DDLogInfo(@"Presence included unknown caps hash %@, requesting disco query", newVer);
                             shouldQueryCaps = YES;
                         }
                     }
                     
                     if(shouldQueryCaps)
                     {
-                        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-                        [discoInfo setiqTo:presenceNode.from];
-                        [discoInfo setDiscoInfoNode];
-                        [self sendIq:discoInfo withHandler:$newHandler(MLIQProcessor, handleEntityCapsDisco)];
+                        if([_runningCapsQueries containsObject:newVer])
+                            DDLogInfo(@"Presence included unknown caps hash %@, but disco query already running, not querying again", newVer);
+                        else
+                        {
+                            DDLogInfo(@"Querying disco for caps hash: %@", newVer);
+                            XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+                            [discoInfo setiqTo:presenceNode.from];
+                            [discoInfo setDiscoInfoNode];
+                            [self sendIq:discoInfo withHandler:$newHandler(MLIQProcessor, handleEntityCapsDisco)];
+                            [_runningCapsQueries addObject:newVer];
+                        }
                     }
                 }
                 
@@ -3416,6 +3425,7 @@ NSString* const kStanza = @"stanza";
             
             [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
             [values setObject:[self.mucProcessor getInternalState] forKey:@"mucState"];
+            [values setObject:[self->_runningCapsQueries copy] forKey:@"runningCapsQueries"];
             [values setObject:[self->_runningMamQueries copy] forKey:@"runningMamQueries"];
             [values setObject:[NSNumber numberWithBool:self->_loggedInOnce] forKey:@"loggedInOnce"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
@@ -3670,6 +3680,9 @@ NSString* const kStanza = @"stanza";
             
             if([dic objectForKey:@"mucState"])
                 [self.mucProcessor setInternalState:[dic objectForKey:@"mucState"]];
+            
+            if([dic objectForKey:@"runningCapsQueries"])
+                _runningCapsQueries = [[dic objectForKey:@"runningCapsQueries"] mutableCopy];
             
             if([dic objectForKey:@"runningMamQueries"])
                 _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
@@ -3951,6 +3964,9 @@ NSString* const kStanza = @"stanza";
     
     //clear list of running mam queries
     _runningMamQueries = [NSMutableDictionary new];
+    
+    //clear list of running caps queries
+    _runningCapsQueries = [NSMutableSet new];
     
     //clear old catchup state (technically all stanzas still in delayedMessageStanzas could have also been
     //in the parseQueue in the last run and deleted there)
@@ -5286,6 +5302,11 @@ NSString* const kStanza = @"stanza";
             completion(errorStr);   //signal error to UI
         }
     }];
+}
+
+-(void) markCapsQueryCompleteFor:(NSString*) ver
+{
+    [_runningCapsQueries removeObject:ver];
 }
 
 -(void) publishRosterName:(NSString* _Nullable) rosterName

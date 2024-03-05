@@ -30,7 +30,7 @@ struct WelcomeLogIn: View {
     @State private var isLoadingOmemoBundles = false
     
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @ObservedObject private var overlay = LoadingOverlayState()
+    @StateObject private var overlay = LoadingOverlayState()
 
 #if IS_ALPHA
     let appLogoId = "AlphaAppLogo"

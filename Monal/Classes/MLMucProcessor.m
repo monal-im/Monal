@@ -301,7 +301,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         item[@"nick"] = presenceNode.fromResource;
         
         //handle participant updates
-        if([presenceNode check:@"/<type=unavailable>"])
+        if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)
             [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
         else
             [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
@@ -396,7 +396,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             BOOL isTypeGroup = [[[DataLayer sharedInstance] getMucTypeOfRoom:mucJid andAccount:_account.accountNo] isEqualToString:@"group"];
 #endif
             
-            if([@"none" isEqualToString:item[@"affiliation"]])
+            if(item[@"affiliation"] == nil || [@"none" isEqualToString:item[@"affiliation"]])
             {
                 DDLogVerbose(@"Removing member '%@' from muc '%@'...", item[@"jid"], mucJid);
                 [[DataLayer sharedInstance] removeMember:item fromMuc:mucJid forAccountId:_account.accountNo];

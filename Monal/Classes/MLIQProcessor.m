@@ -618,6 +618,7 @@ $$class_handler(handleEntityCapsDisco, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
     NSArray* forms = [iqNode find:@"{http://jabber.org/protocol/disco#info}query/{jabber:x:data}x"];
     NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features andForms:forms];
     [[DataLayer sharedInstance] setCaps:features forVer:ver onAccountNo:account.accountNo];
+    [account markCapsQueryCompleteFor:ver];
     
     //send out kMonalContactRefresh notification
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{

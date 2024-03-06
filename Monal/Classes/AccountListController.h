@@ -14,6 +14,7 @@
 
 -(NSUInteger) getAccountNum;
 -(NSNumber*) getAccountNoByIndex:(NSUInteger) index;
+-(NSString *) getAccountNameByIndex:(NSUInteger) index;
 -(void) setupAccountsView;
 -(void) refreshAccountList;
 -(void) initContactCell:(MLSwitchCell*) cell forAccNo:(NSUInteger) accNo;

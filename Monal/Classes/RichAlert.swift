@@ -59,17 +59,18 @@ struct RichAlertView<T, TitleContent, BodyContent, ButtonContent>: ViewModifier 
                                 DispatchQueue.main.async {
                                     scrollViewContentSize = geo.size
                                 }
-                                return Color.white
+                                return Color.background
                             }
                         )
                     }
                     .frame(maxHeight: scrollViewContentSize.height)
                 }
+                .foregroundColor(.primary)
                 .padding([.top, .bottom], 13)
                 .frame(width: 320)
-                .background(Color.white)
+                .background(Color.background)
                 .cornerRadius(16)
-                .shadow(color: Color.black.opacity(0.4), radius: 16, x: 0, y: 0)
+                .shadow(color: Color.primary.opacity(0.4), radius: 16, x: 0, y: 0)
                 .padding([.top, .bottom], 24)
             }
         }

@@ -73,7 +73,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         <stream:stream xmlns:stream='http://etherx.jabber.org/streams' version='1.0' xmlns='jabber:client' xml:lang='en' from='example.org' id='a344b8bb-518e-4456-9140-d15f66c1d2db'>\n\
         <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism></mechanisms></stream:features>\n\
         <iq id='18382ACA-EF9D-4BC9-8779-7901C63B6631' to='user1@example.org/Monal-iOS.ef313600' xmlns='jabber:client' type='result' from='luloku@conference.example.org'><query xmlns='http://jabber.org/protocol/disco#info'><feature var='http://jabber.org/protocol/muc#request'/><feature var='muc_hidden'/><feature var='muc_unsecured'/><feature var='muc_membersonly'/><feature var='muc_unmoderated'/><feature var='muc_persistent'/><identity type='text' name='testchat gruppe' category='conference'/><feature var='urn:xmpp:mam:2'/><feature var='urn:xmpp:sid:0'/><feature var='muc_nonanonymous'/><feature var='http://jabber.org/protocol/muc'/><feature var='http://jabber.org/protocol/muc#stable_id'/><feature var='http://jabber.org/protocol/muc#self-ping-optimization'/><feature var='jabber:iq:register'/><feature var='vcard-temp'/><x type='result' xmlns='jabber:x:data'><field type='hidden' var='FORM_TYPE'><value>http://jabber.org/protocol/muc#roominfo</value></field><field label='Description' var='muc#roominfo_description' type='text-single'><value/></field><field label='Number of occupants' var='muc#roominfo_occupants' type='text-single'><value>2</value></field><field label='Allow members to invite new members' var='{http://prosody.im/protocol/muc}roomconfig_allowmemberinvites' type='boolean'><value>0</value></field><field label='Allow users to invite other users' var='muc#roomconfig_allowinvites' type='boolean'><value>0</value></field><field label='Title' var='muc#roomconfig_roomname' type='text-single'><value>testchat gruppe</value></field><field type='boolean' var='muc#roomconfig_changesubject'/><field type='text-single' var='{http://modules.prosody.im/mod_vcard_muc}avatar#sha1'/><field type='text-single' var='muc#roominfo_lang'><value/></field></x></query></iq>\n\
-        <iq id='605818D4-4D16-4ACC-B003-BFA3E11849E1' to='test1@xmpp.eightysoft.de/Monal-iOS.15e153a8' xmlns='jabber:client' type='result' from='asdkjfhskdf@messaging.one'><pubsub xmlns='http://jabber.org/protocol/pubsub'><subscription node='eu.siacs.conversations.axolotl.devicelist' subid='6795F13596465' subscription='subscribed' jid='test1@xmpp.eightysoft.de'/></pubsub></iq>\n\
+        <iq id='605818D4-4D16-4ACC-B003-BFA3E11849E1' to='user@example.com/Monal-iOS.15e153a8' xmlns='jabber:client' type='result' from='asdkjfhskdf@messaging.one'><pubsub xmlns='http://jabber.org/protocol/pubsub'><subscription node='eu.siacs.conversations.axolotl.devicelist' subid='6795F13596465' subscription='subscribed' jid='user@example.com'/></pubsub></iq>\n\
         <iq from='benvolio@capulet.lit/230193' id='disco1' to='juliet@capulet.lit/chamber' type='result'>\n\
           <query xmlns='http://jabber.org/protocol/disco#info' node='http://psi-im.org#q07IKJEyjvHSyhy//CH0CxmKi8w='>\n\
             <identity xml:lang='en' category='client' name='Psi 0.11' type='pc'/>\n\
@@ -124,7 +124,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 DDLogDebug(@"Query: '%@', result: '%@'", query, result);
             }
             NSString* specialQuery1 = @"/<type=%@>/{http://jabber.org/protocol/pubsub}pubsub/subscription<node=%@><subscription=%s><jid=%@>";
-            id result = [parsedStanza find:specialQuery1, @"result", @"eu.siacs.conversations.axolotl.devicelist", "subscribed", @"test1@xmpp.eightysoft.de"];
+            id result = [parsedStanza find:specialQuery1, @"result", @"eu.siacs.conversations.axolotl.devicelist", "subscribed", @"user@example.com"];
             DDLogDebug(@"Query: '%@', result: '%@'", specialQuery1, result);
             
             //handle gajim disco hash testcase
@@ -1617,7 +1617,10 @@ $$
         [refreshingTask setTaskCompletedWithSuccess:YES];
     }
     
-    MLAssert([[MLXMPPManager sharedInstance] hasConnectivity], @"BGTASK has *no* connectivity? That's strange!");
+    if(![[MLXMPPManager sharedInstance] hasConnectivity])
+    {
+        DDLogError(@"BGTASK has *no* connectivity? That's strange!");
+    }
     
     [self startBackgroundTimer:BGPROCESS_GRACEFUL_TIMEOUT];
     @synchronized(self) {
@@ -1715,7 +1718,10 @@ $$
 //         [[UIApplication sharedApplication] endBackgroundTask:task];
 //     }
     
-    MLAssert([[MLXMPPManager sharedInstance] hasConnectivity], @"BGTASK has *no* connectivity? That's strange!");
+    if(![[MLXMPPManager sharedInstance] hasConnectivity])
+    {
+        DDLogError(@"BGTASK has *no* connectivity? That's strange!");
+    }
     
     [self startBackgroundTimer:GRACEFUL_TIMEOUT];
     @synchronized(self) {

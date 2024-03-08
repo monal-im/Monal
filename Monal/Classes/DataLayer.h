@@ -60,8 +60,9 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(NSMutableArray<MLContact*>*) searchContactsWithString:(NSString*) search;
 
--(NSMutableArray<MLContact*>*) contactList;
--(NSMutableArray<MLContact*>*) contactListWithJid:(NSString*) jid;
+-(NSArray<MLContact*>*) contactList;
+-(NSArray<MLContact*>*) contactListWithJid:(NSString*) jid;
+-(NSArray<MLContact*>*) possibleGroupMembersForAccount:(NSNumber*) accountNo;
 -(NSArray<NSString*>*) resourcesForContact:(MLContact* _Nonnull)contact ;
 -(MLContactSoftwareVersionInfo* _Nullable) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSNumber*)account;
 -(void) setSoftwareVersionInfoForContact:(NSString*)contact
@@ -75,8 +76,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo;
 -(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo;
 -(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo;
--(NSSet* _Nullable) getCapsforVer:(NSString*) ver;
--(void) setCaps:(NSSet*) caps forVer:(NSString*) ver;
+-(NSSet* _Nullable) getCapsforVer:(NSString*) ver onAccountNo:(NSNumber*) accountNo;
+-(void) setCaps:(NSSet*) caps forVer:(NSString*) ver onAccountNo:(NSNumber*) accountNo;
 
 #pragma mark  presence functions
 -(void) setResourceOnline:(XMPPPresence*) presenceObj forAccount:(NSNumber*) accountNo;
@@ -114,6 +115,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) removeParticipant:(NSDictionary*) participant fromMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(NSDictionary* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(NSArray<NSDictionary<NSString*, id>*>*) getMembersAndParticipantsOfMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(NSString* _Nullable) getOwnAffiliationInGroupOrChannel:(MLContact*) contact;
+-(NSString* _Nullable) getOwnRoleInGroupOrChannel:(MLContact*) contact;
 -(void) addMucFavorite:(NSString*) room forAccountId:(NSNumber*) accountNo andMucNick:(NSString* _Nullable) mucNick;
 -(NSString*) lastStanzaIdForMuc:(NSString* _Nonnull) room andAccount:(NSNumber* _Nonnull) accountNo;
 -(void) setLastStanzaId:(NSString*) lastStanzaId forMuc:(NSString* _Nonnull) room andAccount:(NSNumber* _Nonnull) accountNo;
@@ -125,7 +128,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) updateMucSubject:(NSString*) subject forAccount:(NSNumber*) accountNo andRoom:(NSString*) room;
 -(NSString*) mucSubjectforAccount:(NSNumber*) accountNo andRoom:(NSString*) room;
 
--(NSMutableArray*) listMucsForAccount:(NSNumber*) accountNo;
+-(NSSet*) listMucsForAccount:(NSNumber*) accountNo;
 -(BOOL) deleteMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 
 -(void) updateMucTypeTo:(NSString*) type forRoom:(NSString*) room andAccount:(NSNumber*) accountNo;
@@ -208,7 +211,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
 -(void) deleteMessageHistoryLocally:(NSNumber*) messageNo;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
--(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSNumber*) accountNo;
+-(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo;
 
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID;
 -(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted historyBaseID:(NSNumber* _Nullable) historyBaseID;

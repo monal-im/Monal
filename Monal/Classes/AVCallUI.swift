@@ -572,7 +572,7 @@ struct AVCallUI: View {
                 dismissButton: .default(Text("OK"))
             )
         }
-        .richAlert(isPresented:$showSecurityHelpAlert, title:Text("Call security help").foregroundColor(.black)) {
+        .richAlert(isPresented:$showSecurityHelpAlert, title:Text("Call security help")) {
             VStack(alignment: .leading) {
                 HStack {
                     Image(systemName: "xmark.shield.fill")
@@ -606,7 +606,7 @@ struct AVCallUI: View {
                 }.font(Font.body.weight(showSecurityHelpAlert == .trusted ? .heavy : .medium))
                 Text("This means your call is encrypted and the remote party was verified using OMEMO encryption.\nYou manually verified the used OMEMO keys and no Man-In-The-Middle can take place.")
                 Spacer().frame(height: 20)
-            }.foregroundColor(.black)
+            }
         }
         .onAppear {
             //force portrait mode and lock ui there

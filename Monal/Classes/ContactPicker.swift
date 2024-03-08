@@ -10,32 +10,18 @@ import SwiftUI
 import monalxmpp
 import OrderedCollections
 
-struct ContactEntry: View { // TODO move
-    let contact : MLContact
-
-    var body:some View {
-        ZStack(alignment: .topLeading) {
-            HStack(alignment: .center) {
-                Image(uiImage: contact.avatar)
-                    .resizable()
-                    .frame(width: 40, height: 40, alignment: .center)
-                VStack(alignment: .leading) {
-                    Text(contact.contactDisplayName as String)
-                    Text(contact.contactJid as String).font(.footnote).opacity(0.6)
-                }
-            }
-        }
-    }
-}
-
 struct ContactPickerEntry: View {
-    let contact : MLContact
+    let contact : ObservableKVOWrapper<MLContact>
     let isPicked: Bool
+    let isExistingMember: Bool
 
     var body:some View {
         ZStack(alignment: .topLeading) {
             HStack(alignment: .center) {
-                if(isPicked) {
+                if(isExistingMember) {
+                    Image(systemName: "checkmark.circle")
+                        .foregroundColor(.gray)
+                } else if(isPicked) {
                     Image(systemName: "checkmark.circle")
                         .foregroundColor(.blue)
                 } else {
@@ -56,17 +42,42 @@ struct ContactPickerEntry: View {
 struct ContactPicker: View {
     @Environment(\.presentationMode) private var presentationMode
 
-    let contacts : [MLContact]
-    @Binding var selectedContacts : OrderedSet<MLContact> // already selected when going into the view
-    @State var searchFieldInput = ""
+    @State var contacts: OrderedSet<ObservableKVOWrapper<MLContact>>
+    let account: xmpp
+    @Binding var selectedContacts: OrderedSet<ObservableKVOWrapper<MLContact>>
+    let existingMembers: OrderedSet<ObservableKVOWrapper<MLContact>>
+    @State var searchText = ""
 
-    func matchesSearch(contact : MLContact) -> Bool {
-        // TODO better lookup
-        if searchFieldInput.isEmpty == true {
-            return true
+    @State var isEditingSearchInput: Bool = false
+
+    init(account: xmpp, selectedContacts: Binding<OrderedSet<ObservableKVOWrapper<MLContact>>>) {
+        self.init(account: account, selectedContacts: selectedContacts, existingMembers: OrderedSet())
+    }
+
+    init(account: xmpp, selectedContacts: Binding<OrderedSet<ObservableKVOWrapper<MLContact>>>, existingMembers: OrderedSet<ObservableKVOWrapper<MLContact>>) {
+        self.account = account
+        self._selectedContacts = selectedContacts
+        self.existingMembers = existingMembers
+
+        var contactsTmp: OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
+        for contact in DataLayer.sharedInstance().possibleGroupMembers(forAccount: account.accountNo) {
+            contactsTmp.append(ObservableKVOWrapper(contact))
+        }
+        _contacts = State(wrappedValue: contactsTmp)
+    }
+
+    private var searchResults : OrderedSet<ObservableKVOWrapper<MLContact>> {
+        if searchText.isEmpty {
+            return self.contacts
         } else {
-            return contact.contactDisplayName.lowercased().contains(searchFieldInput.lowercased()) ||
-                contact.contactJid.contains(searchFieldInput.lowercased())
+            var filteredContacts: OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
+            for contact in self.contacts {
+                if (contact.contactDisplayName as String).lowercased().contains(searchText.lowercased()) ||
+                    (contact.contactJid as String).contains(searchText.lowercased()) {
+                    filteredContacts.append(contact)
+                }
+            }
+            return filteredContacts
         }
     }
 
@@ -76,21 +87,27 @@ struct ContactPicker: View {
                 .navigationTitle("Contact Lists")
         } else {
             List {
-                Section {
-                    TextField(NSLocalizedString("Search contacts", comment: "placeholder in contact picker"), text: $searchFieldInput)
-                }
-                ForEach(Array(contacts.enumerated()), id: \.element) { idx, contact in
-                    if matchesSearch(contact: contact) {
-                        let contactIsSelected = self.selectedContacts.contains(contact);
-                        ContactPickerEntry(contact: contact, isPicked: contactIsSelected)
-                        .onTapGesture(perform: {
+                ForEach(searchResults, id: \.self.obj) { contact in
+                    let contactIsSelected = self.selectedContacts.contains(contact);
+                    let contactIsAlreadyMember = self.existingMembers.contains(contact);
+                    ContactPickerEntry(contact: contact, isPicked: contactIsSelected, isExistingMember: contactIsAlreadyMember)
+                    .onTapGesture(perform: {
+                        // only allow changes to members that are not already part of the group
+                        if(!contactIsAlreadyMember) {
                             if(contactIsSelected) {
                                 self.selectedContacts.remove(contact)
                             } else {
                                 self.selectedContacts.append(contact)
                             }
-                        })
-                    }
+                        }
+                    })
+                }
+            }
+            .applyClosure { view in
+                if #available(iOS 15.0, *) {
+                    view.searchable(text: $searchText, placement: .automatic, prompt: nil)
+                } else {
+                    view
                 }
             }
             .listStyle(.inset)
@@ -104,10 +121,5 @@ struct ContactPicker: View {
                 }
             }
         }
-    }
-
-    init(selectedContacts: Binding<OrderedSet<MLContact>>) {
-        self._selectedContacts = selectedContacts
-        self.contacts = DataLayer.sharedInstance().contactList() as! [MLContact]
     }
 }

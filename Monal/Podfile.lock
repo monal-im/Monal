@@ -1,5 +1,5 @@
 PODS:
-  - ASN1Decoder (1.9.0)
+  - ASN1Decoder (1.10.0)
   - DZNEmptyDataSet (1.8.1)
   - FLAnimatedImage (1.0.17)
   - KSCrash/Core (1.16.2):
@@ -42,9 +42,9 @@ PODS:
     - MarqueeLabel (~> 4.3.0)
     - SnapKit (~> 5.6.0)
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.18.10):
-    - SDWebImage/Core (= 5.18.10)
-  - SDWebImage/Core (5.18.10)
+  - SDWebImage (5.19.0):
+    - SDWebImage/Core (= 5.19.0)
+  - SDWebImage/Core (5.19.0)
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
@@ -53,7 +53,7 @@ PODS:
   - sqlite3/perf-threadsafe (3.45.1):
     - sqlite3/common
   - TOCropViewController (2.6.1)
-  - WebRTC-lib (120.0.0)
+  - WebRTC-lib (122.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -107,7 +107,7 @@ CHECKOUT OPTIONS:
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
 
 SPEC CHECKSUMS:
-  ASN1Decoder: 4f4bbcaf1d1b8be56daa3280e82863a607f5bda9
+  ASN1Decoder: 91cb1d781b5a178ea7375b2f1519e2bdaaa4c427
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
   KSCrash: 469b9f982b97309acb719baaecbf9182f62ddf85
@@ -115,14 +115,14 @@ SPEC CHECKSUMS:
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: fc8f2d48bbfd72ef39d70e981bd24a3f3be53fec
+  SDWebImage: 981fd7e860af070920f249fd092420006014c3eb
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
-  WebRTC-lib: bd0d4b76aab1492415216715bd02f4329a33cd10
+  WebRTC-lib: 5e9d21edbcf9ce5cc66b7ec7f94f0c15a2779113
 
 PODFILE CHECKSUM: f415f317e34fd11a687374f84ee8dfb14ebb29a6
 
-COCOAPODS: 1.15.0
+COCOAPODS: 1.15.2

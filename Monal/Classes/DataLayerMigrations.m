@@ -1020,7 +1020,21 @@
             [db executeNonQuery:@"UPDATE account SET username=TRIM(username);"];
             [db executeNonQuery:@"UPDATE account SET domain=TRIM(domain);"];
         }];
-
+        
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.201 withBlock:^{
+            [db executeNonQuery:@"DROP TABLE IF EXISTS ver_info;"];
+            [db executeNonQuery:@"CREATE TABLE ver_info( \
+                ver VARCHAR(32), \
+                cap VARCHAR(255), \
+                timestamp INTEGER NOT NULL DEFAULT 0, \
+                account_id INTEGER NOT NULL, \
+                PRIMARY KEY (ver, cap, account_id) \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+            );"];
+            [db executeNonQuery:@"DROP TABLE IF EXISTS ver_timestamp;"];
+        }];
+        
+        
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs
         if(![[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"])

@@ -264,13 +264,21 @@ static NSMutableDictionary* _pendingCalls;
     //handle tie breaking: one party migrates the call to other device
     else if(existingCall.state < MLCallStateFinished)       //call already running
     {
-        DDLogInfo(@"Migrating from new call to existing call: %@", existingCall);
-        [existingCall migrateTo:newCall];
-        
-        //drop new call after migration to make sure it does not interfere with our existing call
-        DDLogInfo(@"Dropping newCall '%@' in favor of migrated existingCall '%@' ...", [newCall short], [existingCall short]);
-        newCall = nil;
-        
+        if(newCall.callType == existingCall.callType)
+        {
+            DDLogInfo(@"Migrating from new call to existing call: %@", existingCall);
+            [existingCall migrateTo:newCall];
+            
+            //drop new call after migration to make sure it does not interfere with our existing call
+            DDLogInfo(@"Dropping newCall '%@' in favor of migrated existingCall '%@' ...", [newCall short], [existingCall short]);
+            newCall = nil;
+        }
+        else
+        {
+            existingCall.tieBreak = YES;        //will be ignored if call was connected, but it doesn't hurt either
+            [existingCall end];
+            [self processIncomingCall:notification.userInfo withCompletion:nil];
+        }
         return;
     }
     unreachable();

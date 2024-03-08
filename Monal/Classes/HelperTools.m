@@ -102,7 +102,7 @@ static struct {
 int asyncSafeCopyFile(const char* from, const char* to)
 {
     int fd_to, fd_from;
-    char buf[4096];
+    char buf[1024];
     ssize_t nread;
     int saved_errno;
 
@@ -201,9 +201,15 @@ void logException(NSException* exception)
 void uncaughtExceptionHandler(NSException* exception)
 {
     logException(exception);
+//don't let kscrash handle the exception if we are in the simulator
+//(this makes sure xcode will catch the exception and show proper backtraces etc.)
+#if TARGET_OS_SIMULATOR
+    return;
+#else
     //make sure this crash will be recorded by kscrash using the NSException rather than the c++ exception thrown by the objc runtime
     //this will make sure that the stacktrace matches the objc exception rather than being a top level c++ stacktrace
     KSCrash.sharedInstance.uncaughtExceptionHandler(exception);
+#endif
 }
 
 //this function will only be in use under macos alpha builds to log every exception (even when catched with @try-@catch constructs)
@@ -352,11 +358,13 @@ void swizzle(Class c, SEL orig, SEL new)
 {
     if(description == nil || [description isEqualToString:@""])
         description = @"XMPP Error";
+    NSMutableString* message = [description mutableCopy];
     NSString* errorReason = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
+    if(errorReason && ![errorReason isEqualToString:@""])
+        [message appendString:[NSString stringWithFormat:@": %@", errorReason]];
     NSString* errorText = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
-    NSString* message = [NSString stringWithFormat:@"%@: %@", description, errorReason];
     if(errorText && ![errorText isEqualToString:@""])
-        message = [NSString stringWithFormat:@"%@: %@ (%@)", description, errorReason, errorText];
+        [message appendString:[NSString stringWithFormat:@" (%@)", errorText]];
     return message;
 }
 
@@ -463,9 +471,10 @@ void swizzle(Class c, SEL orig, SEL new)
     
     //every identifier has its own thread priority/qos class
     __block dispatch_queue_priority_t priority;
+    __block char* name;
     switch(identifier)
     {
-        case MLRunLoopIdentifierNetwork: priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND; break;
+        case MLRunLoopIdentifierNetwork: priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND; name = "im.monal.runloop.networking"; break;
         default: unreachable(@"unknown runloop identifier!");
     }
     
@@ -474,7 +483,7 @@ void swizzle(Class c, SEL orig, SEL new)
         {
             NSCondition* condition = [NSCondition new];
             [condition lock];
-            dispatch_async(dispatch_get_global_queue(priority, 0), ^{
+            dispatch_async(dispatch_queue_create_with_target(name, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(priority, 0)), ^{
                 //we don't need an @synchronized block around this because the @synchronized block of the outer thread
                 //waits until we signal our condition (e.g. no other thread can race with us)
                 NSRunLoop* localLoop = runloops[@(identifier)] = [NSRunLoop currentRunLoop];
@@ -1550,7 +1559,7 @@ void swizzle(Class c, SEL orig, SEL new)
 #endif
     if(log_activity)
     {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        dispatch_async(dispatch_queue_create_with_target("im.monal.activityLog", DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)), ^{
             unsigned long counter = 1;
             while(counter++)
             {
@@ -1779,8 +1788,10 @@ void swizzle(Class c, SEL orig, SEL new)
     handler.monitoring = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
     handler.onCrash = crash_callback;
     //this can trigger crashes on macos < 13 (e.g. mac catalyst < 16) (and possibly ios < 16)
-    if(@available(iOS 16.0, macCatalyst 16.0, *))
+#if !TARGET_OS_MACCATALYST
+    if(@available(iOS 16.0, *))
         [handler enableSwapOfCxaThrow];
+#endif
     handler.searchQueueNames = NO;      //this is not async safe and can crash :(
     handler.introspectMemory = YES;
     handler.addConsoleLogToReport = YES;

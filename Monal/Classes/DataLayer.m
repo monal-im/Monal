@@ -478,7 +478,7 @@ static NSDateFormatter* dbFormatter;
         {
             NSMutableDictionary* contact = [results[0] mutableCopy];
             //correctly extract NSDate object or 1970, if last interaction is zero
-            contact[@"lastInteraction"] = [self lastInteractionOfJid:username forAccountNo:accountNo];
+            contact[@"lastInteraction"] = nilWrapper([self lastInteractionOfJid:username forAccountNo:accountNo]);
             //if we have this muc in our favorites table, this muc is "subscribed"
             if([self.db executeScalar:@"SELECT room FROM muc_favorites WHERE room=? AND account_id=?;" andArguments:@[username, accountNo]] != nil)
                 contact[@"subscription"] = @"both";
@@ -501,12 +501,24 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSMutableArray<MLContact*>*) contactList
+-(NSArray<MLContact*>*) contactList
 {
     return [self contactListWithJid:@""];
 }
 
--(NSMutableArray<MLContact*>*) contactListWithJid:(NSString*) jid
+-(NSArray<MLContact*>*) possibleGroupMembersForAccount:(NSNumber*) accountNo
+{
+    return [self.db idReadTransaction:^{
+        //list all contacts and group chats
+        NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) FROM buddylist as B INNER JOIN account AS A ON A.account_id=B.account_id WHERE B.account_id=? AND B.muc=0 AND B.buddy_name != (A.username || '@' || A.domain)";
+        NSMutableArray* toReturn = [NSMutableArray new];
+        for(NSDictionary* dic in [self.db executeReader:query andArguments:@[accountNo]])
+            [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
+        return toReturn;
+    }];
+}
+
+-(NSArray<MLContact*>*) contactListWithJid:(NSString*) jid
 {
     return [self.db idReadTransaction:^{
         //list all contacts and group chats
@@ -523,8 +535,8 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user onAccountNo:(NSNumber*) accountNo
 {
     return [self.db boolReadTransaction:^{
-        NSString* query = @"SELECT COUNT(*) FROM buddylist AS a INNER JOIN buddy_resources AS b ON a.buddy_id=b.buddy_id INNER JOIN ver_info AS c ON b.ver=c.ver WHERE buddy_name=? AND account_id=? AND cap=?;";
-        NSArray *params = @[user, accountNo, cap];
+        NSString* query = @"SELECT COUNT(*) FROM buddylist AS a INNER JOIN buddy_resources AS b ON a.buddy_id=b.buddy_id INNER JOIN ver_info AS c ON b.ver=c.ver WHERE a.buddy_name=? AND a.account_id=? AND c.cap=? AND c.account_id=?;";
+        NSArray *params = @[user, accountNo, cap, accountNo];
         NSNumber* count = (NSNumber*) [self.db executeScalar:query andArguments:params];
         return (BOOL)([count integerValue]>0);
     }];
@@ -533,8 +545,8 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andResource:(NSString*) resource onAccountNo:(NSNumber*) accountNo
 {
     return [self.db boolReadTransaction:^{
-        NSString* query = @"SELECT COUNT(*) FROM buddylist AS a INNER JOIN buddy_resources AS b ON a.buddy_id=b.buddy_id INNER JOIN ver_info AS c ON b.ver=c.ver WHERE buddy_name=? AND resource=? AND account_id=? AND cap=?;";
-        NSNumber* count = (NSNumber*) [self.db executeScalar:query andArguments:@[user, resource, accountNo, cap]];
+        NSString* query = @"SELECT COUNT(*) FROM buddylist AS a INNER JOIN buddy_resources AS b ON a.buddy_id=b.buddy_id INNER JOIN ver_info AS c ON b.ver=c.ver WHERE a.buddy_name=? AND b.resource=? AND a.account_id=? AND c.cap=? AND c.account_id=?;";
+        NSNumber* count = (NSNumber*) [self.db executeScalar:query andArguments:@[user, resource, accountNo, cap, accountNo]];
         return (BOOL)([count integerValue]>0);
     }];
 }
@@ -559,70 +571,37 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:query andArguments:params];
         
         //update timestamp for this ver string to make it not timeout (old ver strings and features are removed from feature cache after 28 days)
-        NSString* query2 = @"INSERT INTO ver_timestamp (ver, timestamp) VALUES (?, ?) ON CONFLICT(ver) DO UPDATE SET timestamp=?;";
-        NSArray * params2 = @[ver, timestamp, timestamp];
+        NSString* query2 = @"UPDATE ver_info SET timestamp=? WHERE ver=? AND account_id=?;";
+        NSArray * params2 = @[timestamp, ver, accountNo];
         [self.db executeNonQuery:query2 andArguments:params2];
     }];
 }
 
--(NSSet*) getCapsforVer:(NSString*) ver
+-(NSSet*) getCapsforVer:(NSString*) ver onAccountNo:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
-        NSString* query = @"select cap from ver_info where ver=?";
-        NSArray * params = @[ver];
-        NSArray* resultArray = [self.db executeReader:query andArguments:params];
+        NSSet* result = [NSSet setWithArray:[self.db executeScalarReader:@"SELECT cap FROM ver_info WHERE ver=? AND account_id=?;" andArguments:@[ver, accountNo]]];
         
-        if(resultArray != nil)
-        {
-            DDLogVerbose(@"caps count: %lu", (unsigned long)[resultArray count]);
-            if([resultArray count] == 0)
-                return (NSSet*)nil;
-            NSMutableSet* retval = [NSMutableSet new];
-            for(NSDictionary* row in resultArray)
-                [retval addObject:row[@"cap"]];
-            return (NSSet*)retval;
-        }
-        else
-        {
-            DDLogError(@"caps list is empty");
+        DDLogVerbose(@"caps count: %lu", (unsigned long)[result count]);
+        if([result count] == 0)
             return (NSSet*)nil;
-        }
+        return result;
     }];
 }
 
--(void) setCaps:(NSSet*) caps forVer:(NSString*) ver
+-(void) setCaps:(NSSet*) caps forVer:(NSString*) ver onAccountNo:(NSNumber*) accountNo
 {
     NSNumber* timestamp = [HelperTools currentTimestampInSeconds];
     [self.db voidWriteTransaction:^{
         //remove old caps for this ver
-        NSString* query0 = @"DELETE FROM ver_info WHERE ver=?;";
-        NSArray * params0 = @[ver];
-        [self.db executeNonQuery:query0 andArguments:params0];
+        [self.db executeNonQuery:@"DELETE FROM ver_info WHERE ver=? AND account_id=?;" andArguments:@[ver, accountNo]];
         
         //insert new caps
         for(NSString* feature in caps)
-        {
-            NSString* query1 = @"INSERT INTO ver_info (ver, cap) VALUES (?, ?);";
-            NSArray * params1 = @[ver, feature];
-            [self.db executeNonQuery:query1 andArguments:params1];
-        }
-        
-        //update timestamp for this ver string
-        NSString* query2 = @"INSERT INTO ver_timestamp (ver, timestamp) VALUES (?, ?) ON CONFLICT(ver) DO UPDATE SET timestamp=?;";
-        NSArray * params2 = @[ver, timestamp, timestamp];
-        [self.db executeNonQuery:query2 andArguments:params2];
-        
-        //cleanup old entries
-        NSString* query3 = @"SELECT ver FROM ver_timestamp WHERE timestamp<?";
-        NSArray* params3 = @[[NSNumber numberWithInteger:[timestamp integerValue] - (86400 * 28)]];     //cache timeout is 28 days
-        NSArray* oldEntries = [self.db executeReader:query3 andArguments:params3];
-        if(oldEntries)
-            for(NSDictionary* row in oldEntries)
-            {
-                NSString* query4 = @"DELETE FROM ver_info WHERE ver=?;";
-                NSArray * params4 = @[row[@"ver"]];
-                [self.db executeNonQuery:query4 andArguments:params4];
-            }
+            [self.db executeNonQuery:@"INSERT INTO ver_info (ver, cap, account_id, timestamp) VALUES (?, ?, ?, ?);" andArguments:@[ver, feature, accountNo, timestamp]];
+                
+        //cleanup old entries of *all* accounts
+        [self.db executeNonQuery:@"DELETE FROM ver_info WHERE timestamp<?;" andArguments:@[[NSNumber numberWithInteger:[timestamp integerValue] - (86400 * 28)]]];      //cache timeout is 28 days
     }];
 }
 
@@ -1002,6 +981,7 @@ static NSDateFormatter* dbFormatter;
     if(!member || !member[@"jid"] || !room || accountNo == nil)
         return;
     
+    DDLogDebug(@"Removing member '%@' from muc '%@'...", member[@"jid"], room);
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=? AND member_jid=?;" andArguments:@[accountNo, room, member[@"jid"]]];
     }];
@@ -1028,6 +1008,25 @@ static NSDateFormatter* dbFormatter;
         [toReturn addObjectsFromArray:[self.db executeReader:@"SELECT *, 0 as 'online' FROM muc_members WHERE account_id=? AND room=? AND NOT EXISTS(SELECT * FROM muc_participants WHERE muc_members.account_id=muc_participants.account_id AND muc_members.room=muc_participants.room AND muc_members.member_jid=muc_participants.participant_jid);" andArguments:@[accountNo, room]]];
         
         return toReturn;
+    }];
+}
+
+-(NSString* _Nullable) getOwnAffiliationInGroupOrChannel:(MLContact*) contact
+{
+    MLAssert(contact.isGroup, @"Function should only be called on a group contact");
+    return [self.db idReadTransaction:^{
+        NSString* retval = [self.db executeScalar:@"SELECT M.affiliation FROM muc_participants AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE M.room=? AND A.account_id=? AND (A.username || '@' || A.domain) == M.participant_jid" andArguments:@[contact.contactJid, contact.accountId]];
+        if(retval == nil)
+            retval = [self.db executeScalar:@"SELECT M.affiliation FROM muc_members AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE M.room=? AND A.account_id=? AND (A.username || '@' || A.domain) == M.member_jid" andArguments:@[contact.contactJid, contact.accountId]];
+        return retval;
+    }];
+}
+
+-(NSString*  _Nullable) getOwnRoleInGroupOrChannel:(MLContact*) contact
+{
+    MLAssert(contact.isGroup, @"Function should only be called on a group contact");
+    return [self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT M.role FROM muc_participants AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE M.room=? AND A.account_id=? AND (A.username || '@' || A.domain) == M.participant_jid" andArguments:@[contact.contactJid, contact.accountId]];
     }];
 }
 
@@ -1105,10 +1104,13 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSMutableArray*) listMucsForAccount:(NSNumber*) accountNo
+-(NSSet*) listMucsForAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
-        return [self.db executeReader:@"SELECT * FROM muc_favorites WHERE account_id=?;" andArguments:@[accountNo]];
+        NSMutableSet* retval = [NSMutableSet new];
+        for(NSDictionary* entry in [self.db executeReader:@"SELECT * FROM muc_favorites WHERE account_id=?;" andArguments:@[accountNo]])
+            [retval addObject:[entry[@"room"] lowercaseString]];
+        return retval;
     }];
 }
 
@@ -1265,7 +1267,7 @@ static NSDateFormatter* dbFormatter;
         }
         else
         {
-            DDLogError(@"Message(%@) %@ with stanzaid %@ already existing, ignoring history update", accountNo, messageid, stanzaid);
+            DDLogWarn(@"Message(%@) %@ with stanzaid %@ already existing, ignoring history update: %@", accountNo, messageid, stanzaid, message);
             return (NSNumber*)nil;
         }
     }];
@@ -1485,12 +1487,29 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSNumber*) accountNo
+-(NSNumber*) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
-        return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE messageid=? AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0)) AND M.account_id=?;" andArguments:@[messageid, from, from, accountNo]];
+        return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id WHERE messageid=? AND M.account_id=? AND (\
+            (B.Muc=0 AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0))) OR \
+            (\
+                B.Muc=1 AND M.buddy_name=? AND M.actual_from=? AND (\
+                    M.participant_jid=? OR M.participant_jid IS NULL \
+                ) AND ( \
+                    (M.actual_from=B.muc_nick AND M.inbound=0) OR \
+                    (M.actual_from!=B.muc_nick AND M.inbound=1) \
+                ) \
+            ) \
+        );" andArguments:@[messageid, accountNo, from, from, from, nilWrapper(actualFrom), nilWrapper(participantJid)]];
     }];
 }
+
+/*
+CF6DE818-6036-4B2E-A228-717303D1E9FF
+bififufuva@conference.xmpp.eightysoft.de
+bififufuva@conference.xmpp.eightysoft.de
+43
+*/
 
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID
 {
@@ -2288,10 +2307,10 @@ static NSDateFormatter* dbFormatter;
     MLAssert(accountNo != nil, @"accountNo should not be null");
     return [self.db idReadTransaction:^{
         //this will only return resources supporting "urn:xmpp:idle:1" and being "online" (e.g. lastInteraction = 0)
-        NSNumber* online = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND V.cap='urn:xmpp:idle:1' AND R.lastInteraction=0 ORDER BY R.lastInteraction ASC LIMIT 1;" andArguments:@[accountNo, jid]];
+        NSNumber* online = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND V.account_id=? AND V.cap='urn:xmpp:idle:1' AND R.lastInteraction=0 ORDER BY R.lastInteraction ASC LIMIT 1;" andArguments:@[accountNo, jid, accountNo]];
         
         //this will only return resources supporting "urn:xmpp:idle:1" and being "idle since <...>" (e.g. lastInteraction > 0)
-        NSNumber* idle = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND cap='urn:xmpp:idle:1' AND R.lastInteraction!=0 ORDER BY R.lastInteraction DESC LIMIT 1;" andArguments:@[accountNo, jid]];
+        NSNumber* idle = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id INNER JOIN ver_info AS V ON R.ver=V.ver WHERE B.account_id=? AND B.buddy_name=? AND V.account_id=? AND V.cap='urn:xmpp:idle:1' AND R.lastInteraction!=0 ORDER BY R.lastInteraction DESC LIMIT 1;" andArguments:@[accountNo, jid, accountNo]];
         
         //this will only return a value if the buddy has a last interaction not being NULL or 0
         NSNumber* globalIdle = [self.db executeScalar:@"SELECT lastInteraction FROM buddylist WHERE account_id=? AND buddy_name=? AND NOT (lastInteraction IS NULL OR lastInteraction==0);" andArguments:@[accountNo, jid]];
@@ -2319,7 +2338,7 @@ static NSDateFormatter* dbFormatter;
     MLAssert(accountNo != nil, @"accountNo should not be null");
     return [self.db idReadTransaction:^{
         //this will only return resources supporting "urn:xmpp:idle:1"
-        NSNumber* lastInteraction = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id WHERE B.account_id=? AND B.buddy_name=? AND R.resource=? AND EXISTS(SELECT * FROM ver_info AS V WHERE V.ver=R.ver AND V.cap='urn:xmpp:idle:1') LIMIT 1;" andArguments:@[accountNo, jid, resource]];
+        NSNumber* lastInteraction = [self.db executeScalar:@"SELECT R.lastInteraction FROM buddy_resources AS R INNER JOIN buddylist AS B ON R.buddy_id=B.buddy_id WHERE B.account_id=? AND B.buddy_name=? AND R.resource=? AND EXISTS(SELECT * FROM ver_info AS V WHERE V.ver=R.ver AND V.account_id=B.account_id AND V.cap='urn:xmpp:idle:1') LIMIT 1;" andArguments:@[accountNo, jid, resource]];
         DDLogDebug(@"LastInteraction of %@/%@ lastInteraction=%@", jid, resource, lastInteraction);
         if(lastInteraction == nil)
             return (NSDate*)nil;

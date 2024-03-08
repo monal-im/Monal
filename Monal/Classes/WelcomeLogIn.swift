@@ -14,7 +14,9 @@ struct WelcomeLogIn: View {
     
     var delegate: SheetDismisserProtocol
     
+    @State private var isEditingJid: Bool = false
     @State private var jid: String = ""
+    @State private var isEditingPassword: Bool = false
     @State private var password: String = ""
 
     @State private var showAlert = false
@@ -25,9 +27,10 @@ struct WelcomeLogIn: View {
     @State private var errorObserverEnabled = false
     @State private var newAccountNo: NSNumber? = nil
     @State private var loginComplete = false
+    @State private var isLoadingOmemoBundles = false
     
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @ObservedObject private var overlay = LoadingOverlayState()
+    @StateObject private var overlay = LoadingOverlayState()
 
 #if IS_ALPHA
     let appLogoId = "AlphaAppLogo"
@@ -56,9 +59,10 @@ struct WelcomeLogIn: View {
     }
 
     private func showTimeoutAlert() {
+        DDLogVerbose("Showing timeout alert...")
         hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Timeout Error")
-        alertPrompt.message = Text("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.")
+        alertPrompt.message = Text("We were not able to connect your account. Please check your username and password and make sure you are connected to the internet.")
         showAlert = true
     }
 
@@ -72,7 +76,7 @@ struct WelcomeLogIn: View {
     private func showLoginErrorAlert(errorMessage: String) {
         hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Error")
-        alertPrompt.message = Text(String(format: NSLocalizedString("We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.\n\nTechnical error message: %@", comment: ""), errorMessage))
+        alertPrompt.message = Text(String(format: NSLocalizedString("We were not able to connect your account. Please check your username and password and make sure you are connected to the internet.\n\nTechnical error message: %@", comment: ""), errorMessage))
         showAlert = true
     }
 
@@ -98,7 +102,9 @@ struct WelcomeLogIn: View {
         self.currentTimeout = newTimeout
         DispatchQueue.main.asyncAfter(deadline: newTimeout) {
             if(newTimeout == self.currentTimeout) {
+                DDLogWarn("First login timeout triggered...")
                 if(self.newAccountNo != nil) {
+                    DDLogVerbose("Removing account...")
                     MLXMPPManager.sharedInstance().removeAccount(forAccountNo: self.newAccountNo!)
                     self.newAccountNo = nil
                 }
@@ -133,14 +139,17 @@ struct WelcomeLogIn: View {
                     
                     TextField(NSLocalizedString("user@domain.tld", comment: "placeholder when adding account"), text: Binding(
                         get: { self.jid },
-                        set: { string in self.jid = string.lowercased().replacingOccurrences(of: " ", with: "") })
+                        set: { string in self.jid = string.lowercased().replacingOccurrences(of: " ", with: "") }), onEditingChanged: { isEditingJid = $0 }
                     )
                     //ios15: .textInputAutocapitalization(.never)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
                     .keyboardType(.emailAddress)
+                    .addClearButton(isEditing: isEditingJid, text: $jid)
                     
                     SecureField(NSLocalizedString("Password", comment: "placeholder when adding account"), text: $password)
+                        .addClearButton(isEditing:  password.count > 0
+                                        , text: $password)
                     
                     HStack() {
                         Button(action: {
@@ -257,6 +266,7 @@ struct WelcomeLogIn: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalUpdateBundleFetchStatus")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if(notificationAccountNo.intValue == newAccountNo.intValue) {
+                    isLoadingOmemoBundles = true
                     DispatchQueue.main.async {
                         showLoadingOverlay(
                             overlay, 
@@ -267,10 +277,9 @@ struct WelcomeLogIn: View {
                 }
             }
         }
-        /*
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedOmemoBundleFetch")).receive(on: RunLoop.main)) { notification in
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
-                if(notificationAccountNo.intValue == newAccountNo.intValue) {
+                if(notificationAccountNo.intValue == newAccountNo.intValue && isLoadingOmemoBundles) {
                     DispatchQueue.main.async {
                         self.loginComplete = true
                         showSuccessAlert()
@@ -278,10 +287,9 @@ struct WelcomeLogIn: View {
                 }
             }
         }
-        */
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedCatchup")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
-                if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
+                if(xmppAccount.accountNo.intValue == newAccountNo.intValue && !isLoadingOmemoBundles) {
                     DispatchQueue.main.async {
                         self.loginComplete = true
                         showSuccessAlert()

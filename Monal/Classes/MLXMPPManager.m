@@ -139,6 +139,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     //default value for sanbox is no (e.g. production)
     [self upgradeBoolUserSettingsIfUnset:@"isSandboxAPNS" toDefault:NO];
+    
+    //anti spam/privacy setting, but default to yes (current behavior, conversations behavior etc.)
+    [self upgradeBoolUserSettingsIfUnset:@"allowNonRosterContacts" toDefault:YES];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -316,7 +319,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     //trigger iq invalidations from a background thread because timeouts aren't time critical
     //we use this to decrement the timeout value of an iq handler every second until it reaches zero
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+    dispatch_async(dispatch_queue_create_with_target("im.monal.iqtimeouts", DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)), ^{
         while(YES) {
             for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
                 [account updateIqHandlerTimeouts];

@@ -13,52 +13,36 @@ import monalxmpp
 import OrderedCollections
 
 struct CreateGroupMenu: View {
-    var delegate: SheetDismisserProtocol
+    private var appDelegate: MonalAppDelegate
 
     @State private var connectedAccounts: [xmpp]
-    @State private var selectedAccount: Int
+    @State private var selectedAccount: xmpp?
     @State private var groupName: String = ""
 
     @State private var showAlert = false
     // note: dismissLabel is not accessed but defined at the .alert() section
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @State private var selectedContacts : OrderedSet<MLContact> = []
+    @State private var selectedContacts : OrderedSet<ObservableKVOWrapper<MLContact>> = []
+    
+    @State private var isEditingGroupName = false
 
-    @ObservedObject private var overlay = LoadingOverlayState()
+    @StateObject private var overlay = LoadingOverlayState()
+    
+    private var delegate: SheetDismisserProtocol
 
-    @State private var success = false
-
-    private let dismissWithNewGroup: (MLContact) -> ()
-
-    init(delegate: SheetDismisserProtocol, dismissWithNewGroup: @escaping (MLContact) -> (), prefillJid: String = "", preauthToken:String? = nil) {
-        // FIXME
+    init(delegate: SheetDismisserProtocol) {
+        self.appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
         self.delegate = delegate
-        self.dismissWithNewGroup = dismissWithNewGroup
-        self.groupName = prefillJid
-        // self.preauthToken = preauthToken
 
         let connectedAccounts = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
         self.connectedAccounts = connectedAccounts
-        self.selectedAccount = connectedAccounts.first != nil ? 0 : -1;
+        _selectedAccount = State(wrappedValue: connectedAccounts.first)
     }
-
-    // FIXME duplicate code from WelcomeLogIn.swift, maybe move to SwiftuiHelpers
 
     private func errorAlert(title: Text, message: Text = Text("")) {
         alertPrompt.title = title
         alertPrompt.message = message
         showAlert = true
-    }
-
-    private func successAlert(title: Text, message: Text) {
-        alertPrompt.title = title
-        alertPrompt.message = message
-        self.success = true // < dismiss entire view on close
-        showAlert = true
-    }
-
-    private var buttonColor: Color {
-        return Color(UIColor.systemBlue)
     }
 
     var body: some View {
@@ -70,37 +54,63 @@ struct CreateGroupMenu: View {
             else
             {
                 Section() {
-                    if(connectedAccounts.count > 1) {
-                        Picker("Use account", selection: $selectedAccount) {
-                            ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
-                                Text(account.connectionProperties.identity.jid).tag(idx)
-                            }
+                    Picker("Use account", selection: $selectedAccount) {
+                        ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
+                            Text(account.connectionProperties.identity.jid).tag(account as xmpp?)
                         }
-                        .pickerStyle(.menu)
                     }
-                    TextField(NSLocalizedString("Group Name (optional)", comment: "placeholder when creating new group"), text: $groupName)
+                    .pickerStyle(.menu)
+                    
+                    TextField(NSLocalizedString("Group Name (optional)", comment: "placeholder when creating new group"), text: $groupName, onEditingChanged: { isEditingGroupName = $0 })
                         .autocorrectionDisabled()
                         .autocapitalization(.none)
-                        .addClearButton(text:$groupName)
+                        .addClearButton(isEditing: isEditingGroupName, text:$groupName)
 
-                    NavigationLink(destination: LazyClosureView(ContactPicker(selectedContacts: $selectedContacts)), label: {
-                            Text("Group Members")
+                    NavigationLink(destination: LazyClosureView(ContactPicker(account: self.selectedAccount!, selectedContacts: $selectedContacts)), label: {
+                            Text("Change Group Members")
                         })
+                    Button(action: {
+                        showLoadingOverlay(overlay, headline: NSLocalizedString("Creating Group", comment: ""))
+                        let roomJid = self.selectedAccount!.mucProcessor.createGroup(nil)
+                        if(roomJid == nil) {
+                            let groupContact = MLContact.createContact(fromJid: roomJid!, andAccountNo: self.selectedAccount!.accountNo)
+                            hideLoadingOverlay(overlay)
+                            self.delegate.dismissWithoutAnimation()
+                            if let activeChats = self.appDelegate.activeChats {
+                                activeChats.presentChat(with:groupContact)
+                            }
+                        } else {
+                            self.selectedAccount!.mucProcessor.addUIHandler({data in
+                                let success : Bool = (data as! NSDictionary)["success"] as! Bool;
+                                if(success) {
+                                    self.selectedAccount!.mucProcessor.changeName(ofMuc: roomJid!, to: self.groupName)
+                                    for user in self.selectedContacts {
+                                        self.selectedAccount!.mucProcessor.setAffiliation("member", ofUser: user.contactJid, inMuc: roomJid!)
+                                        self.selectedAccount!.mucProcessor.inviteUser(user.contactJid, inMuc: roomJid!)
+                                    }
+                                    let groupContact = MLContact.createContact(fromJid: roomJid!, andAccountNo: self.selectedAccount!.accountNo)
+                                    hideLoadingOverlay(overlay)
+                                    self.delegate.dismissWithoutAnimation()
+                                    if let activeChats = self.appDelegate.activeChats {
+                                        activeChats.presentChat(with:groupContact)
+                                    }
+                                } else {
+                                    hideLoadingOverlay(overlay)
+                                    errorAlert(title: Text("Error creating group!"))
+                                }
+                            }, forMuc: roomJid!)
+                        }
+                    }, label: {
+                        Text("Create new group")
+                    })
                 }
                 if(self.selectedContacts.count > 0) {
                     Section(header: Text("Selected Group Members")) {
-                        ForEach(self.selectedContacts, id: \.contactJid) { contact in
+                        ForEach(self.selectedContacts, id: \.obj.contactJid) { contact in
                             ContactEntry(contact: contact)
                         }
                         .onDelete(perform: { indexSet in
                             self.selectedContacts.remove(at: indexSet.first!)
-                        })
-                    }
-                    Section {
-                        Button(action: {
-                            
-                        }, label: {
-                            Text("Create new group")
                         })
                     }
                 }
@@ -109,9 +119,6 @@ struct CreateGroupMenu: View {
         .alert(isPresented: $showAlert) {
             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton:.default(Text("Close"), action: {
                 showAlert = false
-                if self.success == true {
-                    // TODO dismissWithNewGroup
-                }
             }))
         }
         .addLoadingOverlay(overlay)
@@ -123,7 +130,6 @@ struct CreateGroupMenu: View {
 struct CreateGroupMenu_Previews: PreviewProvider {
     static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        CreateGroupMenu(delegate: delegate, dismissWithNewGroup: { c in
-        })
+        CreateGroupMenu(delegate: delegate)
     }
 }

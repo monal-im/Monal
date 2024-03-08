@@ -274,6 +274,9 @@
     {
         NSMutableString* auxData = [NSMutableString new];
         
+        //add version of monal reporting this crash
+        [auxData appendString:[NSString stringWithFormat:@"reporterVersion: %@\n", [HelperTools appBuildVersionInfoFor:MLVersionTypeLog]]];
+        
         //add user data to aux data
         for(NSString* userKey in report[@"user"])
             [auxData appendString:[NSString stringWithFormat:@"%@: %@\n", userKey, report[@"user"][userKey]]];

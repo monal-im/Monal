@@ -78,7 +78,7 @@ struct PasswordMigration: View {
                                     }
                                 }
                             ))
-                            .addClearButton(text:Binding(
+                            .addClearButton(isEditing: true, text:Binding(
                                 get: { self.needingMigration[id]?["password"] as? String ?? "" },
                                 set: { self.needingMigration[id]?["password"] = $0 as NSString }
                             ))

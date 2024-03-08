@@ -49,7 +49,7 @@
 @import AVFoundation;
 @import WebRTC;
 
-#define STATE_VERSION 10
+#define STATE_VERSION 12
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -114,6 +114,7 @@ NSString* const kStanza = @"stanza";
     BOOL _lastIdleState;
     NSMutableDictionary* _mamPageArrays;
     NSString* _internalID;
+    NSString* _logtag;
     NSMutableDictionary* _inCatchup;
     
     //registration related stuff
@@ -180,7 +181,8 @@ NSString* const kStanza = @"stanza";
     self = [super init];
     u_int32_t i = arc4random();
     _internalID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
-    DDLogVerbose(@"Created account %@ with id %@", accountNo, _internalID);
+    _logtag = [NSString stringWithFormat:@"[%@:%@]", accountNo, _internalID];
+    DDLogVerbose(@"Creating account %@ with id %@", accountNo, _internalID);
     self.accountNo = accountNo;
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     
@@ -557,12 +559,12 @@ NSString* const kStanza = @"stanza";
     if(self.connectionProperties.server.isDirectTLS == YES)
     {
         DDLogInfo(@"creating directTLS streams");
-        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:YES inputStream:&localIStream outputStream:&localOStream];
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:YES inputStream:&localIStream outputStream:&localOStream logtag:self->_logtag];
     }
     else
     {
         DDLogInfo(@"creating plaintext streams");
-        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:NO inputStream:&localIStream outputStream:&localOStream];
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:NO inputStream:&localIStream outputStream:&localOStream logtag:self->_logtag];
     }
     
     if(localOStream)
@@ -718,10 +720,11 @@ NSString* const kStanza = @"stanza";
     //this has to be synchronous because we want to be sure no further stanzas are leaking from the parse queue
     //into the receive queue once we leave this method
     _parseQueue.suspended = YES;
-    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
     [self dispatchOnReceiveQueue: ^{
+        MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES (in receive queue)!");
         DDLogWarn(@"Parse queue is frozen now!");
     }];
+    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
 }
 
 -(void) unfreezeParseQueue
@@ -829,6 +832,12 @@ NSString* const kStanza = @"stanza";
     //autodelete messages old enough (second invocation)
     if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
         [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
+    
+    if(_parseQueue.suspended)
+    {
+        DDLogWarn(@"Not trying to connect: parse queue frozen!");
+        return;
+    }
     
     [self dispatchAsyncOnReceiveQueue: ^{
         [self->_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas from old connections
@@ -1158,7 +1167,6 @@ NSString* const kStanza = @"stanza";
         self->_accountState = kStateDisconnected;
         
         [self->_parseQueue cancelAllOperations];    //throw away all parsed but not processed stanzas (we should have closed sockets then!)
-        [self unfreezeParseQueue];                  //make sure the cancelled operations get handled and our next connect can use the parse queue again
         //we don't throw away operations in the receive queue because they could be more than just stanzas
         //(for example outgoing messages that should be written to the smacks queue instead of just vanishing in a void)
         //all incoming stanzas in the receive queue will honor the _accountState being lower than kStateReconnecting and be dropped
@@ -1219,8 +1227,11 @@ NSString* const kStanza = @"stanza";
                 self->_reconnectInProgress = NO;
             }];
         }), (^{
-            DDLogInfo(@"Reconnect got aborted...");
-            self->_reconnectInProgress = NO;
+            DDLogInfo(@"Reconnect got aborted: %@", self);
+            self->_cancelReconnectTimer = nil;
+            [self dispatchAsyncOnReceiveQueue: ^{
+                self->_reconnectInProgress = NO;
+            }];
         }));
         DDLogInfo(@"reconnect exits");
     }];
@@ -1233,58 +1244,41 @@ NSString* const kStanza = @"stanza";
     BOOL appex = [HelperTools isAppExtension];
     if(_xmlParser!=nil)
     {
-        DDLogInfo(@"resetting old xml parser");
+        DDLogInfo(@"%@: resetting old xml parser", self->_logtag);
         [_xmlParser setDelegate:nil];
         [_xmlParser abortParsing];
         [_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we aborted the parser right now)
     }
     if(!_baseParserDelegate)
     {
-        DDLogInfo(@"creating parser delegate");
+        DDLogInfo(@"%@: creating parser delegate", self->_logtag);
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
-            DDLogVerbose(@"Parse finished for new <%@> stanza...", parsedStanza.element);
+            DDLogVerbose(@"%@: Parse finished for new <%@> stanza...", self->_logtag, parsedStanza.element);
             
-            if(!appex)
+            //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
+            //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
+            //should create a backpressure ino the tcp stream, too
+            //the calculated sleep time gives every stanza in the queue ~10ms to be handled (based on statistics)
+            BOOL wasSleeping = NO;
+            while(self.accountState >= kStateConnected)
             {
-                //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
-                //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
-                //should create a backpressure ino the tcp stream, too
-                //the calculated sleep time gives every stanza in the queue ~10ms to be handled
-                BOOL wasSleeping = NO;
-                while([self->_parseQueue operationCount] > 50 && self.accountState >= kStateReconnecting)
-                {
-                    double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries (used/available memory: %.3fMiB / %.3fMiB)...", waittime, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-                    [NSThread sleepForTimeInterval:waittime];
-                    wasSleeping = YES;
-                }
-                if(wasSleeping)
-                    DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+                //use a much smaller limit while in appex because memory there is limited to ~32MiB
+                unsigned long operationCount = [self->_parseQueue operationCount];
+                double usedMemory = [HelperTools report_memory];
+                if(!(operationCount > 50 || (appex && usedMemory > 16 && operationCount > MAX(2, 24 - usedMemory))))
+                    break;
+                
+                double waittime = (double)[self->_parseQueue operationCount] / 100.0;
+                DDLogInfo(@"%@: Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
+                [NSThread sleepForTimeInterval:waittime];
+                wasSleeping = YES;
             }
-            else
-            {
-                BOOL wasSleeping = NO;
-                while(self.accountState >= kStateReconnecting)
-                {
-                    //use a much smaller limit while in appex because memory there is limited to ~32MiB
-                    //like in the mainapp the calculated sleep time gives every stanza in the queue ~10ms to be handled
-                    unsigned long operationCount = [self->_parseQueue operationCount];
-                    double usedMemory = [HelperTools report_memory];
-                    if(!(operationCount > 50 || (appex && usedMemory > 16 && operationCount > MAX(2, 24 - usedMemory))))
-                        break;
-                    
-                    double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                    DDLogInfo(@"Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
-                    [NSThread sleepForTimeInterval:waittime];
-                    wasSleeping = YES;
-                }
-                if(wasSleeping)
-                    DDLogInfo(@"Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-            }
+            if(wasSleeping)
+                DDLogInfo(@"%@: Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
             
-            if(self.accountState < kStateReconnecting)
+            if(self.accountState < kStateConnected)
             {
-                DDLogWarn(@"Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateReconnecting");
+                DDLogWarn(@"%@: Throwing away incoming stanza *before* queueing in parse queue, accountState < kStateConnected", self->_logtag);
                 return;
             }
             
@@ -1328,9 +1322,9 @@ NSString* const kStanza = @"stanza";
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
                 DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue, %.3fMiB / %.3fMiB memory used / available)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                    if(self.accountState<kStateReconnecting)
+                    if(self.accountState < kStateConnected)
                     {
-                        DDLogWarn(@"Throwing away incoming stanza queued in parse queue, accountState < kStateReconnecting");
+                        DDLogWarn(@"Throwing away incoming stanza queued in parse queue, accountState < kStateConnected");
                         return;
                     }
                     [MLNotificationQueue queueNotificationsInBlock:^{
@@ -1356,7 +1350,7 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
-        DDLogInfo(@"resetting parser delegate");
+        DDLogInfo(@"%@: resetting parser delegate", self->_logtag);
         [_baseParserDelegate reset];
     }
     
@@ -1369,10 +1363,10 @@ NSString* const kStanza = @"stanza";
     [_xmlParser setDelegate:_baseParserDelegate];
     
     // do the stanza parsing in the low priority (=utility) global queue
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-        DDLogInfo(@"calling parse");
+    dispatch_async(dispatch_queue_create_with_target([NSString stringWithFormat:@"im.monal.xmlparser%@", self->_logtag].UTF8String, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)), ^{
+        DDLogInfo(@"%@: calling parse", self->_logtag);
         [self->_xmlParser parse];     //blocking operation
-        DDLogInfo(@"parse ended");
+        DDLogInfo(@"%@: parse ended", self->_logtag);
     });
 }
 
@@ -1869,6 +1863,13 @@ NSString* const kStanza = @"stanza";
                     [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
                     return;
                 }
+                
+                if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !contact.isSubscribedFrom)
+                {
+                    //mark this stanza as handled
+                    [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
+                    return;
+                }
 
                 if(![presenceNode check:@"/@type"])
                 {
@@ -1933,7 +1934,7 @@ NSString* const kStanza = @"stanza";
                     BOOL shouldQueryCaps = NO;
                     if(![@"sha-1" isEqualToString:[presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@hash"]])
                     {
-                        DDLogWarn(@"Unknown caps hash algo '%@', querying disco without checking hash!", [presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@hash"]);
+                        DDLogWarn(@"Unknown caps hash algo '%@', requesting disco query without checking hash!", [presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@hash"]);
                         shouldQueryCaps = YES;
                     }
                     else
@@ -1942,28 +1943,26 @@ NSString* const kStanza = @"stanza";
                         if(!ver || ![ver isEqualToString:newVer])     //caps hash of resource changed
                             [[DataLayer sharedInstance] setVer:newVer forUser:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo];
 
-                        if(![[DataLayer sharedInstance] getCapsforVer:newVer])
+                        if(![[DataLayer sharedInstance] getCapsforVer:newVer onAccountNo:self.accountNo])
                         {
-                            if([_runningCapsQueries containsObject:newVer])
-                            {
-                                DDLogDebug(@"Presence included unknown caps hash %@, but disco query already running", newVer);
-                                shouldQueryCaps = NO;
-                            }
-                            else
-                            {
-                                DDLogInfo(@"Presence included unknown caps hash %@, querying disco", newVer);
-                                shouldQueryCaps = YES;
-                            }
+                            DDLogInfo(@"Presence included unknown caps hash %@, requesting disco query", newVer);
+                            shouldQueryCaps = YES;
                         }
                     }
                     
                     if(shouldQueryCaps)
                     {
-                        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-                        [discoInfo setiqTo:presenceNode.from];
-                        [discoInfo setDiscoInfoNode];
-                        [self sendIq:discoInfo withHandler:$newHandler(MLIQProcessor, handleEntityCapsDisco)];
-                        [_runningCapsQueries addObject:newVer];
+                        if([_runningCapsQueries containsObject:newVer])
+                            DDLogInfo(@"Presence included unknown caps hash %@, but disco query already running, not querying again", newVer);
+                        else
+                        {
+                            DDLogInfo(@"Querying disco for caps hash: %@", newVer);
+                            XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+                            [discoInfo setiqTo:presenceNode.from];
+                            [discoInfo setDiscoInfoNode];
+                            [self sendIq:discoInfo withHandler:$newHandler(MLIQProcessor, handleEntityCapsDisco)];
+                            [_runningCapsQueries addObject:newVer];
+                        }
                     }
                 }
                 
@@ -3365,8 +3364,7 @@ NSString* const kStanza = @"stanza";
     if(self.accountState < kStateBound)
         return;
 
-    XMPPMessage* messageNode = [XMPPMessage new];
-    messageNode.attributes[@"to"] = contact.contactJid;
+    XMPPMessage* messageNode = [[XMPPMessage alloc] initToContact:contact];
     [messageNode setNoStoreHint];
     if(isTyping)
         [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"composing" andNamespace:@"http://jabber.org/protocol/chatstates"]];
@@ -3834,9 +3832,9 @@ NSString* const kStanza = @"stanza";
 
 -(void) queryServerVersion
 {
-    XMPPIQ* serverVersion = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [serverVersion getEntitySoftWareVersionTo:self.connectionProperties.identity.domain];
-    [self send:serverVersion];
+    XMPPIQ* serverVersion = [[XMPPIQ alloc] initWithType:kiqGetType to:self.connectionProperties.identity.domain];
+    [serverVersion getEntitySoftwareVersionInfo];
+    [self sendIq:serverVersion withHandler:$newHandler(MLIQProcessor, handleVersionResponse)];
 }
 
 -(void) queryExternalServicesOn:(NSString*) jid
@@ -4024,6 +4022,10 @@ NSString* const kStanza = @"stanza";
 
 -(void) addReconnectionHandler:(MLHandler*) handler
 {
+    //don't check if we are bound and execute the handler directly if so
+    //--> reconnect handlers are frequently used while being bound to schedule a task on *next* (re)connect
+    //--> in cases where the reconnect handler is only needed if we are not bound, the caller can do this check itself
+    //    (this might introduce small race conditions, though, but these should be negligible in most cases)
     @synchronized(_reconnectionHandlers) {
         [_reconnectionHandlers addObject:handler];
     }
@@ -4059,15 +4061,15 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark vcard
 
--(void) getEntitySoftWareVersion:(NSString*) user
+-(void) getEntitySoftWareVersion:(NSString*) jid
 {
-    NSDictionary* jid = [HelperTools splitJid:user];
-    MLAssert(jid[@"resource"] != nil, @"getEntitySoftWareVersion needs a full jid!");
-    if([[DataLayer sharedInstance] checkCap:@"jabber:iq:version" forUser:jid[@"user"] andResource:jid[@"resource"] onAccountNo:self.accountNo])
+    NSDictionary* split = [HelperTools splitJid:jid];
+    MLAssert(split[@"resource"] != nil, @"getEntitySoftWareVersion needs a full jid!");
+    if([[DataLayer sharedInstance] checkCap:@"jabber:iq:version" forUser:split[@"user"] andResource:split[@"resource"] onAccountNo:self.accountNo])
     {
-        XMPPIQ* iqEntitySoftWareVersion = [[XMPPIQ alloc] initWithType:kiqGetType];
-        [iqEntitySoftWareVersion getEntitySoftWareVersionTo:user];
-        [self send:iqEntitySoftWareVersion];
+        XMPPIQ* iqEntitySoftWareVersion = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
+        [iqEntitySoftWareVersion getEntitySoftwareVersionInfo];
+        [self sendIq:iqEntitySoftWareVersion withHandler:$newHandler(MLIQProcessor, handleVersionResponse)];
     }
 }
 
@@ -4256,6 +4258,7 @@ NSString* const kStanza = @"stanza";
                     [[DataLayer sharedInstance] createTransaction:^{
                         DDLogVerbose(@"Handling mam page entry[%u(%@).%u(%@)]): %@", pageNo, @([pageList count]), entryNo, @([page count]), data);
                         MLMessage* msg = [MLMessageProcessor processMessage:data[@"messageNode"] andOuterMessage:data[@"outerMessageNode"] forAccount:self withHistoryId:historyId];
+                        DDLogVerbose(@"Got message processor result: %@", msg);
                         //add successfully added messages to our display list
                         //stanzas not transporting a body will be processed, too, but the message processor will return nil for these
                         if(msg != nil)
@@ -4281,16 +4284,8 @@ NSString* const kStanza = @"stanza";
         }));
         if([historyIdList count] < retrievedBodies)
             DDLogWarn(@"Got %lu mam history messages already contained in history db, possibly ougoing messages that did not have a stanzaid yet!", (unsigned long)(retrievedBodies - [historyIdList count]));
-        if(![historyIdList count])
-        {
-            //call completion with nil to signal an error, if we could not get any messages not yet in history db
-            completion(nil, nil);
-        }
-        else
-        {
-            //query db (again) for the real MLMessage to account for changes in history table by non-body metadata messages received after the body-message
-            completion([[DataLayer sharedInstance] messagesForHistoryIDs:historyIdList], nil);
-        }
+        //query db (again) for the real MLMessage to account for changes in history table by non-body metadata messages received after the body-message
+        completion([[DataLayer sharedInstance] messagesForHistoryIDs:historyIdList], nil);
     };
     responseHandler = ^(XMPPIQ* response) {
         NSMutableArray* mamPage = [self getOrderedMamPageFor:[response findFirst:@"/@id"]];
@@ -4378,7 +4373,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) leaveMuc:(NSString* _Nonnull) room
 {
-    [self.mucProcessor leave:room withBookmarksUpdate:YES];
+    [self.mucProcessor leave:room withBookmarksUpdate:YES keepBuddylistEntry:NO];
 }
 
 -(void) checkJidType:(NSString*) jid withCompletion:(void (^)(NSString* type, NSString* _Nullable errorMessage)) completion
@@ -4649,13 +4644,15 @@ NSString* const kStanza = @"stanza";
                 if(_cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
                     [self reinitLoginTimer];
                 
-                if(_blockToCallOnTCPOpen != nil)
-                {
-                    [self dispatchAsyncOnReceiveQueue:^{
+                //we want this to be sync instead of async to make sure we are in kStateConnected before sending anything
+                [self dispatchOnReceiveQueue:^{
+                    self->_accountState = kStateConnected;
+                    if(self->_blockToCallOnTCPOpen != nil)
+                    {
                         self->_blockToCallOnTCPOpen();
                         self->_blockToCallOnTCPOpen = nil;     //don't call this twice
-                    }];
-                }
+                    }
+                }];
             }
             break;
         }
@@ -5064,7 +5061,7 @@ NSString* const kStanza = @"stanza";
             _iqHandlers[iqid][@"timeout"] = @([_iqHandlers[iqid][@"timeout"] doubleValue] - 1.0);
             if([_iqHandlers[iqid][@"timeout"] doubleValue] < 0.0)
             {
-                DDLogWarn(@"Timeout of handler triggered: %@", _iqHandlers[iqid]);
+                DDLogWarn(@"%@: Timeout of handler triggered: %@", _logtag, _iqHandlers[iqid]);
                 //only force save state after calling a handler
                 //(timeout changes that don't make it to disk only extend the timeout by a few seconds but don't have any negative sideeffect)
                 stateUpdated = YES;
@@ -5103,7 +5100,7 @@ NSString* const kStanza = @"stanza";
                     }]] waitUntilFinished:NO];
                 }
                 else
-                    DDLogWarn(@"iq handler for '%@' vanished while switching to receive queue", iqid);
+                    DDLogError(@"%@: iq handler for '%@' vanished while switching to receive queue", _logtag, iqid);
             }
         }
         //now delete iqs marked for deletion
@@ -5279,10 +5276,7 @@ NSString* const kStanza = @"stanza";
         return;
     }
     
-    XMPPMessage* displayedNode = [XMPPMessage new];
-    //the message type is needed so that the store hint is accepted by the server
-    displayedNode.attributes[@"type"] = msg.isMuc ? @"groupchat" : @"chat";
-    displayedNode.attributes[@"to"] = msg.inbound ? msg.buddyName : self.connectionProperties.identity.jid;
+    XMPPMessage* displayedNode = [[XMPPMessage alloc] initToContact:contact];
     [displayedNode setDisplayed:msg.isMuc && msg.stanzaId != nil ? msg.stanzaId : msg.messageId];
     [displayedNode setStoreHint];
     DDLogVerbose(@"Sending display marker: %@", displayedNode);

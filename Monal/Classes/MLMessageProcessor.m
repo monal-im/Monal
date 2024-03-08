@@ -67,7 +67,7 @@ static NSMutableDictionary* _typingNotifications;
         if(![messageNode check:@"/@id"])
         {
             DDLogError(@"Ignoring error messages having an empty ID");
-            return message;
+            return nil;
         }
         
         NSString* errorType = [messageNode findFirst:@"error@type"];
@@ -94,7 +94,17 @@ static NSMutableDictionary* _typingNotifications;
             @"errorReason": errorText
         }];
 
-        return message;
+        return nil;
+    }
+    
+    NSString* buddyName = [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
+    MLContact* possiblyUnknownContact = [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo];
+    
+    //ignore unknown contacts if configured to do so
+    if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !possiblyUnknownContact.isSubscribedFrom)
+    {
+        DDLogWarn(@"Ignoring incoming message stanza from unknown contact: %@", possiblyUnknownContact);
+        return nil;
     }
     
     //ignore prosody mod_muc_notifications muc push stanzas (they are only needed to trigger an apns push)
@@ -104,18 +114,18 @@ static NSMutableDictionary* _typingNotifications;
         NSString* roomJid = [messageNode findFirst:@"{http://quobis.com/xmpp/muc#push}notification@jid"];
         if([[[DataLayer sharedInstance] listMucsForAccount:account.accountNo] containsObject:roomJid])
             [account.mucProcessor ping:roomJid];
-        return message;
+        return nil;
     }
     
     if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"])
     {
         [account.pubsub handleHeadlineMessage:messageNode];
-        return message;
-    }
-    
-    if(![messageNode check:@"/<type=groupchat>"] && [[messageNode from] isEqualToString:account.connectionProperties.identity.fullJid] && [[messageNode toUser] isEqualToString:account.connectionProperties.identity.jid]) {
         return nil;
     }
+    
+    //ignore messages from our own device, see this github issue: https://github.com/monal-im/Monal/issues/941
+    if(![messageNode check:@"/<type=groupchat>"] && !isMLhistory && [messageNode.from isEqualToString:account.connectionProperties.identity.fullJid] && [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid])
+        return nil;
 
     //handle incoming jmi calls (TODO: add entry to local history, once the UI for this is implemented)
     //only handle incoming propose messages if not older than 60 seconds
@@ -123,7 +133,7 @@ static NSMutableDictionary* _typingNotifications;
     if([messageNode check:@"{urn:xmpp:jingle-message:0}*"] && ![HelperTools shouldProvideVoip])
     {
         DDLogWarn(@"China locale detected, ignoring incoming JMI message!");
-        return message;
+        return nil;
     }
     else if([messageNode check:@"{urn:xmpp:jingle-message:0}*"])
     {
@@ -138,7 +148,7 @@ static NSMutableDictionary* _typingNotifications;
             {
                 //TODO: record this call in history db even if it was outgoing from another device on our account
                 DDLogWarn(@"Ignoring incoming JMI propose coming from another device on our account");
-                return message;
+                return nil;
             }
             
             //only handle jmi stanzas exchanged with contacts allowed to see us and ignore all others
@@ -147,7 +157,7 @@ static NSMutableDictionary* _typingNotifications;
             if(!jmiContact.isSubscribedFrom)
             {
                 DDLogWarn(@"Ignoring incoming JMI propose coming from a contact we are not subscribed from");
-                return message;
+                return nil;
             }
             
             NSDate* delayStamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
@@ -156,7 +166,7 @@ static NSMutableDictionary* _typingNotifications;
             if([[NSDate date] timeIntervalSinceDate:delayStamp] > 60.0)
             {
                 DDLogWarn(@"Ignoring incoming JMI propose: too old");
-                return message;
+                return nil;
             }
             
             //only allow audio calls for now
@@ -173,7 +183,7 @@ static NSMutableDictionary* _typingNotifications;
             }
             else
                 DDLogWarn(@"Ignoring incoming non-audio JMI call, not implemented yet");
-            return message;
+            return nil;
         }
         //handle all other JMI events (TODO: add entry to local history, once the UI for this is implemented)
         //if the corresponding call is unknown these will just be ignored by MLVoipProcessor --> no presence leak
@@ -192,20 +202,20 @@ static NSMutableDictionary* _typingNotifications;
                 //in the monal compilation unit (the ui unit), the NSE resides in yet another compilation unit (the nse-appex unit)
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingJMIStanza object:account userInfo:callData];
             }
-            return message;
+            return nil;
         }
     }
     
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(
-        ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
+        ![messageNode check:@"/<type=groupchat>"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
         ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] && [messageNode check:@"body#"]
     )
     {
         DDLogWarn(@"Ignoring muc pm marked as such...");
         //ignore muc pms without id attribute (we can't send out errors pointing to this message without an id)
         if([messageNode findFirst:@"/@id"] == nil)
-            return message;
+            return nil;
         XMPPMessage* errorReply = [XMPPMessage new];
         [errorReply.attributes setObject:@"error" forKey:@"type"];
         [errorReply.attributes setObject:messageNode.from forKey:@"to"];                       //this has to be the full jid here
@@ -216,7 +226,7 @@ static NSMutableDictionary* _typingNotifications;
         ] andData:nil]];
         [errorReply setStoreHint];
         [account send:errorReply];
-        return message;
+        return nil;
     }
     //ignore carbon copied muc pms not marked as such
     NSString* carbonType = [outerMessageNode findFirst:@"{urn:xmpp:carbons:2}*$"];
@@ -227,27 +237,20 @@ static NSMutableDictionary* _typingNotifications;
         if(carbonTestContact.isGroup)
         {
             DDLogWarn(@"Ignoring carbon copied muc pm...");
-            return message;
+            return nil;
         }
         else
             DDLogVerbose(@"Not a carbon copy of a muc pm for contact: %@", carbonTestContact);
     }
-
-    NSString* possibleUnkownContact;
-    if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
-        possibleUnkownContact = messageNode.toUser;
-    else
-        possibleUnkownContact = messageNode.fromUser;
     
     if(([messageNode check:@"/<type=groupchat>"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
-        // Ignore all group chat msgs from unkown groups or 1:1 chats
-        MLContact* mucTestContact = [MLContact createContactFromJid:possibleUnkownContact andAccountNo:account.accountNo];
-        if([[DataLayer sharedInstance] isContactInList:messageNode.fromUser forAccount:account.accountNo] == NO || !mucTestContact.isGroup)
+        // Ignore all group chat msgs from unkown groups
+        if(![[[DataLayer sharedInstance] listMucsForAccount:account.accountNo] containsObject:messageNode.fromUser])
         {
             // ignore message
             DDLogWarn(@"Ignoring groupchat message from %@", messageNode.toUser);
-            return message;
+            return nil;
         }
     }
     else
@@ -257,12 +260,12 @@ static NSMutableDictionary* _typingNotifications;
         {
             if(!isMLhistory)
             {
-                DDLogInfo(@"Handling KeyTransportElement without trying to add a 1:1 buddy %@", possibleUnkownContact);
+                DDLogInfo(@"Handling KeyTransportElement without trying to add a 1:1 buddy %@", possiblyUnknownContact);
                 [account.omemo decryptMessage:messageNode withMucParticipantJid:nil];
             }
             else
-                DDLogInfo(@"Ignoring MLhistory KeyTransportElement for buddy %@", possibleUnkownContact);
-            return message;
+                DDLogInfo(@"Ignoring MLhistory KeyTransportElement for buddy %@", possiblyUnknownContact);
+            return nil;
         }
     }
 
@@ -290,14 +293,23 @@ static NSMutableDictionary* _typingNotifications;
     }
     
     //handle muc status changes or invites (this checks for the muc namespace itself)
-    if([account.mucProcessor processMessage:messageNode])
-        return message;     //the muc processor said we have stop processing
+    if(isMLhistory)
+    {
+        if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] || ([messageNode check:@"{jabber:x:conference}x@jid"] && [[messageNode findFirst:@"{jabber:x:conference}x@jid"] length] > 0))
+            return nil;     //stop processing because this is a (mediated) muc invite received through backscrolling history
+        else
+            ;   //continue processing for backscrolling history but don't call mucProcessor.processMessage to not process ancient status/memberlist updates
+    }
+    else if([account.mucProcessor processMessage:messageNode])
+    {
+        DDLogVerbose(@"Muc processor said we have to stop message processing here...");
+        return nil;     //the muc processor said we have stop processing
+    }
     
     //add contact if possible (ignore groupchats or already existing contacts, or KeyTransportElements)
-    DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possibleUnkownContact);
-    [[DataLayer sharedInstance] addContact:possibleUnkownContact forAccount:account.accountNo nickname:nil];
+    DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possiblyUnknownContact);
+    [[DataLayer sharedInstance] addContact:possiblyUnknownContact.contactJid forAccount:account.accountNo nickname:nil];
     
-    NSString* buddyName = [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
     NSString* ownNick;
     NSString* actualFrom = messageNode.fromUser;
     NSString* participantJid = nil;
@@ -344,7 +356,10 @@ static NSMutableDictionary* _typingNotifications;
             DDLogInfo(@"Got MUC subject for %@: %@", messageNode.fromUser, subject);
             
             if(subject == nil || [subject isEqualToString:currentSubject])
-                return message;
+            {
+                DDLogVerbose(@"Ignoring subject, nothing changed...");
+                return nil;
+            }
             
             DDLogVerbose(@"Updating subject in database: %@", subject);
             [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
@@ -354,12 +369,17 @@ static NSMutableDictionary* _typingNotifications;
                 @"subject": subject,
             }];
         }
-        return message;
+        else
+            DDLogVerbose(@"Ignoring muc subject: isMLhistory=YES...");
+        return nil;
     }
     
     //ignore all other groupchat messages coming from bare jid (e.g. not being a "normal" muc message nor a subject update handled above)
     if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
-        return message;
+    {
+        DDLogVerbose(@"Ignoring groupchat message without resource (should be already handled above)...");
+        return nil;
+    }
     
     NSString* decrypted;
     if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
@@ -379,10 +399,12 @@ static NSMutableDictionary* _typingNotifications;
         }
         else
             decrypted = [account.omemo decryptMessage:messageNode withMucParticipantJid:participantJid];
+        
+        DDLogVerbose(@"Decrypted: %@", decrypted);
     }
     
 #ifdef IS_ALPHA
-    //thats the negation of our case from line 193
+    //thats the negation of our case from line 375
     //--> opportunistic omemo in alpha builds should use the fallback body instead of the EME error because the fallback body could be the cleartext message
     //    (it could be a real omemo fallback, too, but there is no harm in using that instead of the EME message)
     if(!([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"] && isMLhistory && [messageNode check:@"body#"]))
@@ -407,12 +429,19 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
+    //ignore encrypted messages coming from our own device id (most probably a muc reflection)
+    BOOL sentByOwnOmemoDevice = NO;
+#ifndef DISABLE_OMEMO
+    if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"])
+        sentByOwnOmemoDevice = ((NSNumber*)[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"]).unsignedIntValue == [account.omemo getDeviceId].unsignedIntValue;
+#endif
+    
     //handle message retraction (XEP-0424)
     if([messageNode check:@"{urn:xmpp:fasten:0}apply-to/{urn:xmpp:message-retract:0}retract"])
     {
         NSString* originIdToRetract = [messageNode findFirst:@"{urn:xmpp:fasten:0}apply-to@id"];
         //this checks if this message is from the same jid as the message it tries to retract for (e.g. inbound can only retract inbound and outbound only outbound)
-        NSNumber* historyIdToRetract = [[DataLayer sharedInstance] getHistoryIDForMessageId:originIdToRetract from:messageNode.fromUser andAccount:account.accountNo];
+        NSNumber* historyIdToRetract = [[DataLayer sharedInstance] getHistoryIDForMessageId:originIdToRetract from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
         
         if(historyIdToRetract != nil)
         {
@@ -464,7 +493,8 @@ static NSMutableDictionary* _typingNotifications;
             @"contact": [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo],
         }];
     }
-    else if([messageNode check:@"body#"] || decrypted)
+    //ignore encrypted body messages coming from our own device id (most probably a muc reflection)
+    else if(([messageNode check:@"body#"] || decrypted) && !sentByOwnOmemoDevice)
     {
         BOOL unread = YES;
         BOOL showAlert = YES;
@@ -516,8 +546,10 @@ static NSMutableDictionary* _typingNotifications;
             if([messageNode check:@"{urn:xmpp:message-correct:0}replace"])
             {
                 NSString* messageIdToReplace = [messageNode findFirst:@"{urn:xmpp:message-correct:0}replace@id"];
+                DDLogVerbose(@"Message id to LMC-replace: %@", messageIdToReplace);
                 //this checks if this message is from the same jid as the message it tries to do the LMC for (e.g. inbound can only correct inbound and outbound only outbound)
-                historyId = [[DataLayer sharedInstance] getHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser andAccount:account.accountNo];
+                historyId = [[DataLayer sharedInstance] getHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
+                DDLogVerbose(@"History id to LMC-replace: %@", historyId);
                 //now check if the LMC is allowed (we use historyIdToUse for MLhistory mam queries to only check LMC for the 3 messages coming before this ID in this converastion)
                 //historyIdToUse will be nil, for messages going forward in time which means (check for the newest 3 messages in this conversation)
                 if(historyId != nil && [[DataLayer sharedInstance] checkLMCEligible:historyId encrypted:encrypted historyBaseID:historyIdToUse])

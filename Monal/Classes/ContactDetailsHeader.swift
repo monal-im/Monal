@@ -17,40 +17,37 @@ struct ContactDetailsHeader: View {
     @State private var navigationAction: String?
 
     var body: some View {
-        VStack(alignment: .center) {
-            HStack {
-                Spacer()
-                Image(uiImage: contact.avatar)
-                    .resizable()
-                    .frame(width: 150, height: 150, alignment: .center)
-                    .scaledToFit()
-                    .shadow(radius: 7)
-                Spacer()
-            }
+        VStack(spacing: 20) {
+            Image(uiImage: contact.avatar)
+                .resizable()
+                .scaledToFit()
+                .accessibilityLabel("Avatar")
+                .frame(width: 150, height: 150, alignment: .center)
+                .shadow(radius: 7)
             
-            Spacer()
-                .frame(height: 20)
-            HStack {
-                Text(contact.contactJid as String)
-                //for ios >= 15.0
-                //.textSelection(.enabled)
-                Spacer().frame(width: 10)
-                Button(action: {
-                    UIPasteboard.general.setValue(contact.contactJid as String, forPasteboardType:UTType.utf8PlainText.identifier as String)
-                }) {
+            
+            Button {
+                UIPasteboard.general.setValue(contact.contactJid as String, forPasteboardType:UTType.utf8PlainText.identifier as String)
+                UIAccessibility.post(notification: .announcement, argument: "JID Copied")
+            } label: {
+                HStack {
+                    Text(contact.contactJid as String)
+                    
                     Image(systemName: "doc.on.doc")
                         .foregroundColor(.primary)
+                        .accessibilityHidden(true)
                 }
-                .buttonStyle(BorderlessButtonStyle())
+                .accessibilityHint("Copies JID")
             }
+            .buttonStyle(.borderless)
+                
+            
             //only show account jid if more than one is configured
             if MLXMPPManager.sharedInstance().connectedXMPP.count > 1 && !contact.isSelfChat {
                 Text("Account: \(MLXMPPManager.sharedInstance().getConnectedAccount(forID:contact.accountId)!.connectionProperties.identity.jid)")
             }
             
             if !contact.isSelfChat && !contact.isGroup {
-                Spacer()
-                    .frame(height: 20)
                 if let lastInteractionTime = contact.lastInteractionTime as Date? {
                     if lastInteractionTime.timeIntervalSince1970 > 0 {
                         Text(String(format: NSLocalizedString("Last seen: %@", comment: ""),
@@ -64,27 +61,29 @@ struct ContactDetailsHeader: View {
             }
             
             if(!contact.isGroup && (contact.statusMessage as String).count > 0) {
-                Spacer()
-                    .frame(height: 20)
-                Text("Status message:")
-                Text(contact.statusMessage as String)
-                    .fixedSize(horizontal: false, vertical: true)
+                VStack {
+                    Text("Status message:")
+                    Text(contact.statusMessage as String)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             
             if(contact.isGroup && (contact.groupSubject as String).count > 0) {
-                Spacer()
-                    .frame(height: 20)
-                if(contact.obj.mucType == "group") {
-                    Text("Group subject:")
-                } else {
-                    Text("Channel subject:")
+                VStack {
+                    if(contact.obj.mucType == "group") {
+                        Text("Group subject:")
+                    } else {
+                        Text("Channel subject:")
+                    }
+                    
+                    Text(contact.groupSubject as String)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                Text(contact.groupSubject as String)
-                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .foregroundColor(.primary)
         .padding([.top, .bottom])
+        .frame(maxWidth: .infinity)
     }
 }
 

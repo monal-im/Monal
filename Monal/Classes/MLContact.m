@@ -214,7 +214,7 @@ NSString* const kAskSubscribe = @"subscribe";
             @"state": @"offline",
             @"count": @0,
             @"isActiveChat": @NO,
-            @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],
+            @"lastInteraction": nilWrapper(nil),
         }];
     }
     else
@@ -412,6 +412,11 @@ NSString* const kAskSubscribe = @"subscribe";
     return [self.contactJid isEqualToString:account.connectionProperties.identity.jid];
 }
 
++(NSSet*) keyPathsForValuesAffectingIsSelfChat
+{
+    return [NSSet setWithObjects:@"contactJid", @"accountId", nil];
+}
+
 -(BOOL) isInRoster
 {
     // mucs have a subscription of both (ensured by the datalayer)
@@ -420,10 +425,20 @@ NSString* const kAskSubscribe = @"subscribe";
         || [self.ask isEqualToString:kAskSubscribe];
 }
 
++(NSSet*) keyPathsForValuesAffectingIsInRoster
+{
+    return [NSSet setWithObjects:@"subscription", @"ask", nil];
+}
+
 -(BOOL) isSubscribedTo
 {
     return [self.subscription isEqualToString:kSubBoth]
         || [self.subscription isEqualToString:kSubTo];
+}
+
++(NSSet*) keyPathsForValuesAffectingIsSubscribedTo
+{
+    return [NSSet setWithObjects:@"subscription", nil];
 }
 
 -(BOOL) isSubscribedFrom
@@ -432,9 +447,19 @@ NSString* const kAskSubscribe = @"subscribe";
         || [self.subscription isEqualToString:kSubFrom];
 }
 
++(NSSet*) keyPathsForValuesAffectingIsSubscribedFrom
+{
+    return [NSSet setWithObjects:@"subscription", nil];
+}
+
 -(BOOL) isSubscribedBoth
 {
     return [self.subscription isEqualToString:kSubBoth];
+}
+
++(NSSet*) keyPathsForValuesAffectingIsSubscribedBoth
+{
+    return [NSSet setWithObjects:@"subscription", nil];
 }
 
 -(BOOL) hasIncomingContactRequest
@@ -442,9 +467,19 @@ NSString* const kAskSubscribe = @"subscribe";
     return self.isGroup == NO && [[DataLayer sharedInstance] hasContactRequestForContact:self];
 }
 
++(NSSet*) keyPathsForValuesAffectingHasIncomingContactRequest
+{
+    return [NSSet setWithObjects:@"isGroup", nil];
+}
+
 -(BOOL) hasOutgoingContactRequest
 {
     return self.isGroup == NO && [self.ask isEqualToString:kAskSubscribe];
+}
+
++(NSSet*) keyPathsForValuesAffectingHasOutgoingContactRequest
+{
+    return [NSSet setWithObjects:@"isGroup", @"ask", nil];
 }
 
 // this will cache the unread count on first access
@@ -710,7 +745,7 @@ NSString* const kAskSubscribe = @"subscribe";
     contact.isEncrypted = [[dic objectForKey:@"encrypt"] boolValue];
     contact.isMuted = [[dic objectForKey:@"muted"] boolValue];
     // initial value comes from db, all other values get updated by our kMonalLastInteractionUpdatedNotice handler
-    contact.lastInteractionTime = [dic objectForKey:@"lastInteraction"];        //no default needed, already done in DataLayer
+    contact.lastInteractionTime = nilExtractor([dic objectForKey:@"lastInteraction"]);        //no default needed, already done in DataLayer
     contact->_avatar = nil;
     return contact;
 }

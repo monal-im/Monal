@@ -190,9 +190,6 @@ struct ContactDetails: View {
                 NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact, delegate:delegate))) {
                     Text("Change Chat Background")
                 }
-                NavigationLink(destination: (SoundsSettingView(settings: ContactSettings(contactJid: contact.obj.contactJid)))) {
-                    Text("Change Chat Sound")
-                }
             }
             .listStyle(.plain)
 

@@ -324,7 +324,7 @@
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
-        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
+        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"Chat_AlertSoundFile"];
         if(filename)
         {
             content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
@@ -457,11 +457,21 @@
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
-        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
+        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"Chat_AlertSoundFile"];
         if(filename)
         {
-            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-            DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+            NSInteger fileIndex = [[filename stringByReplacingOccurrencesOfString:@"alert" withString:@""] integerValue];
+            if(fileIndex >= 1 && fileIndex <= 12)
+            {
+                NSString *soundName = [NSString stringWithFormat:@"AlertSounds/%@.aif", filename];
+                content.sound = [UNNotificationSound soundNamed:soundName];
+                DDLogDebug(@"Using user configured alert sound within alert1 to alert12: %@", content.sound);
+            }
+            else
+            {
+                content.sound = [UNNotificationSound soundNamed:@"Sound.m4a"];
+                DDLogDebug(@"Using default sound or another logic for filename outside alert1 to alert12: %@", content.sound);
+            }
         }
         else
         {
@@ -719,7 +729,7 @@
 
         if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
         {
-            NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
+            NSString* filename = [[HelperTools defaultsDB] objectForKey:@"Chat_AlertSoundFile"];
             if(filename)
             {
                 content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];

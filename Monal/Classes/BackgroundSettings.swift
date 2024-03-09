@@ -81,6 +81,7 @@ struct BackgroundSettings: View {
                             } else {
                                 Text("Select background image")
                                     .frame(maxWidth: .infinity, alignment: .center)
+                                
                             }
                         }
                         .sheet(isPresented:$showingImagePicker) {
@@ -132,9 +133,9 @@ struct BackgroundSettings: View {
     }
 }
 
-struct BackgroundSettings_Previews: PreviewProvider {
-    static var delegate = SheetDismisserProtocol()
-    static var previews: some View {
-        BackgroundSettings(contact:nil, delegate:delegate)
-    }
-}
+//struct BackgroundSettings_Previews: PreviewProvider {
+//    static var delegate = SheetDismisserProtocol()
+//    static var previews: some View {
+//        BackgroundSettings(contact:nil, delegate:delegate)
+//    }
+//}

@@ -74,7 +74,6 @@ enum DummySettingsRows {
 @property (nonatomic, strong) NSDateFormatter* uptimeFormatter;
 
 @property (nonatomic, strong) NSIndexPath* selected;
-@property (nonatomic, strong) NSString *username;
 
 @end
 
@@ -183,7 +182,6 @@ enum DummySettingsRows {
         case kSettingSectionAccounts: {
             if(indexPath.row < (int) [self getAccountNum])
             {
-                self.username = [self getAccountNameByIndex:indexPath.row];
                 // User selected an account
                 [self initContactCell:cell forAccNo:indexPath.row];
             }
@@ -336,10 +334,11 @@ enum DummySettingsRows {
                     [self showDetailViewController:backgroundSettingsController sender:self];
                     break;
                 }
-                case SoundsRow:
-//                    [self performSegueWithIdentifier:@"showSounds" sender:self];
-                    [self openSoundsSettingView];
+                case SoundsRow: {
+                    UIViewController* soundSettingsController =[[SwiftuiInterface new] makeSoundSettings:nil];
+                    [self showDetailViewController:soundSettingsController sender:self];
                     break;
+                }
                 default:
                     unreachable();
             }
@@ -469,12 +468,6 @@ enum DummySettingsRows {
 
 -(void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
     [viewController dismissViewControllerAnimated:YES completion:nil];
-}
-
-#pragma mark - Use SoundsSettingView SwiftUI
-- (void)openSoundsSettingView {
-    UIViewController *soundsSettingVC = [SoundsSettingViewController createSoundsSettingViewWithContactJid:self.username];
-    [self.navigationController pushViewController:soundsSettingVC animated:YES];
 }
 
 

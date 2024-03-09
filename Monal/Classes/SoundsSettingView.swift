@@ -10,20 +10,50 @@ import SwiftUI
 import AVFoundation
 
 struct SoundsSettingView: View {
-    @ObservedObject var settings: ContactSettings
     @State private var selectedSound: String
     @State private var playSounds: Bool
     @State private var audioPlayer: AVAudioPlayer?
-    let sounds = ["System Sound", "Morse", "Xylophone", "Bloop", "Bing", "Pipa", "Water", "Forest", "Echo", "Area 51", "Wood", "Chirp", "Sonar"]
+    @State private var showingSoundPicker = false
 
-    init(settings: ContactSettings) {
-        self.settings = settings
-        _selectedSound = State(initialValue: UserDefaults.standard.string(forKey: settings.contactJid + "AlertSoundFile") ?? "System Sound")
-        if UserDefaults.standard.object(forKey: settings.contactJid + "PlaySounds") == nil {
-           _playSounds = State(initialValue: true)
+    let sounds = ["System Sound", "Morse", "Xylophone", "Bloop", "Bing", "Pipa", "Water", "Forest", "Echo", "Area 51", "Wood", "Chirp", "Sonar"]
+    
+    let contact: ObservableKVOWrapper<MLContact>?
+    let delegate: SheetDismisserProtocol
+    
+    init(contact: ObservableKVOWrapper<MLContact>?, delegate: SheetDismisserProtocol) {
+        self.contact = contact
+        self.delegate = delegate
+        let soundKey = "Chat_AlertSoundFile"
+        _playSounds = State(initialValue: HelperTools.defaultsDB().bool(forKey: "Sound"))
+        let savedSound = HelperTools.defaultsDB().string(forKey: soundKey) ?? "Xylophone"
+
+        if savedSound == "Xylophone" {
+            _selectedSound = State(initialValue: sounds[2])
+        } else if savedSound == "CustomizeSound" {
+            _selectedSound = State(initialValue: "Custom Sound")
+        } else if let soundIndex = SoundsSettingView.parseSavedSound(savedSound) {
+            if soundIndex >= 1 && soundIndex <= 12 {
+                _selectedSound = State(initialValue: sounds[soundIndex])
+            } else if soundIndex == 0 {
+                _selectedSound = State(initialValue: "System Sound")
+            } else {
+                _selectedSound = State(initialValue: sounds[2])
+                DDLogVerbose("The audio file does not exist")
+            }
         } else {
-           _playSounds = State(initialValue: UserDefaults.standard.bool(forKey: settings.contactJid + "PlaySounds"))
+            _selectedSound = State(initialValue: sounds[2])
+            DDLogVerbose("The audio file does not exist")
         }
+    }
+    
+    static func parseSavedSound(_ savedSound: String) -> Int? {
+        let pattern = "^alert(\\d+)$"
+        if let regex = try? NSRegularExpression(pattern: pattern, options: []),
+           let match = regex.firstMatch(in: savedSound, options: [], range: NSRange(location: 0, length: savedSound.utf16.count)),
+           let range = Range(match.range(at: 1), in: savedSound) {
+            return Int(savedSound[range])
+        }
+        return nil
     }
     
     var body: some View {
@@ -33,11 +63,44 @@ struct SoundsSettingView: View {
                     Text("Play Sounds")
                 }
                 .onChange(of: playSounds) { newValue in
-                    let key = settings.contactJid + "PlaySounds"
-                    UserDefaults.standard.set(newValue, forKey: key)
+                    HelperTools.defaultsDB().setValue(newValue, forKey: "Sound")
                 }
             }
-
+            if playSounds {
+                Section {
+                    HStack {
+                        Text("Custom Sound")
+                            .onTapGesture {
+                                self.showingSoundPicker = true
+                            }
+                        
+                        Spacer()
+                        
+                        if selectedSound == "Custom Sound" {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    .sheet(isPresented: $showingSoundPicker) {
+                        LazyClosureView(SoundPickerView(onSoundPicked: { (url: URL?) in
+                            if url == nil {
+                                self.selectedSound = "Xylophone"
+                                let key = "Chat_AlertSoundFile"
+                                let filename = String(format: "alert3")
+                                HelperTools.defaultsDB().setValue(filename, forKey: key)
+                                HelperTools.defaultsDB().synchronize()
+                            } else {
+                                self.selectedSound = "Custom Sound"
+                                let key = "Chat_AlertSoundFile"
+                                HelperTools.defaultsDB().setValue("CustomizeSound", forKey: key)
+                                HelperTools.defaultsDB().synchronize()
+                            }
+                        }))
+                    }
+                }
+            }
+            
+            
             if playSounds {
                 soundSelectionSection
             }
@@ -56,35 +119,33 @@ struct SoundsSettingView: View {
         .navigationBarTitle("Sounds", displayMode: .inline)
         .listStyle(GroupedListStyle())
     }
-
-
+    
     var soundSelectionSection: some View {
-        Section(header: Text("SELECT SOUNDS THAT ARE PLAYED WITH NEW MESSAGE NOTIFICATIONS. DEFAULT IS XYLOPHONE.")) {
-            ForEach(Array(sounds.enumerated()), id: \.element) { index, sound in
-                HStack {
-                    Text(sound)
-                    Spacer()
-                    if sound == selectedSound {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(.blue)
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    self.selectedSound = sounds[index]
-                    let key = (settings.contactJid) + "AlertSoundFile"
-                    if index > 0 {
-                        self.playSound(index: index)
-                        UserDefaults.standard.set(sounds[index], forKey: key)
-                    } else {
-                        UserDefaults.standard.removeObject(forKey: key)
-                        self.audioPlayer?.stop()
-                    }
-
-                }
-            }
-        }
-    }
+           Section(header: Text("SELECT SOUNDS THAT ARE PLAYED WITH NEW MESSAGE NOTIFICATIONS. DEFAULT IS XYLOPHONE.")) {
+               ForEach(Array(sounds.enumerated()), id: \.element) { index, sound in
+                   HStack {
+                       Text(sound)
+                       Spacer()
+                       if sound == selectedSound {
+                           Image(systemName: "checkmark")
+                               .foregroundColor(.blue)
+                       }
+                   }
+                   .contentShape(Rectangle())
+                   .onTapGesture {
+                       self.selectedSound = sound
+                       let key = "Chat_AlertSoundFile"
+                       let filename = String(format: "alert%ld", index)
+                       HelperTools.defaultsDB().setValue(filename, forKey: key)
+                       if index > 0 {
+                           self.playSound(index: index)
+                       } else {
+                           self.audioPlayer?.stop()
+                       }
+                   }
+               }
+           }
+       }
 
     func playSound(index: Int) {
         let filename = "alert\(index)"
@@ -93,26 +154,8 @@ struct SoundsSettingView: View {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer?.play()
         } catch {
-            print("Error playing sound: \(error)")
+            DDLogError("Error playing Sound \(error)")
         }
     }
 }
 
-class ContactSettings: ObservableObject {
-    @Published var contactJid: String
-    
-    init(contactJid: String) {
-        self.contactJid = contactJid
-    }
-}
-
-
-
-@objc class SoundsSettingViewController: NSObject {
-    @objc static func createSoundsSettingView(contactJid: String) -> UIViewController {
-        let settings = ContactSettings(contactJid: contactJid)
-        let SoundsSettingSwiftUIView = SoundsSettingView(settings: settings)
-        let hostingController = UIHostingController(rootView: SoundsSettingSwiftUIView)
-        return hostingController
-    }
-}

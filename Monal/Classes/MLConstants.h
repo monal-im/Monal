@@ -162,6 +162,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalNotIdle @"kMonalNotIdle"
 
 #define kMonalBackgroundChanged @"kMonalBackgroundChanged"
+#define kMonalSoundChanged @"kMonalSoundChanged"
 #define kMLMAMPref @"kMLMAMPref"
 
 #define kMonalAccountStatusChanged @"kMonalAccountStatusChanged"

@@ -200,11 +200,11 @@
 -(void) setPinned:(BOOL) pinned
 {
     self.isPinned = pinned;
-
+    
     if(pinned) {
-        self.backgroundColor = [UIColor colorNamed:@"activeChatsPinnedColor"];
+        self.pinBadge.hidden = NO;
     } else {
-        self.backgroundColor = nil;
+        self.pinBadge.hidden = YES;
     }
 }
 

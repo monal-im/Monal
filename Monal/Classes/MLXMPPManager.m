@@ -64,7 +64,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] synchronize];
     }
 
-    [self upgradeObjectUserSettingsIfUnset:@"Chat_AlertSoundFile" toDefault:@"alert2"];
+    [self removeObjectUserSettingsIfSet:@"AlertSoundFile"];
+    [self upgradeObjectUserSettingsIfUnset:@"Chat__AlertSoundFile" toDefault:@"alert2"];
 
     // upgrade ShowGeoLocation
     [self upgradeBoolUserSettingsIfUnset:@"ShowGeoLocation" toDefault:YES];

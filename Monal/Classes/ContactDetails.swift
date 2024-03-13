@@ -190,6 +190,10 @@ struct ContactDetails: View {
                 NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact, delegate:delegate))) {
                     Text("Change Chat Background")
                 }
+                
+                NavigationLink(destination: LazyClosureView(SoundsSettingView(contact:contact, delegate:delegate))) {
+                    Text("Sounds")
+                }
             }
             .listStyle(.plain)
 
@@ -255,6 +259,7 @@ struct ContactDetails: View {
                                         .destructive(
                                             Text("Yes"),
                                             action: {
+                                                MLSoundManager.sharedInstance().deleteSoundData(contact.obj)
                                                 contact.obj.removeFromRoster()      //this will dismiss the chatview via kMonalContactRemoved notification
                                                 self.delegate.dismiss()
                                             }

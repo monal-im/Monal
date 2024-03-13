@@ -31,47 +31,31 @@
 -(id) init
 {
     self = [super init];
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    self.documentsDirectory = [[HelperTools getContainerURLForPathComponents:@[]] path];
-    NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"Library/Sounds/"];
-    [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:nil];
-    [HelperTools configureFileProtectionFor:writablePath];
-    
+    if (self) {
+        NSFileManager* fileManager = [NSFileManager defaultManager];
+        NSURL *soundsDirectoryURL = [HelperTools getContainerURLForPathComponents:@[@"Library", @"Sounds"]];
+        self.documentsDirectory = [soundsDirectoryURL path];
+        [fileManager createDirectoryAtURL:soundsDirectoryURL withIntermediateDirectories:YES attributes:nil error:nil];
+        [HelperTools configureFileProtectionFor:[soundsDirectoryURL path]];
+    }
     return self;
 }
 
-- (void)saveSoundData:(NSData* _Nullable)data{
-    if (data == nil) {
-        DDLogVerbose(@"No audio data is provided.");
-        return;
-    }
-
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSString* libraryPath = [self.documentsDirectory stringByAppendingPathComponent:@"Library/Sounds/"];
-    NSString* writablePath = [libraryPath stringByAppendingPathComponent:@"Sound.m4a"];
-    
-    if (![fileManager fileExistsAtPath:libraryPath]) {
-        [fileManager createDirectoryAtPath:libraryPath withIntermediateDirectories:YES attributes:nil error:nil];
-    }
-
-    if ([fileManager fileExistsAtPath:writablePath]) {
-        [fileManager removeItemAtPath:writablePath error:nil];
-    }
-    
-    DDLogVerbose(@"Writing sound data %@ for %@ '...", data, writablePath);
-    if ([data writeToFile:writablePath atomically:YES]) {
-        DDLogVerbose(@"Writing sound data Successfully: %@", writablePath);
-        [HelperTools configureFileProtectionFor:writablePath];
-    } else {
-        DDLogVerbose(@"Writing sound data failure: %@", writablePath);
-    }
+-(NSString*) fileNameforContact:(MLContact*) contact
+{
+    return [NSString stringWithFormat:@"chat_%@_%@.m4a", contact.accountId.stringValue, [contact.contactJid lowercaseString]];
 }
 
-- (NSString *)loadSoundURL {
-    NSString *libraryPath = [self.documentsDirectory stringByAppendingPathComponent:@"Library/Sounds/"];
-    NSString *soundFilePath = [libraryPath stringByAppendingPathComponent:@"Sound.m4a"];
+- (NSString *)loadSoundURLForContact:(MLContact *_Nullable)contact {
+    NSString *soundName;
+    if (contact == nil) {
+        soundName = @"Sound.m4a";
+    } else {
+        soundName = [self fileNameforContact:contact];
+    }
+    NSString *soundFilePath = [self.documentsDirectory stringByAppendingPathComponent:soundName];
     NSFileManager *fileManager = [NSFileManager defaultManager];
-
+    
     if ([fileManager fileExistsAtPath:soundFilePath]) {
         DDLogVerbose(@"The audio file was loaded successfully");
         return soundFilePath;
@@ -81,25 +65,57 @@
     }
 }
 
-- (void)deleteSoundData {
+- (void)saveSoundDataForContact:(MLContact* _Nullable) contact withSoundData:(NSData *)soundData {
+    // 检查音频数据是否为空
+    if (soundData == nil) {
+        DDLogVerbose(@"No audio data is provided.");
+        return;
+    }
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSString* libraryPath = [self.documentsDirectory stringByAppendingPathComponent:@"Library/Sounds"]; // 获取Library目录
-    NSString* soundFilePath = [libraryPath stringByAppendingPathComponent:@"Sound.m4a"];
+    NSString* targetPath;
+    NSError *error = nil;
 
-    if ([fileManager fileExistsAtPath:soundFilePath]) {
-        NSError* error = nil;
-
-        if ([fileManager removeItemAtPath:soundFilePath error:&error]) {
-            DDLogVerbose(@"The audio file was deleted successfully: %@", soundFilePath);
-        } else {
-            DDLogVerbose(@"Failed to delete audio file: %@", error.localizedDescription);
-        }
+    if (contact == nil) {
+        targetPath = [self.documentsDirectory stringByAppendingPathComponent:@"Sound.m4a"];
     } else {
-        DDLogVerbose(@"The audio file does not exist: %@", soundFilePath);
+        NSString* filename = [self fileNameforContact:contact];
+        targetPath = [self.documentsDirectory stringByAppendingPathComponent:filename];
+        if ([fileManager fileExistsAtPath:targetPath]) {
+            BOOL removed = [fileManager removeItemAtPath:targetPath error:&error];
+            if (!removed && error) {
+                DDLogVerbose(@"Failed to remove existing sound file: %@", error);
+                return;
+            }
+        }
+    }
+
+    BOOL success = [soundData writeToFile:targetPath options:NSDataWritingAtomic error:&error];
+    if (success) {
+        DDLogVerbose(@"Audio data written successfully to: %@", targetPath);
+        [HelperTools configureFileProtectionFor:targetPath];
+    } else {
+        DDLogVerbose(@"Failed to write audio data to file: %@", error);
     }
 }
 
 
-
+- (void)deleteSoundData:(MLContact *_Nullable) contact {
+    NSString *soundName;
+    if (contact == nil) {
+        soundName = @"Sound.m4a";
+    } else {
+        soundName = [self fileNameforContact:contact];
+    }
+    NSString *soundFilePath = [self.documentsDirectory stringByAppendingPathComponent:soundName];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError* error = nil;
+    if ([fileManager removeItemAtPath:soundFilePath error:&error]) {
+        DDLogVerbose(@"The audio file was deleted successfully: %@", soundFilePath);
+    } else if (error) {
+        DDLogVerbose(@"Failed to delete audio file: %@", error.localizedDescription);
+    } else {
+        DDLogVerbose(@"The audio file does not exist: %@", soundFilePath);
+    }
+}
 
 @end

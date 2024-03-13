@@ -23,15 +23,18 @@ struct SoundsSettingView: View {
     init(contact: ObservableKVOWrapper<MLContact>?, delegate: SheetDismisserProtocol) {
         self.contact = contact
         self.delegate = delegate
-        let soundKey = "Chat_AlertSoundFile"
+        var soundKey: String
+        soundKey = "chat_\(contact?.obj.contactJid.lowercased() ?? "")_AlertSoundFile"
         _playSounds = State(initialValue: HelperTools.defaultsDB().bool(forKey: "Sound"))
+    
         let savedSound = HelperTools.defaultsDB().string(forKey: soundKey) ?? "Xylophone"
-
+        
         if savedSound == "Xylophone" {
             _selectedSound = State(initialValue: sounds[2])
         } else if savedSound == "CustomizeSound" {
             _selectedSound = State(initialValue: "Custom Sound")
-        } else if let soundIndex = SoundsSettingView.parseSavedSound(savedSound) {
+        } else {
+            let soundIndex = Int(savedSound.replacingOccurrences(of: "alert", with: "")) ?? -1
             if soundIndex >= 1 && soundIndex <= 12 {
                 _selectedSound = State(initialValue: sounds[soundIndex])
             } else if soundIndex == 0 {
@@ -40,30 +43,19 @@ struct SoundsSettingView: View {
                 _selectedSound = State(initialValue: sounds[2])
                 DDLogVerbose("The audio file does not exist")
             }
-        } else {
-            _selectedSound = State(initialValue: sounds[2])
-            DDLogVerbose("The audio file does not exist")
         }
-    }
-    
-    static func parseSavedSound(_ savedSound: String) -> Int? {
-        let pattern = "^alert(\\d+)$"
-        if let regex = try? NSRegularExpression(pattern: pattern, options: []),
-           let match = regex.firstMatch(in: savedSound, options: [], range: NSRange(location: 0, length: savedSound.utf16.count)),
-           let range = Range(match.range(at: 1), in: savedSound) {
-            return Int(savedSound[range])
-        }
-        return nil
     }
     
     var body: some View {
         List {
-            Section {
-                Toggle(isOn: $playSounds) {
-                    Text("Play Sounds")
-                }
-                .onChange(of: playSounds) { newValue in
-                    HelperTools.defaultsDB().setValue(newValue, forKey: "Sound")
+            if (contact == nil) {
+                Section {
+                    Toggle(isOn: $playSounds) {
+                        Text("Play Sounds")
+                    }
+                    .onChange(of: playSounds) { newValue in
+                        HelperTools.defaultsDB().setValue(newValue, forKey: "Sound")
+                    }
                 }
             }
             if playSounds {
@@ -82,20 +74,20 @@ struct SoundsSettingView: View {
                         }
                     }
                     .sheet(isPresented: $showingSoundPicker) {
-                        LazyClosureView(SoundPickerView(onSoundPicked: { (url: URL?) in
+                        LazyClosureView(SoundPickerView(contact: contact, onSoundPicked: { (url: URL?) in
                             if url == nil {
                                 self.selectedSound = "Xylophone"
-                                let key = "Chat_AlertSoundFile"
-                                let filename = String(format: "alert3")
+                                let key = "chat_\(contact?.obj.contactJid.lowercased() ?? "")_AlertSoundFile"
+                                let filename = String(format: "alert2")
                                 HelperTools.defaultsDB().setValue(filename, forKey: key)
                                 HelperTools.defaultsDB().synchronize()
                             } else {
                                 self.selectedSound = "Custom Sound"
-                                let key = "Chat_AlertSoundFile"
+                                let key = "chat_\(contact?.obj.contactJid.lowercased() ?? "")_AlertSoundFile"
                                 HelperTools.defaultsDB().setValue("CustomizeSound", forKey: key)
                                 HelperTools.defaultsDB().synchronize()
                             }
-                        }))
+                        }, delegate: delegate))
                     }
                 }
             }
@@ -134,7 +126,7 @@ struct SoundsSettingView: View {
                    .contentShape(Rectangle())
                    .onTapGesture {
                        self.selectedSound = sound
-                       let key = "Chat_AlertSoundFile"
+                       let key = "chat_\(contact?.obj.contactJid ?? "")_AlertSoundFile"
                        let filename = String(format: "alert%ld", index)
                        HelperTools.defaultsDB().setValue(filename, forKey: key)
                        if index > 0 {
@@ -154,7 +146,7 @@ struct SoundsSettingView: View {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer?.play()
         } catch {
-            DDLogError("Error playing Sound \(error)")
+            DDLogDebug("Error playing Sound \(error)")
         }
     }
 }

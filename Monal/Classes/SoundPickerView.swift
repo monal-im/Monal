@@ -10,7 +10,6 @@ import SwiftUI
 import UIKit
 import AVFoundation
 
-// 用于选择文档的UIViewControllerRepresentable
 struct DocumentPicker: UIViewControllerRepresentable {
     var onPicked: (URL) -> Void
     var onDismiss: () -> Void
@@ -53,7 +52,10 @@ struct SoundPickerView: View {
     @State private var audioPlayer: AVAudioPlayer?
     @State private var audioData: Data?
 
+    let contact: ObservableKVOWrapper<MLContact>?
     let onSoundPicked: (URL?) -> Void
+    let delegate: SheetDismisserProtocol
+    
 
     var body: some View {
         NavigationView {
@@ -71,7 +73,7 @@ struct SoundPickerView: View {
                                     self.selectedAudioURL = nil
                                     self.audioPlayer?.stop()
                                     self.audioPlayer = nil
-                                    MLSoundManager.sharedInstance().deleteSoundData()
+                                    MLSoundManager.sharedInstance().deleteSoundData(contact?.obj)
                                 }) {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundColor(.red)
@@ -93,7 +95,7 @@ struct SoundPickerView: View {
             .navigationBarItems(trailing: Button("Save") {
                 if let selectedURL = selectedAudioURL {
                     onSoundPicked(selectedURL)
-                    MLSoundManager.sharedInstance().saveSound(audioData)
+                    MLSoundManager.sharedInstance().saveSoundData(for: self.contact?.obj, withSound: audioData!)
                     presentationMode.wrappedValue.dismiss()
                 } else {
                     self.selectedAudioURL = nil
@@ -112,7 +114,7 @@ struct SoundPickerView: View {
                 })
             }
             .onAppear {
-                let soundURLString = MLSoundManager.sharedInstance().loadSoundURL()
+                let soundURLString = MLSoundManager.sharedInstance().loadSoundURL(for: contact?.obj)
                 if let soundURL = URL(string: soundURLString) {
                     selectedAudioURL = soundURL
                     loadAudioData(from: soundURL)
@@ -126,7 +128,7 @@ struct SoundPickerView: View {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer?.play()
         } catch {
-            print("Cannot play audio: \(error)")
+            DDLogDebug("Cannot play audio: \(error)")
         }
     }
     
@@ -134,83 +136,7 @@ struct SoundPickerView: View {
         do {
             audioData = try Data(contentsOf: url)
         } catch {
-            print("加载音频数据失败: \(error)")
+            DDLogDebug("Load audio data failure: \(error)")
         }
     }
 }
-
-
-
-
-//struct SoundPickerView: View {
-//    @Environment(\.presentationMode) var presentationMode
-//    @State private var showDocumentPicker = false
-//    @State private var selectedAudioURL: URL?
-//    @State private var audioPlayer: AVAudioPlayer?
-//    @State private var audioData: Data? // 用于存储音频文件的数据
-//
-//    let onSoundPicked: (URL) -> Void
-//
-//    var body: some View {
-//        VStack {
-//            if let audioURL = selectedAudioURL {
-//                // 展示选中的音频文件名称
-//                Text(audioURL.lastPathComponent)
-//                    .padding()
-//                    .onTapGesture {
-//                        playAudio(url: audioURL)
-//                    }
-//                
-//                // 如果有音频数据，可以在这里添加对应的 UI 组件来展示数据
-//                // 例如，展示音频文件的大小
-//                if let audioData = audioData {
-//                    Text("文件大小: \(audioData.count) bytes")
-//                        .padding()
-//                }
-//
-//                // 确认按钮
-//                Button("确认") {
-//                    if let url = selectedAudioURL {
-//                        onSoundPicked(url)
-//                        presentationMode.wrappedValue.dismiss()
-//                        MLSoundManager.sharedInstance().saveSound(audioData)
-//                    }
-//                }
-//                .padding()
-//            } else {
-//                Button("选择声音文件") {
-//                    showDocumentPicker = true
-//                }
-//                .padding()
-//            }
-//        }
-//        .navigationBarTitle("选择声音", displayMode: .inline)
-//        .sheet(isPresented: $showDocumentPicker) {
-//            DocumentPicker(onPicked: { url in
-//                selectedAudioURL = url
-//                loadAudioData(from: url)
-//                showDocumentPicker = false
-//            }, onDismiss: {
-//                showDocumentPicker = false
-//            })
-//        }
-//    }
-//
-//    func playAudio(url: URL) {
-//        do {
-//            audioPlayer = try AVAudioPlayer(contentsOf: url)
-//            audioPlayer?.play()
-//        } catch {
-//            print("播放音频失败: \(error)")
-//        }
-//    }
-//
-//    // 加载音频数据的方法
-//    func loadAudioData(from url: URL) {
-//        do {
-//            audioData = try Data(contentsOf: url)
-//        } catch {
-//            print("加载音频数据失败: \(error)")
-//        }
-//    }
-//}

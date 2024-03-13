@@ -19,9 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 +(MLSoundManager* _Nonnull) sharedInstance;
-- (void)saveSoundData:(NSData* _Nullable)data;
-- (void)deleteSoundData;
-- (NSString *)loadSoundURL;
+- (void)saveSoundDataForContact:(MLContact* _Nullable) contact withSoundData:(NSData *)soundData;
+- (void)deleteSoundData:(MLContact *_Nullable) contact;
+- (NSString *)loadSoundURLForContact:(MLContact *_Nullable)contact;
 
 @end
 

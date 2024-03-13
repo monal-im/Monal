@@ -361,6 +361,7 @@
 -(void) showModernNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     NSString* idval = [self identifierWithMessage:message];
     
     INSendMessageAttachment* audioAttachment = nil;
@@ -457,9 +458,44 @@
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
-        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"Chat_AlertSoundFile"];
+        content.sound = [UNNotificationSound defaultSound];
+        NSString* userSoundKey = [NSString stringWithFormat:@"chat_%@_AlertSoundFile", [contact.contactJid lowercaseString]];
+        NSString* filename = [[HelperTools defaultsDB] objectForKey:userSoundKey];
+        // If a alert sound has been set for this user
         if(filename)
         {
+            // If it is a customize sound
+            if ([filename isEqualToString:@"CustomizeSound"])
+            {
+                NSString* customSoundName = [NSString stringWithFormat:@"chat_%@_%@.m4a",
+                                             [contact.accountId stringValue],
+                                             [contact.contactJid lowercaseString]];
+                content.sound = [UNNotificationSound soundNamed:customSoundName];
+                DDLogDebug(@"Using custom alert sound: %@", content.sound);
+            }
+            // If it is bundle sound
+            else
+            {
+                NSInteger fileIndex = [[filename stringByReplacingOccurrencesOfString:@"alert" withString:@""] integerValue];
+                if(fileIndex >= 1 && fileIndex <= 12)
+                {
+                    NSString *soundName = [NSString stringWithFormat:@"AlertSounds/%@.aif", filename];
+                    content.sound = [UNNotificationSound soundNamed:soundName];
+                    DDLogDebug(@"Using user configured alert sound within alert1 to alert12: %@", content.sound);
+                }
+                // If it is system sound
+                else if (fileIndex == 0)
+                {
+                    content.sound = [UNNotificationSound defaultSound];
+                }
+            }
+        }
+        // If a alert sound has not been set for this user
+        else
+        {
+            DDLogDebug(@"Filename is nil, using default sound");
+            NSString* normalSoundKey = [NSString stringWithFormat:@"chat__AlertSoundFile"];
+            NSString* filename = [[HelperTools defaultsDB] objectForKey:normalSoundKey];
             NSInteger fileIndex = [[filename stringByReplacingOccurrencesOfString:@"alert" withString:@""] integerValue];
             if(fileIndex >= 1 && fileIndex <= 12)
             {
@@ -467,16 +503,17 @@
                 content.sound = [UNNotificationSound soundNamed:soundName];
                 DDLogDebug(@"Using user configured alert sound within alert1 to alert12: %@", content.sound);
             }
+            else if (fileIndex == 0)
+            {
+                content.sound = [UNNotificationSound defaultSound];
+                DDLogDebug(@"Using default alert sound: %@", content.sound);
+            }
             else
             {
-                content.sound = [UNNotificationSound soundNamed:@"Sound.m4a"];
-                DDLogDebug(@"Using default sound or another logic for filename outside alert1 to alert12: %@", content.sound);
+                NSString *soundName = [NSString stringWithFormat:@"Sound.m4a"];
+                content.sound = [UNNotificationSound soundNamed:soundName];
+                DDLogDebug(@"Using custom alert sound: %@", content.sound);
             }
-        }
-        else
-        {
-            content.sound = [UNNotificationSound defaultSound];
-            DDLogDebug(@"Using default alert sound: %@", content.sound);
         }
     }
     else
@@ -729,16 +766,62 @@
 
         if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
         {
-            NSString* filename = [[HelperTools defaultsDB] objectForKey:@"Chat_AlertSoundFile"];
+            content.sound = [UNNotificationSound defaultSound];
+            NSString* userSoundKey = [NSString stringWithFormat:@"chat_%@_AlertSoundFile", [contact.contactJid lowercaseString]];
+            NSString* filename = [[HelperTools defaultsDB] objectForKey:userSoundKey];
+            // If a alert sound has been set for this user
             if(filename)
             {
-                content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-                DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+                // If it is a customize sound
+                if ([filename isEqualToString:@"CustomizeSound"])
+                {
+                    NSString* customSoundName = [NSString stringWithFormat:@"chat_%@_%@.m4a",
+                                                 [contact.accountId stringValue],
+                                                 [contact.contactJid lowercaseString]];
+                    content.sound = [UNNotificationSound soundNamed:customSoundName];
+                    DDLogDebug(@"Using custom alert sound: %@", content.sound);
+                }
+                // If it is bundle sound
+                else
+                {
+                    NSInteger fileIndex = [[filename stringByReplacingOccurrencesOfString:@"alert" withString:@""] integerValue];
+                    if(fileIndex >= 1 && fileIndex <= 12)
+                    {
+                        NSString *soundName = [NSString stringWithFormat:@"AlertSounds/%@.aif", filename];
+                        content.sound = [UNNotificationSound soundNamed:soundName];
+                        DDLogDebug(@"Using user configured alert sound within alert1 to alert12: %@", content.sound);
+                    }
+                    // If it is system sound
+                    else if (fileIndex == 0)
+                    {
+                        content.sound = [UNNotificationSound defaultSound];
+                    }
+                }
             }
+            // If a alert sound has not been set for this user
             else
             {
-                content.sound = [UNNotificationSound defaultSound];
-                DDLogDebug(@"Using default alert sound: %@", content.sound);
+                DDLogDebug(@"Filename is nil, using default sound");
+                NSString* normalSoundKey = [NSString stringWithFormat:@"chat__AlertSoundFile"];
+                NSString* filename = [[HelperTools defaultsDB] objectForKey:normalSoundKey];
+                NSInteger fileIndex = [[filename stringByReplacingOccurrencesOfString:@"alert" withString:@""] integerValue];
+                if(fileIndex >= 1 && fileIndex <= 12)
+                {
+                    NSString *soundName = [NSString stringWithFormat:@"AlertSounds/%@.aif", filename];
+                    content.sound = [UNNotificationSound soundNamed:soundName];
+                    DDLogDebug(@"Using user configured alert sound within alert1 to alert12: %@", content.sound);
+                }
+                else if (fileIndex == 0)
+                {
+                    content.sound = [UNNotificationSound defaultSound];
+                    DDLogDebug(@"Using default alert sound: %@", content.sound);
+                }
+                else
+                {
+                    NSString *soundName = [NSString stringWithFormat:@"Sound.m4a"];
+                    content.sound = [UNNotificationSound soundNamed:soundName];
+                    DDLogDebug(@"Using custom alert sound: %@", content.sound);
+                }
             }
         }
         else

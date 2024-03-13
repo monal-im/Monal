@@ -2482,6 +2482,7 @@
 				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
 				INFOPLIST_FILE = "Monal-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Monal;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -2735,6 +2736,7 @@
 				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
 				INFOPLIST_FILE = "Monal-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Monal;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -3104,6 +3106,7 @@
 				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
 				INFOPLIST_FILE = "Monal-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Monal;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -3544,6 +3547,7 @@
 				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
 				INFOPLIST_FILE = "Monal-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Monal;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -3899,6 +3903,7 @@
 				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
 				INFOPLIST_FILE = "Quicksy-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Quicksy;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -4313,6 +4318,7 @@
 				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
 				INFOPLIST_FILE = "Alpha.Monal-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Monal.alpha;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",

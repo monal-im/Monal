@@ -427,6 +427,7 @@
     nw_parameters_configure_protocol_block_t tcp_options = ^(nw_protocol_options_t tcp_options) {
         nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
         //nw_tcp_options_set_no_delay(tcp_options, YES);            //disable nagle's algorithm
+        //nw_tcp_options_set_connection_timeout(tcp_options, 4);
     };
     nw_parameters_configure_protocol_block_t configure_tls_block = ^(nw_protocol_options_t tls_options) {
         sec_protocol_options_t options = nw_tls_copy_sec_protocol_options(tls_options);
@@ -555,7 +556,7 @@
             //which seems to mean: if the network path changed (for example connectivity regained)
             //if this happens inside the connection timeout all is ok
             //if not, the connection will be cancelled already and everything will be ok, too
-            DDLogVerbose(@"%@: got nw_connection_state_waiting and ignoring it, see comments in code...", logtag);
+            DDLogVerbose(@"%@: got nw_connection_state_waiting and ignoring it, see comments in code: %@ (%@)", logtag, self, error);
         }
         else if(state == nw_connection_state_failed)
         {

@@ -218,6 +218,9 @@ NSString* const kStanza = @"stanza";
     //we now support the modern bookmarks protocol (XEP-0402)
     [self.pubsub registerForNode:@"urn:xmpp:bookmarks:1" withHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler)];
     
+    //we support mds
+    [self.pubsub registerForNode:@"urn:xmpp:mds:displayed:0" withHandler:$newHandler(MLPubSubProcessor, mdsHandler)];
+    
     //autodelete messages old enough (first invocation)
     if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
         [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
@@ -5230,6 +5233,9 @@ NSString* const kStanza = @"stanza";
     
     //don't queue this notification because it should be handled INLINE inside the receive queue
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
+    
+    //fetch current mds state
+    [self.pubsub fetchNode:@"urn:xmpp:mds:displayed:0" from:self.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleMdsFetchResult)];
 }
 
 -(void) addMessageToMamPageArray:(NSDictionary*) messageDictionary
@@ -5255,6 +5261,25 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendDisplayMarkerForMessage:(MLMessage*) msg
 {
+    //always publish mds marker
+    //TODO: implement server assisted markers if already sending 0333 chat markers
+    NSString* max_items = @"255";       //fallback for servers not supporting "max"
+    if(self.connectionProperties.supportsPubSubMax)
+        max_items = @"max";
+    [self.pubsub publishItem:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{kId: msg.buddyName} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"displayed" andNamespace:@"urn:xmpp:mds:displayed:0" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"stanza-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{
+                @"by": self.connectionProperties.identity.jid,
+                @"id": msg.stanzaId,
+            } andChildren:@[] andData:nil]
+        ] andData:nil]
+    ] andData:nil] onNode:@"urn:xmpp:mds:displayed:0" withConfigOptions:@{
+        @"pubsub#persist_items": @"true",
+        @"pubsub#access_model": @"whitelist",
+        @"pubsub#max_items": max_items,
+        @"pubsub#send_last_published_item": @"never",
+    }];
+    
     if(![[HelperTools defaultsDB] boolForKey:@"SendDisplayedMarkers"])
     {
         DDLogVerbose(@"Not sending chat marker, configured to not do so...");
@@ -5264,7 +5289,7 @@ NSString* const kStanza = @"stanza";
     //don't send chatmarkers in channels
     if(msg.isMuc && [@"channel" isEqualToString:msg.mucType])
     {
-        DDLogVerbose(@"Not sending chat marker in channel...");
+        DDLogVerbose(@"Not sending XEP-0333 chat marker in channel...");
         return;
     }
     

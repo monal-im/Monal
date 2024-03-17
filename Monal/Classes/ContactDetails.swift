@@ -259,7 +259,6 @@ struct ContactDetails: View {
                                         .destructive(
                                             Text("Yes"),
                                             action: {
-                                                MLSoundManager.sharedInstance().deleteSoundData(contact.obj)
                                                 contact.obj.removeFromRoster()      //this will dismiss the chatview via kMonalContactRemoved notification
                                                 self.delegate.dismiss()
                                             }

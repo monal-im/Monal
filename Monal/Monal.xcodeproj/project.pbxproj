@@ -163,9 +163,12 @@
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
+		BE71BFD12BA648910025B956 /* LibMonalRustSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = BE71BFD02BA648910025B956 /* LibMonalRustSwiftBridge */; };
+		BE71BFD42BA654E90025B956 /* MLSoundManager.h in Headers */ = {isa = PBXBuildFile; fileRef = BE71BFD22BA654E90025B956 /* MLSoundManager.h */; };
+		BE71BFD52BA654E90025B956 /* MLSoundManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BE71BFD32BA654E90025B956 /* MLSoundManager.m */; };
+		BE71BFD62BA654E90025B956 /* MLSoundManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BE71BFD32BA654E90025B956 /* MLSoundManager.m */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
 		BE98E9512B990C8C0007691C /* SoundsSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE98E9502B990C8C0007691C /* SoundsSettingView.swift */; };
-		BE98E9542B9967200007691C /* MLSoundManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BE98E9532B99671F0007691C /* MLSoundManager.m */; };
 		BE98E95C2B9A481B0007691C /* SoundPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE98E95B2B9A481B0007691C /* SoundPickerView.swift */; };
 		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
 		C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490E22612F3D00054AC9E /* MLCrypto.swift */; };
@@ -614,9 +617,9 @@
 		B55DCA2ABBDB6E635D46D69A /* Pods-monalxmpp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.debug.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.debug.xcconfig"; sourceTree = "<group>"; };
 		B58835E4BBDCCB6BE1E8F0AE /* Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
 		B8155E63F8DE80FF36D0B3B7 /* Pods-NotificationService.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.adhoc.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.adhoc.xcconfig"; sourceTree = "<group>"; };
+		BE71BFD22BA654E90025B956 /* MLSoundManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSoundManager.h; sourceTree = "<group>"; };
+		BE71BFD32BA654E90025B956 /* MLSoundManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSoundManager.m; sourceTree = "<group>"; };
 		BE98E9502B990C8C0007691C /* SoundsSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundsSettingView.swift; sourceTree = "<group>"; };
-		BE98E9522B99671F0007691C /* MLSoundManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSoundManager.h; sourceTree = "<group>"; };
-		BE98E9532B99671F0007691C /* MLSoundManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSoundManager.m; sourceTree = "<group>"; };
 		BE98E95B2B9A481B0007691C /* SoundPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPickerView.swift; sourceTree = "<group>"; };
 		BFA9EFD7A8064201C81F52CF /* Pods-Monal.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.alpha.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.alpha.xcconfig"; sourceTree = "<group>"; };
 		C10490482612ED2F0054AC9E /* MLEmoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLEmoji.swift; sourceTree = "<group>"; };
@@ -811,6 +814,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84DD7EF92B28512C005AC131 /* CocoaLumberjack in Frameworks */,
+				BE71BFD12BA648910025B956 /* LibMonalRustSwiftBridge in Frameworks */,
 				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
 				84DD7EFB2B28512C005AC131 /* CocoaLumberjackSwift in Frameworks */,
 				84DD7EFD2B28512C005AC131 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
@@ -856,8 +860,8 @@
 				C16D18332792A4AF00F869A0 /* DataLayerMigrations.h */,
 				C16D18342792A4AF00F869A0 /* DataLayerMigrations.m */,
 				84FC37542897521400634E3E /* snprintf.m */,
-				BE98E9522B99671F0007691C /* MLSoundManager.h */,
-				BE98E9532B99671F0007691C /* MLSoundManager.m */,
+				BE71BFD22BA654E90025B956 /* MLSoundManager.h */,
+				BE71BFD32BA654E90025B956 /* MLSoundManager.m */,
 			);
 			name = Shared;
 			path = Classes;
@@ -1487,6 +1491,7 @@
 				C16D18352792A4AF00F869A0 /* DataLayerMigrations.h in Headers */,
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 				5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */,
+				BE71BFD42BA654E90025B956 /* MLSoundManager.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
 				54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */,
 				544656BD25349133006B2953 /* XMPPDataForm.h in Headers */,
@@ -1605,6 +1610,7 @@
 				84DD7EF82B28512C005AC131 /* CocoaLumberjack */,
 				84DD7EFA2B28512C005AC131 /* CocoaLumberjackSwift */,
 				84DD7EFC2B28512C005AC131 /* CocoaLumberjackSwiftLogBackend */,
+				BE71BFD02BA648910025B956 /* LibMonalRustSwiftBridge */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1755,6 +1761,7 @@
 				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
 				84DD7EF72B28512C005AC131 /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
+				BE71BFCF2BA648910025B956 /* XCLocalSwiftPackageReference "../rust/LibMonalRustSwiftBridge" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -2070,7 +2077,6 @@
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
-				BE98E9542B9967200007691C /* MLSoundManager.m in Sources */,
 				384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */,
 				841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */,
 				C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */,
@@ -2099,6 +2105,7 @@
 				849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */,
 				C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
+				BE71BFD52BA654E90025B956 /* MLSoundManager.m in Sources */,
 				3D7D352328626CB80042C5E5 /* LoadingOverlay.swift in Sources */,
 				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
@@ -2177,6 +2184,7 @@
 				84FC37552897521500634E3E /* snprintf.m in Sources */,
 				26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */,
 				26CC57B823A0876300ABB92A /* MLHTTPRequest.m in Sources */,
+				BE71BFD62BA654E90025B956 /* MLSoundManager.m in Sources */,
 				26CC57A223A086AA00ABB92A /* xmpp.m in Sources */,
 				26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */,
 				541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */,
@@ -2457,10 +2465,12 @@
 				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
@@ -2497,6 +2507,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -2711,10 +2722,12 @@
 				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
@@ -2751,6 +2764,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -3080,10 +3094,12 @@
 				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
@@ -3121,6 +3137,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -3522,10 +3539,12 @@
 				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
@@ -3562,6 +3581,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -4296,6 +4316,7 @@
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
@@ -4634,6 +4655,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		BE71BFCF2BA648910025B956 /* XCLocalSwiftPackageReference "../rust/LibMonalRustSwiftBridge" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../rust/LibMonalRustSwiftBridge;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -4693,6 +4721,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 84DD7EF72B28512C005AC131 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
+		};
+		BE71BFD02BA648910025B956 /* LibMonalRustSwiftBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LibMonalRustSwiftBridge;
 		};
 		C1E1EC7A286A025F0097EC74 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;

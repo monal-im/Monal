@@ -133,9 +133,9 @@ struct BackgroundSettings: View {
     }
 }
 
-//struct BackgroundSettings_Previews: PreviewProvider {
-//    static var delegate = SheetDismisserProtocol()
-//    static var previews: some View {
-//        BackgroundSettings(contact:nil, delegate:delegate)
-//    }
-//}
+struct BackgroundSettings_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
+    static var previews: some View {
+        BackgroundSettings(contact:nil, delegate:delegate)
+    }
+}

@@ -73,7 +73,6 @@ struct SoundPickerView: View {
                                     self.selectedAudioURL = nil
                                     self.audioPlayer?.stop()
                                     self.audioPlayer = nil
-                                    MLSoundManager.sharedInstance().deleteSoundData(contact?.obj)
                                 }) {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundColor(.red)
@@ -95,7 +94,6 @@ struct SoundPickerView: View {
             .navigationBarItems(trailing: Button("Save") {
                 if let selectedURL = selectedAudioURL {
                     onSoundPicked(selectedURL)
-                    MLSoundManager.sharedInstance().saveSoundData(for: self.contact?.obj, withSound: audioData!)
                     presentationMode.wrappedValue.dismiss()
                 } else {
                     self.selectedAudioURL = nil

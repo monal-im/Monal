@@ -2,7 +2,7 @@
 //  MLSoundManager.h
 //  Monal
 //
-//  Created by 阿栋 on 3/6/24.
+//  Created by 阿栋 on 3/16/24.
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
@@ -18,10 +18,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString* _Nullable selectedSound;
 
 
-+(MLSoundManager* _Nonnull) sharedInstance;
-- (void)saveSoundDataForContact:(MLContact* _Nullable) contact withSoundData:(NSData *)soundData;
++(MLSoundManager*) sharedInstance;
 - (void)deleteSoundData:(MLContact *_Nullable) contact;
+- (NSArray<NSString *> *)loadSoundFromResource;
+- (NSString* )loadSoundNameForContact:(MLContact* _Nullable)contact;
 - (NSString *)loadSoundURLForContact:(MLContact *_Nullable)contact;
+- (void)saveSoundData:(NSData *)soundData AndWithSoundFileName:(NSString *)filename WithPrefix:(NSString *)prefix;
 
 @end
 

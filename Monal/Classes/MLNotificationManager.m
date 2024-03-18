@@ -320,21 +320,13 @@
 -(void) playNotificationSoundForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
 {
     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     NSString* idval = [self identifierWithMessage:message];
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
-        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-        if(filename)
-        {
-            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-            DDLogDebug(@"Using user configured alert sound: %@", content.sound);
-        }
-        else
-        {
-            content.sound = [UNNotificationSound defaultSound];
-            DDLogDebug(@"Using default alert sound: %@", content.sound);
-        }
+        NSString* soundName = [[MLSoundManager sharedInstance] loadSoundNameForContact:contact];
+        content.sound = [UNNotificationSound soundNamed:soundName];
     }
     else
         DDLogDebug(@"Using no alert sound");
@@ -361,6 +353,7 @@
 -(void) showModernNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
 {
     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     NSString* idval = [self identifierWithMessage:message];
     
     INSendMessageAttachment* audioAttachment = nil;
@@ -457,17 +450,8 @@
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
-        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-        if(filename)
-        {
-            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-            DDLogDebug(@"Using user configured alert sound: %@", content.sound);
-        }
-        else
-        {
-            content.sound = [UNNotificationSound defaultSound];
-            DDLogDebug(@"Using default alert sound: %@", content.sound);
-        }
+        NSString* soundName = [[MLSoundManager sharedInstance] loadSoundNameForContact:contact];
+        content.sound = [UNNotificationSound soundNamed:soundName];
     }
     else
         DDLogDebug(@"Using no alert sound");
@@ -719,17 +703,8 @@
 
         if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
         {
-            NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-            if(filename)
-            {
-                content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-                DDLogDebug(@"Using user configured alert sound: %@", content.sound);
-            }
-            else
-            {
-                content.sound = [UNNotificationSound defaultSound];
-                DDLogDebug(@"Using default alert sound: %@", content.sound);
-            }
+            NSString* soundName = [[MLSoundManager sharedInstance] loadSoundNameForContact:contact];
+            content.sound = [UNNotificationSound soundNamed:soundName];
         }
         else
             DDLogDebug(@"Using no alert sound");

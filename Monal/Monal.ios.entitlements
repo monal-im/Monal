@@ -4,11 +4,11 @@
 <dict>
 	<key>aps-environment</key>
 	<string>production</string>
-	<key>com.apple.developer.usernotifications.filtering</key>
-	<true/>
 	<key>com.apple.developer.kernel.increased-memory-limit</key>
 	<true/>
 	<key>com.apple.developer.usernotifications.communication</key>
+	<true/>
+	<key>com.apple.developer.usernotifications.filtering</key>
 	<true/>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>

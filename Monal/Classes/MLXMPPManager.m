@@ -64,7 +64,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] synchronize];
     }
 
-    [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
+    [self removeObjectUserSettingsIfSet:@"AlertSoundFile"];
+    [self upgradeObjectUserSettingsIfUnset:@"chat_global_AlertSoundFile" toDefault:@"global_Xylophone.aif_Builtin"];
 
     // upgrade ShowGeoLocation
     [self upgradeBoolUserSettingsIfUnset:@"ShowGeoLocation" toDefault:YES];
@@ -760,6 +761,7 @@ $$
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
         [contact removeShareInteractions];
         
+        [[MLSoundManager sharedInstance] deleteSoundData:contact];
         //notify the UI
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{
             @"contact": [MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]

@@ -64,6 +64,13 @@
     return result;
 }
 
+-(NSString *) getAccountNameByIndex:(NSUInteger) accNo
+{
+    NSString *str = [NSString stringWithFormat:@"%@@%@", [[self.accountList objectAtIndex:accNo] objectForKey:@"username"],
+                     [[self.accountList objectAtIndex:accNo] objectForKey:@"domain"]];
+    return str;
+}
+
 -(void) refreshAccountList
 {
     NSArray* accountList = [[DataLayer sharedInstance] accountList];

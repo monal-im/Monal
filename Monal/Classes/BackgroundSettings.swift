@@ -81,6 +81,7 @@ struct BackgroundSettings: View {
                             } else {
                                 Text("Select background image")
                                     .frame(maxWidth: .infinity, alignment: .center)
+                                
                             }
                         }
                         .sheet(isPresented:$showingImagePicker) {

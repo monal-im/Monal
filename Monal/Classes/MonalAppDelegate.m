@@ -953,7 +953,7 @@ $$
             //send displayed marker for last unread message (XEP-0333)
             //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
             MLMessage* lastUnreadMessage = [unread lastObject];
-            if(lastUnreadMessage && (!fromContact.isGroup || [@"group" isEqualToString:fromContact.mucType]))
+            if(lastUnreadMessage)
             {
                 DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
                 [account sendDisplayMarkerForMessage:lastUnreadMessage];

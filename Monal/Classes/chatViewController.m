@@ -176,6 +176,7 @@ enum msgSentState {
 
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight = UITableViewAutomaticDimension;
+    self.messageTable.backgroundColor = [UIColor colorNamed:@"chatBackgroundColor"];
 
 #if TARGET_OS_MACCATALYST
     //does not become first responder like in iOS
@@ -968,10 +969,9 @@ enum msgSentState {
                 //get list of unread messages
                 NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
 
-                //send displayed marker for last unread message (XEP-0333)
-                //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
+                //publish MDS display marker and optionally send displayed marker for last unread message (XEP-0333)
                 MLMessage* lastUnreadMessage = [unread lastObject];
-                if(lastUnreadMessage && (!self.contact.isGroup || [@"group" isEqualToString:self.contact.mucType]))
+                if(lastUnreadMessage)
                 {
                     DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
                     [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];

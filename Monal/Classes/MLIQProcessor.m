@@ -456,6 +456,9 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         [account enablePush];
     }
     
+    if([features containsObject:@"urn:xmpp:mds:server-assist:0"])
+        account.connectionProperties.supportsMDSAssist = YES;
+    
     if([features containsObject:@"urn:xmpp:mam:2"])
     {
         DDLogInfo(@"supports mam:2");

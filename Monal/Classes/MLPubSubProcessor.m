@@ -58,7 +58,11 @@ $$class_handler(mdsHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSS
                 
                 //NSString* ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:chatJid forAccount:account.accountNo]
                 NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:chatJid andAccount:account.accountNo tillStanzaId:stanzaId wasOutgoing:NO];
+<<<<<<< HEAD
                 DDLogDebug(@"Marked as read: %@", unread);
+=======
+                DDLogDebug(@"Muc marked as read: %@", unread);
+>>>>>>> 6d3c4e4c9aef5d1a9053fe1900889a4e4e40ca79
                 
                 //remove notifications of all remotely read messages (indicated by sending a display marker)
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
@@ -77,7 +81,11 @@ $$class_handler(mdsHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSS
                 }
                 
                 NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:chatJid andAccount:account.accountNo tillStanzaId:stanzaId wasOutgoing:NO];
+<<<<<<< HEAD
                 DDLogDebug(@"Marked as read: %@", unread);
+=======
+                DDLogDebug(@"1:1 marked as read: %@", unread);
+>>>>>>> 6d3c4e4c9aef5d1a9053fe1900889a4e4e40ca79
                 
                 //remove notifications of all remotely read messages (indicated by sending a display marker)
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
@@ -105,7 +113,11 @@ $$class_handler(handleMdsFetchResult, $$ID(xmpp*, account), $$BOOL(success), $_I
     }
     
     //call +notify handler to process our data dictionary containing all mds items
+<<<<<<< HEAD
     $call($newHandler(MLPubSubProcessor, mdsHandler), $ID(account), $ID(@"jid", account.connectionProperties.identity.jid), $ID(type, @"publish", $ID(data)));
+=======
+    $call($newHandler(MLPubSubProcessor, mdsHandler), $ID(account), $ID(jid, account.connectionProperties.identity.jid), $ID(type, @"publish", $ID(data)));
+>>>>>>> 6d3c4e4c9aef5d1a9053fe1900889a4e4e40ca79
 $$
 
 $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))

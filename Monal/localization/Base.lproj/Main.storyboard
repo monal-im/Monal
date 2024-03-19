@@ -30,6 +30,89 @@
             </objects>
             <point key="canvasLocation" x="-2798" y="-1290"/>
         </scene>
+        <!-- <scene sceneID="t5G-x5-BJO">
+            <objects>
+                <viewController storyboardIdentifier="SettingsVC" useStoryboardIdentifierAsRestorationIdentifier="YES" id="rCb-lj-e1D" customClass="SettingsVC" customModule="BiometricAuthentication" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="cPe-2t-blC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VM0-E4-twf">
+                                <rect key="frame" x="0.0" y="86" width="375" height="45"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Enable Biometric" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fPR-t2-G3U">
+                                        <rect key="frame" x="61" y="15" width="239" height="14"/>
+                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="12"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="pCN-5K-xcm">
+                                        <rect key="frame" x="16" y="4" width="37" height="37"/>
+                                        <color key="tintColor" systemColor="systemGreenColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="37" id="asY-0h-enj"/>
+                                            <constraint firstAttribute="height" constant="37" id="iTb-K6-NFA"/>
+                                        </constraints>
+                                    </imageView>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="ZJ7-YA-359">
+                                        <rect key="frame" x="308" y="7" width="51" height="31"/>
+                                        <color key="onTintColor" systemColor="systemGreenColor"/>
+                                        <connections>
+                                            <action selector="biometricSwitchTap:" destination="rCb-lj-e1D" eventType="valueChanged" id="8ZS-vc-F1y"/>
+                                        </connections>
+                                    </switch>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstItem="ZJ7-YA-359" firstAttribute="centerY" secondItem="VM0-E4-twf" secondAttribute="centerY" id="0Mr-hA-zUw"/>
+                                    <constraint firstItem="fPR-t2-G3U" firstAttribute="centerY" secondItem="pCN-5K-xcm" secondAttribute="centerY" id="3Jd-Xf-hiA"/>
+                                    <constraint firstItem="pCN-5K-xcm" firstAttribute="centerY" secondItem="VM0-E4-twf" secondAttribute="centerY" id="4pb-Fo-HsR"/>
+                                    <constraint firstItem="ZJ7-YA-359" firstAttribute="leading" secondItem="fPR-t2-G3U" secondAttribute="trailing" constant="8" id="936-Mc-iNL"/>
+                                    <constraint firstAttribute="height" constant="45" id="MKH-Og-aw1"/>
+                                    <constraint firstItem="fPR-t2-G3U" firstAttribute="leading" secondItem="pCN-5K-xcm" secondAttribute="trailing" constant="8" id="Xtp-h0-Ljn"/>
+                                    <constraint firstAttribute="trailing" secondItem="ZJ7-YA-359" secondAttribute="trailing" constant="18" id="cAX-ef-uT3"/>
+                                    <constraint firstItem="pCN-5K-xcm" firstAttribute="leading" secondItem="VM0-E4-twf" secondAttribute="leading" constant="16" id="j6Y-GI-5Qi"/>
+                                </constraints>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HCf-X1-gut">
+                                <rect key="frame" x="52" y="172" width="271" height="43.333333333333343"/>
+                                <color key="backgroundColor" systemColor="systemGreenColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="43.329999999999998" id="xvI-NQ-pLS"/>
+                                </constraints>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Logout">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="logoutBtnTapped:" destination="rCb-lj-e1D" eventType="touchUpInside" id="lj3-j4-Ciy"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="lJn-bl-JRS"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="VM0-E4-twf" firstAttribute="leading" secondItem="lJn-bl-JRS" secondAttribute="leading" id="5BE-v6-lJb"/>
+                            <constraint firstItem="lJn-bl-JRS" firstAttribute="trailing" secondItem="HCf-X1-gut" secondAttribute="trailing" constant="52" id="92f-4N-X3b"/>
+                            <constraint firstItem="HCf-X1-gut" firstAttribute="top" secondItem="VM0-E4-twf" secondAttribute="bottom" constant="41" id="DHf-k7-gbH"/>
+                            <constraint firstItem="VM0-E4-twf" firstAttribute="trailing" secondItem="lJn-bl-JRS" secondAttribute="trailing" id="PY0-pi-Miq"/>
+                            <constraint firstItem="VM0-E4-twf" firstAttribute="top" secondItem="lJn-bl-JRS" secondAttribute="top" constant="36" id="frt-0X-ooH"/>
+                            <constraint firstItem="HCf-X1-gut" firstAttribute="leading" secondItem="lJn-bl-JRS" secondAttribute="leading" constant="52" id="nBN-ul-cGz"/>
+                            <constraint firstItem="HCf-X1-gut" firstAttribute="centerX" secondItem="cPe-2t-blC" secondAttribute="centerX" id="xuh-Yg-gRX"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Settings" id="SGy-g3-VbJ"/>
+                    <connections>
+                        <outlet property="biometricImage" destination="pCN-5K-xcm" id="HAP-2f-LhC"/>
+                        <outlet property="biometricLabel" destination="fPR-t2-G3U" id="C46-My-iLl"/>
+                        <outlet property="biometricSwtich" destination="ZJ7-YA-359" id="ZkS-9c-wer"/>
+                        <outlet property="biometricView" destination="VM0-E4-twf" id="PL0-fT-zRs"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="pcv-bC-2CC" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2096.8000000000002" y="-2.2167487684729066"/>
+        </scene> -->
         <!--Contacts -->
         <scene sceneID="i7L-1h-zmZ">
             <objects>

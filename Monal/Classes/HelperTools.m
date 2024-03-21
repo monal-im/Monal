@@ -60,8 +60,6 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
 
-#import "SCRAM.h"
-
 @interface KSCrash()
 @property(nonatomic,readwrite,retain) NSString* basePath;
 @end
@@ -201,15 +199,10 @@ void logException(NSException* exception)
 void uncaughtExceptionHandler(NSException* exception)
 {
     logException(exception);
-//don't let kscrash handle the exception if we are in the simulator
-//(this makes sure xcode will catch the exception and show proper backtraces etc.)
-#if TARGET_OS_SIMULATOR
-    return;
-#else
+
     //make sure this crash will be recorded by kscrash using the NSException rather than the c++ exception thrown by the objc runtime
     //this will make sure that the stacktrace matches the objc exception rather than being a top level c++ stacktrace
     KSCrash.sharedInstance.uncaughtExceptionHandler(exception);
-#endif
 }
 
 //this function will only be in use under macos alpha builds to log every exception (even when catched with @try-@catch constructs)
@@ -1666,19 +1659,12 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) configureXcodeLogging
 {
-    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    //only start console logger
+    [DDLog addLogger:[DDOSLogger sharedInstance]];
 }
 
 +(void) configureLogging
 {
-    //don't log to the console (aka stderr) to not create loops with our redirected stderr
-//     //start console logger first (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
-// #if TARGET_OS_SIMULATOR
-//     [DDLog addLogger:[DDTTYLogger sharedInstance]];
-// #else
-//     [DDLog addLogger:[DDOSLogger sharedInstance]];
-// #endif
-    
     //network logger (start as early as possible)
     MLUDPLogger* udpLogger = [MLUDPLogger new];
     [DDLog addLogger:udpLogger];
@@ -1715,7 +1701,6 @@ void swizzle(Class c, SEL orig, SEL new)
     
     //log version info as early as possible
     DDLogInfo(@"Starting: %@", [self appBuildVersionInfoFor:MLVersionTypeLog]);
-    //[SCRAM SSDPXepOutput];
     [DDLog flushLog];
     
     DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_USER_INTERACTIVE", QOS_CLASS_USER_INTERACTIVE);

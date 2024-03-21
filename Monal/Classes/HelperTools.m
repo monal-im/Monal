@@ -454,6 +454,24 @@ void swizzle(Class c, SEL orig, SEL new)
     ];
 }
 
++(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier
+{
+    switch(identifier)
+    {
+        case MLDefinedIdentifier_kAppGroup: return kAppGroup; break;
+        case MLDefinedIdentifier_kMonalOpenURL: return kMonalOpenURL; break;
+        case MLDefinedIdentifier_kBackgroundProcessingTask: return kBackgroundProcessingTask; break;
+        case MLDefinedIdentifier_kBackgroundRefreshingTask: return kBackgroundRefreshingTask; break;
+        case MLDefinedIdentifier_kMonalKeychainName: return kMonalKeychainName; break;
+        case MLDefinedIdentifier_SHORT_PING: return @(SHORT_PING); break;
+        case MLDefinedIdentifier_LONG_PING: return @(LONG_PING); break;
+        case MLDefinedIdentifier_MUC_PING: return @(MUC_PING); break;
+        case MLDefinedIdentifier_BGFETCH_DEFAULT_INTERVAL: return @(BGFETCH_DEFAULT_INTERVAL); break;
+        default:
+            unreachable(@"unknown MLDefinedIdentifier!");
+    }
+}
+
 +(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier
 {
     static NSMutableDictionary* runloops = nil;

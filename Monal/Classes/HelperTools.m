@@ -1356,9 +1356,8 @@ void swizzle(Class c, SEL orig, SEL new)
     else
         retval[@"host"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
     
-    //log sanity check errors (this checks 'host' and 'user'at once because without node host==user)
-    if([retval[@"host"] isEqualToString:@""])
-        DDLogError(@"jid '%@' has no host part!", jid);
+    //assert on sanity check errors (this checks 'host' and 'user' at once because without node host==user)
+    MLAssert(![retval[@"host"] isEqualToString:@""], @"jid has no host part!", @{@"jid": jid});
     
     //sanitize retval
     if([retval[@"node"] isEqualToString:@""])

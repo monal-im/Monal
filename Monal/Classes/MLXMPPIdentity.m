@@ -22,16 +22,13 @@
 -(id) initWithJid:(NSString*) jid password:(NSString*) password andResource:(NSString*) resource
 {
     self = [super init];
-    self.jid = jid;
+    NSDictionary* parts = [HelperTools splitJid:jid];
+    self.jid = parts[@"user"];
     self.resource = resource;
-    _fullJid = resource ? [NSString stringWithFormat:@"%@/%@", jid, resource] : jid;
+    _fullJid = resource ? [NSString stringWithFormat:@"%@/%@", self.jid, self.resource] : jid;
     self.password = password;
-    
-    NSArray* elements = [self.jid componentsSeparatedByString:@"@"];
-    self.user = elements[0];
-    if(elements.count > 1)
-        self.domain = elements[1];
-    
+    self.user = parts[@"node"];
+    self.domain = parts[@"host"];
     return self;
 }
 
@@ -46,7 +43,8 @@
     NSDictionary* parts = [HelperTools splitJid:jid];
     self.jid = parts[@"user"];
     self.resource = parts[@"resource"];
+    self.user = parts[@"node"];
+    self.domain = parts[@"host"];
 }
-
 
 @end

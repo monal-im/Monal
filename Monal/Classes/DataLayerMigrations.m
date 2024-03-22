@@ -1034,6 +1034,15 @@
             [db executeNonQuery:@"DROP TABLE IF EXISTS ver_timestamp;"];
         }];
         
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.202 withBlock:^{
+            //intentionally left blank
+        }];
+        
+        //fix empty domain in db for weird setups
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.203 withBlock:^{
+            [db executeNonQuery:@"UPDATE account SET domain=TRIM(server) WHERE domain='';"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

@@ -310,7 +310,7 @@ enum DummySettingsRows {
         user = self.jid;
         domain = @"";
     }
-    if([domain isEqualToString:@""] && !self.server)
+    if([domain isEqualToString:@""])
     {
         [self alertWithTitle:NSLocalizedString(@"Domain missing", @"") andMsg:NSLocalizedString(@"Your entered XMPP ID is missing the domain", @"")];
         return;

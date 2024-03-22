@@ -7,6 +7,11 @@
 //
 
 #include <stdio.h>
+#include <assert.h>
+#include <stdbool.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/sysctl.h>
 #include <sys/stat.h>
 #include <mach/mach.h>
 #include <mach/mach_error.h>
@@ -95,6 +100,40 @@ static struct {
 } _crash_info __attribute__((section("__DATA, __crash_info"))) = { 5, 0, 0, 0, 0, 0, 0, 0 };
 #pragma pack()
 
+
+// see: https://developer.apple.com/library/archive/qa/qa1361/_index.html
+// Returns true if the current process is being debugged (either 
+// running under the debugger or has a debugger attached post facto).
+bool isDebugerActive(void)
+{
+#ifdef IS_ALPHA
+    int                 junk;
+    int                 mib[4];
+    struct kinfo_proc   info;
+    size_t              size;
+
+    // Initialize the flags so that, if sysctl fails for some bizarre 
+    // reason, we get a predictable result.
+    info.kp_proc.p_flag = 0;
+
+    // Initialize mib, which tells sysctl the info we want, in this case
+    // we're looking for information about a specific process ID.
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PID;
+    mib[3] = getpid();
+
+    // Call sysctl
+    size = sizeof(info);
+    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+    assert(junk == 0);
+
+    // We're being debugged if the P_TRACED flag is set.
+    return ( (info.kp_proc.p_flag & P_TRACED) != 0 );
+#else
+    return 0;
+#endif
+}
 
 //see https://stackoverflow.com/a/2180788
 int asyncSafeCopyFile(const char* from, const char* to)
@@ -200,6 +239,10 @@ void uncaughtExceptionHandler(NSException* exception)
 {
     logException(exception);
 
+    //don't report that crash through KSCrash if the debugger is active
+    if(isDebugerActive())
+        return;
+    
     //make sure this crash will be recorded by kscrash using the NSException rather than the c++ exception thrown by the objc runtime
     //this will make sure that the stacktrace matches the objc exception rather than being a top level c++ stacktrace
     KSCrash.sharedInstance.uncaughtExceptionHandler(exception);
@@ -226,7 +269,6 @@ void swizzle(Class c, SEL orig, SEL new)
     else
         method_exchangeImplementations(origMethod, newMethod);
 }
-
 
 @implementation HelperTools
 
@@ -371,7 +413,9 @@ void swizzle(Class c, SEL orig, SEL new)
     if(enableDefaultLogAndCrashFramework)
     {
         [self configureLogging];
-        [self installCrashHandler];
+        //don't install KSCrash if the debugger is active
+        if(!isDebugerActive())
+            [self installCrashHandler];
         [self installExceptionHandler];
     }
     else

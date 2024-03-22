@@ -550,6 +550,18 @@
                 return;
             }
         }
+        //always handle errors regardless of current state (cert errors etc.)
+        if(error != nil)
+        {
+            DDLogVerbose(@"%@: %@ got error in state %du and reporting: %@", logtag, self, state, error);
+            NSError* st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(error));
+            @synchronized(shared_state) {
+                shared_state.error = st_error;
+            }
+            [input generateEvent:NSStreamEventErrorOccurred];
+            [output generateEvent:NSStreamEventErrorOccurred];
+        }
+        
         if(state == nw_connection_state_waiting)
         {
             //do nothing here, documentation says the connection will be automatically retried "when conditions are favourable"
@@ -560,13 +572,8 @@
         }
         else if(state == nw_connection_state_failed)
         {
-            DDLogError(@"%@: Connection failed", logtag);
-            NSError* st_error = (NSError*)CFBridgingRelease(nw_error_copy_cf_error(error));
-            @synchronized(shared_state) {
-                shared_state.error = st_error;
-            }
-            [input generateEvent:NSStreamEventErrorOccurred];
-            [output generateEvent:NSStreamEventErrorOccurred];
+            //errors already reported by generic handling above
+            DDLogError(@"%@: Connection failed (error already reported): %@", logtag, error);
         }
         else if(state == nw_connection_state_ready)
         {

@@ -151,6 +151,25 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable,
     }
 }
 
+@propertyWrapper
+public struct defaultsDB<Value> {
+    private let key: String
+    private var container: UserDefaults = HelperTools.defaultsDB()
+    
+    public init(_ key: String) {
+        self.key = key
+    }
+    
+    public var wrappedValue: Value? {
+        get {
+            return container.object(forKey: key) as? Value
+        }
+        set {
+            container.set(newValue, forKey: key)
+        }
+    }
+}
+
 @objcMembers
 public class SwiftHelpers: NSObject {
     public static func initSwiftHelpers() {

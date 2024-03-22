@@ -2609,7 +2609,7 @@ NSString* const kStanza = @"stanza";
             NSString* authid = [parsedStanza findFirst:@"authorization-identifier#"];
             NSDictionary* authidParts = [HelperTools splitJid:authid];
             self.connectionProperties.identity.jid = authidParts[@"user"];
-            if(authidParts[@"user"] != nil)
+            if(authidParts[@"resource"] != nil)
                 self.connectionProperties.identity.resource = authidParts[@"resource"];
             
             //record SDDP support

@@ -272,7 +272,7 @@ void swizzle(Class c, SEL orig, SEL new)
     NSArray* filePathComponents = [fileStr pathComponents];
     if([filePathComponents count]>1)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
-    //DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
+    DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
     @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
 }
 

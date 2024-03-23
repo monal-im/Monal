@@ -7,6 +7,11 @@
 //
 
 #include <stdio.h>
+#include <assert.h>
+#include <stdbool.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/sysctl.h>
 #include <sys/stat.h>
 #include <mach/mach.h>
 #include <mach/mach_error.h>
@@ -60,8 +65,6 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
 
-#import "SCRAM.h"
-
 @interface KSCrash()
 @property(nonatomic,readwrite,retain) NSString* basePath;
 @end
@@ -97,6 +100,40 @@ static struct {
 } _crash_info __attribute__((section("__DATA, __crash_info"))) = { 5, 0, 0, 0, 0, 0, 0, 0 };
 #pragma pack()
 
+
+// see: https://developer.apple.com/library/archive/qa/qa1361/_index.html
+// Returns true if the current process is being debugged (either 
+// running under the debugger or has a debugger attached post facto).
+bool isDebugerActive(void)
+{
+#ifdef IS_ALPHA
+    int                 junk;
+    int                 mib[4];
+    struct kinfo_proc   info;
+    size_t              size;
+
+    // Initialize the flags so that, if sysctl fails for some bizarre 
+    // reason, we get a predictable result.
+    info.kp_proc.p_flag = 0;
+
+    // Initialize mib, which tells sysctl the info we want, in this case
+    // we're looking for information about a specific process ID.
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PID;
+    mib[3] = getpid();
+
+    // Call sysctl
+    size = sizeof(info);
+    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+    assert(junk == 0);
+
+    // We're being debugged if the P_TRACED flag is set.
+    return ( (info.kp_proc.p_flag & P_TRACED) != 0 );
+#else
+    return 0;
+#endif
+}
 
 //see https://stackoverflow.com/a/2180788
 int asyncSafeCopyFile(const char* from, const char* to)
@@ -201,15 +238,14 @@ void logException(NSException* exception)
 void uncaughtExceptionHandler(NSException* exception)
 {
     logException(exception);
-//don't let kscrash handle the exception if we are in the simulator
-//(this makes sure xcode will catch the exception and show proper backtraces etc.)
-#if TARGET_OS_SIMULATOR
-    return;
-#else
+
+    //don't report that crash through KSCrash if the debugger is active
+    if(isDebugerActive())
+        return;
+    
     //make sure this crash will be recorded by kscrash using the NSException rather than the c++ exception thrown by the objc runtime
     //this will make sure that the stacktrace matches the objc exception rather than being a top level c++ stacktrace
     KSCrash.sharedInstance.uncaughtExceptionHandler(exception);
-#endif
 }
 
 //this function will only be in use under macos alpha builds to log every exception (even when catched with @try-@catch constructs)
@@ -233,7 +269,6 @@ void swizzle(Class c, SEL orig, SEL new)
     else
         method_exchangeImplementations(origMethod, newMethod);
 }
-
 
 @implementation HelperTools
 
@@ -279,7 +314,7 @@ void swizzle(Class c, SEL orig, SEL new)
     NSArray* filePathComponents = [fileStr pathComponents];
     if([filePathComponents count]>1)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
-    //DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
+    DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
     @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
 }
 
@@ -378,7 +413,9 @@ void swizzle(Class c, SEL orig, SEL new)
     if(enableDefaultLogAndCrashFramework)
     {
         [self configureLogging];
-        [self installCrashHandler];
+        //don't install KSCrash if the debugger is active
+        if(!isDebugerActive())
+            [self installCrashHandler];
         [self installExceptionHandler];
     }
     else
@@ -459,6 +496,24 @@ void swizzle(Class c, SEL orig, SEL new)
         @"stuns:eu.prod.turn.monal-im.org:3478",
 #endif
     ];
+}
+
++(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier
+{
+    switch(identifier)
+    {
+        case MLDefinedIdentifier_kAppGroup: return kAppGroup; break;
+        case MLDefinedIdentifier_kMonalOpenURL: return kMonalOpenURL; break;
+        case MLDefinedIdentifier_kBackgroundProcessingTask: return kBackgroundProcessingTask; break;
+        case MLDefinedIdentifier_kBackgroundRefreshingTask: return kBackgroundRefreshingTask; break;
+        case MLDefinedIdentifier_kMonalKeychainName: return kMonalKeychainName; break;
+        case MLDefinedIdentifier_SHORT_PING: return @(SHORT_PING); break;
+        case MLDefinedIdentifier_LONG_PING: return @(LONG_PING); break;
+        case MLDefinedIdentifier_MUC_PING: return @(MUC_PING); break;
+        case MLDefinedIdentifier_BGFETCH_DEFAULT_INTERVAL: return @(BGFETCH_DEFAULT_INTERVAL); break;
+        default:
+            unreachable(@"unknown MLDefinedIdentifier!");
+    }
 }
 
 +(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier
@@ -1301,9 +1356,8 @@ void swizzle(Class c, SEL orig, SEL new)
     else
         retval[@"host"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
     
-    //log sanity check errors (this checks 'host' and 'user'at once because without node host==user)
-    if([retval[@"host"] isEqualToString:@""])
-        DDLogError(@"jid '%@' has no host part!", jid);
+    //assert on sanity check errors (this checks 'host' and 'user' at once because without node host==user)
+    MLAssert(![retval[@"host"] isEqualToString:@""], @"jid has no host part!", @{@"jid": jid});
     
     //sanitize retval
     if([retval[@"node"] isEqualToString:@""])
@@ -1666,19 +1720,12 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) configureXcodeLogging
 {
-    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    //only start console logger
+    [DDLog addLogger:[DDOSLogger sharedInstance]];
 }
 
 +(void) configureLogging
 {
-    //don't log to the console (aka stderr) to not create loops with our redirected stderr
-//     //start console logger first (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
-// #if TARGET_OS_SIMULATOR
-//     [DDLog addLogger:[DDTTYLogger sharedInstance]];
-// #else
-//     [DDLog addLogger:[DDOSLogger sharedInstance]];
-// #endif
-    
     //network logger (start as early as possible)
     MLUDPLogger* udpLogger = [MLUDPLogger new];
     [DDLog addLogger:udpLogger];
@@ -1715,7 +1762,6 @@ void swizzle(Class c, SEL orig, SEL new)
     
     //log version info as early as possible
     DDLogInfo(@"Starting: %@", [self appBuildVersionInfoFor:MLVersionTypeLog]);
-    //[SCRAM SSDPXepOutput];
     [DDLog flushLog];
     
     DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_USER_INTERACTIVE", QOS_CLASS_USER_INTERACTIVE);

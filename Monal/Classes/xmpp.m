@@ -2609,7 +2609,7 @@ NSString* const kStanza = @"stanza";
             NSString* authid = [parsedStanza findFirst:@"authorization-identifier#"];
             NSDictionary* authidParts = [HelperTools splitJid:authid];
             self.connectionProperties.identity.jid = authidParts[@"user"];
-            if(authidParts[@"user"] != nil)
+            if(authidParts[@"resource"] != nil)
                 self.connectionProperties.identity.resource = authidParts[@"resource"];
             
             //record SDDP support
@@ -2805,8 +2805,11 @@ NSString* const kStanza = @"stanza";
                 [oStream startTLS];
                 if(!oStream.hasTLS)
                 {
+                    //only show this error if the connection was not closed but timed out (this is the case we want to debug here)
+                    //other cases (cert errors etc.) should not trigger this notification
+                    if([oStream streamStatus] != NSStreamStatusClosed)
+                        showErrorOnAlpha(self, @"Failed to complete TLS handshake while using STARTTLS, retrying!");
                     DDLogError(@"Failed to complete TLS handshake, reconnecting!");
-                    showErrorOnAlpha(self, @"Failed to complete TLS handshake while using STARTTLS, retrying!");
                     [self reconnect];
                     return;
                 }

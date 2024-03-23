@@ -13,6 +13,17 @@
 import CocoaLumberjackSwiftLogBackend
 import LibMonalRustSwiftBridge
 
+//import some defines in MLConstants.h into swift
+let kAppGroup = HelperTools.getObjcDefinedValue(.kAppGroup)
+let kMonalOpenURL = HelperTools.getObjcDefinedValue(.kMonalOpenURL)
+let kBackgroundProcessingTask = HelperTools.getObjcDefinedValue(.kBackgroundProcessingTask)
+let kBackgroundRefreshingTask = HelperTools.getObjcDefinedValue(.kBackgroundRefreshingTask)
+let kMonalKeychainName = HelperTools.getObjcDefinedValue(.kMonalKeychainName)
+let SHORT_PING = HelperTools.getObjcDefinedValue(.SHORT_PING)
+let LONG_PING = HelperTools.getObjcDefinedValue(.LONG_PING)
+let MUC_PING = HelperTools.getObjcDefinedValue(.MUC_PING)
+let BGFETCH_DEFAULT_INTERVAL = HelperTools.getObjcDefinedValue(.BGFETCH_DEFAULT_INTERVAL)
+
 public typealias monal_void_block_t = @convention(block) () -> Void;
 public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
 
@@ -137,6 +148,25 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable,
     @inlinable
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.obj.hashValue)
+    }
+}
+
+@propertyWrapper
+public struct defaultsDB<Value> {
+    private let key: String
+    private var container: UserDefaults = HelperTools.defaultsDB()
+    
+    public init(_ key: String) {
+        self.key = key
+    }
+    
+    public var wrappedValue: Value? {
+        get {
+            return container.object(forKey: key) as? Value
+        }
+        set {
+            container.set(newValue, forKey: key)
+        }
     }
 }
 

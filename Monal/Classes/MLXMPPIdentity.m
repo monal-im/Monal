@@ -39,12 +39,26 @@
 
 -(void) bindJid:(NSString*) jid
 {
-    _fullJid = jid;
     NSDictionary* parts = [HelperTools splitJid:jid];
-    self.jid = parts[@"user"];
-    self.resource = parts[@"resource"];
-    self.user = parts[@"node"];
-    self.domain = parts[@"host"];
+    
+    //we don't allow this because several parts in monal rely on stable bare jids not changing after login/bind
+    MLAssert([self.jid isEqualToString:parts[@"user"]], @"trying to bind to different bare jid!", (@{
+        @"bind_to_jid": jid,
+        @"current_bare_jid": self.jid
+    }));
+    
+    //don't set new full jid if we don't have a resource
+    if(parts[@"resource"] != nil)
+    {
+        //these won't change because of the MLAssert above, but we keep this
+        //to make sure user and domain match the jid once the assertion gets removed
+        self.jid = parts[@"user"];
+        self.user = parts[@"node"];
+        self.domain = parts[@"host"];
+        
+        self.resource = parts[@"resource"];
+        _fullJid = [NSString stringWithFormat:@"%@/%@", self.jid, self.resource];
+    }
 }
 
 @end

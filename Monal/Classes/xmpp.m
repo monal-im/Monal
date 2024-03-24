@@ -2606,11 +2606,7 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.channelBindingTypes = channelBindings;
             
             //update user identity using authorization-identifier, including support for fullJids (as specified by BIND2)
-            NSString* authid = [parsedStanza findFirst:@"authorization-identifier#"];
-            NSDictionary* authidParts = [HelperTools splitJid:authid];
-            self.connectionProperties.identity.jid = authidParts[@"user"];
-            if(authidParts[@"resource"] != nil)
-                self.connectionProperties.identity.resource = authidParts[@"resource"];
+            [self.connectionProperties.identity bindJid:[parsedStanza findFirst:@"authorization-identifier#"]];
             
             //record SDDP support
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;

@@ -48,7 +48,6 @@
 		26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */; };
 		26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */ = {isa = PBXBuildFile; fileRef = 26B0CA8A21AE410E0080B133 /* AlertSounds */; };
 		26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
-		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26CC579623A0867400ABB92A /* monalxmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CC579423A0867400ABB92A /* monalxmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		26CC57A223A086AA00ABB92A /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
@@ -164,6 +163,7 @@
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
+		952EBC802BAF72F300183DBF /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 952EBC7F2BAF72F300183DBF /* LogView.swift */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
 		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
 		C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490E22612F3D00054AC9E /* MLCrypto.swift */; };
@@ -411,8 +411,6 @@
 		26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSoundsTableViewController.m; sourceTree = "<group>"; };
 		26B0CA8A21AE410E0080B133 /* AlertSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = AlertSounds; sourceTree = "<group>"; };
 		26B2A4BA1B73061400272E63 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		26B51C4618654D98002134C3 /* LogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogViewController.h; sourceTree = "<group>"; };
-		26B51C4718654D98002134C3 /* LogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
 		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
 		26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLHTTPRequest.m; sourceTree = "<group>"; };
 		26C4B22221B6B91300610282 /* MLDNSLookup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDNSLookup.h; sourceTree = "<group>"; };
@@ -601,6 +599,7 @@
 		8D1107310486CEB800E47090 /* Monal-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Monal-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		8F1488206B764014DD7EC92A /* Pods_shareSheet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shareSheet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9162E3E9FCE2280BF75F5102 /* Pods-Monal.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.alpha-ios.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.alpha-ios.xcconfig"; sourceTree = "<group>"; };
+		952EBC7F2BAF72F300183DBF /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		9705AFFB59AF72A9B79C1D7B /* Pods-MonalXMPPUnitTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		9760CF4718351300C4256921 /* Pods-shareSheet.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
 		9899D670570190DCBE9EEDDB /* Pods-monalxmpp.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
@@ -998,8 +997,6 @@
 		2644D4961FF29E1900F46AB5 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				26B51C4618654D98002134C3 /* LogViewController.h */,
-				26B51C4718654D98002134C3 /* LogViewController.m */,
 				2644D4971FF29E5600F46AB5 /* MLSettingsTableViewController.h */,
 				2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */,
 				26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */,
@@ -1070,6 +1067,7 @@
 				846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */,
 				841898AB2957DBAC00FEC77D /* RichAlert.swift */,
 				C114D13C2B15B903000FB99F /* ContactEntry.swift */,
+				952EBC7F2BAF72F300183DBF /* LogView.swift */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -2042,7 +2040,6 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
-				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				20ED55852BADDA5C0005783E /* PrivacySettings.swift in Sources */,
@@ -2084,6 +2081,7 @@
 				849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */,
 				C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
+				952EBC802BAF72F300183DBF /* LogView.swift in Sources */,
 				3D7D352328626CB80042C5E5 /* LoadingOverlay.swift in Sources */,
 				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,

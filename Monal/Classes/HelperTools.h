@@ -58,7 +58,7 @@ void swizzle(Class c, SEL orig, SEL new);
 
 @interface HelperTools : NSObject
 
-@property (class, nonatomic, strong) DDFileLogger* fileLogger;
+@property (class, nonatomic, strong, nullable) DDFileLogger* fileLogger;
 
 +(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage counter:(uint64_t*) counter andError:(NSError** _Nullable) error;
 +(void) initSystem;

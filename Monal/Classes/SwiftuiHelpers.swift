@@ -448,6 +448,8 @@ class SwiftuiInterface : NSObject {
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
             case "NotificationSettings":
                 host.rootView = AnyView(UIKitWorkaround(NotificationSettings(delegate:delegate)))
+            case "logView":
+                host.rootView = AnyView(UIKitWorkaround(LogView()))
             case "WelcomeLogIn":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate)))
             case "LogIn":
@@ -493,4 +495,18 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
     } else {
         return []
     }
+}
+
+struct ActivityViewController: UIViewControllerRepresentable {
+
+    var activityItems: [Any]
+    var applicationActivities: [UIActivity]? = nil
+
+    func makeUIViewController(context: UIViewControllerRepresentableContext<ActivityViewController>) -> UIActivityViewController {
+        let controller = UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities)
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: UIViewControllerRepresentableContext<ActivityViewController>) {}
+
 }

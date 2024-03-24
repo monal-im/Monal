@@ -348,15 +348,16 @@ $$
 
 -(void) updateUnread
 {
+    DDLogInfo(@"Updating unread called");
     //make sure unread badge matches application badge
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
-    dispatch_async(dispatch_get_main_queue(), ^{
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         NSInteger unread = 0;
         if(unreadMsgCnt != nil)
             unread = [unreadMsgCnt integerValue];
         DDLogInfo(@"Updating unread badge to: %ld", (long)unread);
         [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
-    });
+    }];
 }
 
 #pragma mark - app life cycle

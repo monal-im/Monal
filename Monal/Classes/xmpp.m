@@ -4740,6 +4740,11 @@ NSString* const kStanza = @"stanza";
                     break;
                 }
 
+                case errSSLBadCert: {
+                    message = NSLocalizedString(@"TLS Error: Bad certificate", @"");
+                    break;
+                }
+
             }
             
             [self postError:message withIsSevere:NO];

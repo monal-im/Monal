@@ -916,7 +916,7 @@ $$instance_handler(handlePublishResult, account.pubsub, $$ID(xmpp*, account), $$
             NSMutableDictionary* publishPreconditions = [NSMutableDictionary new];
             if(configOptions[@"pubsub#persist_items"])
                 publishPreconditions[@"pubsub#persist_items"] = configOptions[@"pubsub#persist_items"];
-            if(configOptions[@"pubsub#persist_items"])
+            if(configOptions[@"pubsub#access_model"])
                 publishPreconditions[@"pubsub#access_model"] = configOptions[@"pubsub#access_model"];
             
             [self internalPublishItem:item onNode:node withConfigOptions:publishPreconditions andHandler:$newHandlerWithInvalidation(self, handleConfigureAfterPublish, handleConfigureAfterPublishInvalidation,

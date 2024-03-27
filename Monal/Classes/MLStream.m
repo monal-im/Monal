@@ -577,7 +577,7 @@
         }
         else if(state == nw_connection_state_ready)
         {
-            DDLogInfo(@"%@: Connection established, wasOpenOnce: %@", bool2str(wasOpenOnce), logtag);
+            DDLogInfo(@"%@: Connection established, wasOpenOnce: %@", logtag, bool2str(wasOpenOnce));
             if(!wasOpenOnce)
             {
                 wasOpenOnce = YES;

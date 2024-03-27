@@ -466,7 +466,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"])
     {
-        [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+        [self showPrivacySettings];
         return;
     }
 }

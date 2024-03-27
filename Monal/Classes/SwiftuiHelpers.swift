@@ -458,6 +458,10 @@ class SwiftuiInterface : NSObject {
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate)))
             case "ChatPlaceholder":
                 host.rootView = AnyView(ChatPlaceholder())
+            case "PrivacySettings" :
+                host.rootView = AnyView(UIKitWorkaround(PrivacySettings()))
+            case "ActiveChatsPrivacySettings":
+                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: PrivacySettings()))
             default:
                 unreachable()
         }
@@ -489,4 +493,51 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
     } else {
         return []
     }
+}
+
+class PrivacyDefaultDB: ObservableObject {
+    
+    @defaultsDB("NotificationPrivacySetting") var notificationPrivacySetting: Int?{
+        willSet{
+            objectWillChange.send()
+        }
+    }
+    @defaultsDB("OMEMODefaultOn") 
+    var omemoDefaultOn:Bool?
+    
+    @defaultsDB("AutodeleteAllMessagesAfter3Days")
+    var autodeleteAllMessagesAfter3Days: Bool?
+    
+    @defaultsDB("SendLastUserInteraction")
+    var sendLastUserInteraction: Bool?
+    
+    @defaultsDB("SendLastChatState")
+    var sendLastChatState: Bool?
+    
+    @defaultsDB("SendReceivedMarkers")
+    var sendReceivedMarkers: Bool?
+    
+    @defaultsDB("SendDisplayedMarkers")
+    var sendDisplayedMarkers: Bool?
+    
+    @defaultsDB("ShowGeoLocation")
+    var showGeoLocation: Bool?
+    
+    @defaultsDB("ShowURLPreview")
+    var showURLPreview: Bool?
+    
+    @defaultsDB("WebrtcAllowP2P")
+    var webrtcAllowP2P: Bool?
+    @defaultsDB("WebrtcUseFallbackTurn")
+    var webrtcUseFallbackTurn: Bool?
+    
+    @defaultsDB("AllowVersionIQ")
+    var allowVersionIQ: Bool?
+    
+   @defaultsDB("AllowNonRosterContacts")
+    var allowNonRosterContacts: Bool?
+    
+    @defaultsDB("HasSeenPrivacySettings")
+    var hasSeenPrivacySettings: Bool?
+    
 }

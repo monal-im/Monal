@@ -2461,7 +2461,7 @@ NSString* const kStanza = @"stanza";
             BOOL deactivate_account = NO;
             NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"/{urn:xmpp:sasl:2}challenge#|base64"] encoding:NSUTF8StringEncoding];
             switch([self->_scramHandler parseServerFirstMessage:innerSASLData]) {
-                case MLScramStatusSSDPTriggered: deactivate_account = YES; message = NSLocalizedString(@"Detected ongoing MITM attack via SSDP, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @""); break;
+                case MLScramStatusSSDPTriggered: deactivate_account = YES; message = NSLocalizedString(@"Detected ongoing MITM attack via SSDP, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""); break;
                 case MLScramStatusNonceError: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (nonce error), disconnecting!", @"parenthesis should be verbatim"); break;
                 case MLScramStatusUnsupportedMAttribute: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (m-attr error), disconnecting!", @"parenthesis should be verbatim"); break;
                 case MLScramStatusIterationCountInsecure: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (iteration count too low), disconnecting!", @"parenthesis should be verbatim"); break;
@@ -2875,8 +2875,27 @@ NSString* const kStanza = @"stanza";
     //called below, if neither SASL1 nor SASL2 could be used to negotiate a valid SASL mechanism
     monal_void_block_t noAuthSupported = ^{
         DDLogWarn(@"No supported auth mechanism!");
-        clearPipelineCacheOrReportSevereError(NSLocalizedString(@"No supported auth mechanism found, disabling account!", @""));
+        
+        //sasl2 will be pinned if we saw sasl2 support and PLAIN was NOT allowed by creating this account using the  advanced account creation menu
+        //display scary warning message if sasl2 is pinned and login was successful at least once
+        //or display a message pointing to the advanced account creation menu if sasl2 is pinned and login was NOT successful at least once
+        //(e.g. we are trying to create this account just now)
+        if([[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo])
+        {
+            if(self->_loggedInOnce)
+            {
+                clearPipelineCacheOrReportSevereError(NSLocalizedString(@"Server suddenly lacks support for SASL2-SCRAM, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""));
+            }
+            else if([self->_supportedSaslMechanisms containsObject:@"PLAIN"])
+            {
+                clearPipelineCacheOrReportSevereError(NSLocalizedString(@"Server only supports authentication methods not safe against man-in-the-middle attacks! Use the advanced account creation menu if you absolutely must use this server.", @""));
+            }
+        }
+        else
+            clearPipelineCacheOrReportSevereError(NSLocalizedString(@"No supported auth mechanism found, disabling account!", @""));
     };
+    
+    MLAssert(!([[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo] && [[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo]), @"SASL2 pinned AND plain auth enabled, that should never happen!", @{@"account": self});
     
     if([parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
     {
@@ -2903,7 +2922,7 @@ NSString* const kStanza = @"stanza";
         [self submitRegForm];
     }
     //prefer SASL2 over SASL1
-    else if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"])
+    else if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && ![[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo])
     {
         weakify(self);
         _blockToCallOnTCPOpen = ^{
@@ -2983,7 +3002,7 @@ NSString* const kStanza = @"stanza";
         
         //directly call our continuation block if SCRAM is not supported, because _blockToCallOnTCPOpen() will throw an error then
         //(we currently only support SCRAM for SASL2)
-        //pipelining can also be done immediately if we are sure the tls handshake is complete (e.g. we're not in direct tls mode)
+        //pipelining can also be done immediately if we are sure the tls handshake is complete (e.g. we're NOT in direct tls mode)
         //and if we are not pipelining the auth, we can call the block immediately, too
         //(because the TLS connection was obviously already established and that made us receive the non-cached stream features used here)
         //if we don't call it here, the continuation block will be called automatically once the TLS connection got established
@@ -2995,9 +3014,19 @@ NSString* const kStanza = @"stanza";
         else
             DDLogWarn(@"Waiting until TLS stream is connected before pipelining the auth element due to channel binding...");
     }
-    //SASL1 is fallback only if SASL2 isn't supported
+    //SASL1 is fallback only if SASL2 isn't supported with something better than PLAIN
     else if([parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"] && ![[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo])
     {
+        //check if we SASL2 is supported with something better than PLAIN and, if so, switch off plain_activated
+        NSSet* supportedSasl2Mechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
+        for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:YES])
+            if([supportedSasl2Mechanisms containsObject:mechanism])
+            {
+                [[DataLayer sharedInstance] deactivatePlainForAccount:self.accountNo];
+                //try again, this time using sasl2
+                return [self handleFeaturesBeforeAuth:parsedStanza];
+            }
+        
         //extract menchanisms presented
         NSSet* supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
         
@@ -3046,7 +3075,7 @@ NSString* const kStanza = @"stanza";
         }
         
         //if the above case didn't trigger, this is a downgrade attack downgrading from SASL2 to SASL1, report is as such
-        clearPipelineCacheOrReportSevereError(NSLocalizedString(@"SASL2 to SASL1 downgrade attack detected, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @""));
+        clearPipelineCacheOrReportSevereError(NSLocalizedString(@"SASL2 to SASL1 downgrade attack detected, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""));
     }
 }
 
@@ -3109,7 +3138,7 @@ NSString* const kStanza = @"stanza";
     BOOL deactivate_account = NO;
     NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"additional-data#|base64"] encoding:NSUTF8StringEncoding];
     switch([self->_scramHandler parseServerFinalMessage:innerSASLData]) {
-        case MLScramStatusWrongServerProof: deactivate_account = YES; message = NSLocalizedString(@"SCRAM server proof wrong, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should reenable your account once you are in a clean networking environment again.", @""); break;
+        case MLScramStatusWrongServerProof: deactivate_account = YES; message = NSLocalizedString(@"SCRAM server proof wrong, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""); break;
         case MLScramStatusServerError: deactivate_account = NO; message = NSLocalizedString(@"Unexpected error authenticating server using SASL2 (does your server have a bug?), disconnecting!", @""); break;
         case MLScramStatusOK: deactivate_account = NO; message = nil; break;        //everything is okay
         default: unreachable(@"wrong status for scram message!"); break;

@@ -1043,6 +1043,11 @@
             [db executeNonQuery:@"UPDATE account SET domain=TRIM(server) WHERE domain='';"];
         }];
         
+        //add new setting to force deactivate sasl2 and fallback to sals1 and plain
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.204 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE account ADD COLUMN plain_activated BOOL DEFAULT false;"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

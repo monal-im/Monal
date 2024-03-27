@@ -10,6 +10,7 @@
 		08CAF17FA202CF3CB760D93C /* Pods_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7A5555D807EE78C95217FD /* Pods_NotificationService.framework */; };
 		1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* MonalAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
+		20ED55852BADDA5C0005783E /* PrivacySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20ED55842BADDA5C0005783E /* PrivacySettings.swift */; };
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		260773C4232FC4E800BFD50F /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 260773C3232FC4E800BFD50F /* NotificationService.m */; };
 		2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */; };
@@ -175,7 +176,6 @@
 		C117F7E22B0863B3001F2BC6 /* ContactPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D631822294BAB1D00026BE7 /* ContactPicker.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
 		C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */; };
-		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
 		C153825F2B89BBE600EA83EC /* GroupDetailsEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = C153825E2B89BBE600EA83EC /* GroupDetailsEdit.swift */; };
 		C15382622B89C38300EA83EC /* EditGroupName.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15382612B89C38300EA83EC /* EditGroupName.swift */; };
@@ -304,6 +304,7 @@
 		1D3623240D0F684500981E51 /* MonalAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MonalAppDelegate.h; path = Classes/MonalAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* MonalAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MonalAppDelegate.m; path = Classes/MonalAppDelegate.m; sourceTree = "<group>"; };
 		1D46F251C198E3D8FA55692F /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
+		20ED55842BADDA5C0005783E /* PrivacySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettings.swift; sourceTree = "<group>"; };
 		213F5BFD4599EC9317B99E97 /* Pods-Monal.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
 		21E99538324C14220843F325 /* Pods-shareSheet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.debug.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.debug.xcconfig"; sourceTree = "<group>"; };
 		222F09C97CFF93A2CF1007F3 /* Pods-MonalUITests.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.alpha-ios.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.alpha-ios.xcconfig"; sourceTree = "<group>"; };
@@ -633,8 +634,6 @@
 		C13E640625BD405700763D6F /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "external/zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C13E640825BD406600763D6F /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "external/pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C13E640925BD406700763D6F /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "external/pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		C13EBB8C24DC685C008AADDA /* MLPrivacySettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPrivacySettingsViewController.h; sourceTree = "<group>"; };
-		C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPrivacySettingsViewController.m; sourceTree = "<group>"; };
 		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
 		C153825E2B89BBE600EA83EC /* GroupDetailsEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailsEdit.swift; sourceTree = "<group>"; };
@@ -1006,13 +1005,12 @@
 				26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */,
 				26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */,
 				3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */,
-				C13EBB8C24DC685C008AADDA /* MLPrivacySettingsViewController.h */,
-				C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */,
 				384E4EA525F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.h */,
 				384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */,
 				E8CF9CBF26249640001A1952 /* MLSettingsAboutViewController.h */,
 				E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */,
 				8441EFF82921B53500E851E9 /* BackgroundSettings.swift */,
+				20ED55842BADDA5C0005783E /* PrivacySettings.swift */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -2035,7 +2033,6 @@
 			files = (
 				848717F3295ED64600B8D288 /* MLCall.m in Sources */,
 				26D89F061A890672009B147C /* MLSwitchCell.m in Sources */,
-				C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */,
 				C18967C72B81F61B0073C7C5 /* ChannelMemberList.swift in Sources */,
 				C114D13D2B15B903000FB99F /* ContactEntry.swift in Sources */,
 				841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */,
@@ -2048,6 +2045,7 @@
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
+				20ED55852BADDA5C0005783E /* PrivacySettings.swift in Sources */,
 				84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */,
 				C15382622B89C38300EA83EC /* EditGroupName.swift in Sources */,
 				C1E8A7F72B8E47C300760220 /* EditGroupSubject.swift in Sources */,

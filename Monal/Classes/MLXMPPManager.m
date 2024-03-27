@@ -662,6 +662,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - login/register
 
+//this will NOT set plain_activated to YES, only using the advanced account creation ui can do this
 -(NSNumber*) login:(NSString*) jid password:(NSString*) password
 {
     //if it is a JID

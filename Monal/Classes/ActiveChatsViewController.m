@@ -713,11 +713,11 @@ static NSMutableSet* _smacksWarningDisplayed;
 
     MLContact* chatContact = nil;
     // Select correct contact array
-    if(indexPath.section == pinnedChats) {
+    if(indexPath.section == pinnedChats)
         chatContact = [self.pinnedContacts objectAtIndex:indexPath.row];
-    } else {
+    else
         chatContact = [self.unpinnedContacts objectAtIndex:indexPath.row];
-    }
+    
     // Display msg draft or last msg
     MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:chatContact.contactJid forAccount:chatContact.accountId];
 
@@ -726,13 +726,11 @@ static NSMutableSet* _smacksWarningDisplayed;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
     // Highlight the selected chat
-    if ([MLNotificationManager sharedInstance].currentContact != nil && [chatContact isEqual:[MLNotificationManager sharedInstance].currentContact]) {
+    if([MLNotificationManager sharedInstance].currentContact != nil && [chatContact isEqual:[MLNotificationManager sharedInstance].currentContact]) 
         cell.backgroundColor = [UIColor lightGrayColor];
-    } else{
+    else
         cell.backgroundColor = [UIColor clearColor];
-    }
 
-    
     return cell;
 }
 

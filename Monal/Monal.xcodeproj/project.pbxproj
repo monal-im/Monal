@@ -165,6 +165,7 @@
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
+		BEDDE8582BB4C1B000184ADA /* LibMonalRustSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = BEDDE8572BB4C1B000184ADA /* LibMonalRustSwiftBridge */; };
 		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
 		C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490E22612F3D00054AC9E /* MLCrypto.swift */; };
 		C10490EB2612F3E00054AC9E /* EncryptedPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */; };
@@ -803,6 +804,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */,
+				BEDDE8582BB4C1B000184ADA /* LibMonalRustSwiftBridge in Frameworks */,
 				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
 				849ADF412BACF0360009BCD7 /* CocoaLumberjackSwift in Frameworks */,
 				849ADF432BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
@@ -1592,6 +1594,7 @@
 				849ADF3E2BACF0360009BCD7 /* CocoaLumberjack */,
 				849ADF402BACF0360009BCD7 /* CocoaLumberjackSwift */,
 				849ADF422BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend */,
+				BEDDE8572BB4C1B000184ADA /* LibMonalRustSwiftBridge */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1742,6 +1745,7 @@
 				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
 				849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
+				BEDDE8562BB4C1B000184ADA /* XCLocalSwiftPackageReference "../rust/LibMonalRustSwiftBridge" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4608,6 +4612,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		BEDDE8562BB4C1B000184ADA /* XCLocalSwiftPackageReference "../rust/LibMonalRustSwiftBridge" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../rust/LibMonalRustSwiftBridge;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -4667,6 +4678,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
+		};
+		BEDDE8572BB4C1B000184ADA /* LibMonalRustSwiftBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LibMonalRustSwiftBridge;
 		};
 		C1E1EC7A286A025F0097EC74 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;

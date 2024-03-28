@@ -54,11 +54,13 @@ enum activeChatsControllerSections {
 
 static NSMutableSet* _mamWarningDisplayed;
 static NSMutableSet* _smacksWarningDisplayed;
+static NSMutableSet* _pushWarningDisplayed;
 
 +(void) initialize
 {
     _mamWarningDisplayed = [NSMutableSet new];
     _smacksWarningDisplayed = [NSMutableSet new];
+    _pushWarningDisplayed = [NSMutableSet new];
 }
 
 #pragma mark view lifecycle
@@ -449,6 +451,7 @@ static NSMutableSet* _smacksWarningDisplayed;
             xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
             if(!account)
                 @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];
+            
             if(![_mamWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
             {
                 if(!account.connectionProperties.supportsMam2)
@@ -458,11 +461,11 @@ static NSMutableSet* _smacksWarningDisplayed;
                         [_mamWarningDisplayed addObject:accountNo];
                     }]];
                     [self presentViewController:messageAlert animated:YES completion:nil];
-                    return;
                 }
                 else
                     [_mamWarningDisplayed addObject:accountNo];
             }
+            
             if(![_smacksWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound)
             {
                 if(!account.connectionProperties.supportsSM3)
@@ -472,10 +475,23 @@ static NSMutableSet* _smacksWarningDisplayed;
                         [_smacksWarningDisplayed addObject:accountNo];
                     }]];
                     [self presentViewController:messageAlert animated:YES completion:nil];
-                    return;
                 }
                 else
                     [_smacksWarningDisplayed addObject:accountNo];
+            }
+            
+            if(![_pushWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
+            {
+                if(!account.connectionProperties.supportsMam2)
+                {
+                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support PUSH (XEP-0357). That means you have to manually open the app to retrieve new incoming messages!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                        [_pushWarningDisplayed addObject:accountNo];
+                    }]];
+                    [self presentViewController:messageAlert animated:YES completion:nil];
+                }
+                else
+                    [_pushWarningDisplayed addObject:accountNo];
             }
         }
     });

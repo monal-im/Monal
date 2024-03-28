@@ -87,29 +87,21 @@ struct PrivacySettings: View {
     
     var body: some View {
         Form {
-            Section(header: Text("Notification Settings")) {
-                Picker("Notification Privacy Setting", selection: $privacyDefaultDB.notificationPrivacySetting) {
-                    ForEach(NotificationPrivacySettingOption.allCases, id: \.self) { option in
-                        Text(getNotificationPrivacyOption(option)).tag(option.rawValue)
-                    }
-                }
-                
-                NavigationLink(destination: PrivacyScreen()) {
-                    Text("Privacy & Security")
-                }
-                NavigationLink(destination: InteractionScreen()) {
-                    Text("Interactions settings")
-                }
-                NavigationLink(destination: LocationScreen()) {
-                    Text("Location & Sharing")
-                }
-                NavigationLink(destination: CommunicationScreen()) {
-                    Text("Communications")
-                }
-                
-                NavigationLink(destination: ViewControllerWrapper()) {
-                    Text("Media Upload & Download")
-                }
+            NavigationLink(destination: PrivacyScreen()) {
+                Text("Privacy & Security")
+            }
+            NavigationLink(destination: PublishingScreen()) {
+                Text("Publishing")
+            }
+            NavigationLink(destination: PreviewsScreen()) {
+                Text("Previews")
+            }
+            NavigationLink(destination: CommunicationScreen()) {
+                Text("Communication")
+            }
+            
+            NavigationLink(destination: ViewControllerWrapper()) {
+                Text("Media Upload & Download")
             }
         }
         .navigationTitle("Privacy Settings")
@@ -124,36 +116,42 @@ struct PrivacyScreen: View {
     
     var body: some View {
         Form {
+            Picker("Notification Privacy Setting", selection: $privacyDefaultDB.notificationPrivacySetting) {
+                ForEach(NotificationPrivacySettingOption.allCases, id: \.self) { option in
+                    Text(getNotificationPrivacyOption(option)).tag(option.rawValue)
+                }
+            }
+            
             Toggle("Enable encryption by default for new chats", isOn: $privacyDefaultDB.omemoDefaultOn)
-            Toggle("Autodelete all messages after 3 days", isOn: $privacyDefaultDB.omemoDefaultOn)
+            Toggle("Autodelete all messages after 3 days", isOn: $privacyDefaultDB.autodeleteAllMessagesAfter3Days)
         }
         .navigationBarTitle("Privacy & security", displayMode: .inline)
     }
 }
 
-struct InteractionScreen: View {
+struct PublishingScreen: View {
     @ObservedObject var privacyDefaultDB = PrivacyDefaultDB()
     
     var body: some View {
         Form {
-            Toggle("Send Last Interaction Time", isOn: $privacyDefaultDB.sendLastUserInteraction)
-            Toggle("Send Typing Notifications", isOn: $privacyDefaultDB.sendLastChatState)
+            Toggle("Send last interaction time", isOn: $privacyDefaultDB.sendLastUserInteraction)
+            Toggle("Send typing notifications", isOn: $privacyDefaultDB.sendLastChatState)
             Toggle("Send message received state", isOn: $privacyDefaultDB.sendReceivedMarkers)
-            Toggle("Sync Read-Markers", isOn: $privacyDefaultDB.sendDisplayedMarkers)
+            Toggle("Send message displayed state", isOn: $privacyDefaultDB.sendDisplayedMarkers)
         }
-        .navigationBarTitle("Interaction Settings", displayMode: .inline)
+        .navigationBarTitle("Publishing", displayMode: .inline)
     }
 }
 
-struct LocationScreen: View {
+struct PreviewsScreen: View {
     @ObservedObject var privacyDefaultDB = PrivacyDefaultDB()
     
     var body: some View {
         Form {
-            Toggle("Show Inline Geo Location", isOn: $privacyDefaultDB.showGeoLocation)
+            Toggle("Show inline geo location", isOn: $privacyDefaultDB.showGeoLocation)
             Toggle("Show URL previews", isOn: $privacyDefaultDB.showURLPreview)
         }
-        .navigationBarTitle("Location & Sharing", displayMode: .inline)
+        .navigationBarTitle("Previews", displayMode: .inline)
     }
 }
 
@@ -162,10 +160,10 @@ struct CommunicationScreen: View {
     
     var body: some View {
         Form {
+            Toggle("Allow contacts not in my Contact list to contact me", isOn: $privacyDefaultDB.allowNonRosterContacts)
+            Toggle("Allow approved contacts to query my Monal and iOS version", isOn: $privacyDefaultDB.allowVersionIQ)
             Toggle("Calls: Allow P2P sessions", isOn: $privacyDefaultDB.webrtcAllowP2P)
             Toggle("Calls: Allow TURN fallback to Monal-Servers", isOn: $privacyDefaultDB.webrtcUseFallbackTurn)
-            Toggle("Allow approved contacts to query my Monal and iOS version", isOn: $privacyDefaultDB.allowVersionIQ)
-            Toggle("Allow contacts not in my Contact list to contact me", isOn: $privacyDefaultDB.allowNonRosterContacts)
         }
         .navigationBarTitle("Communication", displayMode: .inline)
     }

@@ -86,24 +86,26 @@ struct PrivacySettings: View {
     
     var body: some View {
         Form {
-            NavigationLink(destination: PrivacyScreen()) {
-                Text("Privacy & Security")
-            }
-            NavigationLink(destination: PublishingScreen()) {
-                Text("Publishing")
-            }
-            NavigationLink(destination: PreviewsScreen()) {
-                Text("Previews")
-            }
-            NavigationLink(destination: CommunicationScreen()) {
-                Text("Communication")
-            }
-            
-            NavigationLink(destination: ViewControllerWrapper()) {
-                Text("Media Upload & Download")
+            Section(header:Text("Privacy and security settings")) {
+                NavigationLink(destination: PrivacyScreen()) {
+                    Text("Privacy & Security")
+                }
+                NavigationLink(destination: PublishingScreen()) {
+                    Text("Publishing")
+                }
+                NavigationLink(destination: PreviewsScreen()) {
+                    Text("Previews")
+                }
+                NavigationLink(destination: CommunicationScreen()) {
+                    Text("Communication")
+                }
+                
+                NavigationLink(destination: ViewControllerWrapper()) {
+                    Text("Media Upload & Download")
+                }
             }
         }
-        .navigationTitle("Privacy Settings")
+        .navigationBarTitle("Privacy Settings")
         .onAppear {
             privacyDefaultDB.hasSeenPrivacySettings = true
         }

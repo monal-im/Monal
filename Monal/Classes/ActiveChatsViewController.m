@@ -437,24 +437,20 @@ static NSMutableSet* _smacksWarningDisplayed;
         return;
     }
     
-    //use a timer to overcome strange race conditions detecting missing features even though they are supported
-    createQueuedTimer(1.0, dispatch_get_main_queue(), (^{
-        [self showWarningsIfNeeded];
-    }));
+    [self showWarningsIfNeeded];
 }
 
 -(void) showWarningsIfNeeded
 {
-    for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
-    {
-        NSNumber* accountNo = accountDict[kAccountID];
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
-        if(!account)
-            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];
-        if(![_mamWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
+    dispatch_async(dispatch_get_main_queue(), ^{
+        for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
         {
-            //use a timer to overcome strange race conditions detecting missing mam even though it is supported
-            createQueuedTimer(1.0, dispatch_get_main_queue(), (^{
+            NSNumber* accountNo = accountDict[kAccountID];
+            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+            if(!account)
+                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];
+            if(![_mamWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
+            {
                 if(!account.connectionProperties.supportsMam2)
                 {
                     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support MAM (XEP-0313). That means you could frequently miss incoming messages!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
@@ -466,12 +462,9 @@ static NSMutableSet* _smacksWarningDisplayed;
                 }
                 else
                     [_mamWarningDisplayed addObject:accountNo];
-            }));
-        }
-        if(![_smacksWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound)
-        {
-            //use a timer to overcome strange race conditions detecting missing smacks even though it is supported
-            createQueuedTimer(1.0, dispatch_get_main_queue(), (^{
+            }
+            if(![_smacksWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound)
+            {
                 if(!account.connectionProperties.supportsSM3)
                 {
                     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support Stream Management (XEP-0198). That means your outgoing messages can get lost frequently!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
@@ -483,9 +476,9 @@ static NSMutableSet* _smacksWarningDisplayed;
                 }
                 else
                     [_smacksWarningDisplayed addObject:accountNo];
-            }));
+            }
         }
-    }
+    });
 }
 
 -(void) openConversationPlaceholder:(MLContact*) contact

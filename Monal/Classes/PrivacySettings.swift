@@ -6,6 +6,7 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
+import Combine
 
 //TODO: rewrite this using swiftui
 struct ViewControllerWrapper: UIViewControllerRepresentable{
@@ -28,7 +29,7 @@ enum NotificationPrivacySettingOption: Int , CaseIterable, RawRepresentable{
 func getNotificationPrivacyOption(_ option: NotificationPrivacySettingOption) -> String {
     switch option{
         case .displayNameAndMessage:
-            return NSLocalizedString("Display name And Message", comment: "")
+            return NSLocalizedString("Display Name And Message", comment: "")
          case .displayOnlyName:
             return NSLocalizedString("Display Only Name", comment: "")
          case .displayOnlyPlaceholder:
@@ -38,84 +39,71 @@ func getNotificationPrivacyOption(_ option: NotificationPrivacySettingOption) ->
 
 class PrivacyDefaultDB: ObservableObject {
     @defaultsDB("NotificationPrivacySetting")
-    var notificationPrivacySetting: Int? {
-        willSet {
-            objectWillChange.send()
-        }
-    }
+    var notificationPrivacySetting: Int
     
     @defaultsDB("OMEMODefaultOn") 
-    var omemoDefaultOn:Bool?
+    var omemoDefaultOn:Bool
     
     @defaultsDB("AutodeleteAllMessagesAfter3Days")
-    var autodeleteAllMessagesAfter3Days: Bool?
+    var autodeleteAllMessagesAfter3Days: Bool
     
     @defaultsDB("SendLastUserInteraction")
-    var sendLastUserInteraction: Bool?
+    var sendLastUserInteraction: Bool
     
     @defaultsDB("SendLastChatState")
-    var sendLastChatState: Bool?
+    var sendLastChatState: Bool
     
     @defaultsDB("SendReceivedMarkers")
-    var sendReceivedMarkers: Bool?
+    var sendReceivedMarkers: Bool
     
     @defaultsDB("SendDisplayedMarkers")
-    var sendDisplayedMarkers: Bool?
+    var sendDisplayedMarkers: Bool
     
     @defaultsDB("ShowGeoLocation")
-    var showGeoLocation: Bool?
+    var showGeoLocation: Bool
     
     @defaultsDB("ShowURLPreview")
-    var showURLPreview: Bool?
+    var showURLPreview: Bool
     
     @defaultsDB("WebrtcAllowP2P")
-    var webrtcAllowP2P: Bool?
+    var webrtcAllowP2P: Bool
     
     @defaultsDB("WebrtcUseFallbackTurn")
-    var webrtcUseFallbackTurn: Bool?
+    var webrtcUseFallbackTurn: Bool
     
     @defaultsDB("AllowVersionIQ")
-    var allowVersionIQ: Bool?
+    var allowVersionIQ: Bool
     
     @defaultsDB("AllowNonRosterContacts")
-    var allowNonRosterContacts: Bool?
+    var allowNonRosterContacts: Bool
     
     @defaultsDB("HasSeenPrivacySettings")
-    var hasSeenPrivacySettings: Bool?
+    var hasSeenPrivacySettings: Bool
 }
 
 
 struct PrivacySettings: View {
-    @ObservedObject var privacyDefaultDB: PrivacyDefaultDB
-    
-    init() {
-        self.privacyDefaultDB = PrivacyDefaultDB()
-    }
+    @ObservedObject var privacyDefaultDB = PrivacyDefaultDB()
     
     var body: some View {
         Form {
             Section(header: Text("Notification Settings")) {
-                Picker("Notification Privacy Setting", selection: Binding(
-                    get: { self.privacyDefaultDB.notificationPrivacySetting! },
-                    set: { self.privacyDefaultDB.notificationPrivacySetting = $0 }
-                )){
+                Picker("Notification Privacy Setting", selection: $privacyDefaultDB.notificationPrivacySetting) {
                     ForEach(NotificationPrivacySettingOption.allCases, id: \.self) { option in
-                        Text(getNotificationPrivacyOption(option))
-                            .tag(option.rawValue)
+                        Text(getNotificationPrivacyOption(option)).tag(option.rawValue)
                     }
-                    
                 }
                 
-                NavigationLink(destination: PrivacyScreen(privacyDefaultDB: PrivacyDefaultDB())) {
+                NavigationLink(destination: PrivacyScreen()) {
                     Text("Privacy & Security")
                 }
-                NavigationLink(destination: InteractionScreen(privacyDefaultDB: PrivacyDefaultDB())) {
+                NavigationLink(destination: InteractionScreen()) {
                     Text("Interactions settings")
                 }
-                NavigationLink(destination: LocationScreen(privacyDefaultDB: PrivacyDefaultDB())) {
+                NavigationLink(destination: LocationScreen()) {
                     Text("Location & Sharing")
                 }
-                NavigationLink(destination: CommunicationScreen(privacyDefaultDB: PrivacyDefaultDB())) {
+                NavigationLink(destination: CommunicationScreen()) {
                     Text("Communications")
                 }
                 
@@ -132,94 +120,54 @@ struct PrivacySettings: View {
 }
 
 struct PrivacyScreen: View {
-    @ObservedObject var privacyDefaultDB: PrivacyDefaultDB
+    @ObservedObject var privacyDefaultDB = PrivacyDefaultDB()
     
     var body: some View {
         Form {
-            Section(header: Text("Privacy & security")) {
-                Toggle("Enable encryption by default for new chats", isOn: Binding(
-                    get: { self.privacyDefaultDB.omemoDefaultOn!},
-                    set: { self.privacyDefaultDB.omemoDefaultOn = $0 }
-                ))
-                Toggle("Autodelete all messages after 3 days", isOn: Binding(
-                    get: { self.privacyDefaultDB.autodeleteAllMessagesAfter3Days!},
-                    set: { self.privacyDefaultDB.autodeleteAllMessagesAfter3Days = $0 }
-                ))
-            }
+            Toggle("Enable encryption by default for new chats", isOn: $privacyDefaultDB.omemoDefaultOn)
+            Toggle("Autodelete all messages after 3 days", isOn: $privacyDefaultDB.omemoDefaultOn)
         }
+        .navigationBarTitle("Privacy & security", displayMode: .inline)
     }
 }
 
 struct InteractionScreen: View {
-    @ObservedObject var privacyDefaultDB: PrivacyDefaultDB
+    @ObservedObject var privacyDefaultDB = PrivacyDefaultDB()
     
     var body: some View {
         Form {
-            Section(header: Text("Interaction Settings")) {
-                Toggle("Send Last Interaction Time", isOn: Binding(
-                    get: { self.privacyDefaultDB.sendLastUserInteraction! },
-                    set: { self.privacyDefaultDB.sendLastUserInteraction = $0 }
-                ))
-                Toggle("Send Typing Notifications", isOn: Binding(
-                    get: { self.privacyDefaultDB.sendLastChatState!},
-                    set: { self.privacyDefaultDB.sendLastChatState = $0 }
-                ))
-                Toggle("Send message received state", isOn: Binding(
-                    get: { self.privacyDefaultDB.sendReceivedMarkers! },
-                    set: { self.privacyDefaultDB.sendReceivedMarkers = $0 }
-                ))
-                Toggle("Sync Read-Markers", isOn: Binding(
-                    get: { self.privacyDefaultDB.sendDisplayedMarkers! },
-                    set: { self.privacyDefaultDB.sendDisplayedMarkers = $0 }
-                ))
-            }
+            Toggle("Send Last Interaction Time", isOn: $privacyDefaultDB.sendLastUserInteraction)
+            Toggle("Send Typing Notifications", isOn: $privacyDefaultDB.sendLastChatState)
+            Toggle("Send message received state", isOn: $privacyDefaultDB.sendReceivedMarkers)
+            Toggle("Sync Read-Markers", isOn: $privacyDefaultDB.sendDisplayedMarkers)
         }
+        .navigationBarTitle("Interaction Settings", displayMode: .inline)
     }
 }
 
 struct LocationScreen: View {
-    @ObservedObject var privacyDefaultDB: PrivacyDefaultDB
+    @ObservedObject var privacyDefaultDB = PrivacyDefaultDB()
     
     var body: some View {
         Form {
-            Section(header: Text("Location & Sharing")) {
-                Toggle("Show Inline Geo Location", isOn: Binding(
-                    get: { self.privacyDefaultDB.showGeoLocation! },
-                    set: { self.privacyDefaultDB.showGeoLocation = $0 }
-                ))
-                Toggle("Show URL previews", isOn: Binding(
-                    get: { self.privacyDefaultDB.showURLPreview! },
-                    set: { self.privacyDefaultDB.showURLPreview = $0 }
-                ))
-            }
+            Toggle("Show Inline Geo Location", isOn: $privacyDefaultDB.showGeoLocation)
+            Toggle("Show URL previews", isOn: $privacyDefaultDB.showURLPreview)
         }
+        .navigationBarTitle("Location & Sharing", displayMode: .inline)
     }
 }
 
 struct CommunicationScreen: View {
-    @ObservedObject var privacyDefaultDB: PrivacyDefaultDB
+    @ObservedObject var privacyDefaultDB = PrivacyDefaultDB()
     
     var body: some View {
         Form {
-            Section(header: Text("Communication")) {
-                Toggle("Calls: Allow P2P sessions", isOn: Binding(
-                    get: { self.privacyDefaultDB.webrtcAllowP2P! },
-                    set: { self.privacyDefaultDB.webrtcAllowP2P = $0 }
-                ))
-                Toggle("Calls: Allow TURN fallback to Monal-Servers", isOn: Binding(
-                    get: { self.privacyDefaultDB.webrtcUseFallbackTurn! },
-                    set: { self.privacyDefaultDB.webrtcUseFallbackTurn = $0 }
-                ))
-                Toggle("Allow approved contacts to query my Monal and iOS version", isOn: Binding(
-                    get: { self.privacyDefaultDB.allowVersionIQ! },
-                    set: { self.privacyDefaultDB.allowVersionIQ = $0 }
-                ))
-                Toggle("Allow contacts not in my Contact list to contact me", isOn: Binding(
-                    get: { self.privacyDefaultDB.allowNonRosterContacts! },
-                    set: { self.privacyDefaultDB.allowNonRosterContacts = $0 }
-                ))
-            }
+            Toggle("Calls: Allow P2P sessions", isOn: $privacyDefaultDB.webrtcAllowP2P)
+            Toggle("Calls: Allow TURN fallback to Monal-Servers", isOn: $privacyDefaultDB.webrtcUseFallbackTurn)
+            Toggle("Allow approved contacts to query my Monal and iOS version", isOn: $privacyDefaultDB.allowVersionIQ)
+            Toggle("Allow contacts not in my Contact list to contact me", isOn: $privacyDefaultDB.allowNonRosterContacts)
         }
+        .navigationBarTitle("Communication", displayMode: .inline)
     }
 }
 

@@ -34,6 +34,7 @@ NSString *const kDomain = @"domain";
 NSString *const kEnabled = @"enabled";
 NSString *const kNeedsPasswordMigration = @"needs_password_migration";
 NSString *const kSupportsSasl2 = @"supports_sasl2";
+NSString *const kPlainActivated = @"plain_activated";
 
 NSString *const kServer = @"server";
 NSString *const kPort = @"other_port";
@@ -265,7 +266,7 @@ static NSDateFormatter* dbFormatter;
 -(NSNumber*) addAccountWithDictionary:(NSDictionary*) dictionary
 {
     return [self.db idWriteTransaction:^{
-        NSString* query = @"INSERT INTO account (server, other_port, resource, domain, enabled, directTLS, username, rosterName, statusMessage) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        NSString* query = @"INSERT INTO account (server, other_port, resource, domain, enabled, directTLS, username, rosterName, statusMessage, plain_activated) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         NSString* server = (NSString*) [dictionary objectForKey:kServer];
         NSString* port = (NSString*)[dictionary objectForKey:kPort];
         NSArray* params = @[
@@ -277,7 +278,8 @@ static NSDateFormatter* dbFormatter;
             [dictionary objectForKey:kDirectTLS],
             ((NSString *)[dictionary objectForKey:kUsername]),
             [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
-            [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @""
+            [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
+            [dictionary objectForKey:kPlainActivated] != nil ? [dictionary objectForKey:kPlainActivated] : [NSNumber numberWithBool:NO],
         ];
         BOOL result = [self.db executeNonQuery:query andArguments:params];
         // return the accountID
@@ -343,6 +345,24 @@ static NSDateFormatter* dbFormatter;
             return NO;
         else
             return [sasl2Pinned boolValue];
+    }];
+}
+
+-(BOOL) isPlainActivatedForAccount:(NSNumber*) accountNo
+{
+    return [self.db boolReadTransaction:^{
+        NSNumber* plainActivated = (NSNumber*)[self.db executeScalar:@"SELECT plain_activated FROM account WHERE account_id=?;" andArguments:@[accountNo]];
+        if(plainActivated == nil)
+            return NO;
+        else
+            return [plainActivated boolValue];
+    }];
+}
+
+-(BOOL) deactivatePlainForAccount:(NSNumber*) accountNo
+{
+    return [self.db boolReadTransaction:^{
+        return [self.db executeNonQuery:@"UPDATE account SET plain_activated=0 WHERE account_id=?;" andArguments:@[accountNo]];
     }];
 }
 

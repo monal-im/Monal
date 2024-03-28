@@ -28,7 +28,7 @@
 {
     //only handle these iqs if the remote user is on our roster
     MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
-    if(![account.connectionProperties.identity.jid isEqualToString:iqNode.fromUser] && !(contact.isSubscribedFrom && !contact.isGroup))
+    if(![account.connectionProperties.identity.jid isEqualToString:iqNode.fromUser] && [account.connectionProperties.identity.domain isEqualToString:iqNode.fromUser] && !(contact.isSubscribedFrom && !contact.isGroup))
         DDLogWarn(@"Invalid sender for iq (!subscribedFrom || isGroup), ignoring: %@", iqNode);
     
     if([iqNode check:@"/<type=get>"])
@@ -455,6 +455,9 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         account.connectionProperties.supportsPush = YES;
         [account enablePush];
     }
+    
+    if([features containsObject:@"urn:xmpp:mds:server-assist:0"])
+        account.connectionProperties.supportsMDSAssist = YES;
     
     if([features containsObject:@"urn:xmpp:mam:2"])
     {

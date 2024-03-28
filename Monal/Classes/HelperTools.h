@@ -37,6 +37,18 @@ typedef NS_ENUM(NSUInteger, MLVersionType) {
     MLVersionTypeLog,
 };
 
+typedef NS_ENUM(NSUInteger, MLDefinedIdentifier) {
+    MLDefinedIdentifier_kAppGroup,
+    MLDefinedIdentifier_kMonalOpenURL,
+    MLDefinedIdentifier_kBackgroundProcessingTask,
+    MLDefinedIdentifier_kBackgroundRefreshingTask,
+    MLDefinedIdentifier_kMonalKeychainName,
+    MLDefinedIdentifier_SHORT_PING,
+    MLDefinedIdentifier_LONG_PING,
+    MLDefinedIdentifier_MUC_PING,
+    MLDefinedIdentifier_BGFETCH_DEFAULT_INTERVAL,
+};
+
 typedef NS_ENUM(NSUInteger, MLRunLoopIdentifier) {
     MLRunLoopIdentifierNetwork,
 };
@@ -55,6 +67,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(void) flushLogsWithTimeout:(double) timeout;
 +(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func;
 +(void) __attribute__((noreturn)) handleRustPanicWithText:(NSString*) text andBacktrace:(NSString*) backtrace;
++(void) __attribute__((noreturn)) throwExceptionWithName:(NSString*) name reason:(NSString*) reason userInfo:(NSDictionary* _Nullable) userInfo;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
@@ -73,6 +86,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(MLXMLNode* _Nullable) candidate2xml:(NSString*) candidate withMid:(NSString*) mid pwd:(NSString* _Nullable) pwd ufrag:(NSString* _Nullable) ufrag andInitiator:(BOOL) initiator;
 +(NSString* _Nullable) xml2candidate:(MLXMLNode*) xml withInitiator:(BOOL) initiator;
 
++(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier;
 +(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier;
 +(NSError* _Nullable) hardLinkOrCopyFile:(NSString*) from to:(NSString*) to;
 +(NSString*) getQueueThreadLabelFor:(DDLogMessage*) logMessage;

@@ -252,8 +252,6 @@
             [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
             [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
         }
-        //update app badge
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
     };
     
     //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
@@ -262,6 +260,9 @@
         block();
     else
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), block);
+    
+    //update app badge
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
     
 }
 

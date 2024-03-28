@@ -23,6 +23,7 @@ extern NSString* const kDomain;
 extern NSString* const kEnabled;
 extern NSString* const kNeedsPasswordMigration;
 extern NSString* const kSupportsSasl2;
+extern NSString* const kPlainActivated;
 
 extern NSString* const kServer;
 extern NSString* const kPort;
@@ -163,6 +164,8 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(BOOL) pinSasl2ForAccount:(NSNumber*) accountNo;
 -(BOOL) isSasl2PinnedForAccount:(NSNumber*) accountNo;
+-(BOOL) isPlainActivatedForAccount:(NSNumber*) accountNo;
+-(BOOL) deactivatePlainForAccount:(NSNumber*) accountNo;
 
 -(NSMutableDictionary* _Nullable) readStateForAccount:(NSNumber*) accountNo;
 -(void) persistState:(NSDictionary*) state forAccount:(NSNumber*) accountNo;

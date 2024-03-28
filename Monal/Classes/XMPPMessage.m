@@ -118,6 +118,18 @@ NSString* const kMessageHeadlineType = @"headline";
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"displayed" andNamespace:@"urn:xmpp:chat-markers:0" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
 }
 
+-(void) setMDSDisplayed:(NSString*) stanzaId withStanzaIdBy:(NSString*) by
+{
+    [self addChildNode:
+        [[MLXMLNode alloc] initWithElement:@"displayed" andNamespace:@"urn:xmpp:mds:displayed:0" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"stanza-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{
+                @"by": by,
+                @"id": stanzaId,
+            } andChildren:@[] andData:nil]
+        ] andData:nil]
+    ];
+}
+
 -(void) setStoreHint
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"store" andNamespace:@"urn:xmpp:hints"]];

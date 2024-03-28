@@ -458,6 +458,10 @@ class SwiftuiInterface : NSObject {
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate)))
             case "ChatPlaceholder":
                 host.rootView = AnyView(ChatPlaceholder())
+            case "PrivacySettings" :
+                host.rootView = AnyView(UIKitWorkaround(PrivacySettings()))
+            case "ActiveChatsPrivacySettings":
+                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: PrivacySettings()))
             default:
                 unreachable()
         }

@@ -17,6 +17,7 @@
     if (!CGSizeEqualToSize(self.bounds.size, [self intrinsicContentSize])) {
         [self invalidateIntrinsicContentSize];
     }
+    [self becomeFirstResponder];
 }
 
 - (CGSize)intrinsicContentSize

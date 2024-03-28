@@ -587,7 +587,7 @@ static NSMutableDictionary* _typingNotifications;
                 //send receive markers if requested, but DON'T do so for MLhistory messages (and don't do so for channel type mucs)
                 if(
                     [[HelperTools defaultsDB] boolForKey:@"SendReceivedMarkers"] &&
-                    ([messageNode check:@"{urn:xmpp:receipts}request"] || [messageNode check:@"{urn:xmpp:chat-markers:0}markable"]) &&
+                    [messageNode check:@"{urn:xmpp:receipts}request"] &&
                     ![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] &&
                     !isMLhistory
                 )
@@ -607,8 +607,6 @@ static NSMutableDictionary* _typingNotifications;
                         receiptNode.attributes[@"to"] = messageNode.fromUser;
                         if([messageNode check:@"{urn:xmpp:receipts}request"])
                             [receiptNode setReceipt:messageId];
-                        if([messageNode check:@"{urn:xmpp:chat-markers:0}markable"])
-                            [receiptNode setChatmarkerReceipt:messageId];
                         [receiptNode setStoreHint];
                         [account send:receiptNode];
                     }
@@ -654,23 +652,17 @@ static NSMutableDictionary* _typingNotifications;
     
     //handle message receipts
     if(
-        ([messageNode check:@"{urn:xmpp:receipts}received@id"] || [messageNode check:@"{urn:xmpp:chat-markers:0}received@id"]) &&
+        [messageNode check:@"{urn:xmpp:receipts}received@id"] &&
         [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid]
     )
     {
-        NSString* msgId;
-        if([messageNode check:@"{urn:xmpp:receipts}received@id"])
-            msgId = [messageNode findFirst:@"{urn:xmpp:receipts}received@id"];
-        else
-            msgId = [messageNode findFirst:@"{urn:xmpp:chat-markers:0}received@id"];        //fallback only
-        if(msgId)
-        {
-            //save in DB
-            [[DataLayer sharedInstance] setMessageId:msgId received:YES];
-            
-            //Post notice
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{kMessageId:msgId}];
-        }
+        NSString* msgId = [messageNode findFirst:@"{urn:xmpp:receipts}received@id"];
+        
+        //save in DB
+        [[DataLayer sharedInstance] setMessageId:msgId received:YES];
+        
+        //Post notice
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{kMessageId:msgId}];
     }
     
     //handle chat-markers in groupchats slightly different

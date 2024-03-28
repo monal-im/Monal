@@ -246,6 +246,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 -(void) markCapsQueryCompleteFor:(NSString*) ver;
 
+-(void) updateMdsData:(NSDictionary*) mdsData;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -6,7 +6,6 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
-import Combine
 
 //TODO: rewrite this using swiftui
 struct ViewControllerWrapper: UIViewControllerRepresentable{
@@ -65,16 +64,16 @@ class PrivacyDefaultDB: ObservableObject {
     @defaultsDB("ShowURLPreview")
     var showURLPreview: Bool
     
-    @defaultsDB("WebrtcAllowP2P")
+    @defaultsDB("webrtcAllowP2P")
     var webrtcAllowP2P: Bool
     
-    @defaultsDB("WebrtcUseFallbackTurn")
+    @defaultsDB("webrtcUseFallbackTurn")
     var webrtcUseFallbackTurn: Bool
     
-    @defaultsDB("AllowVersionIQ")
+    @defaultsDB("allowVersionIQ")
     var allowVersionIQ: Bool
     
-    @defaultsDB("AllowNonRosterContacts")
+    @defaultsDB("allowNonRosterContacts")
     var allowNonRosterContacts: Bool
     
     @defaultsDB("HasSeenPrivacySettings")
@@ -116,7 +115,7 @@ struct PrivacyScreen: View {
     
     var body: some View {
         Form {
-            Picker("Notification Privacy Setting", selection: $privacyDefaultDB.notificationPrivacySetting) {
+            Picker("Notification privacy", selection: $privacyDefaultDB.notificationPrivacySetting) {
                 ForEach(NotificationPrivacySettingOption.allCases, id: \.self) { option in
                     Text(getNotificationPrivacyOption(option)).tag(option.rawValue)
                 }

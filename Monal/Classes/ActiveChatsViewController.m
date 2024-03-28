@@ -510,8 +510,8 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) showPrivacySettings
 {
-    UIViewController* ActiveprivacyViewController = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsPrivacySettings"];
-    [self showDetailViewController:ActiveprivacyViewController sender:self];
+    UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsPrivacySettings"];
+    [self presentViewController:view animated:YES completion:^{}];
 }
 
 -(void) showSettings

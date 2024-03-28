@@ -49,7 +49,7 @@
 @import AVFoundation;
 @import WebRTC;
 
-#define STATE_VERSION 13
+#define STATE_VERSION 14
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -116,6 +116,7 @@ NSString* const kStanza = @"stanza";
     NSString* _internalID;
     NSString* _logtag;
     NSMutableDictionary* _inCatchup;
+    NSMutableDictionary* _mdsData;
     
     //registration related stuff
     BOOL _registration;
@@ -265,6 +266,7 @@ NSString* const kStanza = @"stanza";
     _runningCapsQueries = [NSMutableSet new];
     _runningMamQueries = [NSMutableDictionary new];
     _inCatchup = [NSMutableDictionary new];
+    _mdsData = [NSMutableDictionary new];
     _pipeliningState = kPipelinedNothing;
     _cachedStreamFeaturesBeforeAuth = nil;
     _cachedStreamFeaturesAfterAuth = nil;
@@ -3475,6 +3477,8 @@ NSString* const kStanza = @"stanza";
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
             [values setObject:[self->_inCatchup copy] forKey:@"inCatchup"];
+            [values setObject:[self->_mdsData copy] forKey:@"mdsData"];
+            
             if(self->_cachedStreamFeaturesBeforeAuth != nil)
                 [values setObject:self->_cachedStreamFeaturesBeforeAuth forKey:@"cachedStreamFeaturesBeforeAuth"];
             if(self->_cachedStreamFeaturesAfterAuth != nil)
@@ -3727,6 +3731,9 @@ NSString* const kStanza = @"stanza";
             
             if([dic objectForKey:@"inCatchup"])
                 _inCatchup = [[dic objectForKey:@"inCatchup"] mutableCopy];
+            
+            if([dic objectForKey:@"mdsData"])
+                _mdsData = [[dic objectForKey:@"mdsData"] mutableCopy];
             
             if([dic objectForKey:@"cachedStreamFeaturesBeforeAuth"])
                 _cachedStreamFeaturesBeforeAuth = [dic objectForKey:@"cachedStreamFeaturesBeforeAuth"];
@@ -4053,6 +4060,9 @@ NSString* const kStanza = @"stanza";
         //initSession() above does not add message stanzas to the self.unAckedStanzas queue --> this is safe to do
         [self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
     }
+    
+    //fetch current mds state
+    [self.pubsub fetchNode:@"urn:xmpp:mds:displayed:0" from:self.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleMdsFetchResult)];
     
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
     
@@ -5194,6 +5204,10 @@ NSString* const kStanza = @"stanza";
                 DDLogInfo(@"Catchup finished for jid %@", archiveJid);
                 [self->_inCatchup removeObjectForKey:archiveJid];     //catchup done and replay finished
                 
+                //handle cached mds data for this jid
+                if(self->_mdsData[archiveJid] != nil)
+                    [self handleMdsData:self->_mdsData[archiveJid] forJid:archiveJid];
+                
                 //handle old mamFinished code as soon as all delayed messages have been processed
                 //we need to wait for all delayed messages because at least omemo needs the pep headline messages coming in during mam catchup
                 if([self.connectionProperties.identity.jid isEqualToString:archiveJid])
@@ -5275,9 +5289,59 @@ NSString* const kStanza = @"stanza";
     
     //don't queue this notification because it should be handled INLINE inside the receive queue
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
+}
+
+-(void) updateMdsData:(NSDictionary*) mdsData
+{
+    for(NSString* jid in mdsData)
+        _mdsData[jid] = mdsData[jid];
+}
+
+-(void) handleMdsData:(MLXMLNode*) data forJid:(NSString*) jid
+{
+    NSString* stanzaId = [data findFirst:@"{urn:xmpp:mds:displayed:0}displayed/{urn:xmpp:sid:0}stanza-id@id"];
+    NSString* by = [data findFirst:@"{urn:xmpp:mds:displayed:0}displayed/{urn:xmpp:sid:0}stanza-id@by"];
+    DDLogInfo(@"Got mds displayed element for chat %@ by %@: %@", jid, by, stanzaId);
     
-    //fetch current mds state
-    [self.pubsub fetchNode:@"urn:xmpp:mds:displayed:0" from:self.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleMdsFetchResult)];
+    if([[DataLayer sharedInstance] isBuddyMuc:jid forAccount:self.accountNo])
+    {
+        if(![jid isEqualToString:by])
+        {
+            DDLogWarn(@"Mds stanza-id by not equal to muc jid, ignoring!");
+            return;
+        }
+        
+        //NSString* ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:jid forAccount:self.accountNo]
+        NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:jid andAccount:self.accountNo tillStanzaId:stanzaId wasOutgoing:NO];
+        DDLogDebug(@"Muc marked as read: %@", unread);
+        
+        //remove notifications of all remotely read messages (indicated by sending a display marker)
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:self userInfo:@{@"messagesArray":unread}];
+        
+        //update unread count in active chats list
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+            @"contact": [MLContact createContactFromJid:jid andAccountNo:self.accountNo]
+        }];
+    }
+    else
+    {
+        if(![self.connectionProperties.identity.jid isEqualToString:by])
+        {
+            DDLogWarn(@"Mds stanza-id by not equal to own bare jid, ignoring!");
+            return;
+        }
+        
+        NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:jid andAccount:self.accountNo tillStanzaId:stanzaId wasOutgoing:NO];
+        DDLogDebug(@"1:1 marked as read: %@", unread);
+        
+        //remove notifications of all remotely read messages (indicated by sending a display marker)
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:self userInfo:@{@"messagesArray":unread}];
+        
+        //update unread count in active chats list
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+            @"contact": [MLContact createContactFromJid:jid andAccountNo:self.accountNo]
+        }];
+    }
 }
 
 -(void) addMessageToMamPageArray:(NSDictionary*) messageDictionary

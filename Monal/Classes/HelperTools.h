@@ -67,6 +67,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(void) flushLogsWithTimeout:(double) timeout;
 +(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func;
 +(void) __attribute__((noreturn)) handleRustPanicWithText:(NSString*) text andBacktrace:(NSString*) backtrace;
++(void) __attribute__((noreturn)) throwExceptionWithName:(NSString*) name reason:(NSString*) reason userInfo:(NSDictionary* _Nullable) userInfo;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount;
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;

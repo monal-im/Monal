@@ -106,6 +106,15 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountNo withComment:(NSString*) comment;
 -(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
+#pragma mark - sound
+-(void) setAlertSoundWithAccountId:(NSString*) accountId buddyId:(NSString*) buddyId soundName:(NSString*) soundName soundData:(NSData*) soundData isCustom:(NSNumber*) custom;
+-(NSData*) getSoundDataForAccountId:(NSString*) accountId buddyId:(NSString*) buddyId;
+-(NSString*) getSoundNameForAccountId:(NSString*) accountId buddyId:(NSString*) buddyId;
+-(NSNumber*) getIsCustomSoundForAccountId:(NSString*) accountId buddyId:(NSString*) buddyId;
+-(void) checkAndCreateAlertSoundsTable;
+-(void) deleteSoundForAccountId:(NSString*) accountId buddyId:(NSString*) buddyId;
+-(void) deleteSoundsForBuddyId:(NSString *)buddyId;
+
 #pragma mark - MUC
 
 -(BOOL) initMuc:(NSString*) room forAccountId:(NSNumber*) accountNo andMucNick:(NSString* _Nullable) mucNick;

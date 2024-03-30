@@ -338,6 +338,11 @@ void swizzle(Class c, SEL orig, SEL new)
     abort();
 }
 
++(void) __attribute__((noreturn)) throwExceptionWithName:(NSString*) name reason:(NSString*) reason userInfo:(NSDictionary* _Nullable) userInfo
+{
+    @throw [NSException exceptionWithName:name reason:reason userInfo:userInfo];
+}
+
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount
 {
     [self postError:description withNode:node andAccount:account andIsSevere:isSevere];
@@ -1502,7 +1507,7 @@ void swizzle(Class c, SEL orig, SEL new)
                     //we always want to post sync errors if we are in the appex (because an incoming push means the server has
                     //*possibly* queued some messages for us)
                     //if we are in the main app we only want to post sync errors if we are in one of these states:
-                    //1. we are NOT doing a full reconnect and the smacks queue contains some unacked message stanzas having a body
+                    //1. we are NOT doing a full reconnect and the smacks queue does not contain some unacked message stanzas having a body
                     //--> (briefly) opening the app while not having an internet connection does not generate sync errors (if no
                     //outgoing message is pending)
                     //2. we are doing a full reconnect --> we always want to post sync erros because we have to rejoin mucs,

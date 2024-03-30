@@ -41,54 +41,7 @@ $$class_handler(mdsHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSS
     }
     
     if([type isEqualToString:@"publish"])
-    {
-        for(NSString* chatJid in data)
-        {
-            NSString* stanzaId = [data[chatJid] findFirst:@"{urn:xmpp:mds:displayed:0}displayed/{urn:xmpp:sid:0}stanza-id@id"];
-            NSString* by = [data[chatJid] findFirst:@"{urn:xmpp:mds:displayed:0}displayed/{urn:xmpp:sid:0}stanza-id@by"];
-            DDLogInfo(@"Got mds displayed element for chat %@ by %@: %@", chatJid, by, stanzaId);
-            
-            if([[DataLayer sharedInstance] isBuddyMuc:chatJid forAccount:account.accountNo])
-            {
-                if(![chatJid isEqualToString:by])
-                {
-                    DDLogWarn(@"Mds stanza-id by not equal to muc jid, ignoring!");
-                    return;
-                }
-                
-                //NSString* ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:chatJid forAccount:account.accountNo]
-                NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:chatJid andAccount:account.accountNo tillStanzaId:stanzaId wasOutgoing:NO];
-                DDLogDebug(@"Muc marked as read: %@", unread);
-                
-                //remove notifications of all remotely read messages (indicated by sending a display marker)
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
-                
-                //update unread count in active chats list
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                    @"contact": [MLContact createContactFromJid:chatJid andAccountNo:account.accountNo]
-                }];
-            }
-            else
-            {
-                if(![account.connectionProperties.identity.jid isEqualToString:by])
-                {
-                    DDLogWarn(@"Mds stanza-id by not equal to own bare jid, ignoring!");
-                    return;
-                }
-                
-                NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:chatJid andAccount:account.accountNo tillStanzaId:stanzaId wasOutgoing:NO];
-                DDLogDebug(@"1:1 marked as read: %@", unread);
-                
-                //remove notifications of all remotely read messages (indicated by sending a display marker)
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
-                
-                //update unread count in active chats list
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                    @"contact": [MLContact createContactFromJid:chatJid andAccountNo:account.accountNo]
-                }];
-            }
-        }
-    }
+        [account updateMdsData:data];
 $$
 
 $$class_handler(handleMdsFetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
@@ -105,7 +58,7 @@ $$class_handler(handleMdsFetchResult, $$ID(xmpp*, account), $$BOOL(success), $_I
     }
     
     //call +notify handler to process our data dictionary containing all mds items
-    $call($newHandler(MLPubSubProcessor, mdsHandler), $ID(account), $ID(jid, account.connectionProperties.identity.jid), $ID(type, @"publish", $ID(data)));
+    [account updateMdsData:data];
 $$
 
 $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))

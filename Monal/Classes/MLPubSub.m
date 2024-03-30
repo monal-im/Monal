@@ -95,7 +95,7 @@ $$
     DDLogInfo(@"Fetching node '%@' at jid '%@' using callback %@...", node, jid, handler);
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedFetchNodeHandler, handleFetchInvalidation, $ID(node), $ID(jid), $ID(itemsList), $HANDLER(handler))];
@@ -143,7 +143,7 @@ $$
     DDLogInfo(@"Subscribing to node '%@' at jid '%@' using callback %@...", node, jid, handler);
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedSubscribeToNodeHandler, handleSubscribeInvalidation, $ID(node), $ID(jid), $HANDLER(handler))];
@@ -226,7 +226,7 @@ $$
 {
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedConfigureNodeHandler, handleConfigFormResultInvalidation, $ID(node), $ID(configOptions), $HANDLER(handler))];
@@ -303,7 +303,7 @@ $$
 {
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedRetractItemWithIdHandler, handleRetractResultInvalidation, $ID(itemId), $ID(node), $HANDLER(handler))];
@@ -340,7 +340,7 @@ $$
 {
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedPurgeNodeNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $HANDLER(handler))];
@@ -374,7 +374,7 @@ $$
 {
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedDeleteNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $HANDLER(handler))];

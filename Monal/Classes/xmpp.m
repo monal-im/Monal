@@ -49,7 +49,7 @@
 @import AVFoundation;
 @import WebRTC;
 
-#define STATE_VERSION 13
+#define STATE_VERSION 14
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -116,6 +116,7 @@ NSString* const kStanza = @"stanza";
     NSString* _internalID;
     NSString* _logtag;
     NSMutableDictionary* _inCatchup;
+    NSMutableDictionary* _mdsData;
     
     //registration related stuff
     BOOL _registration;
@@ -265,6 +266,7 @@ NSString* const kStanza = @"stanza";
     _runningCapsQueries = [NSMutableSet new];
     _runningMamQueries = [NSMutableDictionary new];
     _inCatchup = [NSMutableDictionary new];
+    _mdsData = [NSMutableDictionary new];
     _pipeliningState = kPipelinedNothing;
     _cachedStreamFeaturesBeforeAuth = nil;
     _cachedStreamFeaturesAfterAuth = nil;
@@ -3475,6 +3477,8 @@ NSString* const kStanza = @"stanza";
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
             [values setObject:[self->_inCatchup copy] forKey:@"inCatchup"];
+            [values setObject:[self->_mdsData copy] forKey:@"mdsData"];
+            
             if(self->_cachedStreamFeaturesBeforeAuth != nil)
                 [values setObject:self->_cachedStreamFeaturesBeforeAuth forKey:@"cachedStreamFeaturesBeforeAuth"];
             if(self->_cachedStreamFeaturesAfterAuth != nil)
@@ -3503,7 +3507,7 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsMDSAssist=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsMDSAssist=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
                 self.accountNo,
                 values[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3524,6 +3528,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
                 self.connectionProperties.supportsBookmarksCompat,
+                self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
                 self.omemo.state
             );
@@ -3728,6 +3733,9 @@ NSString* const kStanza = @"stanza";
             if([dic objectForKey:@"inCatchup"])
                 _inCatchup = [[dic objectForKey:@"inCatchup"] mutableCopy];
             
+            if([dic objectForKey:@"mdsData"])
+                _mdsData = [[dic objectForKey:@"mdsData"] mutableCopy];
+            
             if([dic objectForKey:@"cachedStreamFeaturesBeforeAuth"])
                 _cachedStreamFeaturesBeforeAuth = [dic objectForKey:@"cachedStreamFeaturesBeforeAuth"];
             if([dic objectForKey:@"cachedStreamFeaturesAfterAuth"])
@@ -3737,7 +3745,7 @@ NSString* const kStanza = @"stanza";
                 self.omemo.state = [dic objectForKey:@"omemoState"];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsMDSAssist=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsMDSAssist=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3758,6 +3766,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsBlocking,
                 self.connectionProperties.supportsClientState,
                 self.connectionProperties.supportsBookmarksCompat,
+                self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
                 self.omemo.state
             );
@@ -3845,6 +3854,79 @@ NSString* const kStanza = @"stanza";
     
     self.isDoingFullReconnect = YES;
     _accountState = kStateBinding;
+    
+    //delete old resources because we get new presences once we're done initializing the session
+    [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
+    
+    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
+    @synchronized(_iqHandlers) {
+        //make sure this works even if the invalidation handlers add a new iq to the list
+        NSMutableDictionary* handlersCopy = [_iqHandlers mutableCopy];
+        [_iqHandlers removeAllObjects];
+        
+        for(NSString* iqid in handlersCopy)
+        {
+            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+            if(handlersCopy[iqid][@"handler"] != nil)
+                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self));
+            else if(handlersCopy[iqid][@"errorHandler"])
+                ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
+        }
+        
+    }
+    
+    //invalidate pubsub queue (a pubsub operation will be either invalidated by an iq handler above OR by the invalidation here, but never twice!)
+    [self.pubsub invalidateQueue];
+    
+    //clean up all idle timers
+    [[DataLayer sharedInstance] cleanupIdleTimerOnAccountNo:self.accountNo];
+    
+    //force new disco queries because we landed here because of a failed smacks resume
+    //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
+    //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
+    //    and other state values are stale now
+    //(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
+    self.connectionProperties.serverFeatures = [NSSet new];
+    self.connectionProperties.discoveredServices = [NSMutableArray new];
+    self.connectionProperties.discoveredStunTurnServers = [NSMutableArray new];
+    self.connectionProperties.discoveredAdhocCommands = [NSMutableDictionary new];
+    self.connectionProperties.serverVersion = nil;
+    self.connectionProperties.conferenceServer = nil;
+    self.connectionProperties.supportsHTTPUpload = NO;
+    self.connectionProperties.uploadServer = nil;
+    //self.connectionProperties.supportsClientState = NO;           //already set by stream feature parsing
+    self.connectionProperties.supportsMam2 = NO;
+    //self.connectionProperties.supportsSM3 = NO;                   //already set by stream feature parsing
+    self.connectionProperties.supportsPush = NO;
+    self.connectionProperties.pushEnabled = NO;
+    self.connectionProperties.supportsMDSAssist = NO;
+    self.connectionProperties.supportsBookmarksCompat = NO;
+    self.connectionProperties.usingCarbons2 = NO;
+    //self.connectionProperties.supportsRosterVersion = NO;         //already set by stream feature parsing
+    //self.connectionProperties.supportsRosterPreApproval = NO;     //already set by stream feature parsing
+    //self.connectionProperties.serverIdentity = @"";               //already set by stream feature parsing
+    self.connectionProperties.supportsBlocking = NO;
+    self.connectionProperties.supportsPing = NO;
+    self.connectionProperties.supportsExternalServiceDiscovery = NO;
+    self.connectionProperties.supportsPubSub = NO;
+    self.connectionProperties.supportsPubSubMax = NO;
+    self.connectionProperties.supportsModernPubSub = NO;
+    //self.connectionProperties.supportsPreauthIbr = NO;            //already set by stream feature parsing
+    self.connectionProperties.accountDiscoDone = NO;
+    
+    //clear list of running mam queries
+    _runningMamQueries = [NSMutableDictionary new];
+    
+    //clear list of running caps queries
+    _runningCapsQueries = [NSMutableSet new];
+    
+    //clear old catchup state (technically all stanzas still in delayedMessageStanzas could have also been
+    //in the parseQueue in the last run and deleted there)
+    //--> no harm in deleting them when starting a new session (but DON'T DELETE them when resuming the old smacks session)
+    _inCatchup = [NSMutableDictionary new];
+    [[DataLayer sharedInstance] deleteDelayedMessageStanzasForAccount:self.accountNo];
+    
+    //send bind iq
     XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:resource];
     [self sendIq:iqNode withHandler:$newHandler(MLIQProcessor, handleBind)];
@@ -3947,72 +4029,9 @@ NSString* const kStanza = @"stanza";
     DDLogInfo(@"Now bound, initializing new xmpp session");
     self.isDoingFullReconnect = YES;
     
-    //delete old resources because we get new presences once we're done initializing the session
-    [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
-    
     //we are now bound
     _connectedTime = [NSDate date];
     _reconnectBackoffTime = 0;
-    
-    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-    @synchronized(_iqHandlers) {
-        //make sure this works even if the invalidation handlers add a new iq to the list
-        NSMutableDictionary* handlersCopy = [_iqHandlers mutableCopy];
-        [_iqHandlers removeAllObjects];
-        
-        for(NSString* iqid in handlersCopy)
-        {
-            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-            if(handlersCopy[iqid][@"handler"] != nil)
-                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self));
-            else if(handlersCopy[iqid][@"errorHandler"])
-                ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
-        }
-        
-    }
-    
-    //invalidate pubsub queue (a pubsub operation will be either invalidated by an iq handler above OR by the invalidation here, but never twice!)
-    [self.pubsub invalidateQueue];
-    
-    //clean up all idle timers
-    [[DataLayer sharedInstance] cleanupIdleTimerOnAccountNo:self.accountNo];
-    
-    //force new disco queries because we landed here because of a failed smacks resume
-    //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
-    //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
-    //    and other state values are stale now
-    //(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
-    self.connectionProperties.serverFeatures = [NSSet new];
-    self.connectionProperties.discoveredServices = [NSMutableArray new];
-    self.connectionProperties.discoveredStunTurnServers = [NSMutableArray new];
-    self.connectionProperties.discoveredAdhocCommands = [NSMutableDictionary new];
-    self.connectionProperties.uploadServer = nil;
-    self.connectionProperties.conferenceServer = nil;
-    self.connectionProperties.usingCarbons2 = NO;
-    self.connectionProperties.supportsPush = NO;
-    self.connectionProperties.pushEnabled = NO;
-    self.connectionProperties.supportsMDSAssist = NO;
-    self.connectionProperties.supportsBookmarksCompat = NO;
-    self.connectionProperties.supportsMam2 = NO;
-    self.connectionProperties.supportsPubSub = NO;
-    self.connectionProperties.supportsPubSubMax = NO;
-    self.connectionProperties.supportsModernPubSub = NO;
-    self.connectionProperties.supportsHTTPUpload = NO;
-    self.connectionProperties.supportsPing = NO;
-    self.connectionProperties.supportsExternalServiceDiscovery = NO;
-    self.connectionProperties.supportsRosterPreApproval = NO;
-    
-    //clear list of running mam queries
-    _runningMamQueries = [NSMutableDictionary new];
-    
-    //clear list of running caps queries
-    _runningCapsQueries = [NSMutableSet new];
-    
-    //clear old catchup state (technically all stanzas still in delayedMessageStanzas could have also been
-    //in the parseQueue in the last run and deleted there)
-    //--> no harm in deleting them when starting a new session (but DON'T DELETE them when resuming the old smacks session)
-    _inCatchup = [NSMutableDictionary new];
-    [[DataLayer sharedInstance] deleteDelayedMessageStanzasForAccount:self.accountNo];
     
     //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
     _accountState = kStateBound;
@@ -4053,6 +4072,9 @@ NSString* const kStanza = @"stanza";
         //initSession() above does not add message stanzas to the self.unAckedStanzas queue --> this is safe to do
         [self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
     }
+    
+    //fetch current mds state
+    [self.pubsub fetchNode:@"urn:xmpp:mds:displayed:0" from:self.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleMdsFetchResult)];
     
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
     
@@ -5194,6 +5216,10 @@ NSString* const kStanza = @"stanza";
                 DDLogInfo(@"Catchup finished for jid %@", archiveJid);
                 [self->_inCatchup removeObjectForKey:archiveJid];     //catchup done and replay finished
                 
+                //handle cached mds data for this jid
+                if(self->_mdsData[archiveJid] != nil)
+                    [self handleMdsData:self->_mdsData[archiveJid] forJid:archiveJid];
+                
                 //handle old mamFinished code as soon as all delayed messages have been processed
                 //we need to wait for all delayed messages because at least omemo needs the pep headline messages coming in during mam catchup
                 if([self.connectionProperties.identity.jid isEqualToString:archiveJid])
@@ -5275,9 +5301,59 @@ NSString* const kStanza = @"stanza";
     
     //don't queue this notification because it should be handled INLINE inside the receive queue
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
+}
+
+-(void) updateMdsData:(NSDictionary*) mdsData
+{
+    for(NSString* jid in mdsData)
+        _mdsData[jid] = mdsData[jid];
+}
+
+-(void) handleMdsData:(MLXMLNode*) data forJid:(NSString*) jid
+{
+    NSString* stanzaId = [data findFirst:@"{urn:xmpp:mds:displayed:0}displayed/{urn:xmpp:sid:0}stanza-id@id"];
+    NSString* by = [data findFirst:@"{urn:xmpp:mds:displayed:0}displayed/{urn:xmpp:sid:0}stanza-id@by"];
+    DDLogInfo(@"Got mds displayed element for chat %@ by %@: %@", jid, by, stanzaId);
     
-    //fetch current mds state
-    [self.pubsub fetchNode:@"urn:xmpp:mds:displayed:0" from:self.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleMdsFetchResult)];
+    if([[DataLayer sharedInstance] isBuddyMuc:jid forAccount:self.accountNo])
+    {
+        if(![jid isEqualToString:by])
+        {
+            DDLogWarn(@"Mds stanza-id by not equal to muc jid, ignoring!");
+            return;
+        }
+        
+        //NSString* ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:jid forAccount:self.accountNo]
+        NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:jid andAccount:self.accountNo tillStanzaId:stanzaId wasOutgoing:NO];
+        DDLogDebug(@"Muc marked as read: %@", unread);
+        
+        //remove notifications of all remotely read messages (indicated by sending a display marker)
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:self userInfo:@{@"messagesArray":unread}];
+        
+        //update unread count in active chats list
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+            @"contact": [MLContact createContactFromJid:jid andAccountNo:self.accountNo]
+        }];
+    }
+    else
+    {
+        if(![self.connectionProperties.identity.jid isEqualToString:by])
+        {
+            DDLogWarn(@"Mds stanza-id by not equal to own bare jid, ignoring!");
+            return;
+        }
+        
+        NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:jid andAccount:self.accountNo tillStanzaId:stanzaId wasOutgoing:NO];
+        DDLogDebug(@"1:1 marked as read: %@", unread);
+        
+        //remove notifications of all remotely read messages (indicated by sending a display marker)
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:self userInfo:@{@"messagesArray":unread}];
+        
+        //update unread count in active chats list
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+            @"contact": [MLContact createContactFromJid:jid andAccountNo:self.accountNo]
+        }];
+    }
 }
 
 -(void) addMessageToMamPageArray:(NSDictionary*) messageDictionary

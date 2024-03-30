@@ -12,6 +12,7 @@
 @_exported import Logging
 import CocoaLumberjackSwiftLogBackend
 import LibMonalRustSwiftBridge
+import Combine
 
 //import some defines in MLConstants.h into swift
 let kAppGroup = HelperTools.getObjcDefinedValue(.kAppGroup)
@@ -118,7 +119,14 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable,
 
     public subscript<T>(member: String) -> T {
         get {
-            return self.getWrapper(for:member) as! T
+            if let value = self.getWrapper(for:member) as? T {
+                return value
+            } else {
+                HelperTools.throwException(withName:"ObservableKVOWrapperCastingError", reason:"Could not cast member '\(String(describing:member))' to expected type \(String(describing:T.self))", userInfo:[
+                    "key": "\(String(describing:member))",
+                    "type": "\(String(describing:T.self))",
+                ])
+            }
         }
         set {
             self.setWrapper(for:member, value:newValue as AnyObject?)
@@ -127,7 +135,14 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable,
 
     public subscript<T>(dynamicMember member: String) -> T {
         get {
-            return self.getWrapper(for:member) as! T
+            if let value = self.getWrapper(for:member) as? T {
+                return value
+            } else {
+                HelperTools.throwException(withName:"ObservableKVOWrapperCastingError", reason:"Could not cast dynamicMember '\(String(describing:member))' to expected type \(String(describing:T.self))", userInfo:[
+                    "key": "\(String(describing:member))",
+                    "type": "\(String(describing:T.self))",
+                ])
+            }
         }
         set {
             self.setWrapper(for:member, value:newValue as AnyObject?)
@@ -151,6 +166,20 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable,
     }
 }
 
+struct RuntimeError: LocalizedError {
+    let description: String
+
+    init(_ description: String) {
+        self.description = description
+    }
+
+    var errorDescription: String? {
+        description
+    }
+}
+
+//see https://www.avanderlee.com/swift/property-wrappers/
+//and https://fatbobman.com/en/posts/adding-published-ability-to-custom-property-wrapper-types/
 @propertyWrapper
 public struct defaultsDB<Value> {
     private let key: String
@@ -160,12 +189,33 @@ public struct defaultsDB<Value> {
         self.key = key
     }
     
-    public var wrappedValue: Value? {
+    public var wrappedValue: Value {
         get {
-            return container.object(forKey: key) as? Value
+            if let value = container.object(forKey: key) as? Value {
+                return value
+            } else {
+                HelperTools.throwException(withName:"DefaultsDBCastingError", reason:"Could not cast deaultsDB entry '\(String(describing:key))' to expected type \(String(describing: Value.self))", userInfo:[
+                    "key": "\(String(describing:key))",
+                    "type": "\(String(describing: Value.self))",
+                ])
+            }
         }
+        set { container.set(newValue, forKey: key) }
+    }
+    
+    public static subscript<OuterSelf: ObservableObject>(
+        _enclosingInstance observed: OuterSelf,
+        wrapped wrappedKeyPath: ReferenceWritableKeyPath<OuterSelf, Value>,
+        storage storageKeyPath: ReferenceWritableKeyPath<OuterSelf, Self>
+    ) -> Value {
+        get { observed[keyPath: storageKeyPath].wrappedValue }
         set {
-            container.set(newValue, forKey: key)
+            if let subject = observed.objectWillChange as? ObservableObjectPublisher {
+                subject.send()      // Before modifying wrappedValue
+                observed[keyPath: storageKeyPath].wrappedValue = newValue
+            } else {
+                observed[keyPath: storageKeyPath].wrappedValue = newValue
+            }
         }
     }
 }

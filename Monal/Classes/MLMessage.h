@@ -119,6 +119,7 @@ The of the message in the DB , should be int
 +(MLMessage*) messageFromDictionary:(NSDictionary*) dic;
 
 -(void) updateWithMessage:(MLMessage*) msg;
+@property (nonatomic, readonly) MLContact* contact;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
 -(BOOL) isEqualToMessage:(MLMessage*) message;

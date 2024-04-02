@@ -10,6 +10,9 @@
 #import "MLContact.h"
 
 @implementation MLMessage
+{
+    MLContact* _contact;
+}
 
 +(MLMessage*) messageFromDictionary:(NSDictionary*) dic
 {
@@ -160,6 +163,13 @@
     }
     else
         return [MLContact createContactFromJid:self.buddyName andAccountNo:self.accountId].contactDisplayName;
+}
+
+-(MLContact*) contact
+{
+    if(self->_contact != nil)
+        return self->_contact;
+    return self->_contact = [MLContact createContactFromJid:self.buddyName andAccountNo:self.accountId];
 }
 
 -(BOOL) isEqualToContact:(MLContact*) contact

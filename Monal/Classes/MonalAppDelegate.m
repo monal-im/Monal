@@ -815,7 +815,7 @@ $$
                     
                     //add given jid to our roster if in roster mode (e.g. the jid is not the jid we just registered as like in register mode)
                     if(account != nil && isRoster)      //silence memory warning despite assertion above
-                        [self handleXMPPURL:url];
+                        return [self handleXMPPURL:url];
                 }];
             }
             //I know this if is moot, but I wanted to preserve the different cases:

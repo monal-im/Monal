@@ -1524,13 +1524,6 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
-/*
-CF6DE818-6036-4B2E-A228-717303D1E9FF
-bififufuva@conference.xmpp.eightysoft.de
-bififufuva@conference.xmpp.eightysoft.de
-43
-*/
-
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID
 {
     return [self.db idReadTransaction:^{

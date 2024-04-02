@@ -64,7 +64,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] synchronize];
     }
 
-    [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
+    [self removeObjectUserSettingsIfSet:@"AlertSoundFile"];
 
     // upgrade ShowGeoLocation
     [self upgradeBoolUserSettingsIfUnset:@"ShowGeoLocation" toDefault:YES];
@@ -662,7 +662,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - login/register
 
-//this will NOT set plain_activated to YES, only using the advanced account creation ui can do this
 -(NSNumber*) login:(NSString*) jid password:(NSString*) password
 {
     //if it is a JID
@@ -761,6 +760,7 @@ $$
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
         [contact removeShareInteractions];
         
+        [[MLSoundManager sharedInstance] deleteContactForAccountId:contact.contactJid];
         //notify the UI
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{
             @"contact": [MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]

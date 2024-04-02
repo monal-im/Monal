@@ -264,6 +264,8 @@
             [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
             [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
         }
+        //update app badge
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
     };
     
     //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
@@ -272,9 +274,6 @@
         block();
     else
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), block);
-    
-    //update app badge
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
     
 }
 
@@ -337,16 +336,16 @@
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
-        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-        if(filename)
+        NSString* senderJID = [message.buddyName lowercaseString];
+        NSString* receiverJID = account.connectionProperties.identity.jid;
+        NSString* soundName = [[MLSoundManager sharedInstance] getSoundNameForSenderJID:senderJID AndReceiverJID:receiverJID];
+        if([soundName isEqualToString:@""])
         {
-            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-            DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+            content.sound = [UNNotificationSound defaultSound];
         }
         else
         {
-            content.sound = [UNNotificationSound defaultSound];
-            DDLogDebug(@"Using default alert sound: %@", content.sound);
+            content.sound = [UNNotificationSound soundNamed:soundName];
         }
     }
     else
@@ -470,16 +469,16 @@
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
-        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-        if(filename)
+        NSString* senderJID = [message.buddyName lowercaseString];
+        NSString* receiverJID = account.connectionProperties.identity.jid;
+        NSString* soundName = [[MLSoundManager sharedInstance] getSoundNameForSenderJID:senderJID AndReceiverJID:receiverJID];
+        if([soundName isEqualToString:@""])
         {
-            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-            DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+            content.sound = [UNNotificationSound defaultSound];
         }
         else
         {
-            content.sound = [UNNotificationSound defaultSound];
-            DDLogDebug(@"Using default alert sound: %@", content.sound);
+            content.sound = [UNNotificationSound soundNamed:soundName];
         }
     }
     else
@@ -732,16 +731,16 @@
 
         if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
         {
-            NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-            if(filename)
+            NSString* senderJID = [message.buddyName lowercaseString];
+            NSString* receiverJID = contact.contactJid;
+            NSString* soundName = [[MLSoundManager sharedInstance] getSoundNameForSenderJID:senderJID AndReceiverJID:receiverJID];
+            if([soundName isEqualToString:@""])
             {
-                content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-                DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+                content.sound = [UNNotificationSound defaultSound];
             }
             else
             {
-                content.sound = [UNNotificationSound defaultSound];
-                DDLogDebug(@"Using default alert sound: %@", content.sound);
+                content.sound = [UNNotificationSound soundNamed:soundName];
             }
         }
         else

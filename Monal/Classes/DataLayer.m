@@ -2522,4 +2522,207 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+#pragma mark - sounds
+
+-(void) setAlertSoundWithAccountId:(NSString*) accountId buddyId:(NSString* )buddyId soundName:(NSString*) soundName soundData:(NSData*) soundData isCustom:(NSNumber*) custom
+{
+    if(!soundName || !soundData) 
+    {
+        return;
+    }
+    BOOL isAccountIdDefault = [accountId isEqualToString:@"Default"];
+    BOOL isBuddyIdGlobal = [buddyId isEqualToString:@"global"];
+    
+    NSMutableArray* arguments = [NSMutableArray array];
+    if(!isAccountIdDefault)
+    {
+        [arguments addObject:accountId];
+    }
+    if(!isBuddyIdGlobal)
+    {
+        [arguments addObject:buddyId];
+    }
+    
+    NSString* accountIdCondition = isAccountIdDefault ? @"account_id IS NULL" : @"account_id = ?";
+    NSString* buddyIdCondition = isBuddyIdGlobal ? @"buddy_id IS NULL" : @"buddy_id = ?";
+    
+    [self.db voidWriteTransaction:^{
+        NSString* selectSql = [NSString stringWithFormat:@"SELECT COUNT(*) FROM alertsounds WHERE %@ AND %@;", accountIdCondition, buddyIdCondition];
+        id countResult = [self.db executeScalar:selectSql andArguments:arguments];
+        NSInteger count = [countResult integerValue];
+        
+        if(count > 0) 
+        {
+            NSString* whereClause = @"";
+            NSMutableArray* arguments = [NSMutableArray arrayWithObjects:soundName, soundData, custom, nil];
+
+            if ([accountId isEqualToString:@"Default"] && [buddyId isEqualToString:@"global"]) 
+            {
+                whereClause = @"account_id IS NULL AND buddy_id IS NULL";
+            } 
+            else if([accountId isEqualToString:@"Default"])
+            {
+                whereClause = @"account_id IS NULL AND buddy_id = ?";
+                [arguments addObject:buddyId];
+            } 
+            else if([buddyId isEqualToString:@"global"])
+            {
+                whereClause = @"account_id = ? AND buddy_id IS NULL";
+                [arguments addObject:accountId];
+            } 
+            else
+            {
+                whereClause = @"account_id = ? AND buddy_id = ?";
+                [arguments addObjectsFromArray:@[accountId, buddyId]];
+            }
+            NSString* updateSql = [NSString stringWithFormat:@"UPDATE alertsounds SET soundname = ?, sounddata = ?, customsound = ? WHERE %@", whereClause];
+            [self.db executeNonQuery:updateSql andArguments:arguments];
+        } 
+        else
+        {
+            NSString* insertSql = @"INSERT INTO alertsounds (account_id, buddy_id, soundname, sounddata, customsound) VALUES (?, ?, ?, ?, ?);";
+            NSArray* insertArguments = @[isAccountIdDefault ? [NSNull null] : accountId, isBuddyIdGlobal ? [NSNull null] : buddyId, soundName, soundData, custom];
+            [self.db executeNonQuery:insertSql andArguments:insertArguments];
+        }
+    }];
+}
+
+
+-(NSString*) getSoundNameForAccountId:(NSString*) accountId buddyId:(NSString*) buddyId
+{
+    return [self.db idReadTransaction:^id{
+        NSString* accountIdCondition = [accountId  isEqualToString:@"Default"] ?  @"IS NULL" : @"= ?";
+        NSString* buddyIdCondition = [buddyId isEqualToString:@"global"] ? @"IS NULL" : @"= ?";
+
+        NSString* query = [NSString stringWithFormat:@"SELECT soundname FROM alertsounds WHERE account_id %@ AND buddy_id %@ LIMIT 1;", accountIdCondition, buddyIdCondition];
+
+        NSMutableArray* arguments = [[NSMutableArray alloc] init];
+        if (![accountId isEqualToString:@"Default"])
+        {
+            [arguments addObject:accountId];
+        }
+        if (![buddyId isEqualToString:@"global"]) 
+        {
+            [arguments addObject:buddyId];
+        }
+        id queryResult = [self.db executeScalar:query andArguments:arguments];
+        NSString* soundName = queryResult ? [NSString stringWithFormat:@"%@", queryResult] : nil;
+        return soundName;
+    }];
+}
+
+-(NSData*) getSoundDataForAccountId:(NSString*) accountId buddyId:(NSString*) buddyId
+{
+    return [self.db idReadTransaction:^id{
+        NSString* accountIdCondition = [accountId  isEqualToString:@"Default"] ?  @"IS NULL" : @"= ?";
+        NSString* buddyIdCondition = [buddyId isEqualToString:@"global"] ? @"IS NULL" : @"= ?";
+
+        NSString* query = [NSString stringWithFormat:@"SELECT sounddata FROM alertsounds WHERE account_id %@ AND buddy_id %@ LIMIT 1;", accountIdCondition, buddyIdCondition];
+
+        NSMutableArray* arguments = [[NSMutableArray alloc] init];
+        if(![accountId isEqualToString:@"Default"])
+        {
+            [arguments addObject:accountId];
+        }
+        if(![buddyId isEqualToString:@"global"])
+        {
+            [arguments addObject:buddyId];
+        }
+        
+        id queryResult = [self.db executeScalar:query andArguments:arguments];
+        NSData* soundData = [NSData dataWithData:queryResult];
+        return soundData;
+    }];
+}
+
+-(NSNumber*) getIsCustomSoundForAccountId:(NSString*) accountId buddyId:(NSString*) buddyId 
+{
+    return [self.db idReadTransaction:^id{
+        NSString* accountIdCondition = [accountId  isEqualToString:@"Default"] ?  @"IS NULL" : @"= ?";
+        NSString* buddyIdCondition = [buddyId isEqualToString:@"global"] ? @"IS NULL" : @"= ?";
+
+        NSString* query = [NSString stringWithFormat:@"SELECT customsound FROM alertsounds WHERE account_id %@ AND buddy_id %@ LIMIT 1;", accountIdCondition, buddyIdCondition];
+    
+        NSMutableArray* arguments = [[NSMutableArray alloc] init];
+        if(![accountId isEqualToString:@"Default"])
+        {
+            [arguments addObject:accountId];
+        }
+        if(![buddyId isEqualToString:@"global"])
+        {
+            [arguments addObject:buddyId];
+        }
+        
+        id queryResult = [self.db executeScalar:query andArguments:arguments];
+        NSNumber* customSound = queryResult;
+        return customSound;
+    }];
+}
+
+-(void) checkAndCreateAlertSoundsTable
+{
+    [self.db idReadTransaction:^id{
+        NSString* checkTableExistsQuery = @"SELECT name FROM sqlite_master WHERE type='table' AND name='alertsounds';";
+        id tableExistsResult = [self.db executeScalar:checkTableExistsQuery];
+        
+        if(!tableExistsResult)
+        {
+            NSString* createTableQuery = @"CREATE TABLE alertsounds (alertsound_id INTEGER PRIMARY KEY, account_id VARCHAR, buddy_id VARCHAR, soundname VARCHAR, sounddata BLOB, customsound INTEGER);";
+            
+            [self.db executeNonQuery:createTableQuery];
+            
+            NSLog(@"alertsounds table created.");
+        } 
+        else
+        {
+            NSLog(@"alertsounds table already exists.");
+        }
+        return nil;
+    }];
+}
+
+
+-(void) deleteSoundForAccountId:(NSString *) accountId buddyId:(NSString *) buddyId
+{
+    [self.db voidWriteTransaction:^{
+        BOOL isAccountIdDefault = [accountId isEqualToString:@"Default"];
+        BOOL isBuddyIdGlobal = [buddyId isEqualToString:@"global"];
+
+        NSMutableArray* arguments = [NSMutableArray array];
+        NSString* query;
+
+        if(isAccountIdDefault && isBuddyIdGlobal)
+        {
+            query = @"DELETE FROM alertsounds WHERE account_id IS NULL AND buddy_id IS NULL;";
+        } 
+        else if(isAccountIdDefault)
+        {
+            query = @"DELETE FROM alertsounds WHERE account_id IS NULL AND buddy_id = ?;";
+            [arguments addObject:buddyId];
+        } 
+        else if(isBuddyIdGlobal)
+        {
+            query = @"DELETE FROM alertsounds WHERE account_id = ? AND buddy_id IS NULL;";
+            [arguments addObject:accountId];
+        } 
+        else
+        {
+            query = @"DELETE FROM alertsounds WHERE account_id = ? AND buddy_id = ?;";
+            [arguments addObject:accountId];
+            [arguments addObject:buddyId];
+        }
+        [self.db executeNonQuery:query andArguments:arguments];
+    }];
+}
+
+-(void) deleteSoundsForBuddyId:(NSString *) buddyId
+{
+    [self.db voidWriteTransaction:^{
+        NSString *query = @"DELETE FROM alertsounds WHERE buddy_id = ?;";
+        NSArray *arguments = @[buddyId];
+        [self.db executeNonQuery:query andArguments:arguments];
+    }];
+}
+
+
 @end

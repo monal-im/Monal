@@ -30,6 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 //server details
 @property (nonatomic, strong) NSSet* serverFeatures;
+@property (nonatomic, strong) NSSet* accountFeatures;
 
 @property (nonatomic, strong) NSMutableArray* discoveredServices;
 @property (nonatomic, strong) NSMutableArray* discoveredStunTurnServers;
@@ -49,7 +50,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL supportsSM3;
 @property (nonatomic, assign) BOOL supportsPush;
 @property (nonatomic, assign) BOOL pushEnabled;
-@property (nonatomic, assign) BOOL supportsMDSAssist;
 @property (nonatomic, assign) BOOL supportsBookmarksCompat;
 @property (nonatomic, assign) BOOL usingCarbons2;
 @property (nonatomic, assign) BOOL supportsRosterVersion;

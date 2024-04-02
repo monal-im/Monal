@@ -49,7 +49,7 @@
 @import AVFoundation;
 @import WebRTC;
 
-#define STATE_VERSION 14
+#define STATE_VERSION 15
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -3295,19 +3295,20 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark messaging
 
--(void) retractMessage:(NSString*) messageId toContact:(MLContact*) contact
+-(void) retractMessage:(MLMessage*) msg
 {
-    XMPPMessage* messageNode = [[XMPPMessage alloc] initToContact:contact];
+    MLAssert([msg.accountId isEqual:self.accountNo], @"Can not retract message from one account on another account!", (@{@"self.accountNo": self.accountNo, @"msg": msg}));
+    XMPPMessage* messageNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:msg.buddyName];
     
-    //fasten retraction
-    [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"apply-to" andNamespace:@"urn:xmpp:fasten:0" withAttributes:@{
-        @"id": messageId
-    } andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:message-retract:0"]
-    ] andData:nil]];
+    //retraction
+    [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:message-retract:1" withAttributes:@{
+        @"id": msg.isMuc ? msg.stanzaId : msg.messageId,
+    } andChildren:@[] andData:nil]];
     
     //add fallback indication and fallback body
-    [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"fallback" andNamespace:@"urn:xmpp:fallback:0"]];
+    [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"fallback" andNamespace:@"urn:xmpp:fallback:0" withAttributes:@{
+        @"for": @"urn:xmpp:message-retract:1",
+    } andChildren:@[] andData:nil]];
     [messageNode setBody:@"This person attempted to retract a previous message, but it's unsupported by your client."];
     
     //for MAM
@@ -3450,6 +3451,8 @@ NSString* const kStanza = @"stanza";
             }
 
             [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
+            [values setValue:[self.connectionProperties.accountFeatures copy] forKey:@"accountFeatures"];
+            
             if(self.connectionProperties.uploadServer)
                 [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
             if(self.connectionProperties.conferenceServer)
@@ -3464,7 +3467,6 @@ NSString* const kStanza = @"stanza";
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBookmarksCompat] forKey:@"supportsBookmarksCompat"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
-            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMDSAssist] forKey:@"supportsMDSAssist"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
@@ -3507,7 +3509,7 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsMDSAssist=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
                 self.accountNo,
                 values[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3519,7 +3521,6 @@ NSString* const kStanza = @"stanza";
                 self->_lastInteractionDate,
                 persistentIqHandlerDescriptions,
                 self.connectionProperties.supportsPush,
-                self.connectionProperties.supportsMDSAssist,
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
@@ -3605,6 +3606,8 @@ NSString* const kStanza = @"stanza";
             }
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
+            self.connectionProperties.accountFeatures = [dic objectForKey:@"accountFeatures"];
+            
             self.connectionProperties.discoveredServices = [[dic objectForKey:@"discoveredServices"] mutableCopy];
             self.connectionProperties.discoveredStunTurnServers = [[dic objectForKey:@"discoveredStunTurnServers"] mutableCopy];
             self.connectionProperties.discoveredAdhocCommands = [[dic objectForKey:@"discoveredAdhocCommands"] mutableCopy];
@@ -3641,12 +3644,6 @@ NSString* const kStanza = @"stanza";
             {
                 NSNumber* pushEnabled = [dic objectForKey:@"pushEnabled"];
                 self.connectionProperties.pushEnabled = pushEnabled.boolValue;
-            }
-            
-            if([dic objectForKey:@"supportsMDSAssist"])
-            {
-                NSNumber* mdsNumber = [dic objectForKey:@"supportsMDSAssist"];
-                self.connectionProperties.supportsMDSAssist = mdsNumber.boolValue;
             }
             
             if([dic objectForKey:@"supportsClientState"])
@@ -3745,7 +3742,7 @@ NSString* const kStanza = @"stanza";
                 self.omemo.state = [dic objectForKey:@"omemoState"];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsMDSAssist=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3757,7 +3754,6 @@ NSString* const kStanza = @"stanza";
                 self->_lastInteractionDate,
                 persistentIqHandlerDescriptions,
                 self.connectionProperties.supportsPush,
-                self.connectionProperties.supportsMDSAssist,
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
@@ -3887,6 +3883,7 @@ NSString* const kStanza = @"stanza";
     //    and other state values are stale now
     //(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
     self.connectionProperties.serverFeatures = [NSSet new];
+    self.connectionProperties.accountFeatures = [NSSet new];
     self.connectionProperties.discoveredServices = [NSMutableArray new];
     self.connectionProperties.discoveredStunTurnServers = [NSMutableArray new];
     self.connectionProperties.discoveredAdhocCommands = [NSMutableDictionary new];
@@ -3899,7 +3896,6 @@ NSString* const kStanza = @"stanza";
     //self.connectionProperties.supportsSM3 = NO;                   //already set by stream feature parsing
     self.connectionProperties.supportsPush = NO;
     self.connectionProperties.pushEnabled = NO;
-    self.connectionProperties.supportsMDSAssist = NO;
     self.connectionProperties.supportsBookmarksCompat = NO;
     self.connectionProperties.usingCarbons2 = NO;
     //self.connectionProperties.supportsRosterVersion = NO;         //already set by stream feature parsing
@@ -5425,10 +5421,14 @@ NSString* const kStanza = @"stanza";
     
     XMPPMessage* displayedNode = [[XMPPMessage alloc] initToContact:contact];
     [displayedNode setDisplayed:msg.isMuc && msg.stanzaId != nil ? msg.stanzaId : msg.messageId];
-    [displayedNode setMDSDisplayed:msg.stanzaId withStanzaIdBy:(msg.isMuc ? msg.buddyName : self.connectionProperties.identity.jid)];
+    if([self.connectionProperties.accountFeatures containsObject:@"urn:xmpp:mds:server-assist:0"])
+        [displayedNode setMDSDisplayed:msg.stanzaId withStanzaIdBy:(msg.isMuc ? msg.buddyName : self.connectionProperties.identity.jid)];
     [displayedNode setStoreHint];
     DDLogVerbose(@"Sending display marker: %@", displayedNode);
     [self send:displayedNode];
+    
+    if(![self.connectionProperties.accountFeatures containsObject:@"urn:xmpp:mds:server-assist:0"])
+        [self publishMDSMarkerForMessage:msg];      //always publish mds marker
 }
 
 -(void) removeFromServerWithCompletion:(void (^)(NSString* _Nullable error)) completion

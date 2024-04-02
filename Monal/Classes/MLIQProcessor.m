@@ -399,6 +399,7 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
     }
     
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
+    account.connectionProperties.accountFeatures = features;
     
     if(
         [iqNode check:@"{http://jabber.org/protocol/disco#info}query/identity<category=pubsub><type=pep>"] &&       //xep-0163 support
@@ -455,9 +456,6 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         account.connectionProperties.supportsPush = YES;
         [account enablePush];
     }
-    
-    if([features containsObject:@"urn:xmpp:mds:server-assist:0"])
-        account.connectionProperties.supportsMDSAssist = YES;
     
     if([features containsObject:@"urn:xmpp:mam:2"])
     {

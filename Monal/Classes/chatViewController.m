@@ -2483,7 +2483,7 @@ enum msgSentState {
     quoteAction.image = [[[UIImage systemImageNamed:@"quote.bubble.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     UIContextualAction* retractAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Retract", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        [self.xmppAccount retractMessage:message.messageId toContact:self.contact];
+        [self.xmppAccount retractMessage:message];
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         [message updateWithMessage:[[[DataLayer sharedInstance] messagesForHistoryIDs:@[message.messageDBId]] firstObject]];
 

@@ -1946,7 +1946,7 @@ void swizzle(Class c, SEL orig, SEL new)
             @"http://jabber.org/protocol/chatstates",
             @"urn:xmpp:chat-markers:0",
             @"urn:xmpp:eme:0",
-            @"urn:xmpp:message-retract:0",
+            @"urn:xmpp:message-retract:1",
             @"urn:xmpp:message-correct:0",
             
             

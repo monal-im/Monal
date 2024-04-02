@@ -1524,13 +1524,22 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber* _Nullable) getRetractionHistoryIDForMessageId:(NSString* _Nullable) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
+-(NSNumber* _Nullable) getRetractionHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id WHERE M.account_id=? AND ( \
             (B.Muc=0 AND M.messageid=? AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0))) OR \
             (B.Muc=1 AND M.stanzaid=? AND M.buddy_name=? AND (M.participant_jid=? OR (M.participant_jid IS NULL AND M.actual_from=?))) \
         );" andArguments:@[accountNo, messageid, from, from, messageid, from, nilWrapper(participantJid), nilWrapper(actualFrom)]];
+    }];
+}
+
+-(NSNumber* _Nullable) getRetractionHistoryIDForModeratedStanzaId:(NSString*) stanzaId from:(NSString*) from andAccount:(NSNumber*) accountNo
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id \
+            WHERE M.account_id=? AND B.Muc=1 AND M.stanzaid=? AND M.buddy_name=?;"
+            andArguments:@[accountNo, stanzaId, from]];
     }];
 }
 

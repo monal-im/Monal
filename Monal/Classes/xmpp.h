@@ -123,6 +123,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
  send a message to a contact with xmpp id
  */
 -(void) retractMessage:(MLMessage*) msg;
+-(void) moderateMessage:(MLMessage*) msg withReason:(NSString*) reason;
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId;
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId withLMCId:(NSString* _Nullable) LMCId;
 -(void) sendChatState:(BOOL) isTyping toContact:(nonnull MLContact*) contact;

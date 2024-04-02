@@ -3317,6 +3317,20 @@ NSString* const kStanza = @"stanza";
     [self send:messageNode];
 }
 
+-(void) moderateMessage:(MLMessage*) msg withReason:(NSString*) reason
+{
+    MLAssert(msg.isMuc, @"Moderated message must be in a muc!");
+    
+    XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType to:msg.buddyName];
+    [iqNode addChildNode:[[MLXMLNode alloc] initWithElement:@"moderate" andNamespace:@"urn:xmpp:message-moderate:1" withAttributes:@{
+        @"id": msg.stanzaId,
+    } andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"retract" andNamespace:@"urn:xmpp:message-retract:1"],
+        [[MLXMLNode alloc] initWithElement:@"reason" andData:reason],
+    ] andData:nil]];
+    [self sendIq:iqNode withHandler:$newHandler(MLIQProcessor, handleModerationResponse, $ID(msg))];
+}
+
 -(void) addEME:(NSString*) encryptionNamesapce withName:(NSString* _Nullable) name toMessageNode:(XMPPMessage*) messageNode
 {
     if(name)

@@ -654,8 +654,17 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0424.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>6.3</xmpp:since>
-        <xmpp:version>0.4.0</xmpp:version>
+        <xmpp:version>0.4.1</xmpp:version>
         <xmpp:note>XEP-0424: Message Retraction</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0425.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.3</xmpp:since>
+        <xmpp:version>0.3.0</xmpp:version>
+        <xmpp:note>XEP-0425: Moderated Message Retraction</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>

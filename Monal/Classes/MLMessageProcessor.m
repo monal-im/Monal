@@ -440,8 +440,16 @@ static NSMutableDictionary* _typingNotifications;
     if([messageNode check:@"{urn:xmpp:message-retract:1}retract"])
     {
         NSString* idToRetract = [messageNode findFirst:@"{urn:xmpp:message-retract:1}retract@id"];
-        //this checks if this message is from the same jid as the message it tries to retract (e.g. inbound can only retract inbound and outbound only outbound)
-        NSNumber* historyIdToRetract = [[DataLayer sharedInstance] getRetractionHistoryIDForMessageId:idToRetract from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
+        NSNumber* historyIdToRetract = nil;
+        if(possiblyUnknownContact.isGroup && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"] && [messageNode findFirst:@"{urn:xmpp:message-retract:1}retract/{urn:xmpp:message-moderate:1}moderated"])
+        {
+            historyIdToRetract = [[DataLayer sharedInstance] getRetractionHistoryIDForModeratedStanzaId:idToRetract from:messageNode.fromUser andAccount:account.accountNo];
+        }
+        else
+        {
+            //this checks for all spelled out in the business rules of XEP-0424
+            historyIdToRetract = [[DataLayer sharedInstance] getRetractionHistoryIDForMessageId:idToRetract from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
+        }
         
         if(historyIdToRetract != nil)
         {

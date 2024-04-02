@@ -727,6 +727,33 @@ $$class_handler(handleVersionResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
                                                         userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
 $$
 
+$$class_handler(handleModerationResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLMessage*, msg))
+    [msg updateWithMessage:[[DataLayer sharedInstance] messageForHistoryID:msg.messageDBId]];       //make sure our msg is up to date
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Moderating message %@ returned an error: %@", msg, [iqNode findFirst:@"error"]);
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to moderate message in group/channel '%@'", @""), iqNode.fromUser] withNode:iqNode andAccount:account andIsSevere:YES];
+        return;
+    }
+    
+    DDLogInfo(@"Successfully moderated message in muc: %@", msg);
+    [[DataLayer sharedInstance] deleteMessageHistory:msg.messageDBId];
+    
+    //update ui
+    DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", msg.messageDBId);
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
+        @"message": msg,
+        @"historyId": msg.messageDBId,
+        @"contact": msg.contact,
+    }];
+    
+    //update unread count in active chats list
+    [msg.contact updateUnreadCount];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+        @"contact": msg.contact,
+    }];
+$$
+
 +(void) respondWithErrorTo:(XMPPIQ*) iqNode onAccount:(xmpp*) account
 {
     XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];

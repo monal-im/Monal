@@ -15,8 +15,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  message object intended to be passed around and eventually used to render
  */
-@interface MLMessage : NSObject
+@interface MLMessage : NSObject <NSSecureCoding>
 
++(BOOL) supportsSecureCoding;
 
 /**
  account number in the database should be an integer

@@ -77,7 +77,7 @@ enum DummySettingsRows {
 
 @end
 
-@implementation MLSettingsTableViewController 
+@implementation MLSettingsTableViewController
 
 
 -(IBAction) close:(id) sender
@@ -337,9 +337,11 @@ enum DummySettingsRows {
                     [self showDetailViewController:backgroundSettingsController sender:self];
                     break;
                 }
-                case SoundsRow:
-                    [self performSegueWithIdentifier:@"showSounds" sender:self];
+                case SoundsRow: {
+                    UIViewController* soundSettingsController =[[SwiftuiInterface new] makeSoundSettings:nil];
+                    [self showDetailViewController:soundSettingsController sender:self];
                     break;
+                }
                 default:
                     unreachable();
             }

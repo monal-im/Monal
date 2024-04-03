@@ -337,16 +337,16 @@
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
-        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-        if(filename)
+        NSString* senderJID = [message.buddyName lowercaseString];
+        NSString* receiverJID = account.connectionProperties.identity.jid;
+        NSString* soundName = [[MLSoundManager sharedInstance] getSoundNameForSenderJID:senderJID andReceiverJID:receiverJID];
+        if([soundName isEqualToString:@""])
         {
-            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-            DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+            content.sound = [UNNotificationSound defaultSound];
         }
         else
         {
-            content.sound = [UNNotificationSound defaultSound];
-            DDLogDebug(@"Using default alert sound: %@", content.sound);
+            content.sound = [UNNotificationSound soundNamed:soundName];
         }
     }
     else
@@ -470,16 +470,16 @@
     
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
-        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-        if(filename)
+        NSString* senderJID = [message.buddyName lowercaseString];
+        NSString* receiverJID = account.connectionProperties.identity.jid;
+        NSString* soundName = [[MLSoundManager sharedInstance] getSoundNameForSenderJID:senderJID andReceiverJID:receiverJID];
+        if([soundName isEqualToString:@""])
         {
-            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-            DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+            content.sound = [UNNotificationSound defaultSound];
         }
         else
         {
-            content.sound = [UNNotificationSound defaultSound];
-            DDLogDebug(@"Using default alert sound: %@", content.sound);
+            content.sound = [UNNotificationSound soundNamed:soundName];
         }
     }
     else
@@ -732,16 +732,16 @@
 
         if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
         {
-            NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-            if(filename)
+            NSString* senderJID = [message.buddyName lowercaseString];
+            NSString* receiverJID = contact.contactJid;
+            NSString* soundName = [[MLSoundManager sharedInstance] getSoundNameForSenderJID:senderJID andReceiverJID:receiverJID];
+            if([soundName isEqualToString:@""])
             {
-                content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
-                DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+                content.sound = [UNNotificationSound defaultSound];
             }
             else
             {
-                content.sound = [UNNotificationSound defaultSound];
-                DDLogDebug(@"Using default alert sound: %@", content.sound);
+                content.sound = [UNNotificationSound soundNamed:soundName];
             }
         }
         else

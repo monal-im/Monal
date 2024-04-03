@@ -421,6 +421,16 @@ class SwiftuiInterface : NSObject {
         host.rootView = AnyView(UIKitWorkaround(BackgroundSettings(contact:contactArg, delegate:delegate)))
         return host
     }
+    
+    @objc
+    func makeSoundSettings(_ contact: MLContact?) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView: AnyView(EmptyView()))
+        delegate.host = host
+        let contactArg = contact != nil ? ObservableKVOWrapper<MLContact>(contact!) : nil
+        host.rootView = AnyView(UIKitWorkaround(SoundsSettingView(contact: contactArg, delegate: delegate)))
+        return host
+    }
 
     @objc
     func makeAddContactView(dismisser: @escaping (MLContact) -> ()) -> UIViewController {

@@ -2467,6 +2467,11 @@ a=%@\r\n", mid, candidate];
         return [NSData new];
     }
     unsigned char* bytes = malloc([hex length] / 2);
+    if(bytes == NULL)
+    {
+        [NSException raise:@"NSInternalInconsistencyException" format:@"failed malloc" arguments:nil];
+        return nil;
+    }
     unsigned char* bp = bytes;
     for (unsigned int i = 0; i < [hex length]; i += 2) {
         buf[0] = (unsigned char) [hex characterAtIndex:i];

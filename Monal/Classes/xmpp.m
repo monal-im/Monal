@@ -2937,7 +2937,7 @@ NSString* const kStanza = @"stanza";
             //but only do so, if we are using channel-binding for additional security
             //(a MITM could passively intercept the new SCRAM hash which is roughly equivalent to intercepting the plaintext password)
             self->_upgradeTask = nil;
-            if([self channelBindingToUse] != nil)
+            if([self channelBindingToUse] != nil && ![kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]])
             {
                 NSSet* upgradesOffered = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/{urn:xmpp:sasl:upgrade:0}upgrade#"]];
                 for(NSString* method in [SCRAM supportedMechanismsIncludingChannelBinding:NO])
@@ -4990,6 +4990,11 @@ NSString* const kStanza = @"stanza";
             DDLogVerbose(@"could not send all bytes of outgoing stanza: %lu of %lu sent, %lu remaining", (unsigned long)sentLen, (unsigned long)rawstringLen, (unsigned long)(rawstringLen-sentLen));
             //allocate new _outputBuffer
             _outputBuffer=malloc(sizeof(uint8_t) * (rawstringLen-sentLen));
+            if(_outputBuffer == NULL)
+            {
+                [NSException raise:@"NSInternalInconsistencyException" format:@"failed malloc" arguments:nil];
+                return NO;      //since the stanza was partially written, neither YES nor NO as return value will result in a consistent state
+            }
             //copy the remaining data into the buffer and set the buffer pointer accordingly
             memcpy(_outputBuffer, rawstring+(size_t)sentLen, (size_t)(rawstringLen-sentLen));
             _outputBufferByteCount=(size_t)(rawstringLen-sentLen);

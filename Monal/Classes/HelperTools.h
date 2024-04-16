@@ -171,6 +171,8 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSNumber*) currentTimestampInSeconds;
 +(NSNumber*) dateToNSNumberSeconds:(NSDate*) date;
 
++(BOOL) constantTimeCompareAttackerString:(NSString* _Nonnull) str1 withKnownString:(NSString* _Nonnull) str2;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -618,8 +618,7 @@ void swizzle(Class c, SEL orig, SEL new)
 #if TARGET_OS_MACCATALYST
     shouldProvideVoip = NO;
 #else
-    NSLocale* userLocale = [NSLocale currentLocale];
-    shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
+    shouldProvideVoip = YES;
 #endif
     return shouldProvideVoip;
 }

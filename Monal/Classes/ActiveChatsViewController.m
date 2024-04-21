@@ -753,10 +753,16 @@ static NSMutableSet* _pushWarningDisplayed;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
     // Highlight the selected chat
-    if([MLNotificationManager sharedInstance].currentContact != nil && [chatContact isEqual:[MLNotificationManager sharedInstance].currentContact]) 
+    if([MLNotificationManager sharedInstance].currentContact != nil && [chatContact isEqual:[MLNotificationManager sharedInstance].currentContact])
+    {
         cell.backgroundColor = [UIColor lightGrayColor];
+        cell.statusText.textColor = [UIColor whiteColor];
+    }
     else
+    {
         cell.backgroundColor = [UIColor clearColor];
+        cell.statusText.textColor = [UIColor lightGrayColor];
+    }
 
     return cell;
 }

@@ -757,7 +757,8 @@ static NSMutableSet* _pushWarningDisplayed;
         cell.backgroundColor = [UIColor lightGrayColor];
         cell.statusText.textColor = [UIColor whiteColor];
     }
-    else{
+    else
+    {
         cell.backgroundColor = [UIColor clearColor];
         cell.statusText.textColor = [UIColor lightGrayColor];
     }

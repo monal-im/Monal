@@ -375,9 +375,11 @@ enum DummySettingsRows {
 #ifdef DEBUG
                 case LogRow:
 #endif
-                case SettingsAboutRowsCntORLogRow:
-                    [self performSegueWithIdentifier:@"showLogs" sender:self];
+                case SettingsAboutRowsCntORLogRow:{
+                    UIViewController* logView = [[SwiftuiInterface new] makeViewWithName:@"logView"];
+                    [self showDetailViewController:logView sender:self];
                     break;
+                }
                 case VersionRow: {
 #ifndef DEBUG
                     if(_tappedVersionInfo >= 16)

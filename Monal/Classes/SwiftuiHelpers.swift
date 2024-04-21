@@ -36,6 +36,15 @@ public extension Color {
 #endif
 }
 
+extension Binding where Value == Bool {
+  static func mappedTo<Wrapped>(bindingToOptional: Binding<Wrapped?>) -> Binding<Bool> {
+    Binding<Bool>(
+      get: { bindingToOptional.wrappedValue != nil },
+      set: { newValue in if !newValue { bindingToOptional.wrappedValue = nil } }
+    )
+  }
+}
+
 class SheetDismisserProtocol: ObservableObject {
     weak var host: UIHostingController<AnyView>? = nil
     func dismiss() {
@@ -154,6 +163,20 @@ extension DocumentPickerViewController: UIDocumentPickerDelegate {
 
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
         onDismiss()
+    }
+}
+
+struct ActivityViewController: UIViewControllerRepresentable {
+    var activityItems: [Any]
+    var applicationActivities: [UIActivity]? = nil
+
+    func makeUIViewController(context: UIViewControllerRepresentableContext<ActivityViewController>) -> UIActivityViewController {
+        let controller = UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities)
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: UIViewControllerRepresentableContext<ActivityViewController>) {
+        
     }
 }
 
@@ -449,7 +472,7 @@ class SwiftuiInterface : NSObject {
             case "NotificationSettings":
                 host.rootView = AnyView(UIKitWorkaround(NotificationSettings(delegate:delegate)))
             case "logView":
-                host.rootView = AnyView(UIKitWorkaround(LogView()))
+                host.rootView = AnyView(UIKitWorkaround(DebugView()))
             case "WelcomeLogIn":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate)))
             case "LogIn":
@@ -495,27 +518,4 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
     } else {
         return []
     }
-}
-
-extension Binding where Value == Bool {
-  static func mappedTo<Wrapped>(bindingToOptional: Binding<Wrapped?>) -> Binding<Bool> {
-    Binding<Bool>(
-      get: { bindingToOptional.wrappedValue != nil },
-      set: { newValue in if !newValue { bindingToOptional.wrappedValue = nil } }
-    )
-  }
-}
-
-struct ActivityViewController: UIViewControllerRepresentable {
-
-    var activityItems: [Any]
-    var applicationActivities: [UIActivity]? = nil
-
-    func makeUIViewController(context: UIViewControllerRepresentableContext<ActivityViewController>) -> UIActivityViewController {
-        let controller = UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities)
-        return controller
-    }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: UIViewControllerRepresentableContext<ActivityViewController>) {}
-
 }

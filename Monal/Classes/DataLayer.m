@@ -128,7 +128,7 @@ static NSDateFormatter* dbFormatter;
 -(NSString* _Nullable) exportDB
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSString* temporaryFilename = [NSString stringWithFormat:@"%@.db", [[NSProcessInfo processInfo] globallyUniqueString]];
+    NSString* temporaryFilename = [NSString stringWithFormat:@"sworim_%@.db", [[NSProcessInfo processInfo] globallyUniqueString]];
     NSString* temporaryFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:temporaryFilename];
     
     //checkpoint db before copying db file
@@ -141,7 +141,7 @@ static NSDateFormatter* dbFormatter;
         [fileManager copyItemAtPath:dbPath toPath:temporaryFilePath error:&error];
         if(error)
         {
-            DDLogError(@"Could not copy logfile to export location!");
+            DDLogError(@"Could not copy database to export location!");
             return NO;
         }
         return YES;

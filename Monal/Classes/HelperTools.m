@@ -56,6 +56,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "MLStreamRedirect.h"
 #import "commithash.h"
 #import "MLContactSoftwareVersionInfo.h"
+#import "IPC.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -1302,6 +1303,12 @@ void swizzle(Class c, SEL orig, SEL new)
         counter++;
     }
     return token;
+}
+
+//proxy to not have full IPC class accessible from UI
++(NSString* _Nullable) exportIPCDatabase
+{
+    return [[IPC sharedInstance] exportDB];
 }
 
 +(void) configureFileProtection:(NSString*) protectionLevel forFile:(NSString*) file

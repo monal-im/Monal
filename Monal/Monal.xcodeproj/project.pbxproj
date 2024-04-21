@@ -163,7 +163,7 @@
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
-		952EBC802BAF72F300183DBF /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 952EBC7F2BAF72F300183DBF /* LogView.swift */; };
+		952EBC802BAF72F300183DBF /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 952EBC7F2BAF72F300183DBF /* DebugView.swift */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
 		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
 		C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490E22612F3D00054AC9E /* MLCrypto.swift */; };
@@ -599,7 +599,7 @@
 		8D1107310486CEB800E47090 /* Monal-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Monal-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		8F1488206B764014DD7EC92A /* Pods_shareSheet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shareSheet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9162E3E9FCE2280BF75F5102 /* Pods-Monal.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.alpha-ios.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.alpha-ios.xcconfig"; sourceTree = "<group>"; };
-		952EBC7F2BAF72F300183DBF /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
+		952EBC7F2BAF72F300183DBF /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		9705AFFB59AF72A9B79C1D7B /* Pods-MonalXMPPUnitTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		9760CF4718351300C4256921 /* Pods-shareSheet.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
 		9899D670570190DCBE9EEDDB /* Pods-monalxmpp.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
@@ -1067,7 +1067,7 @@
 				846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */,
 				841898AB2957DBAC00FEC77D /* RichAlert.swift */,
 				C114D13C2B15B903000FB99F /* ContactEntry.swift */,
-				952EBC7F2BAF72F300183DBF /* LogView.swift */,
+				952EBC7F2BAF72F300183DBF /* DebugView.swift */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -2081,7 +2081,7 @@
 				849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */,
 				C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
-				952EBC802BAF72F300183DBF /* LogView.swift in Sources */,
+				952EBC802BAF72F300183DBF /* DebugView.swift in Sources */,
 				3D7D352328626CB80042C5E5 /* LoadingOverlay.swift in Sources */,
 				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,

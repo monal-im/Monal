@@ -756,7 +756,6 @@ static NSMutableSet* _pushWarningDisplayed;
     if([MLNotificationManager sharedInstance].currentContact != nil && [chatContact isEqual:[MLNotificationManager sharedInstance].currentContact])
         cell.backgroundColor = [UIColor lightGrayColor];
         cell.statusText.textColor = [UIColor whiteColor];
-    }
     else
     {
         cell.backgroundColor = [UIColor clearColor];

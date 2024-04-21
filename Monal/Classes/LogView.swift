@@ -6,7 +6,6 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
 import monalxmpp
 
 extension Binding where Value == Bool {

@@ -7,14 +7,6 @@
 //
 
 
-extension Binding where Value == Bool {
-  static func mappedTo<Wrapped>(bindingToOptional: Binding<Wrapped?>) -> Binding<Bool> {
-    Binding<Bool>(
-      get: { bindingToOptional.wrappedValue != nil },
-      set: { newValue in if !newValue { bindingToOptional.wrappedValue = nil } }
-    )
-  }
-}
 
 struct LogFilesView: View {
     @State private var sortedLogFileInfos: [DDLogFileInfo] = []
@@ -26,24 +18,22 @@ struct LogFilesView: View {
         List {
             Section(header: Text("Log Files")) {
                 ForEach(sortedLogFileInfos, id: \.self) { logFileInfo in
-                    Text(logFileInfo.fileName)
-                        .onTapGesture {
-                            fileURL=URL(fileURLWithPath: logFileInfo.filePath)
-                        }
+                    Button(logFileInfo.fileName) {
+                        fileURL = URL(fileURLWithPath: logFileInfo.filePath)
+                    }
                 }
             }
             Section(header: Text("Database File")) {
                 if let dbFileURL = dbFileURL {
-                    Text(dbFileURL.lastPathComponent)
-                        .onTapGesture {
-                            self.fileURL=dbFileURL
-                        }
+                    Button(dbFileURL.lastPathComponent) {
+                        self.fileURL=dbFileURL
+                    }
                 }
             }
         }
         .onAppear {
             if let sortedLogFileInfos = HelperTools.fileLogger?.logFileManager.sortedLogFileInfos {
-                self.sortedLogFileInfos=sortedLogFileInfos
+                self.sortedLogFileInfos = sortedLogFileInfos
             }
             if let dbFile = DataLayer.sharedInstance().exportDB() {
                 dbFileURL = URL(fileURLWithPath: dbFile)
@@ -57,7 +47,7 @@ struct LogFilesView: View {
     }
 }
 
-class LogDefaultDB: ObservableObject {
+class DebugDefaultDB: ObservableObject {
     @defaultsDB("udpLoggerEnabled")
     var udpLoggerEnabled:Bool
     
@@ -72,7 +62,7 @@ class LogDefaultDB: ObservableObject {
 }
 
 struct UDPConfigView: View {
-    @ObservedObject var defaultDB: LogDefaultDB
+    @ObservedObject var defaultDB: DebugDefaultDB
     
     var body: some View {
         Form {
@@ -90,42 +80,32 @@ struct UDPConfigView: View {
 struct CrashTestingView: View {
     var body: some View {
         VStack(spacing: 25){
-            Button(action: {
+            Button("Try to call unknown handler method") {
                 DispatchQueue.global(qos: .default).async(execute: {
                     HelperTools.flushLogs(withTimeout: 0.100)
                     let handler = MLHandler(delegate: self, handlerName: "IDontKnowThis", andBoundArguments: [:])
                     handler.call(withArguments: nil)
                 })
-            }, label: {
-                Text("Try to call unknown handler method")
-            })
-            Button(action: {
+            }
+            Button("Bad Access Crash") {
                 HelperTools.flushLogs(withTimeout: 0.100)
                 let delegate: AnyClass? = NSClassFromString("MonalAppDelegate")
                 print(delegate.unsafelyUnwrapped.audiovisualTypes())
                 
-            }, label: {
-                Text("Bad Access Crash")
-            })
-            Button(action: {
+            }
+            Button("Assertion Crash") {
                 HelperTools.flushLogs(withTimeout: 0.100)
                 assert(false)
-            }, label: {
-                Text("Assertion Crash")
-            })
-            Button(action: {
+            }
+            Button("Fatal Error Crash") {
                 HelperTools.flushLogs(withTimeout: 0.100)
                 fatalError("fatalError_example")
-            }, label: {
-                Text("Fatal Error Crash")
-            })
-            Button(action: {
+            }
+            Button("Nil Crash") {
                 HelperTools.flushLogs(withTimeout: 0.100)
                 let crasher:Int? = nil
                 print(crasher!)
-            }, label: {
-                Text("Nil Crash")
-            })
+            }
             Spacer()
         }
         .foregroundColor(.red)
@@ -133,7 +113,7 @@ struct CrashTestingView: View {
     }
 }
 
-struct LogView: View {
+struct DebugView: View {
     @State private var isReconnecting: Bool = false
     @StateObject private var overlay = LoadingOverlayState()
     var body: some View {
@@ -146,7 +126,7 @@ struct LogView: View {
             UDPConfigView(defaultDB: LogDefaultDB())
                 .tabItem {
                     Image(systemName: "gear")
-                    Text("UDP Config")
+                    Text("UDP Logger")
                 }
             CrashTestingView()
                 .tabItem {
@@ -155,14 +135,10 @@ struct LogView: View {
                 }
         }
         .addLoadingOverlay(overlay)
-        .onAppear(perform: {
-            hideLoadingOverlay(overlay)
-        })
-        .onChange(of:isReconnecting) { _ in
+        .onChange(of: isReconnecting) { _ in
             if isReconnecting{
-                showLoadingOverlay(overlay, headline: "Reconnecting", description: "Will logout and reconnect any connected accounts.")
-            }
-            else{
+                showLoadingOverlay(overlay, headline: "Reconnecting", description: "Will log out and reconnect all (connected) accounts.")
+            } else {
                 hideLoadingOverlay(overlay)
             }
         }
@@ -180,6 +156,6 @@ struct LogView: View {
 
 #Preview {
     NavigationView {
-        LogView()
+        DebugView()
     }
 }

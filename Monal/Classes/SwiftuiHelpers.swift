@@ -497,6 +497,15 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
     }
 }
 
+extension Binding where Value == Bool {
+  static func mappedTo<Wrapped>(bindingToOptional: Binding<Wrapped?>) -> Binding<Bool> {
+    Binding<Bool>(
+      get: { bindingToOptional.wrappedValue != nil },
+      set: { newValue in if !newValue { bindingToOptional.wrappedValue = nil } }
+    )
+  }
+}
+
 struct ActivityViewController: UIViewControllerRepresentable {
 
     var activityItems: [Any]

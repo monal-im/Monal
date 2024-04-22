@@ -26,9 +26,17 @@
 
 +(void) processUnboundIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    //only handle these iqs if the remote user is on our roster
+    //only handle these iqs if the remote user is on our roster,
+    //if the are coming from our own domain,
+    //or if they are from a muc group, not a channel
     MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
-    if(![account.connectionProperties.identity.jid isEqualToString:iqNode.fromUser] && [account.connectionProperties.identity.domain isEqualToString:iqNode.fromUser] && !(contact.isSubscribedFrom && !contact.isGroup))
+    if(!(
+        //we have to check for .isGroup because mucs always set .isSubscribedFrom to YES
+        (!contact.isGroup && contact.isSubscribedFrom) ||
+        contact.isSelfChat ||
+        [account.connectionProperties.identity.domain isEqualToString:iqNode.fromUser] ||
+        (contact.isGroup && [@"group" isEqualToString:contact.mucType])
+    ))
         DDLogWarn(@"Invalid sender for iq (!subscribedFrom || isGroup), ignoring: %@", iqNode);
     
     if([iqNode check:@"/<type=get>"])

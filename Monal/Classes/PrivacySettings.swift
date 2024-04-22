@@ -76,6 +76,9 @@ class PrivacyDefaultDB: ObservableObject {
     @defaultsDB("allowNonRosterContacts")
     var allowNonRosterContacts: Bool
     
+    @defaultsDB("allowCallsFromNonRosterContacts")
+    var allowCallsFromNonRosterContacts: Bool
+    
     @defaultsDB("HasSeenPrivacySettings")
     var hasSeenPrivacySettings: Bool
 }
@@ -161,8 +164,9 @@ struct CommunicationScreen: View {
     
     var body: some View {
         Form {
-            Toggle("Allow contacts not in my Contact list to contact me", isOn: $privacyDefaultDB.allowNonRosterContacts)
+            Toggle("Allow contacts not in my contact list to contact me", isOn: $privacyDefaultDB.allowNonRosterContacts)
             Toggle("Allow approved contacts to query my Monal and iOS version", isOn: $privacyDefaultDB.allowVersionIQ)
+            Toggle("Calls: Allow contacts not in my contact list to call me", isOn: $privacyDefaultDB.allowCallsFromNonRosterContacts)
             Toggle("Calls: Allow P2P sessions", isOn: $privacyDefaultDB.webrtcAllowP2P)
             Toggle("Calls: Allow TURN fallback to Monal-Servers", isOn: $privacyDefaultDB.webrtcUseFallbackTurn)
         }

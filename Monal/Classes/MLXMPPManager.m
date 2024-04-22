@@ -142,6 +142,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     //anti spam/privacy setting, but default to yes (current behavior, conversations behavior etc.)
     [self upgradeBoolUserSettingsIfUnset:@"allowNonRosterContacts" toDefault:YES];
+    [self upgradeBoolUserSettingsIfUnset:@"allowCallsFromNonRosterContacts" toDefault:YES];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

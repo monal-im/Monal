@@ -132,7 +132,7 @@ static NSMutableDictionary* _typingNotifications;
     
     if([messageNode check:@"{urn:xmpp:jingle-message:0}*"] && ![HelperTools shouldProvideVoip])
     {
-        DDLogWarn(@"China locale detected, ignoring incoming JMI message!");
+        DDLogWarn(@"VoIP not supported, ignoring incoming JMI message!");
         return nil;
     }
     else if([messageNode check:@"{urn:xmpp:jingle-message:0}*"])
@@ -154,7 +154,7 @@ static NSMutableDictionary* _typingNotifications;
             //only handle jmi stanzas exchanged with contacts allowed to see us and ignore all others
             //--> no presence leak and no unwanted spam calls
             //but: outgoing calls are still allowed even without presence subscriptions in either direction
-            if(!jmiContact.isSubscribedFrom)
+            if(![[HelperTools defaultsDB] boolForKey:@"allowCallsFromNonRosterContacts"] && !jmiContact.isSubscribedFrom)
             {
                 DDLogWarn(@"Ignoring incoming JMI propose coming from a contact we are not subscribed from");
                 return nil;

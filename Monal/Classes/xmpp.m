@@ -976,7 +976,7 @@ NSString* const kStanza = @"stanza";
                         {
                             DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
                             if(self->_iqHandlers[iqid][@"handler"] != nil)
-                                $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self));
+                                $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self), $ID(reason, @"disconnect"));
                             else if(self->_iqHandlers[iqid][@"errorHandler"])
                                 ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                         }
@@ -1064,7 +1064,7 @@ NSString* const kStanza = @"stanza";
                     {
                         DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
                         if(self->_iqHandlers[iqid][@"handler"] != nil)
-                            $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self));
+                            $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self), $ID(reason, @"disconnect"));
                         else if(self->_iqHandlers[iqid][@"errorHandler"])
                             ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                     }
@@ -3878,7 +3878,7 @@ NSString* const kStanza = @"stanza";
         {
             DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
             if(handlersCopy[iqid][@"handler"] != nil)
-                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self));
+                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self), $ID(reason, @"bind"));
             else if(handlersCopy[iqid][@"errorHandler"])
                 ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
         }

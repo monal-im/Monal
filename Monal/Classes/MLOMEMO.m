@@ -349,7 +349,10 @@ $$instance_handler(handleDevicelistFetchInvalidation, account.omemo, $$ID(xmpp*,
     //mark devicelist fetch as done
     [self.state.openDevicelistFetches removeObject:jid];
     
-    [self handleOwnDevicelistFetchError];
+    //our own devicelist fetch can't be invalidated because of a iq timeout introduced by a slow s2s connection
+    //--> the only reason for such an invalidation can be a disconnect/bind and in this case we don't need to do something
+    //    because the fetch will be retriggered after the next catchup
+    //[self handleOwnDevicelistFetchError];
     
     //retrigger queued key transport elements for this jid (if any)
     [self retriggerKeyTransportElementsForJid:jid];

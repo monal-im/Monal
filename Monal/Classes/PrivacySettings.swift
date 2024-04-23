@@ -7,17 +7,7 @@
 //
 
 
-//TODO: rewrite this using swiftui
-struct ViewControllerWrapper: UIViewControllerRepresentable{
-    func makeUIViewController(context: Context) -> UIViewController {
-        let storyboard = UIStoryboard(name: "Settings", bundle: Bundle.main)
-        let controller = storyboard.instantiateViewController(identifier: "Autodownload")
-        return controller
-    }
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        
-    }
-}
+
 
 enum NotificationPrivacySettingOption: Int , CaseIterable, RawRepresentable{
     case displayNameAndMessage = 1
@@ -81,6 +71,18 @@ class PrivacyDefaultDB: ObservableObject {
     
     @defaultsDB("HasSeenPrivacySettings")
     var hasSeenPrivacySettings: Bool
+    
+    @defaultsDB("AutodownloadFiletransfers")
+    var autodownloadFiletransfers : Bool
+    
+    @defaultsDB("AutodownloadFiletransfersWifiMaxSize")
+    var autodownloadFiletransfersWifiMaxSize : Double
+    
+    @defaultsDB("AutodownloadFiletransfersMobileMaxSize")
+    var autodownloadFiletransfersMobileMaxSize : Double
+    
+    @defaultsDB("ImageUploadQuality")
+    var imageUploadQuality : Float
 }
 
 
@@ -102,8 +104,7 @@ struct PrivacySettings: View {
                 NavigationLink(destination: CommunicationScreen()) {
                     Text("Communication")
                 }
-                
-                NavigationLink(destination: ViewControllerWrapper()) {
+                NavigationLink(destination : MLAutoDownloadFiletransferSettingView()) {
                     Text("Media Upload & Download")
                 }
             }
@@ -171,6 +172,59 @@ struct CommunicationScreen: View {
             Toggle("Calls: Allow TURN fallback to Monal-Servers", isOn: $privacyDefaultDB.webrtcUseFallbackTurn)
         }
         .navigationBarTitle("Communication", displayMode: .inline)
+    }
+}
+
+struct MLAutoDownloadFiletransferSettingView: View {
+    @ObservedObject var privacyDefaultDB = PrivacyDefaultDB()
+    
+    var body: some View {
+        Form {
+            Section(header: Text("General File Transfer Settings")) {
+                Toggle("Auto-Download Media", isOn: $privacyDefaultDB.autodownloadFiletransfers)
+            }
+            
+            Section(header: Text("Download Settings")) {
+                
+                Text("Adjust the maximum file size for auto-downloads over WiFi")
+                    .foregroundColor(.secondary)
+                    .font(.footnote)
+                Slider(value: $privacyDefaultDB.autodownloadFiletransfersWifiMaxSize,
+                       in: 1.0...100.0,
+                       step: 1.0,
+                       minimumValueLabel: Text("1 MiB"),
+                       maximumValueLabel: Text("100 MiB"),
+                       label: {Text("Load over wifi")}
+                )
+                Text("Load over WiFi upto : \(Int(privacyDefaultDB.autodownloadFiletransfersWifiMaxSize)) MiB")
+            }
+            
+            Text("Adjust the maximum file size for auto-downloads over cellular network")
+                .foregroundColor(.secondary)
+                .font(.footnote)
+            Slider(value: $privacyDefaultDB.autodownloadFiletransfersMobileMaxSize,
+                   in: 1.0...100.0,
+                   step: 1.0 ,
+                   minimumValueLabel: Text("1 MiB"),
+                   maximumValueLabel: Text("100 MiB"),
+                   label: {Text("Load over Cellular")}
+            )
+            Text("Load over cellular upto : \(Int(privacyDefaultDB.autodownloadFiletransfersMobileMaxSize)) MiB")
+            
+            Section(header: Text("Upload Settings")) {
+                Text("Adjust the quality of images uploaded")
+                    .foregroundColor(.secondary)
+                    .font(.footnote)
+                Slider(value: $privacyDefaultDB.imageUploadQuality,
+                       in: 0.33...1.0,
+                       step: 0.01,
+                       minimumValueLabel: Text("33%"),
+                       maximumValueLabel: Text("100%"),
+                       label: {Text("Uploaad Settings")
+                })
+                Text("Image Upload Quality : \(String(format: "%.0f%%", privacyDefaultDB.imageUploadQuality*100))")
+            }
+        }
     }
 }
 

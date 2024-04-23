@@ -80,7 +80,6 @@
 		26E8462824EABAED00ECE419 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462A24EABAED00ECE419 /* Main.storyboard */; };
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
 		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
-		384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */; };
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
 		389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
@@ -494,8 +493,6 @@
 		2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalXMPPUnitTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E5021A8D40FCC591D952104 /* Pods-NotificaionService.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.alpha-ios.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.alpha-ios.xcconfig"; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* MonalSourceCodePrefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonalSourceCodePrefix.pch; sourceTree = "<group>"; };
-		384E4EA525F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAutoDownloadFiletransferSettingViewController.h; sourceTree = "<group>"; };
-		384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAutoDownloadFiletransferSettingViewController.m; sourceTree = "<group>"; };
 		3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXEPSlashMeHandler.h; sourceTree = "<group>"; };
 		38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXEPSlashMeHandler.m; sourceTree = "<group>"; };
 		389E298925E901CA009A5268 /* MLAudioRecoderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAudioRecoderManager.m; sourceTree = "<group>"; };
@@ -1002,8 +999,6 @@
 				26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */,
 				26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */,
 				3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */,
-				384E4EA525F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.h */,
-				384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */,
 				E8CF9CBF26249640001A1952 /* MLSettingsAboutViewController.h */,
 				E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */,
 				8441EFF82921B53500E851E9 /* BackgroundSettings.swift */,
@@ -2054,7 +2049,6 @@
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
-				384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */,
 				841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */,
 				C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,

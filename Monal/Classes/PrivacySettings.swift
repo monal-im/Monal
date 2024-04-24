@@ -93,19 +93,50 @@ struct PrivacySettings: View {
         Form {
             Section(header:Text("Privacy and security settings")) {
                 NavigationLink(destination: PrivacyScreen()) {
-                    Text("Privacy & Security")
+                    HStack{
+                        Image(systemName: "lock.shield")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                        Text("Privacy & Security")
+                    }
                 }
                 NavigationLink(destination: PublishingScreen()) {
-                    Text("Publishing")
+                    HStack{
+                        Image(systemName: "eye")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                        Text("Publishing")
+                    }
                 }
                 NavigationLink(destination: PreviewsScreen()) {
-                    Text("Previews")
+                    HStack{
+                        Image(systemName: "doc.text.magnifyingglass")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                        Text("Previews")
+                    }
                 }
                 NavigationLink(destination: CommunicationScreen()) {
-                    Text("Communication")
+                    HStack{
+                        Image(systemName: "message.badge.circle.rtl")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                        Text("Communication")
+                    }
                 }
-                NavigationLink(destination : MLAutoDownloadFiletransferSettingView()) {
-                    Text("Media Upload & Download")
+                
+                NavigationLink(destination: MLAutoDownloadFiletransferSettingView()) {
+                    HStack{
+                        Image(systemName: "arrow.triangle.2.circlepath.icloud")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                        Text("Media Upload & Download")
+                    }
                 }
             }
         }

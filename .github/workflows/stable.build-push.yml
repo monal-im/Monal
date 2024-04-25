@@ -73,6 +73,27 @@ jobs:
         run: xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
       # - name: Update xmpp.org client list with new timestamp
       #   run: ./scripts/push_xmpp.org.sh
+      - name: Extract version number and changelog from newest merge commit
+        id: releasenotes
+        run: |
+          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          echo "tag=Build_iOS_$buildNumber" >> "$GITHUB_OUTPUT"
+          echo "name=$(git log -n 1 --merges --pretty=format:%s)" >> "$GITHUB_OUTPUT"
+          echo "notes=$(git log -n 1 --merges --pretty=format:%b)" >> "$GITHUB_OUTPUT"
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ steps.releasenotes.outputs.name }}
+          tag_name: ${{ steps.releasenotes.outputs.tag }}
+          target_commitish: stable
+          generate_release_notes: false
+          body: ${{ steps.releasenotes.outputs.notes }}
+          files: |
+            ./Monal/build/ipa/Monal.ipa
+            ./Monal/build/app/Monal.zip
+          fail_on_unmatched_files: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
       - uses: actions/upload-artifact@v3
         with:
           name: monal-catalyst-pkg

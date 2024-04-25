@@ -32,6 +32,35 @@
 
 @implementation MLPubSubProcessor
 
+$$class_handler(mdsHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    DDLogDebug(@"Got new mds displayed status from '%@'", jid);
+    if(![jid isEqualToString:account.connectionProperties.identity.jid])
+    {
+        DDLogWarn(@"Ignoring mds update not coming from our own jid");
+        return;
+    }
+    
+    if([type isEqualToString:@"publish"])
+        [account updateMdsData:data];
+$$
+
+$$class_handler(handleMdsFetchResult, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    if(!success)
+    {
+        //item-not-found means: no mds items in storage --> use an empty data dict
+        if([errorIq check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+            data = @{};
+        else
+        {
+            DDLogWarn(@"Could not fetch mds from pep, doing nothing!");
+            return;
+        }
+    }
+    
+    //call +notify handler to process our data dictionary containing all mds items
+    [account updateMdsData:data];
+$$
+
 $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     DDLogDebug(@"Got new avatar metadata from '%@'", jid);
     if([type isEqualToString:@"publish"])

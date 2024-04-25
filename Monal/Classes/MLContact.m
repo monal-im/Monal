@@ -173,8 +173,8 @@ NSString* const kAskSubscribe = @"subscribe";
 +(NSString*) ownDisplayNameForAccount:(xmpp*) account
 {
     NSDictionary* accountDic = [[DataLayer sharedInstance] detailsForAccount:account.accountNo];
-    DDLogVerbose(@"Own nickname in accounts table %@: %@", account.accountNo, accountDic[kRosterName]);
     NSString* displayName = accountDic[kRosterName];
+    DDLogVerbose(@"Own nickname in accounts table %@: '%@'", account.accountNo, displayName);
     if(!displayName || !displayName.length)
     {
         // default is local part, see https://docs.modernxmpp.org/client/design/#contexts

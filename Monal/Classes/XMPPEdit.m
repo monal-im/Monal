@@ -60,6 +60,7 @@ enum kSettingsAdvancedRows {
     SettingsServerRow,
     SettingsPortRow,
     SettingsDirectTLSRow,
+    SettingsPlainActivatedRow,
     SettingsResourceRow,
     SettingsAdvancedRowsCnt
 };
@@ -111,7 +112,12 @@ enum DummySettingsRows {
 @property (nonatomic) BOOL avatarChanged;
 @property (nonatomic) BOOL rosterNameChanged;
 @property (nonatomic) BOOL statusMessageChanged;
+@property (nonatomic) BOOL detailsChanged;
+
 @property (nonatomic) BOOL sasl2Supported;
+@property (nonatomic) BOOL plainActivated;
+
+@property (nonatomic) BOOL deactivateSave;
 @end
 
 @implementation XMPPEdit
@@ -125,6 +131,7 @@ enum DummySettingsRows {
 
 -(void) viewDidLoad
 {
+    self.deactivateSave = NO;
     [super viewDidLoad];
     
     [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell"
@@ -179,14 +186,9 @@ enum DummySettingsRows {
         //edit
         DDLogVerbose(@"reading account number %@", self.accountNo);
         NSDictionary* settings = [_db detailsForAccount:self.accountNo];
-        if(!settings)
-        {
-            //present another UI here.
-            return;
-        }
+        MLAssert(settings != nil, @"Settings dict should never be nil here!");
 
         self.jid = [NSString stringWithFormat:@"%@@%@", [settings objectForKey:@"username"], [settings objectForKey:@"domain"]];
-        self.sectionDictionary[@(kSettingSectionAccount)] = [NSString stringWithFormat:NSLocalizedString(@"Account (%@)", @""), self.jid];
         NSString* pass = [SAMKeychain passwordForService:kMonalKeychainName account:self.accountNo.stringValue];
 
         if(pass)
@@ -206,6 +208,8 @@ enum DummySettingsRows {
         
         self.sasl2Supported = [[settings objectForKey:kSupportsSasl2] boolValue];
         
+        self.plainActivated = [[settings objectForKey:kPlainActivated] boolValue];
+        
         //overwrite account section heading in edit mode
         self.sectionDictionary[@(kSettingSectionAccount)] = [NSString stringWithFormat:NSLocalizedString(@"Account (%@)", @""), self.jid];
     }
@@ -219,6 +223,8 @@ enum DummySettingsRows {
         self.statusMessage = @"";
         self.enabled = YES;
         self.sasl2Supported = NO;
+        self.plainActivated = NO;
+        
         //overwrite account section heading in new mode
         self.sectionDictionary[@(kSettingSectionAccount)] = NSLocalizedString(@"Account (new)", @"");
     }
@@ -229,13 +235,13 @@ enum DummySettingsRows {
 #endif
 }
 
-- (void) viewWillAppear:(BOOL) animated
+-(void) viewWillAppear:(BOOL) animated
 {
     [super viewWillAppear:animated];
     DDLogVerbose(@"xmpp edit view will appear");
 }
 
-- (void) viewWillDisappear:(BOOL) animated
+-(void) viewWillDisappear:(BOOL) animated
 {
     [super viewWillDisappear:animated];
     DDLogVerbose(@"xmpp edit view will hide");
@@ -261,6 +267,12 @@ enum DummySettingsRows {
 
 -(IBAction) save:(id) sender
 {
+    if(self.deactivateSave)
+    {
+        DDLogWarn(@"Save pressed but already deactivated!");
+        return;
+    }
+    
     NSError* error;
     [self.currentTextField resignFirstResponder];
 
@@ -297,7 +309,7 @@ enum DummySettingsRows {
         }
     }
     
-    NSArray* elements = [self.jid componentsSeparatedByString:@"@"];
+    NSArray* elements = [lowerJid componentsSeparatedByString:@"@"];
 
     //if it is a JID
     if([elements count] > 1)
@@ -307,10 +319,10 @@ enum DummySettingsRows {
     }
     else
     {
-        user = self.jid;
+        user = lowerJid;
         domain = @"";
     }
-    if([domain isEqualToString:@""] && !self.server)
+    if([domain isEqualToString:@""])
     {
         [self alertWithTitle:NSLocalizedString(@"Domain missing", @"") andMsg:NSLocalizedString(@"Your entered XMPP ID is missing the domain", @"")];
         return;
@@ -332,8 +344,11 @@ enum DummySettingsRows {
         [dic setObject:[self.rosterName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:kRosterName];
     if(self.statusMessage)
         [dic setObject:[self.statusMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:@"statusMessage"];
+    
     [dic setObject:[NSNumber numberWithBool:self.sasl2Supported] forKey:kSupportsSasl2];
-
+    
+    [dic setObject:[NSNumber numberWithBool:self.plainActivated] forKey:kPlainActivated];
+    
     if(!self.editMode)
     {
 
@@ -397,45 +412,32 @@ enum DummySettingsRows {
                     DDLogError(@"Could not delete all SiriKit interactions: %@", error);
             }];
         }
+        //this case makes sure we recreate a completely new account instance below (using our new settings) if the account details changed
+        else if(self.detailsChanged)
+            [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo withExplicitLogout:NO];
+        
         DDLogVerbose(@"Now updating DB with account dict...");
-        BOOL updatedAccount = [[DataLayer sharedInstance] updateAccounWithDictionary:dic];
-        if(updatedAccount)
+        [[DataLayer sharedInstance] updateAccounWithDictionary:dic];
+        if(self.password.length)
         {
-            DDLogVerbose(@"DB update succeeded: %@", self.accountNo);
-            if(self.password.length)
-            {
-                DDLogVerbose(@"Now setting password for account %@ in SAMKeychain...", self.accountNo);
-                [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountNo];
-            }
-            if(self.enabled)
-            {
-                DDLogVerbose(@"Account is still enabled, updating in-memory structures to reflect new settings: %@", self.accountNo);
-                [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
-                xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-                //it is okay to only update the server settings here:
-                //1) if the account was not yet connected, the settings from our db (which got updated with our dict prior
-                //      to connecting) will be used upon connecting 
-                //2) if the account is already connected, the settings will be updated (account.connectionProperties.identity and account.connectionProperties.server)
-                //      and used when connecting next time (still using the old smacks session of course)
-                account.connectionProperties.identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@", [dic objectForKey:kUsername], [dic objectForKey:kDomain]] password:self.password andResource:[dic objectForKey:kResource]];
-                MLXMPPServer* oldServer = account.connectionProperties.server;
-                account.connectionProperties.server = [[MLXMPPServer alloc] initWithHost:(dic[kServer] == nil ? @"" : dic[kServer]) andPort:(dic[kPort] == nil ? @"5222" : dic[kPort]) andDirectTLS:[[dic objectForKey:kDirectTLS] boolValue]];
-                [account.connectionProperties.server updateConnectServer:[oldServer connectServer]];
-                [account.connectionProperties.server updateConnectPort:[oldServer connectPort]];
-                [account.connectionProperties.server updateConnectTLS:[oldServer isDirectTLS]];
-                if(self.statusMessageChanged)
-                    [account publishStatusMessage:self.statusMessage];
-                if(self.rosterNameChanged)
-                    [account publishRosterName:self.rosterName];
-                if(self.avatarChanged)
-                    [account publishAvatar:self.selectedAvatarImage];
-            }
-            //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-            [self showSuccessHUD];
+            DDLogVerbose(@"Now setting password for account %@ in SAMKeychain...", self.accountNo);
+            [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountNo];
         }
-        else
-            DDLogError(@"DB update failed!");
+        if(self.enabled)
+        {
+            DDLogVerbose(@"Account is (still) enabled, connecting it: %@", self.accountNo);
+            [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
+            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+            if(self.statusMessageChanged)
+                [account publishStatusMessage:self.statusMessage];
+            if(self.rosterNameChanged)
+                [account publishRosterName:self.rosterName];
+            if(self.avatarChanged)
+                [account publishAvatar:self.selectedAvatarImage];
+        }
+        //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+        [self showSuccessHUD];
     }
 }
 
@@ -465,6 +467,7 @@ enum DummySettingsRows {
     }];
     UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
         DDLogVerbose(@"Removing accountNo %@", self.accountNo);
+        self.deactivateSave = YES;
         [[MLXMPPManager sharedInstance] removeAccountForAccountNo:self.accountNo];
 
         MBProgressHUD* hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -512,6 +515,7 @@ enum DummySettingsRows {
     }];
     UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
         DDLogVerbose(@"Deleting account on server: %@", xmppAccount);
+        self.deactivateSave = YES;
         [xmppAccount removeFromServerWithCompletion:^(NSString* error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if(error != nil)
@@ -695,6 +699,12 @@ enum DummySettingsRows {
             }
             case SettingsDirectTLSRow: {
                 [thecell initCell:NSLocalizedString(@"Always use direct TLS, not STARTTLS", @"") withToggle:self.directTLS andTag:2];
+                break;
+            }
+            case SettingsPlainActivatedRow: {
+                [thecell initCell:NSLocalizedString(@"Allow MITM-prone PLAIN authentication", @"") withToggle:self.plainActivated andTag:3];
+                if(self.editMode)
+                    [thecell.toggleSwitch setEnabled:NO];
                 break;
             }
             case SettingsResourceRow: {
@@ -940,18 +950,22 @@ enum DummySettingsRows {
         }
         case 2: {
             self.jid = textField.text;
+            self.detailsChanged = YES;
             break;
         }
         case 3: {
             self.password = textField.text;
+            self.detailsChanged = YES;
             break;
         }
         case 4: {
             self.server = textField.text;
+            self.detailsChanged = YES;
             break;
         }
         case 5: {
             self.port = textField.text;
+            self.detailsChanged = YES;
             break;
         }
         case 6: {
@@ -977,22 +991,25 @@ enum DummySettingsRows {
 
     switch (toggle.tag) {
         case 1: {
-            if(toggle.on)
-            {
-                self.enabled = YES;
-            }
-            else {
-                self.enabled = NO;
-            }
+            self.enabled = toggle.on;
             break;
         }
         case 2: {
-            if(toggle.on)
+            self.directTLS = toggle.on;
+            self.detailsChanged = YES;
+            break;
+        }
+        case 3: {
+            self.plainActivated = toggle.on;
+            self.detailsChanged = YES;
+            if(self.plainActivated)
             {
-                self.directTLS = YES;
-            }
-            else {
-                self.directTLS = NO;
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Warning", @"")
+                                                                    message:NSLocalizedString(@"If you turn this on, you will no longer be safe from man-in-the-middle attacks. Such attacks enable the adversary to manipulate your incoming and outgoing messages, add their own OMEMO keys, change your account details and even know or change your password!\n\nYou should rather switch to another server than turning this on.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Understood", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
+                    [alert dismissViewControllerAnimated:YES completion:nil];
+                }]];
+                [self presentViewController:alert animated:YES completion:nil];
             }
             break;
         }

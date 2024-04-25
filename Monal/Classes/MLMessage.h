@@ -15,8 +15,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  message object intended to be passed around and eventually used to render
  */
-@interface MLMessage : NSObject
+@interface MLMessage : NSObject <NSSecureCoding>
 
++(BOOL) supportsSecureCoding;
 
 /**
  account number in the database should be an integer
@@ -118,6 +119,7 @@ The of the message in the DB , should be int
 +(MLMessage*) messageFromDictionary:(NSDictionary*) dic;
 
 -(void) updateWithMessage:(MLMessage*) msg;
+@property (nonatomic, readonly) MLContact* contact;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
 -(BOOL) isEqualToMessage:(MLMessage*) message;

@@ -40,7 +40,7 @@ static NSString* appName = @"Monal";
     }
     
     //add 32bit length prefix
-    NSAssert(rawData.length < (NSUInteger)1<<30, @"LogMessage is longer than 1<<30 bytes!");
+    NSAssert(rawData.length < (NSUInteger)1<<26, @"LogMessage is longer than 1<<26 bytes!");
     uint32_t length = CFSwapInt32HostToBig((uint32_t)rawData.length);
     NSMutableData* data = [[NSMutableData alloc] initWithBytes:&length length:sizeof(length)];
     [data appendData:rawData];

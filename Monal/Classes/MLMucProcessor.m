@@ -563,7 +563,6 @@ $$
                         //update nick in database
                         DDLogInfo(@"Updating muc %@ nick in database to nick provided by server: '%@'...", node.fromUser, node.fromResource);
                         [[DataLayer sharedInstance] updateOwnNickName:node.fromResource forMuc:node.fromUser forAccount:_account.accountNo];
-                        selfPrecenceHandled = YES;
                     }
                     break;
                 }

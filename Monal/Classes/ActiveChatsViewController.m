@@ -54,11 +54,13 @@ enum activeChatsControllerSections {
 
 static NSMutableSet* _mamWarningDisplayed;
 static NSMutableSet* _smacksWarningDisplayed;
+static NSMutableSet* _pushWarningDisplayed;
 
 +(void) initialize
 {
     _mamWarningDisplayed = [NSMutableSet new];
     _smacksWarningDisplayed = [NSMutableSet new];
+    _pushWarningDisplayed = [NSMutableSet new];
 }
 
 #pragma mark view lifecycle
@@ -113,6 +115,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
     [nc addObserver:self selector:@selector(handleDeviceRotation) name:UIDeviceOrientationDidChangeNotification object:nil];
+    [nc addObserver:self selector:@selector(showWarningsIfNeeded) name:kMonalFinishedCatchup object:nil];
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"ContactCell"];
     
@@ -392,40 +395,6 @@ static NSMutableSet* _smacksWarningDisplayed;
 {
     DDLogDebug(@"active chats view did appear");
     [super viewDidAppear:animated];
-    
-    for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
-    {
-        NSNumber* accountNo = accountDict[kAccountID];
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
-        if(!account)
-            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];
-        if(![_mamWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
-        {
-            if(!account.connectionProperties.supportsMam2)
-            {
-                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support MAM (XEP-0313). That means you could frequently miss incoming messages!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
-                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                    [_mamWarningDisplayed addObject:accountNo];
-                }]];
-                [self presentViewController:messageAlert animated:YES completion:nil];
-            }
-            else
-                [_mamWarningDisplayed addObject:accountNo];
-        }
-        if(![_smacksWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound)
-        {
-            if(!account.connectionProperties.supportsSM3)
-            {
-                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support Stream Management (XEP-0198). That means your outgoing messages can get lost frequently!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
-                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                    [_smacksWarningDisplayed addObject:accountNo];
-                }]];
-                [self presentViewController:messageAlert animated:YES completion:nil];
-            }
-            else
-                [_smacksWarningDisplayed addObject:accountNo];
-        }
-    }
 }
 
 -(void) didReceiveMemoryWarning
@@ -466,9 +435,66 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"])
     {
-        [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+        [self showPrivacySettings];
         return;
     }
+    
+    [self showWarningsIfNeeded];
+}
+
+-(void) showWarningsIfNeeded
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
+        {
+            NSNumber* accountNo = accountDict[kAccountID];
+            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+            if(!account)
+                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];
+            
+            if(![_mamWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
+            {
+                if(!account.connectionProperties.supportsMam2)
+                {
+                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support MAM (XEP-0313). That means you could frequently miss incoming messages!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                        [_mamWarningDisplayed addObject:accountNo];
+                    }]];
+                    [self presentViewController:messageAlert animated:YES completion:nil];
+                }
+                else
+                    [_mamWarningDisplayed addObject:accountNo];
+            }
+            
+            if(![_smacksWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound)
+            {
+                if(!account.connectionProperties.supportsSM3)
+                {
+                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support Stream Management (XEP-0198). That means your outgoing messages can get lost frequently!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                        [_smacksWarningDisplayed addObject:accountNo];
+                    }]];
+                    [self presentViewController:messageAlert animated:YES completion:nil];
+                }
+                else
+                    [_smacksWarningDisplayed addObject:accountNo];
+            }
+            
+            if(![_pushWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
+            {
+                if(!account.connectionProperties.supportsMam2)
+                {
+                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support PUSH (XEP-0357). That means you have to manually open the app to retrieve new incoming messages!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                        [_pushWarningDisplayed addObject:accountNo];
+                    }]];
+                    [self presentViewController:messageAlert animated:YES completion:nil];
+                }
+                else
+                    [_pushWarningDisplayed addObject:accountNo];
+            }
+        }
+    });
 }
 
 -(void) openConversationPlaceholder:(MLContact*) contact
@@ -484,7 +510,8 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) showPrivacySettings
 {
-    [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+    UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsPrivacySettings"];
+    [self presentViewController:view animated:YES completion:^{}];
 }
 
 -(void) showSettings
@@ -713,15 +740,29 @@ static NSMutableSet* _smacksWarningDisplayed;
 
     MLContact* chatContact = nil;
     // Select correct contact array
-    if(indexPath.section == pinnedChats) {
+    if(indexPath.section == pinnedChats)
         chatContact = [self.pinnedContacts objectAtIndex:indexPath.row];
-    } else {
+    else
         chatContact = [self.unpinnedContacts objectAtIndex:indexPath.row];
-    }
+    
     // Display msg draft or last msg
     MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:chatContact.contactJid forAccount:chatContact.accountId];
 
     [cell initCell:chatContact withLastMessage:messageRow];
+
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    
+    // Highlight the selected chat
+    if([MLNotificationManager sharedInstance].currentContact != nil && [chatContact isEqual:[MLNotificationManager sharedInstance].currentContact])
+    {
+        cell.backgroundColor = [UIColor lightGrayColor];
+        cell.statusText.textColor = [UIColor whiteColor];
+    }
+    else
+    {
+        cell.backgroundColor = [UIColor clearColor];
+        cell.statusText.textColor = [UIColor lightGrayColor];
+    }
 
     return cell;
 }

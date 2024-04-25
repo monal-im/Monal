@@ -132,7 +132,7 @@ static NSMutableDictionary* _typingNotifications;
     
     if([messageNode check:@"{urn:xmpp:jingle-message:0}*"] && ![HelperTools shouldProvideVoip])
     {
-        DDLogWarn(@"China locale detected, ignoring incoming JMI message!");
+        DDLogWarn(@"VoIP not supported, ignoring incoming JMI message!");
         return nil;
     }
     else if([messageNode check:@"{urn:xmpp:jingle-message:0}*"])
@@ -154,7 +154,7 @@ static NSMutableDictionary* _typingNotifications;
             //only handle jmi stanzas exchanged with contacts allowed to see us and ignore all others
             //--> no presence leak and no unwanted spam calls
             //but: outgoing calls are still allowed even without presence subscriptions in either direction
-            if(!jmiContact.isSubscribedFrom)
+            if(![[HelperTools defaultsDB] boolForKey:@"allowCallsFromNonRosterContacts"] && !jmiContact.isSubscribedFrom)
             {
                 DDLogWarn(@"Ignoring incoming JMI propose coming from a contact we are not subscribed from");
                 return nil;
@@ -437,11 +437,19 @@ static NSMutableDictionary* _typingNotifications;
 #endif
     
     //handle message retraction (XEP-0424)
-    if([messageNode check:@"{urn:xmpp:fasten:0}apply-to/{urn:xmpp:message-retract:0}retract"])
+    if([messageNode check:@"{urn:xmpp:message-retract:1}retract"])
     {
-        NSString* originIdToRetract = [messageNode findFirst:@"{urn:xmpp:fasten:0}apply-to@id"];
-        //this checks if this message is from the same jid as the message it tries to retract for (e.g. inbound can only retract inbound and outbound only outbound)
-        NSNumber* historyIdToRetract = [[DataLayer sharedInstance] getHistoryIDForMessageId:originIdToRetract from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
+        NSString* idToRetract = [messageNode findFirst:@"{urn:xmpp:message-retract:1}retract@id"];
+        NSNumber* historyIdToRetract = nil;
+        if(possiblyUnknownContact.isGroup && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"] && [messageNode findFirst:@"{urn:xmpp:message-retract:1}retract/{urn:xmpp:message-moderate:1}moderated"])
+        {
+            historyIdToRetract = [[DataLayer sharedInstance] getRetractionHistoryIDForModeratedStanzaId:idToRetract from:messageNode.fromUser andAccount:account.accountNo];
+        }
+        else
+        {
+            //this checks for all spelled out in the business rules of XEP-0424
+            historyIdToRetract = [[DataLayer sharedInstance] getRetractionHistoryIDForMessageId:idToRetract from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
+        }
         
         if(historyIdToRetract != nil)
         {
@@ -452,46 +460,60 @@ static NSMutableDictionary* _typingNotifications;
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
                 @"message": [[[DataLayer sharedInstance] messagesForHistoryIDs:@[historyIdToRetract]] firstObject],
                 @"historyId": historyIdToRetract,
-                @"contact": [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo],
+                @"contact": possiblyUnknownContact,
+            }];
+            
+            //update unread count in active chats list
+            [possiblyUnknownContact updateUnreadCount];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                @"contact": possiblyUnknownContact,
             }];
         }
         else
-            DDLogWarn(@"Could not find history ID for originIdToRetract '%@' from '%@' on account %@", originIdToRetract, messageNode.fromUser, account.accountNo);
+            DDLogWarn(@"Could not find history ID for idToRetract '%@' from '%@' on account %@", idToRetract, messageNode.fromUser, account.accountNo);
     }
     //handle retraction tombstone in MAM (XEP-0424)
-    else if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [messageNode check:@"{urn:xmpp:message-retract:0}retracted/{urn:xmpp:sid:0}origin-id@id"])
+    else if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [messageNode check:@"{urn:xmpp:message-retract:1}retracted@id"])
     {
-        //first add an empty message into our history db...
-        NSString* retractedOriginId = [messageNode findFirst:@"{urn:xmpp:message-retract:0}retracted/{urn:xmpp:sid:0}origin-id@id"];
-        NSNumber* historyIdToRetract = [[DataLayer sharedInstance]
-                     addMessageToChatBuddy:buddyName
-                            withInboundDir:inbound
-                                forAccount:account.accountNo
-                                  withBody:@""
-                              actuallyfrom:actualFrom
-                            participantJid:participantJid
-                                      sent:YES
-                                    unread:NO
-                                 messageId:retractedOriginId
-                           serverMessageId:stanzaid
-                               messageType:kMessageTypeText
-                           andOverrideDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]
-                                 encrypted:NO
-                       displayMarkerWanted:NO
-                            usingHistoryId:historyIdToUse
-                        checkForDuplicates:[messageNode check:@"{urn:xmpp:sid:0}origin-id"] || (stanzaid != nil)
-        ];
-        
-        //...then retract this message (e.g. mark as retracted)
-        [[DataLayer sharedInstance] deleteMessageHistory:historyIdToRetract];
-        
-        //update ui
-        DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
-            @"message": [[[DataLayer sharedInstance] messagesForHistoryIDs:@[historyIdToRetract]] firstObject],
-            @"historyId": historyIdToRetract,
-            @"contact": [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo],
-        }];
+        //ignore tombstones if not supported by server (someone probably faked them)
+        if(
+            (!possiblyUnknownContact.isGroup && [account.connectionProperties.accountFeatures containsObject:@"urn:xmpp:message-retract:1#tombstone"]) ||
+            (possiblyUnknownContact.isGroup && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-retract:1#tombstone"])
+        )
+        {
+            //first add an empty message into our history db...
+            NSNumber* historyIdToRetract = [[DataLayer sharedInstance]
+                        addMessageToChatBuddy:buddyName
+                                withInboundDir:inbound
+                                    forAccount:account.accountNo
+                                    withBody:@""
+                                actuallyfrom:actualFrom
+                                participantJid:participantJid
+                                        sent:YES
+                                        unread:NO
+                                    messageId:messageId
+                            serverMessageId:stanzaid
+                                messageType:kMessageTypeText
+                            andOverrideDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]
+                                    encrypted:NO
+                        displayMarkerWanted:NO
+                                usingHistoryId:historyIdToUse
+                            checkForDuplicates:[messageNode check:@"{urn:xmpp:sid:0}origin-id"] || (stanzaid != nil)
+            ];
+            
+            //...then retract this message (e.g. mark as retracted)
+            [[DataLayer sharedInstance] deleteMessageHistory:historyIdToRetract];
+            
+            //update ui
+            DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
+                @"message": [[[DataLayer sharedInstance] messagesForHistoryIDs:@[historyIdToRetract]] firstObject],
+                @"historyId": historyIdToRetract,
+                @"contact": possiblyUnknownContact,
+            }];
+        }
+        else
+            DDLogWarn(@"Got faked tombstone without server supporting them, ignoring it!");
     }
     //ignore encrypted body messages coming from our own device id (most probably a muc reflection)
     else if(([messageNode check:@"body#"] || decrypted) && !sentByOwnOmemoDevice)
@@ -548,7 +570,7 @@ static NSMutableDictionary* _typingNotifications;
                 NSString* messageIdToReplace = [messageNode findFirst:@"{urn:xmpp:message-correct:0}replace@id"];
                 DDLogVerbose(@"Message id to LMC-replace: %@", messageIdToReplace);
                 //this checks if this message is from the same jid as the message it tries to do the LMC for (e.g. inbound can only correct inbound and outbound only outbound)
-                historyId = [[DataLayer sharedInstance] getHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
+                historyId = [[DataLayer sharedInstance] getLMCHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
                 DDLogVerbose(@"History id to LMC-replace: %@", historyId);
                 //now check if the LMC is allowed (we use historyIdToUse for MLhistory mam queries to only check LMC for the 3 messages coming before this ID in this converastion)
                 //historyIdToUse will be nil, for messages going forward in time which means (check for the newest 3 messages in this conversation)
@@ -587,18 +609,17 @@ static NSMutableDictionary* _typingNotifications;
                 //send receive markers if requested, but DON'T do so for MLhistory messages (and don't do so for channel type mucs)
                 if(
                     [[HelperTools defaultsDB] boolForKey:@"SendReceivedMarkers"] &&
-                    ([messageNode check:@"{urn:xmpp:receipts}request"] || [messageNode check:@"{urn:xmpp:chat-markers:0}markable"]) &&
+                    [messageNode check:@"{urn:xmpp:receipts}request"] &&
                     ![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] &&
                     !isMLhistory
                 )
                 {
-                    MLContact* contact = [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo];
                     //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)
                     if(
                         //1:1 with user in our contact list that subscribed us (e.g. is allowed to see us)
-                        (!contact.isGroup  && contact.isSubscribedFrom) ||
+                        (!possiblyUnknownContact.isGroup  && possiblyUnknownContact.isSubscribedFrom) ||
                         //muc group message from a user of this group
-                        ([contact.mucType isEqualToString:@"group"] && messageNode.fromResource)
+                        ([possiblyUnknownContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
                     )
                     {
                         XMPPMessage* receiptNode = [XMPPMessage new];
@@ -607,8 +628,6 @@ static NSMutableDictionary* _typingNotifications;
                         receiptNode.attributes[@"to"] = messageNode.fromUser;
                         if([messageNode check:@"{urn:xmpp:receipts}request"])
                             [receiptNode setReceipt:messageId];
-                        if([messageNode check:@"{urn:xmpp:chat-markers:0}markable"])
-                            [receiptNode setChatmarkerReceipt:messageId];
                         [receiptNode setStoreHint];
                         [account send:receiptNode];
                     }
@@ -630,9 +649,12 @@ static NSMutableDictionary* _typingNotifications;
                     
                     //update unread count in active chats list
                     if([unread count])
+                    {
+                        [possiblyUnknownContact updateUnreadCount];
                         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                            @"contact": [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo],
+                            @"contact": possiblyUnknownContact,
                         }];
+                    }
                 }
                 
                 [[DataLayer sharedInstance] addActiveBuddies:buddyName forAccount:account.accountNo];
@@ -642,7 +664,7 @@ static NSMutableDictionary* _typingNotifications;
                     @"message": message,
                     @"historyId": historyId,
                     @"showAlert": @(showAlert),
-                    @"contact": [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo],
+                    @"contact": possiblyUnknownContact,
                 }];
                 
                 //try to automatically determine content type of filetransfers
@@ -654,31 +676,24 @@ static NSMutableDictionary* _typingNotifications;
     
     //handle message receipts
     if(
-        ([messageNode check:@"{urn:xmpp:receipts}received@id"] || [messageNode check:@"{urn:xmpp:chat-markers:0}received@id"]) &&
+        [messageNode check:@"{urn:xmpp:receipts}received@id"] &&
         [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid]
     )
     {
-        NSString* msgId;
-        if([messageNode check:@"{urn:xmpp:receipts}received@id"])
-            msgId = [messageNode findFirst:@"{urn:xmpp:receipts}received@id"];
-        else
-            msgId = [messageNode findFirst:@"{urn:xmpp:chat-markers:0}received@id"];        //fallback only
-        if(msgId)
-        {
-            //save in DB
-            [[DataLayer sharedInstance] setMessageId:msgId received:YES];
-            
-            //Post notice
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{kMessageId:msgId}];
-        }
+        NSString* msgId = [messageNode findFirst:@"{urn:xmpp:receipts}received@id"];
+        
+        //save in DB
+        [[DataLayer sharedInstance] setMessageId:msgId received:YES];
+        
+        //Post notice
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{kMessageId:msgId}];
     }
     
     //handle chat-markers in groupchats slightly different
     if([messageNode check:@"{urn:xmpp:chat-markers:0}displayed@id"] && ownNick != nil)
     {
-        MLContact* groupchatContact = [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo];
         //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)
-        if(groupchatContact.isGroup && [groupchatContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
+        if(possiblyUnknownContact.isGroup && [possiblyUnknownContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
         {
             //incoming chat markers from own account (muc echo, muc "carbon")
             //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessagesNotice goes to MLNotificationManager and activeChatsViewController/chatViewController
@@ -693,9 +708,13 @@ static NSMutableDictionary* _typingNotifications;
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
                 
                 //update unread count in active chats list
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                    @"contact": groupchatContact
-                }];
+                if([unread count])
+                {
+                    [possiblyUnknownContact updateUnreadCount];
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                        @"contact": possiblyUnknownContact,
+                    }];
+                }
             }
             //incoming chat markers from participant
             //this will mark groupchat messages as read as soon as one of the participants sends a displayed chat-marker
@@ -737,9 +756,13 @@ static NSMutableDictionary* _typingNotifications;
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
             
             //update unread count in active chats list
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                @"contact": [MLContact createContactFromJid:messageNode.toUser andAccountNo:account.accountNo]
-            }];
+            if([unread count])
+            {
+                [possiblyUnknownContact updateUnreadCount];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                    @"contact": possiblyUnknownContact,
+                }];
+            }
         }
     }
     

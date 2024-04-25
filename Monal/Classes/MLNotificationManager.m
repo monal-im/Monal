@@ -88,11 +88,17 @@
                         [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[idval]];
                     }
             }];
-            [removed addObject:idval];
+            @synchronized(removed) {
+                [removed addObject:idval];
+            }
         };
         
         //only try to remove once
-        if(![removed containsObject:idval])
+        BOOL isContained = NO;
+        @synchronized(removed) {
+            isContained = [removed containsObject:idval];
+        }
+        if(!isContained)
         {
             //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
             //but DON'T do this in the appex because this can try to mess with notifications after the parse queue was frozen (see appex code for explanation what this means)
@@ -101,12 +107,16 @@
             else
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), block);
         }
+        
+        //return because we don't want to display any contact request notification
         return;
     }
     
     //don't alert twice
-    if([displayed containsObject:idval])
-        return;
+    @synchronized(displayed) {
+        if([displayed containsObject:idval])
+            return;
+    }
     
     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     content.title = xmppAccount.connectionProperties.identity.jid;
@@ -121,7 +131,9 @@
     
     DDLogDebug(@"Publishing notification with id %@", idval);
     [self publishNotificationContent:content withID:idval];
-    [displayed addObject:idval];
+    @synchronized(displayed) {
+        [displayed addObject:idval];
+    }
 }
 
 -(void) handleXMPPError:(NSNotification*) notification
@@ -252,8 +264,6 @@
             [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
             [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
         }
-        //update app badge
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
     };
     
     //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
@@ -262,6 +272,9 @@
         block();
     else
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), block);
+    
+    //update app badge
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
     
 }
 

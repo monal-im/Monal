@@ -112,7 +112,7 @@
         _ssdpSupported = YES;
         //calculate base64 encoded SSDP hash and compare it to server sent value
         NSString* ssdpHash =[HelperTools encodeBase64WithData:[self hash:[_ssdpString dataUsingEncoding:NSUTF8StringEncoding]]];
-        if(![ssdpHash isEqualToString:msg[@"d"]])
+        if(![HelperTools constantTimeCompareAttackerString:msg[@"d"] withKnownString:ssdpHash])
             return MLScramStatusSSDPTriggered;
     }
     if(_iterationCount < 4096)
@@ -164,7 +164,7 @@
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     NSDictionary* msg = [self parseScramString:str];
     //wrong v-value
-    if(![_expectedServerSignature isEqualToString:msg[@"v"]])
+    if(![HelperTools constantTimeCompareAttackerString:msg[@"v"] withKnownString:_expectedServerSignature])
         return MLScramStatusWrongServerProof;
     //server sent a SCRAM error
     if(msg[@"e"] != nil)
@@ -241,8 +241,8 @@
 -(NSString*) quote:(NSString*) str
 {
     //TODO: use proper saslprep to allow for non-ascii chars
-    str = [str stringByReplacingOccurrencesOfString:@"," withString:@"=2C"];
     str = [str stringByReplacingOccurrencesOfString:@"=" withString:@"=3D"];
+    str = [str stringByReplacingOccurrencesOfString:@"," withString:@"=2C"];
     return str;
 }
 

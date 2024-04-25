@@ -321,9 +321,12 @@ enum DummySettingsRows {
         }
         case kSettingSectionApp: {
             switch(indexPath.row) {
-                case PrivacySettingsRow:
-                    [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+                    
+                case PrivacySettingsRow: {
+                    UIViewController* privacyViewController = [[SwiftuiInterface new] makeViewWithName:@"PrivacySettings"];
+                    [self showDetailViewController:privacyViewController sender:self];
                     break;
+                }
                 case NotificationsRow: {
                     UIViewController* notificationSettingsController = [[SwiftuiInterface new] makeViewWithName:@"NotificationSettings"];
                     [self showDetailViewController:notificationSettingsController sender:self];
@@ -372,9 +375,11 @@ enum DummySettingsRows {
 #ifdef DEBUG
                 case LogRow:
 #endif
-                case SettingsAboutRowsCntORLogRow:
-                    [self performSegueWithIdentifier:@"showLogs" sender:self];
+                case SettingsAboutRowsCntORLogRow:{
+                    UIViewController* logView = [[SwiftuiInterface new] makeViewWithName:@"logView"];
+                    [self showDetailViewController:logView sender:self];
                     break;
+                }
                 case VersionRow: {
 #ifndef DEBUG
                     if(_tappedVersionInfo >= 16)

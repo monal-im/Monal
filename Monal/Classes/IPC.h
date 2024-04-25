@@ -24,6 +24,7 @@ typedef void (^IPC_response_handler_t)(NSDictionary*);
 -(void) sendMessage:(NSString*) name withData:(NSData* _Nullable) data to:(NSString*) destination withResponseHandler:(IPC_response_handler_t _Nullable) responseHandler;
 -(void) sendBroadcastMessage:(NSString*) name withData:(NSData* _Nullable) data;
 -(void) sendBroadcastMessage:(NSString*) name withData:(NSData* _Nullable) data withResponseHandler:(IPC_response_handler_t _Nullable) responseHandler;
+-(NSString* _Nullable) exportDB;
 
 -(void) respondToMessage:(NSDictionary*) message withData:(NSData* _Nullable) data;
 

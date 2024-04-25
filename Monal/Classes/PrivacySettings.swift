@@ -121,7 +121,7 @@ struct PrivacySettings: View {
                 }
                 NavigationLink(destination: CommunicationScreen()) {
                     HStack{
-                        Image(systemName: "message.badge.circle.rtl")
+                        Image(systemName: "bubble.left.and.text.bubble.right")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 20, height: 20)

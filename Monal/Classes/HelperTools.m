@@ -505,6 +505,24 @@ void swizzle(Class c, SEL orig, SEL new)
     ];
 }
 
++(void) busyWaitForOperationQueue:(NSOperationQueue*) queue
+{
+    //apparently setting someQueue.suspended = YES does return before the queue is actually suspended
+    //--> busy wait for someQueue.suspended == YES
+    int busyWaitCounter = 0;
+    NSTimeInterval waitTime = 0.0;
+    NSDate* startTime = [NSDate date];
+    while(queue.suspended != YES)
+    {
+        busyWaitCounter++;
+        waitTime = [[NSDate date] timeIntervalSinceDate:startTime];
+        MLAssert(waitTime <= 4.0, @"Busy wait for queue freeze took longer than 4.0 seconds!", (@{@"queue": queue, @"name": queue.name}));
+        
+    }
+    if(busyWaitCounter > 0)
+        DDLogWarn(@"busyWaitFor:%@ --> busyWaitCounter=%d, waitTime=%f", queue.name, busyWaitCounter, waitTime);
+}
+
 +(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier
 {
     switch(identifier)

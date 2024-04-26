@@ -951,8 +951,10 @@ $$
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
             DDLogDebug(@"Marked as read: %@", unread);
             
-            //send displayed marker for last unread message (XEP-0333)
-            //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
+            //send displayed marker for last unread message marked as wanting chat markers (XEP-0333)
+//             for(MLMessage* msg in unread)
+//                 ;   //TODO: implement this!!
+            
             MLMessage* lastUnreadMessage = [unread lastObject];
             if(lastUnreadMessage)
             {
@@ -1133,6 +1135,7 @@ $$
 {
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         [account freeze];
+    [MLProcessLock unlock];
     _wasFreezed = YES;
     @synchronized(self) {
         DDLogVerbose(@"Setting _shutdownPending to NO...");

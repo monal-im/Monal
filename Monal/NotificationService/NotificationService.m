@@ -295,6 +295,8 @@
         //WARNING: we have to closely watch apple...if they remove this 5 second gap between this call to the expiration handler and the actual
         //appex freeze, this sleep will no longer be harmless and could even cause smacks state corruption (by not diconnecting cleanly and having stanzas
         //still in the TCP queue delivered on next appex unfreeze even if they have been handled by the mainapp already)
+        //NOTE: not sure if that really can happen since we use file based locking, because iOS will kill processes holding such a lock
+        //when trying to freeze the process (and we would still hold the MLProcessLock for the appex when the freeze happens --> process kill)
         usleep(500000);
         
         //this returns YES if we got new pushes in the meantime --> do nothing if so

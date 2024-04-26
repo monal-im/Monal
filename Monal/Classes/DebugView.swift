@@ -64,7 +64,12 @@ struct LogFilesView: View {
                         }
                     }.foregroundColor(monalDarkGreen)
                 }
-            }.padding(0)
+            }
+            .applyClosure { view in
+                if #available(iOS 15, *) {
+                    view.listStyle(.grouped)
+                }
+            }
         }
         .alert(isPresented: $showingDBExportFailedAlert) {
             Alert(title: Text("Database Export Failed"), message: Text("Failed to export the database, please check the logfile for errors and try again."), dismissButton: .default(Text("Close")))

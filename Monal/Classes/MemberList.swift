@@ -221,7 +221,7 @@ struct MemberList: View {
         if self.group.mucType != "group" {
             return AnyView(
                 affiliationButton(selectedMember, affiliation: "outcast", label: {
-                    Text("Block grom group")
+                    Text("Block from group")
                 })
             )
         } else {

@@ -251,7 +251,7 @@ struct MLAutoDownloadFiletransferSettingView: View {
                        step: 0.01,
                        minimumValueLabel: Text("33%"),
                        maximumValueLabel: Text("100%"),
-                       label: {Text("Uploaad Settings")
+                       label: {Text("Upload Settings")
                 })
                 Text("Image Upload Quality : \(String(format: "%.0f%%", privacyDefaultDB.imageUploadQuality*100))")
             }

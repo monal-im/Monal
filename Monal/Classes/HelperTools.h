@@ -175,6 +175,8 @@ void swizzle(Class c, SEL orig, SEL new);
 
 +(BOOL) constantTimeCompareAttackerString:(NSString* _Nonnull) str1 withKnownString:(NSString* _Nonnull) str2;
 
++(BOOL) isIP:(NSString*) host;
+
 @end
 
 NS_ASSUME_NONNULL_END

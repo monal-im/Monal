@@ -74,7 +74,7 @@ struct LogFilesView: View {
         .alert(isPresented: $showingDBExportFailedAlert) {
             Alert(title: Text("Database Export Failed"), message: Text("Failed to export the database, please check the logfile for errors and try again."), dismissButton: .default(Text("Close")))
         }
-        .sheet(isPresented:Binding.mappedTo(bindingToOptional: $fileURL)) {
+        .sheet(isPresented:$fileURL.optionalMappedToBool()) {
             if let fileURL = fileURL {
                 ActivityViewController(activityItems: [fileURL])
             }

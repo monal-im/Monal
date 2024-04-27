@@ -16,6 +16,7 @@
 #import "MLFiletransfer.h"
 #import "MLNotificationQueue.h"
 #import "MLXMPPManager.h"
+#import <monalxmpp/monalxmpp-Swift.h>
 
 @import UserNotifications;
 @import CoreServices;
@@ -24,7 +25,7 @@
 @import UniformTypeIdentifiers;
 
 @interface MLNotificationManager ()
-@property (nonatomic, assign) NotificationPrivacySettingOption notificationPrivacySetting;
+@property (nonatomic, readonly) NotificationPrivacySettingOption notificationPrivacySetting;
 @end
 
 @implementation MLNotificationManager
@@ -49,9 +50,14 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRemoved object:nil];
-
-    self.notificationPrivacySetting = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
     return self;
+}
+
+-(NotificationPrivacySettingOption) notificationPrivacySetting
+{
+    NotificationPrivacySettingOption value = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
+    DDLogVerbose(@"Current NotificationPrivacySettingOption: %d", (int)value);
+    return value;
 }
 
 -(void) handleContactRefresh:(NSNotification*) notification
@@ -359,7 +365,7 @@
 -(void) showNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
 {
     // always use legacy notifications if we should only show a generic "New Message" notifiation without name or content
-    if(self.notificationPrivacySetting > DisplayOnlyName)
+    if(self.notificationPrivacySetting > NotificationPrivacySettingOptionDisplayOnlyName)
         return [self showLegacyNotificationForMessage:message withSound:sound];
     
     // use modern communication notifications on ios >= 15.0 and legacy ones otherwise
@@ -380,7 +386,7 @@
     NSString* msgText = NSLocalizedString(@"Open app to see more", @"");
     
     //only show msgText if allowed
-    if(self.notificationPrivacySetting == DisplayNameAndMessage)
+    if(self.notificationPrivacySetting == NotificationPrivacySettingOptionDisplayNameAndMessage)
     {
         //XEP-0245: The slash me Command
         if([message.messageText hasPrefix:@"/me "])
@@ -702,7 +708,7 @@
     NSString* idval = [self identifierWithMessage:message];
     
     //Only show contact name if allowed
-    if(self.notificationPrivacySetting <= DisplayOnlyName)
+    if(self.notificationPrivacySetting <= NotificationPrivacySettingOptionDisplayOnlyName)
     {
         content.title = [contact contactDisplayName];
         if(message.isMuc)
@@ -712,7 +718,7 @@
         content.title = NSLocalizedString(@"New Message", @"");
 
     //only show msgText if allowed
-    if(self.notificationPrivacySetting == DisplayNameAndMessage)
+    if(self.notificationPrivacySetting == NotificationPrivacySettingOptionDisplayNameAndMessage)
     {
         NSString* msgText = message.messageText;
 

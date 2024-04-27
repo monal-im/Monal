@@ -48,6 +48,15 @@ extension Binding {
     }
 }
 
+extension Binding {
+    func bytecount(mappedTo: Double) -> Binding<Double> where Value == UInt {
+        Binding<Double>(
+            get: { Double(self.wrappedValue) / mappedTo },
+            set: { newValue in self.wrappedValue = UInt(newValue * mappedTo) }
+        )
+    }
+}
+
 class SheetDismisserProtocol: ObservableObject {
     weak var host: UIHostingController<AnyView>? = nil
     func dismiss() {

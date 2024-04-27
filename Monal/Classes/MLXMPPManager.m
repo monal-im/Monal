@@ -16,6 +16,7 @@
 #import "MLNotificationQueue.h"
 #import "MLNotificationManager.h"
 #import "MLOMEMO.h"
+#import <monalxmpp/monalxmpp-Swift.h>
 
 @import Network;
 @import MobileCoreServices;
@@ -52,7 +53,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowURLPreview"];
 
         // Message Settings / Privacy
-        [[HelperTools defaultsDB] setInteger:DisplayNameAndMessage forKey:@"NotificationPrivacySetting"];
+        [[HelperTools defaultsDB] setInteger:NotificationPrivacySettingOptionDisplayNameAndMessage forKey:@"NotificationPrivacySetting"];
 
         // udp logger
         [[HelperTools defaultsDB] setBool:NO forKey:@"udpLoggerEnabled"];
@@ -95,21 +96,18 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerKey" toDefault:@""];
 
     // upgrade Message Settings / Privacy
-    [self upgradeIntegerUserSettingsIfUnset:@"NotificationPrivacySetting" toDefault:DisplayNameAndMessage];
-    
+    [self upgradeIntegerUserSettingsIfUnset:@"NotificationPrivacySetting" toDefault:NotificationPrivacySettingOptionDisplayNameAndMessage];
+
     // upgrade filetransfer settings
     [self upgradeBoolUserSettingsIfUnset:@"AutodownloadFiletransfers" toDefault:YES];
-#ifdef IS_ALPHA
-    [self upgradeIntegerUserSettingsIfUnset:@"AutodownloadFiletransfersMaxSize" toDefault:16*1024*1024];    // 16 MiB
-#else
-    [self upgradeIntegerUserSettingsIfUnset:@"AutodownloadFiletransfersMaxSize" toDefault:5*1024*1024];     // 5 MiB
-#endif
 
     //upgrade syncErrorsDisplayed list
     [self upgradeObjectUserSettingsIfUnset:@"syncErrorsDisplayed" toDefault:@{}];
 
-    [self upgradeFloatUserSettingsIfUnset:@"AutodownloadFiletransfersMobileMaxSize" toDefault:5*1024*1024];     // 5 MiB
-    [self upgradeFloatUserSettingsIfUnset:@"AutodownloadFiletransfersWifiMaxSize" toDefault:32*1024*1024];     // 32 MiB
+    [self upgradeFloatUserSettingsToInteger:@"AutodownloadFiletransfersMobileMaxSize"];
+    [self upgradeFloatUserSettingsToInteger:@"AutodownloadFiletransfersWifiMaxSize"];
+    [self upgradeIntegerUserSettingsIfUnset:@"AutodownloadFiletransfersMobileMaxSize" toDefault:5*1024*1024];     // 5 MiB
+    [self upgradeIntegerUserSettingsIfUnset:@"AutodownloadFiletransfersWifiMaxSize" toDefault:32*1024*1024];     // 32 MiB
 
     // upgrade default image quality
     [self upgradeFloatUserSettingsIfUnset:@"ImageUploadQuality" toDefault:0.75];
@@ -143,6 +141,15 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //anti spam/privacy setting, but default to yes (current behavior, conversations behavior etc.)
     [self upgradeBoolUserSettingsIfUnset:@"allowNonRosterContacts" toDefault:YES];
     [self upgradeBoolUserSettingsIfUnset:@"allowCallsFromNonRosterContacts" toDefault:YES];
+}
+
+-(void) upgradeFloatUserSettingsToInteger:(NSString*) settingsName
+{
+    if([[HelperTools defaultsDB] objectForKey:settingsName] == nil)
+        return;
+    NSInteger value = (NSInteger)[[HelperTools defaultsDB] floatForKey:settingsName];
+    [[HelperTools defaultsDB] setInteger:value forKey:settingsName];
+    [[HelperTools defaultsDB] synchronize];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

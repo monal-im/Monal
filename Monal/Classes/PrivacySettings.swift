@@ -7,21 +7,13 @@
 //
 
 
-
-
-enum NotificationPrivacySettingOption: Int , CaseIterable, RawRepresentable{
-    case displayNameAndMessage = 1
-    case displayOnlyName = 2
-    case displayOnlyPlaceholder = 3
-}
-
 func getNotificationPrivacyOption(_ option: NotificationPrivacySettingOption) -> String {
     switch option{
-        case .displayNameAndMessage:
+        case .DisplayNameAndMessage:
             return NSLocalizedString("Display Name And Message", comment: "")
-         case .displayOnlyName:
+         case .DisplayOnlyName:
             return NSLocalizedString("Display Only Name", comment: "")
-         case .displayOnlyPlaceholder:
+         case .DisplayOnlyPlaceholder:
             return NSLocalizedString("Display Only Placeholder", comment: "")
     }
 }
@@ -76,10 +68,10 @@ class PrivacyDefaultDB: ObservableObject {
     var autodownloadFiletransfers : Bool
     
     @defaultsDB("AutodownloadFiletransfersWifiMaxSize")
-    var autodownloadFiletransfersWifiMaxSize : Double
+    var autodownloadFiletransfersWifiMaxSize : UInt
     
     @defaultsDB("AutodownloadFiletransfersMobileMaxSize")
-    var autodownloadFiletransfersMobileMaxSize : Double
+    var autodownloadFiletransfersMobileMaxSize : UInt
     
     @defaultsDB("ImageUploadQuality")
     var imageUploadQuality : Float
@@ -121,7 +113,7 @@ struct PrivacySettings: View {
                 }
                 NavigationLink(destination: CommunicationScreen()) {
                     HStack{
-                        Image(systemName: "bubble.left.and.text.bubble.right")
+                        Image(systemName: "bubble.left.and.bubble.right")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 20, height: 20)
@@ -131,7 +123,7 @@ struct PrivacySettings: View {
                 
                 NavigationLink(destination: MLAutoDownloadFiletransferSettingView()) {
                     HStack{
-                        Image(systemName: "arrow.triangle.2.circlepath.icloud")
+                        Image(systemName: "square.and.arrow.down")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 20, height: 20)
@@ -157,7 +149,6 @@ struct PrivacyScreen: View {
                     Text(getNotificationPrivacyOption(option)).tag(option.rawValue)
                 }
             }
-            
             Toggle("Enable encryption by default for new chats", isOn: $privacyDefaultDB.omemoDefaultOn)
             Toggle("Autodelete all messages after 3 days", isOn: $privacyDefaultDB.autodeleteAllMessagesAfter3Days)
         }
@@ -220,27 +211,27 @@ struct MLAutoDownloadFiletransferSettingView: View {
                 Text("Adjust the maximum file size for auto-downloads over WiFi")
                     .foregroundColor(.secondary)
                     .font(.footnote)
-                Slider(value: $privacyDefaultDB.autodownloadFiletransfersWifiMaxSize,
+                Slider(value: $privacyDefaultDB.autodownloadFiletransfersWifiMaxSize.bytecount(mappedTo: 1024*1024),
                        in: 1.0...100.0,
                        step: 1.0,
                        minimumValueLabel: Text("1 MiB"),
                        maximumValueLabel: Text("100 MiB"),
                        label: {Text("Load over wifi")}
                 )
-                Text("Load over WiFi upto : \(Int(privacyDefaultDB.autodownloadFiletransfersWifiMaxSize)) MiB")
+                Text("Load over WiFi upto : \(UInt(privacyDefaultDB.autodownloadFiletransfersWifiMaxSize/(1024*1024))) MiB")
             }
             
             Text("Adjust the maximum file size for auto-downloads over cellular network")
                 .foregroundColor(.secondary)
                 .font(.footnote)
-            Slider(value: $privacyDefaultDB.autodownloadFiletransfersMobileMaxSize,
-                   in: 1.0...100.0,
-                   step: 1.0 ,
+            Slider(value: $privacyDefaultDB.autodownloadFiletransfersMobileMaxSize.bytecount(mappedTo: 1024*1024),
+                   in: 0.0...100.0,
+                   step: 1.0,
                    minimumValueLabel: Text("1 MiB"),
                    maximumValueLabel: Text("100 MiB"),
                    label: {Text("Load over Cellular")}
             )
-            Text("Load over cellular upto : \(Int(privacyDefaultDB.autodownloadFiletransfersMobileMaxSize)) MiB")
+            Text("Load over cellular upto : \(Int(privacyDefaultDB.autodownloadFiletransfersMobileMaxSize/(1024*1024))) MiB")
             
             Section(header: Text("Upload Settings")) {
                 Text("Adjust the quality of images uploaded")

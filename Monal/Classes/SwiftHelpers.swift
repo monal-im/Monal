@@ -57,6 +57,12 @@ public func nilExtractor(_ value: Any?) -> Any? {
     }
 }
 
+@objc public enum NotificationPrivacySettingOption: Int, CaseIterable, RawRepresentable {
+    case DisplayNameAndMessage
+    case DisplayOnlyName
+    case DisplayOnlyPlaceholder
+}
+
 class KVOObserver: NSObject {
     var obj: NSObject
     var keyPath: String

@@ -176,7 +176,6 @@ enum msgSentState {
 
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight = UITableViewAutomaticDimension;
-    self.messageTable.backgroundColor = [UIColor colorNamed:@"chatBackgroundColor"];
 
 #if TARGET_OS_MACCATALYST
     //does not become first responder like in iOS

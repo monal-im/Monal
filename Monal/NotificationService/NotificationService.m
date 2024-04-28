@@ -471,139 +471,143 @@ static BOOL warnUnclean = NO;
 
 -(void) didReceiveNotificationRequest:(UNNotificationRequest*) request withContentHandler:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
-    DDLogInfo(@"Notification handler called (request id: %@)", request.identifier);
-    DDLogInfo(@"Push userInfo: %@", request.content.userInfo);
-    [handlers addObject:contentHandler];
-    
-    //only show this notification once a day at maximum (and if a build number was given in our push)
-    NSDate* lastAppVersionAlert = [[HelperTools defaultsDB] objectForKey:@"lastAppVersionAlert"];
-    if((lastAppVersionAlert == nil || [[NSDate date] timeIntervalSinceDate:lastAppVersionAlert] > 86400) && request.content.userInfo[@"firstGoodBuildNumber"] != nil)
-    {
-        NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-        long buildNumber = ((NSString*)[infoDict objectForKey:@"CFBundleVersion"]).integerValue;
-        long firstGoodBuildNumber = ((NSNumber*)request.content.userInfo[@"firstGoodBuildNumber"]).integerValue;
-        BOOL isKnownGoodBuild = NO;
-        for(NSNumber* allowed in request.content.userInfo[@"knownGoodBuildNumber"])
-            if(buildNumber == allowed.integerValue)
-                isKnownGoodBuild = YES;
-        DDLogDebug(@"current build number: %ld, firstGoodBuildNumber: %ld, isKnownGoodBuild: %@", buildNumber, firstGoodBuildNumber, bool2str(isKnownGoodBuild));
-        if(buildNumber < firstGoodBuildNumber && !isKnownGoodBuild)
+    //make sure to handle complete push and properly proxy it while not racing with expired handlers
+    @synchronized(handlers) {
+        DDLogInfo(@"Notification handler called (request id: %@)", request.identifier);
+        DDLogInfo(@"Push userInfo: %@", request.content.userInfo);
+        [handlers addObject:contentHandler];
+        
+        //only show this notification once a day at maximum (and if a build number was given in our push)
+        NSDate* lastAppVersionAlert = [[HelperTools defaultsDB] objectForKey:@"lastAppVersionAlert"];
+        if((lastAppVersionAlert == nil || [[NSDate date] timeIntervalSinceDate:lastAppVersionAlert] > 86400) && request.content.userInfo[@"firstGoodBuildNumber"] != nil)
         {
-            UNMutableNotificationContent* tooOldContent = [UNMutableNotificationContent new];
-            tooOldContent.title = NSLocalizedString(@"Very old app version", @"");
-            tooOldContent.subtitle = NSLocalizedString(@"Please update!", @"");
-            tooOldContent.body = NSLocalizedString(@"This app is too old and can contain security bugs as well as suddenly cease operation. Please Upgrade!", @"");
-            tooOldContent.sound = [UNNotificationSound defaultSound];
-            UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:tooOldContent trigger:nil];
+            NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+            long buildNumber = ((NSString*)[infoDict objectForKey:@"CFBundleVersion"]).integerValue;
+            long firstGoodBuildNumber = ((NSNumber*)request.content.userInfo[@"firstGoodBuildNumber"]).integerValue;
+            BOOL isKnownGoodBuild = NO;
+            for(NSNumber* allowed in request.content.userInfo[@"knownGoodBuildNumber"])
+                if(buildNumber == allowed.integerValue)
+                    isKnownGoodBuild = YES;
+            DDLogDebug(@"current build number: %ld, firstGoodBuildNumber: %ld, isKnownGoodBuild: %@", buildNumber, firstGoodBuildNumber, bool2str(isKnownGoodBuild));
+            if(buildNumber < firstGoodBuildNumber && !isKnownGoodBuild)
+            {
+                UNMutableNotificationContent* tooOldContent = [UNMutableNotificationContent new];
+                tooOldContent.title = NSLocalizedString(@"Very old app version", @"");
+                tooOldContent.subtitle = NSLocalizedString(@"Please update!", @"");
+                tooOldContent.body = NSLocalizedString(@"This app is too old and can contain security bugs as well as suddenly cease operation. Please Upgrade!", @"");
+                tooOldContent.sound = [UNNotificationSound defaultSound];
+                UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:tooOldContent trigger:nil];
+                NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
+                if(error)
+                    DDLogError(@"Error posting local app-too-old notification: %@", error);
+                [[HelperTools defaultsDB] setObject:[NSDate now] forKey:@"lastAppVersionAlert"];
+                [[HelperTools defaultsDB] synchronize];
+            }
+        }
+        
+    #ifdef DEBUG
+        if(warnUnclean)
+        {
+            UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
+            errorContent.title = NSLocalizedString(@"Unclean appex shutown", @"");
+            errorContent.body = NSLocalizedString(@"This should never happen, please contact the developers and provide a logfile!", @"");
+            errorContent.sound = [UNNotificationSound defaultSound];
+            UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:errorContent trigger:nil];
             NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
             if(error)
-                DDLogError(@"Error posting local app-too-old notification: %@", error);
-            [[HelperTools defaultsDB] setObject:[NSDate now] forKey:@"lastAppVersionAlert"];
-            [[HelperTools defaultsDB] synchronize];
+                DDLogError(@"Error posting local appex unclean shutdown error notification: %@", error);
+            else
+                warnUnclean = NO;       //try again on error
         }
+    #endif
+        
+        //proxy to push singleton
+        DDLogDebug(@"proxying to incomingPush");
+        [DDLog flushLog];
+        [[PushSingleton instance] incomingPush:contentHandler];
+        DDLogDebug(@"incomingPush proxy completed");
+        [DDLog flushLog];
     }
-    
-#ifdef DEBUG
-    if(warnUnclean)
-    {
-        UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
-        errorContent.title = NSLocalizedString(@"Unclean appex shutown", @"");
-        errorContent.body = NSLocalizedString(@"This should never happen, please contact the developers and provide a logfile!", @"");
-        errorContent.sound = [UNNotificationSound defaultSound];
-        UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:errorContent trigger:nil];
-        NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
-        if(error)
-            DDLogError(@"Error posting local appex unclean shutdown error notification: %@", error);
-        else
-            warnUnclean = NO;       //try again on error
-    }
-#endif
-    
-    //proxy to push singleton
-    DDLogDebug(@"proxying to incomingPush");
-    [DDLog flushLog];
-    [[PushSingleton instance] incomingPush:contentHandler];
-    DDLogDebug(@"incomingPush proxy completed");
-    [DDLog flushLog];
 }
 
 -(void) serviceExtensionTimeWillExpire
 {
-    DDLogError(@"notification handler expired, that should never happen!");
-    
+    @synchronized(handlers) {
+        DDLogError(@"notification handler expired, that should never happen!");
+        
 /*
-#ifdef DEBUG
-    UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
-    errorContent.title = @"Unexpected appex expiration";
-    errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
-    errorContent.sound = [UNNotificationSound defaultSound];
-    UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:errorContent trigger:nil];
-    NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
-    if(error)
-        DDLogError(@"Error posting local appex expiration error notification: %@", error);
-#endif
-    
-    //It seems the iOS induced deadlock unlocks itself after this expiration handler got called and even new pushes
-    //can come in while this handler is still running
-    //--> we just wait for 1.8 seconds to make sure the unlocking can happen
-    //    (this should be greater than the 1.5 seconds waiting time on last pushes and possibly smaller than 2 seconds,
-    //    cause that could be the time apple will kill us after)
-    //NOTE: the unlocking of our deadlock will feed this expired handler and no killing should occur
-    //WARNING: if it's a real deadlock not unlocking itself, apple will kill us nontheless,
-    //         but that's not different to us committing suicide like in the old code commented below
-    usleep(1800000);
+    #ifdef DEBUG
+        UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
+        errorContent.title = @"Unexpected appex expiration";
+        errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
+        errorContent.sound = [UNNotificationSound defaultSound];
+        UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:errorContent trigger:nil];
+        NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
+        if(error)
+            DDLogError(@"Error posting local appex expiration error notification: %@", error);
+    #endif
+        
+        //It seems the iOS induced deadlock unlocks itself after this expiration handler got called and even new pushes
+        //can come in while this handler is still running
+        //--> we just wait for 1.8 seconds to make sure the unlocking can happen
+        //    (this should be greater than the 1.5 seconds waiting time on last pushes and possibly smaller than 2 seconds,
+        //    cause that could be the time apple will kill us after)
+        //NOTE: the unlocking of our deadlock will feed this expired handler and no killing should occur
+        //WARNING: if it's a real deadlock not unlocking itself, apple will kill us nontheless,
+        //         but that's not different to us committing suicide like in the old code commented below
+        usleep(1800000);
 */
 
 #ifdef DEBUG
-    if([handlers count] > 0)
-    {
-        //we don't want two error notifications for the user
-        [NotificationService setAppexCleanShutdownStatus:YES];
-        
-        //we feed all handlers, these shouldn't be silenced already, because we wouldn't see this expiration
-        for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
+        if([handlers count] > 0)
         {
-            DDLogError(@"Feeding handler with error notification: %@", _handler);
-            UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
-            errorContent.title = NSLocalizedString(@"Unexpected appex expiration", @"");
-            errorContent.body = NSLocalizedString(@"This should never happen, please contact the developers and provide a logfile!", @"");
-            errorContent.sound = [UNNotificationSound defaultSound];
-            _handler(errorContent);
+            //we don't want two error notifications for the user
+            [NotificationService setAppexCleanShutdownStatus:YES];
+            
+            //we feed all handlers, these shouldn't be silenced already, because we wouldn't see this expiration
+            for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
+            {
+                DDLogError(@"Feeding handler with error notification: %@", _handler);
+                UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
+                errorContent.title = NSLocalizedString(@"Unexpected appex expiration", @"");
+                errorContent.body = NSLocalizedString(@"This should never happen, please contact the developers and provide a logfile!", @"");
+                errorContent.sound = [UNNotificationSound defaultSound];
+                _handler(errorContent);
+            }
         }
-    }
-    else
-        [NotificationService setAppexCleanShutdownStatus:NO];
+        else
+            [NotificationService setAppexCleanShutdownStatus:NO];
 #else
-    if([handlers count] > 0)
-    {
-        //we don't want two error notifications for the user
-        [NotificationService setAppexCleanShutdownStatus:YES];
-        
-        //we feed all handlers, these shouldn't be silenced already, because we wouldn't see this expiration
-        for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
+        if([handlers count] > 0)
         {
-            DDLogError(@"Feeding handler with silent notification: %@", _handler);
-            UNMutableNotificationContent* emptyContent = [UNMutableNotificationContent new];
-            _handler(emptyContent);
+            //we don't want two error notifications for the user
+            [NotificationService setAppexCleanShutdownStatus:YES];
+            
+            //we feed all handlers, these shouldn't be silenced already, because we wouldn't see this expiration
+            for(void (^_handler)(UNNotificationContent* _Nonnull) in handlers)
+            {
+                DDLogError(@"Feeding handler with silent notification: %@", _handler);
+                UNMutableNotificationContent* emptyContent = [UNMutableNotificationContent new];
+                _handler(emptyContent);
+            }
         }
-    }
-    else
-        [NotificationService setAppexCleanShutdownStatus:NO];
+        else
+            [NotificationService setAppexCleanShutdownStatus:NO];
 #endif
 
-    DDLogInfo(@"Committing suicide...");
-    [DDLog flushLog];
-    exit(0);
+        DDLogInfo(@"Committing suicide...");
+        [DDLog flushLog];
+        exit(0);
 
 /*
-    //proxy to push singleton
-    DDLogDebug(@"proxying to pushExpired");
-    [DDLog flushLog];
-    [[PushSingleton instance] pushExpired];
-    DDLogDebug(@"pushExpired proxy completed");
-    [DDLog flushLog];
+        //proxy to push singleton
+        DDLogDebug(@"proxying to pushExpired");
+        [DDLog flushLog];
+        [[PushSingleton instance] pushExpired];
+        DDLogDebug(@"pushExpired proxy completed");
+        [DDLog flushLog];
 */
-
+    }
 }
 
 @end

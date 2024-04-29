@@ -41,7 +41,7 @@ extension Binding {
         Binding<Bool>(
             get: { self.wrappedValue != nil },
             set: { newValue in
-                MLAssert(!newValue, "New value should never be false when writing to a binding created by optionalMappedToBool()")
+                MLAssert(!newValue, "New value should never be true when writing to a binding created by optionalMappedToBool()")
                 self.wrappedValue = nil
             }
         )

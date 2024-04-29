@@ -4,11 +4,11 @@
    PrivacyInfo.xcprivacy
    Monal
 
-   Created by admin on 29.04.24.
+   Created by tmolitor on 29.04.24.
    Copyright (c) 2024 monal-im.org. All rights reserved.
 -->
 <plist version="1.0">
-<dict/>
+  <dict>
     <key>NSPrivacyTracking</key>
     <false/>
     <key>NSPrivacyTrackingDomains</key>
@@ -17,13 +17,14 @@
     <array/>
     <key>NSPrivacyAccessedAPITypes</key>
     <array>
-        <dict>
-            <key>NSPrivacyAccessedAPIType</key>
-            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
-            <key>NSPrivacyAccessedAPITypeReasons</key>
-            <array>
-                <string>1C8F.1</string>
-            </array>
-        </dict>
+      <dict>
+        <key>NSPrivacyAccessedAPIType</key>
+        <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+        <key>NSPrivacyAccessedAPITypeReasons</key>
+        <array>
+          <string>1C8F.1</string>
+        </array>
+      </dict>
     </array>
+  </dict>
 </plist>

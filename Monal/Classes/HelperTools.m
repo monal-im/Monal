@@ -7,6 +7,11 @@
 //
 
 #include <stdio.h>
+#include <assert.h>
+#include <stdbool.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/sysctl.h>
 #include <sys/stat.h>
 #include <mach/mach.h>
 #include <mach/mach_error.h>
@@ -51,6 +56,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "MLStreamRedirect.h"
 #import "commithash.h"
 #import "MLContactSoftwareVersionInfo.h"
+#import "IPC.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -59,8 +65,6 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 @import AVFoundation;
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
-
-#import "SCRAM.h"
 
 @interface KSCrash()
 @property(nonatomic,readwrite,retain) NSString* basePath;
@@ -81,6 +85,13 @@ static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
 static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
 #endif
 
+//shamelessly stolen from utils.ip in conversations source
+static NSRegularExpression* IPV4;
+static NSRegularExpression* IPV6_HEX4DECCOMPRESSED;
+static NSRegularExpression* IPV6_6HEX4DEC;
+static NSRegularExpression* IPV6_HEXCOMPRESSED;
+static NSRegularExpression* IPV6;
+
 //add own crash info (used by rust panic handler)
 //see https://alastairs-place.net/blog/2013/01/10/interesting-os-x-crash-report-tidbits/
 //and kscrash sources (KSDynamicLinker.c)
@@ -97,6 +108,40 @@ static struct {
 } _crash_info __attribute__((section("__DATA, __crash_info"))) = { 5, 0, 0, 0, 0, 0, 0, 0 };
 #pragma pack()
 
+
+// see: https://developer.apple.com/library/archive/qa/qa1361/_index.html
+// Returns true if the current process is being debugged (either 
+// running under the debugger or has a debugger attached post facto).
+bool isDebugerActive(void)
+{
+#ifdef IS_ALPHA
+    int                 junk;
+    int                 mib[4];
+    struct kinfo_proc   info;
+    size_t              size;
+
+    // Initialize the flags so that, if sysctl fails for some bizarre 
+    // reason, we get a predictable result.
+    info.kp_proc.p_flag = 0;
+
+    // Initialize mib, which tells sysctl the info we want, in this case
+    // we're looking for information about a specific process ID.
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PID;
+    mib[3] = getpid();
+
+    // Call sysctl
+    size = sizeof(info);
+    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+    assert(junk == 0);
+
+    // We're being debugged if the P_TRACED flag is set.
+    return ( (info.kp_proc.p_flag & P_TRACED) != 0 );
+#else
+    return 0;
+#endif
+}
 
 //see https://stackoverflow.com/a/2180788
 int asyncSafeCopyFile(const char* from, const char* to)
@@ -201,15 +246,14 @@ void logException(NSException* exception)
 void uncaughtExceptionHandler(NSException* exception)
 {
     logException(exception);
-//don't let kscrash handle the exception if we are in the simulator
-//(this makes sure xcode will catch the exception and show proper backtraces etc.)
-#if TARGET_OS_SIMULATOR
-    return;
-#else
+
+    //don't report that crash through KSCrash if the debugger is active
+    if(isDebugerActive())
+        return;
+    
     //make sure this crash will be recorded by kscrash using the NSException rather than the c++ exception thrown by the objc runtime
     //this will make sure that the stacktrace matches the objc exception rather than being a top level c++ stacktrace
     KSCrash.sharedInstance.uncaughtExceptionHandler(exception);
-#endif
 }
 
 //this function will only be in use under macos alpha builds to log every exception (even when catched with @try-@catch constructs)
@@ -234,7 +278,6 @@ void swizzle(Class c, SEL orig, SEL new)
         method_exchangeImplementations(origMethod, newMethod);
 }
 
-
 @implementation HelperTools
 
 +(void) initialize
@@ -244,6 +287,13 @@ void swizzle(Class c, SEL orig, SEL new)
     
     u_int32_t i = arc4random();
     _processID = [self hexadecimalString:[NSData dataWithBytes:&i length:sizeof(i)]];
+    
+    //shamelessly stolen from utils.ip in conversations source
+    IPV4 = [NSRegularExpression regularExpressionWithPattern:@"\\A(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z" options:0 error:nil];
+    IPV6_HEX4DECCOMPRESSED = [NSRegularExpression regularExpressionWithPattern:@"\\A((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?) ::((?:[0-9A-Fa-f]{1,4}:)*)(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z" options:0 error:nil];
+    IPV6_6HEX4DEC = [NSRegularExpression regularExpressionWithPattern:@"\\A((?:[0-9A-Fa-f]{1,4}:){6,6})(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z" options:0 error:nil];
+    IPV6_HEXCOMPRESSED = [NSRegularExpression regularExpressionWithPattern:@"\\A((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)\\z" options:0 error:nil];
+    IPV6 = [NSRegularExpression regularExpressionWithPattern:@"\\A(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\\z" options:0 error:nil];
 }
 
 +(void) installExceptionHandler
@@ -279,7 +329,7 @@ void swizzle(Class c, SEL orig, SEL new)
     NSArray* filePathComponents = [fileStr pathComponents];
     if([filePathComponents count]>1)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
-    //DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
+    DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
     @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
 }
 
@@ -303,17 +353,23 @@ void swizzle(Class c, SEL orig, SEL new)
     abort();
 }
 
++(void) __attribute__((noreturn)) throwExceptionWithName:(NSString*) name reason:(NSString*) reason userInfo:(NSDictionary* _Nullable) userInfo
+{
+    @throw [NSException exceptionWithName:name reason:reason userInfo:userInfo];
+}
+
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount
 {
     [self postError:description withNode:node andAccount:account andIsSevere:isSevere];
     
+    //disconnect and reset state (including pipelined auth etc.)
+    //this has to be done before disabling the account to not trigger an assertion
+    [[MLXMPPManager sharedInstance] disconnectAccount:account.accountNo withExplicitLogout:YES];
+
     //make sure we don't try this again even when the mainapp/appex gets restarted
     NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:YES];
     accountDic[kEnabled] = @NO;
-    [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
-    
-    //disconnect and reset state (including pipelined auth etc.)
-    [[MLXMPPManager sharedInstance] disconnectAccount:account.accountNo withExplicitLogout:YES];
+    [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];    
 }
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
@@ -378,7 +434,9 @@ void swizzle(Class c, SEL orig, SEL new)
     if(enableDefaultLogAndCrashFramework)
     {
         [self configureLogging];
-        [self installCrashHandler];
+        //don't install KSCrash if the debugger is active
+        if(!isDebugerActive())
+            [self installCrashHandler];
         [self installExceptionHandler];
     }
     else
@@ -459,6 +517,42 @@ void swizzle(Class c, SEL orig, SEL new)
         @"stuns:eu.prod.turn.monal-im.org:3478",
 #endif
     ];
+}
+
++(void) busyWaitForOperationQueue:(NSOperationQueue*) queue
+{
+    //apparently setting someQueue.suspended = YES does return before the queue is actually suspended
+    //--> busy wait for someQueue.suspended == YES
+    int busyWaitCounter = 0;
+    NSTimeInterval waitTime = 0.0;
+    NSDate* startTime = [NSDate date];
+    while(queue.suspended != YES)
+    {
+        busyWaitCounter++;
+        waitTime = [[NSDate date] timeIntervalSinceDate:startTime];
+        MLAssert(waitTime <= 4.0, @"Busy wait for queue freeze took longer than 4.0 seconds!", (@{@"queue": queue, @"name": queue.name}));
+        
+    }
+    if(busyWaitCounter > 0)
+        DDLogWarn(@"busyWaitFor:%@ --> busyWaitCounter=%d, waitTime=%f", queue.name, busyWaitCounter, waitTime);
+}
+
++(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier
+{
+    switch(identifier)
+    {
+        case MLDefinedIdentifier_kAppGroup: return kAppGroup; break;
+        case MLDefinedIdentifier_kMonalOpenURL: return kMonalOpenURL; break;
+        case MLDefinedIdentifier_kBackgroundProcessingTask: return kBackgroundProcessingTask; break;
+        case MLDefinedIdentifier_kBackgroundRefreshingTask: return kBackgroundRefreshingTask; break;
+        case MLDefinedIdentifier_kMonalKeychainName: return kMonalKeychainName; break;
+        case MLDefinedIdentifier_SHORT_PING: return @(SHORT_PING); break;
+        case MLDefinedIdentifier_LONG_PING: return @(LONG_PING); break;
+        case MLDefinedIdentifier_MUC_PING: return @(MUC_PING); break;
+        case MLDefinedIdentifier_BGFETCH_DEFAULT_INTERVAL: return @(BGFETCH_DEFAULT_INTERVAL); break;
+        default:
+            unreachable(@"unknown MLDefinedIdentifier!");
+    }
 }
 
 +(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier
@@ -558,8 +652,7 @@ void swizzle(Class c, SEL orig, SEL new)
 #if TARGET_OS_MACCATALYST
     shouldProvideVoip = NO;
 #else
-    NSLocale* userLocale = [NSLocale currentLocale];
-    shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
+    shouldProvideVoip = YES;
 #endif
     return shouldProvideVoip;
 }
@@ -1245,6 +1338,12 @@ void swizzle(Class c, SEL orig, SEL new)
     return token;
 }
 
+//proxy to not have full IPC class accessible from UI
++(NSString* _Nullable) exportIPCDatabase
+{
+    return [[IPC sharedInstance] exportDB];
+}
+
 +(void) configureFileProtection:(NSString*) protectionLevel forFile:(NSString*) file
 {
 #if TARGET_OS_IPHONE
@@ -1301,9 +1400,11 @@ void swizzle(Class c, SEL orig, SEL new)
     else
         retval[@"host"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
     
-    //log sanity check errors (this checks 'host' and 'user'at once because without node host==user)
+    //don't assert to not have a dos vector here, but still log the error
     if([retval[@"host"] isEqualToString:@""])
-        DDLogError(@"jid '%@' has no host part!", jid);
+        DDLogError(@"jid has no host part: %@", jid);
+    //assert on sanity check errors (this checks 'host' and 'user' at once because without node host==user)
+    //MLAssert(![retval[@"host"] isEqualToString:@""], @"jid has no host part!", @{@"jid": jid});
     
     //sanitize retval
     if([retval[@"node"] isEqualToString:@""])
@@ -1448,7 +1549,7 @@ void swizzle(Class c, SEL orig, SEL new)
                     //we always want to post sync errors if we are in the appex (because an incoming push means the server has
                     //*possibly* queued some messages for us)
                     //if we are in the main app we only want to post sync errors if we are in one of these states:
-                    //1. we are NOT doing a full reconnect and the smacks queue contains some unacked message stanzas having a body
+                    //1. we are NOT doing a full reconnect and the smacks queue does not contain some unacked message stanzas having a body
                     //--> (briefly) opening the app while not having an internet connection does not generate sync errors (if no
                     //outgoing message is pending)
                     //2. we are doing a full reconnect --> we always want to post sync erros because we have to rejoin mucs,
@@ -1666,19 +1767,12 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) configureXcodeLogging
 {
-    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    //only start console logger
+    [DDLog addLogger:[DDOSLogger sharedInstance]];
 }
 
 +(void) configureLogging
 {
-    //don't log to the console (aka stderr) to not create loops with our redirected stderr
-//     //start console logger first (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
-// #if TARGET_OS_SIMULATOR
-//     [DDLog addLogger:[DDTTYLogger sharedInstance]];
-// #else
-//     [DDLog addLogger:[DDOSLogger sharedInstance]];
-// #endif
-    
     //network logger (start as early as possible)
     MLUDPLogger* udpLogger = [MLUDPLogger new];
     [DDLog addLogger:udpLogger];
@@ -1715,7 +1809,6 @@ void swizzle(Class c, SEL orig, SEL new)
     
     //log version info as early as possible
     DDLogInfo(@"Starting: %@", [self appBuildVersionInfoFor:MLVersionTypeLog]);
-    //[SCRAM SSDPXepOutput];
     [DDLog flushLog];
     
     DDLogVerbose(@"QOS level: %@ = %d", @"QOS_CLASS_USER_INTERACTIVE", QOS_CLASS_USER_INTERACTIVE);
@@ -1892,7 +1985,7 @@ void swizzle(Class c, SEL orig, SEL new)
             @"http://jabber.org/protocol/chatstates",
             @"urn:xmpp:chat-markers:0",
             @"urn:xmpp:eme:0",
-            @"urn:xmpp:message-retract:0",
+            @"urn:xmpp:message-retract:1",
             @"urn:xmpp:message-correct:0",
             
             
@@ -2413,6 +2506,11 @@ a=%@\r\n", mid, candidate];
         return [NSData new];
     }
     unsigned char* bytes = malloc([hex length] / 2);
+    if(bytes == NULL)
+    {
+        [NSException raise:@"NSInternalInconsistencyException" format:@"failed malloc" arguments:nil];
+        return nil;
+    }
     unsigned char* bp = bytes;
     for (unsigned int i = 0; i < [hex length]; i += 2) {
         buf[0] = (unsigned char) [hex characterAtIndex:i];
@@ -2560,6 +2658,54 @@ a=%@\r\n", mid, candidate];
     [result addObject:[lastItem substringToIndex:lastItem.length - 1]];
 
     return result;
+}
+
+//see https://nachtimwald.com/2017/04/02/constant-time-string-comparison-in-c/
++(BOOL) constantTimeCompareAttackerString:(NSString* _Nonnull) str1 withKnownString:(NSString* _Nonnull) str2
+{
+    if(str1 == nil || str2 == nil)
+        return NO;
+    
+    const char* s1 = str1.UTF8String;
+    const char* s2 = str2.UTF8String;
+    volatile int m = 0;
+    volatile size_t i = 0;
+    volatile size_t j = 0;
+    volatile size_t k = 0;    
+    
+    while(1)
+    {
+        //this will only turn on bits in m, but never turn them off
+        m |= s1[i] ^ s2[j];
+        
+        //
+        if(s1[i] == '\0')
+            break;
+        i++;
+        
+        //always balance increments even if s2 is shorter than s1
+        if(s2[j] != '\0')
+            j++;
+        if(s2[j] == '\0')
+            k++;
+    }
+    
+    return m == 0;      //check if we never turned on any bit in m
+}
+
++(BOOL) isIP:(NSString*) host
+{
+    if([[IPV4 matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
+        return YES;
+    if([[IPV6_HEX4DECCOMPRESSED matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
+        return YES;
+    if([[IPV6_6HEX4DEC matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
+        return YES;
+    if([[IPV6_HEXCOMPRESSED matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
+        return YES;
+    if([[IPV6 matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
+        return YES;
+    return NO;
 }
 
 @end

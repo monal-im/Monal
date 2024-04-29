@@ -116,7 +116,7 @@
 {
     NSString* statusMessage = @"";
     if(inboundDir == NO)
-        statusMessage = [NSString stringWithFormat:@"%@ ", NSLocalizedString(@"Me", @"")];
+        statusMessage = [NSString stringWithFormat:@"%@ ", NSLocalizedString(@"Me:", @"Prefix for own messages in chat overview")];
     else if(inboundDir == YES && fromUser != nil && fromUser.length > 0)
         statusMessage = [NSString stringWithFormat:@"%@: ", fromUser];
 
@@ -200,11 +200,11 @@
 -(void) setPinned:(BOOL) pinned
 {
     self.isPinned = pinned;
-
+    
     if(pinned) {
-        self.backgroundColor = [UIColor colorNamed:@"activeChatsPinnedColor"];
+        self.pinBadge.hidden = NO;
     } else {
-        self.backgroundColor = nil;
+        self.pinBadge.hidden = YES;
     }
 }
 

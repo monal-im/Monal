@@ -26,9 +26,17 @@
 
 +(void) processUnboundIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    //only handle these iqs if the remote user is on our roster
+    //only handle these iqs if the remote user is on our roster,
+    //if the are coming from our own domain,
+    //or if they are from a muc group, not a channel
     MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
-    if(![account.connectionProperties.identity.jid isEqualToString:iqNode.fromUser] && !(contact.isSubscribedFrom && !contact.isGroup))
+    if(!(
+        //we have to check for .isGroup because mucs always set .isSubscribedFrom to YES
+        (!contact.isGroup && contact.isSubscribedFrom) ||
+        contact.isSelfChat ||
+        [account.connectionProperties.identity.domain isEqualToString:iqNode.fromUser] ||
+        (contact.isGroup && [@"group" isEqualToString:contact.mucType])
+    ))
         DDLogWarn(@"Invalid sender for iq (!subscribedFrom || isGroup), ignoring: %@", iqNode);
     
     if([iqNode check:@"/<type=get>"])
@@ -399,6 +407,7 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
     }
     
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
+    account.connectionProperties.accountFeatures = features;
     
     if(
         [iqNode check:@"{http://jabber.org/protocol/disco#info}query/identity<category=pubsub><type=pep>"] &&       //xep-0163 support
@@ -724,6 +733,33 @@ $$class_handler(handleVersionResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh            
                                                         object:account
                                                         userInfo:@{@"versionInfo": newSoftwareVersionInfo}];
+$$
+
+$$class_handler(handleModerationResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLMessage*, msg))
+    [msg updateWithMessage:[[DataLayer sharedInstance] messageForHistoryID:msg.messageDBId]];       //make sure our msg is up to date
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Moderating message %@ returned an error: %@", msg, [iqNode findFirst:@"error"]);
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to moderate message in group/channel '%@'", @""), iqNode.fromUser] withNode:iqNode andAccount:account andIsSevere:YES];
+        return;
+    }
+    
+    DDLogInfo(@"Successfully moderated message in muc: %@", msg);
+    [[DataLayer sharedInstance] deleteMessageHistory:msg.messageDBId];
+    
+    //update ui
+    DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", msg.messageDBId);
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
+        @"message": msg,
+        @"historyId": msg.messageDBId,
+        @"contact": msg.contact,
+    }];
+    
+    //update unread count in active chats list
+    [msg.contact updateUnreadCount];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+        @"contact": msg.contact,
+    }];
 $$
 
 +(void) respondWithErrorTo:(XMPPIQ*) iqNode onAccount:(xmpp*) account

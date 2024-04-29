@@ -34,6 +34,7 @@ NSString *const kDomain = @"domain";
 NSString *const kEnabled = @"enabled";
 NSString *const kNeedsPasswordMigration = @"needs_password_migration";
 NSString *const kSupportsSasl2 = @"supports_sasl2";
+NSString *const kPlainActivated = @"plain_activated";
 
 NSString *const kServer = @"server";
 NSString *const kPort = @"other_port";
@@ -127,7 +128,7 @@ static NSDateFormatter* dbFormatter;
 -(NSString* _Nullable) exportDB
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSString* temporaryFilename = [NSString stringWithFormat:@"%@.db", [[NSProcessInfo processInfo] globallyUniqueString]];
+    NSString* temporaryFilename = [NSString stringWithFormat:@"sworim_%@.db", [[NSProcessInfo processInfo] globallyUniqueString]];
     NSString* temporaryFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:temporaryFilename];
     
     //checkpoint db before copying db file
@@ -140,7 +141,7 @@ static NSDateFormatter* dbFormatter;
         [fileManager copyItemAtPath:dbPath toPath:temporaryFilePath error:&error];
         if(error)
         {
-            DDLogError(@"Could not copy logfile to export location!");
+            DDLogError(@"Could not copy database to export location!");
             return NO;
         }
         return YES;
@@ -265,7 +266,7 @@ static NSDateFormatter* dbFormatter;
 -(NSNumber*) addAccountWithDictionary:(NSDictionary*) dictionary
 {
     return [self.db idWriteTransaction:^{
-        NSString* query = @"INSERT INTO account (server, other_port, resource, domain, enabled, directTLS, username, rosterName, statusMessage) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        NSString* query = @"INSERT INTO account (server, other_port, resource, domain, enabled, directTLS, username, rosterName, statusMessage, plain_activated) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         NSString* server = (NSString*) [dictionary objectForKey:kServer];
         NSString* port = (NSString*)[dictionary objectForKey:kPort];
         NSArray* params = @[
@@ -277,7 +278,8 @@ static NSDateFormatter* dbFormatter;
             [dictionary objectForKey:kDirectTLS],
             ((NSString *)[dictionary objectForKey:kUsername]),
             [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
-            [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @""
+            [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
+            [dictionary objectForKey:kPlainActivated] != nil ? [dictionary objectForKey:kPlainActivated] : [NSNumber numberWithBool:NO],
         ];
         BOOL result = [self.db executeNonQuery:query andArguments:params];
         // return the accountID
@@ -343,6 +345,24 @@ static NSDateFormatter* dbFormatter;
             return NO;
         else
             return [sasl2Pinned boolValue];
+    }];
+}
+
+-(BOOL) isPlainActivatedForAccount:(NSNumber*) accountNo
+{
+    return [self.db boolReadTransaction:^{
+        NSNumber* plainActivated = (NSNumber*)[self.db executeScalar:@"SELECT plain_activated FROM account WHERE account_id=?;" andArguments:@[accountNo]];
+        if(plainActivated == nil)
+            return NO;
+        else
+            return [plainActivated boolValue];
+    }];
+}
+
+-(BOOL) deactivatePlainForAccount:(NSNumber*) accountNo
+{
+    return [self.db boolReadTransaction:^{
+        return [self.db executeNonQuery:@"UPDATE account SET plain_activated=0 WHERE account_id=?;" andArguments:@[accountNo]];
     }];
 }
 
@@ -1487,7 +1507,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
+-(NSNumber* _Nullable) getLMCHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id WHERE messageid=? AND M.account_id=? AND (\
@@ -1504,12 +1524,24 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
-/*
-CF6DE818-6036-4B2E-A228-717303D1E9FF
-bififufuva@conference.xmpp.eightysoft.de
-bififufuva@conference.xmpp.eightysoft.de
-43
-*/
+-(NSNumber* _Nullable) getRetractionHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id WHERE M.account_id=? AND ( \
+            (B.Muc=0 AND M.messageid=? AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0))) OR \
+            (B.Muc=1 AND M.stanzaid=? AND M.buddy_name=? AND (M.participant_jid=? OR (M.participant_jid IS NULL AND M.actual_from=?))) \
+        );" andArguments:@[accountNo, messageid, from, from, messageid, from, nilWrapper(participantJid), nilWrapper(actualFrom)]];
+    }];
+}
+
+-(NSNumber* _Nullable) getRetractionHistoryIDForModeratedStanzaId:(NSString*) stanzaId from:(NSString*) from andAccount:(NSNumber*) accountNo
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id \
+            WHERE M.account_id=? AND B.Muc=1 AND M.stanzaid=? AND M.buddy_name=?;"
+            andArguments:@[accountNo, stanzaId, from]];
+    }];
+}
 
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID
 {

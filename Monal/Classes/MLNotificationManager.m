@@ -16,6 +16,7 @@
 #import "MLFiletransfer.h"
 #import "MLNotificationQueue.h"
 #import "MLXMPPManager.h"
+#import <monalxmpp/monalxmpp-Swift.h>
 
 @import UserNotifications;
 @import CoreServices;
@@ -24,7 +25,7 @@
 @import UniformTypeIdentifiers;
 
 @interface MLNotificationManager ()
-@property (nonatomic, assign) NotificationPrivacySettingOption notificationPrivacySetting;
+@property (nonatomic, readonly) NotificationPrivacySettingOption notificationPrivacySetting;
 @end
 
 @implementation MLNotificationManager
@@ -49,9 +50,14 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRemoved object:nil];
-
-    self.notificationPrivacySetting = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
     return self;
+}
+
+-(NotificationPrivacySettingOption) notificationPrivacySetting
+{
+    NotificationPrivacySettingOption value = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
+    DDLogVerbose(@"Current NotificationPrivacySettingOption: %d", (int)value);
+    return value;
 }
 
 -(void) handleContactRefresh:(NSNotification*) notification
@@ -88,11 +94,17 @@
                         [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[idval]];
                     }
             }];
-            [removed addObject:idval];
+            @synchronized(removed) {
+                [removed addObject:idval];
+            }
         };
         
         //only try to remove once
-        if(![removed containsObject:idval])
+        BOOL isContained = NO;
+        @synchronized(removed) {
+            isContained = [removed containsObject:idval];
+        }
+        if(!isContained)
         {
             //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
             //but DON'T do this in the appex because this can try to mess with notifications after the parse queue was frozen (see appex code for explanation what this means)
@@ -101,12 +113,16 @@
             else
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), block);
         }
+        
+        //return because we don't want to display any contact request notification
         return;
     }
     
     //don't alert twice
-    if([displayed containsObject:idval])
-        return;
+    @synchronized(displayed) {
+        if([displayed containsObject:idval])
+            return;
+    }
     
     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     content.title = xmppAccount.connectionProperties.identity.jid;
@@ -121,7 +137,9 @@
     
     DDLogDebug(@"Publishing notification with id %@", idval);
     [self publishNotificationContent:content withID:idval];
-    [displayed addObject:idval];
+    @synchronized(displayed) {
+        [displayed addObject:idval];
+    }
 }
 
 -(void) handleXMPPError:(NSNotification*) notification
@@ -252,8 +270,6 @@
             [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
             [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
         }
-        //update app badge
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
     };
     
     //do this in its own thread because we don't want to block the main thread or other threads here (the removal can take ~50ms)
@@ -262,6 +278,9 @@
         block();
     else
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), block);
+    
+    //update app badge
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
     
 }
 
@@ -346,7 +365,7 @@
 -(void) showNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
 {
     // always use legacy notifications if we should only show a generic "New Message" notifiation without name or content
-    if(self.notificationPrivacySetting > DisplayOnlyName)
+    if(self.notificationPrivacySetting > NotificationPrivacySettingOptionDisplayOnlyName)
         return [self showLegacyNotificationForMessage:message withSound:sound];
     
     // use modern communication notifications on ios >= 15.0 and legacy ones otherwise
@@ -367,7 +386,7 @@
     NSString* msgText = NSLocalizedString(@"Open app to see more", @"");
     
     //only show msgText if allowed
-    if(self.notificationPrivacySetting == DisplayNameAndMessage)
+    if(self.notificationPrivacySetting == NotificationPrivacySettingOptionDisplayNameAndMessage)
     {
         //XEP-0245: The slash me Command
         if([message.messageText hasPrefix:@"/me "])
@@ -689,7 +708,7 @@
     NSString* idval = [self identifierWithMessage:message];
     
     //Only show contact name if allowed
-    if(self.notificationPrivacySetting <= DisplayOnlyName)
+    if(self.notificationPrivacySetting <= NotificationPrivacySettingOptionDisplayOnlyName)
     {
         content.title = [contact contactDisplayName];
         if(message.isMuc)
@@ -699,7 +718,7 @@
         content.title = NSLocalizedString(@"New Message", @"");
 
     //only show msgText if allowed
-    if(self.notificationPrivacySetting == DisplayNameAndMessage)
+    if(self.notificationPrivacySetting == NotificationPrivacySettingOptionDisplayNameAndMessage)
     {
         NSString* msgText = message.messageText;
 

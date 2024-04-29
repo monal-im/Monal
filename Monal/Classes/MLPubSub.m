@@ -95,7 +95,7 @@ $$
     DDLogInfo(@"Fetching node '%@' at jid '%@' using callback %@...", node, jid, handler);
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedFetchNodeHandler, handleFetchInvalidation, $ID(node), $ID(jid), $ID(itemsList), $HANDLER(handler))];
@@ -143,7 +143,7 @@ $$
     DDLogInfo(@"Subscribing to node '%@' at jid '%@' using callback %@...", node, jid, handler);
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedSubscribeToNodeHandler, handleSubscribeInvalidation, $ID(node), $ID(jid), $HANDLER(handler))];
@@ -226,7 +226,7 @@ $$
 {
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedConfigureNodeHandler, handleConfigFormResultInvalidation, $ID(node), $ID(configOptions), $HANDLER(handler))];
@@ -303,7 +303,7 @@ $$
 {
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedRetractItemWithIdHandler, handleRetractResultInvalidation, $ID(itemId), $ID(node), $HANDLER(handler))];
@@ -340,7 +340,7 @@ $$
 {
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedPurgeNodeNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $HANDLER(handler))];
@@ -374,7 +374,7 @@ $$
 {
     xmpp* account = _account;
     
-    if(!account.connectionProperties.accountDiscoDone)
+    if(account.accountState < kStateBound || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
         [_queue addObject:$newHandlerWithInvalidation(self, queuedDeleteNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $HANDLER(handler))];
@@ -600,13 +600,14 @@ $$
     return retval;
 }
 
-$$instance_handler(handleSubscribeInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$HANDLER(handler))
+$$instance_handler(handleSubscribeInvalidation, account.pubsub, $$ID(xmpp*, account), $_ID(NSString*, reason), $$ID(NSString*, node), $$ID(NSString*, jid), $$HANDLER(handler))
     //invalidate our user handler
     $invalidate(handler,
         $ID(account),
         $BOOL(success, NO),
         $ID(node),
         $ID(jid),
+        $ID(reason),
     );
 $$
 
@@ -652,13 +653,14 @@ $$instance_handler(handleSubscribe, account.pubsub, $$ID(xmpp*, account), $$ID(X
     }
 $$
 
-$$instance_handler(handleUnsubscribeInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $_HANDLER(handler))
+$$instance_handler(handleUnsubscribeInvalidation, account.pubsub, $$ID(xmpp*, account), $_ID(NSString*, reason), $$ID(NSString*, node), $$ID(NSString*, jid), $_HANDLER(handler))
     //invalidate our user handler
     $invalidate(handler,
         $ID(account),
         $BOOL(success, NO),
         $ID(node),
-        $ID(jid)
+        $ID(jid),
+        $ID(reason),
     );
 $$
 
@@ -704,13 +706,14 @@ $$instance_handler(handleUnsubscribe, account.pubsub, $$ID(xmpp*, account), $$ID
     }
 $$
 
-$$instance_handler(handleFetchInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$HANDLER(handler))
+$$instance_handler(handleFetchInvalidation, account.pubsub, $$ID(xmpp*, account), $_ID(NSString*, reason), $$ID(NSString*, node), $$ID(NSString*, jid), $$HANDLER(handler))
     //invalidate user handler
     $invalidate(handler,
         $ID(account),
         $BOOL(success, NO),
         $ID(node),
-        $ID(jid)
+        $ID(jid),
+        $ID(reason),
     );
 $$
 
@@ -777,9 +780,9 @@ $$instance_handler(handleInternalFetch, account.pubsub, $$ID(xmpp*, account), $$
         [self callHandlersForNode:node andJid:jid withType:@"publish" andData:data];
 $$
 
-$$instance_handler(handleConfigFormResultInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $_HANDLER(handler))
+$$instance_handler(handleConfigFormResultInvalidation, account.pubsub, $$ID(xmpp*, account), $_ID(NSString*, reason), $$ID(NSString*, node), $_HANDLER(handler))
     //invalidate user handler
-    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node));
+    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node), $ID(reason));
 $$
 
 $$instance_handler(handleConfigFormResult, account.pubsub, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $_HANDLER(handler))
@@ -844,9 +847,9 @@ $$instance_handler(handleConfigFormResult, account.pubsub, $$ID(xmpp*, account),
     )];
 $$
 
-$$instance_handler(handleConfigureResultInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $_HANDLER(handler))
+$$instance_handler(handleConfigureResultInvalidation, account.pubsub, $$ID(xmpp*, account), $_ID(NSString*, reason), $$ID(NSString*, node), $_HANDLER(handler))
     //invalidate user handler
-    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node));
+    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node), $ID(reason));
 $$
 
 $$instance_handler(handleConfigureResult, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(XMPPIQ*, iqNode), $_HANDLER(handler))
@@ -862,9 +865,9 @@ $$instance_handler(handleConfigureResult, account.pubsub, $$ID(xmpp*, account), 
 $$
 
 //this is a user handler for configureNode: called from handlePublishResult
-$$instance_handler(handlePublishAgainInvalidation, account.pubsub, $$ID(xmpp*, account), $$BOOL(success), $$ID(NSString*, node), $_HANDLER(handler))
+$$instance_handler(handlePublishAgainInvalidation, account.pubsub, $$ID(xmpp*, account), $_ID(NSString*, reason), $$BOOL(success), $$ID(NSString*, node), $_HANDLER(handler))
     //invalidate user handler
-    $invalidate(handler, $ID(account), $BOOL(success), $ID(node));
+    $invalidate(handler, $ID(account), $BOOL(success), $ID(node), $ID(reason));
 $$
 
 //this is a user handler for configureNode: called from handlePublishResult
@@ -881,9 +884,9 @@ $$instance_handler(handlePublishAgain, account.pubsub, $$ID(xmpp*, account), $$B
 $$
 
 //this is a user handler for internalPublishItem: called from handlePublishResult
-$$instance_handler(handleConfigureAfterPublishInvalidation, account.pubsub, $$ID(xmpp*, account), $$BOOL(success), $$ID(NSString*, node), $_HANDLER(handler))
+$$instance_handler(handleConfigureAfterPublishInvalidation, account.pubsub, $$ID(xmpp*, account), $_ID(NSString*, reason), $$BOOL(success), $$ID(NSString*, node), $_HANDLER(handler))
     //invalidate user handler
-    $invalidate(handler, $ID(account), $BOOL(success), $ID(node));
+    $invalidate(handler, $ID(account), $BOOL(success), $ID(node), $ID(reason));
 $$
 
 //this is a user handler for internalPublishItem: called from handlePublishResult
@@ -899,9 +902,9 @@ $$instance_handler(handleConfigureAfterPublish, account.pubsub, $$ID(xmpp*, acco
     [self configureNode:node withConfigOptions:configOptions andHandler:handler];
 $$
 
-$$instance_handler(handlePublishResultInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(MLXMLNode*, item), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $_HANDLER(handler))
+$$instance_handler(handlePublishResultInvalidation, account.pubsub, $$ID(xmpp*, account), $_ID(NSString*, reason), $$ID(MLXMLNode*, item), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $_HANDLER(handler))
     //invalidate user handler
-    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node));
+    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node), $ID(reason));
 $$
 
 $$instance_handler(handlePublishResult, account.pubsub, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLXMLNode*, item), $$ID(NSString*, node), $$ID(NSDictionary*, configOptions), $_HANDLER(handler))
@@ -916,7 +919,7 @@ $$instance_handler(handlePublishResult, account.pubsub, $$ID(xmpp*, account), $$
             NSMutableDictionary* publishPreconditions = [NSMutableDictionary new];
             if(configOptions[@"pubsub#persist_items"])
                 publishPreconditions[@"pubsub#persist_items"] = configOptions[@"pubsub#persist_items"];
-            if(configOptions[@"pubsub#persist_items"])
+            if(configOptions[@"pubsub#access_model"])
                 publishPreconditions[@"pubsub#access_model"] = configOptions[@"pubsub#access_model"];
             
             [self internalPublishItem:item onNode:node withConfigOptions:publishPreconditions andHandler:$newHandlerWithInvalidation(self, handleConfigureAfterPublish, handleConfigureAfterPublishInvalidation,
@@ -949,9 +952,9 @@ $$instance_handler(handlePublishResult, account.pubsub, $$ID(xmpp*, account), $$
     $call(handler, $ID(account), $BOOL(success, YES), $ID(node));
 $$
 
-$$instance_handler(handleRetractResultInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, itemId), $_HANDLER(handler))
+$$instance_handler(handleRetractResultInvalidation, account.pubsub, $$ID(xmpp*, account), $_ID(NSString*, reason), $$ID(NSString*, node), $$ID(NSString*, itemId), $_HANDLER(handler))
     //invalidate user handler
-    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node), $ID(itemId));
+    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node), $ID(itemId), $ID(reason));
 $$
 
 $$instance_handler(handleRetractResult, account.pubsub, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, node), $$ID(NSString*, itemId), $_HANDLER(handler))
@@ -964,9 +967,9 @@ $$instance_handler(handleRetractResult, account.pubsub, $$ID(xmpp*, account), $$
     $call(handler, $ID(account), $BOOL(success, YES), $ID(node), $ID(itemId));
 $$
 
-$$instance_handler(handlePurgeOrDeleteResultInvalidation, account.pubsub, $$ID(xmpp*, account), $$ID(NSString*, node), $_HANDLER(handler))
+$$instance_handler(handlePurgeOrDeleteResultInvalidation, account.pubsub, $$ID(xmpp*, account), $_ID(NSString*, reason), $$ID(NSString*, node), $_HANDLER(handler))
     //invalidate user handler
-    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node));
+    $invalidate(handler, $ID(account), $BOOL(success, NO), $ID(node), $ID(reason));
 $$
 
 $$instance_handler(handlePurgeOrDeleteResult, account.pubsub, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, node), $_HANDLER(handler))

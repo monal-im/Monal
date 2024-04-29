@@ -1034,6 +1034,25 @@
             [db executeNonQuery:@"DROP TABLE IF EXISTS ver_timestamp;"];
         }];
         
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.202 withBlock:^{
+            //intentionally left blank
+        }];
+        
+        //fix empty domain in db for weird setups
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.203 withBlock:^{
+            [db executeNonQuery:@"UPDATE account SET domain=TRIM(server) WHERE domain='';"];
+        }];
+        
+        //add new setting to force deactivate sasl2 and fallback to sals1 and plain
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.204 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE account ADD COLUMN plain_activated BOOL DEFAULT false;"];
+            
+            //make sure that all users are still able to connect if the server supports SASL2 and the account is disabled
+            //--> possibly disabled because it only supports PLAIN
+            //==> the next connect will (re)set the plain_activated and supports_sasl2 flags to the correct values
+            [db executeNonQuery:@"UPDATE account SET plain_activated=true, supports_sasl2=false WHERE NOT enabled AND supports_sasl2;"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

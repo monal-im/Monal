@@ -23,6 +23,7 @@ extern NSString* const kDomain;
 extern NSString* const kEnabled;
 extern NSString* const kNeedsPasswordMigration;
 extern NSString* const kSupportsSasl2;
+extern NSString* const kPlainActivated;
 
 extern NSString* const kServer;
 extern NSString* const kPort;
@@ -163,6 +164,8 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(BOOL) pinSasl2ForAccount:(NSNumber*) accountNo;
 -(BOOL) isSasl2PinnedForAccount:(NSNumber*) accountNo;
+-(BOOL) isPlainActivatedForAccount:(NSNumber*) accountNo;
+-(BOOL) deactivatePlainForAccount:(NSNumber*) accountNo;
 
 -(NSMutableDictionary* _Nullable) readStateForAccount:(NSNumber*) accountNo;
 -(void) persistState:(NSDictionary*) state forAccount:(NSNumber*) accountNo;
@@ -211,7 +214,9 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
 -(void) deleteMessageHistoryLocally:(NSNumber*) messageNo;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
--(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo;
+-(NSNumber* _Nullable) getLMCHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo;
+-(NSNumber* _Nullable) getRetractionHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo;
+-(NSNumber* _Nullable) getRetractionHistoryIDForModeratedStanzaId:(NSString*) stanzaId from:(NSString*) from andAccount:(NSNumber*) accountNo;
 
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID;
 -(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted historyBaseID:(NSNumber* _Nullable) historyBaseID;

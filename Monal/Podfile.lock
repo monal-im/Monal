@@ -2,26 +2,26 @@ PODS:
   - ASN1Decoder (1.10.0)
   - DZNEmptyDataSet (1.8.1)
   - FLAnimatedImage (1.0.17)
-  - KSCrash/Core (1.16.2):
+  - KSCrash/Core (1.17.0):
     - KSCrash/Reporting/Filters/Basic
-  - KSCrash/Recording (1.16.2):
-    - KSCrash/Recording/Tools (= 1.16.2)
-  - KSCrash/Recording/Tools (1.16.2)
-  - KSCrash/Reporting/Filters/AppleFmt (1.16.2):
+  - KSCrash/Recording (1.17.0):
+    - KSCrash/Recording/Tools (= 1.17.0)
+  - KSCrash/Recording/Tools (1.17.0)
+  - KSCrash/Reporting/Filters/AppleFmt (1.17.0):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/Base (1.16.2):
+  - KSCrash/Reporting/Filters/Base (1.17.0):
     - KSCrash/Recording
-  - KSCrash/Reporting/Filters/Basic (1.16.2):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/GZip (1.16.2):
+  - KSCrash/Reporting/Filters/Basic (1.17.0):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/JSON (1.16.2):
+  - KSCrash/Reporting/Filters/GZip (1.17.0):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/Sets (1.16.2):
+  - KSCrash/Reporting/Filters/JSON (1.17.0):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters/Base
+  - KSCrash/Reporting/Filters/Sets (1.17.0):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/AppleFmt
     - KSCrash/Reporting/Filters/Base
@@ -29,12 +29,12 @@ PODS:
     - KSCrash/Reporting/Filters/GZip
     - KSCrash/Reporting/Filters/JSON
     - KSCrash/Reporting/Filters/Stringify
-  - KSCrash/Reporting/Filters/Stringify (1.16.2):
+  - KSCrash/Reporting/Filters/Stringify (1.17.0):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/Tools (1.16.2):
+  - KSCrash/Reporting/Filters/Tools (1.17.0):
     - KSCrash/Recording
-  - KSCrash/Reporting/Tools (1.16.2):
+  - KSCrash/Reporting/Tools (1.17.0):
     - KSCrash/Recording
   - MarqueeLabel (4.3.2)
   - MBProgressHUD (1.2.0)
@@ -42,9 +42,9 @@ PODS:
     - MarqueeLabel (~> 4.3.0)
     - SnapKit (~> 5.6.0)
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.19.0):
-    - SDWebImage/Core (= 5.19.0)
-  - SDWebImage/Core (5.19.0)
+  - SDWebImage (5.19.1):
+    - SDWebImage/Core (= 5.19.1)
+  - SDWebImage/Core (5.19.1)
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
@@ -53,7 +53,7 @@ PODS:
   - sqlite3/perf-threadsafe (3.45.1):
     - sqlite3/common
   - TOCropViewController (2.6.1)
-  - WebRTC-lib (122.0.0)
+  - WebRTC-lib (123.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -110,18 +110,18 @@ SPEC CHECKSUMS:
   ASN1Decoder: 91cb1d781b5a178ea7375b2f1519e2bdaaa4c427
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
-  KSCrash: 469b9f982b97309acb719baaecbf9182f62ddf85
+  KSCrash: 593ec373759e4c1bce381421a627326a20d2dc66
   MarqueeLabel: 15e524a6762552bb279cb17438b8a94990269fb9
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: 981fd7e860af070920f249fd092420006014c3eb
+  SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
-  WebRTC-lib: 5e9d21edbcf9ce5cc66b7ec7f94f0c15a2779113
+  WebRTC-lib: bb973dd47acf5bc48d8a935a92ae836b70599bc1
 
 PODFILE CHECKSUM: f415f317e34fd11a687374f84ee8dfb14ebb29a6
 

@@ -813,27 +813,34 @@ enum msgSentState {
 {
     [super viewDidAppear:animated];
 #ifndef DISABLE_OMEMO
-    if(self.xmppAccount) {
+    if(self.xmppAccount)
+    {
         BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid].count > 0;
-        if(!omemoDeviceForContactFound) {
-            if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo] && self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])
+        if(!omemoDeviceForContactFound && self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
+        {
+            if(!self.contact.isGroup && [[HelperTools splitJid:self.contact.contactJid][@"host"] isEqualToString:@"cheogram.com"])
             {
-                // a group that does not support OMEMO has encryption enabled
-                // disable it
+                // cheogram.com does not support OMEMO encryption as it is a PSTN gateway
+                // --> disable it
                 self.contact.isEncrypted = NO;
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
             }
-            else if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo] && (!self.contact.isGroup || (self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])))
+            else if(self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])
             {
-                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No OMEMO keys found", @"") message:NSLocalizedString(@"This contact may not support OMEMO encrypted messages. Please try again in a few seconds.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
+                // --> disable it
+                self.contact.isEncrypted = NO;
+                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+            }
+            else if(!self.contact.isGroup || (self.contact.isGroup && [self.contact.mucType isEqualToString:@"group"]))
+            {
+                // a 1:1 contact or a group type muc has OMEMO encryption enabled
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No OMEMO keys found", @"") message:NSLocalizedString(@"This contact may not support OMEMO encrypted messages. Please try to enable encryption again in a few seconds, if you think this is wrong.", @"") preferredStyle:UIAlertControllerStyleAlert];
                 [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     // Disable encryption
                     self.contact.isEncrypted = NO;
                     [self updateUIElements];
                     [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-                    [alert dismissViewControllerAnimated:YES completion:nil];
-                }]];
-                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ignore", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                     [alert dismissViewControllerAnimated:YES completion:nil];
                 }]];
 
@@ -968,10 +975,9 @@ enum msgSentState {
                 //get list of unread messages
                 NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
 
-                //send displayed marker for last unread message (XEP-0333)
-                //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
+                //publish MDS display marker and optionally send displayed marker for last unread message (XEP-0333)
                 MLMessage* lastUnreadMessage = [unread lastObject];
-                if(lastUnreadMessage && (!self.contact.isGroup || [@"group" isEqualToString:self.contact.mucType]))
+                if(lastUnreadMessage)
                 {
                     DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
                     [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];
@@ -2483,17 +2489,26 @@ enum msgSentState {
     quoteAction.image = [[[UIImage systemImageNamed:@"quote.bubble.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     UIContextualAction* retractAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Retract", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        [self.xmppAccount retractMessage:message.messageId toContact:self.contact];
-        [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
-        [message updateWithMessage:[[[DataLayer sharedInstance] messagesForHistoryIDs:@[message.messageDBId]] firstObject]];
+        //only delete directly if we sent that message, try to moderate otherwise
+        if(!message.inbound)
+        {
+            [self.xmppAccount retractMessage:message];
+            [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
+            [message updateWithMessage:[[[DataLayer sharedInstance] messagesForHistoryIDs:@[message.messageDBId]] firstObject]];
 
-        //update table entry
-        [self->_messageTable beginUpdates];
-        [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-        [self->_messageTable endUpdates];
-        
-        //update active chats if necessary
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+            //update table entry
+            [self->_messageTable beginUpdates];
+            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            [self->_messageTable endUpdates];
+            
+            //update active chats if necessary
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+        }
+        else
+        {
+            //hardcode reason for now (change this when rewriting chatui using swiftui)
+            [self.xmppAccount moderateMessage:message withReason:@"This message contains inappropriate content for this forum."];
+        }
 
         return completionHandler(YES);
     }];
@@ -2510,7 +2525,7 @@ enum msgSentState {
 
         //update active chats if necessary
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
-
+        
         return completionHandler(YES);
     }];
     localDeleteAction.backgroundColor = UIColor.systemYellowColor;
@@ -2538,8 +2553,8 @@ enum msgSentState {
             LMCEditAction,
             retractAction,
         ]];
-    //only allow retraction for outgoing messages
-    else if(!message.inbound)
+    //only allow retraction for outgoing messages or if we are the moderator of that muc
+    else if(!message.inbound || (self.contact.isGroup && [[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact] isEqualToString:@"moderator"] && [[self.xmppAccount.mucProcessor getRoomFeaturesForMuc:self.contact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"]))
         return [UISwipeActionsConfiguration configurationWithActions:@[
             quoteAction,
             copyAction,

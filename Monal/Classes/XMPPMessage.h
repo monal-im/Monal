@@ -41,6 +41,7 @@ FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
 -(void) setReceipt:(NSString*) messageId;
 -(void) setChatmarkerReceipt:(NSString*) messageId;
 -(void) setDisplayed:(NSString*) messageId;
+-(void) setMDSDisplayed:(NSString*) stanzaId withStanzaIdBy:(NSString*) by;
 
 /**
  Hint saying the message should be stored

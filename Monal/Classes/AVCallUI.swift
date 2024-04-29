@@ -525,33 +525,23 @@ struct AVCallUI: View {
                             }
                             .buttonStyle(BorderlessButtonStyle())
                             
-                            if MLCallState(rawValue:call.state) == .connected || MLCallState(rawValue:call.state) == .reconnecting {
-                                Spacer().frame(width: 32)
-                                Button(action: {
-                                    call.speaker = !call.speaker
-                                }) {
-                                    if #available(iOS 15, *) {
+                            //the button somehow does not work in iOS 15 and we don't know how to fix that
+                            //--> don't show the button on iOS 14 and 15
+                            if #available(iOS 16, *) {
+                                if MLCallState(rawValue:call.state) == .connected || MLCallState(rawValue:call.state) == .reconnecting {
+                                    Spacer().frame(width: 32)
+                                    Button(action: {
+                                        call.speaker = !call.speaker
+                                    }) {
                                         Image(systemName: "speaker.wave.2.circle.fill")
                                             .resizable()
                                             .frame(width: 64.0, height: 64.0)
                                             .symbolRenderingMode(.palette)
                                             .foregroundStyle(call.speaker ? .black : .white, call.speaker ? .white : .black)
                                             .shadow(radius: 7)
-                                    } else {
-                                        ZStack {
-                                            Image(systemName: "circle.fill")
-                                                .resizable()
-                                                .frame(width: 64.0, height: 64.0)
-                                                .accentColor(call.speaker ? .black : .white)
-                                            Image(systemName: "speaker.wave.2.circle.fill")
-                                                .resizable()
-                                                .frame(width: 64.0, height: 64.0)
-                                                .accentColor(call.speaker ? .white : .black)
-                                                .shadow(radius: 7)
-                                        }
                                     }
+                                    .buttonStyle(BorderlessButtonStyle())
                                 }
-                                .buttonStyle(BorderlessButtonStyle())
                             }
                             
                             Spacer()

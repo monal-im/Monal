@@ -56,18 +56,36 @@ struct ImageViewer: View {
             Color.background
                 .edgesIgnoringSafeArea(.all)
             
-            let image = UIImage(contentsOfFile:info["cacheFile"] as! String)!
-            
-            VStack {
-                ZoomableContainer(maxScale:8.0, doubleTapScale:4.0) {
-                    if (info["mimeType"] as! String).hasPrefix("image/gif") {
-                        GIFViewer(data:Binding(get: { try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data }, set: { _ in }))
-                            .scaledToFit()
-                    } else {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
+            if let image = UIImage(contentsOfFile:info["cacheFile"] as! String) {
+                VStack {
+                    ZoomableContainer(maxScale:8.0, doubleTapScale:4.0) {
+                        if (info["mimeType"] as! String).hasPrefix("image/gif") {
+                            GIFViewer(data:Binding(get: { try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data }, set: { _ in }))
+                                .scaledToFit()
+                        } else {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFit()
+                        }
                     }
+                }
+            } else {
+                VStack {
+                    Spacer()
+                    Text("Invalid image file!")
+                    Spacer().frame(height: 24)
+                    if #available(iOS 15, *) {
+                        Image(systemName: "xmark.square.fill")
+                            .resizable()
+                            .frame(width: 128.0, height: 128.0)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .red)
+                    } else {
+                        Image(systemName: "xmark.square.fill")
+                            .resizable()
+                            .frame(width: 128.0, height: 128.0)
+                    }
+                    Spacer()
                 }
             }
             
@@ -80,7 +98,7 @@ struct ImageViewer: View {
                                 Spacer().frame(width:20)
                                 Text(info["filename"] as! String).foregroundColor(.primary)
                                 Spacer()
-                                if #available(iOS 16, *) {
+                                if #available(iOS 16, *), let image = UIImage(contentsOfFile:info["cacheFile"] as! String) {
                                     if (info["mimeType"] as! String).hasPrefix("image/gif") {
                                         ShareLink(
                                             item: GifRepresentation(getData: {

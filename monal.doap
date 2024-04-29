@@ -653,9 +653,18 @@
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0424.html" />
         <xmpp:status>complete</xmpp:status>
-        <xmpp:since>6.0</xmpp:since>
-        <xmpp:version>0.3.0</xmpp:version>
+        <xmpp:since>6.3</xmpp:since>
+        <xmpp:version>0.4.1</xmpp:version>
         <xmpp:note>XEP-0424: Message Retraction</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0425.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.3</xmpp:since>
+        <xmpp:version>0.3.0</xmpp:version>
+        <xmpp:note>XEP-0425: Moderated Message Retraction</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -704,6 +713,15 @@
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>6.0</xmpp:since>
         <xmpp:note>XEP-0480: SASL Upgrade Tasks</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0490.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>6.3</xmpp:since>
+        <xmpp:version>0.1.0</xmpp:version>
+        <xmpp:note>XEP-0490: Message Displayed Synchronization</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
   </Project>

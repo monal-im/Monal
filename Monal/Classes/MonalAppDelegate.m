@@ -348,15 +348,16 @@ $$
 
 -(void) updateUnread
 {
+    DDLogInfo(@"Updating unread called");
     //make sure unread badge matches application badge
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
-    dispatch_async(dispatch_get_main_queue(), ^{
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         NSInteger unread = 0;
         if(unreadMsgCnt != nil)
             unread = [unreadMsgCnt integerValue];
         DDLogInfo(@"Updating unread badge to: %ld", (long)unread);
         [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
-    });
+    }];
 }
 
 #pragma mark - app life cycle
@@ -814,7 +815,7 @@ $$
                     
                     //add given jid to our roster if in roster mode (e.g. the jid is not the jid we just registered as like in register mode)
                     if(account != nil && isRoster)      //silence memory warning despite assertion above
-                        [self handleXMPPURL:url];
+                        return [self handleXMPPURL:url];
                 }];
             }
             //I know this if is moot, but I wanted to preserve the different cases:
@@ -950,10 +951,12 @@ $$
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
             DDLogDebug(@"Marked as read: %@", unread);
             
-            //send displayed marker for last unread message (XEP-0333)
-            //but only for 1:1 or group-type mucs,not for channe-type mucs (privacy etc.)
+            //send displayed marker for last unread message *marked as wanting chat markers* (XEP-0333)
+//             for(MLMessage* msg in unread)
+//                 ;   //TODO: implement this!!
+            
             MLMessage* lastUnreadMessage = [unread lastObject];
-            if(lastUnreadMessage && (!fromContact.isGroup || [@"group" isEqualToString:fromContact.mucType]))
+            if(lastUnreadMessage)
             {
                 DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
                 [account sendDisplayMarkerForMessage:lastUnreadMessage];
@@ -1132,6 +1135,7 @@ $$
 {
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         [account freeze];
+    [MLProcessLock unlock];
     _wasFreezed = YES;
     @synchronized(self) {
         DDLogVerbose(@"Setting _shutdownPending to NO...");

@@ -86,6 +86,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(MLXMLNode* _Nullable) candidate2xml:(NSString*) candidate withMid:(NSString*) mid pwd:(NSString* _Nullable) pwd ufrag:(NSString* _Nullable) ufrag andInitiator:(BOOL) initiator;
 +(NSString* _Nullable) xml2candidate:(MLXMLNode*) xml withInitiator:(BOOL) initiator;
 
++(void) busyWaitForOperationQueue:(NSOperationQueue*) queue;
 +(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier;
 +(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier;
 +(NSError* _Nullable) hardLinkOrCopyFile:(NSString*) from to:(NSString*) to;
@@ -173,6 +174,8 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSNumber*) dateToNSNumberSeconds:(NSDate*) date;
 
 +(BOOL) constantTimeCompareAttackerString:(NSString* _Nonnull) str1 withKnownString:(NSString* _Nonnull) str2;
+
++(BOOL) isIP:(NSString*) host;
 
 @end
 

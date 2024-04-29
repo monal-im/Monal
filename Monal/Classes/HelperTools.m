@@ -85,6 +85,13 @@ static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
 static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
 #endif
 
+//shamelessly stolen from utils.ip in conversations source
+static NSRegularExpression* IPV4;
+static NSRegularExpression* IPV6_HEX4DECCOMPRESSED;
+static NSRegularExpression* IPV6_6HEX4DEC;
+static NSRegularExpression* IPV6_HEXCOMPRESSED;
+static NSRegularExpression* IPV6;
+
 //add own crash info (used by rust panic handler)
 //see https://alastairs-place.net/blog/2013/01/10/interesting-os-x-crash-report-tidbits/
 //and kscrash sources (KSDynamicLinker.c)
@@ -280,6 +287,13 @@ void swizzle(Class c, SEL orig, SEL new)
     
     u_int32_t i = arc4random();
     _processID = [self hexadecimalString:[NSData dataWithBytes:&i length:sizeof(i)]];
+    
+    //shamelessly stolen from utils.ip in conversations source
+    IPV4 = [NSRegularExpression regularExpressionWithPattern:@"\\A(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z" options:0 error:nil];
+    IPV6_HEX4DECCOMPRESSED = [NSRegularExpression regularExpressionWithPattern:@"\\A((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?) ::((?:[0-9A-Fa-f]{1,4}:)*)(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z" options:0 error:nil];
+    IPV6_6HEX4DEC = [NSRegularExpression regularExpressionWithPattern:@"\\A((?:[0-9A-Fa-f]{1,4}:){6,6})(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z" options:0 error:nil];
+    IPV6_HEXCOMPRESSED = [NSRegularExpression regularExpressionWithPattern:@"\\A((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)\\z" options:0 error:nil];
+    IPV6 = [NSRegularExpression regularExpressionWithPattern:@"\\A(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\\z" options:0 error:nil];
 }
 
 +(void) installExceptionHandler
@@ -503,6 +517,24 @@ void swizzle(Class c, SEL orig, SEL new)
         @"stuns:eu.prod.turn.monal-im.org:3478",
 #endif
     ];
+}
+
++(void) busyWaitForOperationQueue:(NSOperationQueue*) queue
+{
+    //apparently setting someQueue.suspended = YES does return before the queue is actually suspended
+    //--> busy wait for someQueue.suspended == YES
+    int busyWaitCounter = 0;
+    NSTimeInterval waitTime = 0.0;
+    NSDate* startTime = [NSDate date];
+    while(queue.suspended != YES)
+    {
+        busyWaitCounter++;
+        waitTime = [[NSDate date] timeIntervalSinceDate:startTime];
+        MLAssert(waitTime <= 4.0, @"Busy wait for queue freeze took longer than 4.0 seconds!", (@{@"queue": queue, @"name": queue.name}));
+        
+    }
+    if(busyWaitCounter > 0)
+        DDLogWarn(@"busyWaitFor:%@ --> busyWaitCounter=%d, waitTime=%f", queue.name, busyWaitCounter, waitTime);
 }
 
 +(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier
@@ -2659,6 +2691,21 @@ a=%@\r\n", mid, candidate];
     }
     
     return m == 0;      //check if we never turned on any bit in m
+}
+
++(BOOL) isIP:(NSString*) host
+{
+    if([[IPV4 matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
+        return YES;
+    if([[IPV6_HEX4DECCOMPRESSED matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
+        return YES;
+    if([[IPV6_6HEX4DEC matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
+        return YES;
+    if([[IPV6_HEXCOMPRESSED matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
+        return YES;
+    if([[IPV6 matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
+        return YES;
+    return NO;
 }
 
 @end

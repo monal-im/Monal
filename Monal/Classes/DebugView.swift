@@ -22,10 +22,18 @@ class DebugDefaultDB: ObservableObject {
 
 struct LogFilesView: View {
     @State private var sortedLogFileInfos: [DDLogFileInfo] = []
-    @State private var dbFileURL: URL?
     @State private var showShareSheet:Bool = false
     @State private var fileURL: URL?
     @State private var showingDBExportFailedAlert = false
+    
+    func refreshSortedLogfiles() {
+        if let sortedLogFileInfos = HelperTools.fileLogger?.logFileManager.sortedLogFileInfos {
+            self.sortedLogFileInfos = sortedLogFileInfos
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+            refreshSortedLogfiles()
+        }
+    }
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -57,22 +65,22 @@ struct LogFilesView: View {
                     }.foregroundColor(monalDarkGreen)
                 }
             }
+            .applyClosure { view in
+                if #available(iOS 15, *) {
+                    view.listStyle(.grouped)
+                }
+            }
         }
         .alert(isPresented: $showingDBExportFailedAlert) {
             Alert(title: Text("Database Export Failed"), message: Text("Failed to export the database, please check the logfile for errors and try again."), dismissButton: .default(Text("Close")))
         }
-        .onAppear {
-            if let sortedLogFileInfos = HelperTools.fileLogger?.logFileManager.sortedLogFileInfos {
-                self.sortedLogFileInfos = sortedLogFileInfos
-            }
-            if let dbFile = DataLayer.sharedInstance().exportDB() {
-                dbFileURL = URL(fileURLWithPath: dbFile)
-            }
-        }
-        .sheet(isPresented:Binding.mappedTo(bindingToOptional: $fileURL)) {
+        .sheet(isPresented:$fileURL.optionalMappedToBool()) {
             if let fileURL = fileURL {
                 ActivityViewController(activityItems: [fileURL])
             }
+        }
+        .onAppear {
+            refreshSortedLogfiles()
         }
     }
 }
@@ -97,7 +105,9 @@ struct UDPConfigView: View {
                             TextField("AES Encryption Key", text: $defaultDB.udpLoggerKey, prompt: Text("Required"))
                         }
                     }
-                }.textFieldStyle(.roundedBorder)
+                }
+                .padding(0)
+                .textFieldStyle(.roundedBorder)
             } else {
                 Text("The UDP logger allows you to livestream the log to the configured IP.")
                 Link("Learn more", destination: URL(string: "https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#stream-the-log")!)
@@ -167,6 +177,7 @@ struct DebugView: View {
                     Text("Crash Testing")
                 }
         }
+        .padding()
         .addLoadingOverlay(overlay)
         .onChange(of: isReconnecting) { _ in
             if isReconnecting{
@@ -175,15 +186,13 @@ struct DebugView: View {
                 hideLoadingOverlay(overlay)
             }
         }
-        .navigationBarItems(trailing:
-                                Button("Reconnect All"){
+        .navigationBarItems(trailing:Button("Reconnect All") {
             isReconnecting = true
             MLXMPPManager.sharedInstance().reconnectAll()
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                 isReconnecting = false
             }
-        }
-        )
+        })
     }
 }
 

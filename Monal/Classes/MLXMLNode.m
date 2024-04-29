@@ -732,7 +732,8 @@ static NSRegularExpression* attributeFilterRegex;
                 //instead of starting with a fresh copy (which would always extract only the first variadic argument
                 //regardless of the position in the format string we are at).
                 char* dest = NULL;
-                rpl_vasprintf(&dest, [attributeFilterValue UTF8String], args);
+                if(rpl_vasprintf(&dest, [attributeFilterValue UTF8String], args) == -1)
+                    [NSException raise:@"NSInternalInconsistencyException" format:@"failed malloc in MLXMLNode's usage of rpl_vasprintf" arguments:nil];
                 MLAssert(dest != NULL, @"dest should *never* be NULL!");
                 NSString* unescapedAttributeFilterValue = [NSString stringWithUTF8String:dest];
                 free(dest);

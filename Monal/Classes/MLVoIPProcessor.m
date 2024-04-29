@@ -363,7 +363,29 @@ static NSMutableDictionary* _pendingCalls;
                 NSMutableDictionary* serviceWithCredentials = [NSMutableDictionary dictionaryWithDictionary:service];
                 [serviceWithCredentials addEntriesFromDictionary:(NSDictionary*)data];
                 DDLogDebug(@"Got new external service credentials: %@", serviceWithCredentials);
-                [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:@[[NSString stringWithFormat:@"%@:%@:%@", serviceWithCredentials[@"type"], serviceWithCredentials[@"host"], serviceWithCredentials[@"port"]]] username:serviceWithCredentials[@"username"] credential:serviceWithCredentials[@"password"]]];
+                //transport is only defined for turn/turns, but not for stun/stuns from M110 onwards
+                NSString* transport = @"";
+                if([@[@"turn", @"turns"] containsObject:serviceWithCredentials[@"type"]])
+                {
+                    if(serviceWithCredentials[@"username"] == nil || serviceWithCredentials[@"password"] == nil)
+                    {
+                        DDLogWarn(@"Invalid turn/turns credentials: missing username or password, ignoring!");
+                        return;
+                    }
+                    if(serviceWithCredentials[@"transport"] != nil)
+                        transport = [NSString stringWithFormat:@"?transport=%@", serviceWithCredentials[@"transport"]];
+                }
+                [iceServers addObject:[[RTCIceServer alloc]
+                    initWithURLStrings:@[[NSString stringWithFormat:@"%@:%@:%@%@",
+                        serviceWithCredentials[@"type"],
+                        [HelperTools isIP:serviceWithCredentials[@"host"]] ? [NSString stringWithFormat:@"[%@]", serviceWithCredentials[@"host"]] : serviceWithCredentials[@"host"],
+                        serviceWithCredentials[@"port"],
+                        transport
+                    ]]
+                    username:serviceWithCredentials[@"username"]
+                    credential:serviceWithCredentials[@"password"]
+                    tlsCertPolicy:RTCTlsCertPolicyInsecureNoCheck
+                ]];
                 
                 //proceed only if all ice servers have been processed
                 if([iceServers count] == [call.account.connectionProperties.discoveredStunTurnServers count])

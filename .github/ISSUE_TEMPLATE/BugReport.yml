@@ -21,35 +21,27 @@ body:
   - type: input
     id: ios_version
     attributes:
-      label: iOS system version
+      label: iOS system version (if applicable)
       description: What iOS version are you using? Open Settings, scroll down until "General", select "Info" and report "Software version".
       placeholder: "14.7"
     validations:
       required: false
   - type: input
-    id: ios_monal__version
-    attributes:
-      label: iOS Monal version
-      description: What Monal version are you using? Open Monal, select top left icon, scoll down until "Version".
-      placeholder: "5.0.1"
-    validations:
-      required: false
-  - type: input
     id: mac_version
     attributes:
-      label: macOS system version
+      label: macOS system version (if applicable)
       description: What macOS version are you using?
       placeholder: "14.7"
     validations:
       required: false
   - type: input
-    id: mac_monal__version
+    id: monal_version
     attributes:
-      label: macOS Monal version
-      description: What Monal version are you using?
-      placeholder: "5.0.1"
+      label: Monal version
+      description: What Monal version are you using? Open Monal, select top left icon, scoll down until "Version".
+      placeholder: "1.0"
     validations:
-      required: false
+      required: true
   - type: input
     id: xmpp_server
     attributes:
@@ -131,13 +123,13 @@ body:
       options:
         - label: I have checked if my issue can be solved with [Considerations for XMPP users](https://github.com/monal-im/Monal/wiki/Considerations-for-XMPP-users) and [Considerations for XMPP server admins](https://github.com/monal-im/Monal/wiki/Considerations-for-XMPP-server-admins)
           required: true
-  - type: checkboxes
-    id: cross-check-checkbox
-    attributes:
-      label: Related Issues
-      options:
-        - label: I have cross-checked this overview https://github.com/monal-im/Monal/issues/322 as well as filtered for related labels https://github.com/monal-im/Monal/labels
-          required: true
+  # - type: checkboxes
+  #   id: cross-check-checkbox
+  #   attributes:
+  #     label: Related Issues
+  #     options:
+  #       - label: I have cross-checked this overview https://github.com/monal-im/Monal/issues/322 as well as filtered for related labels https://github.com/monal-im/Monal/labels
+  #         required: true
   - type: checkboxes
     id: xep-checkbox
     attributes:

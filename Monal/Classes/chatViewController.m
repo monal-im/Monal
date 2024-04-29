@@ -176,7 +176,6 @@ enum msgSentState {
 
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight = UITableViewAutomaticDimension;
-    self.messageTable.backgroundColor = [UIColor colorNamed:@"chatBackgroundColor"];
 
 #if TARGET_OS_MACCATALYST
     //does not become first responder like in iOS
@@ -814,27 +813,34 @@ enum msgSentState {
 {
     [super viewDidAppear:animated];
 #ifndef DISABLE_OMEMO
-    if(self.xmppAccount) {
+    if(self.xmppAccount)
+    {
         BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid].count > 0;
-        if(!omemoDeviceForContactFound) {
-            if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo] && self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])
+        if(!omemoDeviceForContactFound && self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
+        {
+            if(!self.contact.isGroup && [[HelperTools splitJid:self.contact.contactJid][@"host"] isEqualToString:@"cheogram.com"])
             {
-                // a group that does not support OMEMO has encryption enabled
-                // disable it
+                // cheogram.com does not support OMEMO encryption as it is a PSTN gateway
+                // --> disable it
                 self.contact.isEncrypted = NO;
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
             }
-            else if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo] && (!self.contact.isGroup || (self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])))
+            else if(self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])
             {
-                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No OMEMO keys found", @"") message:NSLocalizedString(@"This contact may not support OMEMO encrypted messages. Please try again in a few seconds.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
+                // --> disable it
+                self.contact.isEncrypted = NO;
+                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+            }
+            else if(!self.contact.isGroup || (self.contact.isGroup && [self.contact.mucType isEqualToString:@"group"]))
+            {
+                // a 1:1 contact or a group type muc has OMEMO encryption enabled
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No OMEMO keys found", @"") message:NSLocalizedString(@"This contact may not support OMEMO encrypted messages. Please try to enable encryption again in a few seconds, if you think this is wrong.", @"") preferredStyle:UIAlertControllerStyleAlert];
                 [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     // Disable encryption
                     self.contact.isEncrypted = NO;
                     [self updateUIElements];
                     [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-                    [alert dismissViewControllerAnimated:YES completion:nil];
-                }]];
-                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ignore", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                     [alert dismissViewControllerAnimated:YES completion:nil];
                 }]];
 

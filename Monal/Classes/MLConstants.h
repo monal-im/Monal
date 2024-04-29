@@ -64,12 +64,6 @@ typedef void (^monal_void_block_t)(void);
 typedef void (^monal_id_block_t)(id _Nonnull);
 typedef void (^monal_upload_completion_t)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error);
 
-typedef enum NotificationPrivacySettingOption {
-    DisplayNameAndMessage,
-    DisplayOnlyName,
-    DisplayOnlyPlaceholder
-} NotificationPrivacySettingOption;
-
 typedef NS_ENUM(NSUInteger, MLAudioState) {
     MLAudioStateNormal,
     MLAudioStateCall,

@@ -148,6 +148,9 @@
 		846DF27C2937FAA600AAB9C0 /* ChatPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */; };
 		848717F3295ED64600B8D288 /* MLCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 848717F1295ED64500B8D288 /* MLCall.m */; };
 		848904A9289C82C30097E19C /* SCRAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 848904A8289C82C30097E19C /* SCRAM.m */; };
+		848C73E02BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 848C73DF2BDF2014007035C9 /* PrivacyInfo.xcprivacy */; };
+		848C73E12BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 848C73DF2BDF2014007035C9 /* PrivacyInfo.xcprivacy */; };
+		848C73E22BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 848C73DF2BDF2014007035C9 /* PrivacyInfo.xcprivacy */; };
 		849248492AD4CEC400986C1A /* ZoomableContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849248482AD4CEC400986C1A /* ZoomableContainer.swift */; };
 		849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 849A53E3287135B2007E941A /* MLVoIPProcessor.m */; };
 		849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF3E2BACF0360009BCD7 /* CocoaLumberjack */; };
@@ -580,6 +583,7 @@
 		848717F2295ED64500B8D288 /* MLCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLCall.h; path = Classes/MLCall.h; sourceTree = SOURCE_ROOT; };
 		848904A8289C82C30097E19C /* SCRAM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SCRAM.m; sourceTree = "<group>"; };
 		848904AA289C82DB0097E19C /* SCRAM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SCRAM.h; sourceTree = "<group>"; };
+		848C73DF2BDF2014007035C9 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		849248482AD4CEC400986C1A /* ZoomableContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoomableContainer.swift; sourceTree = "<group>"; };
 		849A53E3287135B2007E941A /* MLVoIPProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLVoIPProcessor.m; path = Classes/MLVoIPProcessor.m; sourceTree = SOURCE_ROOT; };
 		849A53E5287135D7007E941A /* MLVoIPProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLVoIPProcessor.h; path = Classes/MLVoIPProcessor.h; sourceTree = SOURCE_ROOT; };
@@ -1293,6 +1297,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				848C73DF2BDF2014007035C9 /* PrivacyInfo.xcprivacy */,
 				842790842A32D16C005C18CC /* CallSounds */,
 				26B0CA8A21AE410E0080B133 /* AlertSounds */,
 				26158AF31FFA8A6A00E53BDC /* opensource.html */,
@@ -1758,6 +1763,7 @@
 				262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */,
 				2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */,
 				264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */,
+				848C73E02BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */,
 				26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */,
 				842790852A32D16D005C18CC /* CallSounds in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
@@ -1778,6 +1784,7 @@
 			files = (
 				845EFFBD2918721800C1E03E /* Localizable.strings in Resources */,
 				C1D7D7B0283FB4E700401389 /* Media.xcassets in Resources */,
+				848C73E22BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */,
 				C1D7D7AF283FB4E500401389 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1786,6 +1793,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				848C73E12BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */,
 				845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */,
 				26AA70182146BBB900598605 /* iosShare.storyboard in Resources */,
 			);

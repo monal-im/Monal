@@ -90,7 +90,7 @@ final class WebRTCClient: NSObject {
     
     @objc
     required init(iceServers: [RTCIceServer], audioOnly: Bool, forceRelay: Bool) {
-        RTCSetMinDebugLogLevel(.info)
+        RTCSetMinDebugLogLevel(.verbose)
         
         var peerConnection = WebRTCClient.createPeerConnection(iceServers: iceServers, forceRelay: forceRelay)
         if peerConnection == nil {

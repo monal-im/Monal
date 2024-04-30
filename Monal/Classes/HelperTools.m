@@ -650,7 +650,7 @@ void swizzle(Class c, SEL orig, SEL new)
 {
     BOOL shouldProvideVoip;
 #if TARGET_OS_MACCATALYST
-    shouldProvideVoip = NO;
+    shouldProvideVoip = YES;
 #else
     shouldProvideVoip = YES;
 #endif

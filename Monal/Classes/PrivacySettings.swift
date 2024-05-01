@@ -75,6 +75,9 @@ class PrivacyDefaultDB: ObservableObject {
     
     @defaultsDB("ImageUploadQuality")
     var imageUploadQuality : Float
+    
+    @defaultsDB("showKeyboardOnChatOpen")
+    var showKeyboardOnChatOpen: Bool
 }
 
 
@@ -161,12 +164,17 @@ struct PublishingScreen: View {
     
     var body: some View {
         Form {
-            Toggle("Send last interaction time", isOn: $privacyDefaultDB.sendLastUserInteraction)
-            Toggle("Send typing notifications", isOn: $privacyDefaultDB.sendLastChatState)
-            Toggle("Send message received state", isOn: $privacyDefaultDB.sendReceivedMarkers)
-            Toggle("Send message displayed state", isOn: $privacyDefaultDB.sendDisplayedMarkers)
+            Section(header: Text("Publishing")) {
+                Toggle("Send last interaction time", isOn: $privacyDefaultDB.sendLastUserInteraction)
+                Toggle("Send typing notifications", isOn: $privacyDefaultDB.sendLastChatState)
+                Toggle("Send message received state", isOn: $privacyDefaultDB.sendReceivedMarkers)
+                Toggle("Send message displayed state", isOn: $privacyDefaultDB.sendDisplayedMarkers)
+            }
+            Section(header: Text("Appearance")) {
+                Toggle("Autofocus text input on chat open", isOn: $privacyDefaultDB.showKeyboardOnChatOpen)
+            }
         }
-        .navigationBarTitle("Publishing", displayMode: .inline)
+        .navigationBarTitle("Publishing & appearance", displayMode: .inline)
     }
 }
 

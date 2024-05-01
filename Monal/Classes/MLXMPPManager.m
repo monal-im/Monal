@@ -141,6 +141,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //anti spam/privacy setting, but default to yes (current behavior, conversations behavior etc.)
     [self upgradeBoolUserSettingsIfUnset:@"allowNonRosterContacts" toDefault:YES];
     [self upgradeBoolUserSettingsIfUnset:@"allowCallsFromNonRosterContacts" toDefault:YES];
+    
+    //mac catalyst will not show a soft-keyboard when setting focus, ios will
+    //--> only automatically set focus on macos and make this configurable
+#if TARGET_OS_MACCATALYST
+    [self upgradeBoolUserSettingsIfUnset:@"showKeyboardOnChatOpen" toDefault:YES];
+#else
+    [self upgradeBoolUserSettingsIfUnset:@"showKeyboardOnChatOpen" toDefault:NO];
+#endif
 }
 
 -(void) upgradeFloatUserSettingsToInteger:(NSString*) settingsName

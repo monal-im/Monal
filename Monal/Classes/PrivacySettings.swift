@@ -219,40 +219,49 @@ struct MLAutoDownloadFiletransferSettingView: View {
                 Text("Adjust the maximum file size for auto-downloads over WiFi")
                     .foregroundColor(.secondary)
                     .font(.footnote)
-                Slider(value: $privacyDefaultDB.autodownloadFiletransfersWifiMaxSize.bytecount(mappedTo: 1024*1024),
-                       in: 1.0...100.0,
-                       step: 1.0,
-                       minimumValueLabel: Text("1 MiB"),
-                       maximumValueLabel: Text("100 MiB"),
-                       label: {Text("Load over wifi")}
+                Slider(
+                    value: $privacyDefaultDB.autodownloadFiletransfersWifiMaxSize.bytecount(mappedTo: 1024*1024),
+                    in: 1.0...100.0,
+                    step: 1.0,
+                    minimumValueLabel: Text("1 MiB"),
+                    maximumValueLabel: Text("100 MiB"),
+                    label: {
+                        Text("Load over wifi")
+                    }
                 )
-                Text("Load over WiFi upto : \(UInt(privacyDefaultDB.autodownloadFiletransfersWifiMaxSize/(1024*1024))) MiB")
+                Text("Load over WiFi up to: \(UInt(privacyDefaultDB.autodownloadFiletransfersWifiMaxSize/(1024*1024))) MiB")
             }
             
             Text("Adjust the maximum file size for auto-downloads over cellular network")
                 .foregroundColor(.secondary)
                 .font(.footnote)
-            Slider(value: $privacyDefaultDB.autodownloadFiletransfersMobileMaxSize.bytecount(mappedTo: 1024*1024),
-                   in: 0.0...100.0,
-                   step: 1.0,
-                   minimumValueLabel: Text("1 MiB"),
-                   maximumValueLabel: Text("100 MiB"),
-                   label: {Text("Load over Cellular")}
+            Slider(
+                value: $privacyDefaultDB.autodownloadFiletransfersMobileMaxSize.bytecount(mappedTo: 1024*1024),
+                in: 0.0...100.0,
+                step: 1.0,
+                minimumValueLabel: Text("1 MiB"),
+                maximumValueLabel: Text("100 MiB"),
+                label: {
+                    Text("Load over Cellular")
+                }
             )
-            Text("Load over cellular upto : \(Int(privacyDefaultDB.autodownloadFiletransfersMobileMaxSize/(1024*1024))) MiB")
+            Text("Load over cellular up to: \(Int(privacyDefaultDB.autodownloadFiletransfersMobileMaxSize/(1024*1024))) MiB")
             
             Section(header: Text("Upload Settings")) {
                 Text("Adjust the quality of images uploaded")
                     .foregroundColor(.secondary)
                     .font(.footnote)
-                Slider(value: $privacyDefaultDB.imageUploadQuality,
-                       in: 0.33...1.0,
-                       step: 0.01,
-                       minimumValueLabel: Text("33%"),
-                       maximumValueLabel: Text("100%"),
-                       label: {Text("Upload Settings")
-                })
-                Text("Image Upload Quality : \(String(format: "%.0f%%", privacyDefaultDB.imageUploadQuality*100))")
+                Slider(
+                    value: $privacyDefaultDB.imageUploadQuality,
+                    in: 0.33...1.0,
+                    step: 0.01,
+                    minimumValueLabel: Text("33%"),
+                    maximumValueLabel: Text("100%"),
+                    label: {
+                        Text("Upload Settings")
+                    }
+                )
+                Text("Image Upload Quality: \(String(format: "%.0f%%", privacyDefaultDB.imageUploadQuality*100))")
             }
         }
     }

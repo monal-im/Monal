@@ -34,7 +34,7 @@
 
 -(void)layoutSubviews
 {
-    if([MLFiletransfer isFileforHistoryIdInTransfer:self.messageDBId])
+    if([MLFiletransfer isFileForHistoryIdInTransfer:self.messageDBId])
     {
         [self.loadingView setHidden:NO];
         [self.loadingView startAnimating];

@@ -9,7 +9,12 @@ if ! which bartycrouch > /dev/null; then
     echo "ERROR: BartyCrouch not installed, download it from https://github.com/Flinesoft/BartyCrouch"
     exit 1
 fi
-    
+
+SWIFT_EMIT_LOC_STRINGS=NO
+if [ "$2" != "" ]; then
+    SWIFT_EMIT_LOC_STRINGS="$2"
+fi
+
 function pullCurrentState {
     #subshell to not leak from "cd $folder"
     (
@@ -58,10 +63,30 @@ function runBartycrouch {
     bartycrouch lint -x -w
 }
 
+echo ""
+echo "***************************************"
+echo "*     Initializing submodules         *"
+echo "***************************************"
 git submodule deinit --all -f
 git submodule update --init --recursive --remote
 pullCurrentState "$@"
 
+echo ""
+echo "*******************************************"
+echo "*     Building rust packages & bridge     *"
+echo "*******************************************"
+bash ../rust/build-rust.sh
+
+echo ""
+echo "***************************************"
+echo "*     Installing macOS & iOS Pods     *"
+echo "***************************************"
+pod install --repo-update
+
+echo ""
+echo "***************************************"
+echo "*     Removing unused strings         *"
+echo "***************************************"
 # update strings to remove everything that's now unused (that includes swiftui strings we'll readd below)
 cp .bartycrouch.toml .bartycrouch.toml.orig
 sed 's/additive = true/additive = false/g' .bartycrouch.toml > .bartycrouch.toml.new
@@ -70,23 +95,26 @@ mv .bartycrouch.toml.new .bartycrouch.toml
 runBartycrouch
 rm .bartycrouch.toml
 mv .bartycrouch.toml.orig .bartycrouch.toml
-
 # now restore original state for all languages but our base one (otherwise every swiftui translation will be deleted)
 mv "localization/external/Base.lproj/Localizable.strings" "localization/external/Base.lproj/Localizable.strings.updated"
 pullCurrentState "$@"
 mv "localization/external/Base.lproj/Localizable.strings.updated" "localization/external/Base.lproj/Localizable.strings"
 
-# extract xliff file (has to be run multiple times, even if no error occured, don't ask me why)
-# we use grep here to test for a dummy string to detect if our run succeeded
+echo ""
+echo "***************************************"
+echo "*     Extracting xliff files          *"
+echo "***************************************"
 if [ -e localization.tmp ]; then
     rm -rf localization.tmp
 fi
+# extract xliff file (has to be run multiple times, even if no error occured, don't ask me why)
+# we use grep here to test for a dummy string to detect if our run succeeded
 dummy="DON'T TRANSLATE: $(head /dev/urandom | LC_ALL=C tr -dc A-Za-z0-9 | head -c 8)"
-echo "\nlet swiftuiTranslationRandomDummyString = Text(\"$dummy\")" >> Classes/SwiftuiHelpers.swift
+#echo "\nlet swiftuiTranslationRandomDummyString = Text(\"$dummy\")" >> Classes/SwiftuiHelpers.swift
 x=$((1))
 while [[ $x -lt 16 ]]; do
     echo "STARTING RUN $x..."
-    while ! xcrun xcodebuild -exportLocalizations -localizationPath localization.tmp -exportLanguage base SWIFT_EMIT_LOC_STRINGS=NO; do
+    while ! xcrun xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk iphoneos -configuration "Beta" -allowProvisioningUpdates -exportLocalizations -localizationPath localization.tmp -exportLanguage base SWIFT_EMIT_LOC_STRINGS=$SWIFT_EMIT_LOC_STRINGS; do
         echo "ERROR, TRYING AGAIN..."
     done
     echo "RUN $x SUCCEEDED, EXTRACTING STRINGS FROM XLIFF!"
@@ -94,20 +122,27 @@ while [[ $x -lt 16 ]]; do
     ../scripts/xliff_extractor.py -x "localization.tmp/base.xcloc/Localized Contents/base.xliff"
     x=$((x+1))
 done
-rm -rf *A\ Document\ Being\ Saved\ By\ xcodebuild*
 if ! grep -q "$dummy" "localization/external/Base.lproj/Localizable.strings"; then
     echo "Could not extract dummy string after $x runs!"
-    exit 1
+    #exit 1
 fi
 awk "!/$dummy/" "localization/external/Base.lproj/Localizable.strings" > "localization/external/Base.lproj/Localizable.strings.new"
 mv "localization/external/Base.lproj/Localizable.strings.new" "localization/external/Base.lproj/Localizable.strings"
+rm -rf *A\ Document\ Being\ Saved\ By\ xcodebuild*
 
+echo ""
+echo "*********************************************************"
+echo "*     Using batrycrouch to update all languages         *"
+echo "*********************************************************"
 runBartycrouch
-
 if [ -e localization.tmp ]; then
     rm -rf localization.tmp
 fi
 
+echo ""
+echo "*******************************************"
+echo "*     Showing results as git diff         *"
+echo "*******************************************"
 for folder in "localization/external" "shareSheet-iOS/localization/external"; do
     #subshell to not leak from "cd $folder"
     (
@@ -125,6 +160,11 @@ for folder in "localization/external" "shareSheet-iOS/localization/external"; do
     )
 done
 
+echo ""
+echo "***************************************"
+echo "*     Cleaning up submodules          *"
+echo "***************************************"
 git submodule deinit --all -f
 git submodule update --init --recursive
+
 exit 0

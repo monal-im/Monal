@@ -47,7 +47,6 @@
 #import "AESGcm.h"
 
 @import AVFoundation;
-@import WebRTC;
 
 #define STATE_VERSION 15
 #define CONNECT_TIMEOUT 7.0

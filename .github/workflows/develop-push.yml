@@ -84,3 +84,8 @@ jobs:
       #    name: monal-ios-dsym
       #    path: Monal/build/ios_Monal.xcarchive/dSYMs
       #    if-no-files-found: error
+      # - name: Update translations
+      #   run: |
+      #     chmod +x ./scripts/updateLocalization.sh
+      #     chmod +x ./scripts/xliff_extractor.py
+      #     ./scripts/updateLocalization.sh NOCOMMIT

@@ -65,8 +65,10 @@ pullCurrentState "$@"
 # update strings to remove everything that's now unused (that includes swiftui strings we'll readd below)
 cp .bartycrouch.toml .bartycrouch.toml.orig
 sed 's/additive = true/additive = false/g' .bartycrouch.toml > .bartycrouch.toml.new
+rm .bartycrouch.toml
 mv .bartycrouch.toml.new .bartycrouch.toml
 runBartycrouch
+rm .bartycrouch.toml
 mv .bartycrouch.toml.orig .bartycrouch.toml
 
 # now restore original state for all languages but our base one (otherwise every swiftui translation will be deleted)

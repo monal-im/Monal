@@ -136,7 +136,7 @@ struct AddContactMenu: View {
         }
         showLoadingOverlay(overlay, headline: NSLocalizedString("Adding...", comment: ""))
         account.checkJidType(jid, withCompletion: { type, errorMsg in
-            if(type == "account") {
+            if type == "account" {
                 hideLoadingOverlay(overlay)
                 let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
                 self.newContact = contact
@@ -144,16 +144,16 @@ struct AddContactMenu: View {
                 //import omemo fingerprints as manually trusted, if requested
                 trustFingerprints(self.importScannedFingerprints ? self.scannedFingerprints : [:], for:jid, on:account)
                 successAlert(title: Text("Permission Requested"), message: Text("The new contact will be added to your contacts list when the person you've added has approved your request."))
-            } else if(type == "muc") {
+            } else if type == "muc" {
                 showLoadingOverlay(overlay, headline: NSLocalizedString("Adding Group/Channel...", comment: ""))
                 account.mucProcessor.addUIHandler({data in
                     let success : Bool = (data as! NSDictionary)["success"] as! Bool;
                     hideLoadingOverlay(overlay)
-                    if(success) {
+                    if success {
                         self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
                         successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined group/channel %@!", jid)))
                     } else {
-                        errorAlert(title: Text("Error entering group/channel!"))
+                        errorAlert(title: Text("Error entering group/channel!"), message: Text((data as! NSDictionary)["errorMessage"] as! String))
                     }
                 }, forMuc: jid)
                 account.joinMuc(jid)
@@ -168,14 +168,14 @@ struct AddContactMenu: View {
         let account = self.connectedAccounts[selectedAccount]
         let splitJid = HelperTools.splitJid(account.connectionProperties.identity.jid)
         Form {
-            if(connectedAccounts.isEmpty) {
+            if connectedAccounts.isEmpty {
                 Text("Please make sure at least one account has connected before trying to add a contact or channel.")
                     .foregroundColor(.secondary)
             }
             else
             {
                 Section(header:Text("Contact and Group/Channel Jids are usually in the format: name@domain.tld")) {
-                    if(connectedAccounts.count > 1) {
+                    if connectedAccounts.count > 1 {
                         Picker("Use account", selection: $selectedAccount) {
                             ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
                                 Text(account.connectionProperties.identity.jid).tag(idx)
@@ -196,7 +196,7 @@ struct AddContactMenu: View {
                             toAdd = toAdd.replacingOccurrences(of: " ", with: "")
                         }
                 }
-                if(scannedFingerprints != nil && scannedFingerprints!.count > 0) {
+                if scannedFingerprints != nil && scannedFingerprints!.count > 0 {
                     Section(header: Text("A contact was scanned through the QR code scanner")) {
                         Toggle(isOn: $importScannedFingerprints) {
                             Text("Import and trust OMEMO fingerprints from QR code")
@@ -204,7 +204,7 @@ struct AddContactMenu: View {
                     }
                 }
                 Section {
-                    if(scannedFingerprints != nil) {
+                    if scannedFingerprints != nil {
                         Button(action: {
                             toAdd = ""
                             importScannedFingerprints = true
@@ -217,9 +217,9 @@ struct AddContactMenu: View {
                     Button(action: {
                         showAlert = toAddEmptyAlert || toAddInvalidAlert
 
-                        if(!showAlert) {
+                        if !showAlert {
                             let jidComponents = HelperTools.splitJid(toAdd)
-                            if(jidComponents["host"] == nil || jidComponents["host"]!.isEmpty) {
+                            if jidComponents["host"] == nil || jidComponents["host"]!.isEmpty {
                                 errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing the string..."))
                                 showAlert = true
                                 return

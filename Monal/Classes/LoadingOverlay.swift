@@ -61,6 +61,10 @@ func showLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayState, headli
         overlay.enabled = true
         //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
         overlay.objectWillChange.send()
+        //make sure to really draw the overlay on race conditions
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.250) {
+            overlay.objectWillChange.send()
+        }
     }
 }
 
@@ -71,6 +75,10 @@ func showLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headli
         overlay.enabled = true
         //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
         overlay.objectWillChange.send()
+        //make sure to really draw the overlay on race conditions
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.250) {
+            overlay.objectWillChange.send()
+        }
     }
 }
 
@@ -81,6 +89,10 @@ func hideLoadingOverlay(_ overlay: LoadingOverlayState) {
         overlay.enabled = false
         //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
         overlay.objectWillChange.send()
+        //make sure to really draw the overlay on race conditions
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.250) {
+            overlay.objectWillChange.send()
+        }
     }
 }
 

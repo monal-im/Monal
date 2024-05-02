@@ -177,15 +177,19 @@ enum MLServerDetailsSections {
 
 -(void) checkMucServers:(MLXMPPConnection*) connection
 {
-    DDLogVerbose(@"Checking muc servers: %@", connection.conferenceServer);
+    DDLogVerbose(@"Checking muc servers: %@", connection.conferenceServers);
     //yes, checkMucServers: is plural, but for now, our connectionProperties only store one single muc server (the first one encountered)
-    if(connection.conferenceServer == nil || [@"" isEqualToString:connection.conferenceServer])
+    if(connection.conferenceServers.count == 0)
     {
         [self.mucServers addObject:@{@"Title": NSLocalizedString(@"None", @""), @"Description":NSLocalizedString(@"This server does not provide any MUC servers.", @""), @"Color":SERVER_DETAILS_COLOR_ERROR}];
         return;
     }
-    [self.mucServers addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Server: %@", @""), connection.conferenceServer], @"Description": NSLocalizedString(@"Conference server for Channels and Groups", @""), @"Color": SERVER_DETAILS_COLOR_OK}];
-    DDLogVerbose(@"Muc server entries: %@", self.mucServers);
+    for(NSString* jid in connection.conferenceServers)
+    {
+        NSDictionary* entry = [connection.conferenceServers[jid] findFirst:@"identity@@"];
+        [self.mucServers addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Server: %@", @""), jid], @"Description": [NSString stringWithFormat:NSLocalizedString(@"%@ (type '%@', category '%@')", @""), entry[@"name"], entry[@"type"], entry[@"category"]], @"Color": [@"text" isEqualToString:entry[@"type"]] ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_NONE}];
+    }
+    DDLogVerbose(@"Extracted muc server entries: %@", self.mucServers);
 }
 
 -(void) checkStunServers:(NSMutableArray<NSDictionary*>*) stunTurnServers
@@ -231,7 +235,7 @@ enum MLServerDetailsSections {
         NSString* prio = [srvEntry objectForKey:@"priority"];
 
         // Check if entry is currently in use
-        NSString* entryColor = @"None";
+        NSString* entryColor = SERVER_DETAILS_COLOR_NONE;
         if([self.xmppAccount.connectionProperties.server.connectServer isEqualToString:hostname] &&
            self.xmppAccount.connectionProperties.server.connectPort == port &&
            self.xmppAccount.connectionProperties.server.isDirectTLS == [[srvEntry objectForKey:@"isSecure"] boolValue])
@@ -253,8 +257,8 @@ enum MLServerDetailsSections {
 -(void) checkTLSVersions:(MLXMPPConnection*) connection
 {
     DDLogVerbose(@"connection uses tls version: %@", connection.tlsVersion);
-    [self.tlsVersions addObject:@{@"Title": NSLocalizedString(@"TLS 1.2", @""), @"Description":NSLocalizedString(@"Older, slower, but still secure TLS version", @""), @"Color":([@"1.2" isEqualToString:connection.tlsVersion] ? SERVER_DETAILS_COLOR_OK : @"None")}];
-    [self.tlsVersions addObject:@{@"Title": NSLocalizedString(@"TLS 1.3", @""), @"Description":NSLocalizedString(@"Newest TLS version which is faster than TLS 1.2", @""), @"Color":([@"1.3" isEqualToString:connection.tlsVersion] ? SERVER_DETAILS_COLOR_OK : @"None")}];
+    [self.tlsVersions addObject:@{@"Title": NSLocalizedString(@"TLS 1.2", @""), @"Description":NSLocalizedString(@"Older, slower, but still secure TLS version", @""), @"Color":([@"1.2" isEqualToString:connection.tlsVersion] ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_NONE)}];
+    [self.tlsVersions addObject:@{@"Title": NSLocalizedString(@"TLS 1.3", @""), @"Description":NSLocalizedString(@"Newest TLS version which is faster than TLS 1.2", @""), @"Color":([@"1.3" isEqualToString:connection.tlsVersion] ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_NONE)}];
     DDLogVerbose(@"tls versions: %@", self.tlsVersions);
 }
 
@@ -279,7 +283,7 @@ enum MLServerDetailsSections {
             description = NSLocalizedString(@"Salted Challenge Response Authentication Mechanism using the given Hash Method additionally secured by Channel-Binding", @"");
         else if([method hasPrefix:@"SCRAM-"])
             description = NSLocalizedString(@"Salted Challenge Response Authentication Mechanism using the given Hash Method", @"");
-        [self.saslMethods addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Method: %@", @""), method], @"Description":description, @"Color":(used ? SERVER_DETAILS_COLOR_OK : (!supported ? SERVER_DETAILS_COLOR_NON_IDEAL : @"None"))}];
+        [self.saslMethods addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Method: %@", @""), method], @"Description":description, @"Color":(used ? SERVER_DETAILS_COLOR_OK : (!supported ? SERVER_DETAILS_COLOR_NON_IDEAL : SERVER_DETAILS_COLOR_NONE))}];
     }
 }
 
@@ -301,7 +305,7 @@ enum MLServerDetailsSections {
             description = NSLocalizedString(@"Secure channel-binding defined for TLS1.3 and some TLS1.2 connections.", @"");
         else if([type isEqualToString:@"tls-server-end-point"])
             description = NSLocalizedString(@"Weakest channel-binding type, not securing against stolen certs/keys, but detects wrongly issued certs.", @"");
-        [self.channelBindingTypes addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Type: %@", @""), type], @"Description":description, @"Color":(used ? SERVER_DETAILS_COLOR_OK : (!supported ? SERVER_DETAILS_COLOR_NON_IDEAL : @"None"))}];
+        [self.channelBindingTypes addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Type: %@", @""), type], @"Description":description, @"Color":(used ? SERVER_DETAILS_COLOR_OK : (!supported ? SERVER_DETAILS_COLOR_NON_IDEAL : SERVER_DETAILS_COLOR_NONE))}];
     }
 }
 
@@ -412,7 +416,7 @@ enum MLServerDetailsSections {
     else if(section == SUPPORTED_SERVER_XEPS_SECTION)
         return NSLocalizedString(@"These are the modern XMPP capabilities Monal detected on your server after you have logged in.", @"");
     else if(section == MUC_SERVERS_SECTION)
-        return NSLocalizedString(@"These are the MUC servers detected by Monal.", @"");
+        return NSLocalizedString(@"These are the MUC servers detected by Monal (blue entry used by Monal).", @"");
     else if(section == VOIP_SECTION)
         return NSLocalizedString(@"These are STUN and TURN services announced by your server (blue entries are used by Monal).", @"");
     else if(section == SRV_RECORS_SECTION)

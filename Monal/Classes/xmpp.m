@@ -48,7 +48,7 @@
 
 @import AVFoundation;
 
-#define STATE_VERSION 15
+#define STATE_VERSION 16
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -3495,8 +3495,9 @@ NSString* const kStanza = @"stanza";
             
             if(self.connectionProperties.uploadServer)
                 [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
-            if(self.connectionProperties.conferenceServer)
-                [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
+            
+            if(self.connectionProperties.conferenceServers)
+                [values setObject:self.connectionProperties.conferenceServers forKey:@"conferenceServers"];
             
             [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
             [values setObject:[self.mucProcessor getInternalState] forKey:@"mucState"];
@@ -3654,7 +3655,7 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.serverVersion = [dic objectForKey:@"serverVersion"];
             
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
-            self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
+            self.connectionProperties.conferenceServers = [[dic objectForKey:@"conferenceServers"] mutableCopy];
             
             if([dic objectForKey:@"loggedInOnce"])
             {
@@ -3928,7 +3929,7 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.discoveredStunTurnServers = [NSMutableArray new];
     self.connectionProperties.discoveredAdhocCommands = [NSMutableDictionary new];
     self.connectionProperties.serverVersion = nil;
-    self.connectionProperties.conferenceServer = nil;
+    self.connectionProperties.conferenceServers = [NSMutableDictionary new];
     self.connectionProperties.supportsHTTPUpload = NO;
     self.connectionProperties.uploadServer = nil;
     //self.connectionProperties.supportsClientState = NO;           //already set by stream feature parsing

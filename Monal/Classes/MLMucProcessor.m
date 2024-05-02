@@ -191,6 +191,7 @@ static NSDictionary* _optionalGroupConfigOptions;
 {
     //this will replace the old handler
     @synchronized(_stateLockObject) {
+        DDLogVerbose(@"Adding ui handler for muc: %@", room);
         _uiHandler[room] = handler;
     }
 }
@@ -849,12 +850,27 @@ $$instance_handler(handleCreateTimeout, account.mucProcessor, $$ID(xmpp*, accoun
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not create group '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
 $$
 
--(NSString* _Nullable) createGroup:(NSString* _Nullable) node
+-(NSString* _Nullable) generateMucJid
 {
-    if(node == nil)
-        node = [self generateSpeakableGroupNode];
+    NSString* mucServer = nil;
+    for(NSString* jid in _account.connectionProperties.conferenceServers)
+    {
+        if([_account.connectionProperties.conferenceServers[jid] check:@"identity<type=text>"])
+        {
+            mucServer = jid;
+            break;
+        }
+    }
+    if(mucServer == nil)
+        return nil;
+    NSString* node = [self generateSpeakableGroupNode];
     node = [node stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet].lowercaseString;
-    NSString* room = [[NSString stringWithFormat:@"%@@%@", node, _account.connectionProperties.conferenceServer] lowercaseString];
+    NSString* room = [[NSString stringWithFormat:@"%@@%@", node, mucServer] lowercaseString];
+    return room;
+}
+
+-(NSString* _Nullable) createGroup:(NSString*) room
+{
     if([[DataLayer sharedInstance] isBuddyMuc:room forAccount:_account.accountNo])
     {
         DDLogWarn(@"Cannot create muc already existing in our buddy list, checking if we are still joined and join if needed...");

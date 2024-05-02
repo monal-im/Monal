@@ -47,7 +47,7 @@ struct CreateGroupMenu: View {
 
     var body: some View {
         Form {
-            if(connectedAccounts.isEmpty) {
+            if connectedAccounts.isEmpty {
                 Text("Please make sure at least one account has connected before trying to create new group.")
                     .foregroundColor(.secondary)
             }
@@ -70,41 +70,46 @@ struct CreateGroupMenu: View {
                             Text("Change Group Members")
                         })
                     Button(action: {
+                        guard let generatedJid = self.selectedAccount!.mucProcessor.generateMucJid() else {
+                            errorAlert(title: Text("Error creating group!"), message: Text("Your server does not provide a MUC component."))
+                            return
+                        }
                         showLoadingOverlay(overlay, headline: NSLocalizedString("Creating Group", comment: ""))
-                        let roomJid = self.selectedAccount!.mucProcessor.createGroup(nil)
-                        if(roomJid == nil) {
-                            let groupContact = MLContact.createContact(fromJid: roomJid!, andAccountNo: self.selectedAccount!.accountNo)
+                        guard let roomJid = self.selectedAccount!.mucProcessor.createGroup(generatedJid) else {
+                            //room already existing in our local bookmarks --> just open it
+                            //this should never happen since we randomly generated a jid above
                             hideLoadingOverlay(overlay)
+                            let groupContact = MLContact.createContact(fromJid: generatedJid, andAccountNo: self.selectedAccount!.accountNo)
                             self.delegate.dismissWithoutAnimation()
                             if let activeChats = self.appDelegate.activeChats {
                                 activeChats.presentChat(with:groupContact)
                             }
-                        } else {
-                            self.selectedAccount!.mucProcessor.addUIHandler({data in
-                                let success : Bool = (data as! NSDictionary)["success"] as! Bool;
-                                if(success) {
-                                    self.selectedAccount!.mucProcessor.changeName(ofMuc: roomJid!, to: self.groupName)
-                                    for user in self.selectedContacts {
-                                        self.selectedAccount!.mucProcessor.setAffiliation("member", ofUser: user.contactJid, inMuc: roomJid!)
-                                        self.selectedAccount!.mucProcessor.inviteUser(user.contactJid, inMuc: roomJid!)
-                                    }
-                                    let groupContact = MLContact.createContact(fromJid: roomJid!, andAccountNo: self.selectedAccount!.accountNo)
-                                    hideLoadingOverlay(overlay)
-                                    self.delegate.dismissWithoutAnimation()
-                                    if let activeChats = self.appDelegate.activeChats {
-                                        activeChats.presentChat(with:groupContact)
-                                    }
-                                } else {
-                                    hideLoadingOverlay(overlay)
-                                    errorAlert(title: Text("Error creating group!"))
-                                }
-                            }, forMuc: roomJid!)
+                            return
                         }
+                        self.selectedAccount!.mucProcessor.addUIHandler({data in
+                            let success : Bool = (data as! NSDictionary)["success"] as! Bool;
+                            if success {
+                                self.selectedAccount!.mucProcessor.changeName(ofMuc: roomJid, to: self.groupName)
+                                for user in self.selectedContacts {
+                                    self.selectedAccount!.mucProcessor.setAffiliation("member", ofUser: user.contactJid, inMuc: roomJid)
+                                    self.selectedAccount!.mucProcessor.inviteUser(user.contactJid, inMuc: roomJid)
+                                }
+                                let groupContact = MLContact.createContact(fromJid: roomJid, andAccountNo: self.selectedAccount!.accountNo)
+                                hideLoadingOverlay(overlay)
+                                self.delegate.dismissWithoutAnimation()
+                                if let activeChats = self.appDelegate.activeChats {
+                                    activeChats.presentChat(with:groupContact)
+                                }
+                            } else {
+                                hideLoadingOverlay(overlay)
+                                errorAlert(title: Text("Error creating group!"), message: Text((data as! NSDictionary)["errorMessage"] as! String))
+                            }
+                        }, forMuc: roomJid)
                     }, label: {
                         Text("Create new group")
                     })
                 }
-                if(self.selectedContacts.count > 0) {
+                if self.selectedContacts.count > 0 {
                     Section(header: Text("Selected Group Members")) {
                         ForEach(self.selectedContacts, id: \.obj.contactJid) { contact in
                             ContactEntry(contact: contact)

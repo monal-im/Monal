@@ -152,8 +152,12 @@ struct PrivacyScreen: View {
                     Text(getNotificationPrivacyOption(option)).tag(option.rawValue)
                 }
             }
-            Toggle("Enable encryption by default for new chats", isOn: $privacyDefaultDB.omemoDefaultOn)
-            Toggle("Autodelete all messages after 3 days", isOn: $privacyDefaultDB.autodeleteAllMessagesAfter3Days)
+            Toggle(isOn: $privacyDefaultDB.omemoDefaultOn) {
+                Text("Enable encryption by default for new chats")
+            }
+            Toggle(isOn: $privacyDefaultDB.autodeleteAllMessagesAfter3Days) {
+                Text("Autodelete all messages after 3 days")
+            }
         }
         .navigationBarTitle("Privacy & security", displayMode: .inline)
     }
@@ -165,13 +169,23 @@ struct PublishingScreen: View {
     var body: some View {
         Form {
             Section(header: Text("Publishing")) {
-                Toggle("Send last interaction time", isOn: $privacyDefaultDB.sendLastUserInteraction)
-                Toggle("Send typing notifications", isOn: $privacyDefaultDB.sendLastChatState)
-                Toggle("Send message received state", isOn: $privacyDefaultDB.sendReceivedMarkers)
-                Toggle("Send message displayed state", isOn: $privacyDefaultDB.sendDisplayedMarkers)
+                Toggle(isOn: $privacyDefaultDB.sendLastUserInteraction) {
+                    Text("Send last interaction time")
+                }
+                Toggle(isOn: $privacyDefaultDB.sendLastChatState) {
+                    Text("Send typing notifications")
+                }
+                Toggle(isOn: $privacyDefaultDB.sendReceivedMarkers) {
+                    Text("Send message received state")
+                }
+                Toggle(isOn: $privacyDefaultDB.sendDisplayedMarkers) {
+                    Text("Send message displayed state")
+                }
             }
             Section(header: Text("Appearance")) {
-                Toggle("Autofocus text input on chat open", isOn: $privacyDefaultDB.showKeyboardOnChatOpen)
+                Toggle(isOn: $privacyDefaultDB.showKeyboardOnChatOpen) {
+                    Text("Autofocus text input on chat open")
+                }
             }
         }
         .navigationBarTitle("Publishing & appearance", displayMode: .inline)
@@ -183,8 +197,12 @@ struct PreviewsScreen: View {
     
     var body: some View {
         Form {
-            Toggle("Show inline geo location", isOn: $privacyDefaultDB.showGeoLocation)
-            Toggle("Show URL previews", isOn: $privacyDefaultDB.showURLPreview)
+            Toggle(isOn: $privacyDefaultDB.showGeoLocation) {
+                Text("Show inline geo location")
+            }
+            Toggle(isOn: $privacyDefaultDB.showURLPreview) {
+                Text("Show URL previews")
+            }
         }
         .navigationBarTitle("Previews", displayMode: .inline)
     }
@@ -195,11 +213,21 @@ struct CommunicationScreen: View {
     
     var body: some View {
         Form {
-            Toggle("Allow contacts not in my contact list to contact me", isOn: $privacyDefaultDB.allowNonRosterContacts)
-            Toggle("Allow approved contacts to query my Monal and iOS version", isOn: $privacyDefaultDB.allowVersionIQ)
-            Toggle("Calls: Allow contacts not in my contact list to call me", isOn: $privacyDefaultDB.allowCallsFromNonRosterContacts)
-            Toggle("Calls: Allow P2P sessions", isOn: $privacyDefaultDB.webrtcAllowP2P)
-            Toggle("Calls: Allow TURN fallback to Monal-Servers", isOn: $privacyDefaultDB.webrtcUseFallbackTurn)
+            Toggle(isOn: $privacyDefaultDB.allowNonRosterContacts) {
+                Text("Allow contacts not in my contact list to contact me")
+            }
+            Toggle(isOn: $privacyDefaultDB.allowVersionIQ) {
+                Text("Allow approved contacts to query my Monal and iOS version")
+            }
+            Toggle(isOn: $privacyDefaultDB.allowCallsFromNonRosterContacts) {
+                Text("Calls: Allow contacts not in my contact list to call me")
+            }
+            Toggle(isOn: $privacyDefaultDB.webrtcAllowP2P) {
+                Text("Calls: Allow P2P sessions")
+            }
+            Toggle(isOn: $privacyDefaultDB.webrtcUseFallbackTurn) {
+                Text("Calls: Allow TURN fallback to Monal-Servers")
+            }
         }
         .navigationBarTitle("Communication", displayMode: .inline)
     }
@@ -211,7 +239,9 @@ struct MLAutoDownloadFiletransferSettingView: View {
     var body: some View {
         Form {
             Section(header: Text("General File Transfer Settings")) {
-                Toggle("Auto-Download Media", isOn: $privacyDefaultDB.autodownloadFiletransfers)
+                Toggle(isOn: $privacyDefaultDB.autodownloadFiletransfers) {
+                    Text("Auto-Download Media")
+                }
             }
             
             Section(header: Text("Download Settings")) {

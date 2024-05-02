@@ -198,9 +198,9 @@ struct AddContactMenu: View {
                 }
                 if(scannedFingerprints != nil && scannedFingerprints!.count > 0) {
                     Section(header: Text("A contact was scanned through the QR code scanner")) {
-                        Toggle(isOn: $importScannedFingerprints, label: {
+                        Toggle(isOn: $importScannedFingerprints) {
                             Text("Import and trust OMEMO fingerprints from QR code")
-                        })
+                        }
                     }
                 }
                 Section {

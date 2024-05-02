@@ -100,7 +100,9 @@ struct UDPConfigView: View {
                 Text("The UDP logger allows you to livestream the log to the configured IP. Please use a secure key when streaming over the internet!\n[Learn how to receive the log stream](https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#stream-the-log).")
                 Form {
                     Section(header: Text("UDP Logger Configuration")) {
-                        Toggle("Enable", isOn: $defaultDB.udpLoggerEnabled)
+                        Toggle(isOn: $defaultDB.udpLoggerEnabled) {
+                            Text("Enable")
+                        }
                         LabeledContent("Logserver IP:") {
                             TextField("Logserver IP", text: $defaultDB.udpLoggerHostname, prompt: Text("Required"))
                         }

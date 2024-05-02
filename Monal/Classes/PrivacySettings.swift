@@ -152,6 +152,7 @@ struct PrivacyScreen: View {
                     Text(getNotificationPrivacyOption(option)).tag(option.rawValue)
                 }
             }
+            .frame(width: .infinity, height: 56, alignment: .trailing)
             Toggle(isOn: $privacyDefaultDB.omemoDefaultOn) {
                 Text("Enable encryption by default for new chats")
             }

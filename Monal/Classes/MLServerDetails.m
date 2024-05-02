@@ -16,6 +16,7 @@
 
 @property (nonatomic, strong) MLContactSoftwareVersionInfo* serverVersion;
 @property (nonatomic, strong) NSMutableArray* serverCaps;
+@property (nonatomic, strong) NSMutableArray* mucServers;
 @property (nonatomic, strong) NSMutableArray* stunTurnServers;
 @property (nonatomic, strong) NSMutableArray* srvRecords;
 @property (nonatomic, strong) NSMutableArray* tlsVersions;
@@ -30,6 +31,7 @@
 enum MLServerDetailsSections {
     SERVER_VERSION_SECTION,
     SUPPORTED_SERVER_XEPS_SECTION,
+    MUC_SERVERS_SECTION,
     VOIP_SECTION,
     SRV_RECORS_SECTION,
     TLS_SECTION,
@@ -52,6 +54,7 @@ enum MLServerDetailsSections {
 {
     [super viewWillAppear:animated];
     self.serverCaps = [NSMutableArray new];
+    self.mucServers = [NSMutableArray new];
     self.stunTurnServers = [NSMutableArray new];
     self.srvRecords = [NSMutableArray new];
     self.tlsVersions = [NSMutableArray new];
@@ -63,6 +66,7 @@ enum MLServerDetailsSections {
 
     self.serverVersion = self.xmppAccount.connectionProperties.serverVersion;
     [self checkServerCaps:self.xmppAccount.connectionProperties];
+    [self checkMucServers:self.xmppAccount.connectionProperties];
     [self convertSRVRecordsToReadable];
     [self checkTLSVersions:self.xmppAccount.connectionProperties];
     [self checkSASLMethods:self.xmppAccount.connectionProperties];
@@ -169,6 +173,19 @@ enum MLServerDetailsSections {
         @"Description":NSLocalizedString(@"This specification provides a way to secure the SASL and SASL2 handshakes against method and channel-binding downgrades.", @""),
         @"Color": connection.supportsSSDP ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
     }];
+}
+
+-(void) checkMucServers:(MLXMPPConnection*) connection
+{
+    DDLogVerbose(@"Checking muc servers: %@", connection.conferenceServer);
+    //yes, checkMucServers: is plural, but for now, our connectionProperties only store one single muc server (the first one encountered)
+    if(connection.conferenceServer == nil || [@"" isEqualToString:connection.conferenceServer])
+    {
+        [self.mucServers addObject:@{@"Title": NSLocalizedString(@"None", @""), @"Description":NSLocalizedString(@"This server does not provide any MUC servers.", @""), @"Color":SERVER_DETAILS_COLOR_ERROR}];
+        return;
+    }
+    [self.mucServers addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Server: %@", @""), connection.conferenceServer], @"Description": NSLocalizedString(@"Conference server for Channels and Groups", @""), @"Color": SERVER_DETAILS_COLOR_OK}];
+    DDLogVerbose(@"Muc server entries: %@", self.mucServers);
 }
 
 -(void) checkStunServers:(NSMutableArray<NSDictionary*>*) stunTurnServers
@@ -301,6 +318,8 @@ enum MLServerDetailsSections {
         return 1;
     else if(section == SUPPORTED_SERVER_XEPS_SECTION)
         return (NSInteger)self.serverCaps.count;
+    else if(section == MUC_SERVERS_SECTION)
+        return (NSInteger)self.mucServers.count;
     else if(section == VOIP_SECTION)
         return (NSInteger)self.stunTurnServers.count;
     else if(section == SRV_RECORS_SECTION)
@@ -335,7 +354,9 @@ enum MLServerDetailsSections {
     }
     else if(indexPath.section == SUPPORTED_SERVER_XEPS_SECTION)
         dic = [self.serverCaps objectAtIndex:(NSUInteger)indexPath.row];
-    if(indexPath.section == VOIP_SECTION)
+    else if(indexPath.section == MUC_SERVERS_SECTION)
+        dic = [self.mucServers objectAtIndex:(NSUInteger)indexPath.row];
+    else if(indexPath.section == VOIP_SECTION)
         dic = [self.stunTurnServers objectAtIndex:(NSUInteger)indexPath.row];
     else if(indexPath.section == SRV_RECORS_SECTION)
         dic = [self.srvRecords objectAtIndex:(NSUInteger)indexPath.row];
@@ -390,8 +411,10 @@ enum MLServerDetailsSections {
         return NSLocalizedString(@"This is the software running on your server.", @"");
     else if(section == SUPPORTED_SERVER_XEPS_SECTION)
         return NSLocalizedString(@"These are the modern XMPP capabilities Monal detected on your server after you have logged in.", @"");
+    else if(section == MUC_SERVERS_SECTION)
+        return NSLocalizedString(@"These are the MUC servers detected by Monal.", @"");
     else if(section == VOIP_SECTION)
-        return NSLocalizedString(@"These are STUN and TURN services announced by your server. (blue entries are used by monal)", @"");
+        return NSLocalizedString(@"These are STUN and TURN services announced by your server (blue entries are used by Monal).", @"");
     else if(section == SRV_RECORS_SECTION)
         return NSLocalizedString(@"These are SRV resource records found for your domain.", @"");
     else if(section == TLS_SECTION)

@@ -28,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 //muc management methods
 -(NSString* _Nullable) generateMucJid;
 -(NSString* _Nullable) createGroup:(NSString*) room;
+-(void) destroyRoom:(NSString*) room;
 -(void) changeNameOfMuc:(NSString*) room to:(NSString*) name;
 -(void) changeSubjectOfMuc:(NSString*) room to:(NSString*) subject;
 -(void) publishAvatar:(UIImage* _Nullable) image forMuc:(NSString*) room;

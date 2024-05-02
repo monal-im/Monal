@@ -815,7 +815,22 @@ enum msgSentState {
 #ifndef DISABLE_OMEMO
     if(self.xmppAccount)
     {
-        BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid].count > 0;
+        BOOL omemoDeviceForContactFound = NO;
+        if(!self.contact.isGroup)
+            omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid].count > 0;
+        else
+        {
+            omemoDeviceForContactFound = NO;
+            for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountId:self.xmppAccount.accountNo])
+            {
+                if(participant[@"participant_jid"])
+                    omemoDeviceForContactFound |= [self.xmppAccount.omemo knownDevicesForAddressName:participant[@"participant_jid"]].count > 0;
+                else if(participant[@"member_jid"])
+                    omemoDeviceForContactFound |= [self.xmppAccount.omemo knownDevicesForAddressName:participant[@"member_jid"]].count > 0;
+                if(omemoDeviceForContactFound)
+                    break;
+            }
+        }
         if(!omemoDeviceForContactFound && self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
         {
             if(!self.contact.isGroup && [[HelperTools splitJid:self.contact.contactJid][@"host"] isEqualToString:@"cheogram.com"])

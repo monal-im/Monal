@@ -23,7 +23,7 @@
 #import "MLOMEMO.h"
 #import "MLImageManager.h"
 
-#define CURRENT_MUC_STATE_VERSION @7
+#define CURRENT_MUC_STATE_VERSION @8
 
 @interface MLMucProcessor()
 {
@@ -33,6 +33,7 @@
     NSMutableDictionary* _roomFeatures;
     NSMutableDictionary* _creating;
     NSMutableDictionary* _joining;
+    NSMutableSet* _destroying;
     NSMutableSet* _firstJoin;
     NSDate* _lastPing;
     NSMutableSet* _noUpdateBookmarks;
@@ -75,6 +76,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     _roomFeatures = [NSMutableDictionary new];
     _creating = [NSMutableDictionary new];
     _joining = [NSMutableDictionary new];
+    _destroying = [NSMutableSet new];
     _firstJoin = [NSMutableSet new];
     _uiHandler = [NSMutableDictionary new];
     _lastPing = [NSDate date];
@@ -107,6 +109,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         _roomFeatures = [state[@"roomFeatures"] mutableCopy];
         _creating = [state[@"creating"] mutableCopy];
         _joining = [state[@"joining"] mutableCopy];
+        _destroying = [state[@"destroying"] mutableCopy];
         _firstJoin = [state[@"firstJoin"] mutableCopy];
         _lastPing = state[@"lastPing"];
         _noUpdateBookmarks = [state[@"noUpdateBookmarks"] mutableCopy];
@@ -122,6 +125,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             @"roomFeatures": [_roomFeatures copy],
             @"creating": [_creating copy],
             @"joining": [_joining copy],
+            @"destroying": [_destroying copy],
             @"firstJoin": [_firstJoin copy],
             @"lastPing": _lastPing,
             @"noUpdateBookmarks": [_noUpdateBookmarks copy],
@@ -148,6 +152,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             NSDictionary* creatingCopy = [_creating copy];
             for(NSString* room in creatingCopy)
                  [self removeRoomFromCreating:room];
+            _destroying = [NSMutableSet new];
             
             //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
             
@@ -291,25 +296,35 @@ static NSDictionary* _optionalGroupConfigOptions;
     {
         DDLogVerbose(@"Got muc presence from full jid: %@", presenceNode.from);
         
-        //extract info if present (use an empty dict if no info is present)
-        NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
-        if(!item)
-            item = [NSMutableDictionary new];
-        
-        //update jid to be a bare jid and add muc nick to our dict
-        if(item[@"jid"])
-            item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
-        item[@"nick"] = presenceNode.fromResource;
-        
-        //handle participant updates
-        if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)
-            [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+        //don't handle this error if we ourselves are destroying this room
+        BOOL isDestroying = NO;
+        @synchronized(_stateLockObject) {
+            isDestroying = [_destroying containsObject:presenceNode.fromUser];
+        }
+        if(!isDestroying)
+        {
+            //extract info if present (use an empty dict if no info is present)
+            NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
+            if(!item)
+                item = [NSMutableDictionary new];
+            
+            //update jid to be a bare jid and add muc nick to our dict
+            if(item[@"jid"])
+                item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
+            item[@"nick"] = presenceNode.fromResource;
+            
+            //handle participant updates
+            if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)
+                [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+            else
+                [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+            
+            //handle members updates
+            if(item[@"jid"] != nil)
+                [self handleMembersListUpdate:[presenceNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:presenceNode.fromUser];
+        }
         else
-            [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
-        
-        //handle members updates
-        if(item[@"jid"] != nil)
-            [self handleMembersListUpdate:[presenceNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:presenceNode.fromUser];
+            DDLogDebug(@"Ignoring unavailable presences of room being destroyed by us...");
         
         //handle muc status codes in reflected presences
         //this MUST be done after the above code to make sure the db correctly reflects our membership/participant status
@@ -712,8 +727,16 @@ $$
                 //(normally these have an additional status code that was already handled in the switch statement above
                 if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
                 {
-                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
-                    [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                    //don't handle this error if we ourselves are destroying this room
+                    BOOL isDestroying = NO;
+                    @synchronized(_stateLockObject) {
+                        isDestroying = [_destroying containsObject:node.fromUser];
+                    }
+                    if(!isDestroying)
+                    {
+                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                    }
                 }
             }
             else
@@ -908,6 +931,70 @@ $$
     
     return room;
 }
+
+-(void) destroyRoom:(NSString*) room
+{
+    MLAssert([[DataLayer sharedInstance] isBuddyMuc:room forAccount:_account.accountNo], @"Cannot destroy non-muc!", (@{@"room": room}));
+    
+    @synchronized(_stateLockObject) {
+        [_destroying addObject:room];
+    }
+    
+    XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType to:room];
+    [iqNode addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#owner" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"destroy" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"reason" andData:@"Groupchat got destroyed"]
+        ] andData:nil],
+    ] andData:nil]];
+    [_account sendIq:iqNode withHandler:$newHandlerWithInvalidation(self, handleRoomDestroyResult, handleRoomDestroyResultInvalidation, $ID(room))];
+}
+
+$$instance_handler(handleRoomDestroyResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
+    DDLogError(@"Could not destroy room '%@' on account %@: invalidation called", room, account);
+    @synchronized(_stateLockObject) {
+        [_destroying removeObject:room];
+    }
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to destroy group/channel '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
+$$
+
+$$instance_handler(handleRoomDestroyResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, room))
+    @synchronized(_stateLockObject) {
+        [_destroying removeObject:room];
+    }
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Failed to destroy room '%@' on account %@: %@", room, account, [iqNode findFirst:@"error"]);
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to destroy group/channel '%@'", @""), room] forMuc:room withNode:iqNode andIsSevere:YES];
+        return;
+    }
+    
+    DDLogInfo(@"Successfully destroyed room '%@' on account %@", room, account);
+    monal_id_block_t uiHandler = [self getUIHandlerForMuc:room];
+    if(uiHandler)
+    {
+        //remove handler (it will only be called once)
+        [self removeUIHandlerForMuc:room];
+        
+        DDLogInfo(@"Calling UI handler for muc %@...", room);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            uiHandler(@{
+                @"success": @YES,
+                @"muc": room,
+                @"account": self->_account,
+                @"callback": ^{
+                    //don't even keep our bookmark in this case
+                    [self deleteMuc:room withBookmarksUpdate:YES keepBuddylistEntry:NO];
+                },
+            });
+        });
+    }
+    else
+    {
+        //don't even keep our bookmark in this case
+        //this will handled by the ui handler callback if the ui was used to destroy this room and must be handled here otherwise
+        [self deleteMuc:room withBookmarksUpdate:YES keepBuddylistEntry:NO];
+    }
+$$
 
 -(void) join:(NSString*) room
 {

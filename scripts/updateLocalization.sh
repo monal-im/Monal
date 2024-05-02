@@ -10,9 +10,9 @@ if ! which bartycrouch > /dev/null; then
     exit 1
 fi
 
-SWIFT_EMIT_LOC_STRINGS=NO
-if [ "$2" != "" ]; then
-    SWIFT_EMIT_LOC_STRINGS="$2"
+compile_swift="NO"
+if [ "x$2" != "x" ]; then
+    compile_swift="$2"
 fi
 
 function pullCurrentState {
@@ -71,17 +71,19 @@ git submodule deinit --all -f
 git submodule update --init --recursive --remote
 pullCurrentState "$@"
 
-echo ""
-echo "*******************************************"
-echo "*     Building rust packages & bridge     *"
-echo "*******************************************"
-bash ../rust/build-rust.sh
+if [ "$compile_swift" == "YES" ]; then
+    echo ""
+    echo "*******************************************"
+    echo "*     Building rust packages & bridge     *"
+    echo "*******************************************"
+    bash ../rust/build-rust.sh
 
-echo ""
-echo "***************************************"
-echo "*     Installing macOS & iOS Pods     *"
-echo "***************************************"
-pod install --repo-update
+    echo ""
+    echo "***************************************"
+    echo "*     Installing macOS & iOS Pods     *"
+    echo "***************************************"
+    pod install --repo-update
+fi
 
 echo ""
 echo "***************************************"
@@ -114,7 +116,7 @@ dummy="DON'T TRANSLATE: $(head /dev/urandom | LC_ALL=C tr -dc A-Za-z0-9 | head -
 x=$((1))
 while [[ $x -lt 16 ]]; do
     echo "STARTING RUN $x..."
-    while ! xcrun xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk iphoneos -configuration "Beta" -allowProvisioningUpdates -exportLocalizations -localizationPath localization.tmp -exportLanguage base SWIFT_EMIT_LOC_STRINGS=$SWIFT_EMIT_LOC_STRINGS; do
+    while ! xcrun xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk iphoneos -configuration "Beta" -allowProvisioningUpdates -exportLocalizations -localizationPath localization.tmp -exportLanguage base SWIFT_EMIT_LOC_STRINGS="$compile_swift"; do
         echo "ERROR, TRYING AGAIN..."
     done
     echo "RUN $x SUCCEEDED, EXTRACTING STRINGS FROM XLIFF!"

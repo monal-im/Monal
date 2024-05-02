@@ -813,7 +813,7 @@ enum msgSentState {
 {
     [super viewDidAppear:animated];
 #ifndef DISABLE_OMEMO
-    if(self.xmppAccount)
+    if(self.xmppAccount && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
     {
         BOOL omemoDeviceForContactFound = NO;
         if(!self.contact.isGroup)
@@ -831,7 +831,7 @@ enum msgSentState {
                     break;
             }
         }
-        if(!omemoDeviceForContactFound && self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
+        if(!omemoDeviceForContactFound && self.contact.isEncrypted)
         {
             if(!self.contact.isGroup && [[HelperTools splitJid:self.contact.contactJid][@"host"] isEqualToString:@"cheogram.com"])
             {

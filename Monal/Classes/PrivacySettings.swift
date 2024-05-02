@@ -147,7 +147,7 @@ struct PrivacyScreen: View {
     
     var body: some View {
         Form {
-            Picker("Notification privacy", selection: $privacyDefaultDB.notificationPrivacySetting) {
+            Picker(selection: $privacyDefaultDB.notificationPrivacySetting, label: Text("Notification privacy")) {
                 ForEach(NotificationPrivacySettingOption.allCases, id: \.self) { option in
                     Text(getNotificationPrivacyOption(option)).tag(option.rawValue)
                 }

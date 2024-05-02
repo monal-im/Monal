@@ -102,7 +102,7 @@ struct PrivacySettings: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 20, height: 20)
-                        Text("Publishing")
+                        Text("Publishing & Appearance")
                     }
                 }
                 NavigationLink(destination: PreviewsScreen()) {
@@ -189,7 +189,7 @@ struct PublishingScreen: View {
                 }
             }
         }
-        .navigationBarTitle("Publishing & appearance", displayMode: .inline)
+        .navigationBarTitle("Publishing & Appearance", displayMode: .inline)
     }
 }
 

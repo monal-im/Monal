@@ -845,6 +845,7 @@ $$instance_handler(handleCreateTimeout, account.mucProcessor, $$ID(xmpp*, accoun
         DDLogError(@"Got room create idle timeout but not creating group, ignoring: %@", room);
         return;
     }
+    DDLogWarn(@"Timeout while creating muc '%@'...", room);
     [self removeRoomFromCreating:room];
     [self deleteMuc:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not create group '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
@@ -1484,14 +1485,10 @@ $$
         //remove handler (it will only be called once)
         [self removeUIHandlerForMuc:room];
         
-        if(node == nil)
-        {
-            DDLogInfo(@"Could not extract UI error message. node == nil");
-            return;
-        }
-        
-        //prepare data
-        NSString* message = [HelperTools extractXMPPError:node withDescription:description];
+        //prepare data        
+        NSString* message = description;
+        if(node != nil)
+            message = [HelperTools extractXMPPError:node withDescription:description];
         NSDictionary* data = @{
             @"success": @NO,
             @"muc": room,

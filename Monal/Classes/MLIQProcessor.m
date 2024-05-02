@@ -561,8 +561,8 @@ $$class_handler(handleServiceDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
         DDLogInfo(@"Upload max filesize: %lu", account.connectionProperties.uploadSize);
     }
     
-    if(!account.connectionProperties.conferenceServer && [features containsObject:@"http://jabber.org/protocol/muc"])
-        account.connectionProperties.conferenceServer = iqNode.fromUser;
+    if([features containsObject:@"http://jabber.org/protocol/muc"])
+        account.connectionProperties.conferenceServers[iqNode.fromUser] = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query"];
 $$
 
 $$class_handler(handleServerDiscoItems, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))

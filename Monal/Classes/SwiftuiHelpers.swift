@@ -24,16 +24,12 @@ let monalGreen = Color(UIColor(red:128.0/255, green:203.0/255, blue:182.0/255, a
 let monalDarkGreen = Color(UIColor(red:20.0/255, green:138.0/255, blue:103.0/255, alpha:1.0));
 
 //see https://stackoverflow.com/a/62207329/3528174
-public extension Color {
-#if os(macOS)
-    static let background = Color(NSColor.windowBackgroundColor)
-    static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
-    static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
-#else
-    static let background = Color(UIColor.systemBackground)
-    static let secondaryBackground = Color(UIColor.secondarySystemBackground)
-    static let tertiaryBackground = Color(UIColor.tertiarySystemBackground)
-#endif
+//and https://www.hackingwithswift.com/forums/100-days-of-swiftui/extending-shapestyle-for-adding-colors-instead-of-extending-color/12324
+public extension ShapeStyle where Self == Color {
+    static var interpolatedWindowBackground: Color { Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor.systemBackground : UIColor.secondarySystemBackground }) }
+    static var background: Color { Color(UIColor.systemBackground) }
+    static var secondaryBackground: Color { Color(UIColor.secondarySystemBackground) }
+    static var tertiaryBackground: Color { Color(UIColor.tertiarySystemBackground) }
 }
 
 extension Binding {
@@ -483,7 +479,7 @@ class SwiftuiInterface : NSObject {
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
             case "NotificationSettings":
                 host.rootView = AnyView(UIKitWorkaround(NotificationSettings(delegate:delegate)))
-            case "logView":
+            case "DebugView":
                 host.rootView = AnyView(UIKitWorkaround(DebugView()))
             case "WelcomeLogIn":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate)))

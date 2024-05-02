@@ -141,6 +141,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //anti spam/privacy setting, but default to yes (current behavior, conversations behavior etc.)
     [self upgradeBoolUserSettingsIfUnset:@"allowNonRosterContacts" toDefault:YES];
     [self upgradeBoolUserSettingsIfUnset:@"allowCallsFromNonRosterContacts" toDefault:YES];
+    
+    //mac catalyst will not show a soft-keyboard when setting focus, ios will
+    //--> only automatically set focus on macos and make this configurable
+#if TARGET_OS_MACCATALYST
+    [self upgradeBoolUserSettingsIfUnset:@"showKeyboardOnChatOpen" toDefault:YES];
+#else
+    [self upgradeBoolUserSettingsIfUnset:@"showKeyboardOnChatOpen" toDefault:NO];
+#endif
 }
 
 -(void) upgradeFloatUserSettingsToInteger:(NSString*) settingsName
@@ -325,9 +333,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     });
     nw_path_monitor_start(_path_monitor);
     
-    //trigger iq invalidations from a background thread because timeouts aren't time critical
-    //we use this to decrement the timeout value of an iq handler every second until it reaches zero
-    dispatch_async(dispatch_queue_create_with_target("im.monal.iqtimeouts", DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)), ^{
+    //trigger iq invalidations and idle timers from a background thread because timeouts aren't time critical
+    //we use this to decrement the timeout value of an iq handler / idle timer every second until it reaches zero
+    dispatch_async(dispatch_queue_create_with_target("im.monal.timeouts", DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)), ^{
         while(YES) {
             for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
                 [account updateIqHandlerTimeouts];

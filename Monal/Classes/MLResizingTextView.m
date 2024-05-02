@@ -7,6 +7,7 @@
 //
 
 #import "MLResizingTextView.h"
+#import "HelperTools.h"
 
 @implementation MLResizingTextView
 
@@ -17,7 +18,8 @@
     if (!CGSizeEqualToSize(self.bounds.size, [self intrinsicContentSize])) {
         [self invalidateIntrinsicContentSize];
     }
-    [self becomeFirstResponder];
+    if([[HelperTools defaultsDB] boolForKey: @"showKeyboardOnChatOpen"])
+        [self becomeFirstResponder];
 }
 
 - (CGSize)intrinsicContentSize

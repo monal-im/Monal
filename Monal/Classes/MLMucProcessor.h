@@ -26,7 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry;
 
 //muc management methods
--(NSString* _Nullable) createGroup:(NSString* _Nullable) node;
+-(NSString* _Nullable) generateMucJid;
+-(NSString* _Nullable) createGroup:(NSString*) room;
 -(void) changeNameOfMuc:(NSString*) room to:(NSString*) name;
 -(void) changeSubjectOfMuc:(NSString*) room to:(NSString*) subject;
 -(void) publishAvatar:(UIImage* _Nullable) image forMuc:(NSString*) room;

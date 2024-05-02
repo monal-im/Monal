@@ -102,7 +102,7 @@ xcrun xcodebuild \
     -configuration $BUILD_TYPE \
     -archivePath "build/ios_$APP_NAME.xcarchive" \
     -allowProvisioningUpdates \
-    clean archive
+    archive
 
 echo ""
 echo "*************************"

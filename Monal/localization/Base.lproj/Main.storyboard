@@ -216,9 +216,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" insetsLayoutMarginsFromSafeArea="NO" image="Tie_My_Boat_by_Ray_Garcia" translatesAutoresizingMaskIntoConstraints="NO" id="SEk-WZ-Rcm">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" insetsLayoutMarginsFromSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SEk-WZ-Rcm">
                                 <rect key="frame" x="0.0" y="20" width="704" height="955.5"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </imageView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" keyboardDismissMode="interactive" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Kkq-aZ-5fP">
                                 <rect key="frame" x="0.0" y="0.0" width="704" height="987.5"/>
@@ -2537,7 +2536,6 @@
         <image name="744-locked-received" width="21" height="28"/>
         <image name="744-locked-selected" width="21" height="28"/>
         <image name="745-unlocked" width="21" height="28"/>
-        <image name="Tie_My_Boat_by_Ray_Garcia" width="563" height="1218"/>
         <image name="down" width="28" height="28"/>
         <image name="file" width="28" height="28"/>
         <image name="info.circle" catalog="system" width="128" height="123"/>
@@ -2547,9 +2545,6 @@
         <image name="plus.square" catalog="system" width="128" height="114"/>
         <image name="text.bubble" catalog="system" width="128" height="110"/>
         <image name="xmark.circle.fill" catalog="system" width="128" height="123"/>
-        <namedColor name="chatBackgroundColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

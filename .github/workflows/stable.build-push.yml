@@ -76,41 +76,41 @@ jobs:
       - name: Extract version number and changelog from newest merge commit
         id: releasenotes
         run: |
-          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           echo "tag=Build_iOS_$buildNumber" >> "$GITHUB_OUTPUT"
-          echo "name=$(git log -n 1 --merges --pretty=format:%s)" >> "$GITHUB_OUTPUT"
+          echo "name=$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^\s*([^\s]+)\s+\(([^\s]+)\)$/\1 (Build '$buildNumber', PR \2)/g')" >> "$GITHUB_OUTPUT"
           echo "notes=$(git log -n 1 --merges --pretty=format:%b)" >> "$GITHUB_OUTPUT"
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Release ${{ steps.releasenotes.outputs.name }}
-          tag_name: ${{ steps.releasenotes.outputs.tag }}
+          name: "Release ${{ steps.releasenotes.outputs.name }}"
+          tag_name: "${{ steps.releasenotes.outputs.tag }}"
           target_commitish: stable
           generate_release_notes: false
-          body: ${{ steps.releasenotes.outputs.notes }}
+          body: "${{ steps.releasenotes.outputs.notes }}"
           files: |
             ./Monal/build/ipa/Monal.ipa
             ./Monal/build/app/Monal.zip
           fail_on_unmatched_files: true
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: monal-catalyst-pkg
           path: Monal/build/app/Monal.pkg
           if-no-files-found: error
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: monal-ios
           path: Monal/build/ipa/Monal.ipa
           if-no-files-found: error
-      - uses: actions/upload-artifact@v3
-        with:
-          name: monal-catalyst-dsym
-          path: Monal/build/macos_Monal.xcarchive/dSYMs
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v3
-        with:
-          name: monal-ios-dsym
-          path: Monal/build/ios_Monal.xcarchive/dSYMs
-          if-no-files-found: error
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: monal-catalyst-dsym
+      #     path: Monal/build/macos_Monal.xcarchive/dSYMs
+      #     if-no-files-found: error
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: monal-ios-dsym
+      #     path: Monal/build/ios_Monal.xcarchive/dSYMs
+      #     if-no-files-found: error

@@ -13,7 +13,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   buildAndPublishBeta:
-    # The type of runner that the job will run on
+    name: "Build and Publish Beta Release"
     runs-on: self-hosted
     env:
       APP_NAME: "Monal"
@@ -70,11 +70,6 @@ jobs:
         run: ./scripts/uploadNonAlpha.sh beta
       - name: Publish catalyst to appstore connect
         run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
-      - name: Update translations
-        run: |
-          chmod +x ./scripts/updateLocalization.sh
-          chmod +x ./scripts/xliff_extractor.py
-          ./scripts/updateLocalization.sh BUILDSERVER
       - uses: actions/upload-artifact@v4
         with:
           name: monal-catalyst
@@ -95,3 +90,25 @@ jobs:
           name: monal-ios-dsym
           path: Monal/build/ios_Monal.xcarchive/dSYMs
           if-no-files-found: error
+  
+  updateTranslations:
+    name: Update Translations using Beta-Branch
+    runs-on: self-hosted
+    needs: [buildAndPublishBeta]
+    env:
+      APP_NAME: "Monal"
+      APP_DIR: "Monal.app"
+      BUILD_TYPE: "Beta"
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          submodules: true
+      - name: Checkout submodules
+        run: git submodule update -f --init --remote
+      - name: Update translations
+        run: |
+          chmod +x ./scripts/updateLocalization.sh
+          chmod +x ./scripts/xliff_extractor.py
+          ./scripts/updateLocalization.sh BUILDSERVER

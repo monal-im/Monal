@@ -140,15 +140,14 @@ struct ContactDetails: View {
                     .addClearButton(isEditing: isEditingNickname, text: $contact.nickNameView)
                 }
                 
-                Toggle("Pin Chat", isOn: Binding(get: {
+                Toggle(isOn: Binding(get: {
                     contact.isPinned
                 }, set: {
                     contact.obj.togglePinnedChat($0)
-                }))
-//                Button(contact.isPinned ? "Unpin Chat" : "Pin Chat") {
-//                    contact.obj.togglePinnedChat(!contact.isPinned);
-//                }
-
+                })) {
+                    Text("Pin Chat")
+                }
+                
                 if(contact.obj.isGroup && contact.obj.mucType == "group") {
                     NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
                         Text("Group Members")

@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSMutableDictionary* discoveredAdhocCommands;
 @property (nonatomic, strong) MLContactSoftwareVersionInfo* _Nullable serverVersion;
 
-@property (nonatomic, strong) NSString* _Nullable conferenceServer;
+@property (nonatomic, strong) NSMutableDictionary* conferenceServers;
 
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
 @property (nonatomic, strong) NSString* _Nullable uploadServer;

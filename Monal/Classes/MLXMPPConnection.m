@@ -23,6 +23,7 @@
     self.server = server;
     self.identity = identity;
     self.serverFeatures = [NSSet new];
+    self.conferenceServers = [NSMutableDictionary new];
     self.discoveredServices = [NSMutableArray new];
     self.discoveredStunTurnServers = [NSMutableArray new];
     self.discoveredAdhocCommands = [NSMutableDictionary new];

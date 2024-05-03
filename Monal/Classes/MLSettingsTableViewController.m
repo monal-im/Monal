@@ -376,7 +376,7 @@ enum DummySettingsRows {
                 case LogRow:
 #endif
                 case SettingsAboutRowsCntORLogRow:{
-                    UIViewController* logView = [[SwiftuiInterface new] makeViewWithName:@"logView"];
+                    UIViewController* logView = [[SwiftuiInterface new] makeViewWithName:@"DebugView"];
                     [self showDetailViewController:logView sender:self];
                     break;
                 }

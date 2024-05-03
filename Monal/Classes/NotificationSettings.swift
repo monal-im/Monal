@@ -92,7 +92,7 @@ struct NotificationSettings: View {
                 }
             }
             Section(header: Text("Pushserver Region").font(.title3)) {
-                Picker("Push Server", selection: $selectedPushServer) {
+                Picker(selection: $selectedPushServer, label: Text("Push Server")) {
                     ForEach(self.availablePushServers.sorted(by: >), id: \.key) { pushServerFqdn, pushServerName in
                         Text(pushServerName).tag(pushServerFqdn)
                     }

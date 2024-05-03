@@ -75,6 +75,9 @@ class PrivacyDefaultDB: ObservableObject {
     
     @defaultsDB("ImageUploadQuality")
     var imageUploadQuality : Float
+    
+    @defaultsDB("showKeyboardOnChatOpen")
+    var showKeyboardOnChatOpen: Bool
 }
 
 
@@ -99,7 +102,7 @@ struct PrivacySettings: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 20, height: 20)
-                        Text("Publishing")
+                        Text("Publishing & Appearance")
                     }
                 }
                 NavigationLink(destination: PreviewsScreen()) {
@@ -144,13 +147,18 @@ struct PrivacyScreen: View {
     
     var body: some View {
         Form {
-            Picker("Notification privacy", selection: $privacyDefaultDB.notificationPrivacySetting) {
+            Picker(selection: $privacyDefaultDB.notificationPrivacySetting, label: Text("Notification privacy")) {
                 ForEach(NotificationPrivacySettingOption.allCases, id: \.self) { option in
                     Text(getNotificationPrivacyOption(option)).tag(option.rawValue)
                 }
             }
-            Toggle("Enable encryption by default for new chats", isOn: $privacyDefaultDB.omemoDefaultOn)
-            Toggle("Autodelete all messages after 3 days", isOn: $privacyDefaultDB.autodeleteAllMessagesAfter3Days)
+            .frame(width: .infinity, height: 56, alignment: .trailing)
+            Toggle(isOn: $privacyDefaultDB.omemoDefaultOn) {
+                Text("Enable encryption by default for new chats")
+            }
+            Toggle(isOn: $privacyDefaultDB.autodeleteAllMessagesAfter3Days) {
+                Text("Autodelete all messages after 3 days")
+            }
         }
         .navigationBarTitle("Privacy & security", displayMode: .inline)
     }
@@ -161,12 +169,27 @@ struct PublishingScreen: View {
     
     var body: some View {
         Form {
-            Toggle("Send last interaction time", isOn: $privacyDefaultDB.sendLastUserInteraction)
-            Toggle("Send typing notifications", isOn: $privacyDefaultDB.sendLastChatState)
-            Toggle("Send message received state", isOn: $privacyDefaultDB.sendReceivedMarkers)
-            Toggle("Send message displayed state", isOn: $privacyDefaultDB.sendDisplayedMarkers)
+            Section(header: Text("Publishing")) {
+                Toggle(isOn: $privacyDefaultDB.sendLastUserInteraction) {
+                    Text("Send last interaction time")
+                }
+                Toggle(isOn: $privacyDefaultDB.sendLastChatState) {
+                    Text("Send typing notifications")
+                }
+                Toggle(isOn: $privacyDefaultDB.sendReceivedMarkers) {
+                    Text("Send message received state")
+                }
+                Toggle(isOn: $privacyDefaultDB.sendDisplayedMarkers) {
+                    Text("Send message displayed state")
+                }
+            }
+            Section(header: Text("Appearance")) {
+                Toggle(isOn: $privacyDefaultDB.showKeyboardOnChatOpen) {
+                    Text("Autofocus text input on chat open")
+                }
+            }
         }
-        .navigationBarTitle("Publishing", displayMode: .inline)
+        .navigationBarTitle("Publishing & Appearance", displayMode: .inline)
     }
 }
 
@@ -175,8 +198,12 @@ struct PreviewsScreen: View {
     
     var body: some View {
         Form {
-            Toggle("Show inline geo location", isOn: $privacyDefaultDB.showGeoLocation)
-            Toggle("Show URL previews", isOn: $privacyDefaultDB.showURLPreview)
+            Toggle(isOn: $privacyDefaultDB.showGeoLocation) {
+                Text("Show inline geo location")
+            }
+            Toggle(isOn: $privacyDefaultDB.showURLPreview) {
+                Text("Show URL previews")
+            }
         }
         .navigationBarTitle("Previews", displayMode: .inline)
     }
@@ -187,11 +214,21 @@ struct CommunicationScreen: View {
     
     var body: some View {
         Form {
-            Toggle("Allow contacts not in my contact list to contact me", isOn: $privacyDefaultDB.allowNonRosterContacts)
-            Toggle("Allow approved contacts to query my Monal and iOS version", isOn: $privacyDefaultDB.allowVersionIQ)
-            Toggle("Calls: Allow contacts not in my contact list to call me", isOn: $privacyDefaultDB.allowCallsFromNonRosterContacts)
-            Toggle("Calls: Allow P2P sessions", isOn: $privacyDefaultDB.webrtcAllowP2P)
-            Toggle("Calls: Allow TURN fallback to Monal-Servers", isOn: $privacyDefaultDB.webrtcUseFallbackTurn)
+            Toggle(isOn: $privacyDefaultDB.allowNonRosterContacts) {
+                Text("Allow contacts not in my contact list to contact me")
+            }
+            Toggle(isOn: $privacyDefaultDB.allowVersionIQ) {
+                Text("Allow approved contacts to query my Monal and iOS version")
+            }
+            Toggle(isOn: $privacyDefaultDB.allowCallsFromNonRosterContacts) {
+                Text("Calls: Allow contacts not in my contact list to call me")
+            }
+            Toggle(isOn: $privacyDefaultDB.webrtcAllowP2P) {
+                Text("Calls: Allow P2P sessions")
+            }
+            Toggle(isOn: $privacyDefaultDB.webrtcUseFallbackTurn) {
+                Text("Calls: Allow TURN fallback to Monal-Servers")
+            }
         }
         .navigationBarTitle("Communication", displayMode: .inline)
     }
@@ -203,7 +240,9 @@ struct MLAutoDownloadFiletransferSettingView: View {
     var body: some View {
         Form {
             Section(header: Text("General File Transfer Settings")) {
-                Toggle("Auto-Download Media", isOn: $privacyDefaultDB.autodownloadFiletransfers)
+                Toggle(isOn: $privacyDefaultDB.autodownloadFiletransfers) {
+                    Text("Auto-Download Media")
+                }
             }
             
             Section(header: Text("Download Settings")) {
@@ -211,40 +250,49 @@ struct MLAutoDownloadFiletransferSettingView: View {
                 Text("Adjust the maximum file size for auto-downloads over WiFi")
                     .foregroundColor(.secondary)
                     .font(.footnote)
-                Slider(value: $privacyDefaultDB.autodownloadFiletransfersWifiMaxSize.bytecount(mappedTo: 1024*1024),
-                       in: 1.0...100.0,
-                       step: 1.0,
-                       minimumValueLabel: Text("1 MiB"),
-                       maximumValueLabel: Text("100 MiB"),
-                       label: {Text("Load over wifi")}
+                Slider(
+                    value: $privacyDefaultDB.autodownloadFiletransfersWifiMaxSize.bytecount(mappedTo: 1024*1024),
+                    in: 1.0...100.0,
+                    step: 1.0,
+                    minimumValueLabel: Text("1 MiB"),
+                    maximumValueLabel: Text("100 MiB"),
+                    label: {
+                        Text("Load over wifi")
+                    }
                 )
-                Text("Load over WiFi upto : \(UInt(privacyDefaultDB.autodownloadFiletransfersWifiMaxSize/(1024*1024))) MiB")
+                Text("Load over WiFi up to: \(UInt(privacyDefaultDB.autodownloadFiletransfersWifiMaxSize/(1024*1024))) MiB")
             }
             
             Text("Adjust the maximum file size for auto-downloads over cellular network")
                 .foregroundColor(.secondary)
                 .font(.footnote)
-            Slider(value: $privacyDefaultDB.autodownloadFiletransfersMobileMaxSize.bytecount(mappedTo: 1024*1024),
-                   in: 0.0...100.0,
-                   step: 1.0,
-                   minimumValueLabel: Text("1 MiB"),
-                   maximumValueLabel: Text("100 MiB"),
-                   label: {Text("Load over Cellular")}
+            Slider(
+                value: $privacyDefaultDB.autodownloadFiletransfersMobileMaxSize.bytecount(mappedTo: 1024*1024),
+                in: 0.0...100.0,
+                step: 1.0,
+                minimumValueLabel: Text("1 MiB"),
+                maximumValueLabel: Text("100 MiB"),
+                label: {
+                    Text("Load over Cellular")
+                }
             )
-            Text("Load over cellular upto : \(Int(privacyDefaultDB.autodownloadFiletransfersMobileMaxSize/(1024*1024))) MiB")
+            Text("Load over cellular up to: \(Int(privacyDefaultDB.autodownloadFiletransfersMobileMaxSize/(1024*1024))) MiB")
             
             Section(header: Text("Upload Settings")) {
                 Text("Adjust the quality of images uploaded")
                     .foregroundColor(.secondary)
                     .font(.footnote)
-                Slider(value: $privacyDefaultDB.imageUploadQuality,
-                       in: 0.33...1.0,
-                       step: 0.01,
-                       minimumValueLabel: Text("33%"),
-                       maximumValueLabel: Text("100%"),
-                       label: {Text("Upload Settings")
-                })
-                Text("Image Upload Quality : \(String(format: "%.0f%%", privacyDefaultDB.imageUploadQuality*100))")
+                Slider(
+                    value: $privacyDefaultDB.imageUploadQuality,
+                    in: 0.33...1.0,
+                    step: 0.01,
+                    minimumValueLabel: Text("33%"),
+                    maximumValueLabel: Text("100%"),
+                    label: {
+                        Text("Upload Settings")
+                    }
+                )
+                Text("Image Upload Quality: \(String(format: "%.0f%%", privacyDefaultDB.imageUploadQuality*100))")
             }
         }
     }

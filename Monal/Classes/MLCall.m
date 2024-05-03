@@ -410,6 +410,11 @@
 -(void) setAudioSession:(AVAudioSession*) audioSession
 {
     @synchronized(self) {
+        if(audioSession == _audioSession)
+        {
+            DDLogWarn(@"Trying to activate same audio session a second time, ignoring...");
+            return;
+        }
         if(audioSession != nil)
             MLAssert(_audioSession == nil, @"Audio session should never be activated without deactivating old audio session first!", (@{
                 @"oldAudioSession": nilWrapper(_audioSession),

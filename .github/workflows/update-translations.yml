@@ -1,0 +1,33 @@
+# build a new beta release and push it to apple
+name: update-translations
+
+# Controls when the action will run.
+on:
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  updateTranslations:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    env:
+      APP_NAME: "Monal"
+      APP_DIR: "Monal.app"
+      BUILD_TYPE: "Beta"
+      EXPORT_OPTIONS_CATALYST_APPSTORE: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
+      EXPORT_OPTIONS_CATALYST_APP_EXPORT: "../scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
+      EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Beta_iOS_ExportOptions.plist"
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          submodules: true
+      - name: Checkout submodules
+        run: git submodule update -f --init --remote
+      - name: Update translations
+        run: |
+          chmod +x ./scripts/updateLocalization.sh
+          chmod +x ./scripts/xliff_extractor.py
+          ./scripts/updateLocalization.sh BUILDSERVER

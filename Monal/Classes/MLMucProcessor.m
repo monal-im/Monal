@@ -191,6 +191,7 @@ static NSDictionary* _optionalGroupConfigOptions;
 {
     //this will replace the old handler
     @synchronized(_stateLockObject) {
+        DDLogVerbose(@"Adding ui handler for muc: %@", room);
         _uiHandler[room] = handler;
     }
 }
@@ -844,17 +845,33 @@ $$instance_handler(handleCreateTimeout, account.mucProcessor, $$ID(xmpp*, accoun
         DDLogError(@"Got room create idle timeout but not creating group, ignoring: %@", room);
         return;
     }
+    DDLogWarn(@"Timeout while creating muc '%@'...", room);
     [self removeRoomFromCreating:room];
     [self deleteMuc:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not create group '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
 $$
 
--(NSString* _Nullable) createGroup:(NSString* _Nullable) node
+-(NSString* _Nullable) generateMucJid
 {
-    if(node == nil)
-        node = [self generateSpeakableGroupNode];
+    NSString* mucServer = nil;
+    for(NSString* jid in _account.connectionProperties.conferenceServers)
+    {
+        if([_account.connectionProperties.conferenceServers[jid] check:@"identity<type=text>"])
+        {
+            mucServer = jid;
+            break;
+        }
+    }
+    if(mucServer == nil)
+        return nil;
+    NSString* node = [self generateSpeakableGroupNode];
     node = [node stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet].lowercaseString;
-    NSString* room = [[NSString stringWithFormat:@"%@@%@", node, _account.connectionProperties.conferenceServer] lowercaseString];
+    NSString* room = [[NSString stringWithFormat:@"%@@%@", node, mucServer] lowercaseString];
+    return room;
+}
+
+-(NSString* _Nullable) createGroup:(NSString*) room
+{
     if([[DataLayer sharedInstance] isBuddyMuc:room forAccount:_account.accountNo])
     {
         DDLogWarn(@"Cannot create muc already existing in our buddy list, checking if we are still joined and join if needed...");
@@ -1468,14 +1485,10 @@ $$
         //remove handler (it will only be called once)
         [self removeUIHandlerForMuc:room];
         
-        if(node == nil)
-        {
-            DDLogInfo(@"Could not extract UI error message. node == nil");
-            return;
-        }
-        
-        //prepare data
-        NSString* message = [HelperTools extractXMPPError:node withDescription:description];
+        //prepare data        
+        NSString* message = description;
+        if(node != nil)
+            message = [HelperTools extractXMPPError:node withDescription:description];
         NSDictionary* data = @{
             @"success": @NO,
             @"muc": room,

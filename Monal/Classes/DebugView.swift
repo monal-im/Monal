@@ -71,6 +71,12 @@ struct LogFilesView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .applyClosure { view in
+            if #available(iOS 15, *) {
+                view.background(.interpolatedWindowBackground)
+            }
+        }
         .alert(isPresented: $showingDBExportFailedAlert) {
             Alert(title: Text("Database Export Failed"), message: Text("Failed to export the database, please check the logfile for errors and try again."), dismissButton: .default(Text("Close")))
         }
@@ -94,7 +100,9 @@ struct UDPConfigView: View {
                 Text("The UDP logger allows you to livestream the log to the configured IP. Please use a secure key when streaming over the internet!\n[Learn how to receive the log stream](https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#stream-the-log).")
                 Form {
                     Section(header: Text("UDP Logger Configuration")) {
-                        Toggle("Enable", isOn: $defaultDB.udpLoggerEnabled)
+                        Toggle(isOn: $defaultDB.udpLoggerEnabled) {
+                            Text("Enable")
+                        }
                         LabeledContent("Logserver IP:") {
                             TextField("Logserver IP", text: $defaultDB.udpLoggerHostname, prompt: Text("Required"))
                         }
@@ -115,44 +123,56 @@ struct UDPConfigView: View {
                 Text("UDP Logging UI not supported on iOS < 16").foregroundColor(.red)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .applyClosure { view in
+            if #available(iOS 15, *) {
+                view.background(.interpolatedWindowBackground)
+            }
+        }
     }
 }
 
 struct CrashTestingView: View {
     var body: some View {
-        VStack(alignment:.leading, spacing: 25) {
-            Text("This allows you to forcefully crash the app using several different methods to test the crash handling.")
-            
-            Group {
-                Button("Try to call unknown handler method") {
-                    DispatchQueue.global(qos: .default).async(execute: {
+            VStack(alignment:.leading, spacing: 25) {
+                Text("This allows you to forcefully crash the app using several different methods to test the crash handling.")
+                
+                Group {
+                    Button("Try to call unknown handler method") {
+                        DispatchQueue.global(qos: .default).async(execute: {
+                            HelperTools.flushLogs(withTimeout: 0.100)
+                            let handler = MLHandler(delegate: self, handlerName: "IDontKnowThis", andBoundArguments: [:])
+                            handler.call(withArguments: nil)
+                        })
+                    }
+                    Button("Bad Access Crash") {
                         HelperTools.flushLogs(withTimeout: 0.100)
-                        let handler = MLHandler(delegate: self, handlerName: "IDontKnowThis", andBoundArguments: [:])
-                        handler.call(withArguments: nil)
-                    })
+                        let delegate: AnyClass? = NSClassFromString("MonalAppDelegate")
+                        print(delegate.unsafelyUnwrapped.audiovisualTypes())
+                        
+                    }
+                    Button("Assertion Crash") {
+                        HelperTools.flushLogs(withTimeout: 0.100)
+                        assert(false)
+                    }
+                    Button("Fatal Error Crash") {
+                        HelperTools.flushLogs(withTimeout: 0.100)
+                        fatalError("fatalError_example")
+                    }
+                    Button("Nil Crash") {
+                        HelperTools.flushLogs(withTimeout: 0.100)
+                        let crasher:Int? = nil
+                        print(crasher!)
+                    }
+                }.foregroundColor(.red)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .applyClosure { view in
+                if #available(iOS 15, *) {
+                    view.background(.interpolatedWindowBackground)
                 }
-                Button("Bad Access Crash") {
-                    HelperTools.flushLogs(withTimeout: 0.100)
-                    let delegate: AnyClass? = NSClassFromString("MonalAppDelegate")
-                    print(delegate.unsafelyUnwrapped.audiovisualTypes())
-                    
-                }
-                Button("Assertion Crash") {
-                    HelperTools.flushLogs(withTimeout: 0.100)
-                    assert(false)
-                }
-                Button("Fatal Error Crash") {
-                    HelperTools.flushLogs(withTimeout: 0.100)
-                    fatalError("fatalError_example")
-                }
-                Button("Nil Crash") {
-                    HelperTools.flushLogs(withTimeout: 0.100)
-                    let crasher:Int? = nil
-                    print(crasher!)
-                }
-            }.foregroundColor(.red)
-            Spacer()
-        }
+            }
     }
 }
 
@@ -177,6 +197,7 @@ struct DebugView: View {
                     Text("Crash Testing")
                 }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
         .addLoadingOverlay(overlay)
         .onChange(of: isReconnecting) { _ in

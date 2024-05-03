@@ -67,7 +67,7 @@ static NSObject* _hardlinkingSyncObject;
     }
     //make sure we don't check or download this twice
     @synchronized(_currentlyTransfering) {
-        if([_currentlyTransfering containsObject:historyId])
+        if([self isFileForHistoryIdInTransfer:historyId])
         {
             DDLogDebug(@"Already checking/downloading this content, ignoring");
             return;
@@ -81,7 +81,15 @@ static NSObject* _hardlinkingSyncObject;
         request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
 
         NSURLSession* session = [NSURLSession sharedSession];
-        [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data __unused, NSURLResponse* _Nullable response, NSError* _Nullable error __unused) {
+        [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data __unused, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+            if(error != nil)
+            {
+                DDLogError(@"Failed to fetch headers of %@ at %@: %@", msg, url, error);
+                //check done, remove from "currently checking/downloading list" and set error
+                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to fetch download metadata: %@", @""), error] forMessageId:msg.messageId];
+                [self markAsComplete:historyId];
+                return;
+            }
             NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
             NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);
@@ -154,7 +162,7 @@ static NSObject* _hardlinkingSyncObject;
     //make sure we don't check or download this twice (but only do this if the download is not forced anyway)
     @synchronized(_currentlyTransfering)
     {
-        if(!forceDownload && [_currentlyTransfering containsObject:historyId])
+        if(!forceDownload && [self isFileForHistoryIdInTransfer:historyId])
         {
             DDLogDebug(@"Already checking/downloading this content, ignoring");
             return;
@@ -167,7 +175,7 @@ static NSObject* _hardlinkingSyncObject;
         NSURLComponents* urlComponents = [NSURLComponents componentsWithString:msg.messageText];
         if(!urlComponents)
         {
-            DDLogError(@"url components decoding failed");
+            DDLogError(@"url components decoding failed for %@", msg);
             [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode download link", @"") forMessageId:msg.messageId];
             [self markAsComplete:historyId];
             return;
@@ -179,8 +187,8 @@ static NSObject* _hardlinkingSyncObject;
         NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
             if(error)
             {
-                DDLogError(@"File download failed: %@", error);
-                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to download file", @"") forMessageId:msg.messageId];
+                DDLogError(@"File download for %@ failed: %@", msg, error);
+                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to download file: %@", @""), error] forMessageId:msg.messageId];
                 [self markAsComplete:historyId];
                 return;
             }
@@ -206,7 +214,7 @@ static NSObject* _hardlinkingSyncObject;
                 DDLogInfo(@"Decrypting encrypted filetransfer stored at '%@'...", location);
                 if(urlComponents.fragment.length < 88)
                 {
-                    DDLogError(@"File download failed: %@", error);
+                    DDLogError(@"File download for %@ failed: %@", msg, error);
                     [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode encrypted link", @"") forMessageId:msg.messageId];
                     [self markAsComplete:historyId];
                     return;
@@ -223,7 +231,7 @@ static NSObject* _hardlinkingSyncObject;
                     NSData* decryptedData = [AESGcm decrypt:encryptedData withKey:key andIv:iv withAuth:nil];
                     if(decryptedData == nil)
                     {
-                        DDLogError(@"File download decryption failed");
+                        DDLogError(@"File download decryption failed for %@", msg);
                         [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt download", @"") forMessageId:msg.messageId];
                         [self markAsComplete:historyId];
                         return;
@@ -231,7 +239,7 @@ static NSObject* _hardlinkingSyncObject;
                     [decryptedData writeToFile:cacheFile options:NSDataWritingAtomic error:&error];
                     if(error)
                     {
-                        DDLogError(@"File download failed: %@", error);
+                        DDLogError(@"File download for %@ failed: %@", msg, error);
                         [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to write decrypted download into cache directory", @"") forMessageId:msg.messageId];
                         [self markAsComplete:historyId];
                         return;
@@ -241,7 +249,7 @@ static NSObject* _hardlinkingSyncObject;
                 }
                 else
                 {
-                    DDLogError(@"Failed to decrypt file (iv, key, data length checks failed)");
+                    DDLogError(@"Failed to decrypt file (iv, key, data length checks failed) for %@", msg);
                     [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt filetransfer", @"") forMessageId:msg.messageId];
                     [self markAsComplete:historyId];
                     return;
@@ -255,8 +263,8 @@ static NSObject* _hardlinkingSyncObject;
                 error = [HelperTools hardLinkOrCopyFile:[location path] to:cacheFile];
                 if(error)
                 {
-                    DDLogError(@"File download failed: %@", error);
-                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to copy downloaded file into cache directory", @"") forMessageId:msg.messageId];
+                    DDLogError(@"File download for %@ failed: %@", msg, error);
+                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to copy downloaded file into cache directory: %@", @""), error] forMessageId:msg.messageId];
                     [self markAsComplete:historyId];
                     return;
                 }
@@ -818,7 +826,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
     //make sure we don't upload the same tmpfile twice (should never happen anyways)
     @synchronized(_currentlyTransfering)
     {
-        if([_currentlyTransfering containsObject:file])
+        if([self isFileAtPathInTransfer:file])
         {
             error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Already uploading this content, ignoring", @"")}];
             DDLogError(@"Already uploading this content, ignoring %@", file);
@@ -875,7 +883,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
         @"data":fileData,
         @"fileName":userFacingFilename,
         @"contentType":sendMimeType
-    } andCompletion:^(NSString *url, NSError *error) {
+    } andCompletion:^(NSString* url, NSError* error) {
         if(error)
         {
             [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
@@ -914,7 +922,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
             [_fileManager moveItemAtPath:file toPath:cacheFile error:&error];
             if(error)
             {
-                NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to uploaded file to file cache directory", @"")}];
+                NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to move uploaded file to file cache directory", @"")}];
                 [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
                 [self markAsComplete:file];
                 DDLogError(@"File upload failed: %@", error);
@@ -947,9 +955,16 @@ $$
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFiletransfersIdle object:self];
 }
 
-+(BOOL) isFileforHistoryIdInTransfer:(NSNumber*) historyId
++(BOOL) isFileForHistoryIdInTransfer:(NSNumber*) historyId
 {
     if([_currentlyTransfering containsObject:historyId])
+        return YES;
+    return NO;
+}
+
++(BOOL) isFileAtPathInTransfer:(NSString*) path
+{
+    if([_currentlyTransfering containsObject:path])
         return YES;
     return NO;
 }

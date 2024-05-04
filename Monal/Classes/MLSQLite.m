@@ -153,9 +153,17 @@ static NSMutableDictionary* currentTransactions;
 
     if(sqlite3_prepare_v2(self->_database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) != SQLITE_OK)
     {
-        DDLogError(@"sqlite prepare '%@' failed: %s", query, sqlite3_errmsg(self->_database));
+        [self throwErrorForQuery:query andArguments:args];
         return NULL;
     }
+    
+    if((int)args.count != sqlite3_bind_parameter_count(statement))
+        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"SQL parameter count not equals argument count!" userInfo:@{
+            @"query": query,
+            @"args": args,
+            @"paramCount": @(sqlite3_bind_parameter_count(statement)),
+            @"argCount": @(args.count),
+        }];
     
     //bind args to statement
     sqlite3_reset(statement);

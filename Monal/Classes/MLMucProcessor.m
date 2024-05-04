@@ -23,7 +23,7 @@
 #import "MLOMEMO.h"
 #import "MLImageManager.h"
 
-#define CURRENT_MUC_STATE_VERSION @8
+#define CURRENT_MUC_STATE_VERSION @9
 
 @interface MLMucProcessor()
 {
@@ -35,6 +35,7 @@
     NSMutableDictionary* _joining;
     NSMutableSet* _destroying;
     NSMutableSet* _firstJoin;
+    NSMutableDictionary* _changingName;
     NSDate* _lastPing;
     NSMutableSet* _noUpdateBookmarks;
     BOOL _hasFetchedBookmarks;
@@ -78,6 +79,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     _joining = [NSMutableDictionary new];
     _destroying = [NSMutableSet new];
     _firstJoin = [NSMutableSet new];
+    _changingName = [NSMutableDictionary new];
     _uiHandler = [NSMutableDictionary new];
     _lastPing = [NSDate date];
     _noUpdateBookmarks = [NSMutableSet new];
@@ -111,6 +113,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         _joining = [state[@"joining"] mutableCopy];
         _destroying = [state[@"destroying"] mutableCopy];
         _firstJoin = [state[@"firstJoin"] mutableCopy];
+        _changingName = [state[@"changingName"] mutableCopy];
         _lastPing = state[@"lastPing"];
         _noUpdateBookmarks = [state[@"noUpdateBookmarks"] mutableCopy];
         _hasFetchedBookmarks = [state[@"hasFetchedBookmarks"] boolValue];
@@ -127,6 +130,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             @"joining": [_joining copy],
             @"destroying": [_destroying copy],
             @"firstJoin": [_firstJoin copy],
+            @"changingName": [_changingName copy],
             @"lastPing": _lastPing,
             @"noUpdateBookmarks": [_noUpdateBookmarks copy],
             @"hasFetchedBookmarks": @(_hasFetchedBookmarks),
@@ -144,6 +148,8 @@ static NSDictionary* _optionalGroupConfigOptions;
     {
         @synchronized(_stateLockObject) {
             _roomFeatures = [NSMutableDictionary new];
+            _destroying = [NSMutableSet new];
+            _changingName = [NSMutableDictionary new];
             
             //make sure all idle timers get invalidated properly
             NSDictionary* joiningCopy = [_joining copy];
@@ -152,7 +158,6 @@ static NSDictionary* _optionalGroupConfigOptions;
             NSDictionary* creatingCopy = [_creating copy];
             for(NSString* room in creatingCopy)
                  [self removeRoomFromCreating:room];
-            _destroying = [NSMutableSet new];
             
             //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
             
@@ -189,6 +194,32 @@ static NSDictionary* _optionalGroupConfigOptions;
 {
     @synchronized(_stateLockObject) {
         return _joining[room] != nil;
+    }
+}
+
+-(BOOL) incrementNameChange:(NSString*) room
+{
+    @synchronized(_stateLockObject) {
+        if(!_changingName[room])
+        {
+            _changingName[room] = @1;
+            return YES;
+        }
+        _changingName[room] = @(((NSNumber*)_changingName[room]).integerValue + 1);
+        return NO;
+    }
+}
+
+-(BOOL) decrementNameChange:(NSString*) room
+{
+    @synchronized(_stateLockObject) {
+        if(_changingName[room] == nil)
+            return YES;
+        NSInteger oldValue = ((NSNumber*)_changingName[room]).integerValue;
+        _changingName[room] = @(max(0, oldValue - 1));
+        if(oldValue == 0)
+            return YES;
+        return NO;
     }
 }
 
@@ -445,6 +476,7 @@ static NSDictionary* _optionalGroupConfigOptions;
 }
 
 $$instance_handler(handleRoomConfigFormInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    [self decrementNameChange:roomJid];
     if(deleteOnError)
     {
         DDLogError(@"Config form fetch failed, removing muc '%@' from _creating...", roomJid);
@@ -464,6 +496,7 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Failed to fetch room config form for '%@': %@", roomJid, [iqNode findFirst:@"error"]);
+        [self decrementNameChange:roomJid];
         if(deleteOnError)
         {
             [self removeRoomFromCreating:roomJid];
@@ -477,6 +510,7 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
     if(dataForm == nil)
     {
         DDLogError(@"Got empty room config form for '%@'!", roomJid);
+        [self decrementNameChange:roomJid];
         if(deleteOnError)
         {
             [self removeRoomFromCreating:roomJid];
@@ -491,6 +525,7 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
         if([dataForm getField:option] == nil)
         {
             DDLogError(@"Could not configure room '%@' to be a groupchat: config option '%@' not available!", roomJid, option);
+            [self decrementNameChange:roomJid];
             if(deleteOnError)
             {
                 [self removeRoomFromCreating:roomJid];
@@ -520,6 +555,7 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
 $$
 
 $$instance_handler(handleRoomConfigResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    [self decrementNameChange:roomJid];
     if(deleteOnError)
     {
         DDLogError(@"Config form submit failed, removing muc '%@' from _creating...", roomJid);
@@ -535,6 +571,7 @@ $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, acc
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Failed to submit room config form of '%@': %@", roomJid, [iqNode findFirst:@"error"]);
+        [self decrementNameChange:roomJid];
         if(deleteOnError)
         {
             [self removeRoomFromCreating:roomJid];
@@ -1190,6 +1227,7 @@ $$
 
 -(void) changeNameOfMuc:(NSString*) room to:(NSString*) name
 {
+    [self incrementNameChange:room];
     [self configureMuc:room withMandatoryOptions:@{
         @"muc#roomconfig_roomname": name,
     } andOptionalOptions:@{} deletingMucOnError:NO andJoiningMucOnSuccess:NO];
@@ -1238,6 +1276,7 @@ $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, 
 $$
 
 $$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid))
+    [self decrementNameChange:roomJid];
     DDLogInfo(@"Removing muc '%@' from _joining...", roomJid);
     [self removeRoomFromJoining:roomJid];
 $$
@@ -1258,6 +1297,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     if([iqNode check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}gone"])
     {
         DDLogError(@"Querying muc info returned this muc isn't available anymore: %@", [iqNode findFirst:@"error"]);
+        [self decrementNameChange:iqNode.fromUser];
         [self removeRoomFromJoining:iqNode.fromUser];
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
@@ -1272,6 +1312,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     if([iqNode check:@"/<type=error>/error<type=wait>"])
     {
         DDLogError(@"Querying muc info returned a temporary error: %@", [iqNode findFirst:@"error"]);
+        [self decrementNameChange:iqNode.fromUser];
         [self removeRoomFromJoining:iqNode.fromUser];
         
         //do nothing: the error is only temporary (a s2s problem etc.), a muc ping will retry the join
@@ -1287,6 +1328,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     else if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Querying muc info returned a persistent error: %@", [iqNode findFirst:@"error"]);
+        [self decrementNameChange:iqNode.fromUser];
         [self removeRoomFromJoining:iqNode.fromUser];
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
@@ -1305,6 +1347,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     if(![features containsObject:@"http://jabber.org/protocol/muc"])
     {
         DDLogError(@"muc disco returned that this jid is not a muc!");
+        [self decrementNameChange:iqNode.fromUser];
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         //make sure to update remote bookmarks, even if updateBookmarks == NO
@@ -1324,6 +1367,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     if(join && ![self isJoining:iqNode.fromUser])
     {
         DDLogWarn(@"Ignoring muc disco result for '%@' on account %@: not joining anymore...", iqNode.fromUser, _account);
+        [self decrementNameChange:iqNode.fromUser];
         return;
     }
         
@@ -1371,12 +1415,15 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         [[DataLayer sharedInstance] updateMucTypeTo:mucType forRoom:iqNode.fromUser andAccount:_account.accountNo];
     }
     
-    if(mucName && [mucName length])
+    if(!mucName || ![mucName length])
+        mucName = @"";
+    //only handle incoming name updates if they are not our own reflected changes
+    if([self decrementNameChange:iqNode.fromUser])
     {
         MLContact* mucContact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo];
         if(![mucName isEqualToString:mucContact.fullName])
         {
-            DDLogInfo(@"Configuring muc %@ to use name '%@'...", iqNode.fromUser, mucName);
+            DDLogInfo(@"Configuring muc %@ to use name '%@' (old value: '%@')...", iqNode.fromUser, mucName, mucContact.fullName);
             [[DataLayer sharedInstance] setFullName:mucName forContact:iqNode.fromUser andAccount:_account.accountNo];
         }
     }

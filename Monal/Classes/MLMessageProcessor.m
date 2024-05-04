@@ -346,16 +346,16 @@ static NSMutableDictionary* _typingNotifications;
         DDLogDebug(@"This is muc, inbound is now: %@ (ownNick: %@, actualFrom: %@, participantJid: %@)", inbound ? @"YES": @"NO", ownNick, actualFrom, participantJid);
     }
     
-    if([messageNode check:@"/<type=groupchat>/subject#"])
+    if([messageNode check:@"/<type=groupchat>/subject"])
     {
         if(!isMLhistory)
         {
-            NSString* subject = [messageNode findFirst:@"/<type=groupchat>/subject#"];
+            NSString* subject = nilDefault([messageNode findFirst:@"/<type=groupchat>/subject#"], @"");
             subject = [subject stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:account.accountNo andRoom:messageNode.fromUser];
-            DDLogInfo(@"Got MUC subject for %@: %@", messageNode.fromUser, subject);
+            DDLogInfo(@"Got MUC subject for %@: '%@'", messageNode.fromUser, subject);
             
-            if(subject == nil || [subject isEqualToString:currentSubject])
+            if([subject isEqualToString:currentSubject])
             {
                 DDLogVerbose(@"Ignoring subject, nothing changed...");
                 return nil;

@@ -91,7 +91,7 @@ class KVOObserver: NSObject {
 }
 
 @dynamicMemberLookup
-public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable, CustomStringConvertible {
+public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable, CustomStringConvertible, Identifiable {
     public var obj: ObjType
     private var observedMembers: NSMutableSet = NSMutableSet()
     private var observers: [KVOObserver] = Array()

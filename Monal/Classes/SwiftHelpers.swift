@@ -91,7 +91,7 @@ class KVOObserver: NSObject {
 }
 
 @dynamicMemberLookup
-public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable {
+public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable, CustomStringConvertible {
     public var obj: ObjType
     private var observedMembers: NSMutableSet = NSMutableSet()
     private var observers: [KVOObserver] = Array()
@@ -157,6 +157,10 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable,
         set {
             self.setWrapper(for:member, value:newValue as AnyObject?)
         }
+    }
+    
+    public var description: String {
+        return "ObservableKVOWrapper<\(String(describing:self.obj))>"
     }
 
     @inlinable

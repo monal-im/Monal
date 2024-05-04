@@ -675,7 +675,7 @@ static NSMutableDictionary* _typingNotifications;
     {
         //just try to use the probably reflected message to update the stanzaid of our message in the db
         //messageId is always a proper origin-id in this case, because inbound == NO and Monal uses origin-ids
-        NSNumber* historyId = [[DataLayer sharedInstance] hasMessageForStanzaId:stanzaid orMessageID:messageId withInboundDir:inbound onAccount:account.accountNo];
+        NSNumber* historyId = [[DataLayer sharedInstance] hasMessageForStanzaId:stanzaid orMessageID:messageId withInboundDir:inbound andJid:buddyName onAccount:account.accountNo];
         if(historyId != nil)
         {
             message = [[DataLayer sharedInstance] messageForHistoryID:historyId];

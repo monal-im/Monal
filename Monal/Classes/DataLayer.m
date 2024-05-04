@@ -1236,7 +1236,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     
     return [self.db idWriteTransaction:^{
-        if(!checkForDuplicates || [self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound onAccount:accountNo] == nil)
+        if(!checkForDuplicates || [self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound andJid:buddyName onAccount:accountNo] == nil)
         {
             //this is always from a contact
             NSDateFormatter* formatter = [NSDateFormatter new];
@@ -1293,7 +1293,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound onAccount:(NSNumber*) accountNo
+-(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound andJid:(NSString*) jid onAccount:(NSNumber*) accountNo
 {
     if(accountNo == nil)
         return (NSNumber*)nil;
@@ -1303,7 +1303,7 @@ static NSDateFormatter* dbFormatter;
         if(stanzaId)
         {
             DDLogVerbose(@"stanzaid provided");
-            NSArray<NSNumber*>* found = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];
+            NSArray<NSNumber*>* found = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, jid, stanzaId]];
             if([found count])
             {
                 DDLogVerbose(@"stanzaid provided and could be found: %@", found);
@@ -1318,7 +1318,7 @@ static NSDateFormatter* dbFormatter;
         //   the check, if an origin-id was given, lives in MLMessageProcessor.m (it only triggers a dedup for messages either having a stanzaid or an origin-id)
         if(inbound == NO)
         {
-            NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND inbound=0 AND messageid=?;" andArguments:@[accountNo, messageId]];
+            NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND inbound=0 AND messageid=?;" andArguments:@[accountNo, jid, messageId]];
             if(historyId != nil)
             {
                 DDLogVerbose(@"found by origin-id or messageid");

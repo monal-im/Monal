@@ -61,7 +61,7 @@ struct CreateGroupMenu: View {
                         .autocapitalization(.none)
                         .addClearButton(isEditing: isEditingGroupName, text:$groupName)
 
-                    NavigationLink(destination: LazyClosureView(ContactPicker(account: self.selectedAccount!, selectedContacts: $selectedContacts))) {
+                    NavigationLink(destination: LazyClosureView(ContactPicker(self.selectedAccount!, binding: $selectedContacts))) {
                         Text("Change Group Members")
                     }
                     Button(action: {

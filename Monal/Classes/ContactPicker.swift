@@ -41,37 +41,40 @@ struct ContactPickerEntry: View {
 
 struct ContactPicker: View {
     @Environment(\.presentationMode) private var presentationMode
-
-    @State var contacts: OrderedSet<ObservableKVOWrapper<MLContact>>
-    let account: xmpp
-    @Binding var selectedContacts: OrderedSet<ObservableKVOWrapper<MLContact>>
-    let existingMembers: OrderedSet<ObservableKVOWrapper<MLContact>>
+    @Binding var returnedContacts: OrderedSet<ObservableKVOWrapper<MLContact>>
+    @State var allContacts: OrderedSet<ObservableKVOWrapper<MLContact>>
+    @State var selectedContacts: OrderedSet<ObservableKVOWrapper<MLContact>>
     @State var searchText = ""
+    @State var isEditingSearchInput = false
+    let allowRemoval: Bool
 
-    @State var isEditingSearchInput: Bool = false
-
-    init(account: xmpp, selectedContacts: Binding<OrderedSet<ObservableKVOWrapper<MLContact>>>) {
-        self.init(account: account, selectedContacts: selectedContacts, existingMembers: OrderedSet())
-    }
-
-    init(account: xmpp, selectedContacts: Binding<OrderedSet<ObservableKVOWrapper<MLContact>>>, existingMembers: OrderedSet<ObservableKVOWrapper<MLContact>>) {
-        self.account = account
-        self._selectedContacts = selectedContacts
-        self.existingMembers = existingMembers
-
+    init(_ account: xmpp, binding returnedContacts: Binding<OrderedSet<ObservableKVOWrapper<MLContact>>>, allowRemoval: Bool = true) {
+        self.allowRemoval = allowRemoval
         var contactsTmp: OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
+        
+        //build currently selected list of contacts
+        contactsTmp.removeAll()
+        for contact in returnedContacts.wrappedValue {
+            contactsTmp.append(contact)
+        }
+        _selectedContacts = State(wrappedValue: contactsTmp)
+
+        //build list of all possible contacts on this account (excluding selfchat and other mucs)
+        contactsTmp.removeAll()
         for contact in DataLayer.sharedInstance().possibleGroupMembers(forAccount: account.accountNo) {
             contactsTmp.append(ObservableKVOWrapper(contact))
         }
-        _contacts = State(wrappedValue: contactsTmp)
+        _allContacts = State(wrappedValue: contactsTmp)
+        
+        _returnedContacts = returnedContacts
     }
 
     private var searchResults : OrderedSet<ObservableKVOWrapper<MLContact>> {
         if searchText.isEmpty {
-            return self.contacts
+            return self.allContacts
         } else {
             var filteredContacts: OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
-            for contact in self.contacts {
+            for contact in self.allContacts {
                 if (contact.contactDisplayName as String).lowercased().contains(searchText.lowercased()) ||
                     (contact.contactJid as String).contains(searchText.lowercased()) {
                     filteredContacts.append(contact)
@@ -82,26 +85,24 @@ struct ContactPicker: View {
     }
 
     var body: some View {
-        if(contacts.isEmpty) {
+        if(allContacts.isEmpty) {
             Text("No contacts to show :(")
                 .navigationTitle("Contact Lists")
         } else {
-            List {
-                ForEach(searchResults, id: \.self.obj) { contact in
-                    let contactIsSelected = self.selectedContacts.contains(contact);
-                    let contactIsAlreadyMember = self.existingMembers.contains(contact);
-                    ContactPickerEntry(contact: contact, isPicked: contactIsSelected, isExistingMember: contactIsAlreadyMember)
-                    .onTapGesture(perform: {
+            List(searchResults) { contact in
+                let contactIsSelected = self.selectedContacts.contains(contact);
+                let contactIsAlreadyMember = self.returnedContacts.contains(contact);
+                ContactPickerEntry(contact: contact, isPicked: contactIsSelected, isExistingMember: !(!contactIsAlreadyMember || allowRemoval))
+                    .onTapGesture {
                         // only allow changes to members that are not already part of the group
-                        if(!contactIsAlreadyMember) {
+                        if(!contactIsAlreadyMember || allowRemoval) {
                             if(contactIsSelected) {
                                 self.selectedContacts.remove(contact)
                             } else {
                                 self.selectedContacts.append(contact)
                             }
                         }
-                    })
-                }
+                    }
             }
             .applyClosure { view in
                 if #available(iOS 15.0, *) {
@@ -111,13 +112,11 @@ struct ContactPicker: View {
                 }
             }
             .listStyle(.inset)
-            .navigationBarTitle("Contact Selection", displayMode: .inline)
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Back", action: {
-                        self.presentationMode.wrappedValue.dismiss()
-                    })
+            .navigationBarTitle(NSLocalizedString("Contact Selection", comment: ""), displayMode: .inline)
+            .onDisappear {
+                returnedContacts.removeAll()
+                for contact in selectedContacts {
+                    returnedContacts.append(contact)
                 }
             }
         }

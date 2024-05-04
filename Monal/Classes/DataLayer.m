@@ -1236,7 +1236,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     
     return [self.db idWriteTransaction:^{
-        if(!checkForDuplicates || ![self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound onAccount:accountNo])
+        if(!checkForDuplicates || [self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound onAccount:accountNo] == nil)
         {
             //this is always from a contact
             NSDateFormatter* formatter = [NSDateFormatter new];
@@ -1293,21 +1293,21 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound onAccount:(NSNumber*) accountNo
+-(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound onAccount:(NSNumber*) accountNo
 {
     if(accountNo == nil)
-        return NO;
+        return (NSNumber*)nil;
     
-    return [self.db boolWriteTransaction:^{
+    return (NSNumber*)[self.db idWriteTransaction:^{
         //if the stanzaid was given, this is conclusive for dedup, we don't need to check any other ids (EXCEPTION BELOW)
         if(stanzaId)
         {
             DDLogVerbose(@"stanzaid provided");
-            NSArray* found = [self.db executeReader:@"SELECT * FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];
+            NSArray<NSNumber*>* found = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];
             if([found count])
             {
                 DDLogVerbose(@"stanzaid provided and could be found: %@", found);
-                return YES;
+                return found[0];
             }
         }
         
@@ -1328,12 +1328,12 @@ static NSDateFormatter* dbFormatter;
                     //this entry needs an update of its stanzaid
                     [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
                 }
-                return YES;
+                return historyId;
             }
         }
         
         DDLogVerbose(@"nothing worked --> message not found");
-        return NO;
+        return (NSNumber*)nil;
     }];
 }
 

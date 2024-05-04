@@ -61,9 +61,6 @@ struct CreateGroupMenu: View {
                         .autocapitalization(.none)
                         .addClearButton(isEditing: isEditingGroupName, text:$groupName)
 
-                    NavigationLink(destination: LazyClosureView(ContactPicker(self.selectedAccount!, binding: $selectedContacts))) {
-                        Text("Change Group Members")
-                    }
                     Button(action: {
                         guard let generatedJid = self.selectedAccount!.mucProcessor.generateMucJid() else {
                             errorAlert(title: Text("Error creating group!"), message: Text("Your server does not provide a MUC component."))
@@ -104,15 +101,17 @@ struct CreateGroupMenu: View {
                         Text("Create new group")
                     })
                 }
-                if self.selectedContacts.count > 0 {
-                    Section(header: Text("Selected Group Members")) {
-                        ForEach(self.selectedContacts, id: \.obj.contactJid) { contact in
-                            ContactEntry(contact: contact)
-                        }
-                        .onDelete(perform: { indexSet in
-                            self.selectedContacts.remove(at: indexSet.first!)
-                        })
+
+                Section(header: Text("Selected Group Members")) {
+                    NavigationLink(destination: LazyClosureView(ContactPicker(self.selectedAccount!, binding: $selectedContacts))) {
+                        Text("Change Group Members")
                     }
+                    ForEach(self.selectedContacts, id: \.obj.contactJid) { contact in
+                        ContactEntry(contact: contact)
+                    }
+                    .onDelete(perform: { indexSet in
+                        self.selectedContacts.remove(at: indexSet.first!)
+                    })
                 }
             }
         }
@@ -122,7 +121,7 @@ struct CreateGroupMenu: View {
             }))
         }
         .addLoadingOverlay(overlay)
-        .navigationBarTitle("Create new group", displayMode: .inline)
+        .navigationBarTitle(NSLocalizedString("Create new group", comment:""), displayMode: .inline)
         .navigationViewStyle(.stack)
     }
 }

@@ -146,14 +146,14 @@ struct AddContactMenu: View {
                 successAlert(title: Text("Permission Requested"), message: Text("The new contact will be added to your contacts list when the person you've added has approved your request."))
             } else if type == "muc" {
                 showLoadingOverlay(overlay, headline: NSLocalizedString("Adding Group/Channel...", comment: ""))
-                account.mucProcessor.addUIHandler({data in
-                    let success : Bool = (data as! NSDictionary)["success"] as! Bool;
+                account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
+                    let success : Bool = data["success"] as! Bool;
                     hideLoadingOverlay(overlay)
                     if success {
                         self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
                         successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined group/channel %@!", jid)))
                     } else {
-                        errorAlert(title: Text("Error entering group/channel!"), message: Text((data as! NSDictionary)["errorMessage"] as! String))
+                        errorAlert(title: Text("Error entering group/channel!"), message: Text(data["errorMessage"] as! String))
                     }
                 }, forMuc: jid)
                 account.joinMuc(jid)

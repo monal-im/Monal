@@ -86,8 +86,8 @@ struct CreateGroupMenu: View {
                             }
                             return
                         }
-                        self.selectedAccount!.mucProcessor.addUIHandler({data in
-                            let success : Bool = (data as! NSDictionary)["success"] as! Bool;
+                        self.selectedAccount!.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
+                            let success : Bool = data["success"] as! Bool;
                             if success {
                                 self.selectedAccount!.mucProcessor.changeName(ofMuc: roomJid, to: self.groupName)
                                 for user in self.selectedContacts {
@@ -102,7 +102,7 @@ struct CreateGroupMenu: View {
                                 }
                             } else {
                                 hideLoadingOverlay(overlay)
-                                errorAlert(title: Text("Error creating group!"), message: Text((data as! NSDictionary)["errorMessage"] as! String))
+                                errorAlert(title: Text("Error creating group!"), message: Text(data["errorMessage"] as! String))
                             }
                         }, forMuc: roomJid)
                     }, label: {

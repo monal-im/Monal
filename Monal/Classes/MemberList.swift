@@ -90,7 +90,7 @@ struct MemberList: View {
         List {
             Section(header: Text(self.group.obj.contactDisplayName)) {
                 if ownAffiliation == "owner" || ownAffiliation == "admin" {
-                    NavigationLink(destination: LazyClosureView(ContactPicker(account: account, selectedContacts: $memberList, existingMembers: memberList))) {
+                    NavigationLink(destination: LazyClosureView(ContactPicker(account, binding: $memberList, allowRemoval: false))) {
                         Text("Add Group Members")
                     }
                 }

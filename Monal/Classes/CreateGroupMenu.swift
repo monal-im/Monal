@@ -14,21 +14,16 @@ import OrderedCollections
 
 struct CreateGroupMenu: View {
     private var appDelegate: MonalAppDelegate
-
+    private var delegate: SheetDismisserProtocol
     @State private var connectedAccounts: [xmpp]
     @State private var selectedAccount: xmpp?
     @State private var groupName: String = ""
-
     @State private var showAlert = false
     // note: dismissLabel is not accessed but defined at the .alert() section
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @State private var selectedContacts : OrderedSet<ObservableKVOWrapper<MLContact>> = []
-    
+    @State private var selectedContacts: OrderedSet<ObservableKVOWrapper<MLContact>> = []
     @State private var isEditingGroupName = false
-
     @StateObject private var overlay = LoadingOverlayState()
-    
-    private var delegate: SheetDismisserProtocol
 
     init(delegate: SheetDismisserProtocol) {
         self.appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
@@ -66,9 +61,9 @@ struct CreateGroupMenu: View {
                         .autocapitalization(.none)
                         .addClearButton(isEditing: isEditingGroupName, text:$groupName)
 
-                    NavigationLink(destination: LazyClosureView(ContactPicker(account: self.selectedAccount!, selectedContacts: $selectedContacts)), label: {
-                            Text("Change Group Members")
-                        })
+                    NavigationLink(destination: LazyClosureView(ContactPicker(account: self.selectedAccount!, selectedContacts: $selectedContacts))) {
+                        Text("Change Group Members")
+                    }
                     Button(action: {
                         guard let generatedJid = self.selectedAccount!.mucProcessor.generateMucJid() else {
                             errorAlert(title: Text("Error creating group!"), message: Text("Your server does not provide a MUC component."))

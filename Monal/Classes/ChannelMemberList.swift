@@ -11,7 +11,7 @@ import monalxmpp
 import OrderedCollections
 
 struct ChannelMemberList: View {
-    @State private var channelMembers: OrderedDictionary<String, String>
+    @State private var channelParticipants: OrderedDictionary<String, String>
     @StateObject var channel: ObservableKVOWrapper<MLContact>
     private let account: xmpp
 
@@ -26,31 +26,30 @@ struct ChannelMemberList: View {
                 nickSet.updateValue((jidDict["affiliation"] as? String) ?? "none", forKey:nick)
             }
         }
-        _channelMembers = State(wrappedValue: nickSet)
+        _channelParticipants = State(wrappedValue: nickSet)
     }
 
     var body: some View {
         List {
             Section(header: Text(self.channel.obj.contactDisplayName)) {
-                ForEach(self.channelMembers.sorted(by: <), id: \.self.key) {
-                    member in
+                ForEach(self.channelParticipants.sorted(by: <), id: \.self.key) { participant in
                     ZStack(alignment: .topLeading) {
                         HStack(alignment: .center) {
-                            Text(member.key)
+                            Text(participant.key)
                             Spacer()
-                            if member.value == "owner" {
+                            if participant.value == "owner" {
                                 Text(NSLocalizedString("Owner", comment: ""))
-                            } else if member.value == "admin" {
+                            } else if participant.value == "admin" {
                                 Text(NSLocalizedString("Admin", comment: ""))
                             } else {
-                                Text(NSLocalizedString("Member", comment: ""))
+                                Text(NSLocalizedString("Participant", comment: ""))
                             }
                         }
                     }
                 }
             }
         }
-        .navigationBarTitle("Channel Members", displayMode: .inline)
+        .navigationBarTitle(NSLocalizedString("Channel Participants", comment: ""), displayMode: .inline)
     }
 }
 

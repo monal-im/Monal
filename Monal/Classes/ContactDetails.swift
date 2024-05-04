@@ -285,15 +285,6 @@ struct ContactDetails: View {
                     Text("Pin Chat")
                 }
                 
-                if contact.obj.isGroup && contact.obj.mucType == "group" {
-                    NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
-                        Text("Group Members")
-                    }
-                } else if contact.obj.isGroup && contact.obj.mucType == "channel" {
-                    NavigationLink(destination: LazyClosureView(ChannelMemberList(mucContact:contact))) {
-                        Text("Channel Members")
-                    }
-                }
 #if !DISABLE_OMEMO
                 if !HelperTools.isContactBlacklisted(forEncryption:contact.obj) {
                     if !contact.isGroup {
@@ -325,6 +316,16 @@ struct ContactDetails: View {
                 
                 NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact, delegate:delegate))) {
                     Text("Change Chat Background")
+                }
+                
+                if contact.obj.isGroup && contact.obj.mucType == "group" {
+                    NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
+                        Text("Group Members")
+                    }
+                } else if contact.obj.isGroup && contact.obj.mucType == "channel" {
+                    NavigationLink(destination: LazyClosureView(ChannelMemberList(mucContact:contact))) {
+                        Text("Channel Members")
+                    }
                 }
             }
             .listStyle(.plain)
@@ -392,6 +393,8 @@ struct ContactDetails: View {
                                             Text("Yes"),
                                             action: {
                                                 contact.obj.removeFromRoster()      //this will dismiss the chatview via kMonalContactRemoved notification
+                                                //this will do nothing for contact details opened through group members list (which is fine!)
+                                                //NOTE: this holds for all delegate.dismiss() calls
                                                 self.delegate.dismiss()
                                             }
                                         )
@@ -542,10 +545,10 @@ struct ContactDetails: View {
             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton:.default(Text("Close"), action: {
                 showAlert = false
                 if self.success == true {
-                    //close muc ui and leave chat ui of this muc
                     if let callback = self.successCallback {
                         callback()
                     }
+                    //close muc ui and leave chat ui of this muc
                     if let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats {
                         activeChats.presentChat(with:nil)
                     }

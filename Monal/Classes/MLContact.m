@@ -17,6 +17,7 @@
 #import "MLImageManager.h"
 #import "MLVoIPProcessor.h"
 #import "MonalAppDelegate.h"
+#import "MLMucProcessor.h"
 
 @import Intents;
 
@@ -31,6 +32,7 @@ NSString* const kAskSubscribe = @"subscribe";
 {
     NSInteger _unreadCount;
     monal_void_block_t _cancelNickChange;
+    monal_void_block_t _cancelFullNameChange;
     UIImage* _avatar;
 }
 @property (nonatomic, assign) BOOL isSelfChat;
@@ -370,6 +372,7 @@ NSString* const kAskSubscribe = @"subscribe";
 
 -(void) setNickNameView:(NSString*) name
 {
+    MLAssert(!self.isGroup, @"Using nickNameView only allowed for 1:1 contacts!", (@{@"contact": self}));
     if([self.nickName isEqualToString:name] || name == nil)
         return;             //no change at all
     self.nickName = name;
@@ -377,7 +380,7 @@ NSString* const kAskSubscribe = @"subscribe";
     if(_cancelNickChange)
         _cancelNickChange();
     // delay changes because we don't want to update the roster on our server too often while typing
-    _cancelNickChange = createTimer(1.0, (^{
+    _cancelNickChange = createTimer(2.0, (^{
         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
         [account updateRosterItem:self withName:self.nickName];
     }));
@@ -386,6 +389,33 @@ NSString* const kAskSubscribe = @"subscribe";
 +(NSSet*) keyPathsForValuesAffectingNickNameView
 {
     return [NSSet setWithObjects:@"nickName", nil];
+}
+
+-(NSString*) fullNameView
+{
+    return nilDefault(self.fullName, @"");
+}
+
+-(void) setFullNameView:(NSString*) name
+{
+    MLAssert(self.isGroup, @"Using fullNameView only allowed for mucs!", (@{@"contact": self}));
+    if([self.fullName isEqualToString:name] || name == nil)
+        return;             //no change at all
+    self.fullName = name;
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    [[DataLayer sharedInstance] setFullName:self.fullName forContact:self.contactJid andAccount:account.accountNo];
+    // abort old change timer and start a new one
+    if(_cancelFullNameChange)
+        _cancelFullNameChange();
+    // delay changes because we don't want to update the roster on our server too often while typing
+    _cancelFullNameChange = createTimer(2.0, (^{
+        [account.mucProcessor changeNameOfMuc:self.contactJid to:self.fullName];
+    }));
+}
+
++(NSSet*) keyPathsForValuesAffectingFullNameView
+{
+    return [NSSet setWithObjects:@"fullName", nil];
 }
 
 -(UIImage*) avatar

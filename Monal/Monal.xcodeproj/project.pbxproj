@@ -177,10 +177,7 @@
 		C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D88BB76295BB6DC00FB30BA /* CreateGroupMenu.swift */; };
 		C117F7E22B0863B3001F2BC6 /* ContactPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D631822294BAB1D00026BE7 /* ContactPicker.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
-		C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
-		C153825F2B89BBE600EA83EC /* GroupDetailsEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = C153825E2B89BBE600EA83EC /* GroupDetailsEdit.swift */; };
-		C15382622B89C38300EA83EC /* EditGroupName.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15382612B89C38300EA83EC /* EditGroupName.swift */; };
 		C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */; };
 		C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = C158D3FE25A0AB810005AA40 /* MLMucProcessor.h */; };
 		C158D41425A0AC630005AA40 /* MLMucProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = C158D41225A0AC630005AA40 /* MLMucProcessor.m */; };
@@ -636,8 +633,6 @@
 		C13E640925BD406700763D6F /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "external/pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
-		C153825E2B89BBE600EA83EC /* GroupDetailsEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailsEdit.swift; sourceTree = "<group>"; };
-		C15382612B89C38300EA83EC /* EditGroupName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditGroupName.swift; sourceTree = "<group>"; };
 		C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLQRCodeScanner.swift; sourceTree = "<group>"; };
 		C1567E3528255C64006E9637 /* Monal.macos.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Monal.macos.entitlements; sourceTree = "<group>"; };
 		C1567E3628255C64006E9637 /* Monal.ios.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Monal.ios.entitlements; sourceTree = "<group>"; };
@@ -666,7 +661,6 @@
 		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
 		C1943A4A25309A9D0036172F /* MLReloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReloadCell.h; sourceTree = "<group>"; };
 		C1943A4B25309A9D0036172F /* MLReloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLReloadCell.m; sourceTree = "<group>"; };
-		C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailsHeader.swift; sourceTree = "<group>"; };
 		C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatViewHelper.h; sourceTree = "<group>"; };
 		C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatViewHelper.m; sourceTree = "<group>"; };
 		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
@@ -1099,11 +1093,8 @@
 				3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */,
 				3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */,
 				3D65B78C27234B74005A30F4 /* ContactDetails.swift */,
-				C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */,
 				3D5A91412842B4AE008CE57E /* MemberList.swift */,
 				C18967C62B81F61B0073C7C5 /* ChannelMemberList.swift */,
-				C153825E2B89BBE600EA83EC /* GroupDetailsEdit.swift */,
-				C15382612B89C38300EA83EC /* EditGroupName.swift */,
 				C1E8A7F62B8E47C300760220 /* EditGroupSubject.swift */,
 			);
 			name = "Contact Details";
@@ -2047,7 +2038,6 @@
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				20ED55852BADDA5C0005783E /* PrivacySettings.swift in Sources */,
 				84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */,
-				C15382622B89C38300EA83EC /* EditGroupName.swift in Sources */,
 				C1E8A7F72B8E47C300760220 /* EditGroupSubject.swift in Sources */,
 				263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */,
 				3D65B78D27234B74005A30F4 /* ContactDetails.swift in Sources */,
@@ -2077,8 +2067,6 @@
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
-				C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */,
-				C153825F2B89BBE600EA83EC /* GroupDetailsEdit.swift in Sources */,
 				3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */,
 				849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */,
 				C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */,

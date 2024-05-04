@@ -57,6 +57,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  */
 @property (nonatomic, readonly) NSString* nickName;
 @property (nonatomic, strong) NSString* nickNameView;
+@property (nonatomic, strong) NSString* fullNameView;
 
 /**
  xmpp state text

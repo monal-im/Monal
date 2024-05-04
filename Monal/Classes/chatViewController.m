@@ -636,8 +636,21 @@ enum msgSentState {
     if(self.contact.isGroup)
     {
         NSArray* members = [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountId:self.xmppAccount.accountNo];
-        if(members.count > 0)
-            jidLabelText = [NSString stringWithFormat:@"%@ (%ld)", contactDisplayName, members.count];
+        NSInteger membercount = members.count;
+        if([self.contact.mucType isEqualToString:@"group"])
+        {
+            NSMutableSet* memberSet = [NSMutableSet new];
+            for(NSDictionary* entry in members)
+            {
+                if(entry[@"participant_jid"] != nil)
+                    [memberSet addObject:entry[@"participant_jid"]];
+                if(entry[@"member_jid"] != nil)
+                    [memberSet addObject:entry[@"member_jid"]];
+            }
+            membercount = memberSet.count;
+        }
+        if(membercount > 1)
+            jidLabelText = [NSString stringWithFormat:@"%@ (%ld)", contactDisplayName, membercount - 1];      //don't count ourselves
     }
     // change text values
     dispatch_async(dispatch_get_main_queue(), ^{

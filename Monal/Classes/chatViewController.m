@@ -2561,15 +2561,23 @@ enum msgSentState {
     copyAction.image = [[[UIImage systemImageNamed:@"doc.on.doc.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     //only allow editing for the 3 newest message && only on outgoing messages
-    if(!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted || self.contact.isEncrypted) historyBaseID:nil])
+    if((!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted || self.contact.isEncrypted) historyBaseID:nil]) && (!message.isMuc || (message.isMuc && message.stanzaId != nil)) && !message.retracted)
         return [UISwipeActionsConfiguration configurationWithActions:@[
             quoteAction,
             copyAction,
             LMCEditAction,
             retractAction,
         ]];
+    else if(!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted || self.contact.isEncrypted) historyBaseID:nil] && !message.retracted)
+        return [UISwipeActionsConfiguration configurationWithActions:@[
+            quoteAction,
+            copyAction,
+            LMCEditAction,
+            localDeleteAction,
+        ]];
     //only allow retraction for outgoing messages or if we are the moderator of that muc
-    else if(!message.inbound || (self.contact.isGroup && [[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact] isEqualToString:@"moderator"] && [[self.xmppAccount.mucProcessor getRoomFeaturesForMuc:self.contact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"]))
+    //but only allow retraction in mucs if we already got the reflected stanzaid (or if this is an 1:1 chat)
+    else if((!message.inbound || (self.contact.isGroup && [[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact] isEqualToString:@"moderator"] && [[self.xmppAccount.mucProcessor getRoomFeaturesForMuc:self.contact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"])) && (!message.isMuc || (message.isMuc && message.stanzaId != nil)) && !message.retracted)
         return [UISwipeActionsConfiguration configurationWithActions:@[
             quoteAction,
             copyAction,

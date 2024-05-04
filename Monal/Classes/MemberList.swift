@@ -109,6 +109,7 @@ struct MemberList: View {
                     if !previousMemberList.contains(member) {
                         // add selected group member with affiliation member
                         affiliationChangeAction(member, affiliation: "member")
+                        self.account.mucProcessor.inviteUser(member.contactJid, inMuc: self.group.contactJid)
                     }
                 }
             }

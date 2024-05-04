@@ -28,6 +28,10 @@ let BGFETCH_DEFAULT_INTERVAL = HelperTools.getObjcDefinedValue(.BGFETCH_DEFAULT_
 public typealias monal_void_block_t = @convention(block) () -> Void;
 public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
 
+public func objcCast<T>(_ obj: Any) -> T {
+    return unsafeBitCast(obj as AnyObject, to:T.self)
+}
+
 public func unreachable(_ text: String = "unreachable", _ auxData: [String:AnyObject] = [String:AnyObject](), file: String = #file, line: Int = #line, function: String = #function) -> Never {
     DDLogError("unreachable: \(file) \(line) \(function)")
     HelperTools.mlAssert(withText:text, andUserData:auxData, andFile:(file as NSString).utf8String!, andLine:Int32(line), andFunc:(function as NSString).utf8String!)
@@ -225,6 +229,7 @@ public struct defaultsDB<Value> {
         }
     }
 }
+
 
 @objcMembers
 public class SwiftHelpers: NSObject {

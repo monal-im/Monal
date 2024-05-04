@@ -55,14 +55,22 @@ static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
     #define BGFETCH_DEFAULT_INTERVAL 3600*3
 #endif
 
+// #define defineBlockType(name, returntype, ...) \
+//     typedef returntype (^name)(__VA_ARGS__); \
+//     name _Nonnull castTo_##name(id _Nonnull block) { return block; }
+// 
+// #ifndef blocktypes
+//     defineBlockType(monal_new_void_block_t, void, void);
+// #endif
+
 @class MLContact;
 
 //some typedefs used throughout the project
-typedef void (^contactCompletion)(MLContact* _Nonnull selectedContact);
-typedef void (^accountCompletion)(NSInteger accountRow);
-typedef void (^monal_void_block_t)(void);
-typedef void (^monal_id_block_t)(id _Nonnull);
-typedef void (^monal_upload_completion_t)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error);
+typedef void (^contactCompletion)(MLContact* _Nonnull selectedContact) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
+typedef void (^accountCompletion)(NSInteger accountRow) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
+typedef void (^monal_void_block_t)(void) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
+typedef void (^monal_id_block_t)(id _Nonnull) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
+typedef void (^monal_upload_completion_t)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
 
 typedef NS_ENUM(NSUInteger, MLAudioState) {
     MLAudioStateNormal,

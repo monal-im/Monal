@@ -6,9 +6,6 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import SwiftUI
-import monalxmpp
-
 //data class for overlay state
 class LoadingOverlayState : ObservableObject {
     var enabled: Bool

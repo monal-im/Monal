@@ -6,11 +6,15 @@
 //  Copyright © 2023 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-
 struct ContactEntry: View {
-    let contact : ObservableKVOWrapper<MLContact>
-
+    let contact: ObservableKVOWrapper<MLContact>
+    let selfnotesPrefix: Bool
+    
+    init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool = true) {
+        self.contact = contact
+        self.selfnotesPrefix = selfnotesPrefix
+    }
+    
     var body:some View {
         ZStack(alignment: .topLeading) {
             HStack(alignment: .center) {
@@ -18,7 +22,11 @@ struct ContactEntry: View {
                     .resizable()
                     .frame(width: 40, height: 40, alignment: .center)
                 VStack(alignment: .leading) {
-                    Text(contact.contactDisplayName as String)
+                    if selfnotesPrefix {
+                        Text(contact.contactDisplayName as String)
+                    } else {
+                        Text(contact.contactDisplayNameWithoutSelfnotesPrefix as String)
+                    }
                     Text(contact.contactJid as String).font(.footnote).opacity(0.6)
                 }
             }

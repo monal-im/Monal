@@ -97,10 +97,7 @@ struct MemberList: View {
                 ForEach(memberList, id:\.self) { contact in
                     if !contact.isSelfChat {
                         HStack(alignment: .center) {
-                            Image(uiImage: contact.avatar)
-                                .resizable()
-                                .frame(width: 40, height: 40, alignment: .center)
-                            Text(contact.contactDisplayName as String)
+                            ContactEntry(contact:contact)
                             
                             Spacer()
                             

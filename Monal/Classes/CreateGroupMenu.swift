@@ -6,10 +6,6 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import MobileCoreServices
-import UniformTypeIdentifiers
-import SwiftUI
-import monalxmpp
 import OrderedCollections
 
 struct CreateGroupMenu: View {

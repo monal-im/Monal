@@ -6,7 +6,6 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
 import ViewExtractor
 
 struct RichAlertView<T, TitleContent, BodyContent, ButtonContent>: ViewModifier where TitleContent: View, BodyContent: View, ButtonContent: View {

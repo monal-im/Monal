@@ -6,9 +6,6 @@
 //  Copyright © 2023 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-import monalxmpp
-
 struct AccountPicker: View {
     let delegate: SheetDismisserProtocol
     let contacts: [MLContact]
@@ -43,25 +40,15 @@ struct AccountPicker: View {
                 .frame(maxWidth: .infinity)
                 .background(Color(UIColor.systemBackground))
                 
-                let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                 List {
                     ForEach(contacts) { contact in
                         if let accountEntry = DataLayer.sharedInstance().details(forAccount:contact.accountId) {
                             let accountJid = "\(accountEntry["username"] ?? "<unknown>" as NSString)@\(accountEntry["domain"] ?? "<unknown>" as NSString)"
-                            let accountDisplayName = MLContact.ownDisplayName(forAccount:MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)!) as String
                             let accountContact = MLContact.createContact(fromJid:accountJid, andAccountNo:accountEntry["account_id"] as! NSNumber)
                             Button {
-                                appDelegate.activeChats!.call(contact, with:callType)
+                                (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!.call(contact, with:callType)
                             } label: {
-                                HStack(alignment: .center) {
-                                    Image(uiImage: MLImageManager.sharedInstance().getIconFor(accountContact)!)
-                                        .resizable()
-                                        .frame(width: 40, height: 40, alignment: .center)
-                                    VStack(alignment: .leading) {
-                                        Text(accountDisplayName)
-                                        Text(accountJid).font(.footnote).opacity(0.6)
-                                    }
-                                }
+                                ContactEntry(contact:ObservableKVOWrapper(accountContact), selfnotesPrefix:false)
                             }
                         }
                     }

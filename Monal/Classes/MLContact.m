@@ -306,6 +306,11 @@ NSString* const kAskSubscribe = @"subscribe";
 
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName;
 {
+    return [self contactDisplayNameWithFallback:fallbackName andSelfnotesPrefix:YES];
+}
+    
+-(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName andSelfnotesPrefix:(BOOL) hasSelfnotesPrefix
+{
     DDLogVerbose(@"Calculating contact display name...");
     NSString* displayName;
     if(!self.isSelfChat)
@@ -338,11 +343,16 @@ NSString* const kAskSubscribe = @"subscribe";
     else
     {
         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
-        //add "Note to self: " prefix for selfchats
-        if([[DataLayer sharedInstance] enabledAccountCnts].intValue > 1)
-            displayName = [NSString stringWithFormat:NSLocalizedString(@"Notes to self: %@", @""), [[self class] ownDisplayNameForAccount:account]];
+        if(hasSelfnotesPrefix)
+        {
+            //add "Note to self: " prefix for selfchats
+            if([[DataLayer sharedInstance] enabledAccountCnts].intValue > 1)
+                displayName = [NSString stringWithFormat:NSLocalizedString(@"Notes to self: %@", @""), [[self class] ownDisplayNameForAccount:account]];
+            else
+                displayName = NSLocalizedString(@"Notes to self", @"");
+        }
         else
-            displayName = NSLocalizedString(@"Notes to self", @"");
+            displayName = [[self class] ownDisplayNameForAccount:account];
     }
     
     DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, displayName);
@@ -361,6 +371,16 @@ NSString* const kAskSubscribe = @"subscribe";
 }
 
 +(NSSet*) keyPathsForValuesAffectingContactDisplayName
+{
+    return [NSSet setWithObjects:@"nickName", @"fullName", @"contactJid", nil];
+}
+
+-(NSString*) contactDisplayNameWithoutSelfnotesPrefix
+{
+    return [self contactDisplayNameWithFallback:nil andSelfnotesPrefix:NO];
+}
+
++(NSSet*) keyPathsForValuesAffectingContactDisplayNameWithoutSelfnotesPrefix
 {
     return [NSSet setWithObjects:@"nickName", @"fullName", @"contactJid", nil];
 }

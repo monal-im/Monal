@@ -6,10 +6,6 @@
 //  Copyright © 2023 monal-im.org. All rights reserved.
 //
 
-import Foundation
-import UIKit
-import SwiftUI
-
 //based upon: https://stackoverflow.com/a/76649224/3528174
 struct ZoomableContainer<Content: View>: View {
     let content: Content

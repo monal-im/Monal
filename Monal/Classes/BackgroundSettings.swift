@@ -6,10 +6,6 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-import UniformTypeIdentifiers
-import monalxmpp
-
 @ViewBuilder
 func title(contact: ObservableKVOWrapper<MLContact>?) -> some View {
     if let contact = contact {

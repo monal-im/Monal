@@ -6,8 +6,6 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import SwiftUI
-
 struct QRCodeScannerLoginView: UIViewControllerRepresentable {
     @Binding private var account : String
     @Binding private var password : String

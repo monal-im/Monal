@@ -6,8 +6,6 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-import monalxmpp
 import OrderedCollections
 
 struct ContactPickerEntry: View {
@@ -27,13 +25,7 @@ struct ContactPickerEntry: View {
                 } else {
                     Image(systemName: "circle")
                 }
-                Image(uiImage: contact.avatar)
-                    .resizable()
-                    .frame(width: 40, height: 40, alignment: .center)
-                VStack(alignment: .leading) {
-                    Text(contact.contactDisplayName as String)
-                    Text(contact.contactJid as String).font(.footnote).opacity(0.6)
-                }
+                ContactEntry(contact: contact)
             }
         }
     }

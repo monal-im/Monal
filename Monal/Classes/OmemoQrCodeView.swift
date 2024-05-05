@@ -6,9 +6,7 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import SwiftUI
 import CoreImage.CIFilterBuiltins
-import monalxmpp
 
 func createQrCode(value: String) -> UIImage
 {

@@ -6,8 +6,6 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-
 struct EditGroupSubject: View {
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     private let account: xmpp?

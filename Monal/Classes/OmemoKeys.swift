@@ -5,10 +5,8 @@
 //  Created by Jan on 04.05.22.
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
-import UniformTypeIdentifiers
-import SwiftUI
+
 import OrderedCollections
-import monalxmpp
 
 struct OmemoKeysEntry: View {
     private let contactJid: String

@@ -2710,4 +2710,12 @@ a=%@\r\n", mid, candidate];
     return NO;
 }
 
++(NSURLSession*) createEphemeralURLSession
+{
+    NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+    if(@available(iOS 16.1, macCatalyst 16.1, *))
+        sessionConfig.requiresDNSSECValidation = YES;
+    return [NSURLSession sessionWithConfiguration:sessionConfig];
+}
+
 @end

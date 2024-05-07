@@ -5349,7 +5349,18 @@ NSString* const kStanza = @"stanza";
 -(void) updateMdsData:(NSDictionary*) mdsData
 {
     for(NSString* jid in mdsData)
+    {
+        //update cached data
         _mdsData[jid] = mdsData[jid];
+        
+        //handle mds update directly, if not in catchup for this jid
+        //everything else will be handled once the catchup is finished
+        NSString* catchupJid = self.connectionProperties.identity.jid;
+        if([[DataLayer sharedInstance] isBuddyMuc:jid forAccount:self.accountNo])
+            catchupJid = jid;
+        if(_inCatchup[catchupJid] == nil && _mdsData[jid] != nil)
+            [self handleMdsData:_mdsData[jid] forJid:jid];
+    }
 }
 
 -(void) handleMdsData:(MLXMLNode*) data forJid:(NSString*) jid

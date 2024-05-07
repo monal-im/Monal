@@ -177,6 +177,8 @@ void swizzle(Class c, SEL orig, SEL new);
 
 +(BOOL) isIP:(NSString*) host;
 
++(NSURLSession*) createEphemeralURLSession;
+
 @end
 
 NS_ASSUME_NONNULL_END

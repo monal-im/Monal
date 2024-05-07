@@ -77,10 +77,12 @@ static NSObject* _hardlinkingSyncObject;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         DDLogInfo(@"Requesting mime-type and size for historyID %@ from http server", historyId);
         NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
+        if(@available(iOS 16.1, macCatalyst 16.1, *))
+            request.requiresDNSSECValidation = YES;
         request.HTTPMethod = @"HEAD";
         request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
 
-        NSURLSession* session = [NSURLSession sharedSession];
+        NSURLSession* session = [HelperTools createEphemeralURLSession];
         [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data __unused, NSURLResponse* _Nullable response, NSError* _Nullable error) {
             if(error != nil)
             {
@@ -181,7 +183,7 @@ static NSObject* _hardlinkingSyncObject;
             return;
         }
         
-        NSURLSession* session = [NSURLSession sharedSession];
+        NSURLSession* session = [HelperTools createEphemeralURLSession];
         // set app defined description for download size checks
         [session setSessionDescription:url];
         NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {

@@ -403,8 +403,11 @@ static NSMutableDictionary* _pendingCalls;
         
         // request turn credentials
         NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"/api/v1/challenge/new" relativeToURL:[HelperTools getFailoverTurnApiServer]]];
+        if(@available(iOS 16.1, macCatalyst 16.1, *))
+            urlRequest.requiresDNSSECValidation = YES;
         [urlRequest setTimeoutInterval:3.0];
-        NSURLSessionTask* challengeSession = [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
+        NSURLSession* challengeSession = [HelperTools createEphemeralURLSession];
+        [[challengeSession dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
             if(error != nil || [(NSHTTPURLResponse*)response statusCode] != 200)
             {
                 DDLogWarn(@"Could not retrieve turn challenge, only using stun: %@", error);
@@ -440,6 +443,8 @@ static NSMutableDictionary* _pendingCalls;
                 return;
             }
             NSMutableURLRequest* responseRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"/api/v1/challenge/validate" relativeToURL:[HelperTools getFailoverTurnApiServer]]];
+            if(@available(iOS 16.1, macCatalyst 16.1, *))
+                responseRequest.requiresDNSSECValidation = YES;
 
             [responseRequest setHTTPMethod:@"POST"];
             [responseRequest setValue:@"application/json" forHTTPHeaderField:@"Accept"];
@@ -448,7 +453,8 @@ static NSMutableDictionary* _pendingCalls;
             [responseRequest setTimeoutInterval:3.0];
             [responseRequest setHTTPBody:challengeResp];
 
-            NSURLSessionTask* responseSession = [[NSURLSession sharedSession] dataTaskWithRequest:responseRequest completionHandler:^(NSData* turnCredentialsData, NSURLResponse* response, NSError* error) {
+            NSURLSession* responseSession = [HelperTools createEphemeralURLSession];
+            [[responseSession dataTaskWithRequest:responseRequest completionHandler:^(NSData* turnCredentialsData, NSURLResponse* response, NSError* error) {
                 if(error != nil || [(NSHTTPURLResponse*)response statusCode] != 200)
                 {
                     DDLogWarn(@"Could not retrieve turn credentials, only using stun: %@", error);
@@ -466,10 +472,8 @@ static NSMutableDictionary* _pendingCalls;
                 [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:[turnCredentials objectForKey:@"uris"] username:[turnCredentials objectForKey:@"username"] credential:[turnCredentials objectForKey:@"password"]]];
                 
                 [self createWebRTCClientForCall:call usingICEServers:iceServers];
-            }];
-            [responseSession resume];
-        }];
-        [challengeSession resume];
+            }] resume];
+        }] resume];
     }
     //continue without any stun/turn servers if only p2p but no stun/turn servers could be found on local xmpp server
     //AND no fallback to monal servers was configured

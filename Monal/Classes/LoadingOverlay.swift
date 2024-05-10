@@ -35,7 +35,8 @@ struct LoadingOverlay: ViewModifier {
                     state.description.font(.footnote)
                     ProgressView()
                 }
-                .frame(width: 250, height: 100)
+                .padding(12)
+                .frame(minWidth: 250, minHeight: 100)
                 .background(Color.secondary.colorInvert())
                 .cornerRadius(20)
                 .transaction { transaction in transaction.animation = nil}

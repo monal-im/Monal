@@ -344,11 +344,11 @@ struct ContactDetails: View {
                 } else if contact.obj.isGroup && contact.obj.mucType == "channel" {
                     if ["owner", "admin"].contains(ownAffiliation) {
                         NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
-                            Text("Channel Members")
+                            Text("Channel Participants")
                         }
                     } else {
                         NavigationLink(destination: LazyClosureView(ChannelMemberList(mucContact:contact))) {
-                            Text("Channel Members")
+                            Text("Channel Participants")
                         }
                     }
                 }

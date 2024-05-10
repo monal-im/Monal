@@ -88,6 +88,27 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
     }
 }
 
+func mucAffiliationToString(_ affiliation: String?) -> String {
+    if let affiliation = affiliation {
+        if affiliation == "owner" {
+            return NSLocalizedString("Owner", comment:"muc affiliation")
+        } else if affiliation == "admin" {
+            return NSLocalizedString("Admin", comment:"muc affiliation")
+        } else if affiliation == "member" {
+            return NSLocalizedString("Member", comment:"muc affiliation")
+        } else if affiliation == "none" {
+            return NSLocalizedString("Participant", comment:"muc affiliation")
+        } else if affiliation == "outcast" {
+            return NSLocalizedString("Blocked", comment:"muc affiliation")
+        } else if affiliation == "profile" {
+            return NSLocalizedString("Open contact details", comment:"muc members list")
+        } else if affiliation == "reinvite" {
+            return NSLocalizedString("Invite again", comment:"muc invite")
+        }
+    }
+    return NSLocalizedString("<unknown>", comment:"muc affiliation")
+}
+
 //see here for some ideas used herein: https://blog.logrocket.com/adding-gifs-ios-app-flanimatedimage-swiftui/#using-flanimatedimage-with-swift
 struct GIFViewer: UIViewRepresentable {
     typealias UIViewType = FLAnimatedImageView

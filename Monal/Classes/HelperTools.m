@@ -1982,9 +1982,6 @@ void swizzle(Class c, SEL orig, SEL new)
             @"jabber:x:conference",
             @"jabber:x:oob",
             @"urn:xmpp:ping",
-            @"urn:xmpp:receipts",
-            @"http://jabber.org/protocol/chatstates",
-            @"urn:xmpp:chat-markers:0",
             @"urn:xmpp:eme:0",
             @"urn:xmpp:message-retract:1",
             @"urn:xmpp:message-correct:0",
@@ -1993,6 +1990,12 @@ void swizzle(Class c, SEL orig, SEL new)
         ] mutableCopy];
         if([[HelperTools defaultsDB] boolForKey: @"SendLastUserInteraction"])
             [featuresArray addObject:@"urn:xmpp:idle:1"];
+        if([[HelperTools defaultsDB] boolForKey: @"SendLastChatState"])
+            [featuresArray addObject:@"http://jabber.org/protocol/chatstates"];
+        if([[HelperTools defaultsDB] boolForKey: @"SendReceivedMarkers"])
+            [featuresArray addObject:@"urn:xmpp:receipts"];
+        if([[HelperTools defaultsDB] boolForKey: @"SendDisplayedMarkers"])
+            [featuresArray addObject:@"urn:xmpp:chat-markers:0"];
         if([[HelperTools defaultsDB] boolForKey: @"allowVersionIQ"])
             [featuresArray addObject:@"jabber:iq:version"];
         //voip stuff

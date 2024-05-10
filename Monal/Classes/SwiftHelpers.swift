@@ -168,10 +168,30 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable,
         return lhs.obj.isEqual(rhs.obj)
     }
     
+    @inlinable
+    public static func ==(lhs: ObservableKVOWrapper<ObjType>, rhs: ObjType) -> Bool {
+        return lhs.obj.isEqual(rhs)
+    }
+    
+    @inlinable
+    public static func ==(lhs: ObjType, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
+        return lhs.isEqual(rhs.obj)
+    }
+    
     // see https://stackoverflow.com/a/33320737
     @inlinable
     public static func ===(lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
         return lhs.obj === rhs.obj
+    }
+    
+    @inlinable
+    public static func ===(lhs: ObservableKVOWrapper<ObjType>, rhs: ObjType) -> Bool {
+        return lhs.obj === rhs
+    }
+    
+    @inlinable
+    public static func ===(lhs: ObjType, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
+        return lhs === rhs.obj
     }
 
     @inlinable

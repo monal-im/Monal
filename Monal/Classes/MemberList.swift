@@ -76,6 +76,10 @@ struct MemberList: View {
     }
 
     func ownUserHasAffiliationToRemove(contact: ObservableKVOWrapper<MLContact>) -> Bool {
+        //we don't want to set affiliation=none in channels using deletion swipe (this does not delete the user)
+        if group.mucType == "channel" {
+            return false
+        }
         if contact.contactJid == account.connectionProperties.identity.jid {
             return false
         }
@@ -90,19 +94,35 @@ struct MemberList: View {
     }
     
     func actionsAllowed(for contact:ObservableKVOWrapper<MLContact>) -> [String] {
-        if let contactAffiliation = affiliations[contact] {
-            if ownAffiliation == "owner" {
-                return ["profile", "owner", "admin", "member", "outcast"]
-            } else {        //only admin left, because other affiliations don't call actionsAllowed at all
-                if ["member", "outcast"].contains(contactAffiliation) {
-                    return ["profile", "member", "outcast"]
-                } else {
-                    //return contact affiliation because that should be displayed as selected in picker
-                    return ["profile", contactAffiliation]
+        if group.mucType == "group" {
+            if let contactAffiliation = affiliations[contact] {
+                if ownAffiliation == "owner" {
+                    return ["profile", "owner", "admin", "member", "outcast"]
+                } else {        //only admin left, because other affiliations don't call actionsAllowed at all
+                    if ["member", "outcast"].contains(contactAffiliation) {
+                        return ["profile", "member", "outcast"]
+                    } else {
+                        //return contact affiliation because that should be displayed as selected in picker
+                        return ["profile", contactAffiliation]
+                    }
                 }
             }
+            return ["profile"]
+        } else {
+            if let contactAffiliation = affiliations[contact] {
+                if ownAffiliation == "owner" {
+                    return ["profile", "owner", "admin", "member", "none", "outcast"]
+                } else {        //only admin left, because other affiliations don't call actionsAllowed at all
+                    if ["member", "none", "outcast"].contains(contactAffiliation) {
+                        return ["profile", "member", "none", "outcast"]
+                    } else {
+                        //return contact affiliation because that should be displayed as selected in picker
+                        return ["profile", contactAffiliation]
+                    }
+                }
+            }
+            return ["profile", "none"]
         }
-        return ["profile"]
     }
     
     func affiliationToString(_ affiliation: String?) -> String {
@@ -113,6 +133,8 @@ struct MemberList: View {
                 return NSLocalizedString("Admin", comment:"muc affiliation")
             } else if affiliation == "member" {
                 return NSLocalizedString("Member", comment:"muc affiliation")
+            } else if affiliation == "none" {
+                return NSLocalizedString("Participant", comment:"muc affiliation")
             } else if affiliation == "outcast" {
                 return NSLocalizedString("Blocked", comment:"muc affiliation")
             } else if affiliation == "profile" {

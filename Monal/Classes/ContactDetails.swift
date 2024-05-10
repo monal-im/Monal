@@ -323,8 +323,14 @@ struct ContactDetails: View {
                         Text("Group Members")
                     }
                 } else if contact.obj.isGroup && contact.obj.mucType == "channel" {
-                    NavigationLink(destination: LazyClosureView(ChannelMemberList(mucContact:contact))) {
-                        Text("Channel Members")
+                    if ["owner", "admin"].contains(DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:contact.obj) ?? "none") {
+                        NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
+                            Text("Channel Members")
+                        }
+                    } else {
+                        NavigationLink(destination: LazyClosureView(ChannelMemberList(mucContact:contact))) {
+                            Text("Channel Members")
+                        }
                     }
                 }
             }
@@ -463,7 +469,6 @@ struct ContactDetails: View {
                                                     if let callback = data["callback"] {
                                                         self.successCallback = objcCast(callback) as monal_void_block_t
                                                     }
-                                                    DDLogError("callback: \(String(describing:self.successCallback))")
                                                     successAlert(title: Text("Success"), message: contact.mucType == "group" ? Text("Successfully destroyed group.") : Text("Successfully destroyed channel."))
                                                 } else {
                                                     errorAlert(title: Text("Error destroying group!"), message: Text(data["errorMessage"] as! String))

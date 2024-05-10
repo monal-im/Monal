@@ -56,6 +56,12 @@ typedef NS_ENUM(NSUInteger, MLRunLoopIdentifier) {
 void logException(NSException* exception);
 void swizzle(Class c, SEL orig, SEL new);
 
+//weak container holding an object as weak pointer (needed to not create retain circles in NSCache
+@interface WeakContainer : NSObject
+@property (nonatomic, weak) id obj;
+-(id) initWithObj:(id) obj;
+@end
+
 @interface HelperTools : NSObject
 
 @property (class, nonatomic, strong, nullable) DDFileLogger* fileLogger;

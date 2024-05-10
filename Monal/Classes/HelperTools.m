@@ -278,6 +278,15 @@ void swizzle(Class c, SEL orig, SEL new)
         method_exchangeImplementations(origMethod, newMethod);
 }
 
+@implementation WeakContainer
+-(id) initWithObj:(id) obj
+{
+    self = [super init];
+    self.obj = obj;
+    return self;
+}
+@end
+
 @implementation HelperTools
 
 +(void) initialize

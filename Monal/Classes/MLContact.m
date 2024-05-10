@@ -28,6 +28,8 @@ NSString* const kSubFrom = @"from";
 NSString* const kSubRemove = @"remove";
 NSString* const kAskSubscribe = @"subscribe";
 
+static NSMutableDictionary* _singletonCache;
+
 @interface MLContact ()
 {
     NSInteger _unreadCount;
@@ -68,6 +70,11 @@ NSString* const kAskSubscribe = @"subscribe";
 @end
 
 @implementation MLContact
+
++(void) initialize
+{
+    _singletonCache = [NSMutableDictionary new];
+}
 
 +(MLContact*) makeDummyContact:(int) type
 {
@@ -191,36 +198,52 @@ NSString* const kAskSubscribe = @"subscribe";
 {
     MLAssert(jid != nil, @"jid must not be nil");
     MLAssert(accountNo != nil && accountNo.intValue >= 0, @"accountNo must not be nil and > 0");
-    NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
     
-    // check if we know this contact and return a dummy one if not
-    if(contactDict == nil)
-    {
-        DDLogInfo(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
-        return [self contactFromDictionary:@{
-            @"buddy_name": jid.lowercaseString,
-            @"nick_name": @"",
-            @"full_name": @"",
-            @"subscription": kSubNone,
-            @"ask": @"",
-            @"account_id": accountNo,
-            //@"muc_subject": nil,
-            //@"muc_nick": nil,
-            @"Muc": @NO,
-            @"mentionOnly": @NO,
-            @"pinned": @NO,
-            @"blocked": @NO,
-            @"encrypt": @NO,
-            @"muted": @NO,
-            @"status": @"",
-            @"state": @"offline",
-            @"count": @0,
-            @"isActiveChat": @NO,
-            @"lastInteraction": nilWrapper(nil),
-        }];
+    NSString* cacheKey = [NSString stringWithFormat:@"%@|%@", accountNo, jid];
+    @synchronized(_singletonCache) {
+        if(_singletonCache[cacheKey] != nil)
+        {
+            if(((WeakContainer*)_singletonCache[cacheKey]).obj != nil)
+                return ((WeakContainer*)_singletonCache[cacheKey]).obj;
+            else
+                [_singletonCache removeObjectForKey:cacheKey];
+        }
+        
+        NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
+        MLContact* retval = nil;
+        
+        // check if we know this contact and return a dummy one if not
+        if(contactDict == nil)
+        {
+            DDLogInfo(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
+            retval = [self contactFromDictionary:@{
+                @"buddy_name": jid.lowercaseString,
+                @"nick_name": @"",
+                @"full_name": @"",
+                @"subscription": kSubNone,
+                @"ask": @"",
+                @"account_id": accountNo,
+                //@"muc_subject": nil,
+                //@"muc_nick": nil,
+                @"Muc": @NO,
+                @"mentionOnly": @NO,
+                @"pinned": @NO,
+                @"blocked": @NO,
+                @"encrypt": @NO,
+                @"muted": @NO,
+                @"status": @"",
+                @"state": @"offline",
+                @"count": @0,
+                @"isActiveChat": @NO,
+                @"lastInteraction": nilWrapper(nil),
+            }];
+        }
+        else
+            retval = [self contactFromDictionary:contactDict];
+        
+        _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:retval];
+        return retval;
     }
-    else
-        return [self contactFromDictionary:contactDict];
 }
 
 -(instancetype) init

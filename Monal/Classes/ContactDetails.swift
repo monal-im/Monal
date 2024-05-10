@@ -120,7 +120,7 @@ struct ContactDetails: View {
                         }
                     }
                     
-                    if !contact.isGroup && (contact.statusMessage as String).count > 0 {
+                    if !contact.isGroup, let statusMessage = contact.statusMessage as String?, statusMessage.count > 0 {
                         VStack {
                             Text("Status message:")
                             Text(contact.statusMessage as String)

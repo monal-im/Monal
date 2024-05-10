@@ -2,7 +2,7 @@
 //  BackgroundSettings.swift
 //  Monal
 //
-//  Created by admin on 14.11.22.
+//  Created by Thilo Molitor on 14.11.22.
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
@@ -83,7 +83,7 @@ struct BackgroundSettings: View {
                             ImagePicker(image:$inputImage)
                         }
                         
-                        //>= ios16
+                        //>= ios 16
                         /*
                         PhotosPicker(selection:$selectedItem, matching:.images, photoLibrary:.shared()) {
                             if let inputImage = inputImage {

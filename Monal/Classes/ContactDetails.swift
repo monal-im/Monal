@@ -72,7 +72,24 @@ struct ContactDetails: View {
                                 if ownAffiliation == "owner" {
                                     view.accessibilityLabel((contact.mucType == "group") ? "Change Group Avatar" : "Change Channel Avatar")
                                         .onTapGesture {
+#if targetEnvironment(macCatalyst)
+                                            let picker = DocumentPickerViewController(
+                                                supportedTypes: [UTType.image], 
+                                                onPick: { url in
+                                                    if let imageData = try? Data(contentsOf: url) {
+                                                        if let loadedImage = UIImage(data: imageData) {
+                                                                self.inputImage = loadedImage
+                                                        }
+                                                    }
+                                                },
+                                                onDismiss: {
+                                                    //do nothing on dismiss
+                                                }
+                                            )
+                                            UIApplication.shared.windows.first?.rootViewController?.present(picker, animated: true)
+#else
                                             showingImagePicker = true
+#endif
                                         }
                                 } else {
                                     view.accessibilityLabel((contact.mucType == "group") ? "Group Avatar" : "Channel Avatar")

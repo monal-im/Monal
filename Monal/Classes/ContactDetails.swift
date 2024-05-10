@@ -9,8 +9,8 @@
 struct ContactDetails: View {
     var delegate: SheetDismisserProtocol
     private var account: xmpp
-    private var ownRole: String
-    private var ownAffiliation: String
+    @State private var ownRole = "participant"
+    @State private var ownAffiliation = "none"
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     @State private var showingBlockContactConfirmation = false
     @State private var showingCannotBlockAlert = false
@@ -35,16 +35,18 @@ struct ContactDetails: View {
         self.delegate = delegate
         _contact = StateObject(wrappedValue: contact)
         self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)!
+    }
 
+    private func updateRoleAndAffiliation() {
         if contact.isGroup {
             self.ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj) ?? "none"
             self.ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:contact.obj) ?? "none"
         } else {
-            self.ownRole = "none"
+            self.ownRole = "participant"
             self.ownAffiliation = "none"
         }
     }
-
+    
     private func errorAlert(title: Text, message: Text = Text("")) {
         alertPrompt.title = title
         alertPrompt.message = message
@@ -323,7 +325,7 @@ struct ContactDetails: View {
                         Text("Group Members")
                     }
                 } else if contact.obj.isGroup && contact.obj.mucType == "channel" {
-                    if ["owner", "admin"].contains(DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:contact.obj) ?? "none") {
+                    if ["owner", "admin"].contains(ownAffiliation) {
                         NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
                             Text("Channel Members")
                         }
@@ -566,6 +568,17 @@ struct ContactDetails: View {
         }
         .onChange(of:contact.avatar as UIImage) { _ in
             hideLoadingOverlay(overlay)
+        }
+        .onAppear {
+            self.updateRoleAndAffiliation()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalMucParticipantsAndMembersUpdated")).receive(on: RunLoop.main)) { notification in
+            if let xmppAccount = notification.object as? xmpp, let notificationContact = notification.userInfo?["contact"] as? MLContact {
+                DDLogVerbose("Got muc participants/members update from account \(xmppAccount)...")
+                if notificationContact == contact {
+                    self.updateRoleAndAffiliation()
+                }
+            }
         }
     }
 }

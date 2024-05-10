@@ -350,9 +350,17 @@ static NSDictionary* _optionalGroupConfigOptions;
             else
                 [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
             
-            //handle members updates
+            //handle members updates (publishing the changes in members/participants is already handled by handleMembersListUpdate
+            //--> only publish if we don't call handleMembersListUpdate
             if(item[@"jid"] != nil)
                 [self handleMembersListUpdate:[presenceNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:presenceNode.fromUser];
+            else
+            {
+                DDLogDebug(@"Publishing participants list update...");
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucParticipantsAndMembersUpdated object:_account userInfo:@{
+                    @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo]
+                }];
+            }
         }
         else
             DDLogDebug(@"Ignoring unavailable presences of room being destroyed by us...");
@@ -462,6 +470,11 @@ static NSDictionary* _optionalGroupConfigOptions;
 #endif// DISABLE_OMEMO
             }
         }
+        
+        DDLogDebug(@"Publishing new memberslist...");
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucParticipantsAndMembersUpdated object:_account userInfo:@{
+            @"contact": [MLContact createContactFromJid:mucJid andAccountNo:_account.accountNo]
+        }];
     }
     else
         DDLogWarn(@"Ignoring handleMembersListUpdate for %@, MUC not in buddylist", mucJid);

@@ -32,33 +32,56 @@ struct ContactPickerEntry: View {
 }
 
 struct ContactPicker: View {
+    typealias completionType = (OrderedSet<ObservableKVOWrapper<MLContact>>)->Void
+    let account: xmpp
     @Environment(\.presentationMode) private var presentationMode
     @Binding var returnedContacts: OrderedSet<ObservableKVOWrapper<MLContact>>
-    @State var allContacts: OrderedSet<ObservableKVOWrapper<MLContact>>
     @State var selectedContacts: OrderedSet<ObservableKVOWrapper<MLContact>>
     @State var searchText = ""
     @State var isEditingSearchInput = false
     let allowRemoval: Bool
+    let completion: completionType?
 
-    init(_ account: xmpp, binding returnedContacts: Binding<OrderedSet<ObservableKVOWrapper<MLContact>>>, allowRemoval: Bool = true) {
+    init(_ account: xmpp, initializeFrom contacts: OrderedSet<ObservableKVOWrapper<MLContact>>, allowRemoval: Bool = true, completion:completionType?) {
+        self.account = account
         self.allowRemoval = allowRemoval
-        var contactsTmp: OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
-        
+        self.completion = completion
+        _selectedContacts = State(wrappedValue:OrderedSet())
+        //use a temporary storage because we don't have a binding to the outside world but use the completion handler
+        var storage = contacts
+        _returnedContacts = Binding(
+            get: { storage },
+            set: { storage = $0 }
+        )
+        buildPreselectedContacts(contacts)
+        DDLogError("self.allowRemoval = \(String(describing:self.allowRemoval))")
+    }
+    
+    init(_ account: xmpp, binding returnedContacts: Binding<OrderedSet<ObservableKVOWrapper<MLContact>>>, allowRemoval: Bool = true) {
+        self.account = account
+        self.allowRemoval = allowRemoval
+        self.completion = nil
+        _selectedContacts = State(wrappedValue:OrderedSet())
+        _returnedContacts = returnedContacts
+        buildPreselectedContacts(returnedContacts.wrappedValue)
+    }
+    
+    private mutating func buildPreselectedContacts(_ source: OrderedSet<ObservableKVOWrapper<MLContact>>) {
         //build currently selected list of contacts
-        contactsTmp.removeAll()
-        for contact in returnedContacts.wrappedValue {
+        var contactsTmp: OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
+        for contact in source {
             contactsTmp.append(contact)
         }
-        _selectedContacts = State(wrappedValue: contactsTmp)
-
+        _selectedContacts = State(wrappedValue:contactsTmp)
+    }
+    
+    private var allContacts: OrderedSet<ObservableKVOWrapper<MLContact>> {
         //build list of all possible contacts on this account (excluding selfchat and other mucs)
-        contactsTmp.removeAll()
+        var contactsTmp: OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
         for contact in DataLayer.sharedInstance().possibleGroupMembers(forAccount: account.accountNo) {
             contactsTmp.append(ObservableKVOWrapper(contact))
         }
-        _allContacts = State(wrappedValue: contactsTmp)
-        
-        _returnedContacts = returnedContacts
+        return contactsTmp
     }
 
     private var searchResults : OrderedSet<ObservableKVOWrapper<MLContact>> {
@@ -109,6 +132,9 @@ struct ContactPicker: View {
                 returnedContacts.removeAll()
                 for contact in selectedContacts {
                     returnedContacts.append(contact)
+                }
+                if let completion = completion {
+                    completion(returnedContacts)
                 }
             }
         }

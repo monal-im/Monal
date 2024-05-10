@@ -173,6 +173,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalXmppUserSoftWareVersionRefresh @"kMonalXmppUserSoftWareVersionRefresh"
 #define kMonalBlockListRefresh @"kMonalBlockListRefresh"
 #define kMonalContactRemoved @"kMonalContactRemoved"
+#define kMonalMucParticipantsAndMembersUpdated @"kMonalMucParticipantsAndMembersUpdated"
 
 // max count of char's in a single message (both: sending and receiving)
 #define kMonalChatMaxAllowedTextLen 2048

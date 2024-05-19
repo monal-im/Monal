@@ -346,9 +346,15 @@ static NSDictionary* _optionalGroupConfigOptions;
             
             //handle participant updates
             if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)
+            {
+                DDLogVerbose(@"Removing participant from muc(%@): %@", presenceNode.fromUser, item);
                 [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+            }
             else
+            {
+                DDLogVerbose(@"Adding participant from muc(%@): %@", presenceNode.fromUser, item);
                 [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+            }
             
             //handle members updates (publishing the changes in members/participants is already handled by handleMembersListUpdate
             //--> only publish if we don't call handleMembersListUpdate
@@ -629,6 +635,11 @@ $$
                         //update nick in database
                         DDLogInfo(@"Updating muc %@ nick in database to nick provided by server: '%@'...", node.fromUser, node.fromResource);
                         [[DataLayer sharedInstance] updateOwnNickName:node.fromResource forMuc:node.fromUser forAccount:_account.accountNo];
+                        
+                        DDLogDebug(@"Updating muc contact...");
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                            @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                        }];
                     }
                     break;
                 }
@@ -643,6 +654,11 @@ $$
                         [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:NO];
                         selfPrecenceHandled = YES;
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from group/channel: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        
+                        DDLogDebug(@"Updating muc contact...");
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                            @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                        }];
                     }
                     break;
                 }
@@ -663,6 +679,11 @@ $$
                             [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:NO];
                             selfPrecenceHandled = YES;
                             [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from group/channel: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                            
+                            DDLogDebug(@"Updating muc contact...");
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                                @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                            }];
                         }
                     }
                     else
@@ -687,6 +708,11 @@ $$
                                 [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                                 selfPrecenceHandled = YES;
                                 [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got removed from group/channel: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                                
+                                DDLogDebug(@"Updating muc contact...");
+                                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                                    @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                                }];
                             }
                         }
                     }
@@ -703,6 +729,11 @@ $$
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because group/channel is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                         [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                         selfPrecenceHandled = YES;
+                        
+                        DDLogDebug(@"Updating muc contact...");
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                            @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                        }];
                     }
                     break;
                 }
@@ -716,6 +747,11 @@ $$
                         [self removeRoomFromJoining:node.fromUser];
                         selfPrecenceHandled = YES;
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked from group/channel, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        
+                        DDLogDebug(@"Updating muc contact...");
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                            @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                        }];
                     }
                     break;
                 }
@@ -786,6 +822,11 @@ $$
                     {
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                         [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                        
+                        DDLogDebug(@"Updating muc contact...");
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                            @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                        }];
                     }
                 }
             }

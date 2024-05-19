@@ -9,45 +9,61 @@
 import OrderedCollections
 
 struct ChannelMemberList: View {
-    @State private var channelParticipants: OrderedDictionary<String, String>
-    @StateObject var channel: ObservableKVOWrapper<MLContact>
     private let account: xmpp
+    @State private var ownAffiliation: String;
+    @StateObject var channel: ObservableKVOWrapper<MLContact>
+    @State private var participants: OrderedDictionary<String, String>
 
     init(mucContact: ObservableKVOWrapper<MLContact>) {
-        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact.accountId)! as xmpp
-        _channel = StateObject(wrappedValue: mucContact)
-        
-        let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: mucContact.contactJid, forAccountId: mucContact.accountId))
-        var nickSet : OrderedDictionary<String, String> = OrderedDictionary()
-        for jidDict in jidList {
-            if let nick = jidDict["room_nick"] as? String {
-                nickSet.updateValue((jidDict["affiliation"] as? String) ?? "none", forKey:nick)
+        account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact.accountId)! as xmpp
+        _channel = StateObject(wrappedValue:mucContact)
+        _ownAffiliation = State(wrappedValue:"none")
+        _participants = State(wrappedValue:OrderedDictionary<String, String>())
+    }
+    
+    func updateParticipantList() {
+        ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:channel.obj) ?? "none"
+        participants.removeAll(keepingCapacity:true)
+        for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc:channel.contactJid, forAccountId:account.accountNo)) {
+            //ignore ourselves
+            if let jid = memberInfo["participant_jid"] as? String ?? memberInfo["member_jid"] as? String {
+                if jid == account.connectionProperties.identity.jid {
+                    continue
+                }
+            }
+            if let nick = memberInfo["room_nick"] as? String {
+                participants[nick] = memberInfo["affiliation"] as? String ?? "none"
             }
         }
-        _channelParticipants = State(wrappedValue: nickSet)
     }
+    
 
     var body: some View {
         List {
-            Section(header: Text(self.channel.obj.contactDisplayName)) {
-                ForEach(self.channelParticipants.sorted(by: <), id: \.self.key) { participant in
+            Section(header: Text("\(self.channel.contactDisplayName as String) (affiliation: \(mucAffiliationToString(ownAffiliation)))")) {
+                ForEach(participants.sorted(by: <), id: \.self.key) { participant in
                     ZStack(alignment: .topLeading) {
                         HStack(alignment: .center) {
                             Text(participant.key)
                             Spacer()
-                            if participant.value == "owner" {
-                                Text(NSLocalizedString("Owner", comment: ""))
-                            } else if participant.value == "admin" {
-                                Text(NSLocalizedString("Admin", comment: ""))
-                            } else {
-                                Text(NSLocalizedString("Participant", comment: ""))
-                            }
+                            Text(mucAffiliationToString(participant.value))
                         }
                     }
                 }
             }
         }
         .navigationBarTitle(NSLocalizedString("Channel Participants", comment: ""), displayMode: .inline)
+        .onAppear {
+            updateParticipantList()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalMucParticipantsAndMembersUpdated")).receive(on: RunLoop.main)) { notification in
+            if let xmppAccount = notification.object as? xmpp, let contact = notification.userInfo?["contact"] as? MLContact {
+                DDLogVerbose("Got muc participants/members update from account \(xmppAccount)...")
+                if contact == channel {
+                    updateParticipantList()
+                }
+            }
+        }
     }
 }
 

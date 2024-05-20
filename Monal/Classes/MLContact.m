@@ -194,6 +194,40 @@ static NSMutableDictionary* _singletonCache;
     return nilDefault(displayName, @"");
 }
 
++(MLContact*) createContactFromDatabaseWithJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
+{
+    NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
+    
+    // check if we know this contact and return a dummy one if not
+    if(contactDict == nil)
+    {
+        DDLogInfo(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
+        return [self contactFromDictionary:@{
+            @"buddy_name": jid.lowercaseString,
+            @"nick_name": @"",
+            @"full_name": @"",
+            @"subscription": kSubNone,
+            @"ask": @"",
+            @"account_id": accountNo,
+            //@"muc_subject": nil,
+            //@"muc_nick": nil,
+            @"Muc": @NO,
+            @"mentionOnly": @NO,
+            @"pinned": @NO,
+            @"blocked": @NO,
+            @"encrypt": @NO,
+            @"muted": @NO,
+            @"status": @"",
+            @"state": @"offline",
+            @"count": @0,
+            @"isActiveChat": @NO,
+            @"lastInteraction": nilWrapper(nil),
+        }];
+    }
+    else
+        return [self contactFromDictionary:contactDict];
+}
+
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
 {
     MLAssert(jid != nil, @"jid must not be nil");
@@ -209,37 +243,7 @@ static NSMutableDictionary* _singletonCache;
                 [_singletonCache removeObjectForKey:cacheKey];
         }
         
-        NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
-        MLContact* retval = nil;
-        
-        // check if we know this contact and return a dummy one if not
-        if(contactDict == nil)
-        {
-            DDLogInfo(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
-            retval = [self contactFromDictionary:@{
-                @"buddy_name": jid.lowercaseString,
-                @"nick_name": @"",
-                @"full_name": @"",
-                @"subscription": kSubNone,
-                @"ask": @"",
-                @"account_id": accountNo,
-                //@"muc_subject": nil,
-                //@"muc_nick": nil,
-                @"Muc": @NO,
-                @"mentionOnly": @NO,
-                @"pinned": @NO,
-                @"blocked": @NO,
-                @"encrypt": @NO,
-                @"muted": @NO,
-                @"status": @"",
-                @"state": @"offline",
-                @"count": @0,
-                @"isActiveChat": @NO,
-                @"lastInteraction": nilWrapper(nil),
-            }];
-        }
-        else
-            retval = [self contactFromDictionary:contactDict];
+        MLContact* retval = [self createContactFromDatabaseWithJid:jid andAccountNo:accountNo];
         
         _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:retval];
         return retval;
@@ -253,7 +257,11 @@ static NSMutableDictionary* _singletonCache;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLastInteractionTimeUpdate:) name:kMonalLastInteractionUpdatedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBlockListRefresh:) name:kMonalBlockListRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRemoved object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMucSubjectChange:) name:kMonalMucSubjectChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMonalDeletedMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMLMessageSentToContact object:nil];
     return self;
 }
 
@@ -294,7 +302,8 @@ static NSMutableDictionary* _singletonCache;
     MLContact* contact = data[@"contact"];
     if(![self.contactJid isEqualToString:contact.contactJid] || self.accountId.intValue != contact.accountId.intValue)
         return;     // ignore other accounts or contacts
-    [self updateWithContact:contact];
+    [self refresh];
+    [self updateUnreadCount];
     //only handle avatar updates if the property was already used and the old avatar is cached in this contact
     if(_avatar != nil)
     {
@@ -319,7 +328,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(void) refresh
 {
-    [self updateWithContact:[MLContact createContactFromJid:self.contactJid andAccountNo:self.accountId]];
+    [self updateWithContact:[[self class] createContactFromDatabaseWithJid:self.contactJid andAccountNo:self.accountId]];
 }
 
 -(void) updateUnreadCount

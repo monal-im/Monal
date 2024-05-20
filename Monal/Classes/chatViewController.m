@@ -3008,7 +3008,8 @@ enum msgSentState {
         DDLogVerbose(@"Fetching HTTP HEAD for %@...", row.url);
         NSMutableURLRequest* headRequest = [[NSMutableURLRequest alloc] initWithURL:row.url];
         if(@available(iOS 16.1, macCatalyst 16.1, *))
-            headRequest.requiresDNSSECValidation = YES;
+            if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+                headRequest.requiresDNSSECValidation = YES;
         headRequest.HTTPMethod = @"HEAD";
         headRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
         NSURLSession* session = [HelperTools createEphemeralURLSession];
@@ -3083,7 +3084,8 @@ enum msgSentState {
     DDLogVerbose(@"Fetching HTTP GET for %@...", row.url);
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:row.url];
     if(@available(iOS 16.1, macCatalyst 16.1, *))
-        request.requiresDNSSECValidation = YES;
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            request.requiresDNSSECValidation = YES;
     [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on some sites for og tags e.g. youtube
     if(useByterange)
         [request setValue:@"bytes=0-524288" forHTTPHeaderField:@"Range"];

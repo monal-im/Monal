@@ -2729,7 +2729,8 @@ a=%@\r\n", mid, candidate];
 {
     NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     if(@available(iOS 16.1, macCatalyst 16.1, *))
-        sessionConfig.requiresDNSSECValidation = YES;
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            sessionConfig.requiresDNSSECValidation = YES;
     return [NSURLSession sessionWithConfiguration:sessionConfig];
 }
 

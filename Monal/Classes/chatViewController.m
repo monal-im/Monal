@@ -1005,12 +1005,8 @@ enum msgSentState {
                 NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
 
                 //publish MDS display marker and optionally send displayed marker for last unread message (XEP-0333)
-                MLMessage* lastUnreadMessage = [unread lastObject];
-                if(lastUnreadMessage)
-                {
-                    DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
-                    [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];
-                }
+                DDLogDebug(@"Sending MDS (and possibly XEP-0333 displayed marker) for messages: %@", unread);
+                [self.xmppAccount sendDisplayMarkerForMessages:unread];
 
                 //now switch back to the main thread, we are reading only (and self.contact should only be accessed from the main thread)
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -1943,6 +1939,7 @@ enum msgSentState {
             [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:animated];
             self->_isAtBottom = YES;
         }
+        [self refreshCounter];
     };
     if(animated)
     {

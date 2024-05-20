@@ -951,16 +951,9 @@ $$
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
             DDLogDebug(@"Marked as read: %@", unread);
             
-            //send displayed marker for last unread message *marked as wanting chat markers* (XEP-0333)
-//             for(MLMessage* msg in unread)
-//                 ;   //TODO: implement this!!
-            
-            MLMessage* lastUnreadMessage = [unread lastObject];
-            if(lastUnreadMessage)
-            {
-                DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
-                [account sendDisplayMarkerForMessage:lastUnreadMessage];
-            }
+            //publish MDS display marker and optionally send displayed marker for last unread message (XEP-0333)
+            DDLogDebug(@"Sending MDS (and possibly XEP-0333 displayed marker) for messages: %@", unread);
+            [account sendDisplayMarkerForMessages:unread];
             
             //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];

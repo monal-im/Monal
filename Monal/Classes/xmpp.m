@@ -5451,42 +5451,62 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
--(void) sendDisplayMarkerForMessage:(MLMessage*) msg
+-(void) sendDisplayMarkerForMessages:(NSArray<MLMessage*>*) unread
 {
+    //ignore empty arrays
+    if(unread.count == 0)
+        return;
+    
+    //send displayed marker for last unread message *marked as wanting chat markers* (XEP-0333)
+    MLMessage* lastMarkableMessage = nil;
+    for(MLMessage* msg in unread)
+        if(msg.displayMarkerWanted)
+            lastMarkableMessage = msg;
+    
+    //last unread message used for mds
+    MLMessage* lastUnreadMessage = [unread lastObject];
+    
     if(![[HelperTools defaultsDB] boolForKey:@"SendDisplayedMarkers"])
     {
         DDLogVerbose(@"Not sending chat marker, configured to not do so...");
-        [self publishMDSMarkerForMessage:msg];      //always publish mds marker
+        [self publishMDSMarkerForMessage:lastUnreadMessage];      //always publish mds marker
         return;
     }
     
-    //don't send chatmarkers in channels
-    if(msg.isMuc && [@"channel" isEqualToString:msg.mucType])
+    //don't send chatmarkers in channels (all messages have the same muc attributes, randomly pick the last one)
+    if(lastUnreadMessage.isMuc && [@"channel" isEqualToString:lastUnreadMessage.mucType])
     {
         DDLogVerbose(@"Not sending XEP-0333 chat marker in channel...");
-        [self publishMDSMarkerForMessage:msg];      //always publish mds marker
+        [self publishMDSMarkerForMessage:lastUnreadMessage];      //always publish mds marker
         return;
     }
     
-    MLContact* contact = [MLContact createContactFromJid:msg.buddyName andAccountNo:msg.accountId];
+    //all messages have the same contact, randomly pick the last one
+    MLContact* contact = [MLContact createContactFromJid:lastUnreadMessage.buddyName andAccountNo:lastUnreadMessage.accountId];
     //don't send chatmarkers to 1:1 chats with users in our contact list that did not subscribe us (e.g. are not allowed to see us)
     if(!contact.isGroup && !contact.isSubscribedFrom)
     {
         DDLogVerbose(@"Not sending chat marker, we are not subscribed from this contact...");
-        [self publishMDSMarkerForMessage:msg];      //always publish mds marker
+        [self publishMDSMarkerForMessage:lastUnreadMessage];      //always publish mds marker
         return;
     }
     
-    XMPPMessage* displayedNode = [[XMPPMessage alloc] initToContact:contact];
-    [displayedNode setDisplayed:msg.isMuc && msg.stanzaId != nil ? msg.stanzaId : msg.messageId];
-    if([self.connectionProperties.accountFeatures containsObject:@"urn:xmpp:mds:server-assist:0"])
-        [displayedNode setMDSDisplayed:msg.stanzaId withStanzaIdBy:(msg.isMuc ? msg.buddyName : self.connectionProperties.identity.jid)];
-    [displayedNode setStoreHint];
-    DDLogVerbose(@"Sending display marker: %@", displayedNode);
-    [self send:displayedNode];
+    //only send chatmarkers if requested by contact
+    BOOL assistedMDS = [self.connectionProperties.accountFeatures containsObject:@"urn:xmpp:mds:server-assist:0"] && lastMarkableMessage == lastUnreadMessage;
+    if(lastMarkableMessage != nil)
+    {
+        XMPPMessage* displayedNode = [[XMPPMessage alloc] initToContact:contact];
+        [displayedNode setDisplayed:lastMarkableMessage.isMuc && lastMarkableMessage.stanzaId != nil ? lastMarkableMessage.stanzaId : lastMarkableMessage.messageId];
+        if(assistedMDS)
+            [displayedNode setMDSDisplayed:lastMarkableMessage.stanzaId withStanzaIdBy:(lastMarkableMessage.isMuc ? lastMarkableMessage.buddyName : self.connectionProperties.identity.jid)];
+        [displayedNode setStoreHint];
+        DDLogVerbose(@"Sending display marker: %@", displayedNode);
+        [self send:displayedNode];
+    }
     
-    if(![self.connectionProperties.accountFeatures containsObject:@"urn:xmpp:mds:server-assist:0"])
-        [self publishMDSMarkerForMessage:msg];      //always publish mds marker
+    //send mds if not already done by server using mds-assist
+    if(!assistedMDS)
+        [self publishMDSMarkerForMessage:lastUnreadMessage];      //always publish mds marker
 }
 
 -(void) removeFromServerWithCompletion:(void (^)(NSString* _Nullable error)) completion

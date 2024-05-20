@@ -1916,7 +1916,11 @@ enum msgSentState {
 -(void) scrollToBottomIfNeeded
 {
     if(_isAtBottom)
-        [self scrollToBottomAnimated:YES];
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self scrollToBottomAnimated:YES];
+        });
+    }
 }
 
 -(void) scrollToBottomAnimated:(BOOL) animated
@@ -3143,8 +3147,12 @@ enum msgSentState {
     //this will be automatically called once the whole chat view is loaded (even if not showing a keyboard)
     //--> filter that first call to not scroll a few pixels on view open
     //(the few pixels come from some margin/padding only applied after viewDidAppear was called)
+#if TARGET_OS_MACCATALYST
+    [self scrollToBottomIfNeeded];
+#else
     if(!firstTime)
         [self scrollToBottomIfNeeded];
+#endif
     firstTime = NO;
 }
 

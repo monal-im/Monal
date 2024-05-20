@@ -55,6 +55,7 @@
     NSMutableDictionary<NSString*, MLContact*>* _localMLContactCache;
     BOOL _isRecording;
     BOOL _isAtBottom;
+    monal_void_block_t _scrollToBottomTimer;
 }
 
 @property (nonatomic, strong) NSDateFormatter* destinationDateFormat;
@@ -1685,6 +1686,7 @@ enum msgSentState {
 
         //update message list in ui
         dispatch_async(dispatch_get_main_queue(), ^{
+            BOOL wasAtBottom = self->_isAtBottom;
             [self.messageTable performBatchUpdates:^{
                 if(!self.messageList)
                     self.messageList = [NSMutableArray new];
@@ -1697,7 +1699,8 @@ enum msgSentState {
                                                 withRowAnimation:UITableViewRowAnimationNone];
                 }
             } completion:^(BOOL finished) {
-                [self scrollToBottomIfNeeded];
+                if(wasAtBottom)
+                    [self scrollToBottomAnimated:NO];
             }];
         });
 
@@ -1730,6 +1733,8 @@ enum msgSentState {
     if([message isEqualToContact:self.contact])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
+            BOOL wasAtBottom = self->_isAtBottom;
+            
             if(!self.messageList)
                 self.messageList = [NSMutableArray new];
 
@@ -1766,7 +1771,7 @@ enum msgSentState {
             }
             [self->_messageTable endUpdates];
 
-            [self scrollToBottomIfNeeded];
+            
             [CATransaction commit];
 
             if (self.searchController.isActive)
@@ -1777,6 +1782,9 @@ enum msgSentState {
             }
 
             [self refreshCounter];
+            
+            if(wasAtBottom)
+                [self scrollToBottomAnimated:YES];
         });
     }
 }
@@ -1917,9 +1925,8 @@ enum msgSentState {
 {
     if(_isAtBottom)
     {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self scrollToBottomAnimated:YES];
-        });
+        //DDLogVerbose(@"Scrolling to bottom because needed: %@", [NSThread callStackSymbols]);
+        [self scrollToBottomAnimated:NO];
     }
 }
 
@@ -1927,15 +1934,27 @@ enum msgSentState {
 {
     if(self.messageList.count == 0)
         return;
-    [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
+    monal_void_block_t scrollBlock = ^{
         NSInteger bottom = [self.messageTable numberOfRowsInSection:messagesSection];
         if(bottom > 0)
         {
+            DDLogVerbose(@"Scrolling to bottom(%@): %@", bool2str(animated), [NSThread callStackSymbols]);
             NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:messagesSection];
-            [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionTop animated:animated];
+            [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:animated];
             self->_isAtBottom = YES;
         }
-    }];
+    };
+    if(animated)
+    {
+        DDLogVerbose(@"Registering timer for scrolling to bottom(%@): %@", bool2str(animated), [NSThread callStackSymbols]);
+        if(_scrollToBottomTimer)
+            _scrollToBottomTimer();
+        _scrollToBottomTimer = createQueuedTimer(0.1, dispatch_get_main_queue(), (^{
+            scrollBlock();
+        }));
+    }
+    else
+        [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:scrollBlock];
 }
 
 #pragma mark - date time
@@ -2925,9 +2944,9 @@ enum msgSentState {
 
 # pragma mark - Textview delegate functions
 
-- (void)textViewDidBeginEditing:(UITextView *)textView
+-(void) textViewDidBeginEditing:(UITextView*) textView
 {
-    //[self scrollToBottomAnimated:YES];
+    [self scrollToBottomIfNeeded];
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
@@ -3135,7 +3154,6 @@ enum msgSentState {
 
 - (void)keyboardDidShow:(NSNotification*)aNotification
 {
-    static BOOL firstTime = YES;
     //TODO grab animation info
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
@@ -3147,15 +3165,7 @@ enum msgSentState {
     self.messageTable.scrollIndicatorInsets = contentInsets;
 
     //this will be automatically called once the whole chat view is loaded (even if not showing a keyboard)
-    //--> filter that first call to not scroll a few pixels on view open
-    //(the few pixels come from some margin/padding only applied after viewDidAppear was called)
-#if TARGET_OS_MACCATALYST
     [self scrollToBottomIfNeeded];
-#else
-    if(!firstTime)
-        [self scrollToBottomIfNeeded];
-#endif
-    firstTime = NO;
 }
 
 - (void)keyboardDidHide:(NSNotification*)aNotification

@@ -78,7 +78,8 @@ static NSObject* _hardlinkingSyncObject;
         DDLogInfo(@"Requesting mime-type and size for historyID %@ from http server", historyId);
         NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
         if(@available(iOS 16.1, macCatalyst 16.1, *))
-            request.requiresDNSSECValidation = YES;
+            if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+                request.requiresDNSSECValidation = YES;
         request.HTTPMethod = @"HEAD";
         request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
 

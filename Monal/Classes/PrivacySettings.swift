@@ -78,6 +78,9 @@ class PrivacyDefaultDB: ObservableObject {
     
     @defaultsDB("showKeyboardOnChatOpen")
     var showKeyboardOnChatOpen: Bool
+    
+    @defaultsDB("useDnssecForAllConnections")
+    var useDnssecForAllConnections: Bool
 }
 
 
@@ -158,6 +161,12 @@ struct PrivacyScreen: View {
             }
             Toggle(isOn: $privacyDefaultDB.autodeleteAllMessagesAfter3Days) {
                 Text("Autodelete all messages after 3 days")
+            }
+            if #available(iOS 16.0, macCatalyst 16.0, *) {
+                Text("Use DNSSEC to validate all DNS query responses before connecting to the IP designated in the DNS response. While being more secure, this can lead to connection problems in certain networks like Hotel WiFi etc.")
+                Toggle(isOn: $privacyDefaultDB.useDnssecForAllConnections) {
+                    Text("Use DNSSEC validation for all connections")
+                }
             }
         }
         .navigationBarTitle("Privacy & security", displayMode: .inline)

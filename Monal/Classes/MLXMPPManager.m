@@ -149,6 +149,12 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #else
     [self upgradeBoolUserSettingsIfUnset:@"showKeyboardOnChatOpen" toDefault:NO];
 #endif
+    
+#ifdef IS_ALPHA
+    [self upgradeBoolUserSettingsIfUnset:@"useDnssecForAllConnections" toDefault:YES];
+#else
+    [self upgradeBoolUserSettingsIfUnset:@"useDnssecForAllConnections" toDefault:NO];
+#endif
 }
 
 -(void) upgradeFloatUserSettingsToInteger:(NSString*) settingsName

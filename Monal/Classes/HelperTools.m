@@ -587,6 +587,8 @@ void swizzle(Class c, SEL orig, SEL new)
             NSCondition* condition = [NSCondition new];
             [condition lock];
             dispatch_async(dispatch_queue_create_with_target(name, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(priority, 0)), ^{
+                //set thread name, too (not only runloop name)
+                [NSThread.currentThread setName:[NSString stringWithFormat:@"%s", name]];
                 //we don't need an @synchronized block around this because the @synchronized block of the outer thread
                 //waits until we signal our condition (e.g. no other thread can race with us)
                 NSRunLoop* localLoop = runloops[@(identifier)] = [NSRunLoop currentRunLoop];

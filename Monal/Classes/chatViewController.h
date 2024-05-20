@@ -84,6 +84,6 @@
 
 -(void) showUploadHUD;
 -(void) hideUploadHUD;
--(void) scrollToBottom;
+-(void) scrollToBottomAnimated:(BOOL) animated;
 
 @end

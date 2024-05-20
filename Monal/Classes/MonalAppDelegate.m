@@ -1969,7 +1969,7 @@ $$
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             if(self.activeChats.currentChatViewController != nil)
             {
-                [self.activeChats.currentChatViewController scrollToBottom];
+                [self.activeChats.currentChatViewController scrollToBottomAnimated:NO];
                 [self.activeChats.currentChatViewController hideUploadHUD];
             }
             //send next item (if there is one left)

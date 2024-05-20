@@ -37,7 +37,11 @@
     NSArray *subViews = self.subviews;
     for(UIView *subView in subViews) {
         if (CGRectContainsPoint(subView.frame, point) && subView.frame.origin.y < 0) {
-            [self.chatInputActionDelegate doScrollDownAction];
+            DDLogDebug(@"ScrollDown button tapped...");
+            //without async dispatch this would do nothing
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.chatInputActionDelegate doScrollDownAction];
+            });
         }
     }
     return [super pointInside:point withEvent:event];

@@ -54,6 +54,7 @@
     monal_void_block_t _cancelLastInteractionTimer;
     NSMutableDictionary<NSString*, MLContact*>* _localMLContactCache;
     BOOL _isRecording;
+    BOOL _isAtBottom;
 }
 
 @property (nonatomic, strong) NSDateFormatter* destinationDateFormat;
@@ -83,9 +84,7 @@
 @property (atomic) BOOL isLoadingMam;
 @property (atomic) BOOL moreMessagesAvailable;
 
-@property (nonatomic, strong) UIButton *lastMsgButton;
-@property (nonatomic, assign) CGFloat lastOffset;
-
+@property (nonatomic, strong) UIButton* lastMsgButton;
 //SearchViewController, SearchResultViewController
 @property (nonatomic, strong) MLSearchViewController* searchController;
 @property (nonatomic, strong) NSMutableArray* searchResultMessageList;
@@ -353,9 +352,9 @@ enum msgSentState {
     self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
 }
 #pragma mark - ChatInputActionDelegage
--(void)doScrollDownAction
+-(void) doScrollDownAction
 {
-    [self scrollToBottom];
+    [self scrollToBottomAnimated:YES];
 }
 
 #pragma mark - SearchViewController
@@ -497,13 +496,13 @@ enum msgSentState {
 
 -(void) handleForeGround
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         @synchronized(self->_localMLContactCache) {
             [self->_localMLContactCache removeAllObjects];
         }
         [self refreshData];
         [self reloadTable];
-    });
+    }];
 }
 
 -(void) openCallScreen:(id) sender
@@ -814,11 +813,12 @@ enum msgSentState {
 
     // Set correct chatInput height constraints
     [self setChatInputHeightConstraints:self.hardwareKeyboardPresent];
-    [self scrollToBottom];
 
     [self tempfreezeAutoloading];
     
     [self.contact addObserver:self forKeyPath:@"isEncrypted" options:NSKeyValueObservingOptionNew context:nil];
+    
+    [self scrollToBottomAnimated:NO];
 }
 
 
@@ -1697,7 +1697,7 @@ enum msgSentState {
                                                 withRowAnimation:UITableViewRowAnimationNone];
                 }
             } completion:^(BOOL finished) {
-                [self scrollToBottom];
+                [self scrollToBottomIfNeeded];
             }];
         });
 
@@ -1766,7 +1766,7 @@ enum msgSentState {
             }
             [self->_messageTable endUpdates];
 
-            [self scrollToBottom];
+            [self scrollToBottomIfNeeded];
             [CATransaction commit];
 
             if (self.searchController.isActive)
@@ -1913,20 +1913,25 @@ enum msgSentState {
     }
 }
 
--(void) scrollToBottom
+-(void) scrollToBottomIfNeeded
 {
-    if(self.messageList.count == 0) return;
-    dispatch_async(dispatch_get_main_queue(), ^{
+    if(_isAtBottom)
+        [self scrollToBottomAnimated:YES];
+}
+
+-(void) scrollToBottomAnimated:(BOOL) animated
+{
+    if(self.messageList.count == 0)
+        return;
+    [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         NSInteger bottom = [self.messageTable numberOfRowsInSection:messagesSection];
         if(bottom > 0)
         {
             NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:messagesSection];
-          //  if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
-            {
-                [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionTop animated:YES];
-            }
+            [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionTop animated:animated];
+            self->_isAtBottom = YES;
         }
-    });
+    }];
 }
 
 #pragma mark - date time
@@ -2686,23 +2691,18 @@ enum msgSentState {
     // Only load old msgs if the view appeared
     if(!self.viewDidAppear)
         return;
-
+    
     // get current scroll position (y-axis)
     CGFloat curOffset = scrollView.contentOffset.y;
-
-    if (self.lastOffset > curOffset)
-    {
-        [self.lastMsgButton setHidden:NO];
-    }
-
     CGFloat bottomLength = scrollView.frame.size.height + curOffset;
-
-    if (scrollView.contentSize.height <= bottomLength)
-    {
+    _isAtBottom = scrollView.contentSize.height <= bottomLength;
+    
+    if(_isAtBottom)
         [self.lastMsgButton setHidden:YES];
-    }
-
-    self.lastOffset = curOffset;
+    else
+        [self.lastMsgButton setHidden:NO];
+    
+    
 }
 
 -(void) loadOldMsgHistory
@@ -2923,7 +2923,7 @@ enum msgSentState {
 
 - (void)textViewDidBeginEditing:(UITextView *)textView
 {
-    [self scrollToBottom];
+    //[self scrollToBottomAnimated:YES];
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
@@ -3129,7 +3129,8 @@ enum msgSentState {
 
 - (void)keyboardDidShow:(NSNotification*)aNotification
 {
-      //TODO grab animation info
+    static BOOL firstTime = YES;
+    //TODO grab animation info
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     if(kbSize.height > 100) { //my inputbar +any other
@@ -3139,10 +3140,12 @@ enum msgSentState {
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
 
-    // Only scroll to bottom of the message table if a chat is opened
-    // don't scroll down on other events like closing a image preview
-    if(self.viewDidAppear == NO)
-        [self scrollToBottom];
+    //this will be automatically called once the whole chat view is loaded (even if not showing a keyboard)
+    //--> filter that first call to not scroll a few pixels on view open
+    //(the few pixels come from some margin/padding only applied after viewDidAppear was called)
+    if(!firstTime)
+        [self scrollToBottomIfNeeded];
+    firstTime = NO;
 }
 
 - (void)keyboardDidHide:(NSNotification*)aNotification
@@ -3157,6 +3160,7 @@ enum msgSentState {
 
 - (void)keyboardWillShow:(NSNotification*)aNotification
 {
+    
     [self setChatInputHeightConstraints:NO];
     //TODO grab animation info
 //    UIEdgeInsets contentInsets = UIEdgeInsetsZero;

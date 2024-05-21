@@ -201,7 +201,7 @@ static NSMutableDictionary* _pendingCalls;
 -(void) pushRegistry:(PKPushRegistry*) registry didUpdatePushCredentials:(PKPushCredentials*) credentials forType:(NSString*) type
 {
     NSString* token = [HelperTools stringFromToken:credentials.token];
-    DDLogDebug(@"Ignoring APNS voip token string: %@", token);
+    DDLogDebug(@"Ignoring APNS voip token string for type %@: %@", type, token);
 }
 
 -(void) pushRegistry:(PKPushRegistry*) registry didInvalidatePushTokenForType:(NSString*) type
@@ -332,14 +332,16 @@ static NSMutableDictionary* _pendingCalls;
             //this will be done once the app delegate started to connect our xmpp accounts above
             //do this in an extra thread to not block this callback thread (could be main thread or otherwise restricted by apple)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                DDLogDebug(@"Sending jmi ringing message...");
+                [call sendJmiRinging];
+                
                 //wait for our account to connect before initializing webrtc using XEP-0215 iq stanzas
                 //if the user proceeds the call before we are bound, the outgoing proceed message stanza will be queued and sent once we are bound
                 //outgoing iq messages are not queued in all cases (e.g. non-smacks reconnect), hence this waiting loop
                 while(call.account.accountState < kStateBound)
                     [NSThread sleepForTimeInterval:0.250];
                 
-                DDLogDebug(@"Account is connected, now send jmi ringing message and really initialize WebRTC...");
-                [call sendJmiRinging];
+                DDLogDebug(@"Account is connected, now really initialize WebRTC...");
                 [self initWebRTCForPendingCall:call];
             });
         }

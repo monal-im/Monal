@@ -387,9 +387,6 @@ $$
         [[MLImageManager sharedInstance] cleanupHashes];
     });
     
-    //initialize callkit
-    _voipProcessor = [MLVoIPProcessor new];
-    
     //only proceed with launching if the NotificationServiceExtension is *not* running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
@@ -587,6 +584,9 @@ $$
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidResignKeyNotification" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidBecomeKeyNotification" object:nil];
 #endif
+    
+    //initialize callkit (mus be done after connectIfNecessary to make sure the list of accounts is already populated when a voip push comes in)
+    _voipProcessor = [MLVoIPProcessor new];
 
     /*
     NSDictionary* options = launchOptions[UIApplicationLaunchOptionsUserActivityDictionaryKey];

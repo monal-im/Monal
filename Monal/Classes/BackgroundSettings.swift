@@ -23,11 +23,9 @@ struct BackgroundSettings: View {
     @State private var showingImagePicker = false
     @State private var inputImage: UIImage?
     let contact: ObservableKVOWrapper<MLContact>?
-    let delegate: SheetDismisserProtocol
     
-    init(contact: ObservableKVOWrapper<MLContact>?, delegate: SheetDismisserProtocol) {
+    init(contact: ObservableKVOWrapper<MLContact>?) {
         self.contact = contact
-        self.delegate = delegate
         _inputImage = State(initialValue:MLImageManager.sharedInstance().getBackgroundFor(self.contact?.obj))
         
     }
@@ -129,8 +127,7 @@ struct BackgroundSettings: View {
 }
 
 struct BackgroundSettings_Previews: PreviewProvider {
-    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        BackgroundSettings(contact:nil, delegate:delegate)
+        BackgroundSettings(contact:nil)
     }
 }

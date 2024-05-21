@@ -28,6 +28,7 @@ let BGFETCH_DEFAULT_INTERVAL = HelperTools.getObjcDefinedValue(.BGFETCH_DEFAULT_
 public typealias monal_void_block_t = @convention(block) () -> Void;
 public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
 
+//see https://stackoverflow.com/a/40592109/3528174
 public func objcCast<T>(_ obj: Any) -> T {
     return unsafeBitCast(obj as AnyObject, to:T.self)
 }

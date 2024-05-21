@@ -1,5 +1,5 @@
 //
-//  NotificationSettings.swift
+//  NotificationDebugging.swift
 //  Monal
 //
 //  Created by Jan on 02.05.22.
@@ -8,28 +8,7 @@
 
 import OrderedCollections
 
-struct NotificationSettings: View {
-    @ViewBuilder
-    func buildLabel(_ description: Text, isWorking: Bool) -> some View {
-        if(isWorking == true) {
-            Label(title: {
-                description
-            }, icon: {
-                Image(systemName: "checkmark.seal")
-                    .foregroundColor(.green)
-            })
-        } else {
-            Label(title: {
-                description
-            }, icon: {
-                Image(systemName: "xmark.seal")
-                    .foregroundColor(.red)
-            })
-        }
-    }
-
-    var delegate: SheetDismisserProtocol
-    
+struct NotificationDebugging: View {
     private let applePushEnabled: Bool
     private let applePushToken: String
     private let xmppAccountInfo: [xmpp]
@@ -46,7 +25,7 @@ struct NotificationSettings: View {
             Group {
                 Section(header: Text("Status").font(.title3)) {
                     VStack(alignment: .leading) {
-                        buildLabel(Text("Apple Push Service"), isWorking: self.applePushEnabled);
+                        buildNotificationStateLabel(Text("Apple Push Service"), isWorking: self.applePushEnabled);
                         Divider()
                         Text("Apple push service should always be on. If it is off, your device can not talk to Apple's server.").font(.footnote)
                         if !self.applePushEnabled, let apnsError = MLXMPPManager.sharedInstance().apnsError {
@@ -70,7 +49,7 @@ struct NotificationSettings: View {
                 }
                 Section {
                     VStack(alignment: .leading) {
-                        buildLabel(Text("Can Show Notifications"), isWorking: self.pushPermissionEnabled);
+                        buildNotificationStateLabel(Text("Can Show Notifications"), isWorking: self.pushPermissionEnabled);
                         Divider()
                         Text("If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission. Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'.").font(.footnote)
                     }
@@ -79,7 +58,7 @@ struct NotificationSettings: View {
                     Section {
                         VStack(alignment: .leading) {
                             ForEach(self.xmppAccountInfo, id: \.self) { account in
-                                buildLabel(Text(account.connectionProperties.identity.jid), isWorking: account.connectionProperties.pushEnabled)
+                                buildNotificationStateLabel(Text(account.connectionProperties.identity.jid), isWorking: account.connectionProperties.pushEnabled)
                                 Divider()
                             }
                             Text("If this is off your device could not activate push on your xmpp server, make sure to have configured it to support XEP-0357.").font(.footnote)
@@ -123,11 +102,10 @@ struct NotificationSettings: View {
         });
     }
 
-    init(delegate: SheetDismisserProtocol) {
+    init() {
         self.applePushEnabled = MLXMPPManager.sharedInstance().hasAPNSToken;
         self.applePushToken = MLXMPPManager.sharedInstance().pushToken;
         self.xmppAccountInfo = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
-        self.delegate = delegate
 
         // push server selector
         self.availablePushServers = HelperTools.getAvailablePushServers()
@@ -136,8 +114,7 @@ struct NotificationSettings: View {
 }
 
 struct PushSettings_Previews: PreviewProvider {
-    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        NotificationSettings(delegate:delegate)
+        NotificationSettings()
     }
 }

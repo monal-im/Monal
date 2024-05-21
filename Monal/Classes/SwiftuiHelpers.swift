@@ -109,6 +109,25 @@ func mucAffiliationToString(_ affiliation: String?) -> String {
     return NSLocalizedString("<unknown>", comment:"muc affiliation")
 }
 
+@ViewBuilder
+func buildNotificationStateLabel(_ description: Text, isWorking: Bool) -> some View {
+    if(isWorking == true) {
+        Label(title: {
+            description
+        }, icon: {
+            Image(systemName: "checkmark.seal")
+                .foregroundColor(.green)
+        })
+    } else {
+        Label(title: {
+            description
+        }, icon: {
+            Image(systemName: "xmark.seal")
+                .foregroundColor(.red)
+        })
+    }
+}
+
 //see here for some ideas used herein: https://blog.logrocket.com/adding-gifs-ios-app-flanimatedimage-swiftui/#using-flanimatedimage-with-swift
 struct GIFViewer: UIViewRepresentable {
     typealias UIViewType = FLAnimatedImageView
@@ -484,19 +503,6 @@ class SwiftuiInterface : NSObject {
     }
     
     @objc
-    func makeBackgroundSettings(_ contact: MLContact?) -> UIViewController {
-        let delegate = SheetDismisserProtocol()
-        let host = UIHostingController(rootView:AnyView(EmptyView()))
-        delegate.host = host
-        var contactArg:ObservableKVOWrapper<MLContact>? = nil;
-        if let contact = contact {
-            contactArg = ObservableKVOWrapper<MLContact>(contact)
-        }
-        host.rootView = AnyView(UIKitWorkaround(BackgroundSettings(contact:contactArg, delegate:delegate)))
-        return host
-    }
-
-    @objc
     func makeAddContactView(dismisser: @escaping (MLContact) -> ()) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
@@ -520,8 +526,6 @@ class SwiftuiInterface : NSObject {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
-            case "NotificationSettings":
-                host.rootView = AnyView(UIKitWorkaround(NotificationSettings(delegate:delegate)))
             case "DebugView":
                 host.rootView = AnyView(UIKitWorkaround(DebugView()))
             case "WelcomeLogIn":
@@ -534,10 +538,12 @@ class SwiftuiInterface : NSObject {
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate)))
             case "ChatPlaceholder":
                 host.rootView = AnyView(ChatPlaceholder())
-            case "PrivacySettings" :
-                host.rootView = AnyView(UIKitWorkaround(PrivacySettings()))
+            case "GeneralSettings" :
+                host.rootView = AnyView(UIKitWorkaround(GeneralSettings()))
             case "ActiveChatsPrivacySettings":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: PrivacySettings()))
+            case "ActiveChatsNotificatioSettings":
+                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings()))
             default:
                 unreachable()
         }

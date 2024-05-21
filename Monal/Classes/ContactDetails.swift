@@ -333,7 +333,7 @@ struct ContactDetails: View {
                     }
                 }
                 
-                NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact, delegate:delegate))) {
+                NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact))) {
                     Text("Change Chat Background")
                 }
                 

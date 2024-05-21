@@ -1016,7 +1016,7 @@ $$
         while(self.activeChats == nil)
             usleep(100000);
         dispatch_async(dispatch_get_main_queue(), ^{
-            [(ActiveChatsViewController*)self.activeChats showPrivacySettings];
+            [(ActiveChatsViewController*)self.activeChats showNotificationSettings];
         });
     });
 }

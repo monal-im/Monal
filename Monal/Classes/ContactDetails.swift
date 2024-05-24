@@ -12,6 +12,7 @@ struct ContactDetails: View {
     @State private var ownRole = "participant"
     @State private var ownAffiliation = "none"
     @StateObject var contact: ObservableKVOWrapper<MLContact>
+    @State private var showingRemoveAvatarConfirmation = false
     @State private var showingBlockContactConfirmation = false
     @State private var showingCannotBlockAlert = false
     @State private var showingRemoveContactConfirmation = false
@@ -57,7 +58,41 @@ struct ContactDetails: View {
         alertPrompt.title = title
         alertPrompt.message = message
         showAlert = true
-        self.success = true // < dismiss entire view on close
+        success = true // < dismiss entire view on close
+    }
+    
+    private func performAction(_ title: Text, action: @escaping ()->Void) {
+        self.account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
+            DispatchQueue.main.async {
+                hideLoadingOverlay(self.overlay)
+                let success : Bool = data["success"] as! Bool;
+                if !success {
+                    errorAlert(title: title, message: Text(data["errorMessage"] as? String ?? "Unknown error!"))
+                }
+            }
+        }, forMuc:self.contact.contactJid)
+        action()
+    }
+    
+    private func showImagePicker() {
+#if targetEnvironment(macCatalyst)
+        let picker = DocumentPickerViewController(
+            supportedTypes: [UTType.image], 
+            onPick: { url in
+                if let imageData = try? Data(contentsOf: url) {
+                    if let loadedImage = UIImage(data: imageData) {
+                            self.inputImage = loadedImage
+                    }
+                }
+            },
+            onDismiss: {
+                //do nothing on dismiss
+            }
+        )
+        UIApplication.shared.windows.first?.rootViewController?.present(picker, animated: true)
+#else
+        showingImagePicker = true
+#endif
     }
     
     var body: some View {
@@ -72,24 +107,50 @@ struct ContactDetails: View {
                                 if ownAffiliation == "owner" {
                                     view.accessibilityLabel((contact.mucType == "group") ? "Change Group Avatar" : "Change Channel Avatar")
                                         .onTapGesture {
-#if targetEnvironment(macCatalyst)
-                                            let picker = DocumentPickerViewController(
-                                                supportedTypes: [UTType.image], 
-                                                onPick: { url in
-                                                    if let imageData = try? Data(contentsOf: url) {
-                                                        if let loadedImage = UIImage(data: imageData) {
-                                                                self.inputImage = loadedImage
+                                            showImagePicker()
+                                        }
+                                        .addTopRight {
+                                            if contact.hasAvatar {
+                                                Button(action: {
+                                                    showingRemoveAvatarConfirmation = true
+                                                }, label: {
+                                                    Image(systemName: "xmark.circle.fill")
+                                                        .resizable()
+                                                        .frame(width: 24.0, height: 24.0)
+                                                        .accessibilityLabel((contact.mucType == "group") ? "Remove Group Avatar" : "Remove Channel Avatar")
+                                                        .applyClosure { view in
+                                                            if #available(iOS 15, *) {
+                                                                view
+                                                                    .symbolRenderingMode(.palette)
+                                                                    .foregroundStyle(.white, .red)
+                                                            } else {
+                                                                view.foregroundColor(.red)
+                                                            }
                                                         }
-                                                    }
-                                                },
-                                                onDismiss: {
-                                                    //do nothing on dismiss
-                                                }
-                                            )
-                                            UIApplication.shared.windows.first?.rootViewController?.present(picker, animated: true)
-#else
-                                            showingImagePicker = true
-#endif
+                                                })
+                                                .buttonStyle(.borderless)
+                                                .offset(x: 8, y: -8)
+                                            } else {
+                                                Button(action: {
+                                                    showImagePicker()
+                                                }, label: {
+                                                    Image(systemName: "pencil.circle.fill")
+                                                        .resizable()
+                                                        .frame(width: 24.0, height: 24.0)
+                                                        .accessibilityLabel((contact.mucType == "group") ? "Change Group Avatar" : "Change Channel Avatar")
+//                                                         .applyClosure { view in
+//                                                             if #available(iOS 15, *) {
+//                                                                 view
+//                                                                     .symbolRenderingMode(.palette)
+//                                                                     .foregroundStyle(.primary, .secondary)
+//                                                             } else {
+//                                                                 view.foregroundColor(.primary)
+//                                                             }
+//                                                         }
+                                                })
+                                                .buttonStyle(.borderless)
+                                                .offset(x: 8, y: -8)
+                                            }
                                         }
                                 } else {
                                     view.accessibilityLabel((contact.mucType == "group") ? "Group Avatar" : "Channel Avatar")
@@ -103,7 +164,24 @@ struct ContactDetails: View {
                         .sheet(isPresented:$showingImagePicker) {
                             ImagePicker(image:$inputImage)
                         }
-                    
+                        .actionSheet(isPresented: $showingRemoveAvatarConfirmation) {
+                            ActionSheet(
+                                title: Text("Really remove avatar?"),
+                                message: Text("This will remove the current avatar image and revert this group/channel to the default one."),
+                                buttons: [
+                                    .cancel(),
+                                    .destructive(
+                                        Text("Yes"),
+                                        action: {
+                                            showLoadingOverlay(overlay, headline: NSLocalizedString("Removing avatar...", comment: ""))
+                                            performAction(Text("Error removing avatar!")) {
+                                                self.account.mucProcessor.publishAvatar(nil, forMuc: contact.contactJid)
+                                            }
+                                        }
+                                    )
+                                ]
+                            )
+                        }
                     
                     Button {
                         UIPasteboard.general.setValue(contact.contactJid as String, forPasteboardType:UTType.utf8PlainText.identifier as String)
@@ -580,8 +658,10 @@ struct ContactDetails: View {
             }))
         }
         .onChange(of:inputImage) { _ in
-            showLoadingOverlay(overlay, headline: NSLocalizedString("Uploading image...", comment: ""))
-            self.account.mucProcessor.publishAvatar(inputImage, forMuc: contact.contactJid)
+            showLoadingOverlay(overlay, headline: NSLocalizedString("Uploading avatar...", comment: ""))
+            performAction(Text("Error changing avatar!")) {
+                self.account.mucProcessor.publishAvatar(inputImage, forMuc: contact.contactJid)
+            }
         }
         .onChange(of:contact.avatar as UIImage) { _ in
             hideLoadingOverlay(overlay)

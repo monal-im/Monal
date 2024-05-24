@@ -50,13 +50,15 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  */
 @property (nonatomic, readonly) NSNumber* accountId;
 @property (nonatomic, readonly) NSString* contactJid;
-@property (nonatomic, copy) UIImage* avatar;
+@property (nonatomic, readonly, copy) UIImage* avatar;
+@property (nonatomic, readonly) BOOL hasAvatar;
 @property (nonatomic, readonly) NSString* fullName;
 /**
  usually user assigned nick name
  */
 @property (nonatomic, readonly) NSString* nickName;
 @property (nonatomic, strong) NSString* nickNameView;
+@property (nonatomic, strong) NSString* fullNameView;
 
 /**
  xmpp state text
@@ -90,6 +92,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, readonly) NSString* ask; //whether we have tried to subscribe
 
 @property (nonatomic, readonly) NSString* contactDisplayName;
+@property (nonatomic, readonly) NSString* contactDisplayNameWithoutSelfnotesPrefix;
 
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName;
 -(void) updateWithContact:(MLContact*) contact;

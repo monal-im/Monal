@@ -7,6 +7,7 @@
 //
 
 #import "MLWebViewController.h"
+#import "HelperTools.h"
 
 @interface MLWebViewController ()
 @property (weak, nonatomic) IBOutlet WKWebView* webview;
@@ -26,10 +27,13 @@
 {
     [super viewWillAppear:animated];
     if(self.urltoLoad.fileURL)
-    {
         [self.webview loadFileURL:self.urltoLoad allowingReadAccessToURL:self.urltoLoad];
-    } else  {
-        NSURLRequest* nsrequest = [NSURLRequest requestWithURL: self.urltoLoad];
+    else
+    {
+        NSMutableURLRequest* nsrequest = [NSMutableURLRequest requestWithURL: self.urltoLoad];
+        if(@available(iOS 16.1, macCatalyst 16.1, *))
+            if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+                nsrequest.requiresDNSSECValidation = YES;
         [self.webview loadRequest:nsrequest];
     }
     self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;

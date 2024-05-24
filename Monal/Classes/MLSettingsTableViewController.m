@@ -32,9 +32,7 @@ enum SettingsAccountRows {
 };
 
 enum SettingsAppRows {
-    PrivacySettingsRow,
-    NotificationsRow,
-    BackgroundsRow,
+    GeneralSettingsRow,
     SoundsRow,
     SettingsAppRowsCnt
 };
@@ -204,14 +202,8 @@ enum DummySettingsRows {
         }
         case kSettingSectionApp: {
             switch(indexPath.row) {
-                case PrivacySettingsRow:
-                    [cell initTapCell:NSLocalizedString(@"Privacy Settings", @"")];
-                    break;
-                case NotificationsRow:
-                    [cell initTapCell:NSLocalizedString(@"Notifications", @"")];
-                    break;
-                case BackgroundsRow:
-                    [cell initTapCell:NSLocalizedString(@"Backgrounds", @"")];
+                case GeneralSettingsRow:
+                    [cell initTapCell:NSLocalizedString(@"General Settings", @"")];
                     break;
                 case SoundsRow:
                     [cell initTapCell:NSLocalizedString(@"Sounds", @"")];
@@ -322,19 +314,9 @@ enum DummySettingsRows {
         case kSettingSectionApp: {
             switch(indexPath.row) {
                     
-                case PrivacySettingsRow: {
-                    UIViewController* privacyViewController = [[SwiftuiInterface new] makeViewWithName:@"PrivacySettings"];
+                case GeneralSettingsRow: {
+                    UIViewController* privacyViewController = [[SwiftuiInterface new] makeViewWithName:@"GeneralSettings"];
                     [self showDetailViewController:privacyViewController sender:self];
-                    break;
-                }
-                case NotificationsRow: {
-                    UIViewController* notificationSettingsController = [[SwiftuiInterface new] makeViewWithName:@"NotificationSettings"];
-                    [self showDetailViewController:notificationSettingsController sender:self];
-                    break;
-                }
-                case BackgroundsRow: {
-                    UIViewController* backgroundSettingsController = [[SwiftuiInterface new] makeBackgroundSettings:nil];
-                    [self showDetailViewController:backgroundSettingsController sender:self];
                     break;
                 }
                 case SoundsRow:

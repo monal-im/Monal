@@ -6,8 +6,6 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-
 struct ChatPlaceholder: View {
     @Environment(\.colorScheme) var colorScheme
     var body: some View {

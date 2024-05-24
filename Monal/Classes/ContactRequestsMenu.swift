@@ -6,9 +6,6 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-import monalxmpp
-
 struct ContactRequestsMenuEntry: View {
     let contact : MLContact
     let doDelete: () -> ()

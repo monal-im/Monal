@@ -33,7 +33,7 @@
 @implementation MLPubSubProcessor
 
 $$class_handler(mdsHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
-    DDLogDebug(@"Got new mds displayed status from '%@'", jid);
+    DDLogDebug(@"Got new mds displayed status from '%@' (should be own jid)...", jid);
     if(![jid isEqualToString:account.connectionProperties.identity.jid])
     {
         DDLogWarn(@"Ignoring mds update not coming from our own jid");

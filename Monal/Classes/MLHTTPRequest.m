@@ -7,7 +7,7 @@
 //
 
 #import "MLHTTPRequest.h"
-
+#import "HelperTools.h"
 
 
 @interface MLHTTPRequest ()
@@ -47,6 +47,9 @@
     NSMutableURLRequest* theRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:path]
                                                             cachePolicy:NSURLRequestReloadIgnoringCacheData
                                                         timeoutInterval:60.0];
+    if(@available(iOS 16.1, macCatalyst 16.1, *))
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            theRequest.requiresDNSSECValidation = YES;
     [theRequest setHTTPMethod:verb];
     
     NSData* dataToSubmit = postedData;
@@ -70,8 +73,7 @@
     
     DDLogVerbose(@"Calling: %@ %@", verb, path);
     
-   NSURLSession* session= [NSURLSession sharedSession];
-
+    NSURLSession* session = [HelperTools createEphemeralURLSession];
     void (^completeBlock)(NSData*,NSURLResponse*,NSError*)= ^(NSData* data,NSURLResponse* response, NSError* connectionError)
     {
         

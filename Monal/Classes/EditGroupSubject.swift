@@ -6,15 +6,13 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-
 struct EditGroupSubject: View {
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     private let account: xmpp?
     @State private var subject: String
-    @State private var isEditingSubject: Bool = false
 
     @Environment(\.presentationMode) var presentationMode
+    //@Environment(\.dismiss) var dismiss
 
     init(contact: ObservableKVOWrapper<MLContact>) {
         MLAssert(contact.isGroup, "contact must be a muc")
@@ -28,8 +26,8 @@ struct EditGroupSubject: View {
         NavigationView {
             VStack {
                 Form {
-                    Section(header: Text("Group Description")) {
-                        TextField(NSLocalizedString("Group Description (optional)", comment: "placeholder when editing a group description"), text: $subject, onEditingChanged: { isEditingSubject = $0 })
+                    Section(header: Text("Group Description (optional)")) {
+                        TextEditor(text: $subject)
                             .multilineTextAlignment(.leading)
                             .applyClosure { view in
                                 if #available(iOS 16.0, *) {
@@ -38,7 +36,6 @@ struct EditGroupSubject: View {
                                     view
                                 }
                             }
-                            .addClearButton(isEditing: isEditingSubject, text:$subject)
                     }
                 }
             }

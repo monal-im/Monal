@@ -399,6 +399,13 @@
         if(self.isConnected && self.audioSession != nil)
             [self startCallDuartionTimer];
     }
+    
+#ifdef IS_ALPHA
+#if TARGET_OS_MACCATALYST
+    //set audio session to default one
+    self.audioSession = [AVAudioSession sharedInstance];
+#endif
+#endif
 }
 -(BOOL) isConnected
 {
@@ -415,7 +422,13 @@
             DDLogWarn(@"Trying to activate same audio session a second time, ignoring...");
             return;
         }
-        if(audioSession != nil)
+        BOOL assertActivated = YES;
+#ifdef IS_ALPHA
+#if TARGET_OS_MACCATALYST
+        assertActivated = NO;
+#endif
+#endif
+        if(assertActivated && audioSession != nil)
             MLAssert(_audioSession == nil, @"Audio session should never be activated without deactivating old audio session first!", (@{
                 @"oldAudioSession": nilWrapper(_audioSession),
                 @"newAudioSession": nilWrapper(audioSession),
@@ -1110,6 +1123,25 @@
             DDLogError(@"Failed to convert raw sdp candidate to jingle, ignoring this candidate: %@", candidate);
             return;
         }
+#ifdef IS_ALPHA
+        if([contentNode check:@"{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate<protocol=tcp>"])
+        {
+            //add tcptype because that attribute is apparently not supported by our mozilla sdp lib
+            MLXMLNode* candidateNode = [contentNode findFirst:@"{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate"];
+            if([candidate.sdp containsString:@"typ host tcptype active"])
+                candidateNode.attributes[@"tcptype"] = @"active";
+            else if([candidate.sdp containsString:@"typ host tcptype passive"])
+                candidateNode.attributes[@"tcptype"] = @"passive";
+            else
+                DDLogWarn(@"Unknown type-tcptype combination!");
+        }
+#else
+        if([contentNode check:@"{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate<protocol=tcp>"])
+        {
+            DDLogError(@"Ignoring raw sdp candidate, because it's using tcp instead of udp: %@", candidate);
+            return;
+        }
+#endif
         //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCIceCandidate.h
         XMPPIQ* candidateIq = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
         [candidateIq addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
@@ -1269,6 +1301,22 @@
 {
     RTCIceCandidate* incomingCandidate = nil;
     NSString* rawSdp = [HelperTools xml2candidate:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:self.direction==MLCallDirectionIncoming];
+#ifdef IS_ALPHA
+    if([iqNode check:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate<protocol=tcp>"])
+    {
+        NSString* type = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate@type"];
+        NSString* tcptype = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate@tcptype"];
+        DDLogDebug(@"Patching raw sdp type=%@ to contain tcptype: %@", type, tcptype);
+        rawSdp = [rawSdp stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"typ %@", type] withString:[NSString stringWithFormat:@"typ %@ tcptype %@", type, tcptype]];
+    }
+#else
+    if([iqNode check:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate<protocol=tcp>"])
+    {
+        DDLogWarn(@"Got tcp candidate, ignoring: %@", [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate"]);
+        rawSdp = nil;
+    }
+#endif
+    DDLogVerbose(@"Got raw remote sdp: %@", rawSdp);
     if(rawSdp == nil)
     {
         DDLogError(@"Failed to convert jingle candidate to raw sdp!");

@@ -173,7 +173,7 @@ impl JingleTransportCandidate {
             priority: candidate.priority,
             protocol: match candidate.transport {
                 SdpAttributeCandidateTransport::Udp => "udp".to_string(),
-                //SdpAttributeCandidateTransport::Tcp => "tcp".to_string(), //not specced in xep-0176
+                SdpAttributeCandidateTransport::Tcp => "tcp".to_string(), //not specced in xep-0176
                 _ => {
                     return Err(SdpParserInternalError::Generic(
                         "Encountered some candidate transport (like tcp) not specced in XEP-0176!"
@@ -196,7 +196,7 @@ impl JingleTransportCandidate {
             component: self.component,
             transport: match self.protocol.as_str() {
                 "udp" => Ok(SdpAttributeCandidateTransport::Udp),
-                //"tcp" => Ok(SdpAttributeCandidateTransport::Tcp),
+                "tcp" => Ok(SdpAttributeCandidateTransport::Tcp), //not specced in xep-0176
                 _ => Err(SdpParserInternalError::Generic(
                     "Encountered some candidate transport (like tcp) not specced in XEP-0176!"
                         .to_string(),

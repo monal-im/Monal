@@ -39,6 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) deleteConversation;
 -(void) showSettings;
 -(void) showPrivacySettings;
+-(void) showNotificationSettings;
 -(void) showDetails;
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString* _Nullable) token usingCompletion:(monal_id_block_t _Nullable) callback;
 -(void) showAddContactWithJid:(NSString*) jid preauthToken:(NSString* _Nullable) preauthToken prefillAccount:(xmpp* _Nullable) account andOmemoFingerprints:(NSDictionary* _Nullable) fingerprints;

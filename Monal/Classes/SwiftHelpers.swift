@@ -28,6 +28,11 @@ let BGFETCH_DEFAULT_INTERVAL = HelperTools.getObjcDefinedValue(.BGFETCH_DEFAULT_
 public typealias monal_void_block_t = @convention(block) () -> Void;
 public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
 
+//see https://stackoverflow.com/a/40592109/3528174
+public func objcCast<T>(_ obj: Any) -> T {
+    return unsafeBitCast(obj as AnyObject, to:T.self)
+}
+
 public func unreachable(_ text: String = "unreachable", _ auxData: [String:AnyObject] = [String:AnyObject](), file: String = #file, line: Int = #line, function: String = #function) -> Never {
     DDLogError("unreachable: \(file) \(line) \(function)")
     HelperTools.mlAssert(withText:text, andUserData:auxData, andFile:(file as NSString).utf8String!, andLine:Int32(line), andFunc:(function as NSString).utf8String!)
@@ -87,7 +92,7 @@ class KVOObserver: NSObject {
 }
 
 @dynamicMemberLookup
-public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable {
+public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable, CustomStringConvertible, Identifiable {
     public var obj: ObjType
     private var observedMembers: NSMutableSet = NSMutableSet()
     private var observers: [KVOObserver] = Array()
@@ -154,16 +159,40 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable,
             self.setWrapper(for:member, value:newValue as AnyObject?)
         }
     }
+    
+    public var description: String {
+        return "ObservableKVOWrapper<\(String(describing:self.obj))>"
+    }
 
     @inlinable
     public static func ==(lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
         return lhs.obj.isEqual(rhs.obj)
     }
     
+    @inlinable
+    public static func ==(lhs: ObservableKVOWrapper<ObjType>, rhs: ObjType) -> Bool {
+        return lhs.obj.isEqual(rhs)
+    }
+    
+    @inlinable
+    public static func ==(lhs: ObjType, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
+        return lhs.isEqual(rhs.obj)
+    }
+    
     // see https://stackoverflow.com/a/33320737
     @inlinable
     public static func ===(lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
         return lhs.obj === rhs.obj
+    }
+    
+    @inlinable
+    public static func ===(lhs: ObservableKVOWrapper<ObjType>, rhs: ObjType) -> Bool {
+        return lhs.obj === rhs
+    }
+    
+    @inlinable
+    public static func ===(lhs: ObjType, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
+        return lhs === rhs.obj
     }
 
     @inlinable
@@ -225,6 +254,7 @@ public struct defaultsDB<Value> {
         }
     }
 }
+
 
 @objcMembers
 public class SwiftHelpers: NSObject {

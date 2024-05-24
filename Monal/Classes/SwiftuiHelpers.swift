@@ -66,6 +66,92 @@ class SheetDismisserProtocol: ObservableObject {
     }
 }
 
+func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedSet<ObservableKVOWrapper<MLContact>> {
+    if let contact = viewContact {
+        if(contact.isGroup) {
+            //this uses the account the muc belongs to and treats every other account to be remote,
+            //even when multiple accounts of the same monal instance are in the same group
+            var contactList : OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
+            for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: contact.accountId)) {
+                //jid can be participant_jid (if currently joined to muc) or member_jid (if not joined but member of muc)
+                guard let jid = memberInfo["participant_jid"] as? String ?? memberInfo["member_jid"] as? String else {
+                    continue
+                }
+                contactList.append(ObservableKVOWrapper<MLContact>(MLContact.createContact(fromJid: jid, andAccountNo: contact.accountId)))
+            }
+            return contactList
+        } else {
+            return [contact]
+        }
+    } else {
+        return []
+    }
+}
+
+func mucAffiliationToString(_ affiliation: String?) -> String {
+    if let affiliation = affiliation {
+        if affiliation == "owner" {
+            return NSLocalizedString("Owner", comment:"muc affiliation")
+        } else if affiliation == "admin" {
+            return NSLocalizedString("Admin", comment:"muc affiliation")
+        } else if affiliation == "member" {
+            return NSLocalizedString("Member", comment:"muc affiliation")
+        } else if affiliation == "none" {
+            return NSLocalizedString("Participant", comment:"muc affiliation")
+        } else if affiliation == "outcast" {
+            return NSLocalizedString("Blocked", comment:"muc affiliation")
+        } else if affiliation == "profile" {
+            return NSLocalizedString("Open contact details", comment:"muc members list")
+        } else if affiliation == "reinvite" {
+            return NSLocalizedString("Invite again", comment:"muc invite")
+        }
+    }
+    return NSLocalizedString("<unknown>", comment:"muc affiliation")
+}
+
+struct TopRight<T: View>: ViewModifier {
+    let overlay: T
+    public func body(content: Content) -> some View {
+        ZStack(alignment: .topLeading) {
+            content
+            VStack {
+                HStack {
+                    Spacer()
+                    overlay
+                }
+                Spacer()
+            }
+        }
+    }
+}
+extension View {
+    func addTopRight<T: View>(view overlayClosure: @autoclosure @escaping () -> T) -> some View {
+        modifier(TopRight(overlay:overlayClosure()))
+    }
+    func addTopRight(@ViewBuilder _ overlayClosure: @escaping () -> some View) -> some View {
+        modifier(TopRight(overlay:overlayClosure()))
+    }
+}
+
+@ViewBuilder
+func buildNotificationStateLabel(_ description: Text, isWorking: Bool) -> some View {
+    if(isWorking == true) {
+        Label(title: {
+            description
+        }, icon: {
+            Image(systemName: "checkmark.seal")
+                .foregroundColor(.green)
+        })
+    } else {
+        Label(title: {
+            description
+        }, icon: {
+            Image(systemName: "xmark.seal")
+                .foregroundColor(.red)
+        })
+    }
+}
+
 //see here for some ideas used herein: https://blog.logrocket.com/adding-gifs-ios-app-flanimatedimage-swiftui/#using-flanimatedimage-with-swift
 struct GIFViewer: UIViewRepresentable {
     typealias UIViewType = FLAnimatedImageView
@@ -441,19 +527,6 @@ class SwiftuiInterface : NSObject {
     }
     
     @objc
-    func makeBackgroundSettings(_ contact: MLContact?) -> UIViewController {
-        let delegate = SheetDismisserProtocol()
-        let host = UIHostingController(rootView:AnyView(EmptyView()))
-        delegate.host = host
-        var contactArg:ObservableKVOWrapper<MLContact>? = nil;
-        if let contact = contact {
-            contactArg = ObservableKVOWrapper<MLContact>(contact)
-        }
-        host.rootView = AnyView(UIKitWorkaround(BackgroundSettings(contact:contactArg, delegate:delegate)))
-        return host
-    }
-
-    @objc
     func makeAddContactView(dismisser: @escaping (MLContact) -> ()) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
@@ -477,8 +550,6 @@ class SwiftuiInterface : NSObject {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
-            case "NotificationSettings":
-                host.rootView = AnyView(UIKitWorkaround(NotificationSettings(delegate:delegate)))
             case "DebugView":
                 host.rootView = AnyView(UIKitWorkaround(DebugView()))
             case "WelcomeLogIn":
@@ -491,39 +562,15 @@ class SwiftuiInterface : NSObject {
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate)))
             case "ChatPlaceholder":
                 host.rootView = AnyView(ChatPlaceholder())
-            case "PrivacySettings" :
-                host.rootView = AnyView(UIKitWorkaround(PrivacySettings()))
+            case "GeneralSettings" :
+                host.rootView = AnyView(UIKitWorkaround(GeneralSettings()))
             case "ActiveChatsPrivacySettings":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: PrivacySettings()))
+            case "ActiveChatsNotificatioSettings":
+                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings()))
             default:
                 unreachable()
         }
         return host
-    }
-}
-
-func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedSet<ObservableKVOWrapper<MLContact>> {
-    if let contact = viewContact {
-        if(contact.isGroup && contact.mucType == "group") {
-            //this uses the account the muc belongs to and treats every other account to be remote, even when multiple accounts of the same monal instance are in the same group
-            let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: contact.accountId))
-            var contactList : OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
-            for jidDict in jidList {
-                //jid can be participant_jid (if currently joined to muc) or member_jid (if not joined but member of muc)
-                var jid : String? = jidDict["participant_jid"] as? String
-                if(jid == nil) {
-                    jid = jidDict["member_jid"] as? String
-                }
-                if(jid != nil) {
-                    let contact = MLContact.createContact(fromJid: jid!, andAccountNo: contact.accountId)
-                    contactList.append(ObservableKVOWrapper<MLContact>(contact))
-                }
-            }
-            return contactList
-        } else {
-            return [contact]
-        }
-    } else {
-        return []
     }
 }

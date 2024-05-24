@@ -54,6 +54,8 @@
     monal_void_block_t _cancelLastInteractionTimer;
     NSMutableDictionary<NSString*, MLContact*>* _localMLContactCache;
     BOOL _isRecording;
+    BOOL _isAtBottom;
+    monal_void_block_t _scrollToBottomTimer;
 }
 
 @property (nonatomic, strong) NSDateFormatter* destinationDateFormat;
@@ -83,9 +85,7 @@
 @property (atomic) BOOL isLoadingMam;
 @property (atomic) BOOL moreMessagesAvailable;
 
-@property (nonatomic, strong) UIButton *lastMsgButton;
-@property (nonatomic, assign) CGFloat lastOffset;
-
+@property (nonatomic, strong) UIButton* lastMsgButton;
 //SearchViewController, SearchResultViewController
 @property (nonatomic, strong) MLSearchViewController* searchController;
 @property (nonatomic, strong) NSMutableArray* searchResultMessageList;
@@ -353,9 +353,9 @@ enum msgSentState {
     self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
 }
 #pragma mark - ChatInputActionDelegage
--(void)doScrollDownAction
+-(void) doScrollDownAction
 {
-    [self scrollToBottom];
+    [self scrollToBottomAnimated:YES];
 }
 
 #pragma mark - SearchViewController
@@ -497,13 +497,13 @@ enum msgSentState {
 
 -(void) handleForeGround
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         @synchronized(self->_localMLContactCache) {
             [self->_localMLContactCache removeAllObjects];
         }
         [self refreshData];
         [self reloadTable];
-    });
+    }];
 }
 
 -(void) openCallScreen:(id) sender
@@ -636,8 +636,21 @@ enum msgSentState {
     if(self.contact.isGroup)
     {
         NSArray* members = [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountId:self.xmppAccount.accountNo];
-        if(members.count > 0)
-            jidLabelText = [NSString stringWithFormat:@"%@ (%ld)", contactDisplayName, members.count];
+        NSInteger membercount = members.count;
+        if([self.contact.mucType isEqualToString:@"group"])
+        {
+            NSMutableSet* memberSet = [NSMutableSet new];
+            for(NSDictionary* entry in members)
+            {
+                if(entry[@"participant_jid"] != nil)
+                    [memberSet addObject:entry[@"participant_jid"]];
+                if(entry[@"member_jid"] != nil)
+                    [memberSet addObject:entry[@"member_jid"]];
+            }
+            membercount = memberSet.count;
+        }
+        if(membercount > 1)
+            jidLabelText = [NSString stringWithFormat:@"%@ (%ld)", contactDisplayName, membercount - 1];      //don't count ourselves
     }
     // change text values
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -801,11 +814,12 @@ enum msgSentState {
 
     // Set correct chatInput height constraints
     [self setChatInputHeightConstraints:self.hardwareKeyboardPresent];
-    [self scrollToBottom];
 
     [self tempfreezeAutoloading];
     
     [self.contact addObserver:self forKeyPath:@"isEncrypted" options:NSKeyValueObservingOptionNew context:nil];
+    
+    [self scrollToBottomAnimated:NO];
 }
 
 
@@ -991,12 +1005,8 @@ enum msgSentState {
                 NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
 
                 //publish MDS display marker and optionally send displayed marker for last unread message (XEP-0333)
-                MLMessage* lastUnreadMessage = [unread lastObject];
-                if(lastUnreadMessage)
-                {
-                    DDLogDebug(@"Sending XEP-0333 displayed marker for message '%@'", lastUnreadMessage.messageId);
-                    [self.xmppAccount sendDisplayMarkerForMessage:lastUnreadMessage];
-                }
+                DDLogDebug(@"Sending MDS (and possibly XEP-0333 displayed marker) for messages: %@", unread);
+                [self.xmppAccount sendDisplayMarkerForMessages:unread];
 
                 //now switch back to the main thread, we are reading only (and self.contact should only be accessed from the main thread)
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -1672,6 +1682,7 @@ enum msgSentState {
 
         //update message list in ui
         dispatch_async(dispatch_get_main_queue(), ^{
+            BOOL wasAtBottom = self->_isAtBottom;
             [self.messageTable performBatchUpdates:^{
                 if(!self.messageList)
                     self.messageList = [NSMutableArray new];
@@ -1684,7 +1695,8 @@ enum msgSentState {
                                                 withRowAnimation:UITableViewRowAnimationNone];
                 }
             } completion:^(BOOL finished) {
-                [self scrollToBottom];
+                if(wasAtBottom)
+                    [self scrollToBottomAnimated:NO];
             }];
         });
 
@@ -1717,6 +1729,8 @@ enum msgSentState {
     if([message isEqualToContact:self.contact])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
+            BOOL wasAtBottom = self->_isAtBottom;
+            
             if(!self.messageList)
                 self.messageList = [NSMutableArray new];
 
@@ -1753,7 +1767,7 @@ enum msgSentState {
             }
             [self->_messageTable endUpdates];
 
-            [self scrollToBottom];
+            
             [CATransaction commit];
 
             if (self.searchController.isActive)
@@ -1764,6 +1778,9 @@ enum msgSentState {
             }
 
             [self refreshCounter];
+            
+            if(wasAtBottom)
+                [self scrollToBottomAnimated:YES];
         });
     }
 }
@@ -1900,20 +1917,41 @@ enum msgSentState {
     }
 }
 
--(void) scrollToBottom
+-(void) scrollToBottomIfNeeded
 {
-    if(self.messageList.count == 0) return;
-    dispatch_async(dispatch_get_main_queue(), ^{
+    if(_isAtBottom)
+    {
+        //DDLogVerbose(@"Scrolling to bottom because needed: %@", [NSThread callStackSymbols]);
+        [self scrollToBottomAnimated:NO];
+    }
+}
+
+-(void) scrollToBottomAnimated:(BOOL) animated
+{
+    if(self.messageList.count == 0)
+        return;
+    monal_void_block_t scrollBlock = ^{
         NSInteger bottom = [self.messageTable numberOfRowsInSection:messagesSection];
         if(bottom > 0)
         {
+            DDLogVerbose(@"Scrolling to bottom(%@): %@", bool2str(animated), [NSThread callStackSymbols]);
             NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:messagesSection];
-          //  if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
-            {
-                [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionTop animated:YES];
-            }
+            [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:animated];
+            self->_isAtBottom = YES;
         }
-    });
+        [self refreshCounter];
+    };
+    if(animated)
+    {
+        DDLogVerbose(@"Registering timer for scrolling to bottom(%@): %@", bool2str(animated), [NSThread callStackSymbols]);
+        if(_scrollToBottomTimer)
+            _scrollToBottomTimer();
+        _scrollToBottomTimer = createQueuedTimer(0.1, dispatch_get_main_queue(), (^{
+            scrollBlock();
+        }));
+    }
+    else
+        [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:scrollBlock];
 }
 
 #pragma mark - date time
@@ -2561,15 +2599,23 @@ enum msgSentState {
     copyAction.image = [[[UIImage systemImageNamed:@"doc.on.doc.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     //only allow editing for the 3 newest message && only on outgoing messages
-    if(!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted || self.contact.isEncrypted) historyBaseID:nil])
+    if((!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted || self.contact.isEncrypted) historyBaseID:nil]) && (!message.isMuc || (message.isMuc && message.stanzaId != nil)) && !message.retracted)
         return [UISwipeActionsConfiguration configurationWithActions:@[
             quoteAction,
             copyAction,
             LMCEditAction,
             retractAction,
         ]];
+    else if(!message.inbound && [[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted || self.contact.isEncrypted) historyBaseID:nil] && !message.retracted)
+        return [UISwipeActionsConfiguration configurationWithActions:@[
+            quoteAction,
+            copyAction,
+            LMCEditAction,
+            localDeleteAction,
+        ]];
     //only allow retraction for outgoing messages or if we are the moderator of that muc
-    else if(!message.inbound || (self.contact.isGroup && [[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact] isEqualToString:@"moderator"] && [[self.xmppAccount.mucProcessor getRoomFeaturesForMuc:self.contact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"]))
+    //but only allow retraction in mucs if we already got the reflected stanzaid (or if this is an 1:1 chat)
+    else if((!message.inbound || (self.contact.isGroup && [[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact] isEqualToString:@"moderator"] && [[self.xmppAccount.mucProcessor getRoomFeaturesForMuc:self.contact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"])) && (!message.isMuc || (message.isMuc && message.stanzaId != nil)) && !message.retracted)
         return [UISwipeActionsConfiguration configurationWithActions:@[
             quoteAction,
             copyAction,
@@ -2665,23 +2711,18 @@ enum msgSentState {
     // Only load old msgs if the view appeared
     if(!self.viewDidAppear)
         return;
-
+    
     // get current scroll position (y-axis)
     CGFloat curOffset = scrollView.contentOffset.y;
-
-    if (self.lastOffset > curOffset)
-    {
-        [self.lastMsgButton setHidden:NO];
-    }
-
     CGFloat bottomLength = scrollView.frame.size.height + curOffset;
-
-    if (scrollView.contentSize.height <= bottomLength)
-    {
+    _isAtBottom = scrollView.contentSize.height <= bottomLength;
+    
+    if(_isAtBottom)
         [self.lastMsgButton setHidden:YES];
-    }
-
-    self.lastOffset = curOffset;
+    else
+        [self.lastMsgButton setHidden:NO];
+    
+    
 }
 
 -(void) loadOldMsgHistory
@@ -2900,9 +2941,9 @@ enum msgSentState {
 
 # pragma mark - Textview delegate functions
 
-- (void)textViewDidBeginEditing:(UITextView *)textView
+-(void) textViewDidBeginEditing:(UITextView*) textView
 {
-    [self scrollToBottom];
+    [self scrollToBottomIfNeeded];
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
@@ -2982,13 +3023,16 @@ enum msgSentState {
     {
         DDLogVerbose(@"Fetching HTTP HEAD for %@...", row.url);
         NSMutableURLRequest* headRequest = [[NSMutableURLRequest alloc] initWithURL:row.url];
+        if(@available(iOS 16.1, macCatalyst 16.1, *))
+            if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+                headRequest.requiresDNSSECValidation = YES;
         headRequest.HTTPMethod = @"HEAD";
         headRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
-        NSURLSession* session = [NSURLSession sharedSession];
+        NSURLSession* session = [HelperTools createEphemeralURLSession];
         [[session dataTaskWithRequest:headRequest completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error) {
             if(error != nil)
             {
-                DDLogWarn(@"Loding preview HEAD for %@ failed: %@", row.url, error);
+                DDLogWarn(@"Loading preview HEAD for %@ failed: %@", row.url, error);
                 resultHandler();
                 return;
             }
@@ -2999,7 +3043,7 @@ enum msgSentState {
             
             if(mimeType.length==0)
             {
-                DDLogWarn(@"Loding preview HEAD for %@ failed: mimeType unkown", row.url);
+                DDLogWarn(@"Loading preview HEAD for %@ failed: mimeType unkown", row.url);
                 resultHandler();
                 return;
             }
@@ -3014,7 +3058,7 @@ enum msgSentState {
             }
             if(![mimeType hasPrefix:@"text/"])
             {
-                DDLogWarn(@"Loding HEAD preview for %@ failed: mimeType not supported: %@", row.url, mimeType);
+                DDLogWarn(@"Loading HEAD preview for %@ failed: mimeType not supported: %@", row.url, mimeType);
                 resultHandler();
                 return;
             }
@@ -3055,11 +3099,15 @@ enum msgSentState {
      */
     DDLogVerbose(@"Fetching HTTP GET for %@...", row.url);
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:row.url];
+    if(@available(iOS 16.1, macCatalyst 16.1, *))
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            request.requiresDNSSECValidation = YES;
     [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on some sites for og tags e.g. youtube
     if(useByterange)
         [request setValue:@"bytes=0-524288" forHTTPHeaderField:@"Range"];
     request.timeoutInterval = 10;
-    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+    NSURLSession* session = [HelperTools createEphemeralURLSession];
+    [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error) {
         if(error != nil)
             DDLogVerbose(@"preview fetching error: %@", error);
         else
@@ -3103,7 +3151,7 @@ enum msgSentState {
 
 - (void)keyboardDidShow:(NSNotification*)aNotification
 {
-      //TODO grab animation info
+    //TODO grab animation info
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     if(kbSize.height > 100) { //my inputbar +any other
@@ -3113,10 +3161,8 @@ enum msgSentState {
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
 
-    // Only scroll to bottom of the message table if a chat is opened
-    // don't scroll down on other events like closing a image preview
-    if(self.viewDidAppear == NO)
-        [self scrollToBottom];
+    //this will be automatically called once the whole chat view is loaded (even if not showing a keyboard)
+    [self scrollToBottomIfNeeded];
 }
 
 - (void)keyboardDidHide:(NSNotification*)aNotification
@@ -3131,6 +3177,7 @@ enum msgSentState {
 
 - (void)keyboardWillShow:(NSNotification*)aNotification
 {
+    
     [self setChatInputHeightConstraints:NO];
     //TODO grab animation info
 //    UIEdgeInsets contentInsets = UIEdgeInsetsZero;

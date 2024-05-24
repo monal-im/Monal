@@ -6,29 +6,20 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import MobileCoreServices
-import UniformTypeIdentifiers
-import SwiftUI
-import monalxmpp
 import OrderedCollections
 
 struct CreateGroupMenu: View {
     private var appDelegate: MonalAppDelegate
-
+    private var delegate: SheetDismisserProtocol
     @State private var connectedAccounts: [xmpp]
     @State private var selectedAccount: xmpp?
     @State private var groupName: String = ""
-
     @State private var showAlert = false
     // note: dismissLabel is not accessed but defined at the .alert() section
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
-    @State private var selectedContacts : OrderedSet<ObservableKVOWrapper<MLContact>> = []
-    
+    @State private var selectedContacts: OrderedSet<ObservableKVOWrapper<MLContact>> = []
     @State private var isEditingGroupName = false
-
     @StateObject private var overlay = LoadingOverlayState()
-    
-    private var delegate: SheetDismisserProtocol
 
     init(delegate: SheetDismisserProtocol) {
         self.appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
@@ -66,9 +57,6 @@ struct CreateGroupMenu: View {
                         .autocapitalization(.none)
                         .addClearButton(isEditing: isEditingGroupName, text:$groupName)
 
-                    NavigationLink(destination: LazyClosureView(ContactPicker(account: self.selectedAccount!, selectedContacts: $selectedContacts)), label: {
-                            Text("Change Group Members")
-                        })
                     Button(action: {
                         guard let generatedJid = self.selectedAccount!.mucProcessor.generateMucJid() else {
                             errorAlert(title: Text("Error creating group!"), message: Text("Your server does not provide a MUC component."))
@@ -86,8 +74,8 @@ struct CreateGroupMenu: View {
                             }
                             return
                         }
-                        self.selectedAccount!.mucProcessor.addUIHandler({data in
-                            let success : Bool = (data as! NSDictionary)["success"] as! Bool;
+                        self.selectedAccount!.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
+                            let success : Bool = data["success"] as! Bool;
                             if success {
                                 self.selectedAccount!.mucProcessor.changeName(ofMuc: roomJid, to: self.groupName)
                                 for user in self.selectedContacts {
@@ -102,22 +90,24 @@ struct CreateGroupMenu: View {
                                 }
                             } else {
                                 hideLoadingOverlay(overlay)
-                                errorAlert(title: Text("Error creating group!"), message: Text((data as! NSDictionary)["errorMessage"] as! String))
+                                errorAlert(title: Text("Error creating group!"), message: Text(data["errorMessage"] as! String))
                             }
                         }, forMuc: roomJid)
                     }, label: {
                         Text("Create new group")
                     })
                 }
-                if self.selectedContacts.count > 0 {
-                    Section(header: Text("Selected Group Members")) {
-                        ForEach(self.selectedContacts, id: \.obj.contactJid) { contact in
-                            ContactEntry(contact: contact)
-                        }
-                        .onDelete(perform: { indexSet in
-                            self.selectedContacts.remove(at: indexSet.first!)
-                        })
+
+                Section(header: Text("Selected Group Members")) {
+                    NavigationLink(destination: LazyClosureView(ContactPicker(self.selectedAccount!, binding: $selectedContacts))) {
+                        Text("Change Group Members")
                     }
+                    ForEach(self.selectedContacts, id: \.obj.contactJid) { contact in
+                        ContactEntry(contact: contact)
+                    }
+                    .onDelete(perform: { indexSet in
+                        self.selectedContacts.remove(at: indexSet.first!)
+                    })
                 }
             }
         }
@@ -127,7 +117,7 @@ struct CreateGroupMenu: View {
             }))
         }
         .addLoadingOverlay(overlay)
-        .navigationBarTitle("Create new group", displayMode: .inline)
+        .navigationBarTitle(NSLocalizedString("Create new group", comment:""), displayMode: .inline)
         .navigationViewStyle(.stack)
     }
 }

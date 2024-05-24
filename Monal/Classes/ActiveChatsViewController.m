@@ -508,6 +508,12 @@ static NSMutableSet* _pushWarningDisplayed;
     }
 }
 
+-(void) showNotificationSettings
+{
+    UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsNotificatioSettings"];
+    [self presentViewController:view animated:YES completion:^{}];
+}
+
 -(void) showPrivacySettings
 {
     UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsPrivacySettings"];

@@ -262,6 +262,18 @@
     
 }
 
+-(BOOL) hasIconForContact:(MLContact*) contact
+{
+    NSString* filename = [self fileNameforContact:contact];
+    
+    NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+    writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
+    writablePath = [writablePath stringByAppendingPathComponent:filename];
+    
+    DDLogVerbose(@"Checking avatar image at: %@", writablePath);
+    return [UIImage imageWithContentsOfFile:writablePath] != nil;
+}
+
 -(UIImage*) getIconForContact:(MLContact*) contact
 {
     return [self getIconForContact:contact withCompletion:nil];

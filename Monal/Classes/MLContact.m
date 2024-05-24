@@ -17,6 +17,7 @@
 #import "MLImageManager.h"
 #import "MLVoIPProcessor.h"
 #import "MonalAppDelegate.h"
+#import "MLMucProcessor.h"
 
 @import Intents;
 
@@ -27,10 +28,13 @@ NSString* const kSubFrom = @"from";
 NSString* const kSubRemove = @"remove";
 NSString* const kAskSubscribe = @"subscribe";
 
+static NSMutableDictionary* _singletonCache;
+
 @interface MLContact ()
 {
     NSInteger _unreadCount;
     monal_void_block_t _cancelNickChange;
+    monal_void_block_t _cancelFullNameChange;
     UIImage* _avatar;
 }
 @property (nonatomic, assign) BOOL isSelfChat;
@@ -66,6 +70,11 @@ NSString* const kAskSubscribe = @"subscribe";
 @end
 
 @implementation MLContact
+
++(void) initialize
+{
+    _singletonCache = [NSMutableDictionary new];
+}
 
 +(MLContact*) makeDummyContact:(int) type
 {
@@ -185,10 +194,8 @@ NSString* const kAskSubscribe = @"subscribe";
     return nilDefault(displayName, @"");
 }
 
-+(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
++(MLContact*) createContactFromDatabaseWithJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
 {
-    MLAssert(jid != nil, @"jid must not be nil");
-    MLAssert(accountNo != nil && accountNo.intValue >= 0, @"accountNo must not be nil and > 0");
     NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
     
     // check if we know this contact and return a dummy one if not
@@ -221,6 +228,28 @@ NSString* const kAskSubscribe = @"subscribe";
         return [self contactFromDictionary:contactDict];
 }
 
++(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
+{
+    MLAssert(jid != nil, @"jid must not be nil");
+    MLAssert(accountNo != nil && accountNo.intValue >= 0, @"accountNo must not be nil and > 0");
+    
+    NSString* cacheKey = [NSString stringWithFormat:@"%@|%@", accountNo, jid];
+    @synchronized(_singletonCache) {
+        if(_singletonCache[cacheKey] != nil)
+        {
+            if(((WeakContainer*)_singletonCache[cacheKey]).obj != nil)
+                return ((WeakContainer*)_singletonCache[cacheKey]).obj;
+            else
+                [_singletonCache removeObjectForKey:cacheKey];
+        }
+        
+        MLContact* retval = [self createContactFromDatabaseWithJid:jid andAccountNo:accountNo];
+        
+        _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:retval];
+        return retval;
+    }
+}
+
 -(instancetype) init
 {
     self = [super init];
@@ -228,7 +257,11 @@ NSString* const kAskSubscribe = @"subscribe";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLastInteractionTimeUpdate:) name:kMonalLastInteractionUpdatedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBlockListRefresh:) name:kMonalBlockListRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRemoved object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMucSubjectChange:) name:kMonalMucSubjectChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMonalDeletedMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMLMessageSentToContact object:nil];
     return self;
 }
 
@@ -269,7 +302,8 @@ NSString* const kAskSubscribe = @"subscribe";
     MLContact* contact = data[@"contact"];
     if(![self.contactJid isEqualToString:contact.contactJid] || self.accountId.intValue != contact.accountId.intValue)
         return;     // ignore other accounts or contacts
-    [self updateWithContact:contact];
+    [self refresh];
+    [self updateUnreadCount];
     //only handle avatar updates if the property was already used and the old avatar is cached in this contact
     if(_avatar != nil)
     {
@@ -294,7 +328,7 @@ NSString* const kAskSubscribe = @"subscribe";
 
 -(void) refresh
 {
-    [self updateWithContact:[MLContact createContactFromJid:self.contactJid andAccountNo:self.accountId]];
+    [self updateWithContact:[[self class] createContactFromDatabaseWithJid:self.contactJid andAccountNo:self.accountId]];
 }
 
 -(void) updateUnreadCount
@@ -303,6 +337,11 @@ NSString* const kAskSubscribe = @"subscribe";
 }
 
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName;
+{
+    return [self contactDisplayNameWithFallback:fallbackName andSelfnotesPrefix:YES];
+}
+    
+-(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName andSelfnotesPrefix:(BOOL) hasSelfnotesPrefix
 {
     DDLogVerbose(@"Calculating contact display name...");
     NSString* displayName;
@@ -336,11 +375,16 @@ NSString* const kAskSubscribe = @"subscribe";
     else
     {
         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
-        //add "Note to self: " prefix for selfchats
-        if([[DataLayer sharedInstance] enabledAccountCnts].intValue > 1)
-            displayName = [NSString stringWithFormat:NSLocalizedString(@"Notes to self: %@", @""), [[self class] ownDisplayNameForAccount:account]];
+        if(hasSelfnotesPrefix)
+        {
+            //add "Note to self: " prefix for selfchats
+            if([[DataLayer sharedInstance] enabledAccountCnts].intValue > 1)
+                displayName = [NSString stringWithFormat:NSLocalizedString(@"Notes to self: %@", @""), [[self class] ownDisplayNameForAccount:account]];
+            else
+                displayName = NSLocalizedString(@"Notes to self", @"");
+        }
         else
-            displayName = NSLocalizedString(@"Notes to self", @"");
+            displayName = [[self class] ownDisplayNameForAccount:account];
     }
     
     DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, displayName);
@@ -363,6 +407,16 @@ NSString* const kAskSubscribe = @"subscribe";
     return [NSSet setWithObjects:@"nickName", @"fullName", @"contactJid", nil];
 }
 
+-(NSString*) contactDisplayNameWithoutSelfnotesPrefix
+{
+    return [self contactDisplayNameWithFallback:nil andSelfnotesPrefix:NO];
+}
+
++(NSSet*) keyPathsForValuesAffectingContactDisplayNameWithoutSelfnotesPrefix
+{
+    return [NSSet setWithObjects:@"nickName", @"fullName", @"contactJid", nil];
+}
+
 -(NSString*) nickNameView
 {
     return nilDefault(self.nickName, @"");
@@ -370,6 +424,7 @@ NSString* const kAskSubscribe = @"subscribe";
 
 -(void) setNickNameView:(NSString*) name
 {
+    MLAssert(!self.isGroup, @"Using nickNameView only allowed for 1:1 contacts!", (@{@"contact": self}));
     if([self.nickName isEqualToString:name] || name == nil)
         return;             //no change at all
     self.nickName = name;
@@ -377,7 +432,7 @@ NSString* const kAskSubscribe = @"subscribe";
     if(_cancelNickChange)
         _cancelNickChange();
     // delay changes because we don't want to update the roster on our server too often while typing
-    _cancelNickChange = createTimer(1.0, (^{
+    _cancelNickChange = createTimer(2.0, (^{
         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
         [account updateRosterItem:self withName:self.nickName];
     }));
@@ -386,6 +441,33 @@ NSString* const kAskSubscribe = @"subscribe";
 +(NSSet*) keyPathsForValuesAffectingNickNameView
 {
     return [NSSet setWithObjects:@"nickName", nil];
+}
+
+-(NSString*) fullNameView
+{
+    return nilDefault(self.fullName, @"");
+}
+
+-(void) setFullNameView:(NSString*) name
+{
+    MLAssert(self.isGroup, @"Using fullNameView only allowed for mucs!", (@{@"contact": self}));
+    if([self.fullName isEqualToString:name] || name == nil)
+        return;             //no change at all
+    self.fullName = name;
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    [[DataLayer sharedInstance] setFullName:self.fullName forContact:self.contactJid andAccount:account.accountNo];
+    // abort old change timer and start a new one
+    if(_cancelFullNameChange)
+        _cancelFullNameChange();
+    // delay changes because we don't want to update the roster on our server too often while typing
+    _cancelFullNameChange = createTimer(2.0, (^{
+        [account.mucProcessor changeNameOfMuc:self.contactJid to:self.fullName];
+    }));
+}
+
++(NSSet*) keyPathsForValuesAffectingFullNameView
+{
+    return [NSSet setWithObjects:@"fullName", nil];
 }
 
 -(UIImage*) avatar
@@ -404,6 +486,11 @@ NSString* const kAskSubscribe = @"subscribe";
         _avatar = avatar;
     else
         _avatar = [UIImage new];           //empty dummy image, to not save nil (should never happen, MLImageManager has default images)
+}
+
+-(BOOL) hasAvatar
+{
+    return [[MLImageManager sharedInstance] hasIconForContact:self];
 }
 
 -(BOOL) isSelfChat

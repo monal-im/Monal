@@ -17,7 +17,10 @@ struct WebView: UIViewRepresentable {
     }
  
     func updateUIView(_ webView: WKWebView, context: Context) {
-        let request = URLRequest(url: url)
+        var request = URLRequest(url: url)
+        if #available(iOS 16.1, macCatalyst 16.1, *), HelperTools.defaultsDB().bool(forKey:"useDnssecForAllConnections") {
+            request.requiresDNSSECValidation = true;
+        }
         webView.load(request)
     }
 }
@@ -71,8 +74,7 @@ struct RegisterAccount: View {
             self._username = State(wrappedValue:(registerData["username"] as? String) ?? "")
             self._registerToken = State(wrappedValue:registerData["token"] as? String)
             if let completion = registerData["completion"] {
-                //see https://stackoverflow.com/a/40592109/3528174
-                self._completionHandler = State(wrappedValue:unsafeBitCast(completion, to:monal_id_block_t.self))
+                self._completionHandler = State(wrappedValue:objcCast(completion) as monal_id_block_t)
             }
             DDLogVerbose("registerToken is now: \(String(describing:self.registerToken))")
             DDLogVerbose("Completion handler is now: \(String(describing:self.completionHandler))")
@@ -385,6 +387,14 @@ struct RegisterAccount: View {
                         Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                             if(self.registerComplete == true) {
                                 self.delegate.dismiss()
+                                
+                                if !HelperTools.defaultsDB().bool(forKey:"HasSeenPrivacySettings") {
+                                    let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+                                    if let activeChats = appDelegate.activeChats {
+                                        activeChats.showPrivacySettings()
+                                    }
+                                }
+                                
                                 if let completion = self.completionHandler {
                                     DDLogVerbose("Calling reg completion handler...")
                                     completion(self.registeredAccountNo as NSNumber)

@@ -33,8 +33,9 @@ struct BackgroundSettings: View {
     var body: some View {
         VStack {
             Form {
-                Group {
-                    Section(header:title(contact:contact)) {
+                Section(header:title(contact:contact)) {
+                    VStack(spacing: 20) {
+                        Spacer().frame(height: 0)
                         Button(action: {
 #if targetEnvironment(macCatalyst)
                             let picker = DocumentPickerViewController(
@@ -56,27 +57,39 @@ struct BackgroundSettings: View {
 #endif
                         }) {
                             if let inputImage = inputImage {
-                                ZStack(alignment: .topLeading) {
-                                    HStack(alignment: .center) {
-                                        Image(uiImage:inputImage)
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .frame(maxWidth: .infinity, alignment: .center)
-                                    }
+                                HStack(alignment: .center) {
+                                    Image(uiImage:inputImage)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                }
+                                .addTopRight {
                                     Button(action: {
                                         self.inputImage = nil
                                     }, label: {
-                                        Image(systemName: "xmark.circle.fill").foregroundColor(.red)
+                                        Image(systemName: "xmark.circle.fill")
+                                            .resizable()
+                                            .frame(width: 32.0, height: 32.0)
+                                            .accessibilityLabel("Remove Background Image")
+                                            .applyClosure { view in
+                                                if #available(iOS 15, *) {
+                                                    view
+                                                        .symbolRenderingMode(.palette)
+                                                        .foregroundStyle(.white, .red)
+                                                } else {
+                                                    view.foregroundColor(.red)
+                                                }
+                                            }
                                     })
                                     .buttonStyle(.borderless)
-                                    .offset(x: -7, y: -7)
+                                    .offset(x: 12, y: -12)
                                 }
-                                .frame(maxWidth: .infinity, alignment: .center)
                             } else {
                                 Text("Select background image")
                                     .frame(maxWidth: .infinity, alignment: .center)
                             }
                         }
+                        .accessibilityLabel("Change Background Image")
                         .sheet(isPresented:$showingImagePicker) {
                             ImagePicker(image:$inputImage)
                         }

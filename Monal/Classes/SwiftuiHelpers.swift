@@ -109,6 +109,30 @@ func mucAffiliationToString(_ affiliation: String?) -> String {
     return NSLocalizedString("<unknown>", comment:"muc affiliation")
 }
 
+struct TopRight<T: View>: ViewModifier {
+    let overlay: T
+    public func body(content: Content) -> some View {
+        ZStack(alignment: .topLeading) {
+            content
+            VStack {
+                HStack {
+                    Spacer()
+                    overlay
+                }
+                Spacer()
+            }
+        }
+    }
+}
+extension View {
+    func addTopRight<T: View>(view overlayClosure: @autoclosure @escaping () -> T) -> some View {
+        modifier(TopRight(overlay:overlayClosure()))
+    }
+    func addTopRight(@ViewBuilder _ overlayClosure: @escaping () -> some View) -> some View {
+        modifier(TopRight(overlay:overlayClosure()))
+    }
+}
+
 @ViewBuilder
 func buildNotificationStateLabel(_ description: Text, isWorking: Bool) -> some View {
     if(isWorking == true) {

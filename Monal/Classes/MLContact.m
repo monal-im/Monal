@@ -488,6 +488,11 @@ static NSMutableDictionary* _singletonCache;
         _avatar = [UIImage new];           //empty dummy image, to not save nil (should never happen, MLImageManager has default images)
 }
 
+-(BOOL) hasAvatar
+{
+    return [[MLImageManager sharedInstance] hasIconForContact:self];
+}
+
 -(BOOL) isSelfChat
 {
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];

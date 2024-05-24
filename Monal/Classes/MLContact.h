@@ -50,7 +50,8 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  */
 @property (nonatomic, readonly) NSNumber* accountId;
 @property (nonatomic, readonly) NSString* contactJid;
-@property (nonatomic, copy) UIImage* avatar;
+@property (nonatomic, readonly, copy) UIImage* avatar;
+@property (nonatomic, readonly) BOOL hasAvatar;
 @property (nonatomic, readonly) NSString* fullName;
 /**
  usually user assigned nick name

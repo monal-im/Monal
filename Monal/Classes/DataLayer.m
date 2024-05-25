@@ -1455,26 +1455,25 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
-
--(void) autodeleteAllMessagesAfter3Days
-{
+-(void)autoDeleteMessagesAfterInterval:(NSTimeInterval)interval {
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
-        //3 days before now
-        NSString* pastDate = [dbFormatter stringFromDate:[[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay value:-3 toDate:[NSDate date] options:0]];
-        //delete all transferred files old enough
-        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND timestamp<?;" andArguments:@[kMessageTypeFiletransfer, pastDate]];
-        for(NSNumber* historyId in messageHistoryIDs)
+
+        NSDate* pastDate = [NSDate dateWithTimeIntervalSinceNow: -interval];
+        NSString* pastDateString = [dbFormatter stringFromDate:pastDate];
+
+        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND timestamp<?;" andArguments:@[kMessageTypeFiletransfer, pastDateString]];
+        for (NSNumber* historyId in messageHistoryIDs) {
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
-        //delete all messages in history old enough
-        [self.db executeNonQuery:@"DELETE FROM message_history WHERE timestamp<?;" andArguments:@[pastDate]];
-        //delete all chats with empty history from active chats list
+        }
+        [self.db executeNonQuery:@"DELETE FROM message_history WHERE timestamp<?;" andArguments:@[pastDateString]];
         [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
+
         [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
-    //vacuum db after delete (must be done outside of transactions)
     [self.db vacuum];
 }
+
 
 -(void) deleteMessageHistory:(NSNumber*) messageNo
 {

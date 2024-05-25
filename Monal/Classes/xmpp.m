@@ -222,8 +222,11 @@ NSString* const kStanza = @"stanza";
     [self.pubsub registerForNode:@"urn:xmpp:mds:displayed:0" withHandler:$newHandler(MLPubSubProcessor, mdsHandler)];
     
     //autodelete messages old enough (first invocation)
-    if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
-        [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
+    NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];
+    NSLog(@"Autodelete IntervalLOGN: %ld", (long)autodeleteInterval);
+    if (autodeleteInterval > 0) {
+        [[DataLayer sharedInstance] autoDeleteMessagesAfterInterval:(NSTimeInterval)autodeleteInterval];
+    }
     
     return self;
 }
@@ -860,9 +863,11 @@ NSString* const kStanza = @"stanza";
 
 -(void) connect
 {
-    //autodelete messages old enough (second invocation)
-    if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
-        [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
+    NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];
+    NSLog(@"Autodelete Interval LOGN: %ld", (long)autodeleteInterval);
+    if (autodeleteInterval > 0) {
+        [[DataLayer sharedInstance] autoDeleteMessagesAfterInterval:(NSTimeInterval)autodeleteInterval];
+    }
     
     if(_parseQueue.suspended)
     {

@@ -380,7 +380,7 @@ struct OmemoKeys: View {
             }
         }
         .accentColor(monalGreen)
-        .navigationBarTitle((self.ownKeys == true) ? "My Encryption Keys" : "Encryption Keys", displayMode: .inline)
+        .navigationBarTitle((self.ownKeys == true) ? Text("My Encryption Keys") : Text("Encryption Keys"), displayMode: .inline)
         .onAppear(perform: {
             self.selectedContact = self.contacts.first // needs to be done here as first is nil in init
         })

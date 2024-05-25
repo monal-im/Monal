@@ -287,7 +287,7 @@ struct AddContactMenu: View {
             }
         }
         .addLoadingOverlay(overlay)
-        .navigationBarTitle("Add Contact or Channel", displayMode: .inline)
+        .navigationBarTitle(Text("Add Contact or Channel"), displayMode: .inline)
         .navigationViewStyle(.stack)
         .toolbar(content: {
             ToolbarItemGroup(placement: .navigationBarTrailing) {

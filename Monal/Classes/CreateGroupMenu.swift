@@ -117,7 +117,7 @@ struct CreateGroupMenu: View {
             }))
         }
         .addLoadingOverlay(overlay)
-        .navigationBarTitle(NSLocalizedString("Create new group", comment:""), displayMode: .inline)
+        .navigationBarTitle(Text("Create new group"), displayMode: .inline)
         .navigationViewStyle(.stack)
     }
 }

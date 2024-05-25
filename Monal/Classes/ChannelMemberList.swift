@@ -52,7 +52,7 @@ struct ChannelMemberList: View {
                 }
             }
         }
-        .navigationBarTitle(NSLocalizedString("Channel Participants", comment: ""), displayMode: .inline)
+        .navigationBarTitle(Text("Channel Participants"), displayMode: .inline)
         .onAppear {
             updateParticipantList()
         }

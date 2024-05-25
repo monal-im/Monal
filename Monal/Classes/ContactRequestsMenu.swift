@@ -85,7 +85,7 @@ struct ContactRequestsMenu: View {
                 }
             }
         }
-        .navigationBarTitle("Contact Requests", displayMode: .inline)
+        .navigationBarTitle(Text("Contact Requests"), displayMode: .inline)
         .navigationViewStyle(.stack)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh")).receive(on: RunLoop.main)) { notification in
             self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]

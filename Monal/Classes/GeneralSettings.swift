@@ -137,7 +137,7 @@ struct GeneralSettings: View {
                 }
             }
         }
-        .navigationBarTitle("General Settings")
+        .navigationBarTitle(Text("General Settings"))
         .onAppear {
             generalSettingsDefaultsDB.hasSeenPrivacySettings = true
         }
@@ -174,7 +174,7 @@ struct UserInterfaceSettings: View {
                 }
             }
         }
-        .navigationBarTitle("User Interface", displayMode: .inline)
+        .navigationBarTitle(Text("User Interface"), displayMode: .inline)
     }
 }
 
@@ -215,7 +215,7 @@ like hotel wifi, ugly mobile carriers etc.
                 }
             }
         }
-        .navigationBarTitle("Security", displayMode: .inline)
+        .navigationBarTitle(Text("Security"), displayMode: .inline)
     }
 }
 
@@ -265,7 +265,7 @@ struct PrivacySettings: View {
                 }
             }
         }
-        .navigationBarTitle("Privacy", displayMode: .inline)
+        .navigationBarTitle(Text("Privacy"), displayMode: .inline)
     }
 }
 
@@ -304,7 +304,7 @@ struct NotificationSettings: View {
                 self.pushPermissionEnabled = (settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional);
             }
         }
-        .navigationBarTitle("Notifications", displayMode: .inline)
+        .navigationBarTitle(Text("Notifications"), displayMode: .inline)
     }
 }
 

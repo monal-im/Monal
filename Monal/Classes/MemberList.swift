@@ -282,7 +282,7 @@ struct MemberList: View {
             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
         })
         .addLoadingOverlay(overlay)
-        .navigationBarTitle("Group Members", displayMode: .inline)
+        .navigationBarTitle(Text("Group Members"), displayMode: .inline)
         .onAppear {
             updateMemberlist()
         }

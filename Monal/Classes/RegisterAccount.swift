@@ -417,7 +417,7 @@ struct RegisterAccount: View {
                         .sheet(isPresented: $showWebView) {
                             NavigationView {
                                 WebView(url: URL(string: (RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["TermsSite_\(Locale.current.languageCode ?? "default")"] ?? RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["TermsSite_default"])!)!)
-                                    .navigationBarTitle("Terms of \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)", displayMode: .inline)
+                                    .navigationBarTitle(Text("Terms of \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)"), displayMode: .inline)
                                     .toolbar(content: {
                                         ToolbarItem(placement: .bottomBar) {
                                             Button (action: {

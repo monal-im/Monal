@@ -25,8 +25,8 @@ class PrivacyDefaultDB: ObservableObject {
     @defaultsDB("OMEMODefaultOn") 
     var omemoDefaultOn:Bool
     
-    @defaultsDB("AutodeleteAllMessagesAfter3Days")
-    var autodeleteAllMessagesAfter3Days: Bool
+    @defaultsDB("AutodeleteInterval")
+    var AutodeleteInterval: Int 
     
     @defaultsDB("SendLastUserInteraction")
     var sendLastUserInteraction: Bool
@@ -142,6 +142,14 @@ struct PrivacySettings: View {
 struct PrivacyScreen: View {
     @ObservedObject var privacyDefaultDB = PrivacyDefaultDB()
     
+    let autodeleteOptions = [
+        0:"Off", 30:"30 seconds", 300:"5 minutes", 3600:"1 hour",
+        28800:"8 hours", 86400:"1 day", 604800:"1 week", 2419200:"4 weeks", -1:"Custom"
+    ]
+    
+    @State private var showingCustomTimeSheet = false
+    @State private var selectedOptionIndex: Int = 0
+    @State private var customTimeString = ""
     var body: some View {
         Form {
             Picker("Notification privacy", selection: $privacyDefaultDB.notificationPrivacySetting) {
@@ -150,8 +158,38 @@ struct PrivacyScreen: View {
                 }
             }
             Toggle("Enable encryption by default for new chats", isOn: $privacyDefaultDB.omemoDefaultOn)
-            Toggle("Autodelete all messages after 3 days", isOn: $privacyDefaultDB.autodeleteAllMessagesAfter3Days)
+            Picker("Autodelete all messages after", selection: $privacyDefaultDB.AutodeleteInterval) {
+                ForEach(autodeleteOptions.keys.sorted(), id: \.self) { key in
+                    Text(autodeleteOptions[key, default: "Custom"]).tag(key)
+                }
+            }
+            .onChange(of: privacyDefaultDB.AutodeleteInterval) { newValue in
+                if newValue == -1  {
+                    showingCustomTimeSheet = true
+                }
+            }
         }
+        .onAppear(perform: {
+            print(privacyDefaultDB.AutodeleteInterval,"LOGN")
+        })
+        .sheet(isPresented: $showingCustomTimeSheet) {
+            NavigationView {
+                Form {
+                    TextField("Enter time in minutes", text: $customTimeString)
+                        .keyboardType(.numberPad)
+                    Button("Set") {
+                        if let minutes = Int(customTimeString), minutes>0 {
+                            privacyDefaultDB.AutodeleteInterval = minutes * 60
+                        }
+                        showingCustomTimeSheet = false
+                    }
+                }
+                .navigationBarTitle("Enter Custom Time", displayMode: .inline)
+                .navigationBarItems(trailing: Button("Cancel") {
+                    showingCustomTimeSheet = false
+                })
+            }
+        }        
         .navigationBarTitle("Privacy & security", displayMode: .inline)
     }
 }

@@ -83,9 +83,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //upgrade url preview
     [self upgradeBoolUserSettingsIfUnset:@"ShowURLPreview" toDefault:YES];
     
-    //upgrade message autodeletion
-    [self upgradeBoolUserSettingsIfUnset:@"AutodeleteAllMessagesAfter3Days" toDefault:NO];
-
+    [self upgradeIntegerUserSettingsIfUnset:@"AutodeleteInterval" toDefault:0];
     //upgrade default omemo on
     [self upgradeBoolUserSettingsIfUnset:@"OMEMODefaultOn" toDefault:YES];
     
@@ -331,6 +329,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         while(YES) {
             for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
                 [account updateIqHandlerTimeouts];
+            NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];
+            if (autodeleteInterval > 0) {
+                [[DataLayer sharedInstance] autoDeleteMessagesAfterInterval:(NSTimeInterval)autodeleteInterval];
+            }
             [NSThread sleepForTimeInterval:1];
         }
     });

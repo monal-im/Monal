@@ -1476,7 +1476,6 @@ static NSDateFormatter* dbFormatter;
 
         [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
-    [self.db vacuum];
 }
 
 -(void) deleteMessageHistory:(NSNumber*) messageNo

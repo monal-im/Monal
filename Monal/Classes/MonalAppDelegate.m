@@ -42,6 +42,7 @@
 #import "XMPPPresence.h"
 #import "XMPPMessage.h"
 #import "chatViewController.h"
+#import "MLSQLite.h"
 
 @import Intents;
 
@@ -62,6 +63,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     BOOL _shutdownPending;
     BOOL _wasFreezed;
 }
+@property (readonly, strong, nonatomic) MLSQLite* db;
 @end
 
 @implementation MonalAppDelegate
@@ -1555,6 +1557,8 @@ $$
                     //disconnect all accounts to prevent TCP buffer leaking
                     [[MLXMPPManager sharedInstance] disconnectAll];
                     
+                    [self.db vacuum];
+                    
                     //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                     //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                     [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
@@ -1668,6 +1672,7 @@ $$
                     //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                     //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                     [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
+                    [self.db vacuum];
                     
                     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                     DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");

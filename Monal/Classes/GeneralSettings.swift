@@ -59,8 +59,8 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     @defaultsDB("OMEMODefaultOn") 
     var omemoDefaultOn:Bool
     
-    @defaultsDB("AutodeleteAllMessagesAfter3Days")
-    var autodeleteAllMessagesAfter3Days: Bool
+    @defaultsDB("AutodeleteInterval")
+    var AutodeleteInterval: Int
     
     @defaultsDB("SendLastUserInteraction")
     var sendLastUserInteraction: Bool
@@ -243,7 +243,14 @@ struct UserInterfaceSettings: View {
 
 struct SecuritySettings: View {
     @ObservedObject var generalSettingsDefaultsDB = GeneralSettingsDefaultsDB()
+    let autodeleteOptions = [
+        0:"Off", 30:"30 seconds", 300:"5 minutes", 3600:"1 hour",
+        28800:"8 hours", 86400:"1 day", 604800:"1 week", 2419200:"4 weeks", -1:"Custom"
+    ]
     
+    @State private var showingCustomTimeSheet = false
+    @State private var selectedOptionIndex: Int = 0
+    @State private var customTimeString = ""
     var body: some View {
         Form {
             Section(header: Text("Encryption")) {
@@ -273,12 +280,38 @@ like hotel wifi, ugly mobile carriers etc.
             }
             
             Section(header: Text("On this device")) {
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.autodeleteAllMessagesAfter3Days) {
-                    Text("Autodelete all messages after 3 days")
+                Picker("Autodelete all messages after", selection: $generalSettingsDefaultsDB.AutodeleteInterval) {
+                    ForEach(autodeleteOptions.keys.sorted(), id: \.self) { key in
+                        Text(autodeleteOptions[key, default: "Custom"]).tag(key)
+                    }
                 }
             }
         }
         .navigationBarTitle(Text("Security"), displayMode: .inline)
+        .onChange(of: generalSettingsDefaultsDB.AutodeleteInterval) { newValue in
+            if newValue == -1  {
+                showingCustomTimeSheet = true
+            }
+        }
+        .sheet(isPresented: $showingCustomTimeSheet) {
+            NavigationView {
+                Form {
+                    TextField("Enter time in minutes", text: $customTimeString)
+                        .keyboardType(.numberPad)
+                    Button("Set") {
+                        if let minutes = Int(customTimeString), minutes>0 {
+                            generalSettingsDefaultsDB.AutodeleteInterval = minutes * 60
+                        }
+                        showingCustomTimeSheet = false
+                    }
+                }
+                .navigationBarTitle("Enter Custom Time", displayMode: .inline)
+                .navigationBarItems(trailing: Button("Cancel") {
+                    showingCustomTimeSheet = false
+                })
+            }
+        }
+
     }
 }
 

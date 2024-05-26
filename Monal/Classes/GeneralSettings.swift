@@ -205,7 +205,7 @@ like hotel wifi, ugly mobile carriers etc.
                 
                 Toggle(isOn: $generalSettingsDefaultsDB.webrtcAllowP2P) {
                     Text("Calls: Allow P2P sessions").font(.body)
-                    Text("Allow your phone to establish a direct network connection to the remote party. This might leak your IP address to the caller/callee.").font(.footnote)
+                    Text("Allow your device to establish a direct network connection to the remote party. This might leak your IP address to the caller/callee.").font(.footnote)
                 }
             }
             

@@ -483,8 +483,12 @@ static BOOL warnUnclean = NO;
         [handlers addObject:contentHandler];
         
         //only show this notification once a day at maximum (and if a build number was given in our push)
+#ifdef IS_ALPHA
+        if(request.content.userInfo[@"firstGoodBuildNumber"] != nil)
+#else
         NSDate* lastAppVersionAlert = [[HelperTools defaultsDB] objectForKey:@"lastAppVersionAlert"];
         if((lastAppVersionAlert == nil || [[NSDate date] timeIntervalSinceDate:lastAppVersionAlert] > 86400) && request.content.userInfo[@"firstGoodBuildNumber"] != nil)
+#endif
         {
             NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
             long buildNumber = ((NSString*)[infoDict objectForKey:@"CFBundleVersion"]).integerValue;

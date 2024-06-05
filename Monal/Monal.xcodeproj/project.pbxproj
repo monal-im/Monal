@@ -589,6 +589,10 @@
 		84C1CD532A8F6196007076ED /* MLStreamRedirect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLStreamRedirect.h; sourceTree = "<group>"; };
 		84D31CE528653B83006D7926 /* WebRTCClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebRTCClient.swift; path = Classes/WebRTCClient.swift; sourceTree = SOURCE_ROOT; };
 		84E55E7F2964426D003E191A /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
+		84F194C32C0FE70900F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Main.strings"; sourceTree = "<group>"; };
+		84F194C42C0FE74500F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Settings.strings"; sourceTree = "<group>"; };
+		84F194C52C0FE78B00F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/iosShare.strings"; sourceTree = "<group>"; };
+		84F194C62C0FE79000F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		84FC37542897521400634E3E /* snprintf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = snprintf.m; sourceTree = "<group>"; };
 		84FC37562897523500634E3E /* metamacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
 		84FC375828981A5600634E3E /* PasswordMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordMigration.swift; sourceTree = "<group>"; };
@@ -1724,6 +1728,7 @@
 				pa,
 				ko,
 				eu,
+				"es-AR",
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			packageReferences = (
@@ -2277,6 +2282,7 @@
 				C132EA9B26C92E9000BB9A67 /* pa */,
 				C15A4E5F279D2AC80055CD11 /* ko */,
 				C1E856A828DECF5F00B104E9 /* eu */,
+				84F194C52C0FE78B00F0A994 /* es-AR */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2318,6 +2324,7 @@
 				C132EA9626C92DD900BB9A67 /* pa */,
 				C15A4E5D279D2AC70055CD11 /* ko */,
 				C1E856A728DECF5F00B104E9 /* eu */,
+				84F194C42C0FE74500F0A994 /* es-AR */,
 			);
 			name = Settings.storyboard;
 			sourceTree = "<group>";
@@ -2359,6 +2366,7 @@
 				C132EA9426C92DD900BB9A67 /* pa */,
 				C15A4E5B279D2AC60055CD11 /* ko */,
 				C1E856A628DECF5F00B104E9 /* eu */,
+				84F194C32C0FE70900F0A994 /* es-AR */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -2399,6 +2407,7 @@
 				C132EA9926C92DDA00BB9A67 /* pa */,
 				C15A4E60279D2AC80055CD11 /* ko */,
 				C1E856A928DECF5F00B104E9 /* eu */,
+				84F194C62C0FE79000F0A994 /* es-AR */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

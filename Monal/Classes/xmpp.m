@@ -716,7 +716,7 @@ NSString* const kStanza = @"stanza";
 
 -(BOOL) parseQueueFrozen
 {
-    return _parseQueue.suspended == YES;
+    return [_parseQueue isSuspended] == YES;
 }
 
 -(void) freezeParseQueue
@@ -729,15 +729,16 @@ NSString* const kStanza = @"stanza";
     //apparently setting _parseQueue.suspended = YES does return before the queue is actually suspended
     //--> busy wait for _parseQueue.suspended == YES
     [HelperTools busyWaitForOperationQueue:_parseQueue];
+    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
     
     //this has to be synchronous because we want to be sure no further stanzas are leaking from the parse queue
     //into the receive queue once we leave this method
     //--> wait for all blocks put into the receive queue by the parse queue right before it was frozen
     [self dispatchOnReceiveQueue: ^{
+        [HelperTools busyWaitForOperationQueue:self->_parseQueue];
         MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES (in receive queue)!");
         DDLogInfo(@"Parse queue is frozen now!");
     }];
-    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
 }
 
 -(void) unfreezeParseQueue

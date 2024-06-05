@@ -535,7 +535,7 @@ void swizzle(Class c, SEL orig, SEL new)
     int busyWaitCounter = 0;
     NSTimeInterval waitTime = 0.0;
     NSDate* startTime = [NSDate date];
-    while(queue.suspended != YES)
+    while([queue isSuspended] != YES)
     {
         busyWaitCounter++;
         waitTime = [[NSDate date] timeIntervalSinceDate:startTime];

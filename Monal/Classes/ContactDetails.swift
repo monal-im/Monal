@@ -61,19 +61,6 @@ struct ContactDetails: View {
         success = true // < dismiss entire view on close
     }
     
-    private func performAction(_ title: Text, action: @escaping ()->Void) {
-        self.account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
-            DispatchQueue.main.async {
-                hideLoadingOverlay(self.overlay)
-                let success : Bool = data["success"] as! Bool;
-                if !success {
-                    errorAlert(title: title, message: Text(data["errorMessage"] as? String ?? "Unknown error!"))
-                }
-            }
-        }, forMuc:self.contact.contactJid)
-        action()
-    }
-    
     private func showImagePicker() {
 #if targetEnvironment(macCatalyst)
         let picker = DocumentPickerViewController(
@@ -173,9 +160,11 @@ struct ContactDetails: View {
                                     .destructive(
                                         Text("Yes"),
                                         action: {
-                                            showLoadingOverlay(overlay, headline: NSLocalizedString("Removing avatar...", comment: ""))
-                                            performAction(Text("Error removing avatar!")) {
+                                            performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:Text("Removing avatar..."), descriptionView:Text("")) {
                                                 self.account.mucProcessor.publishAvatar(nil, forMuc: contact.contactJid)
+                                            }.catch { error in
+                                                errorAlert(title: Text("Error removing avatar!"), message: Text("\(String(describing:error))"))
+                                                hideLoadingOverlay(overlay)
                                             }
                                         }
                                     )
@@ -557,20 +546,18 @@ struct ContactDetails: View {
                                     .destructive(
                                         Text("Yes"),
                                         action: {
-                                            showLoadingOverlay(overlay, headline: contact.mucType == "group" ? NSLocalizedString("Destroying group...", comment: "") : NSLocalizedString("Destroying channel...", comment: ""))
-                                            self.account.mucProcessor.destroyRoom(contact.contactJid as String)
-                                            self.account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
-                                                hideLoadingOverlay(overlay)
-                                                let success : Bool = data["success"] as! Bool;
-                                                if success {
-                                                    if let callback = data["callback"] {
-                                                        self.successCallback = objcCast(callback) as monal_void_block_t
-                                                    }
-                                                    successAlert(title: Text("Success"), message: contact.mucType == "group" ? Text("Successfully destroyed group.") : Text("Successfully destroyed channel."))
-                                                } else {
-                                                    errorAlert(title: Text("Error destroying group!"), message: Text(data["errorMessage"] as! String))
+                                            performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:contact.mucType == "group" ? Text("Destroying group...") : Text("Destroying channel..."), descriptionView:Text("")) {
+                                                self.account.mucProcessor.destroyRoom(contact.contactJid as String)
+                                            }.done { callback in
+                                                if let callback = callback {
+                                                    self.successCallback = callback
                                                 }
-                                            }, forMuc:contact.contactJid)
+                                                successAlert(title: Text("Success"), message: contact.mucType == "group" ? Text("Successfully destroyed group.") : Text("Successfully destroyed channel."))
+                                            }.catch { error in
+                                                errorAlert(title: Text("Error destroying group!"), message: Text("\(String(describing:error))"))
+                                            }.finally {
+                                                hideLoadingOverlay(overlay)
+                                            }
                                         }
                                     )
                                 ]
@@ -658,9 +645,11 @@ struct ContactDetails: View {
             }))
         }
         .onChange(of:inputImage) { _ in
-            showLoadingOverlay(overlay, headline: NSLocalizedString("Uploading avatar...", comment: ""))
-            performAction(Text("Error changing avatar!")) {
+            performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:Text("Uploading avatar..."), descriptionView:Text("")) {
                 self.account.mucProcessor.publishAvatar(inputImage, forMuc: contact.contactJid)
+            }.catch { error in
+                errorAlert(title: Text("Error changing avatar!"), message: Text("\(String(describing:error))"))
+                hideLoadingOverlay(overlay)
             }
         }
         .onChange(of:contact.avatar as UIImage) { _ in

@@ -88,6 +88,34 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
     }
 }
 
+extension UIPickerView {
+    override open func didMoveToSuperview() {
+        super.didMoveToSuperview()
+        self.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+    }
+}
+
+func performMucAction(account: xmpp, mucJid: String, overlay: LoadingOverlayState, headlineView: Optional<some View>, descriptionView: Optional<some View>, action: @escaping ()->Void) -> Promise<monal_void_block_t?> {
+    showLoadingOverlay(overlay, headlineView:headlineView, descriptionView:descriptionView)
+    return Promise<monal_void_block_t?> { seal in
+        DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 1.0) {
+            account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
+                let success : Bool = data["success"] as! Bool;
+                if !success {
+                    seal.reject(data["errorMessage"] as? String ?? "Unknown error!")
+                } else {
+                    if let callback = data["callback"] {
+                        seal.fulfill(objcCast(callback) as monal_void_block_t)
+                    } else {
+                        seal.fulfill(nil)
+                    }
+                }
+            }, forMuc:mucJid)
+            action()
+        }
+    }
+}
+
 func mucAffiliationToString(_ affiliation: String?) -> String {
     if let affiliation = affiliation {
         if affiliation == "owner" {

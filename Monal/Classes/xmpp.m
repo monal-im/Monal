@@ -1685,7 +1685,7 @@ NSString* const kStanza = @"stanza";
                     {
                         XMPPMessage* messageNode = (XMPPMessage*)node;
                         if(messageNode.id)
-                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalSentMessageNotice object:self userInfo:@{kMessageId:messageNode.id}];
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalSentMessageNotice object:self userInfo:@{@"message":messageNode}];
                     }
                 }
             }

@@ -39,7 +39,7 @@
     NSDate* _lastPing;
     NSMutableSet* _noUpdateBookmarks;
     BOOL _hasFetchedBookmarks;
-    //this won't be persisted because it is only for the ui
+    //these won't be persisted because it is only for the ui
     NSMutableDictionary* _uiHandler;
 }
 @end
@@ -87,6 +87,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleResourceBound:) name:kMLResourceBoundNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleCatchupDone:) name:kMonalFinishedCatchup object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     return self;
 }
 
@@ -180,6 +181,39 @@ static NSDictionary* _optionalGroupConfigOptions;
         //don't use [self updateBookmarks] to not update anything (e.g. readd a bookmark removed by another client)
         if(!_hasFetchedBookmarks && _account.connectionProperties.supportsBookmarksCompat)
             [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler, $ID(type, @"publish"))];
+    }
+}
+
+-(void) handleSentMessage:(NSNotification*) notification
+{
+    XMPPMessage* msg = notification.userInfo[@"message"];
+    NSString* callUiHandlerFor = nil;
+    
+    //check if this is a direct invite (direct invites always follow indirect ones, so we don't have to check for indirect ones)
+    if([msg check:@"/{jabber:client}message<type=normal>/{jabber:x:conference}x@jid"])
+        callUiHandlerFor = [msg findFirst:@"/{jabber:client}message<type=normal>/{jabber:x:conference}x@jid"];
+    
+    //check for muc subject change
+    if([msg check:@"/{jabber:client}message<type=groupchat>/subject"])
+        callUiHandlerFor = msg.toUser;
+    
+    if(callUiHandlerFor != nil)
+    {
+        monal_id_block_t uiHandler = [self getUIHandlerForMuc:callUiHandlerFor];
+        if(uiHandler)
+        {
+            //remove handler (it will only be called once)
+            [self removeUIHandlerForMuc:callUiHandlerFor];
+            
+            DDLogInfo(@"Calling UI handler for muc %@...", callUiHandlerFor);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                uiHandler(@{
+                    @"success": @YES,
+                    @"muc": callUiHandlerFor,
+                    @"account": self->_account
+                });
+            });
+        }
     }
 }
 
@@ -550,7 +584,7 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
                 [self removeRoomFromCreating:roomJid];
                 [self deleteMuc:roomJid withBookmarksUpdate:NO keepBuddylistEntry:NO];
             }
-            [self handleError:[NSString stringWithFormat:@"Could not configure new group '%@': config option '%@' not available!", roomJid, option] forMuc:roomJid withNode:nil andIsSevere:YES];
+            [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not configure (new) group '%@': config option '%@' not available!", @""), roomJid, option] forMuc:roomJid withNode:nil andIsSevere:YES];
             return;
         }
         else
@@ -603,6 +637,22 @@ $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, acc
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
     }));
+    
+    monal_id_block_t uiHandler = [self getUIHandlerForMuc:iqNode.fromUser];
+    if(uiHandler)
+    {
+        //remove handler (it will only be called once)
+        [self removeUIHandlerForMuc:iqNode.fromUser];
+        
+        DDLogInfo(@"Calling UI handler for muc %@...", iqNode.fromUser);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            uiHandler(@{
+                @"success": @YES,
+                @"muc": iqNode.fromUser,
+                @"account": self->_account
+            });
+        });
+    }
     
     if(joinOnSuccess)
     {
@@ -1247,13 +1297,14 @@ $$
             @"to": jid
         } andChildren:@[] andData:nil]
     ] andData:nil]];
-    [_account send:indirectInviteMsg];
+    [self->_account send:indirectInviteMsg];
     
     XMPPMessage* directInviteMsg = [[XMPPMessage alloc] initWithType:kMessageNormalType to:jid];
     [directInviteMsg addChildNode:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:conference" withAttributes:@{
         @"jid": roomJid
     } andChildren:@[] andData:nil]];
-    [_account send:directInviteMsg];
+    [self->_account send:directInviteMsg];
+
 }
 
 -(void) setAffiliation:(NSString*) affiliation ofUser:(NSString*) jid inMuc:(NSString*) roomJid
@@ -1277,6 +1328,21 @@ $$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmp
         return;
     }
     DDLogInfo(@"Successfully changed affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
+    monal_id_block_t uiHandler = [self getUIHandlerForMuc:iqNode.fromUser];
+    if(uiHandler)
+    {
+        //remove handler (it will only be called once)
+        [self removeUIHandlerForMuc:iqNode.fromUser];
+        
+        DDLogInfo(@"Calling UI handler for muc %@...", iqNode.fromUser);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            uiHandler(@{
+                @"success": @YES,
+                @"muc": iqNode.fromUser,
+                @"account": self->_account
+            });
+        });
+    }
 $$
 
 -(void) changeNameOfMuc:(NSString*) room to:(NSString*) name
@@ -1327,6 +1393,21 @@ $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, 
         return;
     }
     DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);
+    monal_id_block_t uiHandler = [self getUIHandlerForMuc:iqNode.fromUser];
+    if(uiHandler)
+    {
+        //remove handler (it will only be called once)
+        [self removeUIHandlerForMuc:iqNode.fromUser];
+        
+        DDLogInfo(@"Calling UI handler for muc %@...", iqNode.fromUser);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            uiHandler(@{
+                @"success": @YES,
+                @"muc": iqNode.fromUser,
+                @"account": self->_account
+            });
+        });
+    }
 $$
 
 $$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid))

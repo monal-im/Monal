@@ -13,6 +13,7 @@
 #import "DataLayer.h"
 #import "HelperTools.h"
 #import "xmpp.h"
+#import "XMPPMessage.h"
 #import "MLNotificationQueue.h"
 #import "MLNotificationManager.h"
 #import "MLOMEMO.h"
@@ -862,8 +863,7 @@ $$
 
 -(void) handleSentMessage:(NSNotification*) notification
 {
-    NSDictionary* info = notification.userInfo;
-    NSString* messageId = [info objectForKey:kMessageId];
+    NSString* messageId = ((XMPPMessage*)notification.userInfo[@"message"]).id;
     DDLogInfo(@"message %@ sent, setting status accordingly", messageId);
     [[DataLayer sharedInstance] setMessageId:messageId sent:YES];
 }

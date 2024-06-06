@@ -46,6 +46,9 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     @defaultsDB("ShowURLPreview")
     var showURLPreview: Bool
     
+    @defaultsDB("useInlineSafari")
+    var useInlineSafari: Bool
+    
     @defaultsDB("webrtcAllowP2P")
     var webrtcAllowP2P: Bool
     
@@ -157,6 +160,10 @@ struct UserInterfaceSettings: View {
                 Toggle(isOn: $generalSettingsDefaultsDB.showURLPreview) {
                     Text("Show URL previews").font(.body)
                     Text("The operator of the webserver providing that URL may see your IP address.").font(.footnote)
+                }
+                Toggle(isOn: $generalSettingsDefaultsDB.useInlineSafari) {
+                    Text("Open URLs inline in Safari").font(.body)
+                    Text("When disabled, URLs will opened in your default browser (that might not be Safari).").font(.footnote)
                 }
             }
             

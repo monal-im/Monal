@@ -156,6 +156,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #else
     [self upgradeBoolUserSettingsIfUnset:@"useDnssecForAllConnections" toDefault:NO];
 #endif
+    
+    
+    NSTimeZone* timeZone = [NSTimeZone localTimeZone];
+    DDLogVerbose(@"Current timezone name: '%@'...", [timeZone name]);
+    if([[timeZone name] containsString:@"Europe"])
+        [self upgradeBoolUserSettingsIfUnset:@"useInlineSafari" toDefault:NO];
+    else
+        [self upgradeBoolUserSettingsIfUnset:@"useInlineSafari" toDefault:YES];
 }
 
 -(void) upgradeFloatUserSettingsToInteger:(NSString*) settingsName

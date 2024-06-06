@@ -9,6 +9,8 @@
 #import "MLLinkCell.h"
 #import "UIImageView+WebCache.h"
 #import "MonalAppDelegate.h"
+#import "HelperTools.h"
+
 @import SafariServices;
 
 
@@ -34,7 +36,8 @@
     if(self.link)
     {
         NSURL* url = [NSURL URLWithString:self.link];
-        if([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"])
+        DDLogInfo(@"Opening link (inline=%@): %@", bool2str([[HelperTools defaultsDB] boolForKey: @"useInlineSafari"]), url);
+        if([[HelperTools defaultsDB] boolForKey: @"useInlineSafari"] && ([url.scheme.lowercaseString isEqualToString:@"http"] || [url.scheme.lowercaseString isEqualToString:@"https"]))
         {
             SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
             [self.parent presentViewController:safariView animated:YES completion:nil];

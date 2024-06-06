@@ -6,6 +6,40 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
+import ViewExtractor
+struct SettingsToggle<T>: View where T: View {
+    let value: Binding<Bool>
+    let contents: T
+    
+    init(isOn value: Binding<Bool>, @ViewBuilder contents: @escaping () -> T) {
+        self.value = value
+        self.contents = contents()
+    }
+    
+    var body:some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Extract(contents) { views in
+                if views.count == 0 {
+                    Text("")
+                } else {
+                    Toggle(isOn: value) {
+                        views[0]
+                            .font(.body)
+                    }
+                    if views.count > 1 {
+                        Group {
+                            ForEach(views[1...]) { view in
+                                view
+                                    .foregroundColor(Color(UIColor.secondaryLabel))
+                                    .font(.footnote)
+                            }
+                        }.fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+        }
+    }
+}
 
 func getNotificationPrivacyOption(_ option: NotificationPrivacySettingOption) -> String {
     switch option{
@@ -130,7 +164,7 @@ struct GeneralSettings: View {
                     }
                 }
                 NavigationLink(destination: LazyClosureView(AttachmentSettings())) {
-                    HStack{
+                    HStack {
                         Image(systemName: "paperclip")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -138,6 +172,23 @@ struct GeneralSettings: View {
                         Text("Attachments")
                     }
                 }
+                
+                Button(action: {
+                    UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+                }, label: {
+                    HStack {
+                        Image(systemName: "gear")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                        #if targetEnvironment(macCatalyst)
+                            Text("Open macOS settings")
+                        #else
+                            Text("Open iOS settings")
+                        #endif
+                    }.foregroundColor(Color(UIColor.label))
+                })
+                .buttonStyle(.borderless) 
             }
         }
         .navigationBarTitle(Text("General Settings"))
@@ -153,31 +204,36 @@ struct UserInterfaceSettings: View {
     var body: some View {
         Form {
             Section(header: Text("Previews")) {
-                Toggle(isOn: $generalSettingsDefaultsDB.showGeoLocation) {
-                    Text("Show inline geo location").font(.body)
-                    Text("Received geo locations are shared with Apple's Maps App.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.showGeoLocation) {
+                    Text("Show inline geo location")
+                    Text("Received geo locations are shared with Apple's Maps App.")
                 }
-                Toggle(isOn: $generalSettingsDefaultsDB.showURLPreview) {
-                    Text("Show URL previews").font(.body)
-                    Text("The operator of the webserver providing that URL may see your IP address.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.showURLPreview) {
+                    Text("Show URL previews")
+                    Text("The operator of the webserver providing that URL may see your IP address.")
                 }
-                Toggle(isOn: $generalSettingsDefaultsDB.useInlineSafari) {
-                    Text("Open URLs inline in Safari").font(.body)
-                    Text("When disabled, URLs will opened in your default browser (that might not be Safari).").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.useInlineSafari) {
+                    Text("Open URLs inline in Safari")
+                    Text("When disabled, URLs will opened in your default browser (that might not be Safari).")
                 }
             }
             
             Section(header: Text("Input")) {
-                Toggle(isOn: $generalSettingsDefaultsDB.showKeyboardOnChatOpen) {
-                    Text("Autofocus text input on chat open").font(.body)
-                    Text("Will focus the textfield on macOS or iOS with hardware keyboard attached, will open the software keyboard otherwise.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.showKeyboardOnChatOpen) {
+                    Text("Autofocus text input on chat open")
+                    Text("Will focus the textfield on macOS or iOS with hardware keyboard attached, will open the software keyboard otherwise.")
                 }
             }
             
             Section(header: Text("Appearance")) {
-                NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:nil))) {
-                    Text("Chat background image").font(.body)
-                    Text("Configure the background image displayed in open chats.").font(.footnote)
+                VStack(alignment: .leading, spacing: 0) {
+                    NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:nil))) {
+                        Text("Chat background image").font(.body)
+                    }
+                    Text("Configure the background image displayed in open chats.")
+                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .font(.footnote)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
@@ -191,14 +247,14 @@ struct SecuritySettings: View {
     var body: some View {
         Form {
             Section(header: Text("Encryption")) {
-                Toggle(isOn: $generalSettingsDefaultsDB.omemoDefaultOn) {
-                    Text("Enable encryption by default for new chats").font(.body)
-                    Text("Every new contact will have encryption enabled, but already known contacts will preserve their encryption settings.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.omemoDefaultOn) {
+                    Text("Enable encryption by default for new chats")
+                    Text("Every new contact will have encryption enabled, but already known contacts will preserve their encryption settings.")
                 }
                 
                 if #available(iOS 16.0, macCatalyst 16.0, *) {
-                    Toggle(isOn: $generalSettingsDefaultsDB.useDnssecForAllConnections) {
-                        Text("Use DNSSEC validation for all connections").font(.body)
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.useDnssecForAllConnections) {
+                        Text("Use DNSSEC validation for all connections")
                         Text(
 """
 Use DNSSEC to validate all DNS query responses before connecting to the IP address designated \
@@ -206,18 +262,18 @@ in the DNS response.\n\
 While being more secure, this can lead to connection problems in certain networks \
 like hotel wifi, ugly mobile carriers etc.
 """
-                        ).font(.footnote)
+                        )
                     }
                 }
                 
-                Toggle(isOn: $generalSettingsDefaultsDB.webrtcAllowP2P) {
-                    Text("Calls: Allow P2P sessions").font(.body)
-                    Text("Allow your device to establish a direct network connection to the remote party. This might leak your IP address to the caller/callee.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.webrtcAllowP2P) {
+                    Text("Calls: Allow P2P sessions")
+                    Text("Allow your device to establish a direct network connection to the remote party. This might leak your IP address to the caller/callee.")
                 }
             }
             
             Section(header: Text("On this device")) {
-                Toggle(isOn: $generalSettingsDefaultsDB.autodeleteAllMessagesAfter3Days) {
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.autodeleteAllMessagesAfter3Days) {
                     Text("Autodelete all messages after 3 days")
                 }
             }
@@ -232,43 +288,43 @@ struct PrivacySettings: View {
     var body: some View {
         Form {
             Section(header: Text("Activity indications")) {
-                Toggle(isOn: $generalSettingsDefaultsDB.sendReceivedMarkers) {
-                    Text("Send message received").font(.body)
-                    Text("Let your contacts know if you received a message.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.sendReceivedMarkers) {
+                    Text("Send message received")
+                    Text("Let your contacts know if you received a message.")
                 }
-                Toggle(isOn: $generalSettingsDefaultsDB.sendDisplayedMarkers) {
-                    Text("Send message displayed state").font(.body)
-                    Text("Let your contacts know if you read a message.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.sendDisplayedMarkers) {
+                    Text("Send message displayed state")
+                    Text("Let your contacts know if you read a message.")
                 }
-                Toggle(isOn: $generalSettingsDefaultsDB.sendLastChatState) {
-                    Text("Send typing notifications").font(.body)
-                    Text("Let your contacts know if you are typing a message.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.sendLastChatState) {
+                    Text("Send typing notifications")
+                    Text("Let your contacts know if you are typing a message.")
                 }
-                Toggle(isOn: $generalSettingsDefaultsDB.sendLastUserInteraction) {
-                    Text("Send last interaction time").font(.body)
-                    Text("Let your contacts know when you last opened the app.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.sendLastUserInteraction) {
+                    Text("Send last interaction time")
+                    Text("Let your contacts know when you last opened the app.")
                 }
             }
             
             Section(header: Text("Interactions")) {
-                Toggle(isOn: $generalSettingsDefaultsDB.allowNonRosterContacts) {
-                    Text("Accept incoming messages from strangers").font(.body)
-                    Text("Allow contacts not in your contact list to contact you.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.allowNonRosterContacts) {
+                    Text("Accept incoming messages from strangers")
+                    Text("Allow contacts not in your contact list to contact you.")
                 }
-                Toggle(isOn: $generalSettingsDefaultsDB.allowCallsFromNonRosterContacts) {
-                    Text("Accept incoming calls from strangers").font(.body)
-                    Text("Allow contacts not in your contact list to call you.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.allowCallsFromNonRosterContacts) {
+                    Text("Accept incoming calls from strangers")
+                    Text("Allow contacts not in your contact list to call you.")
                 }.disabled(!generalSettingsDefaultsDB.allowNonRosterContacts)
             }
             
             Section(header: Text("Misc")) {
-                Toggle(isOn: $generalSettingsDefaultsDB.allowVersionIQ) {
-                    Text("Publish version").font(.body)
-                    Text("Allow contacts in your contact list to query your Monal and iOS versions.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.allowVersionIQ) {
+                    Text("Publish version")
+                    Text("Allow contacts in your contact list to query your Monal and iOS versions.")
                 }
-                Toggle(isOn: $generalSettingsDefaultsDB.webrtcUseFallbackTurn) {
-                    Text("Calls: Allow TURN fallback to Monal-Servers").font(.body)
-                    Text("This will make calls possible even if your XMPP server does not provide a TURN server.").font(.footnote)
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.webrtcUseFallbackTurn) {
+                    Text("Calls: Allow TURN fallback to Monal-Servers")
+                    Text("This will make calls possible even if your XMPP server does not provide a TURN server.")
                 }
             }
         }
@@ -292,7 +348,7 @@ struct NotificationSettings: View {
     var body: some View {
         Form {
             Section(header: Text("Settings")) {
-                Picker(selection: $generalSettingsDefaultsDB.notificationPrivacySetting, label: Text("Notification privacy")) {
+                Picker(selection: $generalSettingsDefaultsDB.notificationPrivacySetting, label: Text("Privacy")) {
                     ForEach(NotificationPrivacySettingOption.allCases, id: \.self) { option in
                         Text(getNotificationPrivacyOption(option)).tag(option.rawValue)
                     }
@@ -321,7 +377,7 @@ struct AttachmentSettings: View {
     var body: some View {
         Form {
             Section(header: Text("General File Transfer Settings")) {
-                Toggle(isOn: $generalSettingsDefaultsDB.autodownloadFiletransfers) {
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.autodownloadFiletransfers) {
                     Text("Auto-Download Media")
                 }
             }

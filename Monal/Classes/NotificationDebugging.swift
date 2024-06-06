@@ -27,7 +27,7 @@ struct NotificationDebugging: View {
                     VStack(alignment: .leading) {
                         buildNotificationStateLabel(Text("Apple Push Service"), isWorking: self.applePushEnabled);
                         Divider()
-                        Text("Apple push service should always be on. If it is off, your device can not talk to Apple's server.").font(.footnote)
+                        Text("Apple push service should always be on. If it is off, your device can not talk to Apple's server.").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
                         if !self.applePushEnabled, let apnsError = MLXMPPManager.sharedInstance().apnsError {
                             Text("Error: \(String(describing:apnsError))").foregroundColor(.red).font(.footnote)
                         }
@@ -51,7 +51,7 @@ struct NotificationDebugging: View {
                     VStack(alignment: .leading) {
                         buildNotificationStateLabel(Text("Can Show Notifications"), isWorking: self.pushPermissionEnabled);
                         Divider()
-                        Text("If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission. Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'.").font(.footnote)
+                        Text("If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission. Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'.").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
                     }
                 }
                 if(self.xmppAccountInfo.count > 0) {
@@ -61,12 +61,12 @@ struct NotificationDebugging: View {
                                 buildNotificationStateLabel(Text(account.connectionProperties.identity.jid), isWorking: account.connectionProperties.pushEnabled)
                                 Divider()
                             }
-                            Text("If this is off your device could not activate push on your xmpp server, make sure to have configured it to support XEP-0357.").font(.footnote)
+                            Text("If this is off your device could not activate push on your xmpp server, make sure to have configured it to support XEP-0357.").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
                         }
                     }
                 } else {
                     Section {
-                        Text("No accounts set up currently").font(.footnote)
+                        Text("No accounts set up currently").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
                     }.opacity(0.5)
                 }
             }

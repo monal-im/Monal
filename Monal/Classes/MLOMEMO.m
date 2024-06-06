@@ -52,8 +52,15 @@ static const int KEY_SIZE = 16;
     self.openBundleFetchCnt = 0;
     self.closedBundleFetchCnt = 0;
 
-    //create empty state (will be updated from [xmpp readState] before [self activate] is called
-    self->_state = [OmemoState new];
+    //_state is intentionally left unset and will be updated from [xmpp readState] before [self activate] is called
+    //(but only if the state wasn't invalidated, in which case [self activate] will create a new empty state)
+    return self;
+}
+
+-(void) activate
+{
+    if(self->_state == nil)
+        self->_state = [OmemoState new];
     
     //read own devicelist from database
     self.ownDeviceList = [[self knownDevicesForAddressName:self.account.connectionProperties.identity.jid] mutableCopy];
@@ -62,11 +69,6 @@ static const int KEY_SIZE = 16;
     
     [self createLocalIdentiyKeyPairIfNeeded];
     
-    return self;
-}
-
--(void) activate
-{
     //init pubsub devicelist handler
     [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:$newHandler(self, devicelistHandler)];
     
@@ -103,26 +105,30 @@ static const int KEY_SIZE = 16;
 {
     if(self.monalSignalStore.deviceid == 0)
     {
-        // signal key helper
+        //signal key helper
         SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
 
-        // Generate a new device id
+        //Generate a new device id
         do {
             self.monalSignalStore.deviceid = [signalHelper generateRegistrationId];
         } while(self.monalSignalStore.deviceid == 0 || [self.ownDeviceList containsObject:[NSNumber numberWithUnsignedInt:self.monalSignalStore.deviceid]]);
-        // Create identity key pair
+        //Create identity key pair
         self.monalSignalStore.identityKeyPair = [signalHelper generateIdentityKeyPair];
         self.monalSignalStore.signedPreKey = [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
         SignalAddress* address = [[SignalAddress alloc] initWithName:self.account.connectionProperties.identity.jid deviceId:self.monalSignalStore.deviceid];
         [self.monalSignalStore saveIdentity:address identityKey:self.monalSignalStore.identityKeyPair.publicKey];
-        // do everything done in MLSignalStore init not already mimicked above
+        //do everything done in MLSignalStore init not already mimicked above
         [self.monalSignalStore cleanupKeys];
         [self.monalSignalStore reloadCachedPrekeys];
-        // we generated a new identity
+        //we generated a new identity
         DDLogWarn(@"Created new omemo identity with deviceid: %@", @(self.monalSignalStore.deviceid));
+        //don't alert on new deviceids we could never see before because this is our first connection (otherwise, we'd already have our own deviceid)
+        //this has to be a property of the xmpp class to persist it even across state resets
+        self.account.hasSeenOmemoDeviceListAfterOwnDeviceid = NO;
         return YES;
     }
-    // we did not generate a new identity
+    //we did not generate a new identity
+    //keep the value of hasSeenOmemoDeviceListAfterOwnDeviceid in this case
     return NO;
 }
 
@@ -468,8 +474,9 @@ $$
 
 -(void) handleOwnDevicelistUpdate:(NSSet<NSNumber*>*) receivedDevices
 {
-    //check for new deviceids not previously known, but only if the devicelist is not empty
-    if([self.ownDeviceList count] > 0)
+    //check for new deviceids not previously known, but only if this isn't the first login we see a devicelist
+    //this has to be a property of the xmpp class to persist it even across state resets
+    if(self.account.hasSeenOmemoDeviceListAfterOwnDeviceid)
     {
         NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
         [newDevices minusSet:self.ownDeviceList];
@@ -493,6 +500,8 @@ $$
     
     //update own devicelist (this can be an empty list, if the list on our server is empty)
     self.ownDeviceList = [receivedDevices mutableCopy];
+    //this has to be a property of the xmpp class to persist it even across state resets
+    self.account.hasSeenOmemoDeviceListAfterOwnDeviceid = YES;
     DDLogVerbose(@"Own devicelist for account %@ is now: %@", self.account, self.ownDeviceList);
     
     //make sure to add our own deviceid to the devicelist if it's not yet there

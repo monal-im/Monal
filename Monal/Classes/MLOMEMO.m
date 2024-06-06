@@ -1071,7 +1071,9 @@ $$
             SignalCiphertext* deviceEncryptedKey = [cipher encryptData:encryptedPayload.key error:&error];
             if(error)
             {
-                showErrorOnAlpha(self.account, @"Error while adding encryption key for jid: %@ device: %@ error: %@", encryptForJid, device, error);
+                //only show errors not being of type "unknown error"
+                if(![error.domain isEqualToString:@"org.whispersystems.SignalProtocol"] || error.code != 0)
+                    showErrorOnAlpha(self.account, @"Error while adding encryption key for jid: %@ device: %@ error: %@", encryptForJid, device, error);
                 [self rebuildSessionWithJid:encryptForJid forRid:device];
                 continue;
             }

@@ -7,6 +7,7 @@
 //
 
 import ViewExtractor
+import FrameUp
 
 struct RichAlertView<T, TitleContent, BodyContent, ButtonContent>: ViewModifier where TitleContent: View, BodyContent: View, ButtonContent: View {
     @Binding public var isPresented: T?
@@ -29,40 +30,31 @@ struct RichAlertView<T, TitleContent, BodyContent, ButtonContent>: ViewModifier 
                         .font(.headline)
                         .padding([.leading, .trailing], 24)
                     Divider()
-                    ScrollView {
+                    SmartScrollView(.vertical, showsIndicators: true, optionalScrolling: true, shrinkToFit: true) {
                         VStack {
                             alertBody(data)
                                 .padding([.leading, .trailing], 24)
-                            let buttonViews = alertButtons(data)
-                            Extract(buttonViews) { views in
-                                if views.count == 0 || buttonViews is EmptyView  {
-                                    Divider()
-                                    Button("Close") {
-                                        isPresented = nil
-                                    }
-                                        .padding([.leading, .trailing], 24)
-                                        .buttonStyle(DefaultButtonStyle())
-                                } else {
-                                    ForEach(views) { view in
-                                        Divider()
-                                        .padding(0)
-                                        view
-                                            .padding([.leading, .trailing], 24)
-                                            .buttonStyle(DefaultButtonStyle())
-                                    }
-                                }
+                        }
+                    }
+                    let buttonViews = alertButtons(data)
+                    Extract(buttonViews) { views in
+                        if views.count == 0 || buttonViews is EmptyView  {
+                            Divider()
+                            Button("Close") {
+                                isPresented = nil
+                            }
+                                .padding([.leading, .trailing], 24)
+                                .buttonStyle(DefaultButtonStyle())
+                        } else {
+                            ForEach(views) { view in
+                                Divider()
+                                .padding(0)
+                                view
+                                    .padding([.leading, .trailing], 24)
+                                    .buttonStyle(DefaultButtonStyle())
                             }
                         }
-                        .background(
-                            GeometryReader { geo -> Color in
-                                DispatchQueue.main.async {
-                                    scrollViewContentSize = geo.size
-                                }
-                                return Color.background
-                            }
-                        )
                     }
-                    .frame(maxHeight: scrollViewContentSize.height)
                 }
                 .foregroundColor(.primary)
                 .padding([.top, .bottom], 13)

@@ -155,6 +155,27 @@ enum DummySettingsRows {
 
         [web initViewWithUrl:[NSURL fileURLWithPath:myFile]];
     }
+    else if([segue.identifier isEqualToString:@"showAbout"])
+    {
+        UINavigationController* nav = (UINavigationController*) segue.destinationViewController;
+        MLWebViewController* web = (MLWebViewController*) nav.topViewController;
+
+        [web initViewWithUrl:[NSURL URLWithString:@"https://monal-im.org/about"]];
+    }
+    else if([segue.identifier isEqualToString:@"showPrivacy"])
+    {
+        UINavigationController* nav = (UINavigationController*) segue.destinationViewController;
+        MLWebViewController* web = (MLWebViewController*) nav.topViewController;
+
+        [web initViewWithUrl:[NSURL URLWithString:@"https://monal-im.org/privacy"]];
+    }
+    else if([segue.identifier isEqualToString:@"showBug"])
+    {
+        UINavigationController* nav = (UINavigationController*) segue.destinationViewController;
+        MLWebViewController* web = (MLWebViewController*) nav.topViewController;
+
+        [web initViewWithUrl:[NSURL URLWithString:@"https://github.com/monal-im/Monal/issues"]];
+    }
     else if([segue.identifier isEqualToString:@"editXMPP"])
     {
         XMPPEdit* editor = (XMPPEdit*) segue.destinationViewController.childViewControllers.firstObject; // segue.destinationViewController;
@@ -333,7 +354,7 @@ enum DummySettingsRows {
                     [self composeMail];
                     break;
                 case SubmitABugRow:
-                    [self openLink:@"https://github.com/monal-im/Monal/issues"];
+                    [self performSegueWithIdentifier:@"showBug" sender:self];
                     break;
                 default:
                     unreachable();
@@ -349,10 +370,10 @@ enum DummySettingsRows {
                     [self performSegueWithIdentifier:@"showOpenSource" sender:self];
                     break;
                 case PrivacyRow:
-                    [self openLink:@"https://monal-im.org/privacy"];
+                    [self performSegueWithIdentifier:@"showPrivacy" sender:self];
                     break;
                 case AboutRow:
-                    [self openLink:@"https://monal-im.org/about"];
+                    [self performSegueWithIdentifier:@"showAbout" sender:self];
                     break;
 #ifdef DEBUG
                 case LogRow:

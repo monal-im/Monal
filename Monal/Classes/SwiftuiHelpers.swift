@@ -130,6 +130,27 @@ func mucAffiliationToString(_ affiliation: String?) -> String {
     return NSLocalizedString("<unknown>", comment:"muc affiliation")
 }
 
+func mucAffiliationToInt(_ affiliation: String?) -> Int {
+    if let affiliation = affiliation {
+        if affiliation == "owner" {
+            return 1
+        } else if affiliation == "admin" {
+            return 2
+        } else if affiliation == "member" {
+            return 3
+        } else if affiliation == "none" {
+            return 4
+        } else if affiliation == "outcast" {
+            return 5
+        } else if affiliation == "profile" {
+            return 1000
+        } else if affiliation == "reinvite" {
+            return 100
+        }
+    }
+    return 0
+}
+
 struct CollapsedPickerStyle: ViewModifier {
     let accessibilityLabel: Text
     func body(content: Content) -> some View {

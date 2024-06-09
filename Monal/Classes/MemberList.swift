@@ -48,12 +48,28 @@ struct MemberList: View {
                 continue
             }
             let contact = ObservableKVOWrapper(MLContact.createContact(fromJid:jid, andAccountNo:account.accountNo))
+            if !memberList.contains(contact) {
+                continue
+            }
             affiliations[contact] = memberInfo["affiliation"] as? String ?? "none"
             if let num = memberInfo["online"] as? NSNumber {
                 online[contact] = num.boolValue
             } else {
                 online[contact] = false
             }
+        }
+        memberList.sort {
+            (
+                (online[$0]! ? 0 : 1),
+                mucAffiliationToInt(affiliations[$0]),
+                ($0.contactDisplayNameWithoutSelfnotesPrefix as String),
+                ($0.contactJid as String)
+            ) < (
+                (online[$1]! ? 0 : 1),
+                mucAffiliationToInt(affiliations[$1]),
+                ($1.contactDisplayNameWithoutSelfnotesPrefix as String),
+                ($1.contactJid as String)
+            )
         }
     }
     
@@ -243,7 +259,7 @@ struct MemberList: View {
                         HStack {
                             HStack {
                                 ContactEntry(contact:contact) {
-                                    Text("Affiliation: \(mucAffiliationToString(affiliations[contact]))")
+                                    Text("Affiliation: \(mucAffiliationToString(affiliations[contact]))\(!(online[contact] ?? false) ? Text(" (offline)") : Text(""))")
                                         //.foregroundColor(Color(UIColor.secondaryLabel))
                                         .font(.footnote)
                                 }
@@ -260,6 +276,13 @@ struct MemberList: View {
                                 makePickerView(contact:contact)
                                     .fixedSize()
                                     .offset(x:8, y:0)
+                            }
+                        }
+                        .applyClosure { view in
+                            if !(online[contact] ?? false) {
+                                view.opacity(0.5)
+                            } else {
+                                view
                             }
                         }
                         .deleteDisabled(!ownUserHasAffiliationToRemove(contact: contact))

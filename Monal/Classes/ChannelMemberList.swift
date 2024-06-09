@@ -35,18 +35,21 @@ struct ChannelMemberList: View {
                 participants[nick] = memberInfo["affiliation"] as? String ?? "none"
             }
         }
+        participants.sort {
+            (mucAffiliationToInt($0.value), $0.key) < (mucAffiliationToInt($1.value), $1.key)
+        }
     }
     
 
     var body: some View {
         List {
             Section(header: Text("\(self.channel.contactDisplayName as String) (affiliation: \(mucAffiliationToString(ownAffiliation)))")) {
-                ForEach(participants.sorted(by: <), id: \.self.key) { participant in
+                ForEach(participants.keys, id: \.self) { participant_key in
                     ZStack(alignment: .topLeading) {
                         HStack(alignment: .center) {
-                            Text(participant.key)
+                            Text(participant_key)
                             Spacer()
-                            Text(mucAffiliationToString(participant.value))
+                            Text(mucAffiliationToString(participants[participant_key]))
                         }
                     }
                 }

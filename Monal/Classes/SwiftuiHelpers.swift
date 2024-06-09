@@ -88,13 +88,6 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
     }
 }
 
-extension UIPickerView {
-    override open func didMoveToSuperview() {
-        super.didMoveToSuperview()
-        self.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-    }
-}
-
 func performMucAction(account: xmpp, mucJid: String, overlay: LoadingOverlayState, headlineView: Optional<some View>, descriptionView: Optional<some View>, action: @escaping ()->Void) -> Promise<monal_void_block_t?> {
     showLoadingOverlay(overlay, headlineView:headlineView, descriptionView:descriptionView)
     return Promise<monal_void_block_t?> { seal in
@@ -135,6 +128,34 @@ func mucAffiliationToString(_ affiliation: String?) -> String {
         }
     }
     return NSLocalizedString("<unknown>", comment:"muc affiliation")
+}
+
+struct CollapsedPickerStyle: ViewModifier {
+    let accessibilityLabel: Text
+    func body(content: Content) -> some View {
+        Menu {
+            content
+        } label: {
+            Button(action: { }) {
+                HStack {
+                    Spacer().frame(width:8)
+                    Image(systemName: "ellipsis")
+                        .rotationEffect(.degrees(90))
+                        .foregroundColor(.primary)
+                    Spacer().frame(width:8)
+                }
+                .contentShape(Rectangle())
+            }
+            .frame(width: 24, height: 20)
+            .accessibilityLabel(accessibilityLabel)
+        }
+    }
+    
+}
+extension View {
+    func collapsedPickerStyle(accessibilityLabel label: Text) -> some View {
+        self.modifier(CollapsedPickerStyle(accessibilityLabel:label))
+    }
 }
 
 struct TopRight<T: View>: ViewModifier {

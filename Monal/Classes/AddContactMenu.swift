@@ -11,7 +11,7 @@ import UniformTypeIdentifiers
 
 struct AddContactMenu: View {
     var delegate: SheetDismisserProtocol
-    static private let jidFaultyPattern = "^([^@]+@)?.+\\..{2,}$"
+    static private let jidFaultyPattern = "^([^@]+@)?.+(\\..{2,})?$"
 
     @State private var connectedAccounts: [xmpp]
     @State private var selectedAccount: Int
@@ -218,7 +218,7 @@ struct AddContactMenu: View {
                         if !showAlert {
                             let jidComponents = HelperTools.splitJid(toAdd)
                             if jidComponents["host"] == nil || jidComponents["host"]!.isEmpty {
-                                errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing the string..."))
+                                errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing your input..."))
                                 showAlert = true
                                 return
                             }

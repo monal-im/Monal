@@ -32,6 +32,7 @@
 #import "MLXEPSlashMeHandler.h"
 #import "MonalAppDelegate.h"
 #import "xmpp.h"
+#import "XMPPMessage.h"
 
 #import <Monal-Swift.h>
 #import <stdatomic.h>
@@ -1863,11 +1864,9 @@ enum msgSentState {
     }
 }
 
-
 -(void) handleSentMessage:(NSNotification*) notification
 {
-    NSDictionary* dic = notification.userInfo;
-    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgSent withOptDic:nil];
+    [self updateMsgState:((XMPPMessage*)notification.userInfo[@"message"]).id withEvent:msgSent withOptDic:nil];
 }
 
 -(void) handleMessageError:(NSNotification*) notification

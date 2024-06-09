@@ -435,9 +435,9 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0333.html" />
-        <xmpp:status>partial</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.8</xmpp:since>
-        <xmpp:note>XEP-0333: Chat Markers (received markers won't ever be implemented, use XEP-0184 instead)</xmpp:note> 
+        <xmpp:note>XEP-0333: Displayed Markers</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -503,13 +503,6 @@
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>4.6</xmpp:since>
         <xmpp:note>XEP-0368: SRV records for XMPP over TLS</xmpp:note> 
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0369.html" />
-        <xmpp:status>planned</xmpp:status>
-        <xmpp:note>XEP-0369: Mediated Information eXchange (MIX)</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -713,6 +706,21 @@
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>6.0</xmpp:since>
         <xmpp:note>XEP-0480: SASL Upgrade Tasks</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0158.html" />
+        <xmpp:status>planned</xmpp:status>
+        <xmpp:note>XEP-0484: Fast Authentication Streamlining Tokens</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0158.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>5.0</xmpp:since>
+        <xmpp:note>XEP-0486: MUC Avatars</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>

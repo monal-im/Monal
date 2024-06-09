@@ -127,7 +127,7 @@ struct ContactPicker: View {
                 }
             }
             .listStyle(.inset)
-            .navigationBarTitle(NSLocalizedString("Contact Selection", comment: ""), displayMode: .inline)
+            .navigationBarTitle(Text("Contact Selection"), displayMode: .inline)
             .onDisappear {
                 returnedContacts.removeAll()
                 for contact in selectedContacts {

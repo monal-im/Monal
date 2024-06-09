@@ -13,6 +13,7 @@
 #import "DataLayer.h"
 #import "HelperTools.h"
 #import "xmpp.h"
+#import "XMPPMessage.h"
 #import "MLNotificationQueue.h"
 #import "MLNotificationManager.h"
 #import "MLOMEMO.h"
@@ -155,6 +156,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #else
     [self upgradeBoolUserSettingsIfUnset:@"useDnssecForAllConnections" toDefault:NO];
 #endif
+    
+    
+    NSTimeZone* timeZone = [NSTimeZone localTimeZone];
+    DDLogVerbose(@"Current timezone name: '%@'...", [timeZone name]);
+    if([[timeZone name] containsString:@"Europe"])
+        [self upgradeBoolUserSettingsIfUnset:@"useInlineSafari" toDefault:NO];
+    else
+        [self upgradeBoolUserSettingsIfUnset:@"useInlineSafari" toDefault:YES];
 }
 
 -(void) upgradeFloatUserSettingsToInteger:(NSString*) settingsName
@@ -862,8 +871,7 @@ $$
 
 -(void) handleSentMessage:(NSNotification*) notification
 {
-    NSDictionary* info = notification.userInfo;
-    NSString* messageId = [info objectForKey:kMessageId];
+    NSString* messageId = ((XMPPMessage*)notification.userInfo[@"message"]).id;
     DDLogInfo(@"message %@ sent, setting status accordingly", messageId);
     [[DataLayer sharedInstance] setMessageId:messageId sent:YES];
 }

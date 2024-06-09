@@ -88,6 +88,27 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
     }
 }
 
+func performMucAction(account: xmpp, mucJid: String, overlay: LoadingOverlayState, headlineView: Optional<some View>, descriptionView: Optional<some View>, action: @escaping ()->Void) -> Promise<monal_void_block_t?> {
+    showLoadingOverlay(overlay, headlineView:headlineView, descriptionView:descriptionView)
+    return Promise<monal_void_block_t?> { seal in
+        DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 1.0) {
+            account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
+                let success : Bool = data["success"] as! Bool;
+                if !success {
+                    seal.reject(data["errorMessage"] as? String ?? "Unknown error!")
+                } else {
+                    if let callback = data["callback"] {
+                        seal.fulfill(objcCast(callback) as monal_void_block_t)
+                    } else {
+                        seal.fulfill(nil)
+                    }
+                }
+            }, forMuc:mucJid)
+            action()
+        }
+    }
+}
+
 func mucAffiliationToString(_ affiliation: String?) -> String {
     if let affiliation = affiliation {
         if affiliation == "owner" {
@@ -107,6 +128,55 @@ func mucAffiliationToString(_ affiliation: String?) -> String {
         }
     }
     return NSLocalizedString("<unknown>", comment:"muc affiliation")
+}
+
+func mucAffiliationToInt(_ affiliation: String?) -> Int {
+    if let affiliation = affiliation {
+        if affiliation == "owner" {
+            return 1
+        } else if affiliation == "admin" {
+            return 2
+        } else if affiliation == "member" {
+            return 3
+        } else if affiliation == "none" {
+            return 4
+        } else if affiliation == "outcast" {
+            return 5
+        } else if affiliation == "profile" {
+            return 1000
+        } else if affiliation == "reinvite" {
+            return 100
+        }
+    }
+    return 0
+}
+
+struct CollapsedPickerStyle: ViewModifier {
+    let accessibilityLabel: Text
+    func body(content: Content) -> some View {
+        Menu {
+            content
+        } label: {
+            Button(action: { }) {
+                HStack {
+                    Spacer().frame(width:8)
+                    Image(systemName: "ellipsis")
+                        .rotationEffect(.degrees(90))
+                        .foregroundColor(.primary)
+                    Spacer().frame(width:8)
+                }
+                .contentShape(Rectangle())
+            }
+            .frame(width: 24, height: 20)
+            .accessibilityLabel(accessibilityLabel)
+        }
+    }
+    
+}
+extension View {
+    func collapsedPickerStyle(accessibilityLabel label: Text) -> some View {
+        self.modifier(CollapsedPickerStyle(accessibilityLabel:label))
+    }
 }
 
 struct TopRight<T: View>: ViewModifier {
@@ -290,7 +360,7 @@ struct ClearButton: ViewModifier {
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(Color(UIColor.tertiaryLabel))
-                        .accessibilityLabel("Clear text")
+                        .accessibilityLabel(Text("Clear text"))
                 }
                 .padding(.trailing, 8)
                 .accessibilitySortPriority(1)

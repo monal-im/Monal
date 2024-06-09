@@ -10,6 +10,7 @@
 @_exported import Foundation
 @_exported import CocoaLumberjackSwift
 @_exported import Logging
+@_exported import PromiseKit
 import CocoaLumberjackSwiftLogBackend
 import LibMonalRustSwiftBridge
 import Combine
@@ -27,6 +28,9 @@ let BGFETCH_DEFAULT_INTERVAL = HelperTools.getObjcDefinedValue(.BGFETCH_DEFAULT_
 
 public typealias monal_void_block_t = @convention(block) () -> Void;
 public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
+
+//see https://stackoverflow.com/a/40629365/3528174
+extension String: Error {}
 
 //see https://stackoverflow.com/a/40592109/3528174
 public func objcCast<T>(_ obj: Any) -> T {

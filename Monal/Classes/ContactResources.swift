@@ -144,7 +144,7 @@ struct ContactResources: View {
                 }
             }
         }
-        .navigationBarTitle("Devices of \(contact.contactDisplayName as String)", displayMode: .inline)
+        .navigationBarTitle(Text("Devices of \(contact.contactDisplayName as String)"), displayMode: .inline)
     }
 }
 

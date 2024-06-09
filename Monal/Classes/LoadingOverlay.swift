@@ -35,7 +35,7 @@ struct LoadingOverlay: ViewModifier {
                     state.description.font(.footnote)
                     ProgressView()
                 }
-                .padding(12)
+                .padding(20)
                 .frame(minWidth: 250, minHeight: 100)
                 .background(Color.secondary.colorInvert())
                 .cornerRadius(20)

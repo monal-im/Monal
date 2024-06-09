@@ -48,7 +48,7 @@
 
 @import AVFoundation;
 
-#define STATE_VERSION 16
+#define STATE_VERSION 17
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -197,7 +197,7 @@ NSString* const kStanza = @"stanza";
     //WARNING: pubsub node registrations should only be made *after* the first readState call
     [self readState];
     
-    //register devicelist and notification handler (MUSt be done *after* reading state
+    //register devicelist and notification handler (MUST be done *after* reading state)
     //[self readState] needs a valid self.omemo to load omemo state,
     //but [self.omemo activate] needs a valid pubsub node registration loaded by [self readState]
     //--> split "init" method into "init" and "activate" methods
@@ -716,7 +716,7 @@ NSString* const kStanza = @"stanza";
 
 -(BOOL) parseQueueFrozen
 {
-    return _parseQueue.suspended == YES;
+    return [_parseQueue isSuspended] == YES;
 }
 
 -(void) freezeParseQueue
@@ -729,15 +729,16 @@ NSString* const kStanza = @"stanza";
     //apparently setting _parseQueue.suspended = YES does return before the queue is actually suspended
     //--> busy wait for _parseQueue.suspended == YES
     [HelperTools busyWaitForOperationQueue:_parseQueue];
+    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
     
     //this has to be synchronous because we want to be sure no further stanzas are leaking from the parse queue
     //into the receive queue once we leave this method
     //--> wait for all blocks put into the receive queue by the parse queue right before it was frozen
     [self dispatchOnReceiveQueue: ^{
+        [HelperTools busyWaitForOperationQueue:self->_parseQueue];
         MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES (in receive queue)!");
         DDLogInfo(@"Parse queue is frozen now!");
     }];
-    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
 }
 
 -(void) unfreezeParseQueue
@@ -1684,7 +1685,7 @@ NSString* const kStanza = @"stanza";
                     {
                         XMPPMessage* messageNode = (XMPPMessage*)node;
                         if(messageNode.id)
-                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalSentMessageNotice object:self userInfo:@{kMessageId:messageNode.id}];
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalSentMessageNotice object:self userInfo:@{@"message":messageNode}];
                     }
                 }
             }
@@ -3544,14 +3545,16 @@ NSString* const kStanza = @"stanza";
             [values setValue:[NSDate date] forKey:@"stateSavedAt"];
             [values setValue:@(STATE_VERSION) forKey:@"VERSION"];
 
-            if(self.omemo != nil)
+            if(self.omemo != nil && self.omemo.state != nil)
                 [values setObject:self.omemo.state forKey:@"omemoState"];
+            
+            [values setObject:[NSNumber numberWithBool:self.hasSeenOmemoDeviceListAfterOwnDeviceid] forKey:@"hasSeenOmemoDeviceListAfterOwnDeviceid"];
             
             //save state dictionary
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
                 self.accountNo,
                 values[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3573,7 +3576,8 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsBookmarksCompat,
                 self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
-                self.omemo.state
+                self.omemo.state,
+                bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid)
             );
             DDLogVerbose(@"%@ --> realPersistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
@@ -3595,10 +3599,15 @@ NSString* const kStanza = @"stanza";
         if(dic)
         {
             //check state version
-            if([dic[@"VERSION"] intValue] != STATE_VERSION)
+            int oldVersion = [dic[@"VERSION"] intValue];
+            if(oldVersion != STATE_VERSION)
             {
                 DDLogWarn(@"Account state upgraded from %@ to %d, invalidating state...", dic[@"VERSION"], STATE_VERSION);
                 dic = [[self class] invalidateState:dic];
+                
+                //don't show deviceid alerts on state update (if we need to regenerate our own deviceid, MLOMEMO will reset this to NO anyways)
+                if(oldVersion <= 16)
+                    self.hasSeenOmemoDeviceListAfterOwnDeviceid = YES;
             }
             
             //collect smacks state
@@ -3783,8 +3792,14 @@ NSString* const kStanza = @"stanza";
             if([dic objectForKey:@"omemoState"] && self.omemo)
                 self.omemo.state = [dic objectForKey:@"omemoState"];
             
+            if([dic objectForKey:@"hasSeenOmemoDeviceListAfterOwnDeviceid"])
+            {
+                NSNumber* hasSeenOmemoDeviceListAfterOwnDeviceid = [dic objectForKey:@"hasSeenOmemoDeviceListAfterOwnDeviceid"];
+                self.hasSeenOmemoDeviceListAfterOwnDeviceid = hasSeenOmemoDeviceListAfterOwnDeviceid.boolValue;
+            }
+            
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3806,7 +3821,8 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsBookmarksCompat,
                 self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
-                self.omemo.state
+                self.omemo.state,
+                bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid)
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -3823,7 +3839,7 @@ NSString* const kStanza = @"stanza";
 
 +(NSMutableDictionary*) invalidateState:(NSDictionary*) dic
 {
-    NSArray* toKeep = @[@"lastHandledInboundStanza", @"lastHandledOutboundStanza", @"lastOutboundStanza", @"unAckedStanzas", @"loggedInOnce", @"lastInteractionDate", @"inCatchup"];
+    NSArray* toKeep = @[@"lastHandledInboundStanza", @"lastHandledOutboundStanza", @"lastOutboundStanza", @"unAckedStanzas", @"loggedInOnce", @"lastInteractionDate", @"inCatchup", @"hasSeenOmemoDeviceListAfterOwnDeviceid"];
     
     NSMutableDictionary* newState = [NSMutableDictionary new];
     if(dic)

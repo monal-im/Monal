@@ -70,7 +70,7 @@ struct BackgroundSettings: View {
                                         Image(systemName: "xmark.circle.fill")
                                             .resizable()
                                             .frame(width: 32.0, height: 32.0)
-                                            .accessibilityLabel("Remove Background Image")
+                                            .accessibilityLabel(Text("Remove Background Image"))
                                             .applyClosure { view in
                                                 if #available(iOS 15, *) {
                                                     view
@@ -89,7 +89,7 @@ struct BackgroundSettings: View {
                                     .frame(maxWidth: .infinity, alignment: .center)
                             }
                         }
-                        .accessibilityLabel("Change Background Image")
+                        .accessibilityLabel(Text("Change Background Image"))
                         .sheet(isPresented:$showingImagePicker) {
                             ImagePicker(image:$inputImage)
                         }

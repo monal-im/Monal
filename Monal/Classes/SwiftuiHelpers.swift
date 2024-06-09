@@ -360,7 +360,7 @@ struct ClearButton: ViewModifier {
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(Color(UIColor.tertiaryLabel))
-                        .accessibilityLabel("Clear text")
+                        .accessibilityLabel(Text("Clear text"))
                 }
                 .padding(.trailing, 8)
                 .accessibilitySortPriority(1)

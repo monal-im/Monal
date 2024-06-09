@@ -92,7 +92,7 @@ struct ContactDetails: View {
                         .applyClosure {view in
                             if contact.isGroup {
                                 if ownAffiliation == "owner" {
-                                    view.accessibilityLabel((contact.mucType == "group") ? "Change Group Avatar" : "Change Channel Avatar")
+                                    view.accessibilityLabel((contact.mucType == "group") ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
                                         .onTapGesture {
                                             showImagePicker()
                                         }
@@ -104,7 +104,7 @@ struct ContactDetails: View {
                                                     Image(systemName: "xmark.circle.fill")
                                                         .resizable()
                                                         .frame(width: 24.0, height: 24.0)
-                                                        .accessibilityLabel((contact.mucType == "group") ? "Remove Group Avatar" : "Remove Channel Avatar")
+                                                        .accessibilityLabel((contact.mucType == "group") ? Text("Remove Group Avatar") : Text("Remove Channel Avatar"))
                                                         .applyClosure { view in
                                                             if #available(iOS 15, *) {
                                                                 view
@@ -124,7 +124,7 @@ struct ContactDetails: View {
                                                     Image(systemName: "pencil.circle.fill")
                                                         .resizable()
                                                         .frame(width: 24.0, height: 24.0)
-                                                        .accessibilityLabel((contact.mucType == "group") ? "Change Group Avatar" : "Change Channel Avatar")
+                                                        .accessibilityLabel((contact.mucType == "group") ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
 //                                                         .applyClosure { view in
 //                                                             if #available(iOS 15, *) {
 //                                                                 view
@@ -140,10 +140,10 @@ struct ContactDetails: View {
                                             }
                                         }
                                 } else {
-                                    view.accessibilityLabel((contact.mucType == "group") ? "Group Avatar" : "Channel Avatar")
+                                    view.accessibilityLabel((contact.mucType == "group") ? Text("Group Avatar") : Text("Channel Avatar"))
                                 }
                             } else {
-                                view.accessibilityLabel("Avatar")
+                                view.accessibilityLabel(Text("Avatar"))
                             }
                         }
                         .frame(width: 150, height: 150, alignment: .center)
@@ -353,13 +353,13 @@ struct ContactDetails: View {
                     TextField(label, text: $contact.fullNameView, onEditingChanged: {
                         isEditingNickname = $0
                     })
-                    .accessibilityLabel(contact.obj.mucType == "group" ? "Group name" : "Channel name")
+                    .accessibilityLabel(contact.obj.mucType == "group" ? Text("Group name") : Text("Channel name"))
                     .addClearButton(isEditing: isEditingNickname, text: $contact.fullNameView)
                 } else if !contact.isGroup && !contact.isSelfChat {
                     TextField(NSLocalizedString("Rename Contact", comment: "placeholder text in contact details"), text: $contact.nickNameView, onEditingChanged: {
                         isEditingNickname = $0
                     })
-                    .accessibilityLabel("Nickname")
+                    .accessibilityLabel(Text("Nickname"))
                     .addClearButton(isEditing: isEditingNickname, text: $contact.nickNameView)
                 }
                 

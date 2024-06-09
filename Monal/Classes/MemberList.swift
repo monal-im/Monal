@@ -277,9 +277,6 @@ struct MemberList: View {
                                     .fixedSize()
                                     .offset(x:8, y:0)
                             }
-                            .deleteDisabled(
-                                !ownUserHasAffiliationToRemove(contact: contact)
-                            )
                         }
                         .applyClosure { view in
                             if !(online[contact] ?? false) {
@@ -287,7 +284,6 @@ struct MemberList: View {
                             } else {
                                 view
                             }
-                            .deleteDisabled(true)
                         }
                         .deleteDisabled(!ownUserHasAffiliationToRemove(contact: contact))
                     }

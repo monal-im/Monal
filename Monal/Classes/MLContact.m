@@ -665,7 +665,7 @@ static NSMutableDictionary* _singletonCache;
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
     if(account == nil)
         return NO;
-    if(!account.connectionProperties.supportsBlocking)
+    if(![account.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
         return NO;
     [[MLXMPPManager sharedInstance] block:block contact:self];
     return YES;

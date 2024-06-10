@@ -534,6 +534,12 @@ void swizzle(Class c, SEL orig, SEL new)
     return [SwiftHelpers _renderUIImageFromSVGURL:url];
 }
 
+//this wrapper is needed, because MLChatImageCell can't import our monalxmpp-Swift bridging header, but importing HelperTools is okay
++(UIImage* _Nullable) renderUIImageFromSVGData:(NSData* _Nullable) data    API_AVAILABLE(ios(16.0), macosx(13.0))  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
+{
+    return [SwiftHelpers _renderUIImageFromSVGData:data];
+}
+
 +(void) busyWaitForOperationQueue:(NSOperationQueue*) queue
 {
     //apparently setting someQueue.suspended = YES does return before the queue is actually suspended

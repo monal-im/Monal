@@ -93,6 +93,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSString* _Nullable) xml2candidate:(MLXMLNode*) xml withInitiator:(BOOL) initiator;
 
 +(UIImage* _Nullable) renderUIImageFromSVGURL:(NSURL* _Nullable) url    API_AVAILABLE(ios(16.0), macosx(13.0));  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
++(UIImage* _Nullable) renderUIImageFromSVGData:(NSData* _Nullable) data    API_AVAILABLE(ios(16.0), macosx(13.0));  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
 +(void) busyWaitForOperationQueue:(NSOperationQueue*) queue;
 +(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier;
 +(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier;

@@ -287,7 +287,13 @@ public class SwiftHelpers: NSObject {
         }
         var image: UIImage? = nil
         HelperTools.dispatchAsync(false, reentrantOn: DispatchQueue.main) {
-            image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
+            if HelperTools.isAppExtension() {
+                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
+                DDLogDebug("We are in appex: mirroring SVG image on Y axis...");
+                image = HelperTools.mirrorImage(onXAxis:image)
+            } else {
+                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 1280, height: 960)).uiImage
+            }
         }
         return image
     }
@@ -305,7 +311,14 @@ public class SwiftHelpers: NSObject {
         }
         var image: UIImage? = nil
         HelperTools.dispatchAsync(false, reentrantOn: DispatchQueue.main) {
-            image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
+            //the uiimage is somehow mirrored at the X-axis when received by appex --> mirror it back
+            if HelperTools.isAppExtension() {
+                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
+                DDLogDebug("We are in appex: mirroring SVG image on Y axis...");
+                image = HelperTools.mirrorImage(onXAxis:image)
+            } else {
+                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 1280, height: 960)).uiImage
+            }
         }
         return image
     }

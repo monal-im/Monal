@@ -826,12 +826,6 @@
         {
             DDLogVerbose(@"Preparing for notification attachment(%@): converting downloaded file from svg at '%@' to png at '%@'...", typeHint, info[@"cacheFile"], pngAttachment);
             image = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]];
-            //the uiimage is somehow mirrored at the X-axis when received by appex --> mirror it back
-            if([HelperTools isAppExtension])
-            {
-                DDLogDebug(@"We are in appex: mirroring UNNotificationAttachment image on Y axis...");
-                image = [HelperTools mirrorImageOnXAxis:image];
-            }
         }
         if(image != nil)
         {

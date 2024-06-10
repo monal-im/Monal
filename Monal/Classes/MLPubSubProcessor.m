@@ -145,15 +145,7 @@ $$class_handler(handleAvatarFetchResult, $$ID(xmpp*, account), $$ID(NSString*, j
         if([[metadata findFirst:@"/@type"] hasPrefix:@"image/svg"])
         {
             if(@available(iOS 16.0, macCatalyst 16.0, *))
-            {
                 image = [HelperTools renderUIImageFromSVGData:avatarData];
-                //the uiimage is somehow mirrored at the X-axis when received by appex --> mirror it back
-                if([HelperTools isAppExtension])
-                {
-                    DDLogDebug(@"We are in appex: mirroring UNNotificationAttachment image on Y axis...");
-                    image = [HelperTools mirrorImageOnXAxis:image];
-                }
-            }
         }
         else
             image = [UIImage imageWithData:avatarData];

@@ -528,6 +528,12 @@ void swizzle(Class c, SEL orig, SEL new)
     ];
 }
 
+//this wrapper is needed, because MLChatImageCell can't import our monalxmpp-Swift bridging header, but importing HelperTools is okay
++(UIImage* _Nullable) renderUIImageFromSVGURL:(NSURL* _Nullable) url    API_AVAILABLE(ios(16.0), macosx(13.0))  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
+{
+    return [SwiftHelpers _renderUIImageFromSVGURL:url];
+}
+
 +(void) busyWaitForOperationQueue:(NSOperationQueue*) queue
 {
     //apparently setting someQueue.suspended = YES does return before the queue is actually suspended
@@ -1151,7 +1157,90 @@ void swizzle(Class c, SEL orig, SEL new)
 }
 #pragma clang diagnostic pop
 
-+(UIImage*) imageWithNotificationBadgeForImage:(UIImage*) image {
+//see https://gist.github.com/giaesp/7704753
++(UIImage* _Nullable) rotateImage:(UIImage* _Nullable) image byRadians:(CGFloat) rotation
+{
+    if(image == nil)
+        return nil;
+    
+    //Calculate Destination Size
+    CGAffineTransform t = CGAffineTransformMakeRotation(rotation);
+    CGRect sizeRect = (CGRect) {.size = image.size};
+    CGRect destRect = CGRectApplyAffineTransform(sizeRect, t);
+    CGSize destinationSize = destRect.size;
+    
+    //Draw image
+    UIGraphicsBeginImageContext(destinationSize);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(context, destinationSize.width / 2.0f, destinationSize.height / 2.0f);
+    CGContextRotateCTM(context, rotation);
+    [image drawInRect:CGRectMake(-image.size.width / 2.0f, -image.size.height / 2.0f, image.size.width, image.size.height)];
+    
+    //Save image (and save space)
+    image = nil;
+    image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return image;
+}
+
++(UIImage* _Nullable) mirrorImageOnXAxis:(UIImage* _Nullable) image
+{
+    if(image == nil)
+        return nil;
+    
+    //Create a new image context
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, image.scale);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    //Move the origin to the middle of the image to apply the transformation
+    CGContextTranslateCTM(context, image.size.width / 2, image.size.height / 2);
+    
+    //Apply the x-axis mirroring transform
+    CGContextScaleCTM(context, 1.0, -1.0);
+    
+    //Move the origin back to the bottom left corner
+    CGContextTranslateCTM(context, -image.size.width / 2, -image.size.height / 2);
+    
+    //Draw the original image into the transformed context
+    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    
+    //Save image (and save space)
+    image = nil;
+    image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return image;
+}
+
++(UIImage* _Nullable) mirrorImageOnYAxis:(UIImage* _Nullable) image
+{
+    if(image == nil)
+        return nil;
+    
+    //Create a new image context
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, image.scale);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    //Move the origin to the middle of the image to apply the transformation
+    CGContextTranslateCTM(context, image.size.width / 2, image.size.height / 2);
+    
+    //Apply the y-axis mirroring transform
+    CGContextScaleCTM(context, -1.0, 1.0);
+    
+    //Move the origin back to the bottom left corner
+    CGContextTranslateCTM(context, -image.size.width / 2, -image.size.height / 2);
+    
+    //Draw the original image into the transformed context
+    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    
+    //Save image (and save space)
+    image = nil;
+    image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return image;
+}
+
++(UIImage*) imageWithNotificationBadgeForImage:(UIImage*) image
+{
     UIImage* finalImage;
     UIImage* badge = [[UIImage systemImageNamed:@"circle.fill"] imageWithTintColor:UIColor.redColor];
 
@@ -1168,7 +1257,8 @@ void swizzle(Class c, SEL orig, SEL new)
     return finalImage;
 }
 
-+(UIImageView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler {
++(UIImageView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler
+{
     UIImageView* result;
     if(hasNotification)
         result = [[UIImageView alloc] initWithImage:[self imageWithNotificationBadgeForImage:image]];

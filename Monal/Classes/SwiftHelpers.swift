@@ -14,6 +14,9 @@
 import CocoaLumberjackSwiftLogBackend
 import LibMonalRustSwiftBridge
 import Combine
+//needed to render SVG to UIImage
+import SwiftUI
+import SVGView
 
 //import some defines in MLConstants.h into swift
 let kAppGroup = HelperTools.getObjcDefinedValue(.kAppGroup)
@@ -269,6 +272,24 @@ public class SwiftHelpers: NSObject {
         setRustPanicHandler({(text: String, backtrace: String) in
             HelperTools.handleRustPanic(withText: text, andBacktrace:backtrace)
         });
+    }
+    
+    //this is wrapped by HelperTools.renderUIImage(fromSVGURL) / [HelperTools renderUIImageFromSVGURL:]
+    //because MLChatImageCell wasn't able to import the monalxmpp-Swift bridging header somehow (but importing HelperTools works just fine)
+    @available(iOS 16.0, macCatalyst 16.0, *)
+    @objc(_renderUIImageFromSVGURL:)
+    public static func _renderUIImageFromSVG(url: URL?) -> UIImage? {
+        guard let url = url else {
+            return nil
+        }
+        guard let svgView = SVGParser.parse(contentsOf: url)?.toSwiftUI() else {
+            return nil
+        }
+        var image: UIImage? = nil
+        HelperTools.dispatchAsync(false, reentrantOn: DispatchQueue.main) {
+            image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
+        }
+        return image
     }
 }
 

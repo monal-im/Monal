@@ -92,6 +92,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(MLXMLNode* _Nullable) candidate2xml:(NSString*) candidate withMid:(NSString*) mid pwd:(NSString* _Nullable) pwd ufrag:(NSString* _Nullable) ufrag andInitiator:(BOOL) initiator;
 +(NSString* _Nullable) xml2candidate:(MLXMLNode*) xml withInitiator:(BOOL) initiator;
 
++(UIImage* _Nullable) renderUIImageFromSVGURL:(NSURL* _Nullable) url    API_AVAILABLE(ios(16.0), macosx(13.0));  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
 +(void) busyWaitForOperationQueue:(NSOperationQueue*) queue;
 +(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier;
 +(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier;
@@ -107,8 +108,11 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request;
 +(void) addUploadItemPreviewForItem:(NSURL* _Nullable) url provider:(NSItemProvider* _Nullable) provider andPayload:(NSMutableDictionary*) payload withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion;
 +(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void (^)(NSMutableDictionary* _Nullable)) completion;
-+(UIView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler;
++(UIImage* _Nullable) rotateImage:(UIImage* _Nullable) image byRadians:(CGFloat) rotation;
++(UIImage* _Nullable) mirrorImageOnXAxis:(UIImage* _Nullable) image;
++(UIImage* _Nullable) mirrorImageOnYAxis:(UIImage* _Nullable) image;
 +(UIImage*) imageWithNotificationBadgeForImage:(UIImage*) image;
++(UIView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler;
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length;
 +(double) report_memory;
 +(UIColor*) generateColorFromJid:(NSString*) jid;

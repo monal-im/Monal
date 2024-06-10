@@ -198,23 +198,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         callUiHandlerFor = msg.toUser;
     
     if(callUiHandlerFor != nil)
-    {
-        monal_id_block_t uiHandler = [self getUIHandlerForMuc:callUiHandlerFor];
-        if(uiHandler)
-        {
-            //remove handler (it will only be called once)
-            [self removeUIHandlerForMuc:callUiHandlerFor];
-            
-            DDLogInfo(@"Calling UI handler for muc %@...", callUiHandlerFor);
-            dispatch_async(dispatch_get_main_queue(), ^{
-                uiHandler(@{
-                    @"success": @YES,
-                    @"muc": callUiHandlerFor,
-                    @"account": self->_account
-                });
-            });
-        }
-    }
+        [self callSuccessUIHandlerForMuc:callUiHandlerFor];
 }
 
 -(BOOL) isCreating:(NSString*) room
@@ -638,21 +622,7 @@ $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, acc
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
     }));
     
-    monal_id_block_t uiHandler = [self getUIHandlerForMuc:iqNode.fromUser];
-    if(uiHandler)
-    {
-        //remove handler (it will only be called once)
-        [self removeUIHandlerForMuc:iqNode.fromUser];
-        
-        DDLogInfo(@"Calling UI handler for muc %@...", iqNode.fromUser);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            uiHandler(@{
-                @"success": @YES,
-                @"muc": iqNode.fromUser,
-                @"account": self->_account
-            });
-        });
-    }
+    [self callSuccessUIHandlerForMuc:iqNode.fromUser];
     
     if(joinOnSuccess)
     {
@@ -915,21 +885,7 @@ $$
                     [_account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
                 }
                 
-                monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
-                if(uiHandler)
-                {
-                    //remove handler (it will only be called once)
-                    [self removeUIHandlerForMuc:node.fromUser];
-                    
-                    DDLogInfo(@"Calling UI handler for muc %@...", node.fromUser);
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        uiHandler(@{
-                            @"success": @YES,
-                            @"muc": node.fromUser,
-                            @"account": self->_account
-                        });
-                    });
-                }
+                [self callSuccessUIHandlerForMuc:node.fromUser];
                 
                 //MAYBE TODO: send out notification indicating we joined that room
                 
@@ -1110,24 +1066,12 @@ $$instance_handler(handleRoomDestroyResult, account.mucProcessor, $$ID(xmpp*, ac
     }
     
     DDLogInfo(@"Successfully destroyed room '%@' on account %@", room, account);
-    monal_id_block_t uiHandler = [self getUIHandlerForMuc:room];
-    if(uiHandler)
+    if([self getUIHandlerForMuc:room] != nil)
     {
-        //remove handler (it will only be called once)
-        [self removeUIHandlerForMuc:room];
-        
-        DDLogInfo(@"Calling UI handler for muc %@...", room);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            uiHandler(@{
-                @"success": @YES,
-                @"muc": room,
-                @"account": self->_account,
-                @"callback": ^{
-                    //don't even keep our bookmark in this case
-                    [self deleteMuc:room withBookmarksUpdate:YES keepBuddylistEntry:NO];
-                },
-            });
-        });
+        [self callSuccessUIHandlerForMuc:room withCallback:^{
+            //don't even keep our bookmark in this case
+            [self deleteMuc:room withBookmarksUpdate:YES keepBuddylistEntry:NO];
+        }];
     }
     else
     {
@@ -1328,21 +1272,7 @@ $$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmp
         return;
     }
     DDLogInfo(@"Successfully changed affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
-    monal_id_block_t uiHandler = [self getUIHandlerForMuc:iqNode.fromUser];
-    if(uiHandler)
-    {
-        //remove handler (it will only be called once)
-        [self removeUIHandlerForMuc:iqNode.fromUser];
-        
-        DDLogInfo(@"Calling UI handler for muc %@...", iqNode.fromUser);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            uiHandler(@{
-                @"success": @YES,
-                @"muc": iqNode.fromUser,
-                @"account": self->_account
-            });
-        });
-    }
+    [self callSuccessUIHandlerForMuc:iqNode.fromUser];
 $$
 
 -(void) changeNameOfMuc:(NSString*) room to:(NSString*) name
@@ -1393,21 +1323,7 @@ $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, 
         return;
     }
     DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);
-    monal_id_block_t uiHandler = [self getUIHandlerForMuc:iqNode.fromUser];
-    if(uiHandler)
-    {
-        //remove handler (it will only be called once)
-        [self removeUIHandlerForMuc:iqNode.fromUser];
-        
-        DDLogInfo(@"Calling UI handler for muc %@...", iqNode.fromUser);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            uiHandler(@{
-                @"success": @YES,
-                @"muc": iqNode.fromUser,
-                @"account": self->_account
-            });
-        });
-    }
+    [self callSuccessUIHandlerForMuc:iqNode.fromUser];
 $$
 
 $$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid))
@@ -1773,6 +1689,38 @@ $$
     //otherwise call the general error handler
     else
         [HelperTools postError:description withNode:node andAccount:_account andIsSevere:isSevere];
+}
+
+-(void) callSuccessUIHandlerForMuc:(NSString*) room withCallback:(monal_void_block_t) callback
+{
+    monal_id_block_t uiHandler = [self getUIHandlerForMuc:room];
+    if(uiHandler)
+    {
+        //remove handler (it will only be called once)
+        [self removeUIHandlerForMuc:room];
+        
+        DDLogInfo(@"Calling UI handler for muc %@...", room);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(callback != nil)
+                uiHandler(@{
+                    @"success": @YES,
+                    @"muc": room,
+                    @"account": self->_account,
+                    @"callback": callback,
+                });
+            else
+                uiHandler(@{
+                    @"success": @YES,
+                    @"muc": room,
+                    @"account": self->_account,
+                });
+        });
+    }
+}
+
+-(void) callSuccessUIHandlerForMuc:(NSString*) room
+{
+    
 }
 
 -(void) updateBookmarks

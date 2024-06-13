@@ -87,13 +87,14 @@
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    return self.xmppAccount.connectionProperties.supportsBlocking;
+    return [self.xmppAccount.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"];
 }
 
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        if(!self.xmppAccount.connectionProperties.supportsBlocking) return;
+        if(![self.xmppAccount.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
+            return;
         // unblock jid
         [[MLXMPPManager sharedInstance] block:NO fullJid:self.blockedJids[indexPath.row][@"fullBlockedJid"] onAccount:self.xmppAccount.accountNo];
 
@@ -103,7 +104,7 @@
 
 
 - (IBAction)addBlockButton:(id)sender {
-    if(!self.xmppAccount.connectionProperties.supportsBlocking)
+    if(![self.xmppAccount.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
     {
         // show blocking is not supported alert
         UIAlertController* blockUnsuported = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Blocking is not supported by the server", @"") message:nil preferredStyle:UIAlertControllerStyleAlert];

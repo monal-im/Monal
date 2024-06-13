@@ -48,7 +48,7 @@
 
 @import AVFoundation;
 
-#define STATE_VERSION 17
+#define STATE_VERSION 18
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -1063,7 +1063,7 @@ NSString* const kStanza = @"stanza";
             if(self.accountState>=kStateBound)
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //disable push for this node
-                    if(self.connectionProperties.supportsPush)
+                    if([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
                         [self disablePush];
                     [self sendLastAck];
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the xmpp stream directly afterwards
@@ -2926,15 +2926,11 @@ NSString* const kStanza = @"stanza";
     
     MLAssert(!([[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo] && [[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo]), @"SASL2 pinned AND plain auth enabled, that should never happen!", @{@"account": self});
     
-    if([parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
-    {
-        DDLogInfo(@"Server supports Pre-Authenticated IBR");
-        self.connectionProperties.supportsPreauthIbr = YES;
-    }
-    
+    if(![parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
+        DDLogWarn(@"Server NOT supporting Pre-Authenticated IBR");
     if(_registration)
     {
-        if(_registrationToken && self.connectionProperties.supportsPreauthIbr)
+        if(_registrationToken && [parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
         {
             DDLogInfo(@"Registration: Calling submitRegToken");
             [self submitRegToken:_registrationToken];
@@ -3111,26 +3107,15 @@ NSString* const kStanza = @"stanza";
 
 -(void) handleFeaturesAfterAuth:(MLXMLNode*) parsedStanza
 {
-    if([parsedStanza check:@"{urn:xmpp:csi:0}csi"])
-    {
-        DDLogInfo(@"Server supports CSI");
-        self.connectionProperties.supportsClientState = YES;
-    }
+    self.connectionProperties.serverFeatures = parsedStanza;
+    
+    //this is set to NO if we fail to enable it
     if([parsedStanza check:@"{urn:xmpp:sm:3}sm"])
     {
         DDLogInfo(@"Server supports SM3");
         self.connectionProperties.supportsSM3 = YES;
     }
-    if([parsedStanza check:@"{urn:xmpp:features:rosterver}ver"])
-    {
-        DDLogInfo(@"Server supports roster versioning");
-        self.connectionProperties.supportsRosterVersion = YES;
-    }
-    if([parsedStanza check:@"{urn:xmpp:features:pre-approval}sub"])
-    {
-        DDLogInfo(@"Server supports roster pre approval");
-        self.connectionProperties.supportsRosterPreApproval = YES;
-    }
+    
     if([parsedStanza check:@"{http://jabber.org/protocol/caps}c@node"])
     {
         DDLogInfo(@"Server identity: %@", [parsedStanza findFirst:@"{http://jabber.org/protocol/caps}c@node"]);
@@ -3493,7 +3478,8 @@ NSString* const kStanza = @"stanza";
             }
 
             [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
-            [values setValue:[self.connectionProperties.accountFeatures copy] forKey:@"accountFeatures"];
+            [values setValue:[self.connectionProperties.serverDiscoFeatures copy] forKey:@"serverDiscoFeatures"];
+            [values setValue:[self.connectionProperties.accountDiscoFeatures copy] forKey:@"accountDiscoFeatures"];
             
             if(self.connectionProperties.uploadServer)
                 [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
@@ -3508,18 +3494,11 @@ NSString* const kStanza = @"stanza";
             [values setObject:[NSNumber numberWithBool:self->_loggedInOnce] forKey:@"loggedInOnce"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBookmarksCompat] forKey:@"supportsBookmarksCompat"];
-            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
-            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
-            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSubMax] forKey:@"supportsPubSubMax"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsModernPubSub] forKey:@"supportsModernPubSub"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
-            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
-            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsExternalServiceDiscovery] forKey:@"supportsExternalServiceDiscovery"];
-            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
-            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
             [values setObject:[self->_inCatchup copy] forKey:@"inCatchup"];
             [values setObject:[self->_mdsData copy] forKey:@"mdsData"];
@@ -3554,7 +3533,7 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
                 self.accountNo,
                 values[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3565,14 +3544,11 @@ NSString* const kStanza = @"stanza";
                 self.streamID,
                 self->_lastInteractionDate,
                 persistentIqHandlerDescriptions,
-                self.connectionProperties.supportsPush,
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
                 self.connectionProperties.supportsModernPubSub,
                 self.connectionProperties.supportsPubSubMax,
-                self.connectionProperties.supportsBlocking,
-                self.connectionProperties.supportsClientState,
                 self.connectionProperties.supportsBookmarksCompat,
                 self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
@@ -3657,7 +3633,8 @@ NSString* const kStanza = @"stanza";
             }
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
-            self.connectionProperties.accountFeatures = [dic objectForKey:@"accountFeatures"];
+            self.connectionProperties.serverDiscoFeatures = [dic objectForKey:@"serverDiscoFeatures"];
+            self.connectionProperties.accountDiscoFeatures = [dic objectForKey:@"accountDiscoFeatures"];
             
             self.connectionProperties.discoveredServices = [[dic objectForKey:@"discoveredServices"] mutableCopy];
             self.connectionProperties.discoveredStunTurnServers = [[dic objectForKey:@"discoveredStunTurnServers"] mutableCopy];
@@ -3685,28 +3662,10 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsBookmarksCompat = compatNumber.boolValue;
             }
             
-            if([dic objectForKey:@"supportsPush"])
-            {
-                NSNumber* pushNumber = [dic objectForKey:@"supportsPush"];
-                self.connectionProperties.supportsPush = pushNumber.boolValue;
-            }
-            
             if([dic objectForKey:@"pushEnabled"])
             {
                 NSNumber* pushEnabled = [dic objectForKey:@"pushEnabled"];
                 self.connectionProperties.pushEnabled = pushEnabled.boolValue;
-            }
-            
-            if([dic objectForKey:@"supportsClientState"])
-            {
-                NSNumber* csiNumber = [dic objectForKey:@"supportsClientState"];
-                self.connectionProperties.supportsClientState = csiNumber.boolValue;
-            }
-            
-            if([dic objectForKey:@"supportsMAM"])
-            {
-                NSNumber* mamNumber = [dic objectForKey:@"supportsMAM"];
-                self.connectionProperties.supportsMam2 = mamNumber.boolValue;
             }
             
             if([dic objectForKey:@"supportsPubSub"])
@@ -3733,32 +3692,8 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsHTTPUpload = supportsHTTPUpload.boolValue;
             }
             
-            if([dic objectForKey:@"supportsPing"])
-            {
-                NSNumber* supportsPing = [dic objectForKey:@"supportsPing"];
-                self.connectionProperties.supportsPing = supportsPing.boolValue;
-            }
-            
-            if([dic objectForKey:@"supportsExternalServiceDiscovery"])
-            {
-                NSNumber* supportsExternalServiceDiscovery = [dic objectForKey:@"supportsExternalServiceDiscovery"];
-                self.connectionProperties.supportsExternalServiceDiscovery = supportsExternalServiceDiscovery.boolValue;
-            }
-
             if([dic objectForKey:@"lastInteractionDate"])
                 _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
-            
-            if([dic objectForKey:@"supportsRosterPreApproval"])
-            {
-                NSNumber* supportsRosterPreApproval = [dic objectForKey:@"supportsRosterPreApproval"];
-                self.connectionProperties.supportsRosterPreApproval = supportsRosterPreApproval.boolValue;
-            }
-            
-            if([dic objectForKey:@"supportsBlocking"])
-            {
-                NSNumber* supportsBlocking = [dic objectForKey:@"supportsBlocking"];
-                self.connectionProperties.supportsBlocking = supportsBlocking.boolValue;
-            }
             
             if([dic objectForKey:@"accountDiscoDone"])
             {
@@ -3799,7 +3734,7 @@ NSString* const kStanza = @"stanza";
             }
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3810,14 +3745,11 @@ NSString* const kStanza = @"stanza";
                 self.streamID,
                 self->_lastInteractionDate,
                 persistentIqHandlerDescriptions,
-                self.connectionProperties.supportsPush,
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
                 self.connectionProperties.supportsModernPubSub,
                 self.connectionProperties.supportsPubSubMax,
-                self.connectionProperties.supportsBlocking,
-                self.connectionProperties.supportsClientState,
                 self.connectionProperties.supportsBookmarksCompat,
                 self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
@@ -3940,8 +3872,8 @@ NSString* const kStanza = @"stanza";
     //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
     //    and other state values are stale now
     //(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
-    self.connectionProperties.serverFeatures = [NSSet new];
-    self.connectionProperties.accountFeatures = [NSSet new];
+    self.connectionProperties.serverDiscoFeatures = [NSSet new];
+    self.connectionProperties.accountDiscoFeatures = [NSSet new];
     self.connectionProperties.discoveredServices = [NSMutableArray new];
     self.connectionProperties.discoveredStunTurnServers = [NSMutableArray new];
     self.connectionProperties.discoveredAdhocCommands = [NSMutableDictionary new];
@@ -3949,23 +3881,14 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.conferenceServers = [NSMutableDictionary new];
     self.connectionProperties.supportsHTTPUpload = NO;
     self.connectionProperties.uploadServer = nil;
-    //self.connectionProperties.supportsClientState = NO;           //already set by stream feature parsing
-    self.connectionProperties.supportsMam2 = NO;
     //self.connectionProperties.supportsSM3 = NO;                   //already set by stream feature parsing
-    self.connectionProperties.supportsPush = NO;
     self.connectionProperties.pushEnabled = NO;
     self.connectionProperties.supportsBookmarksCompat = NO;
     self.connectionProperties.usingCarbons2 = NO;
-    //self.connectionProperties.supportsRosterVersion = NO;         //already set by stream feature parsing
-    //self.connectionProperties.supportsRosterPreApproval = NO;     //already set by stream feature parsing
     //self.connectionProperties.serverIdentity = @"";               //already set by stream feature parsing
-    self.connectionProperties.supportsBlocking = NO;
-    self.connectionProperties.supportsPing = NO;
-    self.connectionProperties.supportsExternalServiceDiscovery = NO;
     self.connectionProperties.supportsPubSub = NO;
     self.connectionProperties.supportsPubSubMax = NO;
     self.connectionProperties.supportsModernPubSub = NO;
-    //self.connectionProperties.supportsPreauthIbr = NO;            //already set by stream feature parsing
     self.connectionProperties.accountDiscoDone = NO;
     
     //clear list of running mam queries
@@ -4072,7 +3995,7 @@ NSString* const kStanza = @"stanza";
 {
     XMPPIQ* roster = [[XMPPIQ alloc] initWithType:kiqGetType];
     NSString* rosterVer;
-    if(self.connectionProperties.supportsRosterVersion)
+    if([self.connectionProperties.serverFeatures check:@"{urn:xmpp:features:rosterver}ver"])
         rosterVer = [[DataLayer sharedInstance] getRosterVersionForAccount:self.accountNo];
     [roster setRosterRequest:rosterVer];
     [self sendIq:roster withHandler:$newHandler(MLIQProcessor, handleRoster)];
@@ -4108,9 +4031,6 @@ NSString* const kStanza = @"stanza";
     //(and this is what triggers mam catchup)
     //--> no holes in our history can be caused by these offline messages in conjunction with mam catchup,
     //    however all offline messages will be received twice (as offline message AND via mam catchup)
-    
-    //query external services to learn stun/turn servers
-    [self queryExternalServicesOn:self.connectionProperties.identity.domain];
     
     //send own csi state (this must be done *after* presences to not delay/filter incoming presence flood needed to prime our database
     [self sendCurrentCSIState];
@@ -4150,8 +4070,11 @@ NSString* const kStanza = @"stanza";
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
 {
-    if(!self.connectionProperties.supportsBlocking)
+    if(![self.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
+    {
+        DDLogWarn(@"Server does not support blocking...");
         return;
+    }
     
     XMPPIQ* iqBlocked = [[XMPPIQ alloc] initWithType:kiqSetType];
     
@@ -4161,8 +4084,11 @@ NSString* const kStanza = @"stanza";
 
 -(void) fetchBlocklist
 {
-    if(!self.connectionProperties.supportsBlocking) 
+    if(![self.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
+    {
+        DDLogWarn(@"Server does not support blocking...");
         return;
+    }
     
     XMPPIQ* iqBlockList = [[XMPPIQ alloc] initWithType:kiqGetType];
     
@@ -4298,9 +4224,9 @@ NSString* const kStanza = @"stanza";
 {
     [self dispatchOnReceiveQueue: ^{
         //don't send anything before a resource is bound
-        if(self.accountState<kStateBound || !self.connectionProperties.supportsClientState)
+        if(self.accountState<kStateBound || ![self.connectionProperties.serverFeatures check:@"{urn:xmpp:csi:0}csi"])
         {
-            DDLogVerbose(@"NOT sending csi state, because we are not bound yet");
+            DDLogVerbose(@"NOT sending csi state, because we are not bound yet (or csi is not supported)");
             return;
         }
         
@@ -4319,7 +4245,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) setMAMPrefs:(NSString*) preference
 {
-    if(!self.connectionProperties.supportsMam2)
+    if(![self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:mam:2"])
         return;
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query updateMamArchivePrefDefault:preference];
@@ -5075,7 +5001,7 @@ NSString* const kStanza = @"stanza";
     NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
     if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateBound)
     {
-        DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, bool2str(self.connectionProperties.supportsPush));
+        DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, bool2str([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"]));
         return;
     }
     if([MLXMPPManager sharedInstance].hasAPNSToken)
@@ -5105,7 +5031,7 @@ NSString* const kStanza = @"stanza";
     }
     else // [MLXMPPManager sharedInstance].hasAPNSToken == NO
     {
-        if(self.connectionProperties.supportsPush)
+        if([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
         {
             //disable push for this node
             [self disablePush];
@@ -5123,7 +5049,7 @@ NSString* const kStanza = @"stanza";
     {
         return;
     }
-    DDLogInfo(@"DISABLING push token %@ on server %@ (accountState: %ld, supportsPush: %@)", pushToken, pushServer, (long)self.accountState, bool2str(self.connectionProperties.supportsPush));
+    DDLogInfo(@"DISABLING push token %@ on server %@ (accountState: %ld, supportsPush: %@)", pushToken, pushServer, (long)self.accountState, bool2str([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"]));
     XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
     [disable setPushDisable:pushToken onPushServer:pushServer];
     [self send:disable];
@@ -5508,7 +5434,7 @@ NSString* const kStanza = @"stanza";
     }
     
     //only send chatmarkers if requested by contact
-    BOOL assistedMDS = [self.connectionProperties.accountFeatures containsObject:@"urn:xmpp:mds:server-assist:0"] && lastMarkableMessage == lastUnreadMessage;
+    BOOL assistedMDS = [self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:mds:server-assist:0"] && lastMarkableMessage == lastUnreadMessage;
     if(lastMarkableMessage != nil)
     {
         XMPPMessage* displayedNode = [[XMPPMessage alloc] initToContact:contact];

@@ -43,7 +43,6 @@ extension Binding {
         )
     }
 }
-
 extension Binding {
     func bytecount(mappedTo: Double) -> Binding<Double> where Value == UInt {
         Binding<Double>(

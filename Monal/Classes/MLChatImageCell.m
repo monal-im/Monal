@@ -69,7 +69,7 @@
             if(!image)
                 return;
             _animatedImageView = [FLAnimatedImageView new];
-            DDLogVerbose(@"image: %fx%f", image.size.height, image.size.width);
+            DDLogVerbose(@"image %@\n--> %fx%f", info, image.size.height, image.size.width);
             CGFloat wi = image.size.width;
             CGFloat hi = image.size.height;
             CGFloat ws = 225.0;
@@ -90,10 +90,22 @@
         {
             self.link = msg.messageText;
             // uses cached file if the file was already downloaded
-            UIImage* image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
+            UIImage* image = nil;
+            if([info[@"mimeType"] hasPrefix:@"image/svg"])
+            {
+                if(@available(iOS 16.0, macCatalyst 16.0, *))
+                    image = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]];
+                else
+                {
+                    DDLogWarn(@"Using photo placeholder for SVG on ios < 16...");
+                    image = [UIImage systemImageNamed:@"photo.fill"];
+                }
+            }
+            else
+                image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
             if(!image)
                 return;
-            DDLogVerbose(@"image: %fx%f", image.size.height, image.size.width);
+            DDLogVerbose(@"image %@\n--> %fx%f", info, image.size.height, image.size.width);
             CGFloat wi = image.size.width;
             CGFloat hi = image.size.height;
             CGFloat ws = 225.0;

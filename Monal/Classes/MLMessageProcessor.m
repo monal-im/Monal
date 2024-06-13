@@ -475,7 +475,7 @@ static NSMutableDictionary* _typingNotifications;
     {
         //ignore tombstones if not supported by server (someone probably faked them)
         if(
-            (!possiblyUnknownContact.isGroup && [account.connectionProperties.accountFeatures containsObject:@"urn:xmpp:message-retract:1#tombstone"]) ||
+            (!possiblyUnknownContact.isGroup && [account.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:message-retract:1#tombstone"]) ||
             (possiblyUnknownContact.isGroup && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-retract:1#tombstone"])
         )
         {

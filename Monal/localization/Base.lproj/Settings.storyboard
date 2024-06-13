@@ -241,6 +241,7 @@
                         <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showBug" id="RUx-Ru-YBK"/>
                         <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showAbout" id="XYR-kq-hQQ"/>
                         <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showOpenSource" id="pZO-HH-rUP"/>
+                        <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showPrivacy" id="pZO-HH-XXX"/>
                         <segue destination="Qll-5F-nAT" kind="showDetail" identifier="showLogs" id="2Ew-6e-Nd2"/>
                         <segue destination="rxA-nN-Z6Z" kind="showDetail" identifier="showSounds" id="oQU-xT-ytM"/>
                         <segue destination="NvL-Ob-NsV" kind="showDetail" identifier="showBackgrounds" id="x8n-Ay-hav"/>

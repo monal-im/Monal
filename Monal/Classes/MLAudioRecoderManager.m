@@ -32,14 +32,14 @@ NSURL *audioFileURL = nil;
     [audioSession setCategory:AVAudioSessionCategoryRecord error:&audioSessionCategoryError];
     [audioSession setActive:YES error:&audioRecodSetActiveError];
     if (audioSessionCategoryError) {
-        DDLogError(@"Audio Recoder set category error: %@", audioSessionCategoryError);
-        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder set category error: %@", audioSessionCategoryError)];
+        DDLogError(@"Audio Recorder set category error: %@", audioSessionCategoryError);
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recorder set category error: %@", audioSessionCategoryError)];
         return;
     }
     
     if (audioRecodSetActiveError) {
-        DDLogError(@"Audio Recoder set active error: %@", audioRecodSetActiveError);
-        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder set active error: %@", audioRecodSetActiveError)];
+        DDLogError(@"Audio Recorder set active error: %@", audioRecodSetActiveError);
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recorder set active error: %@", audioRecodSetActiveError)];
         return;
     }
     
@@ -56,8 +56,8 @@ NSURL *audioFileURL = nil;
     
     if(recoderError)
     {
-        DDLogError(@"recoderError: %@", recoderError);
-        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder init fail.", @"")];
+        DDLogError(@"recorderError: %@", recoderError);
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recorder init fail.", @"")];
         return;
     }
     self.audioRecorder.delegate = self;
@@ -65,14 +65,14 @@ NSURL *audioFileURL = nil;
     
     if(!isPrepare)
     {
-        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder prepareToRecord fail.", @"")];
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recorder prepareToRecord fail.", @"")];
         return;
     }
     BOOL isRecord = [self.audioRecorder record];
     
     if(!isRecord)
     {
-        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder record fail.", @"")];
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recorder record fail.", @"")];
         return;
     }
     [recoderManagerDelegate notifyStart];
@@ -110,14 +110,14 @@ NSURL *audioFileURL = nil;
     }
     else
     {
-        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder recode fail", @"")];
-        DDLogError(@"Audio Recoder recode fail");
+        [recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recorder: failed to record", @"")];
+        DDLogError(@"Audio Recorder record fail");
     }
 }
 
 -(void) audioRecorderEncodeErrorDidOccur:(AVAudioRecorder*) recorder error:(NSError*) error
 {
-    DDLogError(@"Audio Recoder EncodeError: %@", [error description]);
+    DDLogError(@"Audio Recorder EncodeError: %@", [error description]);
     [self.recoderManagerDelegate notifyResult:NO error:[error description]];
 }
 
@@ -128,7 +128,7 @@ NSURL *audioFileURL = nil;
     NSError* error = nil;
     [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
     if(error)
-        DDLogError(@"Audio Recoder create directory fail: %@", [error description]);
+        DDLogError(@"Audio Recorder create directory fail: %@", [error description]);
     [HelperTools configureFileProtectionFor:writablePath];
     NSString* audioFilePath = [writablePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.m4a",[[NSUUID UUID] UUIDString]]];
     return  audioFilePath;

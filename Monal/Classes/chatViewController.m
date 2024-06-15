@@ -32,6 +32,7 @@
 #import "MLXEPSlashMeHandler.h"
 #import "MonalAppDelegate.h"
 #import "xmpp.h"
+#import "XMPPMessage.h"
 
 #import <Monal-Swift.h>
 #import <stdatomic.h>
@@ -1863,11 +1864,9 @@ enum msgSentState {
     }
 }
 
-
 -(void) handleSentMessage:(NSNotification*) notification
 {
-    NSDictionary* dic = notification.userInfo;
-    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgSent withOptDic:nil];
+    [self updateMsgState:((XMPPMessage*)notification.userInfo[@"message"]).id withEvent:msgSent withOptDic:nil];
 }
 
 -(void) handleMessageError:(NSNotification*) notification
@@ -2630,37 +2629,37 @@ enum msgSentState {
 }
 
 -(MLBaseCell*) fileTransferCellCheckerWithInfo:(NSDictionary*)info direction:(BOOL)inDirection tableView:(UITableView*)tableView andMsg:(MLMessage*)row{
-    MLBaseCell *cell = nil;
-    //don't crash on svg images not supported by UIImage
-    //TODO: use webview to display SVG
-    if([info[@"mimeType"] hasPrefix:@"image/"] && ![info[@"mimeType"] hasPrefix:@"image/svg"])
+    MLBaseCell* cell = nil;
+    //svg to UIImage conversion is only supported on ios >= 16
+    //--> this shows just a "picture.fill" placeholder for SVGs on ios < 16
+    if(cell == nil && [info[@"mimeType"] hasPrefix:@"image/"])
     {
-        MLChatImageCell* imageCell = (MLChatImageCell *)[self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
+        MLChatImageCell* imageCell = (MLChatImageCell*)[self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
         [imageCell initCellWithMLMessage:row];
         cell = imageCell;
     }
-    else if([info[@"mimeType"] hasPrefix:@"video/"])
+    if(cell == nil && [info[@"mimeType"] hasPrefix:@"video/"])
     {
-        MLFileTransferVideoCell* videoCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
+        MLFileTransferVideoCell* videoCell = (MLFileTransferVideoCell*)[self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
         NSString* videoStr = info[@"cacheFile"];
         NSString* videoFileName = info[@"filename"];
         [videoCell avplayerConfigWithUrlStr:videoStr andMimeType:info[@"mimeType"] fileName:videoFileName andVC:self];
 
         cell = videoCell;
     }
-    else if([info[@"mimeType"] hasPrefix:@"audio/"])
+    if(cell == nil && [info[@"mimeType"] hasPrefix:@"audio/"])
     {
         //we may wan to make a new kind later but for now this is perfectly functional
-        MLFileTransferVideoCell* audioCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferAudio" andInbound:inDirection fromTable:tableView];
+        MLFileTransferVideoCell* audioCell = (MLFileTransferVideoCell*)[self messageTableCellWithIdentifier:@"fileTransferAudio" andInbound:inDirection fromTable:tableView];
         NSString *audioStr = info[@"cacheFile"];
         NSString *audioFileName = info[@"filename"];
         [audioCell avplayerConfigWithUrlStr:audioStr andMimeType:info[@"mimeType"] fileName:audioFileName andVC:self];
 
         cell = audioCell;
     }
-    else
+    if(cell == nil)
     {
-        MLFileTransferTextCell* textCell = (MLFileTransferTextCell *) [self messageTableCellWithIdentifier:@"fileTransferText" andInbound:inDirection fromTable:tableView];
+        MLFileTransferTextCell* textCell = (MLFileTransferTextCell*)[self messageTableCellWithIdentifier:@"fileTransferText" andInbound:inDirection fromTable:tableView];
 
         NSString *fileSizeStr = info[@"size"];
         long long fileSizeLongLongValue = fileSizeStr.longLongValue;

@@ -160,8 +160,11 @@
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
 		84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84C1CD532A8F6196007076ED /* MLStreamRedirect.h */; };
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
+		84E231F32C16A9CE00735FB7 /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 84E231F22C16A9CE00735FB7 /* SVGView */; };
 		84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		84E55E8029644279003E191A /* ActiveChatsViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E55E7F2964426D003E191A /* ActiveChatsViewController.h */; };
+		84F194CE2C101A3E00F0A994 /* PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 84F194CD2C101A3E00F0A994 /* PromiseKit */; };
+		84F194D12C15197200F0A994 /* FrameUp in Frameworks */ = {isa = PBXBuildFile; productRef = 84F194D02C15197200F0A994 /* FrameUp */; };
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
@@ -589,6 +592,10 @@
 		84C1CD532A8F6196007076ED /* MLStreamRedirect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLStreamRedirect.h; sourceTree = "<group>"; };
 		84D31CE528653B83006D7926 /* WebRTCClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebRTCClient.swift; path = Classes/WebRTCClient.swift; sourceTree = SOURCE_ROOT; };
 		84E55E7F2964426D003E191A /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
+		84F194C32C0FE70900F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Main.strings"; sourceTree = "<group>"; };
+		84F194C42C0FE74500F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Settings.strings"; sourceTree = "<group>"; };
+		84F194C52C0FE78B00F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/iosShare.strings"; sourceTree = "<group>"; };
+		84F194C62C0FE79000F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		84FC37542897521400634E3E /* snprintf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = snprintf.m; sourceTree = "<group>"; };
 		84FC37562897523500634E3E /* metamacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
 		84FC375828981A5600634E3E /* PasswordMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordMigration.swift; sourceTree = "<group>"; };
@@ -767,6 +774,7 @@
 			files = (
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
 				C1E1EC7B286A025F0097EC74 /* SwiftSoup in Frameworks */,
+				84F194D12C15197200F0A994 /* FrameUp in Frameworks */,
 				C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
 				841898AA2957712000FEC77D /* ViewExtractor in Frameworks */,
@@ -797,8 +805,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */,
+				84F194CE2C101A3E00F0A994 /* PromiseKit in Frameworks */,
 				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
 				849ADF412BACF0360009BCD7 /* CocoaLumberjackSwift in Frameworks */,
+				84E231F32C16A9CE00735FB7 /* SVGView in Frameworks */,
 				849ADF432BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
 				8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */,
 			);
@@ -1518,6 +1528,7 @@
 				C1F5C7AE2777638B0001F295 /* OrderedCollections */,
 				C1E1EC7A286A025F0097EC74 /* SwiftSoup */,
 				841898A92957712000FEC77D /* ViewExtractor */,
+				84F194D02C15197200F0A994 /* FrameUp */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1581,6 +1592,8 @@
 				849ADF3E2BACF0360009BCD7 /* CocoaLumberjack */,
 				849ADF402BACF0360009BCD7 /* CocoaLumberjackSwift */,
 				849ADF422BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend */,
+				84F194CD2C101A3E00F0A994 /* PromiseKit */,
+				84E231F22C16A9CE00735FB7 /* SVGView */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1724,6 +1737,7 @@
 				pa,
 				ko,
 				eu,
+				"es-AR",
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			packageReferences = (
@@ -1731,6 +1745,9 @@
 				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
 				849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
+				84F194CC2C101A3E00F0A994 /* XCRemoteSwiftPackageReference "PromiseKit" */,
+				84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */,
+				84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -2277,6 +2294,7 @@
 				C132EA9B26C92E9000BB9A67 /* pa */,
 				C15A4E5F279D2AC80055CD11 /* ko */,
 				C1E856A828DECF5F00B104E9 /* eu */,
+				84F194C52C0FE78B00F0A994 /* es-AR */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2318,6 +2336,7 @@
 				C132EA9626C92DD900BB9A67 /* pa */,
 				C15A4E5D279D2AC70055CD11 /* ko */,
 				C1E856A728DECF5F00B104E9 /* eu */,
+				84F194C42C0FE74500F0A994 /* es-AR */,
 			);
 			name = Settings.storyboard;
 			sourceTree = "<group>";
@@ -2359,6 +2378,7 @@
 				C132EA9426C92DD900BB9A67 /* pa */,
 				C15A4E5B279D2AC60055CD11 /* ko */,
 				C1E856A628DECF5F00B104E9 /* eu */,
+				84F194C32C0FE70900F0A994 /* es-AR */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -2399,6 +2419,7 @@
 				C132EA9926C92DDA00BB9A67 /* pa */,
 				C15A4E60279D2AC80055CD11 /* ko */,
 				C1E856A928DECF5F00B104E9 /* eu */,
+				84F194C62C0FE79000F0A994 /* es-AR */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -4613,6 +4634,30 @@
 				minimumVersion = 3.8.5;
 			};
 		};
+		84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/SVGView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.6;
+			};
+		};
+		84F194CC2C101A3E00F0A994 /* XCRemoteSwiftPackageReference "PromiseKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mxcl/PromiseKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.1.2;
+			};
+		};
+		84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ryanlintott/FrameUp";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.8.0;
+			};
+		};
 		C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
@@ -4655,6 +4700,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
+		};
+		84E231F22C16A9CE00735FB7 /* SVGView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */;
+			productName = SVGView;
+		};
+		84F194CD2C101A3E00F0A994 /* PromiseKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84F194CC2C101A3E00F0A994 /* XCRemoteSwiftPackageReference "PromiseKit" */;
+			productName = PromiseKit;
+		};
+		84F194D02C15197200F0A994 /* FrameUp */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */;
+			productName = FrameUp;
 		};
 		C1E1EC7A286A025F0097EC74 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;

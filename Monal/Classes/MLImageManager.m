@@ -38,20 +38,16 @@
 //this mehod should *only* be used in the mainapp due to memory requirements for large images
 +(UIImage*) circularImage:(UIImage*) image
 {
-    UIImage* composedImage;
-    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
-    
-    UIBezierPath* clipPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-    [clipPath addClip];
-    
-    // Flip coordinates before drawing image as UIKit and CoreGraphics have inverted coordinate system
-    CGContextTranslateCTM(UIGraphicsGetCurrentContext(), 0, image.size.height);
-    CGContextScaleCTM(UIGraphicsGetCurrentContext(), 1, -1);
-    
-    CGContextDrawImage(UIGraphicsGetCurrentContext(), CGRectMake(0, 0, image.size.width, image.size.height), image.CGImage);
-    composedImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return composedImage;
+    return [[[UIGraphicsImageRenderer alloc] initWithSize:image.size] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull rendererContext) {
+        UIBezierPath* clipPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+        [clipPath addClip];
+        
+        //Flip coordinates before drawing image as UIKit and CoreGraphics have inverted coordinate system
+        CGContextTranslateCTM(rendererContext.CGContext, 0, image.size.height);
+        CGContextScaleCTM(rendererContext.CGContext, 1, -1);
+        
+        CGContextDrawImage(rendererContext.CGContext, CGRectMake(0, 0, image.size.width, image.size.height), image.CGImage);
+    }];
 }
 
 +(UIImage*) image:(UIImage*) image withMucOverlay:(UIImage*) overlay

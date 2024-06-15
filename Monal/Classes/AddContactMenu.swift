@@ -11,7 +11,7 @@ import UniformTypeIdentifiers
 
 struct AddContactMenu: View {
     var delegate: SheetDismisserProtocol
-    static private let jidFaultyPattern = "^([^@]+@)?.+\\..{2,}$"
+    static private let jidFaultyPattern = "^([^@]+@)?.+(\\..{2,})?$"
 
     @State private var connectedAccounts: [xmpp]
     @State private var selectedAccount: Int
@@ -145,18 +145,16 @@ struct AddContactMenu: View {
                 trustFingerprints(self.importScannedFingerprints ? self.scannedFingerprints : [:], for:jid, on:account)
                 successAlert(title: Text("Permission Requested"), message: Text("The new contact will be added to your contacts list when the person you've added has approved your request."))
             } else if type == "muc" {
-                showLoadingOverlay(overlay, headline: NSLocalizedString("Adding Group/Channel...", comment: ""))
-                account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
-                    let success : Bool = data["success"] as! Bool;
+                performMucAction(account:account, mucJid:jid, overlay:overlay, headlineView:Text("Adding Group/Channel..."), descriptionView:Text("")) {
+                    account.joinMuc(jid)
+                }.done { _ in
+                    self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
+                    successAlert(title: Text("Success!"), message: Text("Successfully joined group/channel \(jid)!"))
+                }.catch { error in
+                    errorAlert(title: Text("Error entering group/channel!"), message: Text("\(String(describing:error))"))
+                }.finally {
                     hideLoadingOverlay(overlay)
-                    if success {
-                        self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
-                        successAlert(title: Text("Success!"), message: Text(String.localizedStringWithFormat("Successfully joined group/channel %@!", jid)))
-                    } else {
-                        errorAlert(title: Text("Error entering group/channel!"), message: Text(data["errorMessage"] as! String))
-                    }
-                }, forMuc: jid)
-                account.joinMuc(jid)
+                }
             } else {
                 hideLoadingOverlay(overlay)
                 errorAlert(title: Text("Error"), message: Text(errorMsg ?? "Undefined error"))
@@ -220,7 +218,7 @@ struct AddContactMenu: View {
                         if !showAlert {
                             let jidComponents = HelperTools.splitJid(toAdd)
                             if jidComponents["host"] == nil || jidComponents["host"]!.isEmpty {
-                                errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing the string..."))
+                                errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing your input..."))
                                 showAlert = true
                                 return
                             }

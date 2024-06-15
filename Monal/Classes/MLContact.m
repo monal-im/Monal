@@ -253,9 +253,10 @@ static NSMutableDictionary* _singletonCache;
 -(instancetype) init
 {
     self = [super init];
-    // watch for changes in lastInteractionTime and update dynamically
+    //watch for all sorts of changes and update our singleton dynamically
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLastInteractionTimeUpdate:) name:kMonalLastInteractionUpdatedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBlockListRefresh:) name:kMonalBlockListRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refresh) name:kMonalRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRemoved object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMucSubjectChange:) name:kMonalMucSubjectChanged object:nil];
@@ -664,7 +665,7 @@ static NSMutableDictionary* _singletonCache;
     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
     if(account == nil)
         return NO;
-    if(!account.connectionProperties.supportsBlocking)
+    if(![account.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
         return NO;
     [[MLXMPPManager sharedInstance] block:block contact:self];
     return YES;

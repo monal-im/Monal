@@ -1720,7 +1720,7 @@ $$
 
 -(void) callSuccessUIHandlerForMuc:(NSString*) room
 {
-    
+    return [self callSuccessUIHandlerForMuc:room withCallback:nil];
 }
 
 -(void) updateBookmarks

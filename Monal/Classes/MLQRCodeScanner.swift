@@ -6,10 +6,6 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
-import CocoaLumberjack
-import AVFoundation
-import UIKit
-import SwiftUI
 import SafariServices
 
 @objc protocol MLLQRCodeScannerAccountLoginDelegate : AnyObject

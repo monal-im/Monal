@@ -6,9 +6,7 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import SwiftUI
 import CoreImage.CIFilterBuiltins
-import monalxmpp
 
 func createQrCode(value: String) -> UIImage
 {
@@ -59,7 +57,7 @@ struct OmemoQrCodeView: View {
             .resizable()
             .scaledToFit()
             .aspectRatio(1, contentMode: .fit)
-            .navigationBarTitle("Keys of \(self.jid)", displayMode: .inline)
+            .navigationBarTitle(Text("Keys of \(self.jid)"), displayMode: .inline)
     }
 }
 

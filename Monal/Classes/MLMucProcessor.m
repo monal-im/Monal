@@ -23,7 +23,7 @@
 #import "MLOMEMO.h"
 #import "MLImageManager.h"
 
-#define CURRENT_MUC_STATE_VERSION @7
+#define CURRENT_MUC_STATE_VERSION @9
 
 @interface MLMucProcessor()
 {
@@ -33,11 +33,13 @@
     NSMutableDictionary* _roomFeatures;
     NSMutableDictionary* _creating;
     NSMutableDictionary* _joining;
+    NSMutableSet* _destroying;
     NSMutableSet* _firstJoin;
+    NSMutableDictionary* _changingName;
     NSDate* _lastPing;
     NSMutableSet* _noUpdateBookmarks;
     BOOL _hasFetchedBookmarks;
-    //this won't be persisted because it is only for the ui
+    //these won't be persisted because it is only for the ui
     NSMutableDictionary* _uiHandler;
 }
 @end
@@ -75,7 +77,9 @@ static NSDictionary* _optionalGroupConfigOptions;
     _roomFeatures = [NSMutableDictionary new];
     _creating = [NSMutableDictionary new];
     _joining = [NSMutableDictionary new];
+    _destroying = [NSMutableSet new];
     _firstJoin = [NSMutableSet new];
+    _changingName = [NSMutableDictionary new];
     _uiHandler = [NSMutableDictionary new];
     _lastPing = [NSDate date];
     _noUpdateBookmarks = [NSMutableSet new];
@@ -83,6 +87,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleResourceBound:) name:kMLResourceBoundNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleCatchupDone:) name:kMonalFinishedCatchup object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     return self;
 }
 
@@ -107,7 +112,9 @@ static NSDictionary* _optionalGroupConfigOptions;
         _roomFeatures = [state[@"roomFeatures"] mutableCopy];
         _creating = [state[@"creating"] mutableCopy];
         _joining = [state[@"joining"] mutableCopy];
+        _destroying = [state[@"destroying"] mutableCopy];
         _firstJoin = [state[@"firstJoin"] mutableCopy];
+        _changingName = [state[@"changingName"] mutableCopy];
         _lastPing = state[@"lastPing"];
         _noUpdateBookmarks = [state[@"noUpdateBookmarks"] mutableCopy];
         _hasFetchedBookmarks = [state[@"hasFetchedBookmarks"] boolValue];
@@ -122,7 +129,9 @@ static NSDictionary* _optionalGroupConfigOptions;
             @"roomFeatures": [_roomFeatures copy],
             @"creating": [_creating copy],
             @"joining": [_joining copy],
+            @"destroying": [_destroying copy],
             @"firstJoin": [_firstJoin copy],
+            @"changingName": [_changingName copy],
             @"lastPing": _lastPing,
             @"noUpdateBookmarks": [_noUpdateBookmarks copy],
             @"hasFetchedBookmarks": @(_hasFetchedBookmarks),
@@ -140,6 +149,8 @@ static NSDictionary* _optionalGroupConfigOptions;
     {
         @synchronized(_stateLockObject) {
             _roomFeatures = [NSMutableDictionary new];
+            _destroying = [NSMutableSet new];
+            _changingName = [NSMutableDictionary new];
             
             //make sure all idle timers get invalidated properly
             NSDictionary* joiningCopy = [_joining copy];
@@ -173,6 +184,23 @@ static NSDictionary* _optionalGroupConfigOptions;
     }
 }
 
+-(void) handleSentMessage:(NSNotification*) notification
+{
+    XMPPMessage* msg = notification.userInfo[@"message"];
+    NSString* callUiHandlerFor = nil;
+    
+    //check if this is a direct invite (direct invites always follow indirect ones, so we don't have to check for indirect ones)
+    if([msg check:@"/{jabber:client}message<type=normal>/{jabber:x:conference}x@jid"])
+        callUiHandlerFor = [msg findFirst:@"/{jabber:client}message<type=normal>/{jabber:x:conference}x@jid"];
+    
+    //check for muc subject change
+    if([msg check:@"/{jabber:client}message<type=groupchat>/subject"])
+        callUiHandlerFor = msg.toUser;
+    
+    if(callUiHandlerFor != nil)
+        [self callSuccessUIHandlerForMuc:callUiHandlerFor];
+}
+
 -(BOOL) isCreating:(NSString*) room
 {
     @synchronized(_stateLockObject) {
@@ -184,6 +212,32 @@ static NSDictionary* _optionalGroupConfigOptions;
 {
     @synchronized(_stateLockObject) {
         return _joining[room] != nil;
+    }
+}
+
+-(BOOL) incrementNameChange:(NSString*) room
+{
+    @synchronized(_stateLockObject) {
+        if(!_changingName[room])
+        {
+            _changingName[room] = @1;
+            return YES;
+        }
+        _changingName[room] = @(((NSNumber*)_changingName[room]).integerValue + 1);
+        return NO;
+    }
+}
+
+-(BOOL) decrementNameChange:(NSString*) room
+{
+    @synchronized(_stateLockObject) {
+        if(_changingName[room] == nil)
+            return YES;
+        NSInteger oldValue = ((NSNumber*)_changingName[room]).integerValue;
+        _changingName[room] = @(max(0, oldValue - 1));
+        if(oldValue == 0)
+            return YES;
+        return NO;
     }
 }
 
@@ -291,25 +345,49 @@ static NSDictionary* _optionalGroupConfigOptions;
     {
         DDLogVerbose(@"Got muc presence from full jid: %@", presenceNode.from);
         
-        //extract info if present (use an empty dict if no info is present)
-        NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
-        if(!item)
-            item = [NSMutableDictionary new];
-        
-        //update jid to be a bare jid and add muc nick to our dict
-        if(item[@"jid"])
-            item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
-        item[@"nick"] = presenceNode.fromResource;
-        
-        //handle participant updates
-        if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)
-            [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+        //don't handle this error if we ourselves are destroying this room
+        BOOL isDestroying = NO;
+        @synchronized(_stateLockObject) {
+            isDestroying = [_destroying containsObject:presenceNode.fromUser];
+        }
+        if(!isDestroying)
+        {
+            //extract info if present (use an empty dict if no info is present)
+            NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
+            if(!item)
+                item = [NSMutableDictionary new];
+            
+            //update jid to be a bare jid and add muc nick to our dict
+            if(item[@"jid"])
+                item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
+            item[@"nick"] = presenceNode.fromResource;
+            
+            //handle participant updates
+            if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)
+            {
+                DDLogVerbose(@"Removing participant from muc(%@): %@", presenceNode.fromUser, item);
+                [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+            }
+            else
+            {
+                DDLogVerbose(@"Adding participant from muc(%@): %@", presenceNode.fromUser, item);
+                [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
+            }
+            
+            //handle members updates (publishing the changes in members/participants is already handled by handleMembersListUpdate
+            //--> only publish if we don't call handleMembersListUpdate
+            if(item[@"jid"] != nil)
+                [self handleMembersListUpdate:[presenceNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:presenceNode.fromUser];
+            else
+            {
+                DDLogDebug(@"Publishing participants list update...");
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucParticipantsAndMembersUpdated object:_account userInfo:@{
+                    @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo]
+                }];
+            }
+        }
         else
-            [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:_account.accountNo];
-        
-        //handle members updates
-        if(item[@"jid"] != nil)
-            [self handleMembersListUpdate:[presenceNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:presenceNode.fromUser];
+            DDLogDebug(@"Ignoring unavailable presences of room being destroyed by us...");
         
         //handle muc status codes in reflected presences
         //this MUST be done after the above code to make sure the db correctly reflects our membership/participant status
@@ -416,6 +494,11 @@ static NSDictionary* _optionalGroupConfigOptions;
 #endif// DISABLE_OMEMO
             }
         }
+        
+        DDLogDebug(@"Publishing new memberslist...");
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucParticipantsAndMembersUpdated object:_account userInfo:@{
+            @"contact": [MLContact createContactFromJid:mucJid andAccountNo:_account.accountNo]
+        }];
     }
     else
         DDLogWarn(@"Ignoring handleMembersListUpdate for %@, MUC not in buddylist", mucJid);
@@ -430,6 +513,7 @@ static NSDictionary* _optionalGroupConfigOptions;
 }
 
 $$instance_handler(handleRoomConfigFormInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    [self decrementNameChange:roomJid];
     if(deleteOnError)
     {
         DDLogError(@"Config form fetch failed, removing muc '%@' from _creating...", roomJid);
@@ -449,6 +533,7 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Failed to fetch room config form for '%@': %@", roomJid, [iqNode findFirst:@"error"]);
+        [self decrementNameChange:roomJid];
         if(deleteOnError)
         {
             [self removeRoomFromCreating:roomJid];
@@ -462,6 +547,7 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
     if(dataForm == nil)
     {
         DDLogError(@"Got empty room config form for '%@'!", roomJid);
+        [self decrementNameChange:roomJid];
         if(deleteOnError)
         {
             [self removeRoomFromCreating:roomJid];
@@ -476,12 +562,13 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
         if([dataForm getField:option] == nil)
         {
             DDLogError(@"Could not configure room '%@' to be a groupchat: config option '%@' not available!", roomJid, option);
+            [self decrementNameChange:roomJid];
             if(deleteOnError)
             {
                 [self removeRoomFromCreating:roomJid];
                 [self deleteMuc:roomJid withBookmarksUpdate:NO keepBuddylistEntry:NO];
             }
-            [self handleError:[NSString stringWithFormat:@"Could not configure new group '%@': config option '%@' not available!", roomJid, option] forMuc:roomJid withNode:nil andIsSevere:YES];
+            [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not configure (new) group '%@': config option '%@' not available!", @""), roomJid, option] forMuc:roomJid withNode:nil andIsSevere:YES];
             return;
         }
         else
@@ -505,6 +592,7 @@ $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, accou
 $$
 
 $$instance_handler(handleRoomConfigResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError))
+    [self decrementNameChange:roomJid];
     if(deleteOnError)
     {
         DDLogError(@"Config form submit failed, removing muc '%@' from _creating...", roomJid);
@@ -520,6 +608,7 @@ $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, acc
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Failed to submit room config form of '%@': %@", roomJid, [iqNode findFirst:@"error"]);
+        [self decrementNameChange:roomJid];
         if(deleteOnError)
         {
             [self removeRoomFromCreating:roomJid];
@@ -532,6 +621,8 @@ $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, acc
         @"iqNode.fromUser": [NSString stringWithFormat:@"%@", iqNode.fromUser],
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
     }));
+    
+    [self callSuccessUIHandlerForMuc:iqNode.fromUser];
     
     if(joinOnSuccess)
     {
@@ -564,6 +655,11 @@ $$
                         //update nick in database
                         DDLogInfo(@"Updating muc %@ nick in database to nick provided by server: '%@'...", node.fromUser, node.fromResource);
                         [[DataLayer sharedInstance] updateOwnNickName:node.fromResource forMuc:node.fromUser forAccount:_account.accountNo];
+                        
+                        DDLogDebug(@"Updating muc contact...");
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                            @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                        }];
                     }
                     break;
                 }
@@ -578,6 +674,11 @@ $$
                         [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:NO];
                         selfPrecenceHandled = YES;
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from group/channel: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        
+                        DDLogDebug(@"Updating muc contact...");
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                            @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                        }];
                     }
                     break;
                 }
@@ -598,6 +699,11 @@ $$
                             [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:NO];
                             selfPrecenceHandled = YES;
                             [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from group/channel: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                            
+                            DDLogDebug(@"Updating muc contact...");
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                                @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                            }];
                         }
                     }
                     else
@@ -622,6 +728,11 @@ $$
                                 [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                                 selfPrecenceHandled = YES;
                                 [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got removed from group/channel: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                                
+                                DDLogDebug(@"Updating muc contact...");
+                                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                                    @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                                }];
                             }
                         }
                     }
@@ -638,6 +749,11 @@ $$
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because group/channel is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                         [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
                         selfPrecenceHandled = YES;
+                        
+                        DDLogDebug(@"Updating muc contact...");
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                            @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                        }];
                     }
                     break;
                 }
@@ -651,6 +767,11 @@ $$
                         [self removeRoomFromJoining:node.fromUser];
                         selfPrecenceHandled = YES;
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked from group/channel, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        
+                        DDLogDebug(@"Updating muc contact...");
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                            @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                        }];
                     }
                     break;
                 }
@@ -712,8 +833,21 @@ $$
                 //(normally these have an additional status code that was already handled in the switch statement above
                 if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
                 {
-                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
-                    [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                    //don't handle this error if we ourselves are destroying this room
+                    BOOL isDestroying = NO;
+                    @synchronized(_stateLockObject) {
+                        isDestroying = [_destroying containsObject:node.fromUser];
+                    }
+                    if(!isDestroying)
+                    {
+                        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
+                        [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];
+                        
+                        DDLogDebug(@"Updating muc contact...");
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
+                            @"contact": [MLContact createContactFromJid:node.fromUser andAccountNo:_account.accountNo]
+                        }];
+                    }
                 }
             }
             else
@@ -751,21 +885,7 @@ $$
                     [_account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
                 }
                 
-                monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
-                if(uiHandler)
-                {
-                    //remove handler (it will only be called once)
-                    [self removeUIHandlerForMuc:node.fromUser];
-                    
-                    DDLogInfo(@"Calling UI handler for muc %@...", node.fromUser);
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        uiHandler(@{
-                            @"success": @YES,
-                            @"muc": node.fromUser,
-                            @"account": self->_account
-                        });
-                    });
-                }
+                [self callSuccessUIHandlerForMuc:node.fromUser];
                 
                 //MAYBE TODO: send out notification indicating we joined that room
                 
@@ -908,6 +1028,58 @@ $$
     
     return room;
 }
+
+-(void) destroyRoom:(NSString*) room
+{
+    MLAssert([[DataLayer sharedInstance] isBuddyMuc:room forAccount:_account.accountNo], @"Cannot destroy non-muc!", (@{@"room": room}));
+    
+    @synchronized(_stateLockObject) {
+        [_destroying addObject:room];
+    }
+    
+    XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType to:room];
+    [iqNode addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#owner" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"destroy" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"reason" andData:@"Groupchat got destroyed"]
+        ] andData:nil],
+    ] andData:nil]];
+    [_account sendIq:iqNode withHandler:$newHandlerWithInvalidation(self, handleRoomDestroyResult, handleRoomDestroyResultInvalidation, $ID(room))];
+}
+
+$$instance_handler(handleRoomDestroyResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
+    DDLogError(@"Could not destroy room '%@' on account %@: invalidation called", room, account);
+    @synchronized(_stateLockObject) {
+        [_destroying removeObject:room];
+    }
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to destroy group/channel '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
+$$
+
+$$instance_handler(handleRoomDestroyResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, room))
+    @synchronized(_stateLockObject) {
+        [_destroying removeObject:room];
+    }
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Failed to destroy room '%@' on account %@: %@", room, account, [iqNode findFirst:@"error"]);
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to destroy group/channel '%@'", @""), room] forMuc:room withNode:iqNode andIsSevere:YES];
+        return;
+    }
+    
+    DDLogInfo(@"Successfully destroyed room '%@' on account %@", room, account);
+    if([self getUIHandlerForMuc:room] != nil)
+    {
+        [self callSuccessUIHandlerForMuc:room withCallback:^{
+            //don't even keep our bookmark in this case
+            [self deleteMuc:room withBookmarksUpdate:YES keepBuddylistEntry:NO];
+        }];
+    }
+    else
+    {
+        //don't even keep our bookmark in this case
+        //this will handled by the ui handler callback if the ui was used to destroy this room and must be handled here otherwise
+        [self deleteMuc:room withBookmarksUpdate:YES keepBuddylistEntry:NO];
+    }
+$$
 
 -(void) join:(NSString*) room
 {
@@ -1069,13 +1241,14 @@ $$
             @"to": jid
         } andChildren:@[] andData:nil]
     ] andData:nil]];
-    [_account send:indirectInviteMsg];
+    [self->_account send:indirectInviteMsg];
     
     XMPPMessage* directInviteMsg = [[XMPPMessage alloc] initWithType:kMessageNormalType to:jid];
     [directInviteMsg addChildNode:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:conference" withAttributes:@{
         @"jid": roomJid
     } andChildren:@[] andData:nil]];
-    [_account send:directInviteMsg];
+    [self->_account send:directInviteMsg];
+
 }
 
 -(void) setAffiliation:(NSString*) affiliation ofUser:(NSString*) jid inMuc:(NSString*) roomJid
@@ -1099,10 +1272,12 @@ $$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmp
         return;
     }
     DDLogInfo(@"Successfully changed affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
+    [self callSuccessUIHandlerForMuc:iqNode.fromUser];
 $$
 
 -(void) changeNameOfMuc:(NSString*) room to:(NSString*) name
 {
+    [self incrementNameChange:room];
     [self configureMuc:room withMandatoryOptions:@{
         @"muc#roomconfig_roomname": name,
     } andOptionalOptions:@{} deletingMucOnError:NO andJoiningMucOnSuccess:NO];
@@ -1148,9 +1323,11 @@ $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, 
         return;
     }
     DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);
+    [self callSuccessUIHandlerForMuc:iqNode.fromUser];
 $$
 
 $$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, roomJid))
+    [self decrementNameChange:roomJid];
     DDLogInfo(@"Removing muc '%@' from _joining...", roomJid);
     [self removeRoomFromJoining:roomJid];
 $$
@@ -1171,6 +1348,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     if([iqNode check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}gone"])
     {
         DDLogError(@"Querying muc info returned this muc isn't available anymore: %@", [iqNode findFirst:@"error"]);
+        [self decrementNameChange:iqNode.fromUser];
         [self removeRoomFromJoining:iqNode.fromUser];
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
@@ -1185,6 +1363,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     if([iqNode check:@"/<type=error>/error<type=wait>"])
     {
         DDLogError(@"Querying muc info returned a temporary error: %@", [iqNode findFirst:@"error"]);
+        [self decrementNameChange:iqNode.fromUser];
         [self removeRoomFromJoining:iqNode.fromUser];
         
         //do nothing: the error is only temporary (a s2s problem etc.), a muc ping will retry the join
@@ -1200,6 +1379,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     else if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Querying muc info returned a persistent error: %@", [iqNode findFirst:@"error"]);
+        [self decrementNameChange:iqNode.fromUser];
         [self removeRoomFromJoining:iqNode.fromUser];
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
@@ -1218,6 +1398,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     if(![features containsObject:@"http://jabber.org/protocol/muc"])
     {
         DDLogError(@"muc disco returned that this jid is not a muc!");
+        [self decrementNameChange:iqNode.fromUser];
         
         //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         //make sure to update remote bookmarks, even if updateBookmarks == NO
@@ -1237,6 +1418,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     if(join && ![self isJoining:iqNode.fromUser])
     {
         DDLogWarn(@"Ignoring muc disco result for '%@' on account %@: not joining anymore...", iqNode.fromUser, _account);
+        [self decrementNameChange:iqNode.fromUser];
         return;
     }
         
@@ -1284,12 +1466,15 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         [[DataLayer sharedInstance] updateMucTypeTo:mucType forRoom:iqNode.fromUser andAccount:_account.accountNo];
     }
     
-    if(mucName && [mucName length])
+    if(!mucName || ![mucName length])
+        mucName = @"";
+    //only handle incoming name updates if they are not our own reflected changes
+    if([self decrementNameChange:iqNode.fromUser])
     {
         MLContact* mucContact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:_account.accountNo];
         if(![mucName isEqualToString:mucContact.fullName])
         {
-            DDLogInfo(@"Configuring muc %@ to use name '%@'...", iqNode.fromUser, mucName);
+            DDLogInfo(@"Configuring muc %@ to use name '%@' (old value: '%@')...", iqNode.fromUser, mucName, mucContact.fullName);
             [[DataLayer sharedInstance] setFullName:mucName forContact:iqNode.fromUser andAccount:_account.accountNo];
         }
     }
@@ -1504,6 +1689,38 @@ $$
     //otherwise call the general error handler
     else
         [HelperTools postError:description withNode:node andAccount:_account andIsSevere:isSevere];
+}
+
+-(void) callSuccessUIHandlerForMuc:(NSString*) room withCallback:(monal_void_block_t) callback
+{
+    monal_id_block_t uiHandler = [self getUIHandlerForMuc:room];
+    if(uiHandler)
+    {
+        //remove handler (it will only be called once)
+        [self removeUIHandlerForMuc:room];
+        
+        DDLogInfo(@"Calling UI handler for muc %@...", room);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(callback != nil)
+                uiHandler(@{
+                    @"success": @YES,
+                    @"muc": room,
+                    @"account": self->_account,
+                    @"callback": callback,
+                });
+            else
+                uiHandler(@{
+                    @"success": @YES,
+                    @"muc": room,
+                    @"account": self->_account,
+                });
+        });
+    }
+}
+
+-(void) callSuccessUIHandlerForMuc:(NSString*) room
+{
+    return [self callSuccessUIHandlerForMuc:room withCallback:nil];
 }
 
 -(void) updateBookmarks

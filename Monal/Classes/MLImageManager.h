@@ -35,6 +35,7 @@
 /**
  retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
  */
+-(BOOL) hasIconForContact:(MLContact* _Nonnull) contact;
 -(UIImage* _Nullable) getIconForContact:(MLContact* _Nonnull) contact withCompletion:(void (^_Nullable)(UIImage *_Nullable))completion;
 -(UIImage* _Nullable) getIconForContact:(MLContact* _Nonnull) contact;
 +(UIImage* _Nonnull) circularImage:(UIImage* _Nonnull) image;

@@ -129,7 +129,6 @@ static NSMutableDictionary* _typingNotifications;
 
     //handle incoming jmi calls (TODO: add entry to local history, once the UI for this is implemented)
     //only handle incoming propose messages if not older than 60 seconds
-    
     if([messageNode check:@"{urn:xmpp:jingle-message:0}*"] && ![HelperTools shouldProvideVoip])
     {
         DDLogWarn(@"VoIP not supported, ignoring incoming JMI message!");
@@ -346,16 +345,16 @@ static NSMutableDictionary* _typingNotifications;
         DDLogDebug(@"This is muc, inbound is now: %@ (ownNick: %@, actualFrom: %@, participantJid: %@)", inbound ? @"YES": @"NO", ownNick, actualFrom, participantJid);
     }
     
-    if([messageNode check:@"/<type=groupchat>/subject#"])
+    if([messageNode check:@"/<type=groupchat>/subject"])
     {
         if(!isMLhistory)
         {
-            NSString* subject = [messageNode findFirst:@"/<type=groupchat>/subject#"];
+            NSString* subject = nilDefault([messageNode findFirst:@"/<type=groupchat>/subject#"], @"");
             subject = [subject stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:account.accountNo andRoom:messageNode.fromUser];
-            DDLogInfo(@"Got MUC subject for %@: %@", messageNode.fromUser, subject);
+            DDLogInfo(@"Got MUC subject for %@: '%@'", messageNode.fromUser, subject);
             
-            if(subject == nil || [subject isEqualToString:currentSubject])
+            if([subject isEqualToString:currentSubject])
             {
                 DDLogVerbose(@"Ignoring subject, nothing changed...");
                 return nil;
@@ -459,7 +458,6 @@ static NSMutableDictionary* _typingNotifications;
             DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
                 @"message": [[[DataLayer sharedInstance] messagesForHistoryIDs:@[historyIdToRetract]] firstObject],
-                @"historyId": historyIdToRetract,
                 @"contact": possiblyUnknownContact,
             }];
             
@@ -477,7 +475,7 @@ static NSMutableDictionary* _typingNotifications;
     {
         //ignore tombstones if not supported by server (someone probably faked them)
         if(
-            (!possiblyUnknownContact.isGroup && [account.connectionProperties.accountFeatures containsObject:@"urn:xmpp:message-retract:1#tombstone"]) ||
+            (!possiblyUnknownContact.isGroup && [account.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:message-retract:1#tombstone"]) ||
             (possiblyUnknownContact.isGroup && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-retract:1#tombstone"])
         )
         {
@@ -581,6 +579,7 @@ static NSMutableDictionary* _typingNotifications;
             }
             
             //handle normal messages or LMC messages that can not be found
+            //(this will update stanzaid in database, too, if deduplication detects a duplicate/reflection)
             if(historyId == nil)
             {
                 historyId = [[DataLayer sharedInstance]
@@ -662,7 +661,6 @@ static NSMutableDictionary* _typingNotifications;
                 DDLogInfo(@"Sending out kMonalNewMessageNotice notification for historyId %@", historyId);
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
                     @"message": message,
-                    @"historyId": historyId,
                     @"showAlert": @(showAlert),
                     @"contact": possiblyUnknownContact,
                 }];
@@ -671,6 +669,23 @@ static NSMutableDictionary* _typingNotifications;
                 if(messageType == kMessageTypeFiletransfer && [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"])
                     [MLFiletransfer checkMimeTypeAndSizeForHistoryID:historyId];
             }
+        }
+    }
+    else if(!inbound)
+    {
+        //just try to use the probably reflected message to update the stanzaid of our message in the db
+        //messageId is always a proper origin-id in this case, because inbound == NO and Monal uses origin-ids
+        NSNumber* historyId = [[DataLayer sharedInstance] hasMessageForStanzaId:stanzaid orMessageID:messageId withInboundDir:inbound andJid:buddyName onAccount:account.accountNo];
+        if(historyId != nil)
+        {
+            message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+            DDLogDebug(@"Managed to update stanzaid of message (or stanzaid already known): %@", message);
+            DDLogInfo(@"Sending out kMonalNewMessageNotice notification for historyId %@", historyId);
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
+                    @"message": message,
+                    @"showAlert": @(NO),
+                    @"contact": possiblyUnknownContact,
+                }];
         }
     }
     

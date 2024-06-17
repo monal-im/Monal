@@ -6,9 +6,6 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-import monalxmpp
-
 struct ContactRequestsMenuEntry: View {
     let contact : MLContact
     let doDelete: () -> ()
@@ -88,7 +85,7 @@ struct ContactRequestsMenu: View {
                 }
             }
         }
-        .navigationBarTitle("Contact Requests", displayMode: .inline)
+        .navigationBarTitle(Text("Contact Requests"), displayMode: .inline)
         .navigationViewStyle(.stack)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh")).receive(on: RunLoop.main)) { notification in
             self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]

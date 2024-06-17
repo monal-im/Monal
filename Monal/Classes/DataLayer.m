@@ -529,7 +529,7 @@ static NSDateFormatter* dbFormatter;
 -(NSArray<MLContact*>*) possibleGroupMembersForAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
-        //list all contacts and group chats
+        //list all contacts without groupchats and self contact
         NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) FROM buddylist as B INNER JOIN account AS A ON A.account_id=B.account_id WHERE B.account_id=? AND B.muc=0 AND B.buddy_name != (A.username || '@' || A.domain)";
         NSMutableArray* toReturn = [NSMutableArray new];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:@[accountNo]])
@@ -1024,8 +1024,8 @@ static NSDateFormatter* dbFormatter;
     return [self.db idReadTransaction:^{
         NSMutableArray<NSDictionary<NSString*, id>*>* toReturn = [[NSMutableArray<NSDictionary<NSString*, id>*> alloc] init];
         
-        [toReturn addObjectsFromArray:[self.db executeReader:@"SELECT *, 1 as 'online' FROM muc_participants WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]]];
-        [toReturn addObjectsFromArray:[self.db executeReader:@"SELECT *, 0 as 'online' FROM muc_members WHERE account_id=? AND room=? AND NOT EXISTS(SELECT * FROM muc_participants WHERE muc_members.account_id=muc_participants.account_id AND muc_members.room=muc_participants.room AND muc_members.member_jid=muc_participants.participant_jid);" andArguments:@[accountNo, room]]];
+        [toReturn addObjectsFromArray:[self.db executeReader:@"SELECT *, 1 as 'online' FROM muc_participants WHERE account_id=? AND room=? ORDER BY affiliation, room_nick;" andArguments:@[accountNo, room]]];
+        [toReturn addObjectsFromArray:[self.db executeReader:@"SELECT *, 0 as 'online' FROM muc_members WHERE account_id=? AND room=? AND NOT EXISTS(SELECT * FROM muc_participants WHERE muc_members.account_id=muc_participants.account_id AND muc_members.room=muc_participants.room AND muc_members.member_jid=muc_participants.participant_jid) ORDER BY affiliation;" andArguments:@[accountNo, room]]];
         
         return toReturn;
     }];
@@ -1236,7 +1236,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     
     return [self.db idWriteTransaction:^{
-        if(!checkForDuplicates || ![self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound onAccount:accountNo])
+        if(!checkForDuplicates || [self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound andJid:buddyName onAccount:accountNo] == nil)
         {
             //this is always from a contact
             NSDateFormatter* formatter = [NSDateFormatter new];
@@ -1293,21 +1293,21 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound onAccount:(NSNumber*) accountNo
+-(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound andJid:(NSString*) jid onAccount:(NSNumber*) accountNo
 {
     if(accountNo == nil)
-        return NO;
+        return (NSNumber*)nil;
     
-    return [self.db boolWriteTransaction:^{
+    return (NSNumber*)[self.db idWriteTransaction:^{
         //if the stanzaid was given, this is conclusive for dedup, we don't need to check any other ids (EXCEPTION BELOW)
         if(stanzaId)
         {
             DDLogVerbose(@"stanzaid provided");
-            NSArray* found = [self.db executeReader:@"SELECT * FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];
+            NSArray<NSNumber*>* found = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, jid, stanzaId]];
             if([found count])
             {
                 DDLogVerbose(@"stanzaid provided and could be found: %@", found);
-                return YES;
+                return found[0];
             }
         }
         
@@ -1318,7 +1318,7 @@ static NSDateFormatter* dbFormatter;
         //   the check, if an origin-id was given, lives in MLMessageProcessor.m (it only triggers a dedup for messages either having a stanzaid or an origin-id)
         if(inbound == NO)
         {
-            NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND inbound=0 AND messageid=?;" andArguments:@[accountNo, messageId]];
+            NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND inbound=0 AND messageid=?;" andArguments:@[accountNo, jid, messageId]];
             if(historyId != nil)
             {
                 DDLogVerbose(@"found by origin-id or messageid");
@@ -1328,12 +1328,12 @@ static NSDateFormatter* dbFormatter;
                     //this entry needs an update of its stanzaid
                     [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
                 }
-                return YES;
+                return historyId;
             }
         }
         
         DDLogVerbose(@"nothing worked --> message not found");
-        return NO;
+        return (NSNumber*)nil;
     }];
 }
 

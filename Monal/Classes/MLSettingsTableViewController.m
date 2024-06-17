@@ -32,9 +32,7 @@ enum SettingsAccountRows {
 };
 
 enum SettingsAppRows {
-    PrivacySettingsRow,
-    NotificationsRow,
-    BackgroundsRow,
+    GeneralSettingsRow,
     SoundsRow,
     SettingsAppRowsCnt
 };
@@ -157,6 +155,27 @@ enum DummySettingsRows {
 
         [web initViewWithUrl:[NSURL fileURLWithPath:myFile]];
     }
+    else if([segue.identifier isEqualToString:@"showAbout"])
+    {
+        UINavigationController* nav = (UINavigationController*) segue.destinationViewController;
+        MLWebViewController* web = (MLWebViewController*) nav.topViewController;
+
+        [web initViewWithUrl:[NSURL URLWithString:@"https://monal-im.org/about"]];
+    }
+    else if([segue.identifier isEqualToString:@"showPrivacy"])
+    {
+        UINavigationController* nav = (UINavigationController*) segue.destinationViewController;
+        MLWebViewController* web = (MLWebViewController*) nav.topViewController;
+
+        [web initViewWithUrl:[NSURL URLWithString:@"https://monal-im.org/privacy"]];
+    }
+    else if([segue.identifier isEqualToString:@"showBug"])
+    {
+        UINavigationController* nav = (UINavigationController*) segue.destinationViewController;
+        MLWebViewController* web = (MLWebViewController*) nav.topViewController;
+
+        [web initViewWithUrl:[NSURL URLWithString:@"https://github.com/monal-im/Monal/issues"]];
+    }
     else if([segue.identifier isEqualToString:@"editXMPP"])
     {
         XMPPEdit* editor = (XMPPEdit*) segue.destinationViewController.childViewControllers.firstObject; // segue.destinationViewController;
@@ -204,14 +223,8 @@ enum DummySettingsRows {
         }
         case kSettingSectionApp: {
             switch(indexPath.row) {
-                case PrivacySettingsRow:
-                    [cell initTapCell:NSLocalizedString(@"Privacy Settings", @"")];
-                    break;
-                case NotificationsRow:
-                    [cell initTapCell:NSLocalizedString(@"Notifications", @"")];
-                    break;
-                case BackgroundsRow:
-                    [cell initTapCell:NSLocalizedString(@"Backgrounds", @"")];
+                case GeneralSettingsRow:
+                    [cell initTapCell:NSLocalizedString(@"General Settings", @"")];
                     break;
                 case SoundsRow:
                     [cell initTapCell:NSLocalizedString(@"Sounds", @"")];
@@ -322,19 +335,9 @@ enum DummySettingsRows {
         case kSettingSectionApp: {
             switch(indexPath.row) {
                     
-                case PrivacySettingsRow: {
-                    UIViewController* privacyViewController = [[SwiftuiInterface new] makeViewWithName:@"PrivacySettings"];
+                case GeneralSettingsRow: {
+                    UIViewController* privacyViewController = [[SwiftuiInterface new] makeViewWithName:@"GeneralSettings"];
                     [self showDetailViewController:privacyViewController sender:self];
-                    break;
-                }
-                case NotificationsRow: {
-                    UIViewController* notificationSettingsController = [[SwiftuiInterface new] makeViewWithName:@"NotificationSettings"];
-                    [self showDetailViewController:notificationSettingsController sender:self];
-                    break;
-                }
-                case BackgroundsRow: {
-                    UIViewController* backgroundSettingsController = [[SwiftuiInterface new] makeBackgroundSettings:nil];
-                    [self showDetailViewController:backgroundSettingsController sender:self];
                     break;
                 }
                 case SoundsRow:
@@ -351,7 +354,7 @@ enum DummySettingsRows {
                     [self composeMail];
                     break;
                 case SubmitABugRow:
-                    [self openLink:@"https://github.com/monal-im/Monal/issues"];
+                    [self performSegueWithIdentifier:@"showBug" sender:self];
                     break;
                 default:
                     unreachable();
@@ -367,10 +370,10 @@ enum DummySettingsRows {
                     [self performSegueWithIdentifier:@"showOpenSource" sender:self];
                     break;
                 case PrivacyRow:
-                    [self openLink:@"https://monal-im.org/privacy"];
+                    [self performSegueWithIdentifier:@"showPrivacy" sender:self];
                     break;
                 case AboutRow:
-                    [self openLink:@"https://monal-im.org/about"];
+                    [self performSegueWithIdentifier:@"showAbout" sender:self];
                     break;
 #ifdef DEBUG
                 case LogRow:

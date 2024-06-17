@@ -201,7 +201,7 @@ static NSMutableDictionary* _pendingCalls;
 -(void) pushRegistry:(PKPushRegistry*) registry didUpdatePushCredentials:(PKPushCredentials*) credentials forType:(NSString*) type
 {
     NSString* token = [HelperTools stringFromToken:credentials.token];
-    DDLogDebug(@"Ignoring APNS voip token string: %@", token);
+    DDLogDebug(@"Ignoring APNS voip token string for type %@: %@", type, token);
 }
 
 -(void) pushRegistry:(PKPushRegistry*) registry didInvalidatePushTokenForType:(NSString*) type
@@ -332,14 +332,16 @@ static NSMutableDictionary* _pendingCalls;
             //this will be done once the app delegate started to connect our xmpp accounts above
             //do this in an extra thread to not block this callback thread (could be main thread or otherwise restricted by apple)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                DDLogDebug(@"Sending jmi ringing message...");
+                [call sendJmiRinging];
+                
                 //wait for our account to connect before initializing webrtc using XEP-0215 iq stanzas
                 //if the user proceeds the call before we are bound, the outgoing proceed message stanza will be queued and sent once we are bound
                 //outgoing iq messages are not queued in all cases (e.g. non-smacks reconnect), hence this waiting loop
                 while(call.account.accountState < kStateBound)
                     [NSThread sleepForTimeInterval:0.250];
                 
-                DDLogDebug(@"Account is connected, now send jmi ringing message and really initialize WebRTC...");
-                [call sendJmiRinging];
+                DDLogDebug(@"Account is connected, now really initialize WebRTC...");
                 [self initWebRTCForPendingCall:call];
             });
         }
@@ -403,8 +405,12 @@ static NSMutableDictionary* _pendingCalls;
         
         // request turn credentials
         NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"/api/v1/challenge/new" relativeToURL:[HelperTools getFailoverTurnApiServer]]];
+        if(@available(iOS 16.1, macCatalyst 16.1, *))
+            if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+                urlRequest.requiresDNSSECValidation = YES;
         [urlRequest setTimeoutInterval:3.0];
-        NSURLSessionTask* challengeSession = [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
+        NSURLSession* challengeSession = [HelperTools createEphemeralURLSession];
+        [[challengeSession dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
             if(error != nil || [(NSHTTPURLResponse*)response statusCode] != 200)
             {
                 DDLogWarn(@"Could not retrieve turn challenge, only using stun: %@", error);
@@ -440,6 +446,9 @@ static NSMutableDictionary* _pendingCalls;
                 return;
             }
             NSMutableURLRequest* responseRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"/api/v1/challenge/validate" relativeToURL:[HelperTools getFailoverTurnApiServer]]];
+            if(@available(iOS 16.1, macCatalyst 16.1, *))
+                if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+                    responseRequest.requiresDNSSECValidation = YES;
 
             [responseRequest setHTTPMethod:@"POST"];
             [responseRequest setValue:@"application/json" forHTTPHeaderField:@"Accept"];
@@ -448,7 +457,8 @@ static NSMutableDictionary* _pendingCalls;
             [responseRequest setTimeoutInterval:3.0];
             [responseRequest setHTTPBody:challengeResp];
 
-            NSURLSessionTask* responseSession = [[NSURLSession sharedSession] dataTaskWithRequest:responseRequest completionHandler:^(NSData* turnCredentialsData, NSURLResponse* response, NSError* error) {
+            NSURLSession* responseSession = [HelperTools createEphemeralURLSession];
+            [[responseSession dataTaskWithRequest:responseRequest completionHandler:^(NSData* turnCredentialsData, NSURLResponse* response, NSError* error) {
                 if(error != nil || [(NSHTTPURLResponse*)response statusCode] != 200)
                 {
                     DDLogWarn(@"Could not retrieve turn credentials, only using stun: %@", error);
@@ -466,10 +476,8 @@ static NSMutableDictionary* _pendingCalls;
                 [iceServers addObject:[[RTCIceServer alloc] initWithURLStrings:[turnCredentials objectForKey:@"uris"] username:[turnCredentials objectForKey:@"username"] credential:[turnCredentials objectForKey:@"password"]]];
                 
                 [self createWebRTCClientForCall:call usingICEServers:iceServers];
-            }];
-            [responseSession resume];
-        }];
-        [challengeSession resume];
+            }] resume];
+        }] resume];
     }
     //continue without any stun/turn servers if only p2p but no stun/turn servers could be found on local xmpp server
     //AND no fallback to monal servers was configured

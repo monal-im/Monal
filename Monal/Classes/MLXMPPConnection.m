@@ -7,6 +7,7 @@
 //
 
 #import "MLXMPPConnection.h"
+#import "MLXMLNode.h"
 
 @interface MLXMPPConnection ()
 
@@ -22,7 +23,9 @@
     self = [super init];
     self.server = server;
     self.identity = identity;
-    self.serverFeatures = [NSSet new];
+    self.serverFeatures = [MLXMLNode new];
+    self.accountDiscoFeatures = [NSSet new];
+    self.serverDiscoFeatures = [NSSet new];
     self.conferenceServers = [NSMutableDictionary new];
     self.discoveredServices = [NSMutableArray new];
     self.discoveredStunTurnServers = [NSMutableArray new];

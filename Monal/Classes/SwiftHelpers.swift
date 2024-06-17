@@ -10,9 +10,13 @@
 @_exported import Foundation
 @_exported import CocoaLumberjackSwift
 @_exported import Logging
+@_exported import PromiseKit
 import CocoaLumberjackSwiftLogBackend
 import LibMonalRustSwiftBridge
 import Combine
+//needed to render SVG to UIImage
+import SwiftUI
+import SVGView
 
 //import some defines in MLConstants.h into swift
 let kAppGroup = HelperTools.getObjcDefinedValue(.kAppGroup)
@@ -27,6 +31,14 @@ let BGFETCH_DEFAULT_INTERVAL = HelperTools.getObjcDefinedValue(.BGFETCH_DEFAULT_
 
 public typealias monal_void_block_t = @convention(block) () -> Void;
 public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
+
+//see https://stackoverflow.com/a/40629365/3528174
+extension String: Error {}
+
+//see https://stackoverflow.com/a/40592109/3528174
+public func objcCast<T>(_ obj: Any) -> T {
+    return unsafeBitCast(obj as AnyObject, to:T.self)
+}
 
 public func unreachable(_ text: String = "unreachable", _ auxData: [String:AnyObject] = [String:AnyObject](), file: String = #file, line: Int = #line, function: String = #function) -> Never {
     DDLogError("unreachable: \(file) \(line) \(function)")
@@ -87,7 +99,7 @@ class KVOObserver: NSObject {
 }
 
 @dynamicMemberLookup
-public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable {
+public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable, CustomStringConvertible, Identifiable {
     public var obj: ObjType
     private var observedMembers: NSMutableSet = NSMutableSet()
     private var observers: [KVOObserver] = Array()
@@ -154,16 +166,40 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable,
             self.setWrapper(for:member, value:newValue as AnyObject?)
         }
     }
+    
+    public var description: String {
+        return "ObservableKVOWrapper<\(String(describing:self.obj))>"
+    }
 
     @inlinable
     public static func ==(lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
         return lhs.obj.isEqual(rhs.obj)
     }
     
+    @inlinable
+    public static func ==(lhs: ObservableKVOWrapper<ObjType>, rhs: ObjType) -> Bool {
+        return lhs.obj.isEqual(rhs)
+    }
+    
+    @inlinable
+    public static func ==(lhs: ObjType, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
+        return lhs.isEqual(rhs.obj)
+    }
+    
     // see https://stackoverflow.com/a/33320737
     @inlinable
     public static func ===(lhs: ObservableKVOWrapper<ObjType>, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
         return lhs.obj === rhs.obj
+    }
+    
+    @inlinable
+    public static func ===(lhs: ObservableKVOWrapper<ObjType>, rhs: ObjType) -> Bool {
+        return lhs.obj === rhs
+    }
+    
+    @inlinable
+    public static func ===(lhs: ObjType, rhs: ObservableKVOWrapper<ObjType>) -> Bool {
+        return lhs === rhs.obj
     }
 
     @inlinable
@@ -226,6 +262,7 @@ public struct defaultsDB<Value> {
     }
 }
 
+
 @objcMembers
 public class SwiftHelpers: NSObject {
     public static func initSwiftHelpers() {
@@ -235,6 +272,55 @@ public class SwiftHelpers: NSObject {
         setRustPanicHandler({(text: String, backtrace: String) in
             HelperTools.handleRustPanic(withText: text, andBacktrace:backtrace)
         });
+    }
+    
+    //this is wrapped by HelperTools.renderUIImage(fromSVGURL) / [HelperTools renderUIImageFromSVGURL:]
+    //because MLChatImageCell wasn't able to import the monalxmpp-Swift bridging header somehow (but importing HelperTools works just fine)
+    @available(iOS 16.0, macCatalyst 16.0, *)
+    @objc(_renderUIImageFromSVGURL:)
+    public static func _renderUIImageFromSVG(url: URL?) -> UIImage? {
+        guard let url = url else {
+            return nil
+        }
+        guard let svgView = SVGParser.parse(contentsOf: url)?.toSwiftUI() else {
+            return nil
+        }
+        var image: UIImage? = nil
+        HelperTools.dispatchAsync(false, reentrantOn: DispatchQueue.main) {
+            if HelperTools.isAppExtension() {
+                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
+                DDLogDebug("We are in appex: mirroring SVG image on Y axis...");
+                image = HelperTools.mirrorImage(onXAxis:image)
+            } else {
+                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 1280, height: 960)).uiImage
+            }
+        }
+        return image
+    }
+    
+    //this is wrapped by HelperTools.renderUIImage(fromSVGURL) / [HelperTools renderUIImageFromSVGURL:]
+    //because MLChatImageCell wasn't able to import the monalxmpp-Swift bridging header somehow (but importing HelperTools works just fine)
+    @available(iOS 16.0, macCatalyst 16.0, *)
+    @objc(_renderUIImageFromSVGData:)
+    public static func _renderUIImageFromSVG(data: Data?) -> UIImage? {
+        guard let data = data else {
+            return nil
+        }
+        guard let svgView = SVGParser.parse(data: data)?.toSwiftUI() else {
+            return nil
+        }
+        var image: UIImage? = nil
+        HelperTools.dispatchAsync(false, reentrantOn: DispatchQueue.main) {
+            //the uiimage is somehow mirrored at the X-axis when received by appex --> mirror it back
+            if HelperTools.isAppExtension() {
+                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
+                DDLogDebug("We are in appex: mirroring SVG image on Y axis...");
+                image = HelperTools.mirrorImage(onXAxis:image)
+            } else {
+                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 1280, height: 960)).uiImage
+            }
+        }
+        return image
     }
 }
 

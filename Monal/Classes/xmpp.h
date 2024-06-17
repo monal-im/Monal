@@ -86,6 +86,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, readonly) xmppState accountState;
 @property (nonatomic, readonly) BOOL reconnectInProgress;
 @property (nonatomic, readonly) BOOL isDoingFullReconnect;
+@property (atomic, assign) BOOL hasSeenOmemoDeviceListAfterOwnDeviceid;
 
 // discovered properties
 @property (nonatomic, strong) NSArray* discoveredServersList;
@@ -228,7 +229,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(NSMutableArray*) getOrderedMamPageFor:(NSString*) mamQueryId;
 -(void) bindResource:(NSString*) resource;
 -(void) initSession;
--(void) sendDisplayMarkerForMessage:(MLMessage*) msg;
+-(void) sendDisplayMarkerForMessages:(NSArray<MLMessage*>*) unread;
 -(void) publishAvatar:(UIImage*) image;
 -(void) publishStatusMessage:(NSString*) message;
 -(void) delayIncomingMessageStanzasForArchiveJid:(NSString*) archiveJid;

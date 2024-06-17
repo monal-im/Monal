@@ -43,7 +43,6 @@ extension Binding {
         )
     }
 }
-
 extension Binding {
     func bytecount(mappedTo: Double) -> Binding<Double> where Value == UInt {
         Binding<Double>(
@@ -63,6 +62,162 @@ class SheetDismisserProtocol: ObservableObject {
     }
     func replace<V>(with view: V) where V: View {
         host?.rootView = AnyView(view)
+    }
+}
+
+func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedSet<ObservableKVOWrapper<MLContact>> {
+    if let contact = viewContact {
+        if(contact.isGroup) {
+            //this uses the account the muc belongs to and treats every other account to be remote,
+            //even when multiple accounts of the same monal instance are in the same group
+            var contactList : OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
+            for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: contact.accountId)) {
+                //jid can be participant_jid (if currently joined to muc) or member_jid (if not joined but member of muc)
+                guard let jid = memberInfo["participant_jid"] as? String ?? memberInfo["member_jid"] as? String else {
+                    continue
+                }
+                contactList.append(ObservableKVOWrapper<MLContact>(MLContact.createContact(fromJid: jid, andAccountNo: contact.accountId)))
+            }
+            return contactList
+        } else {
+            return [contact]
+        }
+    } else {
+        return []
+    }
+}
+
+func performMucAction(account: xmpp, mucJid: String, overlay: LoadingOverlayState, headlineView: Optional<some View>, descriptionView: Optional<some View>, action: @escaping ()->Void) -> Promise<monal_void_block_t?> {
+    showLoadingOverlay(overlay, headlineView:headlineView, descriptionView:descriptionView)
+    return Promise<monal_void_block_t?> { seal in
+        DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 1.0) {
+            account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
+                let success : Bool = data["success"] as! Bool;
+                if !success {
+                    seal.reject(data["errorMessage"] as? String ?? "Unknown error!")
+                } else {
+                    if let callback = data["callback"] {
+                        seal.fulfill(objcCast(callback) as monal_void_block_t)
+                    } else {
+                        seal.fulfill(nil)
+                    }
+                }
+            }, forMuc:mucJid)
+            action()
+        }
+    }
+}
+
+func mucAffiliationToString(_ affiliation: String?) -> String {
+    if let affiliation = affiliation {
+        if affiliation == "owner" {
+            return NSLocalizedString("Owner", comment:"muc affiliation")
+        } else if affiliation == "admin" {
+            return NSLocalizedString("Admin", comment:"muc affiliation")
+        } else if affiliation == "member" {
+            return NSLocalizedString("Member", comment:"muc affiliation")
+        } else if affiliation == "none" {
+            return NSLocalizedString("Participant", comment:"muc affiliation")
+        } else if affiliation == "outcast" {
+            return NSLocalizedString("Blocked", comment:"muc affiliation")
+        } else if affiliation == "profile" {
+            return NSLocalizedString("Open contact details", comment:"muc members list")
+        } else if affiliation == "reinvite" {
+            return NSLocalizedString("Invite again", comment:"muc invite")
+        }
+    }
+    return NSLocalizedString("<unknown>", comment:"muc affiliation")
+}
+
+func mucAffiliationToInt(_ affiliation: String?) -> Int {
+    if let affiliation = affiliation {
+        if affiliation == "owner" {
+            return 1
+        } else if affiliation == "admin" {
+            return 2
+        } else if affiliation == "member" {
+            return 3
+        } else if affiliation == "none" {
+            return 4
+        } else if affiliation == "outcast" {
+            return 5
+        } else if affiliation == "profile" {
+            return 1000
+        } else if affiliation == "reinvite" {
+            return 100
+        }
+    }
+    return 0
+}
+
+struct CollapsedPickerStyle: ViewModifier {
+    let accessibilityLabel: Text
+    func body(content: Content) -> some View {
+        Menu {
+            content
+        } label: {
+            Button(action: { }) {
+                HStack {
+                    Spacer().frame(width:8)
+                    Image(systemName: "ellipsis")
+                        .rotationEffect(.degrees(90))
+                        .foregroundColor(.primary)
+                    Spacer().frame(width:8)
+                }
+                .contentShape(Rectangle())
+            }
+            .frame(width: 24, height: 20)
+            .accessibilityLabel(accessibilityLabel)
+        }
+    }
+    
+}
+extension View {
+    func collapsedPickerStyle(accessibilityLabel label: Text) -> some View {
+        self.modifier(CollapsedPickerStyle(accessibilityLabel:label))
+    }
+}
+
+struct TopRight<T: View>: ViewModifier {
+    let overlay: T
+    public func body(content: Content) -> some View {
+        ZStack(alignment: .topLeading) {
+            content
+            VStack {
+                HStack {
+                    Spacer()
+                    overlay
+                }
+                Spacer()
+            }
+        }
+    }
+}
+extension View {
+    func addTopRight<T: View>(view overlayClosure: @autoclosure @escaping () -> T) -> some View {
+        modifier(TopRight(overlay:overlayClosure()))
+    }
+    func addTopRight(@ViewBuilder _ overlayClosure: @escaping () -> some View) -> some View {
+        modifier(TopRight(overlay:overlayClosure()))
+    }
+}
+
+@ViewBuilder
+func buildNotificationStateLabel(_ description: Text, isWorking: Bool) -> some View {
+    if(isWorking == true) {
+        Label(title: {
+            description
+        }, icon: {
+            Image(systemName: "checkmark.seal")
+                .foregroundColor(.green)
+        })
+    } else {
+        Label(title: {
+            description
+        }, icon: {
+            Image(systemName: "xmark.seal")
+                .foregroundColor(.red)
+        })
     }
 }
 
@@ -204,7 +359,7 @@ struct ClearButton: ViewModifier {
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(Color(UIColor.tertiaryLabel))
-                        .accessibilityLabel("Clear text")
+                        .accessibilityLabel(Text("Clear text"))
                 }
                 .padding(.trailing, 8)
                 .accessibilitySortPriority(1)
@@ -441,19 +596,6 @@ class SwiftuiInterface : NSObject {
     }
     
     @objc
-    func makeBackgroundSettings(_ contact: MLContact?) -> UIViewController {
-        let delegate = SheetDismisserProtocol()
-        let host = UIHostingController(rootView:AnyView(EmptyView()))
-        delegate.host = host
-        var contactArg:ObservableKVOWrapper<MLContact>? = nil;
-        if let contact = contact {
-            contactArg = ObservableKVOWrapper<MLContact>(contact)
-        }
-        host.rootView = AnyView(UIKitWorkaround(BackgroundSettings(contact:contactArg, delegate:delegate)))
-        return host
-    }
-
-    @objc
     func makeAddContactView(dismisser: @escaping (MLContact) -> ()) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
@@ -477,8 +619,6 @@ class SwiftuiInterface : NSObject {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
-            case "NotificationSettings":
-                host.rootView = AnyView(UIKitWorkaround(NotificationSettings(delegate:delegate)))
             case "DebugView":
                 host.rootView = AnyView(UIKitWorkaround(DebugView()))
             case "WelcomeLogIn":
@@ -491,39 +631,15 @@ class SwiftuiInterface : NSObject {
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate)))
             case "ChatPlaceholder":
                 host.rootView = AnyView(ChatPlaceholder())
-            case "PrivacySettings" :
-                host.rootView = AnyView(UIKitWorkaround(PrivacySettings()))
+            case "GeneralSettings" :
+                host.rootView = AnyView(UIKitWorkaround(GeneralSettings()))
             case "ActiveChatsPrivacySettings":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: PrivacySettings()))
+            case "ActiveChatsNotificatioSettings":
+                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings()))
             default:
                 unreachable()
         }
         return host
-    }
-}
-
-func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedSet<ObservableKVOWrapper<MLContact>> {
-    if let contact = viewContact {
-        if(contact.isGroup && contact.mucType == "group") {
-            //this uses the account the muc belongs to and treats every other account to be remote, even when multiple accounts of the same monal instance are in the same group
-            let jidList = Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc: contact.contactJid, forAccountId: contact.accountId))
-            var contactList : OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
-            for jidDict in jidList {
-                //jid can be participant_jid (if currently joined to muc) or member_jid (if not joined but member of muc)
-                var jid : String? = jidDict["participant_jid"] as? String
-                if(jid == nil) {
-                    jid = jidDict["member_jid"] as? String
-                }
-                if(jid != nil) {
-                    let contact = MLContact.createContact(fromJid: jid!, andAccountNo: contact.accountId)
-                    contactList.append(ObservableKVOWrapper<MLContact>(contact))
-                }
-            }
-            return contactList
-        } else {
-            return [contact]
-        }
-    } else {
-        return []
     }
 }

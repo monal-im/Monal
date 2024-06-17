@@ -93,7 +93,7 @@ enum MLServerDetailsSections {
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0191: Blocking Command", @""),
         @"Description":NSLocalizedString(@"XMPP protocol extension for communications blocking.", @""),
-        @"Color": connection.supportsBlocking ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
+        @"Color": [connection.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"] ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
     }];
 
     // supportsSM3
@@ -107,21 +107,21 @@ enum MLServerDetailsSections {
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0199: XMPP Ping", @""),
         @"Description":NSLocalizedString(@"XMPP protocol extension for sending application-level pings over XML streams.", @""),
-        @"Color": connection.supportsPing ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
+        @"Color": [connection.serverDiscoFeatures containsObject:@"urn:xmpp:ping"] ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
     }];
 
     // supportsExternalServiceDiscovery
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0215: External Service Discovery", @""),
         @"Description":NSLocalizedString(@"XMPP protocol extension for discovering services external to the XMPP network, like STUN or TURN servers needed for A/V calls.", @""),
-        @"Color": connection.supportsExternalServiceDiscovery ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
+        @"Color": [connection.serverDiscoFeatures containsObject:@"urn:xmpp:extdisco:2"] ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
     }];
     
     // supportsRosterVersion
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0237: Roster Versioning", @""),
         @"Description":NSLocalizedString(@"Defines a proposed modification to the XMPP roster protocol that enables versioning of rosters such that the server will not send the roster to the client if the roster has not been modified.", @""),
-        @"Color": connection.supportsRosterVersion ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
+        @"Color": [connection.serverFeatures check:@"{urn:xmpp:features:rosterver}ver"] ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
     }];
 
     // usingCarbons2
@@ -135,21 +135,21 @@ enum MLServerDetailsSections {
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0313: Message Archive Management", @""),
         @"Description":NSLocalizedString(@"Access message archives on the server.", @""),
-        @"Color": connection.supportsMam2 ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
+        @"Color": [connection.accountDiscoFeatures containsObject:@"urn:xmpp:mam:2"]  ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
     }];
 
     // supportsClientState
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0352: Client State Indication", @""),
         @"Description":NSLocalizedString(@"Indicate when a particular device is active or inactive. Saves battery.", @""),
-        @"Color": connection.supportsClientState ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
+        @"Color": [connection.serverFeatures check:@"{urn:xmpp:csi:0}csi"] ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
     }];
 
     // supportsPush / pushEnabled
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0357: Push Notifications", @""),
         @"Description":NSLocalizedString(@"Receive push notifications via Apple even when disconnected. Vastly improves reliability.", @""),
-        @"Color": connection.supportsPush ? (connection.pushEnabled ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_NON_IDEAL) : SERVER_DETAILS_COLOR_ERROR
+        @"Color": [connection.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"] ? (connection.pushEnabled ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_NON_IDEAL) : SERVER_DETAILS_COLOR_ERROR
     }];
 
     // supportsHTTPUpload
@@ -163,7 +163,7 @@ enum MLServerDetailsSections {
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0379: Pre-Authenticated Roster Subscription", @""),
         @"Description":NSLocalizedString(@"Defines a protocol and URI scheme for pre-authenticated roster links that allow a third party to automatically obtain the user's presence subscription.", @""),
-        @"Color": connection.supportsRosterPreApproval ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
+        @"Color": [connection.serverFeatures check:@"{urn:xmpp:features:pre-approval}sub"] ? SERVER_DETAILS_COLOR_OK : SERVER_DETAILS_COLOR_ERROR
     }];
 
     // supportsSSDP

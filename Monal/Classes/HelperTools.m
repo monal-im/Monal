@@ -278,6 +278,15 @@ void swizzle(Class c, SEL orig, SEL new)
         method_exchangeImplementations(origMethod, newMethod);
 }
 
+@implementation WeakContainer
+-(id) initWithObj:(id) obj
+{
+    self = [super init];
+    self.obj = obj;
+    return self;
+}
+@end
+
 @implementation HelperTools
 
 +(void) initialize
@@ -519,6 +528,18 @@ void swizzle(Class c, SEL orig, SEL new)
     ];
 }
 
+//this wrapper is needed, because MLChatImageCell can't import our monalxmpp-Swift bridging header, but importing HelperTools is okay
++(UIImage* _Nullable) renderUIImageFromSVGURL:(NSURL* _Nullable) url    API_AVAILABLE(ios(16.0), macosx(13.0))  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
+{
+    return [SwiftHelpers _renderUIImageFromSVGURL:url];
+}
+
+//this wrapper is needed, because MLChatImageCell can't import our monalxmpp-Swift bridging header, but importing HelperTools is okay
++(UIImage* _Nullable) renderUIImageFromSVGData:(NSData* _Nullable) data    API_AVAILABLE(ios(16.0), macosx(13.0))  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
+{
+    return [SwiftHelpers _renderUIImageFromSVGData:data];
+}
+
 +(void) busyWaitForOperationQueue:(NSOperationQueue*) queue
 {
     //apparently setting someQueue.suspended = YES does return before the queue is actually suspended
@@ -526,7 +547,7 @@ void swizzle(Class c, SEL orig, SEL new)
     int busyWaitCounter = 0;
     NSTimeInterval waitTime = 0.0;
     NSDate* startTime = [NSDate date];
-    while(queue.suspended != YES)
+    while([queue isSuspended] != YES)
     {
         busyWaitCounter++;
         waitTime = [[NSDate date] timeIntervalSinceDate:startTime];
@@ -578,6 +599,8 @@ void swizzle(Class c, SEL orig, SEL new)
             NSCondition* condition = [NSCondition new];
             [condition lock];
             dispatch_async(dispatch_queue_create_with_target(name, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(priority, 0)), ^{
+                //set thread name, too (not only runloop name)
+                [NSThread.currentThread setName:[NSString stringWithFormat:@"%s", name]];
                 //we don't need an @synchronized block around this because the @synchronized block of the outer thread
                 //waits until we signal our condition (e.g. no other thread can race with us)
                 NSRunLoop* localLoop = runloops[@(identifier)] = [NSRunLoop currentRunLoop];
@@ -648,9 +671,11 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(BOOL) shouldProvideVoip
 {
-    BOOL shouldProvideVoip;
+    BOOL shouldProvideVoip = NO;
 #if TARGET_OS_MACCATALYST
-    shouldProvideVoip = NO;
+#ifdef IS_ALPHA
+    shouldProvideVoip = YES;
+#endif
 #else
     shouldProvideVoip = YES;
 #endif
@@ -1138,24 +1163,88 @@ void swizzle(Class c, SEL orig, SEL new)
 }
 #pragma clang diagnostic pop
 
-+(UIImage*) imageWithNotificationBadgeForImage:(UIImage*) image {
-    UIImage* finalImage;
-    UIImage* badge = [[UIImage systemImageNamed:@"circle.fill"] imageWithTintColor:UIColor.redColor];
+//see https://gist.github.com/giaesp/7704753
++(UIImage* _Nullable) rotateImage:(UIImage* _Nullable) image byRadians:(CGFloat) rotation
+{
+    if(image == nil)
+        return nil;
+    
+    //Calculate Destination Size
+    CGAffineTransform t = CGAffineTransformMakeRotation(rotation);
+    CGRect sizeRect = (CGRect) {.size = image.size};
+    CGRect destRect = CGRectApplyAffineTransform(sizeRect, t);
+    
+    return [[[UIGraphicsImageRenderer alloc] initWithSize:destRect.size] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull rendererContext) {
+        CGContextRef context = rendererContext.CGContext;
+        
+        //Move the origin to the middle of the image to apply the transformation
+        CGContextTranslateCTM(context, destRect.size.width / 2.0f, destRect.size.height / 2.0f);
+        CGContextRotateCTM(context, rotation);
+        
+        //Draw the original image into the transformed context
+        [image drawInRect:CGRectMake(-image.size.width / 2.0f, -image.size.height / 2.0f, image.size.width, image.size.height)];
+    }];
+}
 
-    UIGraphicsBeginImageContext(CGSizeMake(image.size.width, image.size.height));
++(UIImage* _Nullable) mirrorImageOnXAxis:(UIImage* _Nullable) image
+{
+    if(image == nil)
+        return nil;
+    
+    return [[[UIGraphicsImageRenderer alloc] initWithSize:image.size] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull rendererContext) {
+        CGContextRef context = rendererContext.CGContext;
+        
+        //Move the origin to the middle of the image to apply the transformation
+        CGContextTranslateCTM(context, image.size.width / 2, image.size.height / 2);
+        
+        //Apply the y-axis mirroring transform
+        CGContextScaleCTM(context, 1.0, -1.0);
+        
+        //Move the origin back to the bottom left corner
+        CGContextTranslateCTM(context, -image.size.width / 2, -image.size.height / 2);
+        
+        //Draw the original image into the transformed context
+        [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    }];
+}
+
++(UIImage* _Nullable) mirrorImageOnYAxis:(UIImage* _Nullable) image
+{
+    if(image == nil)
+        return nil;
+    
+    return [[[UIGraphicsImageRenderer alloc] initWithSize:image.size] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull rendererContext) {
+        CGContextRef context = rendererContext.CGContext;
+        
+        //Move the origin to the middle of the image to apply the transformation
+        CGContextTranslateCTM(context, image.size.width / 2, image.size.height / 2);
+        
+        //Apply the y-axis mirroring transform
+        CGContextScaleCTM(context, -1.0, 1.0);
+        
+        //Move the origin back to the bottom left corner
+        CGContextTranslateCTM(context, -image.size.width / 2, -image.size.height / 2);
+        
+        //Draw the original image into the transformed context
+        [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    }];
+}
+
++(UIImage*) imageWithNotificationBadgeForImage:(UIImage*) image
+{
+    UIImage* badge = [[UIImage systemImageNamed:@"circle.fill"] imageWithTintColor:UIColor.redColor];
 
     CGRect imgSize = CGRectMake(0, 0, image.size.width, image.size.height);
     CGRect dotSize = CGRectMake(image.size.width - 7, 0, 7, 7);
-    [image drawInRect:imgSize];
-    [badge drawInRect:dotSize blendMode:kCGBlendModeNormal alpha:1.0];
-
-    finalImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-
-    return finalImage;
+    
+    return [[[UIGraphicsImageRenderer alloc] initWithSize:image.size] imageWithActions:^(UIGraphicsImageRendererContext* _Nonnull rendererContext) {
+        [image drawInRect:imgSize];
+        [badge drawInRect:dotSize blendMode:kCGBlendModeNormal alpha:1.0];
+    }];
 }
 
-+(UIImageView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler {
++(UIImageView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler
+{
     UIImageView* result;
     if(hasNotification)
         result = [[UIImageView alloc] initWithImage:[self imageWithNotificationBadgeForImage:image]];
@@ -1980,16 +2069,20 @@ void swizzle(Class c, SEL orig, SEL new)
             @"jabber:x:conference",
             @"jabber:x:oob",
             @"urn:xmpp:ping",
-            @"urn:xmpp:receipts",
-            @"urn:xmpp:idle:1",
-            @"http://jabber.org/protocol/chatstates",
-            @"urn:xmpp:chat-markers:0",
             @"urn:xmpp:eme:0",
             @"urn:xmpp:message-retract:1",
             @"urn:xmpp:message-correct:0",
             
             
         ] mutableCopy];
+        if([[HelperTools defaultsDB] boolForKey: @"SendLastUserInteraction"])
+            [featuresArray addObject:@"urn:xmpp:idle:1"];
+        if([[HelperTools defaultsDB] boolForKey: @"SendLastChatState"])
+            [featuresArray addObject:@"http://jabber.org/protocol/chatstates"];
+        if([[HelperTools defaultsDB] boolForKey: @"SendReceivedMarkers"])
+            [featuresArray addObject:@"urn:xmpp:receipts"];
+        if([[HelperTools defaultsDB] boolForKey: @"SendDisplayedMarkers"])
+            [featuresArray addObject:@"urn:xmpp:chat-markers:0"];
         if([[HelperTools defaultsDB] boolForKey: @"allowVersionIQ"])
             [featuresArray addObject:@"jabber:iq:version"];
         //voip stuff
@@ -2706,6 +2799,15 @@ a=%@\r\n", mid, candidate];
     if([[IPV6 matchesInString:host options:0 range:NSMakeRange(0, [host length])] count] > 0)
         return YES;
     return NO;
+}
+
++(NSURLSession*) createEphemeralURLSession
+{
+    NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+    if(@available(iOS 16.1, macCatalyst 16.1, *))
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            sessionConfig.requiresDNSSECValidation = YES;
+    return [NSURLSession sessionWithConfiguration:sessionConfig];
 }
 
 @end

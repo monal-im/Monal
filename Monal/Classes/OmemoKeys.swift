@@ -5,10 +5,8 @@
 //  Created by Jan on 04.05.22.
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
-import UniformTypeIdentifiers
-import SwiftUI
+
 import OrderedCollections
-import monalxmpp
 
 struct OmemoKeysEntry: View {
     private let contactJid: String
@@ -382,14 +380,14 @@ struct OmemoKeys: View {
             }
         }
         .accentColor(monalGreen)
-        .navigationBarTitle((self.ownKeys == true) ? "My Encryption Keys" : "Encryption Keys", displayMode: .inline)
+        .navigationBarTitle((self.ownKeys == true) ? Text("My Encryption Keys") : Text("Encryption Keys"), displayMode: .inline)
         .onAppear(perform: {
             self.selectedContact = self.contacts.first // needs to be done here as first is nil in init
         })
         .alert(isPresented: $showScannedContactMissmatchAlert) {
             Alert(
                 title: Text("QR code: Fingerprints found"),
-                message: Text(String.localizedStringWithFormat("Do you want to trust the scanned fingerprints of contact %@ when using your account %@?", self.scannedJid, self.account!.connectionProperties.identity.jid)),
+                message: Text("Do you want to trust the scanned fingerprints of contact \(self.scannedJid) when using your account \(self.account!.connectionProperties.identity.jid)?"),
                 primaryButton: .cancel(Text("No")),
                 secondaryButton: .default(Text("Yes"), action: {
                     resetTrustFromQR(scannedJid: self.scannedJid, scannedFingerprints: self.scannedFingerprints)

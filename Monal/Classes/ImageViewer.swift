@@ -7,6 +7,7 @@
 //
 
 import UniformTypeIdentifiers
+import SVGView
 
 @available(iOS 16, *)
 struct GifRepresentation: Transferable {
@@ -27,6 +28,19 @@ struct JpegRepresentation: Transferable {
     
     static var transferRepresentation: some TransferRepresentation {
         DataRepresentation(exportedContentType: .jpeg) { item in
+            { () -> Data in
+                return item.getData()
+            }()
+        }
+    }
+}
+
+@available(iOS 16, *)
+struct SVGRepresentation: Transferable {
+    let getData: () -> Data
+    
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .svg) { item in
             { () -> Data in
                 return item.getData()
             }()
@@ -56,7 +70,13 @@ struct ImageViewer: View {
             Color.background
                 .edgesIgnoringSafeArea(.all)
             
-            if let image = UIImage(contentsOfFile:info["cacheFile"] as! String) {
+            if (info["mimeType"] as! String).hasPrefix("image/svg") {
+                VStack {
+                    ZoomableContainer(maxScale:8.0, doubleTapScale:4.0) {
+                        SVGView(contentsOf: URL(fileURLWithPath:info["cacheFile"] as! String))
+                    }
+                }
+            } else if let image = UIImage(contentsOfFile:info["cacheFile"] as! String) {
                 VStack {
                     ZoomableContainer(maxScale:8.0, doubleTapScale:4.0) {
                         if (info["mimeType"] as! String).hasPrefix("image/gif") {
@@ -98,27 +118,38 @@ struct ImageViewer: View {
                                 Spacer().frame(width:20)
                                 Text(info["filename"] as! String).foregroundColor(.primary)
                                 Spacer()
-                                if #available(iOS 16, *), let image = UIImage(contentsOfFile:info["cacheFile"] as! String) {
-                                    if (info["mimeType"] as! String).hasPrefix("image/gif") {
+                                if #available(iOS 16, *) {
+                                    if (info["mimeType"] as! String).hasPrefix("image/svg"), let image = HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info["cacheFile"] as! String)) {
                                         ShareLink(
-                                            item: GifRepresentation(getData: {
+                                            item: SVGRepresentation(getData: {
                                                 try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data
                                             }), preview: SharePreview("Share image", image: Image(uiImage: image))
                                         )
                                             .labelStyle(.iconOnly)
                                             .foregroundColor(.primary)
-                                    } else {
-                                        // even share non-gif images as Data instead of Image, because this leads to fewer crashes of other apps
-                                        // see https://medium.com/@timonus/reduce-share-extension-crashes-from-your-app-with-this-one-weird-trick-6b86211bb175
-                                        ShareLink(
-                                            item: JpegRepresentation(getData: {
-                                                try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data
-                                            }), preview: SharePreview("Share image", image: Image(uiImage: image))
-                                        )
-                                            .labelStyle(.iconOnly)
-                                            .foregroundColor(.primary)
+                                        Spacer().frame(width:20)
+                                    } else if let image = UIImage(contentsOfFile:info["cacheFile"] as! String) {
+                                        if (info["mimeType"] as! String).hasPrefix("image/gif") {
+                                            ShareLink(
+                                                item: GifRepresentation(getData: {
+                                                    try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data
+                                                }), preview: SharePreview("Share image", image: Image(uiImage: image))
+                                            )
+                                                .labelStyle(.iconOnly)
+                                                .foregroundColor(.primary)
+                                        } else {
+                                            // even share non-gif images as Data instead of Image, because this leads to fewer crashes of other apps
+                                            // see https://medium.com/@timonus/reduce-share-extension-crashes-from-your-app-with-this-one-weird-trick-6b86211bb175
+                                            ShareLink(
+                                                item: JpegRepresentation(getData: {
+                                                    try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data
+                                                }), preview: SharePreview("Share image", image: Image(uiImage: image))
+                                            )
+                                                .labelStyle(.iconOnly)
+                                                .foregroundColor(.primary)
+                                        }
+                                        Spacer().frame(width:20)
                                     }
-                                    Spacer().frame(width:20)
                                 }
                                 Button(action: {
                                     self.delegate.dismiss()

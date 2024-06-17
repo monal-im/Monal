@@ -23,21 +23,6 @@
 //this is the required prototype from Holger's snprintf.c
 int rpl_vasprintf(char **, const char *, va_list *);
 
-
-//weak container holding an object as weak pointer (needed to not create retain circles in NSCache
-@interface WeakContainer : NSObject
-@property (nonatomic, weak) id obj;
-@end
-@implementation WeakContainer
--(id) initWithObj:(id) obj
-{
-    self = [super init];
-    self.obj = obj;
-    return self;
-}
-@end
-
-
 @interface MLXMLNode()
 {
     NSMutableArray* _children;

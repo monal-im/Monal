@@ -6,9 +6,6 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import SwiftUI
-import monalxmpp
-
 struct WelcomeLogIn: View {
     static private let credFaultyPattern = "^.+@.+\\..{2,}$"
     
@@ -113,6 +110,16 @@ struct WelcomeLogIn: View {
             }
         }
     }
+    
+    private func dismissAndShowPrivacySettings() {
+        self.delegate.dismiss()
+        if !HelperTools.defaultsDB().bool(forKey:"HasSeenPrivacySettings") {
+            let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+            if let activeChats = appDelegate.activeChats {
+                activeChats.showPrivacySettings()
+            }
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -179,7 +186,7 @@ struct WelcomeLogIn: View {
                         .alert(isPresented: $showAlert) {
                             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                                 if(self.loginComplete == true) {
-                                    self.delegate.dismiss()
+                                    dismissAndShowPrivacySettings()
                                 }
                             }))
                         }
@@ -218,7 +225,7 @@ struct WelcomeLogIn: View {
                     
                     if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
                         Button(action: {
-                            self.delegate.dismiss()
+                            dismissAndShowPrivacySettings()
                         }){
                             Text("Set up account later")
                                 .frame(maxWidth: .infinity)

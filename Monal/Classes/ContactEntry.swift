@@ -6,11 +6,25 @@
 //  Copyright © 2023 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-
-struct ContactEntry: View {
-    let contact : ObservableKVOWrapper<MLContact>
-
+struct ContactEntry<AdditionalContent: View>: View {
+    let contact: ObservableKVOWrapper<MLContact>
+    let selfnotesPrefix: Bool
+    @ViewBuilder let additionalContent: () -> AdditionalContent
+    
+    init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool = true) where AdditionalContent == EmptyView {
+        self.init(contact:contact, selfnotesPrefix:selfnotesPrefix, additionalContent:{ EmptyView() })
+    }
+    
+    init(contact:ObservableKVOWrapper<MLContact>, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
+        self.init(contact:contact, selfnotesPrefix:true, additionalContent:additionalContent)
+    }
+    
+    init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
+        self.contact = contact
+        self.selfnotesPrefix = selfnotesPrefix
+        self.additionalContent = additionalContent
+    }
+    
     var body:some View {
         ZStack(alignment: .topLeading) {
             HStack(alignment: .center) {
@@ -18,8 +32,15 @@ struct ContactEntry: View {
                     .resizable()
                     .frame(width: 40, height: 40, alignment: .center)
                 VStack(alignment: .leading) {
-                    Text(contact.contactDisplayName as String)
-                    Text(contact.contactJid as String).font(.footnote).opacity(0.6)
+                    if selfnotesPrefix {
+                        Text(contact.contactDisplayName as String)
+                    } else {
+                        Text(contact.contactDisplayNameWithoutSelfnotesPrefix as String)
+                    }
+                    additionalContent()
+                    Text(contact.contactJid as String)
+                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .font(.footnote)
                 }
             }
         }

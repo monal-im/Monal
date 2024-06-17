@@ -115,7 +115,7 @@
     if([iqNode check:@"{urn:xmpp:blocking}block"] || [iqNode check:@"{urn:xmpp:blocking}unblock"])
     {
         //make sure we don't process blocking updates not coming from our own account
-        if(account.connectionProperties.supportsBlocking && (iqNode.from == nil || [iqNode.fromUser isEqualToString:account.connectionProperties.identity.jid]))
+        if([account.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"] && (iqNode.from == nil || [iqNode.fromUser isEqualToString:account.connectionProperties.identity.jid]))
         {
             BOOL blockingUpdated = NO;
             // mark jid as unblocked
@@ -407,7 +407,7 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
     }
     
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
-    account.connectionProperties.accountFeatures = features;
+    account.connectionProperties.accountDiscoFeatures = features;
     
     if(
         [iqNode check:@"{http://jabber.org/protocol/disco#info}query/identity<category=pubsub><type=pep>"] &&       //xep-0163 support
@@ -461,14 +461,12 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
     if([features containsObject:@"urn:xmpp:push:0"])
     {
         DDLogInfo(@"supports push");
-        account.connectionProperties.supportsPush = YES;
         [account enablePush];
     }
     
     if([features containsObject:@"urn:xmpp:mam:2"])
     {
         DDLogInfo(@"supports mam:2");
-        account.connectionProperties.supportsMam2 = YES;
         
         //query mam since last received stanza ID because we could not resume the smacks session
         //(we would not have landed here if we were able to resume the smacks session)
@@ -513,7 +511,7 @@ $$class_handler(handleServerDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
     }
     
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
-    account.connectionProperties.serverFeatures = features;
+    account.connectionProperties.serverDiscoFeatures = features;
     
     if([features containsObject:@"urn:xmpp:carbons:2"])
     {
@@ -527,17 +525,8 @@ $$class_handler(handleServerDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
         }
     }
     
-    if([features containsObject:@"urn:xmpp:ping"])
-        account.connectionProperties.supportsPing = YES;
-    
-    if([features containsObject:@"urn:xmpp:extdisco:2"])
-        account.connectionProperties.supportsExternalServiceDiscovery = YES;
-
     if([features containsObject:@"urn:xmpp:blocking"])
-    {
-        account.connectionProperties.supportsBlocking = YES;
         [account fetchBlocklist];
-    }
     
     if(!account.connectionProperties.supportsHTTPUpload && [features containsObject:@"urn:xmpp:http:upload:0"])
     {
@@ -547,6 +536,10 @@ $$class_handler(handleServerDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
         account.connectionProperties.uploadSize = [[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{urn:xmpp:http:upload:0}result@max-file-size\\|int"] integerValue];
         DDLogInfo(@"Upload max filesize: %lu", account.connectionProperties.uploadSize);
     }
+    
+    //query external services to learn stun/turn servers
+    if([features containsObject:@"urn:xmpp:extdisco:2"])
+        [account queryExternalServicesOn:iqNode.fromUser];
 $$
 
 $$class_handler(handleServiceDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
@@ -563,6 +556,10 @@ $$class_handler(handleServiceDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
     
     if([features containsObject:@"http://jabber.org/protocol/muc"])
         account.connectionProperties.conferenceServers[iqNode.fromUser] = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query"];
+    
+    //query external services to learn stun/turn servers
+    if([features containsObject:@"urn:xmpp:extdisco:2"])
+        [account queryExternalServicesOn:iqNode.fromUser];
 $$
 
 $$class_handler(handleServerDiscoItems, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
@@ -576,8 +573,6 @@ $$class_handler(handleServerDiscoItems, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
             [discoInfo setiqTo:[item objectForKey:@"jid"]];
             [discoInfo setDiscoInfoNode];
             [account sendIq:discoInfo withHandler:$newHandler(self, handleServiceDiscoInfo)];
-            
-            [account queryExternalServicesOn:[item objectForKey:@"jid"]];
         }
     }
 $$
@@ -675,8 +670,11 @@ $$class_handler(handlePushEnabled, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), 
 $$
 
 $$class_handler(handleBlocklist, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
-    if(!account.connectionProperties.supportsBlocking)
+    if(![account.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
+    {
+        DDLogWarn(@"Ignoring blocklist update, server does not announce support for blocking!");
         return;
+    }
 
     if([iqNode check:@"/<type=error>"])
     {
@@ -698,8 +696,11 @@ $$class_handler(handleBlocklist, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
 $$
 
 $$class_handler(handleBlocked, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, blockedJid))
-    if(!account.connectionProperties.supportsBlocking)
+    if(![account.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
+    {
+        DDLogWarn(@"Ignoring block result, server does not announce support for blocking!");
         return;
+    }
     
     if([iqNode check:@"/<type=error>"])
     {

@@ -45,7 +45,7 @@ static NSMutableDictionary* _RRCache;
     NSString* serviceDiscoveryString = [NSString stringWithFormat:@"_xmpp%@-client._tcp.%@", secure ? @"s" : @"", domain];
     res = DNSServiceQueryRecord(
         &sdRef,
-        kDNSServiceFlagsReturnIntermediates,
+        kDNSServiceFlagsReturnIntermediates,    // | kDNSServiceFlagsValidate,
         0,
         [serviceDiscoveryString UTF8String],
         kDNSServiceType_SRV,
@@ -125,6 +125,8 @@ static NSMutableDictionary* _RRCache;
         //wait for both dns queries to complete
         dispatch_barrier_sync(queue, ^{
             DDLogVerbose(@"SRV DNS queries completed (xmpps AND xmpp)...");
+//             [HelperTools flushLogsWithTimeout:0.100];
+//             exit(0);
         });
         
         @synchronized(self.discoveredServers) {
@@ -240,16 +242,13 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
 {
     //make sure the compiler doesn't cry because of unused arguments
     (void)DNSServiceRef;
-    (void)flags;
     (void)interfaceIndex;
     (void)rrclass;
-    (void)ttl;
-    (void)_context;
     
     //just ignore errors (don't fill anything into the discoveredServers array)
     if(errorCode)
     {
-        // DDLogVerbose(@"query callback: error==%d\n", errorCode);
+        DDLogVerbose(@"query callback: error==%d\n", errorCode);
         return;
     }
     
@@ -265,7 +264,7 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
         if(srvDomainLen > MAX_DOMAIN_NAME)
             return;
         ConvertDomainNameToCString_withescape(&srv->target, srvDomainLen, targetStr, 0);
-        DDLogVerbose(@"pri=%d, w=%d, port=%d, target=%s, ttl=%u\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetStr, ttl);
+        DDLogVerbose(@"pri=%d, w=%d, port=%d, target=%s, ttl=%u, flags=%u\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetStr, ttl, (u_int32_t)flags);
         
         NSString* theServer = [NSString stringWithUTF8String:targetStr];
         NSNumber* prio = [NSNumber numberWithUnsignedInt:(ntohs(srv->priority) + (isSecure == YES ? 0 : UINT16_MAX))]; // prefer TLS over STARTTLS

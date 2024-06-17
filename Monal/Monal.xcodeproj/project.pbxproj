@@ -10,7 +10,7 @@
 		08CAF17FA202CF3CB760D93C /* Pods_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7A5555D807EE78C95217FD /* Pods_NotificationService.framework */; };
 		1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* MonalAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
-		20ED55852BADDA5C0005783E /* PrivacySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20ED55842BADDA5C0005783E /* PrivacySettings.swift */; };
+		20ED55852BADDA5C0005783E /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20ED55842BADDA5C0005783E /* GeneralSettings.swift */; };
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		260773C4232FC4E800BFD50F /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 260773C3232FC4E800BFD50F /* NotificationService.m */; };
 		2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */; };
@@ -83,7 +83,7 @@
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
 		389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
-		3D06A515281FFCC000DDAE90 /* NotificationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */; };
+		3D06A515281FFCC000DDAE90 /* NotificationDebugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D06A514281FFCC000DDAE90 /* NotificationDebugging.swift */; };
 		3D27D956290B0BB60014748B /* AddContactMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D27D955290B0BB60014748B /* AddContactMenu.swift */; };
 		3D27D958290B0BC80014748B /* ContactRequestsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */; };
 		3D5A91422842B4AE008CE57E /* MemberList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D5A91412842B4AE008CE57E /* MemberList.swift */; };
@@ -160,8 +160,11 @@
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
 		84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84C1CD532A8F6196007076ED /* MLStreamRedirect.h */; };
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
+		84E231F32C16A9CE00735FB7 /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 84E231F22C16A9CE00735FB7 /* SVGView */; };
 		84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		84E55E8029644279003E191A /* ActiveChatsViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E55E7F2964426D003E191A /* ActiveChatsViewController.h */; };
+		84F194CE2C101A3E00F0A994 /* PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 84F194CD2C101A3E00F0A994 /* PromiseKit */; };
+		84F194D12C15197200F0A994 /* FrameUp in Frameworks */ = {isa = PBXBuildFile; productRef = 84F194D02C15197200F0A994 /* FrameUp */; };
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
@@ -177,10 +180,7 @@
 		C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D88BB76295BB6DC00FB30BA /* CreateGroupMenu.swift */; };
 		C117F7E22B0863B3001F2BC6 /* ContactPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D631822294BAB1D00026BE7 /* ContactPicker.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
-		C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
-		C153825F2B89BBE600EA83EC /* GroupDetailsEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = C153825E2B89BBE600EA83EC /* GroupDetailsEdit.swift */; };
-		C15382622B89C38300EA83EC /* EditGroupName.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15382612B89C38300EA83EC /* EditGroupName.swift */; };
 		C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */; };
 		C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = C158D3FE25A0AB810005AA40 /* MLMucProcessor.h */; };
 		C158D41425A0AC630005AA40 /* MLMucProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = C158D41225A0AC630005AA40 /* MLMucProcessor.m */; };
@@ -306,7 +306,7 @@
 		1D3623240D0F684500981E51 /* MonalAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MonalAppDelegate.h; path = Classes/MonalAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* MonalAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MonalAppDelegate.m; path = Classes/MonalAppDelegate.m; sourceTree = "<group>"; };
 		1D46F251C198E3D8FA55692F /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
-		20ED55842BADDA5C0005783E /* PrivacySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettings.swift; sourceTree = "<group>"; };
+		20ED55842BADDA5C0005783E /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
 		213F5BFD4599EC9317B99E97 /* Pods-Monal.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
 		21E99538324C14220843F325 /* Pods-shareSheet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.debug.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.debug.xcconfig"; sourceTree = "<group>"; };
 		222F09C97CFF93A2CF1007F3 /* Pods-MonalUITests.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.alpha-ios.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.alpha-ios.xcconfig"; sourceTree = "<group>"; };
@@ -502,7 +502,7 @@
 		389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAudioRecoderManager.h; sourceTree = "<group>"; };
 		39B989B9775C0725A810D271 /* Pods-MonalUITests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		39DB4C9159DA578D1A34990D /* Pods-monalxmpp.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.alpha.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.alpha.xcconfig"; sourceTree = "<group>"; };
-		3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettings.swift; sourceTree = "<group>"; };
+		3D06A514281FFCC000DDAE90 /* NotificationDebugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDebugging.swift; sourceTree = "<group>"; };
 		3D27D955290B0BB60014748B /* AddContactMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddContactMenu.swift; sourceTree = "<group>"; };
 		3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactRequestsMenu.swift; sourceTree = "<group>"; };
 		3D5A91412842B4AE008CE57E /* MemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberList.swift; sourceTree = "<group>"; };
@@ -592,6 +592,10 @@
 		84C1CD532A8F6196007076ED /* MLStreamRedirect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLStreamRedirect.h; sourceTree = "<group>"; };
 		84D31CE528653B83006D7926 /* WebRTCClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebRTCClient.swift; path = Classes/WebRTCClient.swift; sourceTree = SOURCE_ROOT; };
 		84E55E7F2964426D003E191A /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
+		84F194C32C0FE70900F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Main.strings"; sourceTree = "<group>"; };
+		84F194C42C0FE74500F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Settings.strings"; sourceTree = "<group>"; };
+		84F194C52C0FE78B00F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/iosShare.strings"; sourceTree = "<group>"; };
+		84F194C62C0FE79000F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		84FC37542897521400634E3E /* snprintf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = snprintf.m; sourceTree = "<group>"; };
 		84FC37562897523500634E3E /* metamacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
 		84FC375828981A5600634E3E /* PasswordMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordMigration.swift; sourceTree = "<group>"; };
@@ -636,8 +640,6 @@
 		C13E640925BD406700763D6F /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "external/pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
-		C153825E2B89BBE600EA83EC /* GroupDetailsEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailsEdit.swift; sourceTree = "<group>"; };
-		C15382612B89C38300EA83EC /* EditGroupName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditGroupName.swift; sourceTree = "<group>"; };
 		C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLQRCodeScanner.swift; sourceTree = "<group>"; };
 		C1567E3528255C64006E9637 /* Monal.macos.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Monal.macos.entitlements; sourceTree = "<group>"; };
 		C1567E3628255C64006E9637 /* Monal.ios.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Monal.ios.entitlements; sourceTree = "<group>"; };
@@ -666,7 +668,6 @@
 		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
 		C1943A4A25309A9D0036172F /* MLReloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReloadCell.h; sourceTree = "<group>"; };
 		C1943A4B25309A9D0036172F /* MLReloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLReloadCell.m; sourceTree = "<group>"; };
-		C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailsHeader.swift; sourceTree = "<group>"; };
 		C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatViewHelper.h; sourceTree = "<group>"; };
 		C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatViewHelper.m; sourceTree = "<group>"; };
 		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
@@ -773,6 +774,7 @@
 			files = (
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
 				C1E1EC7B286A025F0097EC74 /* SwiftSoup in Frameworks */,
+				84F194D12C15197200F0A994 /* FrameUp in Frameworks */,
 				C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
 				841898AA2957712000FEC77D /* ViewExtractor in Frameworks */,
@@ -803,8 +805,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */,
+				84F194CE2C101A3E00F0A994 /* PromiseKit in Frameworks */,
 				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
 				849ADF412BACF0360009BCD7 /* CocoaLumberjackSwift in Frameworks */,
+				84E231F32C16A9CE00735FB7 /* SVGView in Frameworks */,
 				849ADF432BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
 				8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */,
 			);
@@ -1002,11 +1006,11 @@
 				2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */,
 				26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */,
 				26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */,
-				3D06A514281FFCC000DDAE90 /* NotificationSettings.swift */,
+				3D06A514281FFCC000DDAE90 /* NotificationDebugging.swift */,
 				E8CF9CBF26249640001A1952 /* MLSettingsAboutViewController.h */,
 				E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */,
 				8441EFF82921B53500E851E9 /* BackgroundSettings.swift */,
-				20ED55842BADDA5C0005783E /* PrivacySettings.swift */,
+				20ED55842BADDA5C0005783E /* GeneralSettings.swift */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -1099,11 +1103,8 @@
 				3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */,
 				3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */,
 				3D65B78C27234B74005A30F4 /* ContactDetails.swift */,
-				C19C919A26E26AF000F8CC57 /* ContactDetailsHeader.swift */,
 				3D5A91412842B4AE008CE57E /* MemberList.swift */,
 				C18967C62B81F61B0073C7C5 /* ChannelMemberList.swift */,
-				C153825E2B89BBE600EA83EC /* GroupDetailsEdit.swift */,
-				C15382612B89C38300EA83EC /* EditGroupName.swift */,
 				C1E8A7F62B8E47C300760220 /* EditGroupSubject.swift */,
 			);
 			name = "Contact Details";
@@ -1527,6 +1528,7 @@
 				C1F5C7AE2777638B0001F295 /* OrderedCollections */,
 				C1E1EC7A286A025F0097EC74 /* SwiftSoup */,
 				841898A92957712000FEC77D /* ViewExtractor */,
+				84F194D02C15197200F0A994 /* FrameUp */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1590,6 +1592,8 @@
 				849ADF3E2BACF0360009BCD7 /* CocoaLumberjack */,
 				849ADF402BACF0360009BCD7 /* CocoaLumberjackSwift */,
 				849ADF422BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend */,
+				84F194CD2C101A3E00F0A994 /* PromiseKit */,
+				84E231F22C16A9CE00735FB7 /* SVGView */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1733,6 +1737,7 @@
 				pa,
 				ko,
 				eu,
+				"es-AR",
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			packageReferences = (
@@ -1740,6 +1745,9 @@
 				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
 				849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
+				84F194CC2C101A3E00F0A994 /* XCRemoteSwiftPackageReference "PromiseKit" */,
+				84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */,
+				84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -2045,9 +2053,8 @@
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
 				C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
-				20ED55852BADDA5C0005783E /* PrivacySettings.swift in Sources */,
+				20ED55852BADDA5C0005783E /* GeneralSettings.swift in Sources */,
 				84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */,
-				C15382622B89C38300EA83EC /* EditGroupName.swift in Sources */,
 				C1E8A7F72B8E47C300760220 /* EditGroupSubject.swift in Sources */,
 				263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */,
 				3D65B78D27234B74005A30F4 /* ContactDetails.swift in Sources */,
@@ -2066,7 +2073,7 @@
 				54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */,
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
 				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
-				3D06A515281FFCC000DDAE90 /* NotificationSettings.swift in Sources */,
+				3D06A515281FFCC000DDAE90 /* NotificationDebugging.swift in Sources */,
 				845D636B2AD4AEDA0066EFFB /* ImageViewer.swift in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */,
@@ -2077,8 +2084,6 @@
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
-				C13A0BCE26E78B7B00987E29 /* ContactDetailsHeader.swift in Sources */,
-				C153825F2B89BBE600EA83EC /* GroupDetailsEdit.swift in Sources */,
 				3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */,
 				849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */,
 				C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */,
@@ -2289,6 +2294,7 @@
 				C132EA9B26C92E9000BB9A67 /* pa */,
 				C15A4E5F279D2AC80055CD11 /* ko */,
 				C1E856A828DECF5F00B104E9 /* eu */,
+				84F194C52C0FE78B00F0A994 /* es-AR */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2330,6 +2336,7 @@
 				C132EA9626C92DD900BB9A67 /* pa */,
 				C15A4E5D279D2AC70055CD11 /* ko */,
 				C1E856A728DECF5F00B104E9 /* eu */,
+				84F194C42C0FE74500F0A994 /* es-AR */,
 			);
 			name = Settings.storyboard;
 			sourceTree = "<group>";
@@ -2371,6 +2378,7 @@
 				C132EA9426C92DD900BB9A67 /* pa */,
 				C15A4E5B279D2AC60055CD11 /* ko */,
 				C1E856A628DECF5F00B104E9 /* eu */,
+				84F194C32C0FE70900F0A994 /* es-AR */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -2411,6 +2419,7 @@
 				C132EA9926C92DDA00BB9A67 /* pa */,
 				C15A4E60279D2AC80055CD11 /* ko */,
 				C1E856A928DECF5F00B104E9 /* eu */,
+				84F194C62C0FE79000F0A994 /* es-AR */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -2657,7 +2666,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.3.1;
+				MARKETING_VERSION = 6.4.0;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -3024,7 +3033,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.3.1;
+				MARKETING_VERSION = 6.4.0;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -3186,7 +3195,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.3.1;
+				MARKETING_VERSION = 6.4.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				RUN_CLANG_STATIC_ANALYZER = YES;
@@ -3462,7 +3471,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.3.1;
+				MARKETING_VERSION = 6.4.0;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -3815,7 +3824,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.3.1;
+				MARKETING_VERSION = 6.4.0;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -4229,7 +4238,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = NO;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.3.1;
+				MARKETING_VERSION = 6.4.0;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -4625,6 +4634,30 @@
 				minimumVersion = 3.8.5;
 			};
 		};
+		84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/SVGView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.6;
+			};
+		};
+		84F194CC2C101A3E00F0A994 /* XCRemoteSwiftPackageReference "PromiseKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mxcl/PromiseKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.1.2;
+			};
+		};
+		84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ryanlintott/FrameUp";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.8.0;
+			};
+		};
 		C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
@@ -4667,6 +4700,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
+		};
+		84E231F22C16A9CE00735FB7 /* SVGView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */;
+			productName = SVGView;
+		};
+		84F194CD2C101A3E00F0A994 /* PromiseKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84F194CC2C101A3E00F0A994 /* XCRemoteSwiftPackageReference "PromiseKit" */;
+			productName = PromiseKit;
+		};
+		84F194D02C15197200F0A994 /* FrameUp */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */;
+			productName = FrameUp;
 		};
 		C1E1EC7A286A025F0097EC74 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;

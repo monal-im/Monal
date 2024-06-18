@@ -39,7 +39,7 @@ struct EditGroupSubject: View {
                     }
                 }
             }
-            .navigationTitle("Group description")
+            .navigationTitle(Text("Group/Channel description"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abort") {

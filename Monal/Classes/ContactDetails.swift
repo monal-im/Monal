@@ -140,9 +140,6 @@ struct ContactDetails: View {
                             }
                             .frame(width: 150, height: 150, alignment: .center)
                             .shadow(radius: 7)
-                            .sheet(isPresented:$showingImagePicker) {
-                                ImagePicker(image:$inputImage)
-                            }
                             .actionSheet(isPresented: $showingRemoveAvatarConfirmation) {
                                 ActionSheet(
                                     title: Text("Really remove avatar?"),
@@ -245,9 +242,6 @@ struct ContactDetails: View {
                                     }
                                 }
                                 .buttonStyle(.borderless)
-                                .sheet(isPresented: $showingSheetEditSubject) {
-                                    LazyClosureView(EditGroupSubject(contact: contact))
-                                }
                             } else {
                                 Text("Group subject:")
                             }
@@ -646,12 +640,27 @@ struct ContactDetails: View {
                 }
             }))
         }
-        .onChange(of:inputImage) { _ in
-            performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:Text("Uploading avatar..."), descriptionView:Text("")) {
-                self.account.mucProcessor.publishAvatar(inputImage, forMuc: contact.contactJid)
-            }.catch { error in
-                errorAlert(title: Text("Error changing avatar!"), message: Text("\(String(describing:error))"))
-                hideLoadingOverlay(overlay)
+        .sheet(isPresented: $showingSheetEditSubject) {
+            LazyClosureView(EditGroupSubject(contact: contact))
+        }
+        .sheet(isPresented:$showingImagePicker) {
+            ImagePicker(image:$inputImage)
+        }
+        .sheet(isPresented: $inputImage.optionalMappedToBool()) {
+            ImageCropView(originalImage: inputImage!, configureBlock: { cropViewController in
+                cropViewController.aspectRatioPreset = .presetSquare
+                cropViewController.aspectRatioLockEnabled = true
+                cropViewController.aspectRatioPickerButtonHidden = true
+                cropViewController.resetAspectRatioEnabled = false
+            }, onCanceled: {
+                inputImage = nil
+            }) { (image, cropRect, angle) in
+                performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:Text("Uploading avatar..."), descriptionView:Text("")) {
+                    self.account.mucProcessor.publishAvatar(image, forMuc: contact.contactJid)
+                }.catch { error in
+                    errorAlert(title: Text("Error changing avatar!"), message: Text("\(String(describing:error))"))
+                    hideLoadingOverlay(overlay)
+                }
             }
         }
         .onChange(of:contact.avatar as UIImage) { _ in

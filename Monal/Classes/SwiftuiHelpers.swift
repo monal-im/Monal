@@ -17,6 +17,7 @@ import PhotosUI
 import Combine
 import FLAnimatedImage
 import OrderedCollections
+import CropViewController
 
 extension MLContact : Identifiable {}       //make MLContact be usable in swiftui ForEach clauses
 
@@ -221,6 +222,68 @@ func buildNotificationStateLabel(_ description: Text, isWorking: Bool) -> some V
     }
 }
 
+//see https://github.com/CH3COOH/TOCropViewController/blob/issue/421/Swift/CropViewControllerSwiftUIExample/ImageCropView.swift
+public struct ImageCropView: UIViewControllerRepresentable {
+    private let configureBlock: (CropViewController) -> Void
+    private let originalImage: UIImage
+    private let onCanceled: () -> Void
+    private let onImageCropped: (UIImage,CGRect,Int) -> Void
+    
+    @Environment(\.presentationMode) private var presentationMode
+
+    public init(originalImage: UIImage, configureBlock: @escaping (CropViewController) -> Void, onCanceled: @escaping () -> Void, success onImageCropped: @escaping (UIImage,CGRect,Int) -> Void) {
+        self.originalImage = originalImage
+        self.configureBlock = configureBlock
+        self.onCanceled = onCanceled
+        self.onImageCropped = onImageCropped
+    }
+
+    public func makeUIViewController(context: Context) -> CropViewController {
+        let cropController = CropViewController(image: originalImage)
+        cropController.delegate = context.coordinator
+        configureBlock(cropController)
+        return cropController
+    }
+
+    public func updateUIViewController(_ uiViewController: CropViewController, context: Context) {
+    }
+
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(
+            onDismiss: { self.presentationMode.wrappedValue.dismiss() },
+            onCanceled: self.onCanceled,
+            onImageCropped: self.onImageCropped
+        )
+    }
+
+    final public class Coordinator: NSObject, CropViewControllerDelegate {
+        private let onDismiss: () -> Void
+        private let onImageCropped: (UIImage,CGRect,Int) -> Void
+        private let onCanceled: () -> Void
+
+        init(onDismiss: @escaping () -> Void, onCanceled: @escaping () -> Void, onImageCropped: @escaping (UIImage,CGRect,Int) -> Void) {
+            self.onDismiss = onDismiss
+            self.onImageCropped = onImageCropped
+            self.onCanceled = onCanceled
+        }
+
+        public func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
+            self.onImageCropped(image, cropRect, angle)
+            self.onDismiss()
+        }
+        
+        public func cropViewController(_ cropViewController: CropViewController, didCropToCircularImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
+            self.onImageCropped(image, cropRect, angle)
+            self.onDismiss()
+        }
+        
+        public func cropViewController(_ cropViewController: CropViewController, didFinishCancelled cancelled: Bool) {
+            self.onCanceled()
+            self.onDismiss()
+        }
+    }
+}
+
 //see here for some ideas used herein: https://blog.logrocket.com/adding-gifs-ios-app-flanimatedimage-swiftui/#using-flanimatedimage-with-swift
 struct GIFViewer: UIViewRepresentable {
     typealias UIViewType = FLAnimatedImageView
@@ -230,16 +293,6 @@ struct GIFViewer: UIViewRepresentable {
         let imageView = FLAnimatedImageView(frame:.zero)
         let animatedImage = FLAnimatedImage(animatedGIFData:data)
         imageView.animatedImage = animatedImage
-        //imageView.translatesAutoresizingMaskIntoConstraints = false
-        //imageView.contentMode = .scaleAspectFit
-        //imageView.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-        
-//         imageView.translatesAutoresizingMaskIntoConstraints = false
-//         imageView.layer.cornerRadius = 24
-//         imageView.layer.masksToBounds = true
-//         imageView.setContentHuggingPriority(.required, for: .vertical)
-//         imageView.setContentHuggingPriority(.required, for: .horizontal)
-        
         return imageView
     }
 

@@ -1,5 +1,6 @@
 PODS:
   - ASN1Decoder (1.10.0)
+  - CropViewController (2.7.4)
   - DZNEmptyDataSet (1.8.1)
   - FLAnimatedImage (1.0.17)
   - KSCrash/Core (1.17.0):
@@ -61,11 +62,11 @@ PODS:
   - sqlite3/common (3.45.1)
   - sqlite3/perf-threadsafe (3.45.1):
     - sqlite3/common
-  - TOCropViewController (2.6.1)
   - WebRTC-lib (123.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
+  - CropViewController
   - DZNEmptyDataSet
   - FLAnimatedImage (~> 1.0)
   - KSCrash/Core
@@ -81,12 +82,12 @@ DEPENDENCIES:
   - SignalProtocolC (from `https://github.com/monal-im/libsignal-protocol-c`, branch `master`)
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
   - sqlite3/perf-threadsafe
-  - TOCropViewController
   - WebRTC-lib
 
 SPEC REPOS:
   trunk:
     - ASN1Decoder
+    - CropViewController
     - DZNEmptyDataSet
     - FLAnimatedImage
     - KSCrash
@@ -98,7 +99,6 @@ SPEC REPOS:
     - SDWebImage
     - SnapKit
     - sqlite3
-    - TOCropViewController
     - WebRTC-lib
 
 EXTERNAL SOURCES:
@@ -119,6 +119,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   ASN1Decoder: 91cb1d781b5a178ea7375b2f1519e2bdaaa4c427
+  CropViewController: 3489bbf95a3e11c654382b0bae08ac645cdf1b93
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
   KSCrash: 593ec373759e4c1bce381421a627326a20d2dc66
@@ -132,9 +133,8 @@ SPEC CHECKSUMS:
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
-  TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   WebRTC-lib: bb973dd47acf5bc48d8a935a92ae836b70599bc1
 
-PODFILE CHECKSUM: 057f26bf53534fcd3805f905fef8635b6875a015
+PODFILE CHECKSUM: eb1329bed9beb1b2ebf1a1c250e9e314295e33c1
 
 COCOAPODS: 1.15.2

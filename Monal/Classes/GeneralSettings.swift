@@ -396,7 +396,7 @@ struct AttachmentSettings: View {
                         Text("Load over wifi")
                     }
                 )
-                Text("Load over WiFi up to: \(UInt(generalSettingsDefaultsDB.autodownloadFiletransfersWifiMaxSize/(1024*1024))) MiB")
+                Text("Load over WiFi up to: \(String(describing:UInt(generalSettingsDefaultsDB.autodownloadFiletransfersWifiMaxSize/(1024*1024)))) MiB")
             }
             
             Section {
@@ -413,7 +413,7 @@ struct AttachmentSettings: View {
                         Text("Load over Cellular")
                     }
                 )
-                Text("Load over cellular up to: \(Int(generalSettingsDefaultsDB.autodownloadFiletransfersMobileMaxSize/(1024*1024))) MiB")
+                Text("Load over cellular up to: \(String(describing:UInt(generalSettingsDefaultsDB.autodownloadFiletransfersMobileMaxSize/(1024*1024)))) MiB")
             }
             
             Section(header: Text("Upload Settings")) {

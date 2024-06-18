@@ -29,7 +29,7 @@ Monal is developed by volunteers and community collaboration. The work which has
 
 - Donate via [GitHub Sponsors](https://github.com/sponsors/tmolitor-stud-tu)
 - Donate via [Libera Pay](https://liberapay.com/tmolitor)
-- EU citizens can donate via SEPA, too. Just contact Thilo Molitor via mail to thilo@monal-im.org to get his IBAN.
+- EU citizens can donate via SEPA, too. IBAN: DE66 5007 0371 0856 0419 01
 
 Here you can read about further [support of the development](https://github.com/monal-im/Monal/issues/363)!
 

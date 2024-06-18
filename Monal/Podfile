@@ -34,6 +34,7 @@ def monalxmpp
   pod 'WebRTC-lib'
   pod 'KSCrash', subspecs:['Recording', 'Reporting/Filters/Sets', 'Reporting/Filters/Tools', 'Reporting/Tools', 'Core']
   signalDeps
+  pod "PromiseKit"
 end
 
 target 'shareSheet' do

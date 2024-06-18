@@ -41,6 +41,15 @@ PODS:
   - NotificationBannerSwift (3.2.1):
     - MarqueeLabel (~> 4.3.0)
     - SnapKit (~> 5.6.0)
+  - PromiseKit (8.1.1):
+    - PromiseKit/CorePromise (= 8.1.1)
+    - PromiseKit/Foundation (= 8.1.1)
+    - PromiseKit/UIKit (= 8.1.1)
+  - PromiseKit/CorePromise (8.1.1)
+  - PromiseKit/Foundation (8.1.1):
+    - PromiseKit/CorePromise
+  - PromiseKit/UIKit (8.1.1):
+    - PromiseKit/CorePromise
   - SAMKeychain (1.5.3)
   - SDWebImage (5.19.1):
     - SDWebImage/Core (= 5.19.1)
@@ -66,6 +75,7 @@ DEPENDENCIES:
   - KSCrash/Reporting/Tools
   - MBProgressHUD (~> 1.2.0)
   - NotificationBannerSwift (~> 3.2.0)
+  - PromiseKit
   - SAMKeychain
   - SDWebImage
   - SignalProtocolC (from `https://github.com/monal-im/libsignal-protocol-c`, branch `master`)
@@ -83,6 +93,7 @@ SPEC REPOS:
     - MarqueeLabel
     - MBProgressHUD
     - NotificationBannerSwift
+    - PromiseKit
     - SAMKeychain
     - SDWebImage
     - SnapKit
@@ -114,6 +125,7 @@ SPEC CHECKSUMS:
   MarqueeLabel: 15e524a6762552bb279cb17438b8a94990269fb9
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
+  PromiseKit: d1be44b474e5acfa16adf007a1f49f104e10fead
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
@@ -123,6 +135,6 @@ SPEC CHECKSUMS:
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   WebRTC-lib: bb973dd47acf5bc48d8a935a92ae836b70599bc1
 
-PODFILE CHECKSUM: f415f317e34fd11a687374f84ee8dfb14ebb29a6
+PODFILE CHECKSUM: 057f26bf53534fcd3805f905fef8635b6875a015
 
 COCOAPODS: 1.15.2

@@ -125,15 +125,6 @@ struct ContactDetails: View {
                                                         .resizable()
                                                         .frame(width: 24.0, height: 24.0)
                                                         .accessibilityLabel((contact.mucType == "group") ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
-//                                                         .applyClosure { view in
-//                                                             if #available(iOS 15, *) {
-//                                                                 view
-//                                                                     .symbolRenderingMode(.palette)
-//                                                                     .foregroundStyle(.primary, .secondary)
-//                                                             } else {
-//                                                                 view.foregroundColor(.primary)
-//                                                             }
-//                                                         }
                                                 })
                                                 .buttonStyle(.borderless)
                                                 .offset(x: 8, y: -8)

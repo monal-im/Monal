@@ -36,7 +36,7 @@
     self.mamPref = [NSMutableArray new];
     [self.mamPref addObject:@{@"Title":NSLocalizedString(@"Always archive", @""), @"Description":NSLocalizedString(@"All messages are archived by default.", @""), @"value":@"always"}];
     [self.mamPref addObject:@{@"Title":NSLocalizedString(@"Never archive", @""), @"Description":NSLocalizedString(@"Messages never archived by default.", @""), @"value":@"never"}];
-    [self.mamPref addObject:@{@"Title":NSLocalizedString(@"Only contacts", @""), @"Description":NSLocalizedString(@"Archive only if the contact is in contact list", @""), @"value":@"roster"}];
+    [self.mamPref addObject:@{@"Title":NSLocalizedString(@"Only contacts", @""), @"Description":NSLocalizedString(@"Archive only if the contact is in contact list.", @""), @"value":@"roster"}];
 }
 
 -(void) dealloc

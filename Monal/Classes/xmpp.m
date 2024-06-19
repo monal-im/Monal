@@ -221,12 +221,6 @@ NSString* const kStanza = @"stanza";
     //we support mds
     [self.pubsub registerForNode:@"urn:xmpp:mds:displayed:0" withHandler:$newHandler(MLPubSubProcessor, mdsHandler)];
     
-    //autodelete messages old enough (first invocation)
-    NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];
-    if (autodeleteInterval > 0) {
-        [[DataLayer sharedInstance] autoDeleteMessagesAfterInterval:(NSTimeInterval)autodeleteInterval];
-    }
-    
     return self;
 }
 
@@ -863,12 +857,6 @@ NSString* const kStanza = @"stanza";
 
 -(void) connect
 {
-    //autodelete messages old enough (second invocation)
-    NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];
-    if (autodeleteInterval > 0) {
-        [[DataLayer sharedInstance] autoDeleteMessagesAfterInterval:(NSTimeInterval)autodeleteInterval];
-    }
-    
     if(_parseQueue.suspended)
     {
         DDLogWarn(@"Not trying to connect: parse queue frozen!");

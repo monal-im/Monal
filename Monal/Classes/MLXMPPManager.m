@@ -84,8 +84,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //upgrade url preview
     [self upgradeBoolUserSettingsIfUnset:@"ShowURLPreview" toDefault:YES];
     
-    //upgrade message autodeletion
-    [self upgradeIntegerUserSettingsIfUnset:@"AutodeleteInterval" toDefault:0];
+    //upgrade message autodeletion and migrate old "3 days" setting
+    NSNumber* oldAutodelete = [[HelperTools defaultsDB] objectForKey:@"AutodeleteAllMessagesAfter3Days"];
+    if(oldAutodelete != nil && [oldAutodelete boolValue])
+    {
+        [self upgradeIntegerUserSettingsIfUnset:@"AutodeleteInterval" toDefault:259200];
+        [self removeObjectUserSettingsIfSet:@"AutodeleteAllMessagesAfter3Days"];
+    }
+    else
+        [self upgradeIntegerUserSettingsIfUnset:@"AutodeleteInterval" toDefault:0];
+    
     //upgrade default omemo on
     [self upgradeBoolUserSettingsIfUnset:@"OMEMODefaultOn" toDefault:YES];
     
@@ -353,10 +361,20 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         while(YES) {
             for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
                 [account updateIqHandlerTimeouts];
-            NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];
-            if (autodeleteInterval > 0) {
-                [[DataLayer sharedInstance] autoDeleteMessagesAfterInterval:(NSTimeInterval)autodeleteInterval];
-            }
+            
+            //needed to not crash the app with an obscure EXC_BREAKPOINT while deleting something in a currently open chat
+            //(triggered by [HelperTools dispatchAsync:reentrantOnQueue:withBlock:] in it's call to dispatch_get_current_queue())
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];
+                if(autodeleteInterval > 0)
+                {
+                    NSNumber* deletionCount = [[DataLayer sharedInstance] autoDeleteMessagesAfterInterval:(NSTimeInterval)autodeleteInterval];
+                    //make sure our ui updates after a deletion
+                    if(deletionCount.integerValue > 0)
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                }
+            });
+            
             [NSThread sleepForTimeInterval:1];
         }
     });

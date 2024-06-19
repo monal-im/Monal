@@ -43,6 +43,7 @@ extern NSString* const kMessageTypeFiletransfer;
 +(DataLayer*) sharedInstance;
 -(NSString* _Nullable) exportDB;
 -(void) createTransaction:(monal_void_block_t) block;
+-(void) vacuum;
 
 //Roster
 -(NSString *) getRosterVersionForAccount:(NSNumber*) accountNo;
@@ -212,7 +213,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(void) clearMessages:(NSNumber*) accountNo;
 -(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSNumber*) accountNo;
--(void) autoDeleteMessagesAfterInterval:(NSTimeInterval)interval;
+-(NSNumber*) autoDeleteMessagesAfterInterval:(NSTimeInterval)interval;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
 -(void) deleteMessageHistoryLocally:(NSNumber*) messageNo;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;

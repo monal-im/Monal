@@ -243,14 +243,45 @@ struct UserInterfaceSettings: View {
 
 struct SecuritySettings: View {
     @ObservedObject var generalSettingsDefaultsDB = GeneralSettingsDefaultsDB()
-    let autodeleteOptions = [
-        0:"Off", 30:"30 seconds", 300:"5 minutes", 3600:"1 hour",
-        28800:"8 hours", 86400:"1 day", 604800:"1 week", 2419200:"4 weeks", -1:"Custom"
+    @State var autodeleteInterval: Int = 0
+    @State var autodeleteIntervalSelection: Int = 0
+    var autodeleteOptions = [
+              0: NSLocalizedString("Off", comment:"Message autdelete time"),
+             30: NSLocalizedString("30 seconds", comment:"Message autdelete time"),
+             60: NSLocalizedString("1 minute", comment:"Message autdelete time"),
+            300: NSLocalizedString("5 minutes", comment:"Message autdelete time"),
+            900: NSLocalizedString("15 minutes", comment:"Message autdelete time"),
+           1800: NSLocalizedString("30 minutes", comment:"Message autdelete time"),
+           3600: NSLocalizedString("1 hour", comment:"Message autdelete time"),
+          43200: NSLocalizedString("12 hours", comment:"Message autdelete time"),
+          86400: NSLocalizedString("1 day", comment:"Message autdelete time"),
+         259200: NSLocalizedString("3 days", comment:"Message autdelete time"),
+         604800: NSLocalizedString("1 week", comment:"Message autdelete time"),
+        2419200: NSLocalizedString("4 weeks", comment:"Message autdelete time"),
+        5184000: NSLocalizedString("2 month", comment:"Message autdelete time"),        //based on 30 days per month
+        7776000: NSLocalizedString("3 month", comment:"Message autdelete time"),        //based on 30 days per month
     ]
     
-    @State private var showingCustomTimeSheet = false
-    @State private var selectedOptionIndex: Int = 0
-    @State private var customTimeString = ""
+    init() {
+        _autodeleteInterval = State(wrappedValue:generalSettingsDefaultsDB.AutodeleteInterval)
+        _autodeleteIntervalSelection = State(wrappedValue:generalSettingsDefaultsDB.AutodeleteInterval)
+        if #available(iOS 15, *) {
+            //only activate custom values on ios >= 15
+            autodeleteOptions[-1] = NSLocalizedString("Custom", comment:"Message autdelete time")
+            //check if we have a custom value and change picker value accordingly
+            if autodeleteOptions[autodeleteInterval] == nil {
+                _autodeleteIntervalSelection = State(wrappedValue:-1)
+            }
+        } else {
+            //check if we have a custom value, this should never happen because custom values should only be settable in ios >= 15
+            if autodeleteOptions[autodeleteInterval] == nil {
+                //turn autodelete off int his case (sane value)
+                _autodeleteIntervalSelection = State(wrappedValue:0)
+                _autodeleteInterval = State(wrappedValue:0)
+            }
+        }
+    }
+    
     var body: some View {
         Form {
             Section(header: Text("Encryption")) {
@@ -280,38 +311,41 @@ like hotel wifi, ugly mobile carriers etc.
             }
             
             Section(header: Text("On this device")) {
-                Picker("Autodelete all messages after", selection: $generalSettingsDefaultsDB.AutodeleteInterval) {
-                    ForEach(autodeleteOptions.keys.sorted(), id: \.self) { key in
-                        Text(autodeleteOptions[key, default: "Custom"]).tag(key)
+                VStack(alignment: .leading, spacing: 0) {
+                    Picker("Autodelete all messages older than", selection: $autodeleteIntervalSelection) {
+                        ForEach(autodeleteOptions.keys.sorted(), id: \.self) { key in
+                            Text(autodeleteOptions[key]!).tag(key)
+                        }
                     }
+                    if #available(iOS 15, *) {
+                        //unknown interval or custom interval requested explicitly
+                        if autodeleteOptions[autodeleteInterval] == nil || autodeleteIntervalSelection == -1 {
+                            HStack {
+                                Text("Custom Time: ")
+                                Stepper(NSLocalizedString("\(String(describing:(max(1, autodeleteInterval / 3600)).formatted())) hours", comment:""), value: Binding<Int>(
+                                    get: { max(1, autodeleteInterval / 3600) /*clamp to 1 ... .max*/ },
+                                    set: { autodeleteInterval = $0 * 3600 }
+                                ), in: 1 ... .max)
+                            }
+                        }
+                    }
+                    Text("Be warned: Message will only be deleted on incoming pushes or if you open the app! This is especially true for shorter time intervals!").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
+                    Text("Also beware: You won't be able to load older history from your server, Monal will immediately delete it after fetching it!").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
                 }
             }
         }
         .navigationBarTitle(Text("Security"), displayMode: .inline)
-        .onChange(of: generalSettingsDefaultsDB.AutodeleteInterval) { newValue in
-            if newValue == -1  {
-                showingCustomTimeSheet = true
+        //save only when closing view to not delete messages while the user is selecting a (custom) value
+        .onDisappear {
+            if autodeleteIntervalSelection == -1 {
+                //make sure our custom value is stored clamped, too
+                autodeleteInterval = max(1, autodeleteInterval / 3600)
+            } else {
+                //copy over picker value if not set to custom
+                autodeleteInterval = autodeleteIntervalSelection
             }
+            generalSettingsDefaultsDB.AutodeleteInterval = autodeleteInterval
         }
-        .sheet(isPresented: $showingCustomTimeSheet) {
-            NavigationView {
-                Form {
-                    TextField("Enter time in minutes", text: $customTimeString)
-                        .keyboardType(.numberPad)
-                    Button("Set") {
-                        if let minutes = Int(customTimeString), minutes>0 {
-                            generalSettingsDefaultsDB.AutodeleteInterval = minutes * 60
-                        }
-                        showingCustomTimeSheet = false
-                    }
-                }
-                .navigationBarTitle("Enter Custom Time", displayMode: .inline)
-                .navigationBarItems(trailing: Button("Cancel") {
-                    showingCustomTimeSheet = false
-                })
-            }
-        }
-
     }
 }
 

@@ -1712,8 +1712,9 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) dispatchAsync:(BOOL) async reentrantOnQueue:(dispatch_queue_t _Nullable) queue withBlock:(monal_void_block_t) block
 {
+    dispatch_queue_t main_queue = dispatch_get_main_queue();
     if(!queue)
-        queue = dispatch_get_main_queue();
+        queue = main_queue;
     
     //apple docs say that enqueueing blocks for synchronous execution will execute this blocks in the thread the enqueueing came from
     //(e.g. the tread we are already in).
@@ -1728,7 +1729,9 @@ void swizzle(Class c, SEL orig, SEL new)
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     dispatch_queue_t current_queue = dispatch_get_current_queue();
 #pragma clang diagnostic pop
-    if(current_queue == queue || (queue == dispatch_get_main_queue() && [NSThread isMainThread]))
+    if(queue == main_queue && [NSThread isMainThread])
+        block();
+    else if(current_queue == queue)
         block();
     else
     {

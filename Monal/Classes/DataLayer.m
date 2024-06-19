@@ -157,6 +157,11 @@ static NSDateFormatter* dbFormatter;
     [self.db voidWriteTransaction:block];
 }
 
+-(void) vacuum
+{
+    return [self.db vacuum];
+}
+
 #pragma mark account commands
 
 -(NSArray*) accountList
@@ -1455,28 +1460,31 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void)autoDeleteMessagesAfterInterval:(NSTimeInterval)interval {
-    [self.db voidWriteTransaction:^{
+-(NSNumber*) autoDeleteMessagesAfterInterval:(NSTimeInterval) interval
+{
+    return [self.db idWriteTransaction:^{
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         //interval before now
         NSDate* pastDate = [NSDate dateWithTimeIntervalSinceNow: -interval];
         NSString* pastDateString = [dbFormatter stringFromDate:pastDate];
 
-        // Select message history IDs for read messages before the specified date
-        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE unread=0 AND timestamp<?;" andArguments:@[pastDateString]];
-        for (NSNumber* historyId in messageHistoryIDs) {
+        //select message history IDs of inbound read messages or outgoing messages being old enough
+        //if they are filetransfers and delete those files
+        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<? AND messageType=?;" andArguments:@[pastDateString, kMessageTypeFiletransfer]];
+        for(NSNumber* historyId in messageHistoryIDs)
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
-        }
 
-        // Delete read messages before the specified date
-        [self.db executeNonQuery:@"DELETE FROM message_history WHERE unread=0 AND timestamp<?;" andArguments:@[pastDateString]];
+        //delete inbound read messages or outgoing messages being old enough
+        NSNumber* deletionCount = [self.db executeScalar:@"SELECT COUNT(*) FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<?;" andArguments:@[pastDateString]];
+        [self.db executeNonQuery:@"DELETE FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<?;" andArguments:@[pastDateString]];
 
-        // Update active chats only if they still have remaining messages
+        //delete all chats with empty history from active chats list
         [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT 1 FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
 
         [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
+        
+        return deletionCount;
     }];
-    [self.db vacuum];
 }
 
 -(void) deleteMessageHistory:(NSNumber*) messageNo

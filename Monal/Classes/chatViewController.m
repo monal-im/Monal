@@ -103,7 +103,8 @@
 
 @property (nonatomic) UIView* audioRecoderInfoView;
 
-#define lastMsgButtonSize 40.0
+#define LAST_MSG_BUTTON_OFFSET 5
+#define LAST_MSG_BUTTON_SIZE 40.0
 
 @end
 
@@ -323,8 +324,7 @@ enum msgSentState {
     unichar arrowSymbol = 0x2193;
 
     self.lastMsgButton = [UIButton new];
-    [self lastMsgButtonPositionConfigWithSize:self.inputContainerView.bounds.size];
-    self.lastMsgButton.layer.cornerRadius = lastMsgButtonSize/2;
+    self.lastMsgButton.layer.cornerRadius = LAST_MSG_BUTTON_SIZE/2;
     self.lastMsgButton.layer.backgroundColor = [UIColor whiteColor].CGColor;
     [self.lastMsgButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
     [self.lastMsgButton setTitle:[NSString stringWithCharacters:&arrowSymbol length:1] forState:UIControlStateNormal];
@@ -333,6 +333,7 @@ enum msgSentState {
     self.lastMsgButton.userInteractionEnabled = YES;
     [self.lastMsgButton setHidden:YES];
     [self.inputContainerView addSubview:self.lastMsgButton];
+    [self positionLastMsgButtonAboveInputContainerView];
     MLChatInputContainer* inputView = (MLChatInputContainer*) self.inputContainerView;
     inputView.chatInputActionDelegate = self;
 }
@@ -347,12 +348,29 @@ enum msgSentState {
     self.isAudioMessage = YES;
 }
 
--(void) lastMsgButtonPositionConfigWithSize:(CGSize)size
+-(void) positionLastMsgButtonAboveInputContainerView
 {
-    float buttonXPos = (float)(self.inputContainerView.frame.origin.x + self.inputContainerView.frame.size.width - lastMsgButtonSize - 5);
-    float buttonYPos = (float)(self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5);
-    self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
+    self.lastMsgButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.inputContainerView addConstraints:@[
+        [NSLayoutConstraint constraintWithItem:self.lastMsgButton
+                                     attribute:NSLayoutAttributeTrailing
+                                     relatedBy:NSLayoutRelationEqual
+                                        toItem:self.inputContainerView
+                                     attribute:NSLayoutAttributeTrailing
+                                    multiplier:1.0
+                                      constant:-LAST_MSG_BUTTON_OFFSET],
+        [NSLayoutConstraint constraintWithItem:self.lastMsgButton
+                                     attribute:NSLayoutAttributeBottom
+                                     relatedBy:NSLayoutRelationEqual
+                                        toItem:self.inputContainerView
+                                     attribute:NSLayoutAttributeTop
+                                    multiplier:1.0
+                                      constant:-LAST_MSG_BUTTON_OFFSET],
+    ]];
+    [self.lastMsgButton.widthAnchor constraintEqualToConstant:LAST_MSG_BUTTON_SIZE].active = YES;
+    [self.lastMsgButton.heightAnchor constraintEqualToConstant:LAST_MSG_BUTTON_SIZE].active = YES;
 }
+
 #pragma mark - ChatInputActionDelegage
 -(void) doScrollDownAction
 {
@@ -971,12 +989,6 @@ enum msgSentState {
 {
     [self stopEditing];
     [self.chatInput resignFirstResponder];
-
-    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
-    } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
-        //[self lastMsgButtonPositionConfigWithSize:self.inputContainerView.bounds.size];
-        [self lastMsgButtonPositionConfigWithSize:size];
-    }];
 }
 
 #pragma mark gestures

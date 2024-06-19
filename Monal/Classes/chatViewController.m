@@ -103,8 +103,8 @@
 
 @property (nonatomic) UIView* audioRecoderInfoView;
 
-#define lastMsgButtonOffset 5
-#define lastMsgButtonSize 40.0
+#define LAST_MSG_BUTTON_OFFSET 5
+#define LAST_MSG_BUTTON_SIZE 40.0
 
 @end
 
@@ -324,7 +324,7 @@ enum msgSentState {
     unichar arrowSymbol = 0x2193;
 
     self.lastMsgButton = [UIButton new];
-    self.lastMsgButton.layer.cornerRadius = lastMsgButtonSize/2;
+    self.lastMsgButton.layer.cornerRadius = LAST_MSG_BUTTON_SIZE/2;
     self.lastMsgButton.layer.backgroundColor = [UIColor whiteColor].CGColor;
     [self.lastMsgButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
     [self.lastMsgButton setTitle:[NSString stringWithCharacters:&arrowSymbol length:1] forState:UIControlStateNormal];
@@ -358,17 +358,17 @@ enum msgSentState {
                                         toItem:self.inputContainerView
                                      attribute:NSLayoutAttributeTrailing
                                     multiplier:1.0
-                                      constant:-lastMsgButtonOffset],
+                                      constant:-LAST_MSG_BUTTON_OFFSET],
         [NSLayoutConstraint constraintWithItem:self.lastMsgButton
                                      attribute:NSLayoutAttributeBottom
                                      relatedBy:NSLayoutRelationEqual
                                         toItem:self.inputContainerView
                                      attribute:NSLayoutAttributeTop
                                     multiplier:1.0
-                                      constant:-lastMsgButtonOffset],
+                                      constant:-LAST_MSG_BUTTON_OFFSET],
     ]];
-    [self.lastMsgButton.widthAnchor constraintEqualToConstant:lastMsgButtonSize].active = YES;
-    [self.lastMsgButton.heightAnchor constraintEqualToConstant:lastMsgButtonSize].active = YES;
+    [self.lastMsgButton.widthAnchor constraintEqualToConstant:LAST_MSG_BUTTON_SIZE].active = YES;
+    [self.lastMsgButton.heightAnchor constraintEqualToConstant:LAST_MSG_BUTTON_SIZE].active = YES;
 }
 
 #pragma mark - ChatInputActionDelegage

@@ -336,6 +336,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 [account updateIqHandlerTimeouts];
             
             //needed to not crash the app with an obscure EXC_BREAKPOINT while deleting something in a currently open chat
+            //the crash report then contains: message at /usr/lib/system/libdispatch.dylib: API MISUSE: Resurrection of an object
             //(triggered by [HelperTools dispatchAsync:reentrantOnQueue:withBlock:] in it's call to dispatch_get_current_queue())
             dispatch_async(dispatch_get_main_queue(), ^{
                 NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];

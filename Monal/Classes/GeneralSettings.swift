@@ -318,8 +318,8 @@ like hotel wifi, ugly mobile carriers etc.
                         }
                     }
                     if #available(iOS 15, *) {
-                        //unknown interval or custom interval requested explicitly
-                        if autodeleteOptions[autodeleteInterval] == nil || autodeleteIntervalSelection == -1 {
+                        //custom interval requested explicitly
+                        if autodeleteIntervalSelection == -1 {
                             HStack {
                                 Text("Custom Time: ")
                                 Stepper(NSLocalizedString("\(String(describing:(max(1, autodeleteInterval / 3600)).formatted())) hours", comment:""), value: Binding<Int>(

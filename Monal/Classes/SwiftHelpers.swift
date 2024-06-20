@@ -242,7 +242,10 @@ public struct defaultsDB<Value> {
                 ])
             }
         }
-        set { container.set(newValue, forKey: key) }
+        set {
+            container.set(newValue, forKey: key)
+            container.synchronize()
+        }
     }
     
     public static subscript<OuterSelf: ObservableObject>(

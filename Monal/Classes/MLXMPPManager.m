@@ -39,33 +39,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) defaultSettings
 {
-    BOOL setDefaults = [[HelperTools defaultsDB] boolForKey:@"SetDefaults"];
-    if(!setDefaults)
-    {
-        [[HelperTools defaultsDB] setBool:YES forKey:@"Sound"];
-        [[HelperTools defaultsDB] setBool:NO forKey:@"ChatBackgrounds"];
-
-        // Privacy Settings
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SendReceivedMarkers"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SendDisplayedMarkers"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowURLPreview"];
-
-        // Message Settings / Privacy
-        [[HelperTools defaultsDB] setInteger:NotificationPrivacySettingOptionDisplayNameAndMessage forKey:@"NotificationPrivacySetting"];
-
-        // udp logger
-        [[HelperTools defaultsDB] setBool:NO forKey:@"udpLoggerEnabled"];
-        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerHostname"];
-        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerPort"];
-        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerKey"];
-        
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
-        [[HelperTools defaultsDB] synchronize];
-    }
-
+    [self upgradeBoolUserSettingsIfUnset:@"Sound" toDefault:YES];
     [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
 
     // upgrade ShowGeoLocation
@@ -163,7 +137,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #else
     [self upgradeBoolUserSettingsIfUnset:@"useDnssecForAllConnections" toDefault:NO];
 #endif
-    
     
     NSTimeZone* timeZone = [NSTimeZone localTimeZone];
     DDLogVerbose(@"Current timezone name: '%@'...", [timeZone name]);

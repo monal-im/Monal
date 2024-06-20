@@ -3,6 +3,10 @@ name: test-release
 
 # Controls when the action will run.
 on:
+  # Triggers the workflow on push
+  push:
+    branches: [ stable ]
+
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -23,9 +27,9 @@ jobs:
         id: releasenotes
         run: |
           buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
-          echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "name=$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^\s*([^\s]+)\s+\(([^\s]+)\)$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "notes=$(git log -n 1 --merges --pretty=format:%b)" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "tag='Build_iOS_$buildNumber'" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "name='$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^\s*([^\s]+)\s+\(([^\s]+)\)$/\1 (Build '$buildNumber', PR \2)/g')'" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "notes='$(git log -n 1 --merges --pretty=format:%b)'" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Release
         uses: softprops/action-gh-release@v2
         with:

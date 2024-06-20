@@ -746,7 +746,7 @@ $$class_handler(handleModerationResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iq
     }
     
     DDLogInfo(@"Successfully moderated message in muc: %@", msg);
-    [[DataLayer sharedInstance] deleteMessageHistory:msg.messageDBId];
+    [[DataLayer sharedInstance] retractMessageHistory:msg.messageDBId];
     
     //update ui
     DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", msg.messageDBId);

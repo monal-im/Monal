@@ -1487,7 +1487,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) deleteMessageHistory:(NSNumber*) messageNo
+-(void) retractMessageHistory:(NSNumber*) messageNo
 {
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];

@@ -452,7 +452,7 @@ static NSMutableDictionary* _typingNotifications;
         
         if(historyIdToRetract != nil)
         {
-            [[DataLayer sharedInstance] deleteMessageHistory:historyIdToRetract];
+            [[DataLayer sharedInstance] retractMessageHistory:historyIdToRetract];
             
             //update ui
             DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
@@ -500,7 +500,7 @@ static NSMutableDictionary* _typingNotifications;
             ];
             
             //...then retract this message (e.g. mark as retracted)
-            [[DataLayer sharedInstance] deleteMessageHistory:historyIdToRetract];
+            [[DataLayer sharedInstance] retractMessageHistory:historyIdToRetract];
             
             //update ui
             DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);

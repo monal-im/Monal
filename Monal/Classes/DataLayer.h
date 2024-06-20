@@ -214,7 +214,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) clearMessages:(NSNumber*) accountNo;
 -(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSNumber*) accountNo;
 -(NSNumber*) autoDeleteMessagesAfterInterval:(NSTimeInterval)interval;
--(void) deleteMessageHistory:(NSNumber *) messageNo;
+-(void) retractMessageHistory:(NSNumber *) messageNo;
 -(void) deleteMessageHistoryLocally:(NSNumber*) messageNo;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
 -(NSNumber* _Nullable) getLMCHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo;

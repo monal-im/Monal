@@ -2557,7 +2557,7 @@ enum msgSentState {
         if(!message.inbound)
         {
             [self.xmppAccount retractMessage:message];
-            [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
+            [[DataLayer sharedInstance] retractMessageHistory:message.messageDBId];
             [message updateWithMessage:[[[DataLayer sharedInstance] messagesForHistoryIDs:@[message.messageDBId]] firstObject]];
 
             //update table entry

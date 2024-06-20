@@ -75,9 +75,7 @@ static NSMutableDictionary* currentTransactions;
     [HelperTools configureFileProtectionFor:[NSString stringWithFormat:@"%@-shm", _dbFile]];
     
     if(sqlite3_open_v2([_dbFile UTF8String], &(self->_database), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil) == SQLITE_OK)
-    {
         DDLogInfo(@"Database opened: %@", _dbFile);
-    }
     else
     {
         //database error message
@@ -107,12 +105,17 @@ static NSMutableDictionary* currentTransactions;
     //this uses the private api because we have no thread local instance added to the threadData dictionary yet and we don't use a transaction either (and public apis check both)
     //--> we must use the internal api because it does not call testThreadInstanceForQuery: testTransactionsForQuery:
     sqlite3_busy_timeout(self->_database, 2000);        //set the busy time as early as possible to make sure the pragma states don't trigger a retry too often
+    sqlite3_db_config(self->_database, SQLITE_DBCONFIG_DEFENSIVE);
     while([self executeNonQuery:@"PRAGMA synchronous=NORMAL;" andArguments:@[] withException:NO] != YES)
         DDLogError(@"Database locked, while calling 'PRAGMA synchronous=NORMAL;', retrying...");
     while([self executeNonQuery:@"PRAGMA truncate;" andArguments:@[] withException:NO] != YES)
         DDLogError(@"Database locked, while calling 'PRAGMA truncate;', retrying...");
     while([self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[] withException:NO] != YES)
         DDLogError(@"Database locked, while calling 'PRAGMA foreign_keys=on;', retrying...");
+    //this seems to provide *slightly* better security
+    //see https://sqlite.org/pragma.html#pragma_trusted_schema
+    while([self executeNonQuery:@"PRAGMA trusted_schema = off;" andArguments:@[] withException:NO] != YES)
+        DDLogError(@"Database locked, while calling 'PRAGMA trusted_schema = off;', retrying...");
 
     return self;
 }

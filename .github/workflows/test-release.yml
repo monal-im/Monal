@@ -13,6 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          submodules: true
+      - name: Fetch tags
+        run: git fetch --tags
       - name: Extract version number and changelog from newest merge commit
         id: releasenotes
         run: |

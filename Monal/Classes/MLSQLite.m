@@ -105,7 +105,6 @@ static NSMutableDictionary* currentTransactions;
     //this uses the private api because we have no thread local instance added to the threadData dictionary yet and we don't use a transaction either (and public apis check both)
     //--> we must use the internal api because it does not call testThreadInstanceForQuery: testTransactionsForQuery:
     sqlite3_busy_timeout(self->_database, 2000);        //set the busy time as early as possible to make sure the pragma states don't trigger a retry too often
-    sqlite3_db_config(self->_database, SQLITE_DBCONFIG_DEFENSIVE);
     while([self executeNonQuery:@"PRAGMA synchronous=NORMAL;" andArguments:@[] withException:NO] != YES)
         DDLogError(@"Database locked, while calling 'PRAGMA synchronous=NORMAL;', retrying...");
     while([self executeNonQuery:@"PRAGMA truncate;" andArguments:@[] withException:NO] != YES)

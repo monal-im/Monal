@@ -28,8 +28,10 @@ jobs:
         with:
           clean: true
           submodules: true
-      - name: Fetch tags
-        run: git fetch --tags
+          fetch-depth: 100
+          fetch-tags: true
+          show-progress: true
+          lfs: true
       - name: Checkout submodules
         run: git submodule update -f --init --remote
       - name: Get last build tag and increment it
@@ -72,8 +74,13 @@ jobs:
         run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
       - uses: actions/upload-artifact@v4
         with:
-          name: monal-catalyst
+          name: monal-catalyst-zip
           path: Monal/build/app/Monal.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monal-catalyst-pkg
+          path: Monal/build/app/Monal.pkg
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
@@ -90,6 +97,31 @@ jobs:
           name: monal-ios-dsym
           path: Monal/build/ios_Monal.xcarchive/dSYMs
           if-no-files-found: error
+      - name: Extract version number and changelog from newest merge commit
+        id: releasenotes
+        run: |
+          buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "name=Monal $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^\s*([^\s]+)\s+\(([^\s]+)\)$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "notes<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "${{ steps.releasenotes.outputs.name }}"
+          tag_name: "${{ steps.releasenotes.outputs.tag }}"
+          target_commitish: beta
+          generate_release_notes: false
+          body: "${{ steps.releasenotes.outputs.notes }}"
+          files: |
+            ./Monal/build/ipa/Monal.ipa
+            ./Monal/build/app/Monal.pkg
+            ./Monal/build/app/Monal.zip
+          fail_on_unmatched_files: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          prerelease: true
   
   updateTranslations:
     name: Update Translations using Beta-Branch

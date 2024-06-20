@@ -113,7 +113,7 @@
     createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
     [createGroup setAction:@selector(openCreateGroup:)];
     [createGroup setTarget:self];
-    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], createGroup, nil];
+    self.navigationItem.rightBarButtonItems = @[addContact, [[UIBarButtonItem alloc] init], createGroup];
 
     [self configureContactRequestsImage];
     

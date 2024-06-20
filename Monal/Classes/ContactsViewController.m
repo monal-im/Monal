@@ -110,8 +110,8 @@
     [addContact setTarget:self];
 
     UIBarButtonItem* createGroup = [[UIBarButtonItem alloc] init];
-        createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
-        [createGroup setAction:@selector(openCreateGroup:)];
+    createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
+    [createGroup setAction:@selector(openCreateGroup:)];
     [createGroup setTarget:self];
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], createGroup, nil];
 

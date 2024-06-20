@@ -3,9 +3,6 @@ name: develop-push
 
 # Controls when the action will run.
 on:
-  # Triggers the workflow on push
-  push:
-    branches: [ develop ]
 
   workflow_dispatch:
 

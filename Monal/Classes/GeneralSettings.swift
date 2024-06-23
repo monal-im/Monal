@@ -378,7 +378,10 @@ struct PrivacySettings: View {
                     Text("Accept incoming messages from strangers")
                     Text("Allow contacts not in your contact list to contact you.")
                 }
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.allowCallsFromNonRosterContacts) {
+                SettingsToggle(isOn: Binding<Bool>(
+                    get: { generalSettingsDefaultsDB.allowCallsFromNonRosterContacts && generalSettingsDefaultsDB.allowNonRosterContacts },
+                    set: { generalSettingsDefaultsDB.allowCallsFromNonRosterContacts = $0 }
+                )) {
                     Text("Accept incoming calls from strangers")
                     Text("Allow contacts not in your contact list to call you.")
                 }.disabled(!generalSettingsDefaultsDB.allowNonRosterContacts)

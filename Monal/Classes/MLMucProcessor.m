@@ -622,14 +622,15 @@ $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, acc
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
     }));
     
-    [self callSuccessUIHandlerForMuc:iqNode.fromUser];
-    
+    //don't call success handler if we are only "half-joined" (see comments below for what that means)
     if(joinOnSuccess)
     {
         //group is now properly configured and we are joined, but all the code handling a proper join was not run
         //--> join again to make sure everything is sane
         [self join:roomJid];
     }
+    else
+        [self callSuccessUIHandlerForMuc:iqNode.fromUser];
 $$
 
 -(void) handleStatusCodes:(XMPPStanza*) node

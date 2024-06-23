@@ -77,6 +77,7 @@ struct CreateGroupMenu: View {
                         self.selectedAccount!.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
                             let success : Bool = data["success"] as! Bool;
                             if success {
+                                DataLayer.sharedInstance().setFullName(self.groupName, forContact:roomJid, andAccount:self.selectedAccount!.accountNo)
                                 self.selectedAccount!.mucProcessor.changeName(ofMuc: roomJid, to: self.groupName)
                                 for user in self.selectedContacts {
                                     self.selectedAccount!.mucProcessor.setAffiliation("member", ofUser: user.contactJid, inMuc: roomJid)

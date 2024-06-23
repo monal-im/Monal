@@ -9,19 +9,33 @@
 struct ContactEntry<AdditionalContent: View>: View {
     let contact: ObservableKVOWrapper<MLContact>
     let selfnotesPrefix: Bool
+    let fallback: String?
     @ViewBuilder let additionalContent: () -> AdditionalContent
     
-    init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool = true) where AdditionalContent == EmptyView {
-        self.init(contact:contact, selfnotesPrefix:selfnotesPrefix, additionalContent:{ EmptyView() })
+    init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool = true, fallback: String? = nil) where AdditionalContent == EmptyView {
+        self.init(contact:contact, selfnotesPrefix:selfnotesPrefix, fallback:fallback, additionalContent:{ EmptyView() })
+    }
+    
+    init(contact:ObservableKVOWrapper<MLContact>, fallback: String?) where AdditionalContent == EmptyView {
+        self.init(contact:contact, selfnotesPrefix:true, fallback:fallback, additionalContent:{ EmptyView() })
     }
     
     init(contact:ObservableKVOWrapper<MLContact>, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
         self.init(contact:contact, selfnotesPrefix:true, additionalContent:additionalContent)
     }
     
+    init(contact:ObservableKVOWrapper<MLContact>, fallback: String?, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
+        self.init(contact:contact, selfnotesPrefix:true, fallback:fallback, additionalContent:additionalContent)
+    }
+    
     init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
+        self.init(contact:contact, selfnotesPrefix:selfnotesPrefix, fallback:nil, additionalContent:additionalContent)
+    }
+    
+    init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool, fallback: String?, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
         self.contact = contact
         self.selfnotesPrefix = selfnotesPrefix
+        self.fallback = fallback
         self.additionalContent = additionalContent
     }
     
@@ -33,9 +47,25 @@ struct ContactEntry<AdditionalContent: View>: View {
                     .frame(width: 40, height: 40, alignment: .center)
                 VStack(alignment: .leading) {
                     if selfnotesPrefix {
-                        Text(contact.contactDisplayName as String)
+                        // use the `let contactDisplayName` to make sure this view gets updated if the contact display name changes
+                        // (the condition is never false, because contactDisplayName can not be nil)
+                        if let contactDisplayName = (contact.contactDisplayName as String?) {
+                            if let fallback = fallback {
+                                Text(contact.obj.contactDisplayName(withFallback:fallback))
+                            } else {
+                                Text(contactDisplayName)
+                            }
+                        }
                     } else {
-                        Text(contact.contactDisplayNameWithoutSelfnotesPrefix as String)
+                        // use the `let contactDisplayNameWithoutSelfnotesPrefix` to make sure this view gets updated if the contact display name changes
+                        // (the condition is never false, because contactDisplayNameWithoutSelfnotesPrefix can not be nil)
+                        if let contactDisplayNameWithoutSelfnotesPrefix = (contact.contactDisplayNameWithoutSelfnotesPrefix as String?) {
+                            if let fallback = fallback {
+                                Text(contact.obj.contactDisplayName(withFallback:fallback, andSelfnotesPrefix:false))
+                            } else {
+                                Text(contactDisplayNameWithoutSelfnotesPrefix)
+                            }
+                        }
                     }
                     additionalContent()
                     Text(contact.contactJid as String)

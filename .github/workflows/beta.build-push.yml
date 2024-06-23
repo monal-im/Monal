@@ -15,6 +15,10 @@ jobs:
   buildAndPublishBeta:
     name: "Build and Publish Beta Release"
     runs-on: self-hosted
+    outputs:
+      release-tag: ${{ steps.releasenotes.outputs.tag }}
+      release-name: ${{ steps.releasenotes.outputs.name }}
+      release-changelog: ${{ steps.releasenotes.outputs.notes }}
     env:
       APP_NAME: "Monal"
       APP_DIR: "Monal.app"
@@ -148,3 +152,20 @@ jobs:
           chmod +x ./scripts/updateLocalization.sh
           chmod +x ./scripts/xliff_extractor.py
           ./scripts/updateLocalization.sh BUILDSERVER
+  
+  notifyMuc:
+    name: Notify support MUC about new Betarelease
+    runs-on: ubuntu-latest
+    needs: [buildAndPublishBeta]
+    steps:
+      - name: Notify
+        uses: processone/xmpp-notifier@master
+        with: # Set the secrets as inputs
+          jid: ${{ secrets.BOT_JID }}
+          password: ${{ secrets.BOT_PASSWORD }}
+          server_host: ${{ secrets.BOT_SERVER }}
+          recipient: monal@chat.yax.im
+          recipient_is_room: true
+          message: |
+            New Betarelease: ${{ needs.buildAndPublishBeta.outputs.release-name }}
+            ${{ needs.buildAndPublishBeta.outputs.release-changelog }}

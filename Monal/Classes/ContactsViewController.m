@@ -107,11 +107,13 @@
     UIBarButtonItem* addContact = [UIBarButtonItem new];
     addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
     [addContact setAction:@selector(openAddContacts:)];
+    [addContact setTarget:self];
 
     UIBarButtonItem* createGroup = [[UIBarButtonItem alloc] init];
-        createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
-        [createGroup setAction:@selector(openCreateGroup:)];
-    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addContact, [[UIBarButtonItem alloc] init], createGroup, nil];
+    createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
+    [createGroup setAction:@selector(openCreateGroup:)];
+    [createGroup setTarget:self];
+    self.navigationItem.rightBarButtonItems = @[addContact, [[UIBarButtonItem alloc] init], createGroup];
 
     [self configureContactRequestsImage];
     

@@ -39,33 +39,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) defaultSettings
 {
-    BOOL setDefaults = [[HelperTools defaultsDB] boolForKey:@"SetDefaults"];
-    if(!setDefaults)
-    {
-        [[HelperTools defaultsDB] setBool:YES forKey:@"Sound"];
-        [[HelperTools defaultsDB] setBool:NO forKey:@"ChatBackgrounds"];
-
-        // Privacy Settings
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SendReceivedMarkers"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SendDisplayedMarkers"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowURLPreview"];
-
-        // Message Settings / Privacy
-        [[HelperTools defaultsDB] setInteger:NotificationPrivacySettingOptionDisplayNameAndMessage forKey:@"NotificationPrivacySetting"];
-
-        // udp logger
-        [[HelperTools defaultsDB] setBool:NO forKey:@"udpLoggerEnabled"];
-        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerHostname"];
-        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerPort"];
-        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerKey"];
-        
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
-        [[HelperTools defaultsDB] synchronize];
-    }
-
+    [self upgradeBoolUserSettingsIfUnset:@"Sound" toDefault:YES];
     [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
 
     // upgrade ShowGeoLocation
@@ -84,9 +58,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //upgrade url preview
     [self upgradeBoolUserSettingsIfUnset:@"ShowURLPreview" toDefault:YES];
     
-    //upgrade message autodeletion
-    [self upgradeBoolUserSettingsIfUnset:@"AutodeleteAllMessagesAfter3Days" toDefault:NO];
-
+    //upgrade message autodeletion and migrate old "3 days" setting
+    NSNumber* oldAutodelete = [[HelperTools defaultsDB] objectForKey:@"AutodeleteAllMessagesAfter3Days"];
+    if(oldAutodelete != nil && [oldAutodelete boolValue])
+    {
+        [self upgradeIntegerUserSettingsIfUnset:@"AutodeleteInterval" toDefault:259200];
+        [self removeObjectUserSettingsIfSet:@"AutodeleteAllMessagesAfter3Days"];
+    }
+    else
+        [self upgradeIntegerUserSettingsIfUnset:@"AutodeleteInterval" toDefault:0];
+    
     //upgrade default omemo on
     [self upgradeBoolUserSettingsIfUnset:@"OMEMODefaultOn" toDefault:YES];
     
@@ -156,7 +137,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #else
     [self upgradeBoolUserSettingsIfUnset:@"useDnssecForAllConnections" toDefault:NO];
 #endif
-    
     
     NSTimeZone* timeZone = [NSTimeZone localTimeZone];
     DDLogVerbose(@"Current timezone name: '%@'...", [timeZone name]);
@@ -354,6 +334,21 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         while(YES) {
             for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
                 [account updateIqHandlerTimeouts];
+            
+            //needed to not crash the app with an obscure EXC_BREAKPOINT while deleting something in a currently open chat
+            //the crash report then contains: message at /usr/lib/system/libdispatch.dylib: API MISUSE: Resurrection of an object
+            //(triggered by [HelperTools dispatchAsync:reentrantOnQueue:withBlock:] in it's call to dispatch_get_current_queue())
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];
+                if(autodeleteInterval > 0)
+                {
+                    NSNumber* deletionCount = [[DataLayer sharedInstance] autoDeleteMessagesAfterInterval:(NSTimeInterval)autodeleteInterval];
+                    //make sure our ui updates after a deletion
+                    if(deletionCount.integerValue > 0)
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                }
+            });
+            
             [NSThread sleepForTimeInterval:1];
         }
     });

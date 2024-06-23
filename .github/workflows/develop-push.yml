@@ -28,8 +28,10 @@ jobs:
         with:
           clean: true
           submodules: true
-      - name: Fetch tags
-        run: git fetch --tags
+          fetch-depth: 100
+          fetch-tags: true
+          show-progress: true
+          lfs: true
       - name: Checkout submodules
         run: git submodule update -f --init --remote
       - name: Import TURN secrets

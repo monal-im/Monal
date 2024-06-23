@@ -86,91 +86,81 @@ struct ContactDetails: View {
         Form {
             Section {
                 VStack(spacing: 20) {
-                    Image(uiImage: contact.avatar)
-                        .resizable()
-                        .scaledToFit()
-                        .applyClosure {view in
-                            if contact.isGroup {
-                                if ownAffiliation == "owner" {
-                                    view.accessibilityLabel((contact.mucType == "group") ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
-                                        .onTapGesture {
-                                            showImagePicker()
-                                        }
-                                        .addTopRight {
-                                            if contact.hasAvatar {
-                                                Button(action: {
-                                                    showingRemoveAvatarConfirmation = true
-                                                }, label: {
-                                                    Image(systemName: "xmark.circle.fill")
-                                                        .resizable()
-                                                        .frame(width: 24.0, height: 24.0)
-                                                        .accessibilityLabel((contact.mucType == "group") ? Text("Remove Group Avatar") : Text("Remove Channel Avatar"))
-                                                        .applyClosure { view in
-                                                            if #available(iOS 15, *) {
-                                                                view
-                                                                    .symbolRenderingMode(.palette)
-                                                                    .foregroundStyle(.white, .red)
-                                                            } else {
-                                                                view.foregroundColor(.red)
+                    if !contact.isSelfChat {
+                        Image(uiImage: contact.avatar)
+                            .resizable()
+                            .scaledToFit()
+                            .applyClosure {view in
+                                if contact.isGroup {
+                                    if ownAffiliation == "owner" {
+                                        view.accessibilityLabel((contact.mucType == "group") ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
+                                            .onTapGesture {
+                                                showImagePicker()
+                                            }
+                                            .addTopRight {
+                                                if contact.hasAvatar {
+                                                    Button(action: {
+                                                        showingRemoveAvatarConfirmation = true
+                                                    }, label: {
+                                                        Image(systemName: "xmark.circle.fill")
+                                                            .resizable()
+                                                            .frame(width: 24.0, height: 24.0)
+                                                            .accessibilityLabel((contact.mucType == "group") ? Text("Remove Group Avatar") : Text("Remove Channel Avatar"))
+                                                            .applyClosure { view in
+                                                                if #available(iOS 15, *) {
+                                                                    view
+                                                                        .symbolRenderingMode(.palette)
+                                                                        .foregroundStyle(.white, .red)
+                                                                } else {
+                                                                    view.foregroundColor(.red)
+                                                                }
                                                             }
-                                                        }
-                                                })
-                                                .buttonStyle(.borderless)
-                                                .offset(x: 8, y: -8)
-                                            } else {
-                                                Button(action: {
-                                                    showImagePicker()
-                                                }, label: {
-                                                    Image(systemName: "pencil.circle.fill")
-                                                        .resizable()
-                                                        .frame(width: 24.0, height: 24.0)
-                                                        .accessibilityLabel((contact.mucType == "group") ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
-//                                                         .applyClosure { view in
-//                                                             if #available(iOS 15, *) {
-//                                                                 view
-//                                                                     .symbolRenderingMode(.palette)
-//                                                                     .foregroundStyle(.primary, .secondary)
-//                                                             } else {
-//                                                                 view.foregroundColor(.primary)
-//                                                             }
-//                                                         }
-                                                })
-                                                .buttonStyle(.borderless)
-                                                .offset(x: 8, y: -8)
+                                                    })
+                                                    .buttonStyle(.borderless)
+                                                    .offset(x: 8, y: -8)
+                                                } else {
+                                                    Button(action: {
+                                                        showImagePicker()
+                                                    }, label: {
+                                                        Image(systemName: "pencil.circle.fill")
+                                                            .resizable()
+                                                            .frame(width: 24.0, height: 24.0)
+                                                            .accessibilityLabel((contact.mucType == "group") ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
+                                                    })
+                                                    .buttonStyle(.borderless)
+                                                    .offset(x: 8, y: -8)
+                                                }
                                             }
-                                        }
+                                    } else {
+                                        view.accessibilityLabel((contact.mucType == "group") ? Text("Group Avatar") : Text("Channel Avatar"))
+                                    }
                                 } else {
-                                    view.accessibilityLabel((contact.mucType == "group") ? Text("Group Avatar") : Text("Channel Avatar"))
+                                    view.accessibilityLabel(Text("Avatar"))
                                 }
-                            } else {
-                                view.accessibilityLabel(Text("Avatar"))
                             }
-                        }
-                        .frame(width: 150, height: 150, alignment: .center)
-                        .shadow(radius: 7)
-                        .sheet(isPresented:$showingImagePicker) {
-                            ImagePicker(image:$inputImage)
-                        }
-                        .actionSheet(isPresented: $showingRemoveAvatarConfirmation) {
-                            ActionSheet(
-                                title: Text("Really remove avatar?"),
-                                message: Text("This will remove the current avatar image and revert this group/channel to the default one."),
-                                buttons: [
-                                    .cancel(),
-                                    .destructive(
-                                        Text("Yes"),
-                                        action: {
-                                            performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:Text("Removing avatar..."), descriptionView:Text("")) {
-                                                self.account.mucProcessor.publishAvatar(nil, forMuc: contact.contactJid)
-                                            }.catch { error in
-                                                errorAlert(title: Text("Error removing avatar!"), message: Text("\(String(describing:error))"))
-                                                hideLoadingOverlay(overlay)
+                            .frame(width: 150, height: 150, alignment: .center)
+                            .shadow(radius: 7)
+                            .actionSheet(isPresented: $showingRemoveAvatarConfirmation) {
+                                ActionSheet(
+                                    title: Text("Really remove avatar?"),
+                                    message: Text("This will remove the current avatar image and revert this group/channel to the default one."),
+                                    buttons: [
+                                        .cancel(),
+                                        .destructive(
+                                            Text("Yes"),
+                                            action: {
+                                                performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:Text("Removing avatar..."), descriptionView:Text("")) {
+                                                    self.account.mucProcessor.publishAvatar(nil, forMuc: contact.contactJid)
+                                                }.catch { error in
+                                                    errorAlert(title: Text("Error removing avatar!"), message: Text("\(String(describing:error))"))
+                                                    hideLoadingOverlay(overlay)
+                                                }
                                             }
-                                        }
-                                    )
-                                ]
-                            )
-                        }
+                                        )
+                                    ]
+                                )
+                            }
+                    }
                     
                     Button {
                         UIPasteboard.general.setValue(contact.contactJid as String, forPasteboardType:UTType.utf8PlainText.identifier as String)
@@ -186,7 +176,18 @@ struct ContactDetails: View {
                         .accessibilityHint("Copies JID")
                     }
                     .buttonStyle(.borderless)
-                        
+                    
+//                     //TODO: wait for account edit to become swiftui
+//                     if contact.isSelfChat {
+//                         Button {
+//                             //TODO: open account edit
+//                         } label: {
+//                             Text("Open account settings")
+//                             .accessibilityHint("Open account settings")
+//                         }
+//                         .buttonStyle(.borderless)
+//                     }
+                    
                     
                     //only show account jid if more than one is configured
                     if MLXMPPManager.sharedInstance().connectedXMPP.count > 1 && !contact.isSelfChat {
@@ -241,9 +242,6 @@ struct ContactDetails: View {
                                     }
                                 }
                                 .buttonStyle(.borderless)
-                                .sheet(isPresented: $showingSheetEditSubject) {
-                                    LazyClosureView(EditGroupSubject(contact: contact))
-                                }
                             } else {
                                 Text("Group subject:")
                             }
@@ -260,40 +258,42 @@ struct ContactDetails: View {
                 
             // info/nondestructive buttons
             Section {
-                Button {
-                    if contact.isGroup {
-                        if !contact.isMuted && !contact.isMentionOnly {
-                            contact.obj.toggleMentionOnly(true)
-                        } else if !contact.isMuted && contact.isMentionOnly {
-                            contact.obj.toggleMentionOnly(false)
-                            contact.obj.toggleMute(true)
+                if !contact.isSelfChat {
+                    Button {
+                        if contact.isGroup {
+                            if !contact.isMuted && !contact.isMentionOnly {
+                                contact.obj.toggleMentionOnly(true)
+                            } else if !contact.isMuted && contact.isMentionOnly {
+                                contact.obj.toggleMentionOnly(false)
+                                contact.obj.toggleMute(true)
+                            } else {
+                                contact.obj.toggleMentionOnly(false)
+                                contact.obj.toggleMute(false)
+                            }
                         } else {
-                            contact.obj.toggleMentionOnly(false)
-                            contact.obj.toggleMute(false)
+                            contact.obj.toggleMute(!contact.isMuted)
                         }
-                    } else {
-                        contact.obj.toggleMute(!contact.isMuted)
-                    }
-                } label: {
-                    if contact.isMuted  {
-                        Label {
-                            contact.isGroup ? Text("Notifications disabled") : Text("Contact is muted")
-                        } icon: {
-                            Image(systemName: "bell.slash.fill")
-                                .foregroundColor(.red)
-                        }
-                    } else if contact.isGroup && contact.isMentionOnly {
-                        Label {
-                            Text("Notify only when mentioned")
-                        } icon: {
-                            Image(systemName: "bell.badge")
-                        }
-                    } else {
-                        Label {
-                            contact.isGroup ? Text("Notify on all messages") : Text("Contact is not muted")
-                        } icon: {
-                            Image(systemName: "bell.fill")
-                                .foregroundColor(.green)
+                    } label: {
+                        if contact.isMuted  {
+                            Label {
+                                contact.isGroup ? Text("Notifications disabled") : Text("Contact is muted")
+                            } icon: {
+                                Image(systemName: "bell.slash.fill")
+                                    .foregroundColor(.red)
+                            }
+                        } else if contact.isGroup && contact.isMentionOnly {
+                            Label {
+                                Text("Notify only when mentioned")
+                            } icon: {
+                                Image(systemName: "bell.badge")
+                            }
+                        } else {
+                            Label {
+                                contact.isGroup ? Text("Notify on all messages") : Text("Contact is not muted")
+                            } icon: {
+                                Image(systemName: "bell.fill")
+                                    .foregroundColor(.green)
+                            }
                         }
                     }
                 }
@@ -372,12 +372,8 @@ struct ContactDetails: View {
                 }
                 
 #if !DISABLE_OMEMO
-                if !HelperTools.isContactBlacklisted(forEncryption:contact.obj) {
-                    if !contact.isGroup {
-                        NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
-                            contact.isSelfChat ? Text("Own Encryption Keys") : Text("Encryption Keys")
-                        }
-                    } else if contact.mucType == "group" {
+                if !HelperTools.isContactBlacklisted(forEncryption:contact.obj) && !contact.isSelfChat {
+                    if !contact.isGroup || contact.mucType == "group" {
                         NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
                             Text("Encryption Keys")
                         }
@@ -644,12 +640,27 @@ struct ContactDetails: View {
                 }
             }))
         }
-        .onChange(of:inputImage) { _ in
-            performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:Text("Uploading avatar..."), descriptionView:Text("")) {
-                self.account.mucProcessor.publishAvatar(inputImage, forMuc: contact.contactJid)
-            }.catch { error in
-                errorAlert(title: Text("Error changing avatar!"), message: Text("\(String(describing:error))"))
-                hideLoadingOverlay(overlay)
+        .sheet(isPresented: $showingSheetEditSubject) {
+            LazyClosureView(EditGroupSubject(contact: contact))
+        }
+        .sheet(isPresented:$showingImagePicker) {
+            ImagePicker(image:$inputImage)
+        }
+        .sheet(isPresented: $inputImage.optionalMappedToBool()) {
+            ImageCropView(originalImage: inputImage!, configureBlock: { cropViewController in
+                cropViewController.aspectRatioPreset = .presetSquare
+                cropViewController.aspectRatioLockEnabled = true
+                cropViewController.aspectRatioPickerButtonHidden = true
+                cropViewController.resetAspectRatioEnabled = false
+            }, onCanceled: {
+                inputImage = nil
+            }) { (image, cropRect, angle) in
+                performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:Text("Uploading avatar..."), descriptionView:Text("")) {
+                    self.account.mucProcessor.publishAvatar(image, forMuc: contact.contactJid)
+                }.catch { error in
+                    errorAlert(title: Text("Error changing avatar!"), message: Text("\(String(describing:error))"))
+                    hideLoadingOverlay(overlay)
+                }
             }
         }
         .onChange(of:contact.avatar as UIImage) { _ in

@@ -157,6 +157,11 @@ static NSDateFormatter* dbFormatter;
     [self.db voidWriteTransaction:block];
 }
 
+-(void) vacuum
+{
+    return [self.db vacuum];
+}
+
 #pragma mark account commands
 
 -(NSArray*) accountList
@@ -933,7 +938,8 @@ static NSDateFormatter* dbFormatter;
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
         MLAssert(nick != nil, @"Could not determine muc nick when adding muc");
         
-        [self cleanupMembersAndParticipantsListFor:room forAccountId:accountNo];
+        for(NSString* type in @[@"member", @"admin", @"owner"])
+            [self cleanupMembersAndParticipantsListFor:room andType:type onAccountId:accountNo];
         
         BOOL encrypt = NO;
 #ifndef DISABLE_OMEMO
@@ -945,11 +951,11 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) cleanupMembersAndParticipantsListFor:(NSString*) room forAccountId:(NSNumber*) accountNo
+-(void) cleanupMembersAndParticipantsListFor:(NSString*) room andType:(NSString*) type onAccountId:(NSNumber*) accountNo
 {
     //clean up old muc data (will be refilled by incoming presences and/or disco queries)
-    [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
-    [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
+    [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=? AND affiliation=?;" andArguments:@[accountNo, room, type]];
+    [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=? AND affiliation=?;" andArguments:@[accountNo, room, type]];
 }
 
 -(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSNumber*) accountNo
@@ -1455,28 +1461,34 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
-
--(void) autodeleteAllMessagesAfter3Days
+-(NSNumber*) autoDeleteMessagesAfterInterval:(NSTimeInterval) interval
 {
-    [self.db voidWriteTransaction:^{
+    return [self.db idWriteTransaction:^{
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
-        //3 days before now
-        NSString* pastDate = [dbFormatter stringFromDate:[[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay value:-3 toDate:[NSDate date] options:0]];
-        //delete all transferred files old enough
-        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND timestamp<?;" andArguments:@[kMessageTypeFiletransfer, pastDate]];
+        //interval before now
+        NSDate* pastDate = [NSDate dateWithTimeIntervalSinceNow: -interval];
+        NSString* pastDateString = [dbFormatter stringFromDate:pastDate];
+
+        //select message history IDs of inbound read messages or outgoing messages being old enough
+        //if they are filetransfers and delete those files
+        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<? AND messageType=?;" andArguments:@[pastDateString, kMessageTypeFiletransfer]];
         for(NSNumber* historyId in messageHistoryIDs)
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
-        //delete all messages in history old enough
-        [self.db executeNonQuery:@"DELETE FROM message_history WHERE timestamp<?;" andArguments:@[pastDate]];
+
+        //delete inbound read messages or outgoing messages being old enough
+        NSNumber* deletionCount = [self.db executeScalar:@"SELECT COUNT(*) FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<?;" andArguments:@[pastDateString]];
+        [self.db executeNonQuery:@"DELETE FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<?;" andArguments:@[pastDateString]];
+
         //delete all chats with empty history from active chats list
-        [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
+        [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT 1 FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
+
         [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
+        
+        return deletionCount;
     }];
-    //vacuum db after delete (must be done outside of transactions)
-    [self.db vacuum];
 }
 
--(void) deleteMessageHistory:(NSNumber*) messageNo
+-(void) retractMessageHistory:(NSNumber*) messageNo
 {
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];

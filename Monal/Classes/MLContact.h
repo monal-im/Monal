@@ -95,6 +95,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, readonly) NSString* contactDisplayNameWithoutSelfnotesPrefix;
 
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName;
+-(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName andSelfnotesPrefix:(BOOL) hasSelfnotesPrefix;
 -(void) updateWithContact:(MLContact*) contact;
 -(void) refresh;
 -(void) updateUnreadCount;

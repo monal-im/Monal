@@ -221,10 +221,6 @@ NSString* const kStanza = @"stanza";
     //we support mds
     [self.pubsub registerForNode:@"urn:xmpp:mds:displayed:0" withHandler:$newHandler(MLPubSubProcessor, mdsHandler)];
     
-    //autodelete messages old enough (first invocation)
-    if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
-        [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
-    
     return self;
 }
 
@@ -861,10 +857,6 @@ NSString* const kStanza = @"stanza";
 
 -(void) connect
 {
-    //autodelete messages old enough (second invocation)
-    if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
-        [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
-    
     if(_parseQueue.suspended)
     {
         DDLogWarn(@"Not trying to connect: parse queue frozen!");

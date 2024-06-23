@@ -21,6 +21,7 @@ struct MemberList: View {
     @State private var memberList: OrderedSet<ObservableKVOWrapper<MLContact>>
     @State private var affiliations: Dictionary<ObservableKVOWrapper<MLContact>, String>
     @State private var online: Dictionary<ObservableKVOWrapper<MLContact>, Bool>
+    @State private var nicknames: Dictionary<ObservableKVOWrapper<MLContact>, String>
     @State private var navigationActive: ObservableKVOWrapper<MLContact>?
     @State private var showAlert = false
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
@@ -35,6 +36,7 @@ struct MemberList: View {
         _memberList = State(wrappedValue:OrderedSet<ObservableKVOWrapper<MLContact>>())
         _affiliations = State(wrappedValue:[:])
         _online = State(wrappedValue:[:])
+        _nicknames = State(wrappedValue:[:])
     }
     
     func updateMemberlist() {
@@ -42,12 +44,14 @@ struct MemberList: View {
         ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:self.muc.obj) ?? "none"
         affiliations.removeAll(keepingCapacity:true)
         online.removeAll(keepingCapacity:true)
+        nicknames.removeAll(keepingCapacity:true)
         for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc:self.muc.contactJid, forAccountId:account.accountNo)) {
             DDLogVerbose("Got member/participant entry: \(String(describing:memberInfo))")
             guard let jid = memberInfo["participant_jid"] as? String ?? memberInfo["member_jid"] as? String else {
                 continue
             }
             let contact = ObservableKVOWrapper(MLContact.createContact(fromJid:jid, andAccountNo:account.accountNo))
+            nicknames[contact] = memberInfo["room_nick"] as? String
             if !memberList.contains(contact) {
                 continue
             }
@@ -258,7 +262,7 @@ struct MemberList: View {
                     if !contact.isSelfChat {
                         HStack {
                             HStack {
-                                ContactEntry(contact:contact) {
+                                ContactEntry(contact:contact, fallback:nicknames[contact]) {
                                     Text("Affiliation: \(mucAffiliationToString(affiliations[contact]))\(!(online[contact] ?? false) ? Text(" (offline)") : Text(""))")
                                         //.foregroundColor(Color(UIColor.secondaryLabel))
                                         .font(.footnote)

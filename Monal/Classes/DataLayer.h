@@ -43,6 +43,7 @@ extern NSString* const kMessageTypeFiletransfer;
 +(DataLayer*) sharedInstance;
 -(NSString* _Nullable) exportDB;
 -(void) createTransaction:(monal_void_block_t) block;
+-(void) vacuum;
 
 //Roster
 -(NSString *) getRosterVersionForAccount:(NSNumber*) accountNo;
@@ -109,7 +110,7 @@ extern NSString* const kMessageTypeFiletransfer;
 #pragma mark - MUC
 
 -(BOOL) initMuc:(NSString*) room forAccountId:(NSNumber*) accountNo andMucNick:(NSString* _Nullable) mucNick;
--(void) cleanupMembersAndParticipantsListFor:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(void) cleanupMembersAndParticipantsListFor:(NSString*) room andType:(NSString*) type onAccountId:(NSNumber*) accountNo;
 -(void) addMember:(NSDictionary*) member toMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
@@ -212,8 +213,8 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(void) clearMessages:(NSNumber*) accountNo;
 -(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSNumber*) accountNo;
--(void) autodeleteAllMessagesAfter3Days;
--(void) deleteMessageHistory:(NSNumber *) messageNo;
+-(NSNumber*) autoDeleteMessagesAfterInterval:(NSTimeInterval)interval;
+-(void) retractMessageHistory:(NSNumber *) messageNo;
 -(void) deleteMessageHistoryLocally:(NSNumber*) messageNo;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
 -(NSNumber* _Nullable) getLMCHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo;

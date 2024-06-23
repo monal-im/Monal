@@ -189,7 +189,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     XMPPMessage* msg = notification.userInfo[@"message"];
     NSString* callUiHandlerFor = nil;
     
-    //check if this is a direct invite (direct invites always follow indirect ones, so we don't have to check for indirect ones)
+    //check if this is a direct invite
     if([msg check:@"/{jabber:client}message<type=normal>/{jabber:x:conference}x@jid"])
         callUiHandlerFor = [msg findFirst:@"/{jabber:client}message<type=normal>/{jabber:x:conference}x@jid"];
     
@@ -420,7 +420,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         }
         MLContact* inviteFrom = [MLContact createContactFromJid:invitedMucJid andAccountNo:_account.accountNo];
         DDLogInfo(@"Got mediated muc invite from %@ for %@...", inviteFrom, messageNode.fromUser);
-        if(!inviteFrom.isSubscribedFrom)
+        if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !inviteFrom.isSubscribedFrom)
         {
             DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
             return YES;     //don't process this further
@@ -439,7 +439,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         
         MLContact* inviteFrom = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:_account.accountNo];
         DDLogInfo(@"Got direct muc invite from %@ for %@ --> joining...", inviteFrom, [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
-        if(!inviteFrom.isSubscribedFrom)
+        if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !inviteFrom.isSubscribedFrom)
         {
             DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
             return YES;     //don't process this further

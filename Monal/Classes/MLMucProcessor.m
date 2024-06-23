@@ -1482,9 +1482,6 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     
     if(join)
     {
-        DDLogInfo(@"Clearing muc participants and members tables for %@", iqNode.fromUser);
-        [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser forAccountId:_account.accountNo];
-    
         //now try to join this room if requested
         [self sendJoinPresenceFor:iqNode.fromUser];
     }
@@ -1516,6 +1513,8 @@ $$
 
 $$instance_handler(handleMembersList, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
+    DDLogInfo(@"Clearing muc participants and members tables for type %@: %@", type, iqNode.fromUser);
+    [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser andType:type onAccountId:_account.accountNo];
     [self handleMembersListUpdate:[iqNode find:@"{http://jabber.org/protocol/muc#admin}query/item@@"] forMuc:iqNode.fromUser];
     [self logMembersOfMuc:iqNode.fromUser];
 $$

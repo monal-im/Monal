@@ -1235,15 +1235,11 @@ $$
         _shutdownPending = YES;
         DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
         [HelperTools scheduleBackgroundTask:YES];        //make sure delivery will be attempted, if needed (force as soon as possible)
-        DDLogInfo(@"|~~| 20%% |~~|");
-        [self updateUnread];
-        DDLogInfo(@"|~~| 40%% |~~|");
-        [[HelperTools defaultsDB] synchronize];
-        DDLogInfo(@"|~~| 60%% |~~|");
+        DDLogInfo(@"|~~| 33%% |~~|");
         [[MLXMPPManager sharedInstance] nowBackgrounded];
-        DDLogInfo(@"|~~| 80%% |~~|");
+        DDLogInfo(@"|~~| 66%% |~~|");
         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
-        DDLogInfo(@"|~~| 100%% |~~|");
+        DDLogInfo(@"|~~| 99%% |~~|");
         [[MLXMPPManager sharedInstance] disconnectAll];
         DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
         [DDLog flushLog];

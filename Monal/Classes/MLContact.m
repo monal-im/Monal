@@ -237,8 +237,9 @@ static NSMutableDictionary* _singletonCache;
     @synchronized(_singletonCache) {
         if(_singletonCache[cacheKey] != nil)
         {
-            if(((WeakContainer*)_singletonCache[cacheKey]).obj != nil)
-                return ((WeakContainer*)_singletonCache[cacheKey]).obj;
+            MLContact* obj = ((WeakContainer*)_singletonCache[cacheKey]).obj;
+            if(obj != nil)
+                return obj;
             else
                 [_singletonCache removeObjectForKey:cacheKey];
         }

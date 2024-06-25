@@ -21,6 +21,11 @@
 static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
 #import "MLLogFileManager.h"
 
+@import PromiseKit;
+#define PMKHangEnum(promise)                (((NSNumber*)PMKHang(promise)).integerValue)
+#define PMKHangBool(promise)                (((NSNumber*)PMKHang(promise)).boolValue)
+#define PMKHangInt(promise)                 (((NSNumber*)PMKHang(promise)).intValue)
+#define PMKHangDouble(promise)              (((NSNumber*)PMKHang(promise)).doubleValue)
 
 //configure app group constants
 #ifdef IS_ALPHA

@@ -939,7 +939,10 @@ static NSDateFormatter* dbFormatter;
         MLAssert(nick != nil, @"Could not determine muc nick when adding muc");
         
         for(NSString* type in @[@"member", @"admin", @"owner"])
-            [self cleanupMembersAndParticipantsListFor:room andType:type onAccountId:accountNo];
+        {
+            [self cleanupParticipantsListFor:room andType:type onAccountId:accountNo];
+            [self cleanupMembersListFor:room andType:type onAccountId:accountNo];
+        }
         
         BOOL encrypt = NO;
 #ifndef DISABLE_OMEMO
@@ -951,10 +954,15 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) cleanupMembersAndParticipantsListFor:(NSString*) room andType:(NSString*) type onAccountId:(NSNumber*) accountNo
+-(void) cleanupParticipantsListFor:(NSString*) room andType:(NSString*) type onAccountId:(NSNumber*) accountNo
 {
     //clean up old muc data (will be refilled by incoming presences and/or disco queries)
     [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=? AND affiliation=?;" andArguments:@[accountNo, room, type]];
+}
+
+-(void) cleanupMembersListFor:(NSString*) room andType:(NSString*) type onAccountId:(NSNumber*) accountNo
+{
+    //clean up old muc data (will be refilled by incoming presences and/or disco queries)
     [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=? AND affiliation=?;" andArguments:@[accountNo, room, type]];
 }
 

@@ -32,6 +32,7 @@ static NSDictionary* _defaultOptions;
 
 +(void) initialize
 {
+    //TODO: wait for servers to support pubsub#publish_node_full and set it at least for bookmarks2
     _defaultOptions = @{
         @"pubsub#notify_retract": @"true",
         @"pubsub#notify_delete": @"true"

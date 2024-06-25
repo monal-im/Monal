@@ -3219,6 +3219,17 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark stanza handling
 
+// -(AnyPromise*) sendIq:(XMPPIQ*) iq
+// {
+//     return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+//         [self sendIq:iq withResponseHandler:^(XMPPIQ* response) {
+//             resolve(response);
+//         } andErrorHandler:^(XMPPIQ* error) {
+//             resolve(error);
+//         }];
+//     }];
+// }
+
 -(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler
 {
     if(resultHandler || errorHandler)
@@ -4037,6 +4048,7 @@ NSString* const kStanza = @"stanza";
     [self queryDisco];
     [self queryServerVersion];
     [self purgeOfflineStorage];
+    [self setMAMPrefs:@"always"];   //make sure we are able to do proper catchups
     [self sendPresence];            //this will trigger a replay of offline stanzas on prosody (no XEP-0013 support anymore 😡)
     //the offline messages will come in *after* we initialized the mam query, because the disco result comes in first
     //(and this is what triggers mam catchup)

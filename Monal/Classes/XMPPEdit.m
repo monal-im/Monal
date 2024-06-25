@@ -12,7 +12,6 @@
 #import "MLBlockedUsersTableViewController.h"
 #import "MLButtonCell.h"
 #import "MLImageManager.h"
-#import "MLMAMPrefTableViewController.h"
 #import "MLPasswordChangeTableViewController.h"
 #import "MLServerDetails.h"
 #import "MLSwitchCell.h"
@@ -49,7 +48,6 @@ enum kSettingsAccountRows {
 enum kSettingsGeneralRows {
     SettingsChangePasswordRow,
     SettingsOmemoKeysRow,
-    SettingsMAMPreferencesRow,
     SettingsBlockedUsersRow,
     SettingsGeneralRowsCnt
 };
@@ -655,10 +653,6 @@ enum DummySettingsRows {
                 [thecell initTapCell:NSLocalizedString(@"Encryption Keys (OMEMO)", @"")];
                 break;
             }
-            case SettingsMAMPreferencesRow: {
-                [thecell initTapCell:NSLocalizedString(@"Message Archive Preferences", @"")];
-                break;
-            }
             case SettingsBlockedUsersRow: {
                 [thecell initTapCell:NSLocalizedString(@"Blocked Users", @"")];
                 break;
@@ -848,9 +842,6 @@ enum DummySettingsRows {
                 [self showDetailViewController:ownOmemoKeysView sender:self];
                 break;
             }
-            case SettingsMAMPreferencesRow:
-                [self performSegueWithIdentifier:@"showMAMPref" sender:self];
-                break;
             case SettingsBlockedUsersRow:
                 [self performSegueWithIdentifier:@"showBlockedUsers" sender:self];
                 break;
@@ -899,11 +890,6 @@ enum DummySettingsRows {
     {
         MLServerDetails* server= (MLServerDetails*)segue.destinationViewController;
         server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    }
-    else if([segue.identifier isEqualToString:@"showMAMPref"])
-    {
-        MLMAMPrefTableViewController* mam = (MLMAMPrefTableViewController*)segue.destinationViewController;
-        mam.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
     }
     else if([segue.identifier isEqualToString:@"showBlockedUsers"])
     {

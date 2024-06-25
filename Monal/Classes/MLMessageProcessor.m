@@ -312,6 +312,7 @@ static NSMutableDictionary* _typingNotifications;
     NSString* ownNick;
     NSString* actualFrom = messageNode.fromUser;
     NSString* participantJid = nil;
+    NSString* occupantId = nil;
     if([messageNode check:@"/<type=groupchat>"] && messageNode.fromResource)
     {
         ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
@@ -322,8 +323,17 @@ static NSMutableDictionary* _typingNotifications;
         participantJid = [messageNode findFirst:@"/<type=groupchat>/{http://jabber.org/protocol/muc#user}x/item@jid"];
         if(![outerMessageNode check:@"{urn:xmpp:mam:2}result"] || participantJid == nil)
         {
-            NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo];
-            participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
+            if([[account.mucProcessor getRoomFeaturesForMuc:messageNode.fromUser] containsObject:@"urn:xmpp:occupant-id:0"] && [messageNode check:@"{urn:xmpp:occupant-id:0}occupant-id@id"])
+            {
+                occupantId = [messageNode findFirst:@"{urn:xmpp:occupant-id:0}occupant-id@id"];
+                NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForOccupant:occupantId inRoom:messageNode.fromUser forAccountId:account.accountNo];
+                participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
+            }
+            else
+            {
+                NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo];
+                participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
+            }
         }
         //make sure this is not the full jid
         if(participantJid != nil)
@@ -446,8 +456,8 @@ static NSMutableDictionary* _typingNotifications;
         }
         else
         {
-            //this checks for all spelled out in the business rules of XEP-0424
-            historyIdToRetract = [[DataLayer sharedInstance] getRetractionHistoryIDForMessageId:idToRetract from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
+            //this checks for everything spelled out in the business rules of XEP-0424
+            historyIdToRetract = [[DataLayer sharedInstance] getRetractionHistoryIDForMessageId:idToRetract from:messageNode.fromUser participantJid:participantJid occupantId:occupantId andAccount:account.accountNo];
         }
         
         if(historyIdToRetract != nil)
@@ -486,6 +496,7 @@ static NSMutableDictionary* _typingNotifications;
                                     forAccount:account.accountNo
                                     withBody:@""
                                 actuallyfrom:actualFrom
+                                  occupantId:occupantId
                                 participantJid:participantJid
                                         sent:YES
                                         unread:NO
@@ -568,7 +579,7 @@ static NSMutableDictionary* _typingNotifications;
                 NSString* messageIdToReplace = [messageNode findFirst:@"{urn:xmpp:message-correct:0}replace@id"];
                 DDLogVerbose(@"Message id to LMC-replace: %@", messageIdToReplace);
                 //this checks if this message is from the same jid as the message it tries to do the LMC for (e.g. inbound can only correct inbound and outbound only outbound)
-                historyId = [[DataLayer sharedInstance] getLMCHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser actualFrom:actualFrom participantJid:participantJid andAccount:account.accountNo];
+                historyId = [[DataLayer sharedInstance] getLMCHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser occupantId:occupantId participantJid:participantJid andAccount:account.accountNo];
                 DDLogVerbose(@"History id to LMC-replace: %@", historyId);
                 //now check if the LMC is allowed (we use historyIdToUse for MLhistory mam queries to only check LMC for the 3 messages coming before this ID in this converastion)
                 //historyIdToUse will be nil, for messages going forward in time which means (check for the newest 3 messages in this conversation)
@@ -588,6 +599,7 @@ static NSMutableDictionary* _typingNotifications;
                                         forAccount:account.accountNo
                                           withBody:[body copy]
                                       actuallyfrom:actualFrom
+                                        occupantId:occupantId
                                     participantJid:participantJid
                                               sent:YES
                                             unread:unread

@@ -361,6 +361,8 @@ static NSDictionary* _optionalGroupConfigOptions;
             if(item[@"jid"])
                 item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
             item[@"nick"] = presenceNode.fromResource;
+            if([_roomFeatures[presenceNode.fromUser] containsObject:@"urn:xmpp:occupant-id:0"])
+                item[@"occupant_id"] = [presenceNode findFirst:@"{urn:xmpp:occupant-id:0}occupant-id@id"];
             
             //handle participant updates
             if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)

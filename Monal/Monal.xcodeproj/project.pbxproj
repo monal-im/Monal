@@ -141,6 +141,8 @@
 		842790852A32D16D005C18CC /* CallSounds in Resources */ = {isa = PBXBuildFile; fileRef = 842790842A32D16C005C18CC /* CallSounds */; };
 		843AD3AB2AA55CE20036844D /* MLOgHtmlParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */; };
 		8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8441EFF82921B53500E851E9 /* BackgroundSettings.swift */; };
+		844921EA2C29F9A000B99A9C /* MLDelayableTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 844921E92C29F9A000B99A9C /* MLDelayableTimer.m */; };
+		844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */; };
 		844EEC6D28E718DB00CB5EF9 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		845D636B2AD4AEDA0066EFFB /* ImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845D636A2AD4AEDA0066EFFB /* ImageViewer.swift */; };
 		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
@@ -576,6 +578,8 @@
 		842790842A32D16C005C18CC /* CallSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CallSounds; sourceTree = "<group>"; };
 		843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MLOgHtmlParser.swift; path = Classes/MLOgHtmlParser.swift; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
+		844921E92C29F9A000B99A9C /* MLDelayableTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDelayableTimer.m; sourceTree = "<group>"; };
+		844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDelayableTimer.h; sourceTree = "<group>"; };
 		845D636A2AD4AEDA0066EFFB /* ImageViewer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageViewer.swift; sourceTree = "<group>"; };
 		846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPlaceholder.swift; sourceTree = "<group>"; };
 		848717F1295ED64500B8D288 /* MLCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLCall.m; path = Classes/MLCall.m; sourceTree = SOURCE_ROOT; };
@@ -1256,6 +1260,8 @@
 				84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */,
 				84C1CD512A8F617F007076ED /* MLStreamRedirect.m */,
 				84C1CD532A8F6196007076ED /* MLStreamRedirect.h */,
+				844921E92C29F9A000B99A9C /* MLDelayableTimer.m */,
+				844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */,
 			);
 			name = tools;
 			sourceTree = "<group>";
@@ -1489,6 +1495,7 @@
 				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
 				84E55E8029644279003E191A /* ActiveChatsViewController.h in Headers */,
 				541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */,
+				844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */,
 				84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */,
 				389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */,
 				541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */,
@@ -2188,6 +2195,7 @@
 				26CC57C723A0892100ABB92A /* MLContact.m in Sources */,
 				540F625F24BA951E0008A6D8 /* HelperTools.m in Sources */,
 				38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */,
+				844921EA2C29F9A000B99A9C /* MLDelayableTimer.m in Sources */,
 				544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -47,24 +47,16 @@ struct ContactEntry<AdditionalContent: View>: View {
                     .frame(width: 40, height: 40, alignment: .center)
                 VStack(alignment: .leading) {
                     if selfnotesPrefix {
-                        // use the `let contactDisplayName` to make sure this view gets updated if the contact display name changes
+                        // use the if to make sure this view gets updated if the contact display name changes
                         // (the condition is never false, because contactDisplayName can not be nil)
-                        if let contactDisplayName = (contact.contactDisplayName as String?) {
-                            if let fallback = fallback {
-                                Text(contact.obj.contactDisplayName(withFallback:fallback))
-                            } else {
-                                Text(contactDisplayName)
-                            }
+                        if (contact.contactDisplayName as String?) != nil {
+                            Text(contact.obj.contactDisplayName(withFallback:fallback))
                         }
                     } else {
-                        // use the `let contactDisplayNameWithoutSelfnotesPrefix` to make sure this view gets updated if the contact display name changes
+                        // use the if to make sure this view gets updated if the contact display name changes
                         // (the condition is never false, because contactDisplayNameWithoutSelfnotesPrefix can not be nil)
-                        if let contactDisplayNameWithoutSelfnotesPrefix = (contact.contactDisplayNameWithoutSelfnotesPrefix as String?) {
-                            if let fallback = fallback {
-                                Text(contact.obj.contactDisplayName(withFallback:fallback, andSelfnotesPrefix:false))
-                            } else {
-                                Text(contactDisplayNameWithoutSelfnotesPrefix)
-                            }
+                        if (contact.contactDisplayNameWithoutSelfnotesPrefix as String?) != nil {
+                            Text(contact.obj.contactDisplayName(withFallback:fallback, andSelfnotesPrefix:false))
                         }
                     }
                     additionalContent()

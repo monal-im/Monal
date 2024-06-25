@@ -322,7 +322,7 @@ like hotel wifi, ugly mobile carriers etc.
                         if autodeleteIntervalSelection == -1 {
                             HStack {
                                 Text("Custom Time: ")
-                                Stepper(NSLocalizedString("\(String(describing:(max(1, autodeleteInterval / 3600)).formatted())) hours", comment:""), value: Binding<Int>(
+                                Stepper(String(format:NSLocalizedString("%@ hours", comment:""), String(describing:(max(1, autodeleteInterval / 3600)).formatted())), value: Binding<Int>(
                                     get: { max(1, autodeleteInterval / 3600) /*clamp to 1 ... .max*/ },
                                     set: { autodeleteInterval = $0 * 3600 }
                                 ), in: 1 ... .max)

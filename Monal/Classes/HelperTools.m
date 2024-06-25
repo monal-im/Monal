@@ -57,6 +57,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "commithash.h"
 #import "MLContactSoftwareVersionInfo.h"
 #import "IPC.h"
+#import "MLDelayableTimer.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -70,6 +71,9 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 @property(nonatomic,readwrite,retain) NSString* basePath;
 @end
 
+@interface MLDelayableTimer()
+-(void) invalidate;
+@end
 
 static char* _crashBundleName = "UnifiedReport";
 static NSString* _processID;
@@ -590,6 +594,7 @@ void swizzle(Class c, SEL orig, SEL new)
     switch(identifier)
     {
         case MLRunLoopIdentifierNetwork: priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND; name = "im.monal.runloop.networking"; break;
+        case MLRunLoopIdentifierTimer: priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND; name = "im.monal.runloop.timer"; break;
         default: unreachable(@"unknown runloop identifier!");
     }
     
@@ -2255,8 +2260,8 @@ void swizzle(Class c, SEL orig, SEL new)
     return [rfc3339DateFormatter stringFromDate:datetime];
 }
 
-//don't use this directly, but via createTimer() makro
-+(monal_void_block_t) startQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue
+//don't use this directly, but via createDelayableTimer() makros
++(MLDelayableTimer*) startDelayableQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue
 {
     if(queue == nil)
         queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -2266,47 +2271,41 @@ void swizzle(Class c, SEL orig, SEL new)
     if([filePathComponents count]>1)
         fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
     
-    if(timeout<=0.001)
+    MLDelayableTimer* timer = [[MLDelayableTimer alloc] initWithHandler:^(MLDelayableTimer* timer){
+        if(handler)
+            dispatch_async(queue, ^{
+                DDLogDebug(@"calling handler for timer: %@", timer);
+                handler();
+            });
+    } andCancelHandler:^(MLDelayableTimer* timer){
+        if(cancelHandler)
+            dispatch_async(queue, ^{
+                DDLogDebug(@"calling cancel block for timer: %@", timer);
+                cancelHandler();
+            });
+    } timeout:timeout tolerance:0.1 andDescription:[NSString stringWithFormat:@"created at %@:%d in %s", fileStr, line, func]];
+    
+    if(timeout < 0.001)
     {
-        //DDLogVerbose(@"Timer timeout is smaller than 0.001, dispatching handler directly.");
+        //DDLogVerbose(@"Timer timeout is smaller than 0.001, dispatching handler directly: %@", timer);
+        [timer invalidate];
         if(handler)
             dispatch_async(queue, ^{
                 handler();
             });
-        return ^{ };        //empty cancel block because this "timer" already triggered
+        return timer;       //this timer is not added to a runloop and invalid because the handler already got called
     }
     
-    NSString* uuid = [[NSUUID UUID] UUIDString];
-    
-    //DDLogDebug(@"setting up timer %@(%G)", uuid, timeout);
-    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
-    dispatch_source_set_timer(timer,
-                              dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout*NSEC_PER_SEC)),
-                              DISPATCH_TIME_FOREVER,
-                              (uint64_t) (0.1 * NSEC_PER_SEC));      //leeway of 100ms
-    
-    dispatch_source_set_event_handler(timer, ^{
-        DDLogDebug(@"timer %@ %@(%G) triggered (created at %@:%d in %s)", timer, uuid, timeout, fileStr, line, func);
-        dispatch_source_cancel(timer);
-        if(handler)
-            handler();
-    });
-    
-    dispatch_source_set_cancel_handler(timer, ^{
-        //DDLogDebug(@"timer %@ %@(%G) cancelled (created at %@:%d)", timer, uuid, timeout, fileName, line);
-        if(cancelHandler)
-            cancelHandler();
-    });
-    
-    //start timer
-    DDLogDebug(@"starting timer %@ %@(%G) (created at %@:%d in %s)", timer, uuid, timeout, fileStr, line, func);
-    dispatch_resume(timer);
-    
-    //return block that can be used to cancel the timer
+    [timer start];
+    return timer;
+}
+
+//don't use this directly, but via createTimer() makros
++(monal_void_block_t) startQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue
+{
+    MLDelayableTimer* timer = [self startDelayableQueuedTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:file andLine:line andFunc:func onQueue:queue];
     return ^{
-        DDLogDebug(@"cancel block for timer %@ %@(%G) called (created at %@:%d in %s)", timer, uuid, timeout, fileStr, line, func);
-        if(!dispatch_source_testcancel(timer))
-            dispatch_source_cancel(timer);
+        [timer cancel];
     };
 }
 

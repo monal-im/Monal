@@ -649,8 +649,7 @@ $$
 $$class_handler(handleSetMamPrefs, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
-        DDLogError(@"Setting MAM prefs returned an error: %@", [iqNode findFirst:@"error"]);
-        [HelperTools postError:NSLocalizedString(@"XMPP mam preferences error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
+        DDLogError(@"Setting MAM prefs returned an error, ignoring: %@", [iqNode findFirst:@"error"]);
         return;
     }
 $$

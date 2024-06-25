@@ -110,12 +110,14 @@ extern NSString* const kMessageTypeFiletransfer;
 #pragma mark - MUC
 
 -(BOOL) initMuc:(NSString*) room forAccountId:(NSNumber*) accountNo andMucNick:(NSString* _Nullable) mucNick;
--(void) cleanupMembersAndParticipantsListFor:(NSString*) room andType:(NSString*) type onAccountId:(NSNumber*) accountNo;
+-(void) cleanupParticipantsListFor:(NSString*) room andType:(NSString*) type onAccountId:(NSNumber*) accountNo;
+-(void) cleanupMembersListFor:(NSString*) room andType:(NSString*) type onAccountId:(NSNumber*) accountNo;
 -(void) addMember:(NSDictionary*) member toMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(void) removeParticipant:(NSDictionary*) participant fromMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(NSDictionary* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSNumber*) accountNo;
+-(NSDictionary* _Nullable) getParticipantForOccupant:(NSString*) occupant inRoom:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(NSArray<NSDictionary<NSString*, id>*>*) getMembersAndParticipantsOfMuc:(NSString*) room forAccountId:(NSNumber*) accountNo;
 -(NSString* _Nullable) getOwnAffiliationInGroupOrChannel:(MLContact*) contact;
 -(NSString* _Nullable) getOwnRoleInGroupOrChannel:(MLContact*) contact;
@@ -185,7 +187,7 @@ extern NSString* const kMessageTypeFiletransfer;
 /*
  adds a specified message to the database
  */
--(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSNumber*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*_Nullable) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates;
+-(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSNumber*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom occupantId:(NSString* _Nullable) occupantId participantJid:(NSString*_Nullable) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates;
 
 /*
  Marks a message as sent. When the server acked it
@@ -217,8 +219,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) retractMessageHistory:(NSNumber *) messageNo;
 -(void) deleteMessageHistoryLocally:(NSNumber*) messageNo;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
--(NSNumber* _Nullable) getLMCHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo;
--(NSNumber* _Nullable) getRetractionHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo;
+-(NSNumber* _Nullable) getLMCHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from occupantId:(NSString* _Nullable) occupantId participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo;
+-(NSNumber* _Nullable) getRetractionHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from participantJid:(NSString* _Nullable) participantJid occupantId:(NSString* _Nullable) occupantId andAccount:(NSNumber*) accountNo;
 -(NSNumber* _Nullable) getRetractionHistoryIDForModeratedStanzaId:(NSString*) stanzaId from:(NSString*) from andAccount:(NSNumber*) accountNo;
 
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID;

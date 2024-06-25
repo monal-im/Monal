@@ -361,6 +361,8 @@ static NSDictionary* _optionalGroupConfigOptions;
             if(item[@"jid"])
                 item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
             item[@"nick"] = presenceNode.fromResource;
+            if([_roomFeatures[presenceNode.fromUser] containsObject:@"urn:xmpp:occupant-id:0"])
+                item[@"occupant_id"] = [presenceNode findFirst:@"{urn:xmpp:occupant-id:0}occupant-id@id"];
             
             //handle participant updates
             if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)
@@ -1483,6 +1485,12 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     
     if(join)
     {
+        for(NSString* type in @[@"member", @"admin", @"owner"])
+        {
+            DDLogInfo(@"Clearing muc participants table for type %@: %@", type, iqNode.fromUser);
+            [[DataLayer sharedInstance] cleanupParticipantsListFor:iqNode.fromUser andType:type onAccountId:_account.accountNo];
+        }
+        
         //now try to join this room if requested
         [self sendJoinPresenceFor:iqNode.fromUser];
     }
@@ -1514,8 +1522,8 @@ $$
 
 $$instance_handler(handleMembersList, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
-    DDLogInfo(@"Clearing muc participants and members tables for type %@: %@", type, iqNode.fromUser);
-    [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser andType:type onAccountId:_account.accountNo];
+    DDLogInfo(@"Clearing muc members table for type %@: %@", type, iqNode.fromUser);
+    [[DataLayer sharedInstance] cleanupMembersListFor:iqNode.fromUser andType:type onAccountId:_account.accountNo];
     [self handleMembersListUpdate:[iqNode find:@"{http://jabber.org/protocol/muc#admin}query/item@@"] forMuc:iqNode.fromUser];
     [self logMembersOfMuc:iqNode.fromUser];
 $$

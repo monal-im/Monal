@@ -42,3 +42,7 @@ module HelperToolsPrivate {
     header "../Classes/HelperTools.h"
     export *
 }
+module MLDelayableTimerPrivate {
+    header "../Classes/MLDelayableTimer.h"
+    export *
+}

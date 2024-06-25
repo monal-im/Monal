@@ -31,6 +31,7 @@ let BGFETCH_DEFAULT_INTERVAL = HelperTools.getObjcDefinedValue(.BGFETCH_DEFAULT_
 
 public typealias monal_void_block_t = @convention(block) () -> Void;
 public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
+public typealias monal_timer_block_t = @convention(block) (MLDelayableTimer?) -> Void;
 
 //see https://stackoverflow.com/a/40629365/3528174
 extension String: Error {}

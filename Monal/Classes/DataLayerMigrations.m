@@ -1053,6 +1053,19 @@
             [db executeNonQuery:@"UPDATE account SET plain_activated=true, supports_sasl2=false WHERE NOT enabled AND supports_sasl2;"];
         }];
         
+        //add occupant-id (XEP-0421) support
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.401 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE muc_participants ADD COLUMN occupant_id VARCHAR(128) NULL DEFAULT NULL;"];
+            [db executeNonQuery:@"ALTER TABLE muc_members ADD COLUMN occupant_id VARCHAR(128) NULL DEFAULT NULL;"];
+            [db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN occupant_id VARCHAR(128) NULL DEFAULT NULL;"];
+        }];
+        
+        //fix last update
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.402 withBlock:^{
+            [db executeNonQuery:@"CREATE UNIQUE INDEX unique_occupant ON muc_participants('room', 'account_id', 'occupant_id');"];
+            [db executeNonQuery:@"ALTER TABLE muc_members DROP COLUMN occupant_id;"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

@@ -66,14 +66,15 @@ jobs:
         run: |
           buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "name=Monal $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^\s*([^\s]+)\s+\(([^\s]+)\)$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "name=Monal Beta $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           echo "notes<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           echo "$(git log -n 1 --merges --pretty=format:%b)" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         run: |
-          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" changelog:"${{ steps.releasenotes.outputs.notes }}" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"138111da-28b0-4f57-b870-ecfd90f48637","7309b303-b560-4cca-afa1-b5624e932c0b" reject_build_waiting_for_review:true submit_beta_review:true
+          notes=$(printf '%s\n' "${{ steps.releasenotes.outputs.notes }}" | jq -sRr @sh)
+          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" changelog:$notes ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - name: Notarize catalyst
         run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
       - name: staple
@@ -88,7 +89,8 @@ jobs:
       - name: Publish catalyst to appstore connect
         #run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
         run: |
-          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" changelog:"${{ steps.releasenotes.outputs.notes }}" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"8dad81f2-a83e-41f3-83d6-99626fcc538f","6e08cf63-829a-40ed-ac79-f38fc554d048" reject_build_waiting_for_review:true submit_beta_review:true
+          notes=$(printf '%s\n' "${{ steps.releasenotes.outputs.notes }}" | jq -sRr @sh)
+          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" changelog:$notes pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - uses: actions/upload-artifact@v4
         with:
           name: monal-catalyst-zip
@@ -159,13 +161,14 @@ jobs:
     needs: [buildAndPublishBeta]
     steps:
       - name: Notify
-        uses: processone/xmpp-notifier@master
+        uses: monal-im/xmpp-notifier@master
         with: # Set the secrets as inputs
           jid: ${{ secrets.BOT_JID }}
           password: ${{ secrets.BOT_PASSWORD }}
           server_host: ${{ secrets.BOT_SERVER }}
           recipient: monal@chat.yax.im
           recipient_is_room: true
+          bot_alias: "Monal Release Bot"
           message: |
             New Betarelease: ${{ needs.buildAndPublishBeta.outputs.release-name }}
             ${{ needs.buildAndPublishBeta.outputs.release-changelog }}

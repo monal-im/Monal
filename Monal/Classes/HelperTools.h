@@ -8,12 +8,17 @@
 
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
+#import "MLDelayableTimer.h"
 
 #include "metamacros.h"
 
-#define createTimer(timeout, handler, ...)						            createQueuedTimer(timeout, nil, handler, __VA_ARGS__)
-#define createQueuedTimer(timeout, queue, handler, ...)						metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue])(_createQueuedTimer(timeout, queue, handler, __VA_ARGS__))
-#define _createQueuedTimer(timeout, queue, handler, cancelHandler, ...)		[HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue]
+#define createDelayableTimer(timeout, handler, ...)                                     createDelayableQueuedTimer(timeout, nil, handler, __VA_ARGS__)
+#define createDelayableQueuedTimer(timeout, queue, handler, ...)                        metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startDelayableQueuedTimer:timeout withHandler:handler andCancelHandler:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue])(_createDelayableQueuedTimer(timeout, queue, handler, __VA_ARGS__))
+#define _createDelayableQueuedTimer(timeout, queue, handler, cancelHandler, ...)        [HelperTools startDelayableQueuedTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue]
+
+#define createTimer(timeout, handler, ...)                                  createQueuedTimer(timeout, nil, handler, __VA_ARGS__)
+#define createQueuedTimer(timeout, queue, handler, ...)                     metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue])(_createQueuedTimer(timeout, queue, handler, __VA_ARGS__))
+#define _createQueuedTimer(timeout, queue, handler, cancelHandler, ...)     [HelperTools startQueuedTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue]
 
 #define MLAssert(check, text, ...)                                          do { if(!(check)) { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools MLAssertWithText:text andUserData:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__];)([HelperTools MLAssertWithText:text andUserData:metamacro_head(__VA_ARGS__) andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__];) while(YES); } } while(0)
 #define unreachable(...)                                                    do { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))(MLAssert(NO, @"unreachable", __VA_ARGS__);)(MLAssert(NO, __VA_ARGS__);); } while(0)
@@ -51,6 +56,7 @@ typedef NS_ENUM(NSUInteger, MLDefinedIdentifier) {
 
 typedef NS_ENUM(NSUInteger, MLRunLoopIdentifier) {
     MLRunLoopIdentifierNetwork,
+    MLRunLoopIdentifierTimer,
 };
 
 void logException(NSException* exception);
@@ -58,7 +64,7 @@ void swizzle(Class c, SEL orig, SEL new);
 
 //weak container holding an object as weak pointer (needed to not create retain circles in NSCache
 @interface WeakContainer : NSObject
-@property (nonatomic, weak) id obj;
+@property (atomic, weak) id obj;
 -(id) initWithObj:(id) obj;
 @end
 
@@ -175,6 +181,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(CIImage*) createQRCodeFromString:(NSString*) input;
 
 //don't use these four directly, but via createTimer() makro
++(MLDelayableTimer*) startDelayableQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue;
 +(monal_void_block_t) startQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue;
 
 +(NSString*) appBuildVersionInfoFor:(MLVersionType) type;

@@ -395,6 +395,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) nowBackgrounded
 {
+    DDLogInfo(@"App now backgrounded...");
+    
     _isBackgrounded = YES;
     _isNotInFocus = YES;
     
@@ -404,6 +406,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) nowForegrounded
 {
+    DDLogInfo(@"App now foregrounded...");
+    
     _isBackgrounded = NO;
     _isNotInFocus = NO;
     

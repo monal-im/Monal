@@ -3321,7 +3321,7 @@ NSString* const kStanza = @"stanza";
 -(void) retractMessage:(MLMessage*) msg
 {
     MLAssert([msg.accountId isEqual:self.accountNo], @"Can not retract message from one account on another account!", (@{@"self.accountNo": self.accountNo, @"msg": msg}));
-    XMPPMessage* messageNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:msg.buddyName];
+    XMPPMessage* messageNode = [[XMPPMessage alloc] initWithType:msg.isMuc ? kMessageGroupChatType : kMessageChatType to:msg.buddyName];
     
     DDLogVerbose(@"Retracting message: %@", msg);
     //retraction

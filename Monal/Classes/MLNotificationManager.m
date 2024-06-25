@@ -24,6 +24,12 @@
 @import AVFoundation;
 @import UniformTypeIdentifiers;
 
+typedef NS_ENUM(NSUInteger, MLNotificationState) {
+    MLNotificationStateNone,
+    MLNotificationStatePending,
+    MLNotificationStateDelivered,
+};
+
 @interface MLNotificationManager ()
 @property (nonatomic, readonly) NotificationPrivacySettingOption notificationPrivacySetting;
 @end
@@ -167,28 +173,76 @@
 
 #pragma mark message signals
 
+-(MLNotificationState) notificationStateForMessage:(MLMessage*) message
+{
+    NSString* idval = [self identifierWithMessage:message];
+    __block MLNotificationState retval = MLNotificationStateNone;
+    NSCondition* condition = [NSCondition new];
+    
+    [condition lock];
+    DDLogVerbose(@"Checking for 'pending' notification state for '%@'...", idval);
+    [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
+        for(UNNotificationRequest* request in requests)
+            if([request.identifier isEqualToString:idval])
+            {
+                DDLogDebug(@"Notification state pending for: %@", idval);
+                retval = MLNotificationStatePending;
+                [condition lock];
+                [condition signal];
+                [condition unlock];
+                return;
+            }
+        [condition lock];
+        [condition signal];
+        [condition unlock];
+    }];
+    DDLogVerbose(@"Waiting for notification state check for '%@' to complete...", idval);
+    [condition wait];
+    [condition unlock];
+    
+    [condition lock];
+    DDLogVerbose(@"Checking for 'delivered' notification state for '%@'...", idval);
+    [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
+        for(UNNotification* notification in notifications)
+            if([notification.request.identifier isEqualToString:idval])
+            {
+                DDLogDebug(@"Notification state delivered for: %@", idval);
+                retval = MLNotificationStateDelivered;
+                [condition lock];
+                [condition signal];
+                [condition unlock];
+                return;
+            }
+        [condition lock];
+        [condition signal];
+        [condition unlock];
+    }];
+    DDLogVerbose(@"Waiting for notification state check for '%@' to complete...", idval);
+    [condition wait];
+    [condition unlock];
+    
+    DDLogVerbose(@"Returning notification state for '%@': %@", idval, @(retval));
+    return retval;
+}
+
 -(void) handleFiletransferUpdate:(NSNotification*) notification
 {
     xmpp* xmppAccount = notification.object;
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     NSString* idval = [self identifierWithMessage:message];
-    
-    [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
-        for(UNNotificationRequest* request in requests)
-            if([request.identifier isEqualToString:idval])
-            {
-                DDLogDebug(@"Already pending notification '%@', updating it...", idval);
-                [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:YES];
-            }
-    }];
-    [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
-        for(UNNotification* notification in notifications)
-            if([notification.request.identifier isEqualToString:idval])
-            {
-                DDLogDebug(@"Already displayed notification '%@', updating it...", idval);
-                [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:NO];
-            }
-    }];
+    MLNotificationState state = [self notificationStateForMessage:message];
+    if(state == MLNotificationStatePending || state == MLNotificationStateNone)
+    {
+        DDLogDebug(@"Already pending or unknown notification '%@', updating/posting it...", idval);
+        [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:YES andLMCReplaced:NO];
+    }
+    else if(state == MLNotificationStateDelivered)
+    {
+        DDLogDebug(@"Already displayed notification '%@', updating it...", idval);
+        [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:NO andLMCReplaced:NO];
+    }
+    else
+        unreachable(@"Unknown MLNotificationState!", @{@"state": @(state)});
 }
 
 -(void) handleNewMessage:(NSNotification*) notification
@@ -196,10 +250,11 @@
     xmpp* xmppAccount = notification.object;
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     BOOL showAlert = notification.userInfo[@"showAlert"] ? [notification.userInfo[@"showAlert"] boolValue] : NO;
-    [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:showAlert andSound:YES];
+    BOOL LMCReplaced = notification.userInfo[@"LMCReplaced"] ? [notification.userInfo[@"LMCReplaced"] boolValue] : NO;
+    [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:showAlert andSound:YES andLMCReplaced:LMCReplaced];
 }
 
--(void) internalMessageHandlerWithMessage:(MLMessage*) message andAccount:(xmpp*) xmppAccount showAlert:(BOOL) showAlert andSound:(BOOL) sound
+-(void) internalMessageHandlerWithMessage:(MLMessage*) message andAccount:(xmpp*) xmppAccount showAlert:(BOOL) showAlert andSound:(BOOL) sound andLMCReplaced:(BOOL) LMCReplaced
 {
     if([message.messageType isEqualToString:kMessageTypeStatus])
         return;
@@ -229,6 +284,17 @@
     {
         DDLogDebug(@"not showing notification: this contact got muted");
         return;
+    }
+    
+    //check if we need to replace the still displayed notification or ignore this LMC
+    if(LMCReplaced)
+    {
+        MLNotificationState state = [self notificationStateForMessage:message];
+        if(state == MLNotificationStateNone)
+        {
+            DDLogDebug(@"not showing notification for LMC: this notification was already removed earlier");
+            return;
+        }
     }
     
     if([HelperTools isNotInFocus])

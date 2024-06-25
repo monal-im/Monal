@@ -571,6 +571,7 @@ static NSMutableDictionary* _typingNotifications;
         
         if(body)
         {
+            BOOL LMCReplaced = NO;
             NSNumber* historyId = nil;
             
             //handle LMC
@@ -584,7 +585,10 @@ static NSMutableDictionary* _typingNotifications;
                 //now check if the LMC is allowed (we use historyIdToUse for MLhistory mam queries to only check LMC for the 3 messages coming before this ID in this converastion)
                 //historyIdToUse will be nil, for messages going forward in time which means (check for the newest 3 messages in this conversation)
                 if(historyId != nil && [[DataLayer sharedInstance] checkLMCEligible:historyId encrypted:encrypted historyBaseID:historyIdToUse])
+                {
                     [[DataLayer sharedInstance] updateMessageHistory:historyId withText:body];
+                    LMCReplaced = YES;
+                }
                 else
                     historyId = nil;
             }
@@ -675,6 +679,7 @@ static NSMutableDictionary* _typingNotifications;
                     @"message": message,
                     @"showAlert": @(showAlert),
                     @"contact": possiblyUnknownContact,
+                    @"LMCReplaced": @(LMCReplaced),
                 }];
                 
                 //try to automatically determine content type of filetransfers

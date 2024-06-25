@@ -64,6 +64,7 @@ static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
 // #endif
 
 @class MLContact;
+@class MLDelayableTimer;
 
 //some typedefs used throughout the project
 typedef void (^contactCompletion)(MLContact* _Nonnull selectedContact) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");

@@ -62,16 +62,22 @@ struct MemberList: View {
                 online[contact] = false
             }
         }
+        //this is needed to improve sorting speed
+        var contactNames: [ObservableKVOWrapper<MLContact>:String] = [:]
+        for contact in memberList {
+            contactNames[contact] = contact.obj.contactDisplayName(withFallback:nicknames[contact], andSelfnotesPrefix:false)
+        }
+        //sort our member list
         memberList.sort {
             (
                 (online[$0]! ? 0 : 1),
                 mucAffiliationToInt(affiliations[$0]),
-                ($0.contactDisplayNameWithoutSelfnotesPrefix as String),
+                (contactNames[$0]!),
                 ($0.contactJid as String)
             ) < (
                 (online[$1]! ? 0 : 1),
                 mucAffiliationToInt(affiliations[$1]),
-                ($1.contactDisplayNameWithoutSelfnotesPrefix as String),
+                (contactNames[$1]!),
                 ($1.contactJid as String)
             )
         }
@@ -330,7 +336,9 @@ struct MemberList: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalMucParticipantsAndMembersUpdated")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let contact = notification.userInfo?["contact"] as? MLContact {
                 DDLogVerbose("Got muc participants/members update from account \(xmppAccount)...")
-                if contact == self.muc {
+                //only trigger update if we are either in a group type muc or have admin/owner priviledges
+                //all other cases will close this view anyways, it makes no sense to update everything directly before hiding thsi view
+                if contact == self.muc && (contact.mucType == "group" || ["owner", "admin"].contains(DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:self.muc.obj) ?? "none")) {
                     updateMemberlist()
                 }
             }

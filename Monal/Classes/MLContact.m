@@ -344,7 +344,7 @@ static NSMutableDictionary* _singletonCache;
     
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName andSelfnotesPrefix:(BOOL) hasSelfnotesPrefix
 {
-    DDLogVerbose(@"Calculating contact display name...");
+    //DDLogVerbose(@"Calculating contact display name...");
     NSString* displayName;
     if(!self.isSelfChat)
     {
@@ -359,17 +359,17 @@ static NSMutableDictionary* _singletonCache;
         
         if(self.nickName && self.nickName.length > 0)
         {
-            DDLogVerbose(@"Using nickName: %@", self.nickName);
+            //DDLogVerbose(@"Using nickName: %@", self.nickName);
             displayName = self.nickName;
         }
         else if(self.fullName && self.fullName.length > 0)
         {
-            DDLogVerbose(@"Using fullName: %@", self.fullName);
+            //DDLogVerbose(@"Using fullName: %@", self.fullName);
             displayName = self.fullName;
         }
         else
         {
-            DDLogVerbose(@"Using fallback: %@", fallbackName);
+            //DDLogVerbose(@"Using fallback: %@", fallbackName);
             displayName = fallbackName;
         }
     }

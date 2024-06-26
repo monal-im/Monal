@@ -31,8 +31,13 @@ def monalxmpp
   pod 'SAMKeychain'
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
   pod 'ASN1Decoder'
+  #later versions of the webrtc lib trigger the following app review error:
+  #The app references non-public symbols in Contents/Frameworks/WebRTC.framework/Versions/A/WebRTC:
+  #_AVCaptureSessionInterruptionReasonKey, _AVCaptureSessionPresetInputPriority.
+  #If method names in your source code match the private Apple APIs listed above, altering your method names
+  #will help prevent this app from being flagged in future submissions.
+  pod 'WebRTC-lib', '~> 123.0'
   #pod 'GoogleWebRTC'
-  pod 'WebRTC-lib'
   pod 'KSCrash', subspecs:['Recording', 'Reporting/Filters/Sets', 'Reporting/Filters/Tools', 'Reporting/Tools', 'Core']
   signalDeps
   pod "PromiseKit"

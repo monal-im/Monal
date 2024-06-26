@@ -72,9 +72,10 @@ jobs:
           echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
+        env:
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes }}
         run: |
-          notes=$(printf '%s\n' "${{ steps.releasenotes.outputs.notes }}" | jq -sRr @sh)
-          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" changelog:$notes ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
+          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - name: Notarize catalyst
         run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
       - name: staple
@@ -88,9 +89,10 @@ jobs:
         run: ./scripts/uploadNonAlpha.sh beta
       - name: Publish catalyst to appstore connect
         #run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
+        env:
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes }}
         run: |
-          notes=$(printf '%s\n' "${{ steps.releasenotes.outputs.notes }}" | jq -sRr @sh)
-          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" changelog:$notes pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
+          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - uses: actions/upload-artifact@v4
         with:
           name: monal-catalyst-zip

@@ -615,9 +615,7 @@ class SwiftuiInterface : NSObject {
     
     @objc
     func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
-        let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        delegate.host = host
         if(ownContact == nil) {
             host.rootView = AnyView(OmemoKeys(contact: nil))
         } else {

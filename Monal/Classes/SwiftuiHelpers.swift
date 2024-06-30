@@ -513,10 +513,6 @@ struct AddTopLevelNavigation<Content: View>: View {
         self.build = build
         self.delegate = delegate
     }
-    init(withDelegate delegate: SheetDismisserProtocol, andClosure build: @escaping () -> Content) {
-        self.build = build
-        self.delegate = delegate
-    }
     var body: some View {
         NavigationView {
             build()

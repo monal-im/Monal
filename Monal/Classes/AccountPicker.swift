@@ -7,7 +7,6 @@
 //
 
 struct AccountPicker: View {
-    let delegate: SheetDismisserProtocol
     let contacts: [MLContact]
     let callType: MLCallType
 #if IS_ALPHA
@@ -18,8 +17,7 @@ struct AccountPicker: View {
     let appLogoId = "AppLogo"
 #endif
     
-    init(delegate:SheetDismisserProtocol, contacts:[MLContact], callType: MLCallType) {
-        self.delegate = delegate
+    init(contacts:[MLContact], callType: MLCallType) {
         self.contacts = contacts
         self.callType = callType
     }
@@ -63,8 +61,7 @@ struct AccountPicker: View {
 }
 
 struct AccountPicker_Previews: PreviewProvider {
-    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        AccountPicker(delegate:delegate, contacts:[MLContact.makeDummyContact(0)], callType:.audio)
+        AccountPicker(contacts:[MLContact.makeDummyContact(0)], callType:.audio)
     }
 }

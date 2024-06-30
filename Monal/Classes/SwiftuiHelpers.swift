@@ -582,7 +582,7 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(delegate:delegate, contacts:contacts, callType:MLCallType(rawValue: callType)!)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(contacts:contacts, callType:MLCallType(rawValue: callType)!)))
         return host
     }
     

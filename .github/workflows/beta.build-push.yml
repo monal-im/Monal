@@ -59,16 +59,27 @@ jobs:
         run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
       - name: Push beta tag to repo
         run: |
-          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           git push origin Build_iOS_$buildNumber
       - name: Extract version number and changelog from newest merge commit
         id: releasenotes
         run: |
           buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          
           echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          
           echo "name=Monal Beta $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          
           echo "notes<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "$(git log -n 1 --merges --pretty=format:%b)" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1' | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          
+          echo "notes_ios<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | grep -v '^[\t\n ]*MACOS_ONLY.*$' | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1' | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          
+          echo "notes_macos<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | grep -v '^[\t\n ]*IOS_ONLY.*$' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1' | tee /dev/stderr >> "$GITHUB_OUTPUT"
           echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"

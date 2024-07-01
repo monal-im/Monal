@@ -2923,7 +2923,7 @@ enum msgSentState {
 // Open search ViewController
 -(void) commandFPressed:(UIKeyCommand*)keyCommand
 {
-    [self showSeachButtonAction];
+    //[self showSeachButtonAction];
 }
 
 // List of custom hardware key commands

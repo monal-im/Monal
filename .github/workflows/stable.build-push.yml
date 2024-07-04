@@ -58,8 +58,48 @@ jobs:
         run: |
           buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           git push origin Build_iOS_$buildNumber
+      - name: Extract version number and changelog from newest merge commit
+        id: releasenotes
+        run: |
+          buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          mkdir -p /Users/ci/releases
+          OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
+          touch "$OUTPUT_FILE"
+          echo "OUTPUT_FILE=$OUTPUT_FILE" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          
+          echo "buildNumber=$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "version=$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "name=Monal $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "notes<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "notes_ios<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | grep -v '^[\t\n ]*MACOS_ONLY.*$' | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "notes_macos<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | grep -v '^[\t\n ]*IOS_ONLY.*$' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          cat "$OUTPUT_FILE" >> "$GITHUB_OUTPUT"
+      - name: Create fastlane metadata directory
+        id: metadata
+        env:
+          CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
+        run: |
+          path="$(mktemp -d)"
+          echo -n "$CHANGELOG" > "$path/release_notes.txt"
+          echo "path=$path" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
-        run: xcrun altool --upload-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
+        #run: xcrun altool --upload-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
+        env:
+          DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path }}
+        run: |
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata: true skip_screenshots: true
       - name: Notarize catalyst
         run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
       - name: staple
@@ -69,12 +109,19 @@ jobs:
           stapler validate "$APP_DIR"
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"
           cd ../../../..
-      - name: upload new catalyst stable to monal-im.org
+      - name: Upload new catalyst stable to monal-im.org
         run: ./scripts/uploadNonAlpha.sh stable
       - name: Publish catalyst to appstore connect
-        run: xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
+        #run: xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
+        env:
+          DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path }}
+        run: |
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata: true skip_screenshots: true
       # - name: Update xmpp.org client list with new timestamp
       #   run: ./scripts/push_xmpp.org.sh
+      - name: Remove fastlane metadata directory
+        run: |
+          rm -rf "${{ steps.metadata.outputs.path }}"
       - uses: actions/upload-artifact@v4
         with:
           name: monal-catalyst-zip
@@ -100,16 +147,8 @@ jobs:
       #     name: monal-ios-dsym
       #     path: Monal/build/ios_Monal.xcarchive/dSYMs
       #     if-no-files-found: error
-      - name: Extract version number and changelog from newest merge commit
-        id: releasenotes
-        run: |
-          buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
-          echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "name=Monal $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "notes<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "$(git log -n 1 --merges --pretty=format:%b)" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-      - name: Release
+      - name: Create Draft Release
+        id: draftrelease
         uses: softprops/action-gh-release@v2
         with:
           name: "${{ steps.releasenotes.outputs.name }}"
@@ -123,5 +162,8 @@ jobs:
             ./Monal/build/app/Monal.zip
           fail_on_unmatched_files: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          draft: false
           prerelease: false
+          draft: true
+      - name: Write draft release id to build env
+        run: |
+          echo "releaseID=${{ steps.draftrelease.outputs.id }}" | tee /dev/stderr >> "${{ steps.releasenotes.outputs.OUTPUT_FILE }}"

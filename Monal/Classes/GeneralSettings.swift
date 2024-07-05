@@ -354,6 +354,17 @@ struct PrivacySettings: View {
     
     var body: some View {
         Form {
+            PrivacySettingsOnboarding(onboardingActive: false)
+        }
+        .navigationBarTitle(Text("Privacy"), displayMode: .inline)
+    }
+}
+struct PrivacySettingsOnboarding: View {
+    @ObservedObject var generalSettingsDefaultsDB = GeneralSettingsDefaultsDB()
+    var onboardingActive: Bool
+    
+    var body: some View {
+        VStack {
             Section(header: Text("Activity indications")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.sendReceivedMarkers) {
                     Text("Send message received")
@@ -372,7 +383,6 @@ struct PrivacySettings: View {
                     Text("Let your contacts know when you last opened the app.")
                 }
             }
-            
             Section(header: Text("Interactions")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.allowNonRosterContacts) {
                     Text("Accept incoming messages from strangers")
@@ -386,19 +396,19 @@ struct PrivacySettings: View {
                     Text("Allow contacts not in your contact list to call you.")
                 }.disabled(!generalSettingsDefaultsDB.allowNonRosterContacts)
             }
-            
-            Section(header: Text("Misc")) {
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.allowVersionIQ) {
-                    Text("Publish version")
-                    Text("Allow contacts in your contact list to query your Monal and iOS versions.")
-                }
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.webrtcUseFallbackTurn) {
-                    Text("Calls: Allow TURN fallback to Monal-Servers")
-                    Text("This will make calls possible even if your XMPP server does not provide a TURN server.")
+            if !onboardingActive {
+                Section(header: Text("Misc")) {
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.allowVersionIQ) {
+                        Text("Publish version")
+                        Text("Allow contacts in your contact list to query your Monal and iOS versions.")
+                    }
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.webrtcUseFallbackTurn) {
+                        Text("Calls: Allow TURN fallback to Monal-Servers")
+                        Text("This will make calls possible even if your XMPP server does not provide a TURN server.")
+                    }
                 }
             }
         }
-        .navigationBarTitle(Text("Privacy"), displayMode: .inline)
     }
 }
 

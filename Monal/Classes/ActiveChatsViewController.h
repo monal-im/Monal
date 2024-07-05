@@ -39,6 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) deleteConversation;
 -(void) showSettings;
 -(void) showPrivacySettings;
+-(void) showOnboarding;
 -(void) showNotificationSettings;
 -(void) showDetails;
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString* _Nullable) token usingCompletion:(monal_id_block_t _Nullable) callback;

@@ -426,6 +426,13 @@ static NSMutableSet* _pushWarningDisplayed;
         [self presentViewController:passwordMigration animated:YES completion:^{}];
         return;
     }
+    
+    if(![[HelperTools defaultsDB] boolForKey:@"hasCompletedOnboarding"])
+    {
+        [self showOnboarding];
+        return;
+    }
+    
     // display quick start if the user never seen it or if there are 0 enabled accounts
     if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
     {
@@ -433,6 +440,7 @@ static NSMutableSet* _pushWarningDisplayed;
         [self presentViewController:loginViewController animated:YES completion:^{}];
         return;
     }
+    
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"])
     {
         [self showPrivacySettings];
@@ -518,6 +526,15 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsPrivacySettings"];
     [self presentViewController:view animated:YES completion:^{}];
+}
+
+-(void) showOnboarding
+{
+    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+        UIViewController* callViewController = [[SwiftuiInterface new] makeViewWithName:@"OnboardingView"];
+        callViewController.modalPresentationStyle = UIModalPresentationFullScreen;
+        [self presentViewController:callViewController animated:NO completion:^{}];
+    }];
 }
 
 -(void) showSettings

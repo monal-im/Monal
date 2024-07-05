@@ -684,6 +684,9 @@ class SwiftuiInterface : NSObject {
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: PrivacySettings()))
             case "ActiveChatsNotificatioSettings":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings()))
+            case "OnboardingView":
+                host.rootView = AnyView(createOnboardingView(delegate:delegate))
+            
             default:
                 unreachable()
         }

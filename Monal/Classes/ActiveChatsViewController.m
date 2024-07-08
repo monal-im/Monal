@@ -380,9 +380,6 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     DDLogDebug(@"active chats view will appear");
     [super viewWillAppear:animated];
-    if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
-        [self refreshDisplay];      // load contacts
-    [self segueToIntroScreensIfNeeded];
 }
 
 -(void) viewWillDisappear:(BOOL) animated
@@ -395,6 +392,10 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     DDLogDebug(@"active chats view did appear");
     [super viewDidAppear:animated];
+    
+    if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
+        [self refreshDisplay];      // load contacts
+    [self segueToIntroScreensIfNeeded];
 }
 
 -(void) didReceiveMemoryWarning

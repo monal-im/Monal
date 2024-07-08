@@ -521,6 +521,7 @@ $$
                 @"mimeType": msg.filetransferMimeType,
                 @"size": msg.filetransferSize,
                 @"fileExtension": [filename pathExtension],
+                @"historyID": msg.messageDBId,
             };
         else
             return @{
@@ -528,6 +529,7 @@ $$
                 @"filename": filename,
                 @"needsDownloading": @YES,
                 @"fileExtension": [filename pathExtension],
+                @"historyID": msg.messageDBId,
             };
     }
     return @{
@@ -539,6 +541,7 @@ $$
         @"cacheId": [cacheFile lastPathComponent],
         @"cacheFile": cacheFile,
         @"fileExtension": [filename pathExtension],
+        @"historyID": msg.messageDBId,
     };
 }
 

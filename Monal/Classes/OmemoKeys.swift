@@ -211,10 +211,14 @@ struct OmemoKeysForContact: View {
         self.contactJid = contact.obj.contactJid
         self.account = account
         self.deviceId = account.omemo.getDeviceId()
-        self.deviceIds = OrderedSet(self.account.omemo.knownDevices(forAddressName: self.contactJid))
+        self.deviceIds = OmemoKeysForContact.knownDevices(account: self.account, jid: self.contactJid)
         self.selectedDeviceForDeletion = -1
     }
     
+    private static func knownDevices(account: xmpp, jid: String) -> OrderedSet<NSNumber> {
+        return OrderedSet(account.omemo.knownDevices(forAddressName: jid).sorted { return $0.intValue < $1.intValue })
+    }
+
     func deleteButton(deviceId: NSNumber) -> some View {
         Button(action: {
             selectedDeviceForDeletion = deviceId // SwiftUI does not like to have deviceID nested in multiple functions, so safe this in the struct...

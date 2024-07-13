@@ -668,7 +668,11 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
+#if IS_QUICKSY
+        host.rootView = AnyView(Quicksy_RegisterAccount(delegate:delegate))
+#else
         host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:RegisterAccount(delegate:delegate, registerData:registerData)))
+#endif
         return host
     }
     

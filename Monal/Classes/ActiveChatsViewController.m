@@ -462,6 +462,20 @@ static NSMutableSet* _pushWarningDisplayed;
         return;
     }
     
+#ifdef IS_QUICKSY
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
+    {
+        UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:@{}];
+        if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
+            view.modalPresentationStyle = UIModalPresentationFullScreen;
+        else
+            view.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
+        [self presentViewController:view animated:NO completion:^{}];
+        return;
+    }
+#else
     // display quick start if the user never seen it or if there are 0 enabled accounts
     if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !_loginAlreadyAutodisplayed)
     {
@@ -473,6 +487,7 @@ static NSMutableSet* _pushWarningDisplayed;
         [self presentViewController:loginViewController animated:YES completion:^{}];
         return;
     }
+#endif
     
     [self showWarningsIfNeeded];
 }

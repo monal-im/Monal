@@ -143,6 +143,24 @@ struct OnboardingView: View {
 
 @ViewBuilder
 func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
+#if IS_QUICKSY
+    let cards = [
+        OnboardingCard(
+            title: Text("Welcome to Quicksy !"),
+            description: nil,
+            imageName: "hand.wave",
+            articleText: Text("""
+            Quicksy syncs your contact list in regular intervals to make suggestions about possible contacts who are already on Quicksy.
+            
+            Quicksy shares and stores images, audio recordings, videos and other media to deliver them to the intended recipients. Files will be stored for up to 30 days.
+            
+            Find more Information in our [Privacy Policy](https://quicksy.im/privacy.htm).
+            """),
+            customView: nil,
+            nextText: "Accept and continue"
+        ),
+    ]
+#else
     let cards = [
         OnboardingCard(
             title: Text("Welcome to Monal !"),
@@ -199,6 +217,7 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             nextText: nil
         ),
     ]
+#endif
     OnboardingView(delegate: delegate, cards: cards)
 }
 

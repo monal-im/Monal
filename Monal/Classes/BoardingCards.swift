@@ -30,104 +30,94 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            Color.background
-                .edgesIgnoringSafeArea(.all)
-            TabView(selection: $currentIndex) {
-                ForEach(cards.indices, id: \.self) { index in
-                    //SmartScrollView(.vertical, showsIndicators: true, optionalScrolling: true, shrinkToFit: false) {
-                    ScrollView {
-                    Group {
-                        VStack(alignment: .leading, spacing: 16) {
-                            
-                            HStack {
+            /// Ensure the ZStack takes the entire area
+            Color.clear
+            
+            ForEach(Array(zip(cards, cards.indices)), id: \.1) { card, index in
+                /// Only show card that's visible
+                if index == currentIndex {
+                    GeometryReader { proxy in
+                        SmartScrollView(.vertical, showsIndicators: true, optionalScrolling: true, shrinkToFit: false) {
+                            VStack(alignment: .leading, spacing: 16) {
+                                
                                 if currentIndex > 0 {
-                                    Button(action: {
+                                    Button {
                                         currentIndex -= 1
-                                    }) {
-                                        Image(systemName: "chevron.left")
+                                    } label: {
+                                        Label("Back", systemImage: "chevron.left")
+                                            .labelStyle(.iconOnly)
                                             .foregroundColor(.blue)
                                     }
                                 }
-                            }
-                            
-                            HStack {
-                                if let imageName = cards[index].imageName {
-                                    Image(systemName: imageName)
-                                        .font(.custom("MarkerFelt-Wide", size: 80))
-                                        .foregroundColor(.blue)
+                                
+                                HStack {
+                                    if let imageName = card.imageName {
+                                        Image(systemName: imageName)
+                                            .font(.custom("MarkerFelt-Wide", size: 80))
+                                            .foregroundColor(.blue)
+                                        
+                                    }
                                     
-                                }
-                                if let title = cards[index].title {
-                                    title
+                                    card.title?
                                         .font(.title)
                                         .fontWeight(.bold)
                                         .foregroundColor(.primary)
                                         .padding(.bottom, 4)
                                 }
-                            }
-                            
-                            if let description = cards[index].description {
-                                description
+                                
+                                if let description = card.description {
+                                    description
+                                        .font(.custom("HelveticaNeue-Medium", size: 20))
+                                        .foregroundColor(.primary)
+                                        .multilineTextAlignment(.leading)
+                                        /// This ensures text doesn't get truncated which sometimes happens in ScrollView
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    
+                                    Divider()
+                                }
+                                
+                                card.articleText?
                                     .font(.custom("HelveticaNeue-Medium", size: 20))
                                     .foregroundColor(.primary)
                                     .multilineTextAlignment(.leading)
-                                Divider()
-                            }
-                            
-                            if let articleText = cards[index].articleText {
-                                articleText
-                                    .font(.custom("HelveticaNeue-Medium", size: 20))
-                                    .foregroundColor(.primary)
-                                    .multilineTextAlignment(.leading)
-                            }
-                            
-                            if let view = cards[index].customView {
-                                view
-                            }
-                            
-                            Spacer()
-                            
-                            HStack {
+                                
+                                card.customView
+                                
                                 Spacer()
-                                if index < cards.count - 1 {
-                                    Button(action: {
-                                        currentIndex += 1
-                                    }) {
-                                        HStack {
-                                            Text("Next")
-                                                .fontWeight(.bold)
-                                            Image(systemName: "chevron.right")
+                                
+                                Group {
+                                    if index < cards.count - 1 {
+                                        Button {
+                                            currentIndex += 1
+                                        } label: {
+                                            HStack {
+                                                Text("Next")
+                                                    .fontWeight(.bold)
+                                                Image(systemName: "chevron.right")
+                                            }
                                         }
-                                        .foregroundColor(.blue)
-                                    }
-                                } else {
-                                    Button(action: {
-                                        onboardingState.hasCompletedOnboarding = true
-                                        delegate.dismiss()
-                                    }) {
-                                        Text("Close")
-                                            .fontWeight(.bold)
-                                            .padding()
-                                            .background(Color.blue)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
+                                    } else {
+                                        Button {
+                                            onboardingState.hasCompletedOnboarding = true
+                                            delegate.dismiss()
+                                        } label: {
+                                            Text("Close")
+                                                .fontWeight(.bold)
+                                                .padding()
+                                                .background(Color.blue)
+                                                .foregroundColor(.white)
+                                                .cornerRadius(10)
+                                        }
                                     }
                                 }
+                                .frame(maxWidth: .infinity, alignment: .trailing)
                             }
-                            
-                            Spacer().frame(height: 16)
+                            .padding(.bottom, 16)
+                            .padding()
+                            /// Sets the minimum frame height to the available height of the scrollview and the maxHeight to infinity
+                            .frame(minHeight: proxy.size.height, maxHeight: .infinity)
                         }
-                        .padding()
-                        .frame(maxHeight: .infinity)
-                        .background(Color.green)
-                        //.edgesIgnoringSafeArea([.bottom, .leading, .trailing])
                     }
-                    .background(Color.red)
-                    .edgesIgnoringSafeArea([.bottom, .leading, .trailing])
-                    }
-                    //.background(Color(UIColor.systemBackground))
-                    .background(Color.yellow)
-                    .edgesIgnoringSafeArea([.bottom, .leading, .trailing])
                 }
             }
         }
@@ -151,7 +141,7 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             description: Text("Here's a quick look at what you can expect:"),
             imageName: "sparkles",
             articleText: Text("""
-            • 🔐 OMEMO Encryption : Secure multi-end messaging using the OMEMO protocol..
+            • 🔐 OMEMO Encryption : Secure multi-end messaging using the OMEMO protocol.
             
             • 🛜 Decentralized Network : Leverages the decentralized nature of XMPP, avoiding central servers.
             

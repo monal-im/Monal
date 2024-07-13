@@ -388,13 +388,6 @@ struct RegisterAccount: View {
                             if(self.registerComplete == true) {
                                 self.delegate.dismiss()
                                 
-                                if !HelperTools.defaultsDB().bool(forKey:"HasSeenPrivacySettings") {
-                                    let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-                                    if let activeChats = appDelegate.activeChats {
-                                        activeChats.showPrivacySettings()
-                                    }
-                                }
-                                
                                 if let completion = self.completionHandler {
                                     DDLogVerbose("Calling reg completion handler...")
                                     completion(self.registeredAccountNo as NSNumber)

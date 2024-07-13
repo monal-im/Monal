@@ -110,16 +110,6 @@ struct WelcomeLogIn: View {
             }
         }
     }
-    
-    private func dismissAndShowPrivacySettings() {
-        self.delegate.dismiss()
-        if !HelperTools.defaultsDB().bool(forKey:"HasSeenPrivacySettings") {
-            let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-            if let activeChats = appDelegate.activeChats {
-                activeChats.showPrivacySettings()
-            }
-        }
-    }
 
     var body: some View {
         ScrollView {
@@ -186,7 +176,7 @@ struct WelcomeLogIn: View {
                         .alert(isPresented: $showAlert) {
                             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                                 if(self.loginComplete == true) {
-                                    dismissAndShowPrivacySettings()
+                                    self.delegate.dismiss()
                                 }
                             }))
                         }
@@ -225,7 +215,7 @@ struct WelcomeLogIn: View {
                     
                     if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
                         Button(action: {
-                            dismissAndShowPrivacySettings()
+                            self.delegate.dismiss()
                         }){
                             Text("Set up account later")
                                 .frame(maxWidth: .infinity)

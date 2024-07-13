@@ -98,9 +98,6 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     @defaultsDB("allowCallsFromNonRosterContacts")
     var allowCallsFromNonRosterContacts: Bool
     
-    @defaultsDB("HasSeenPrivacySettings")
-    var hasSeenPrivacySettings: Bool
-    
     @defaultsDB("AutodownloadFiletransfers")
     var autodownloadFiletransfers : Bool
     
@@ -192,9 +189,6 @@ struct GeneralSettings: View {
             }
         }
         .navigationBarTitle(Text("General Settings"))
-        .onAppear {
-            generalSettingsDefaultsDB.hasSeenPrivacySettings = true
-        }
     }
 }
 
@@ -354,49 +348,53 @@ struct PrivacySettings: View {
     
     var body: some View {
         Form {
-            PrivacySettingsOnboarding(onboardingActive: false)
+            PrivacySettingsSubview(onboardingPart:-1)
         }
         .navigationBarTitle(Text("Privacy"), displayMode: .inline)
     }
 }
-struct PrivacySettingsOnboarding: View {
+struct PrivacySettingsSubview: View {
     @ObservedObject var generalSettingsDefaultsDB = GeneralSettingsDefaultsDB()
-    var onboardingActive: Bool
+    var onboardingPart: Int
     
     var body: some View {
         VStack {
-            Section(header: Text("Activity indications")) {
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.sendReceivedMarkers) {
-                    Text("Send message received")
-                    Text("Let your contacts know if you received a message.")
-                }
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.sendDisplayedMarkers) {
-                    Text("Send message displayed state")
-                    Text("Let your contacts know if you read a message.")
-                }
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.sendLastChatState) {
-                    Text("Send typing notifications")
-                    Text("Let your contacts know if you are typing a message.")
-                }
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.sendLastUserInteraction) {
-                    Text("Send last interaction time")
-                    Text("Let your contacts know when you last opened the app.")
+            if onboardingPart == -1 || onboardingPart == 0 {
+                Section(header: Text("Activity indications")) {
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.sendReceivedMarkers) {
+                        Text("Send message received")
+                        Text("Let your contacts know if you received a message.")
+                    }
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.sendDisplayedMarkers) {
+                        Text("Send message displayed state")
+                        Text("Let your contacts know if you read a message.")
+                    }
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.sendLastChatState) {
+                        Text("Send typing notifications")
+                        Text("Let your contacts know if you are typing a message.")
+                    }
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.sendLastUserInteraction) {
+                        Text("Send last interaction time")
+                        Text("Let your contacts know when you last opened the app.")
+                    }
                 }
             }
-            Section(header: Text("Interactions")) {
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.allowNonRosterContacts) {
-                    Text("Accept incoming messages from strangers")
-                    Text("Allow contacts not in your contact list to contact you.")
+            if onboardingPart == -1 || onboardingPart == 1 {
+                Section(header: Text("Interactions")) {
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.allowNonRosterContacts) {
+                        Text("Accept incoming messages from strangers")
+                        Text("Allow contacts not in your contact list to contact you.")
+                    }
+                    SettingsToggle(isOn: Binding<Bool>(
+                        get: { generalSettingsDefaultsDB.allowCallsFromNonRosterContacts && generalSettingsDefaultsDB.allowNonRosterContacts },
+                        set: { generalSettingsDefaultsDB.allowCallsFromNonRosterContacts = $0 }
+                    )) {
+                        Text("Accept incoming calls from strangers")
+                        Text("Allow contacts not in your contact list to call you.")
+                    }.disabled(!generalSettingsDefaultsDB.allowNonRosterContacts)
                 }
-                SettingsToggle(isOn: Binding<Bool>(
-                    get: { generalSettingsDefaultsDB.allowCallsFromNonRosterContacts && generalSettingsDefaultsDB.allowNonRosterContacts },
-                    set: { generalSettingsDefaultsDB.allowCallsFromNonRosterContacts = $0 }
-                )) {
-                    Text("Accept incoming calls from strangers")
-                    Text("Allow contacts not in your contact list to call you.")
-                }.disabled(!generalSettingsDefaultsDB.allowNonRosterContacts)
             }
-            if !onboardingActive {
+            if onboardingPart == -1 || onboardingPart == 2 {
                 Section(header: Text("Misc")) {
                     SettingsToggle(isOn: $generalSettingsDefaultsDB.allowVersionIQ) {
                         Text("Publish version")

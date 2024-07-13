@@ -144,6 +144,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [self upgradeBoolUserSettingsIfUnset:@"useInlineSafari" toDefault:NO];
     else
         [self upgradeBoolUserSettingsIfUnset:@"useInlineSafari" toDefault:YES];
+    
+    [self upgradeBoolUserSettingsIfUnset:@"hasCompletedOnboarding" toDefault:NO];
+    
+    [[HelperTools defaultsDB] setBool:NO forKey:@"hasCompletedOnboarding"];
 }
 
 -(void) upgradeFloatUserSettingsToInteger:(NSString*) settingsName

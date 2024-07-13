@@ -965,7 +965,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(NSAttributedString*) titleForEmptyDataSet:(UIScrollView*) scrollView
 {
-    NSString* text = NSLocalizedString(@"No one is here", @"");
+    NSString* text = NSLocalizedString(@"No active conversations", @"");
     
     NSDictionary* attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: (self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark ? [UIColor whiteColor] : [UIColor blackColor])};
@@ -975,7 +975,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 - (NSAttributedString*)descriptionForEmptyDataSet:(UIScrollView*) scrollView
 {
-    NSString* text = NSLocalizedString(@"When you start talking to someone,\n they will show up here.", @"");
+    NSString* text = NSLocalizedString(@"When you start a conversation\nwith someone, they will\nshow up here.", @"");
     
     NSMutableParagraphStyle* paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;
